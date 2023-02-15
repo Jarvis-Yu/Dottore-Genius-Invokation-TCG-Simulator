@@ -1,0 +1,8 @@
+[build-system]
+requires = ["setuptools"]
+
+[project]
+name = "dgisim"
+version = "0.0.1"
+dependencies = [
+]

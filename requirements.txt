@@ -1,0 +1,2 @@
+setuptools==67.3.2
+build==0.10.0
