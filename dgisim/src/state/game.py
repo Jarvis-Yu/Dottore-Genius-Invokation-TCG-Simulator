@@ -1,9 +1,10 @@
 from __future__ import annotations
 from typing import Optional
 from enum import Enum
-from dgisim.src.mode.mode import DefaultMode, Mode
-from dgisim.src.phase.phase import Phase
-from dgisim.src.state.player import PlayerState
+
+import dgisim.src.mode.mode as md
+import dgisim.src.phase.phase as ph
+import dgisim.src.state.player as pl
 
 
 class GameState:
@@ -19,7 +20,7 @@ class GameState:
     # END_PHASE = "End Phase"
     # GAME_END_PHASE = "Game End Phase"
 
-    def __init__(self, phase: Phase, round: int, mode: Mode, player1: PlayerState, player2: PlayerState):
+    def __init__(self, phase: ph.Phase, round: int, mode: md.Mode, player1: pl.PlayerState, player2: pl.PlayerState):
         self._phase = phase
         self._round = round
         self._player1 = player1
@@ -29,32 +30,32 @@ class GameState:
     @classmethod
     def from_default(cls):
         return cls(
-            DefaultMode().card_select_phase(),
+            md.DefaultMode().card_select_phase(),
             0,
-            DefaultMode(),
-            PlayerState.examplePlayer(),
-            PlayerState.examplePlayer()
+            md.DefaultMode(),
+            pl.PlayerState.examplePlayer(),
+            pl.PlayerState.examplePlayer()
         )
 
     def factory(self):
         return GameStateFactory(self)
 
-    def get_phase(self) -> Phase:
+    def get_phase(self) -> ph.Phase:
         return self._phase
 
     def get_round(self) -> int:
         return self._round
 
-    def get_mode(self) -> Mode:
+    def get_mode(self) -> md.Mode:
         return self._mode
 
-    def get_player1(self) -> PlayerState:
+    def get_player1(self) -> pl.PlayerState:
         return self._player1
 
-    def get_player2(self) -> PlayerState:
+    def get_player2(self) -> pl.PlayerState:
         return self._player2
 
-    def get_pid(self, player: PlayerState) -> GameState.pid:
+    def get_pid(self, player: pl.PlayerState) -> GameState.pid:
         if player is self._player1:
             return self.pid.P1
         elif player is self._player2:
@@ -62,7 +63,7 @@ class GameState:
         else:
             raise Exception("player unknown")
 
-    def get_player(self, player_id: GameState.pid) -> PlayerState:
+    def get_player(self, player_id: GameState.pid) -> pl.PlayerState:
         if player_id is self.pid.P1:
             return self._player1
         elif player_id is self.pid.P2:
@@ -70,7 +71,7 @@ class GameState:
         else:
             raise Exception("player_id unknown")
 
-    def get_other_player(self, player_id: GameState.pid) -> PlayerState:
+    def get_other_player(self, player_id: GameState.pid) -> pl.PlayerState:
         if player_id is self.pid.P1:
             return self._player2
         elif player_id is self.pid.P2:
@@ -137,7 +138,7 @@ class GameStateFactory:
         self._player2 = game_state.get_player2()
         self._mode = game_state.get_mode()
 
-    def phase(self, new_phase: Phase) -> GameStateFactory:
+    def phase(self, new_phase: ph.Phase) -> GameStateFactory:
         self._phase = new_phase
         return self
 
@@ -145,19 +146,19 @@ class GameStateFactory:
         self._round = new_round
         return self
 
-    def mode(self, new_mode: Mode) -> GameStateFactory:
+    def mode(self, new_mode: md.Mode) -> GameStateFactory:
         self._mode = new_mode
         return self
 
-    def player1(self, new_player: PlayerState) -> GameStateFactory:
+    def player1(self, new_player: pl.PlayerState) -> GameStateFactory:
         self._player1 = new_player
         return self
 
-    def player2(self, new_player: PlayerState) -> GameStateFactory:
+    def player2(self, new_player: pl.PlayerState) -> GameStateFactory:
         self._player2 = new_player
         return self
 
-    def player(self, pid: GameState.pid, new_player: PlayerState) -> GameStateFactory:
+    def player(self, pid: GameState.pid, new_player: pl.PlayerState) -> GameStateFactory:
         if pid is GameState.pid.P1:
             self._player1 = new_player
         elif pid is GameState.pid.P2:
@@ -166,7 +167,7 @@ class GameStateFactory:
             raise Exception("player_id unknown")
         return self
 
-    def otherPlayer(self, pid: GameState.pid, new_player: PlayerState) -> GameStateFactory:
+    def otherPlayer(self, pid: GameState.pid, new_player: pl.PlayerState) -> GameStateFactory:
         if pid is GameState.pid.P1:
             self._player2 = new_player
         elif pid is GameState.pid.P2:

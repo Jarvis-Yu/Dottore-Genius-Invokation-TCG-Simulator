@@ -1,15 +1,17 @@
+from __future__ import annotations
 from typing import Optional
-from dgisim.src.state.game import GameState
+
+import dgisim.src.state.game as gm
 
 
 class Phase:
-    def run(self, game_state: GameState) -> GameState:
+    def run(self, game_state: gm.GameState) -> gm.GameState:
         raise Exception("Not Overriden")
 
-    def run_action(self, game_state: GameState, pid: GameState.pid, action) -> GameState:
+    def run_action(self, game_state: gm.GameState, pid: gm.GameState.pid, action) -> gm.GameState:
         raise Exception("Not Overriden")
 
-    def waiting_for(self, game_state: GameState) -> Optional[GameState.pid]:
+    def waiting_for(self, game_state: gm.GameState) -> Optional[gm.GameState.pid]:
         raise Exception("Not Overriden")
 
     def __eq__(self, other: object) -> bool:

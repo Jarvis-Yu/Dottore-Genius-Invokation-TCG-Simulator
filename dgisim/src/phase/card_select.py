@@ -1,14 +1,16 @@
+from __future__ import annotations
 from typing import Optional
-from dgisim.src.state.game import GameState
+
+import dgisim.src.state.game as gm
 from dgisim.src.state.player import PlayerState
-from dgisim.src.phase.phase import Phase
+import dgisim.src.phase.phase as ph
 
 
-class CardSelectPhase(Phase):
+class CardSelectPhase(ph.Phase):
     def __init__(self) -> None:
         super().__init__()
 
-    def run(self, game_state: GameState) -> GameState:
+    def run(self, game_state: gm.GameState) -> gm.GameState:
         p1: PlayerState = game_state.get_player1()
         p2: PlayerState = game_state.get_player2()
         # If both players just entered waiting, make them take actions
@@ -23,7 +25,7 @@ class CardSelectPhase(Phase):
             game_state.get_mode().starting_hand_select_phase()
         ).build()
 
-    def run_action(self, game_state: GameState, pid: GameState.pid, action) -> GameState:
+    def run_action(self, game_state: gm.GameState, pid: gm.GameState.pid, action) -> gm.GameState:
         # TODO: actually implement something when there is an actually deck
         player: PlayerState = game_state.get_player(pid)
         reducedChances: int = player.get_card_redraw_chances() - 1
@@ -36,7 +38,7 @@ class CardSelectPhase(Phase):
             player.factory().card_redraw_chances(reducedChances).phase(phase).build()
         ).build()
 
-    def waiting_for(self, game_state: GameState) -> Optional[GameState.pid]:
+    def waiting_for(self, game_state: gm.GameState) -> Optional[gm.GameState.pid]:
         players = [game_state.get_player1(), game_state.get_player2()]
         for player in players:
             if player.get_phase() is PlayerState.act.ACTION_PHASE:
