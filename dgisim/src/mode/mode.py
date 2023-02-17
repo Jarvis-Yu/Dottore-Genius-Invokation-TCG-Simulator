@@ -3,9 +3,7 @@ from __future__ import annotations
 import dgisim.src.phase.phase as ph
 import  dgisim.src.phase.card_select as cs
 import  dgisim.src.phase.starting_hand_select as shs
-# from dgisim.src.phase.card_select import CardSelectPhase
-# from dgisim.src.phase.starting_hand_select import StartingHandSelectPhase
-# from dgisim.src.phase.phase import Phase
+from dgisim.src.helper.level_print import level_print_single
 
 
 class Mode:
@@ -17,6 +15,12 @@ class Mode:
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Mode)
+
+    def __str__(self) -> str:
+        return self.to_string()
+
+    def to_string(self, indent: int = 0) -> str:
+        return level_print_single(self.__class__.__name__, indent)
 
 
 class DefaultMode(Mode):

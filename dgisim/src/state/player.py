@@ -1,6 +1,8 @@
 from __future__ import annotations
 from enum import Enum
 
+from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
+
 
 class PlayerState:
     class act(Enum):
@@ -42,6 +44,16 @@ class PlayerState:
             self._phase,
             self._card_redraw_chances,
         ))
+    
+    def __str__(self) -> str:
+        return "Player Info To Be Implemented\n"
+
+    def to_string(self, indent: int = 0):
+        new_indent = indent + INDENT
+        return level_print({
+            "Phase": level_print_single(str(self._phase), new_indent),
+            "Card Redraw Chances": level_print_single(str(self._card_redraw_chances), new_indent),
+        }, indent)
 
 
 class PlayerStateFactory:

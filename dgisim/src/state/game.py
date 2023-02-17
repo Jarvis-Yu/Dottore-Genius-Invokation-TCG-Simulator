@@ -5,6 +5,7 @@ from enum import Enum
 import dgisim.src.mode.mode as md
 import dgisim.src.phase.phase as ph
 import dgisim.src.state.player as pl
+from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
 
 
 class GameState:
@@ -20,7 +21,14 @@ class GameState:
     # END_PHASE = "End Phase"
     # GAME_END_PHASE = "Game End Phase"
 
-    def __init__(self, phase: ph.Phase, round: int, mode: md.Mode, player1: pl.PlayerState, player2: pl.PlayerState):
+    def __init__(
+            self,
+            phase: ph.Phase,
+            round: int,
+            mode: md.Mode,
+            player1: pl.PlayerState,
+            player2: pl.PlayerState,
+        ):
         self._phase = phase
         self._round = round
         self._player1 = player1
@@ -121,13 +129,17 @@ class GameState:
         ))
 
     def __str__(self) -> str:
-        return (
-            f"[Mode]: {str(self._mode)}\n"
-            f"[Phase]: {str(self._phase)}\n"
-            f"[Round]: {str(self._round)}\n"
-            f"[Player1]: {str(self._player1)}\n"
-            f"[Player2]: {str(self._player2)}\n"
-        )
+        return self.to_string(0)
+
+    def to_string(self, indent: int = 0) -> str:
+        new_indent = indent + INDENT
+        return level_print({
+            "Mode": self._mode.to_string(new_indent),
+            "Phase": self._phase.to_string(new_indent),
+            "Round": level_print_single(str(self._round), new_indent),
+            "Player1": self._player1.to_string(new_indent),
+            "Player2": self._player2.to_string(new_indent),
+        }, indent)
 
 
 class GameStateFactory:
@@ -184,6 +196,7 @@ class GameStateFactory:
             player1=self._player1,
             player2=self._player2
         )
+
 
 if __name__ == "__main__":
     initial_state = GameState.from_default()

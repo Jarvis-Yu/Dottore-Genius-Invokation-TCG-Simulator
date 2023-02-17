@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Optional
 
 import dgisim.src.state.game as gm
+from dgisim.src.helper.level_print import level_print_single
 
 
 class Phase:
@@ -19,3 +20,9 @@ class Phase:
 
     def __hash__(self) -> int:
         return hash(self.__class__.__name__)
+
+    def __str__(self) -> str:
+        return self.to_string(0)
+
+    def to_string(self, indent: int = 0) -> str:
+        return level_print_single(self.__class__.__name__, indent)
