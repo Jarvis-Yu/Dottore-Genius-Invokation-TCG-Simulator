@@ -1,4 +1,4 @@
-from dgisim.src.state.game_state import GameState
+from dgisim.src.state.game import GameState
 
 class PlayerAgent:
     def chooseAction(self, game_state: GameState):

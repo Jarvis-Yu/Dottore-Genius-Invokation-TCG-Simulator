@@ -1,10 +1,17 @@
 import unittest
-from dgisim.src.game_state import *
+
+from dgisim.src.state.game import GameState
+
 
 class TestGameStateMachine(unittest.TestCase):
-  def test_first_step(self):
-    self.assertEqual(1, 1)
-    pass
+    _intitialState = GameState.from_default()
+
+    def test_first_step(self):
+        pid = self._intitialState.waiting_for()
+        self.assertIsNone(pid)
+        state = self._intitialState.run()
+        pass
+
 
 if __name__ == "__main__":
-  unittest.main()
+    unittest.main()

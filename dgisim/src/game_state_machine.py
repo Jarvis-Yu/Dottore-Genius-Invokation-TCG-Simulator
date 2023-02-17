@@ -1,4 +1,4 @@
-from dgisim.src.state.game_state import GameState
+from dgisim.src.state.game import GameState
 from dgisim.src.player_agent import PlayerAgent
 
 
@@ -9,8 +9,8 @@ class GameStateMachine:
         self._playerAgent2 = player2
 
     @classmethod
-    def from_initial_phase(cls, initial_phase, player1: PlayerAgent, player2: PlayerAgent):
-        return cls(GameState.defaultStart(initial_phase), player1, player2)
+    def from_default(cls, player1: PlayerAgent, player2: PlayerAgent):
+        return cls(GameState.from_default(), player1, player2)
 
     def one_step(self):
         pid = self._game_state.waiting_for()

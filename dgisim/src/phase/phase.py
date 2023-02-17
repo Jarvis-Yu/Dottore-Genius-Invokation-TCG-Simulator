@@ -1,5 +1,5 @@
 from typing import Optional
-from dgisim.src.state.game_state import GameState
+from dgisim.src.state.game import GameState
 
 
 class Phase:
@@ -11,3 +11,9 @@ class Phase:
 
     def waiting_for(self, game_state: GameState) -> Optional[GameState.pid]:
         raise Exception("Not Overriden")
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, Phase)
+
+    def __hash__(self) -> int:
+        return hash(self.__class__.__name__)

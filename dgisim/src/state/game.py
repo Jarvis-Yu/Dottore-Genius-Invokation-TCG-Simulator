@@ -3,7 +3,7 @@ from typing import Optional
 from enum import Enum
 from dgisim.src.mode.mode import DefaultMode, Mode
 from dgisim.src.phase.phase import Phase
-from dgisim.src.state.player_state import PlayerState
+from dgisim.src.state.player import PlayerState
 
 
 class GameState:
@@ -27,8 +27,14 @@ class GameState:
         self._mode = mode
 
     @classmethod
-    def defaultStart(cls, phase: Phase):
-        return cls(phase, 0, DefaultMode(), PlayerState.examplePlayer(), PlayerState.examplePlayer())
+    def from_default(cls):
+        return cls(
+            DefaultMode().card_select_phase(),
+            0,
+            DefaultMode(),
+            PlayerState.examplePlayer(),
+            PlayerState.examplePlayer()
+        )
 
     def factory(self):
         return GameStateFactory(self)
@@ -48,7 +54,7 @@ class GameState:
     def get_player2(self) -> PlayerState:
         return self._player2
 
-    def get_pid(self, player: PlayerState) -> pid:
+    def get_pid(self, player: PlayerState) -> GameState.pid:
         if player is self._player1:
             return self.pid.P1
         elif player is self._player2:
@@ -56,7 +62,7 @@ class GameState:
         else:
             raise Exception("player unknown")
 
-    def get_player(self, player_id: pid) -> PlayerState:
+    def get_player(self, player_id: GameState.pid) -> PlayerState:
         if player_id is self.pid.P1:
             return self._player1
         elif player_id is self.pid.P2:
@@ -64,7 +70,7 @@ class GameState:
         else:
             raise Exception("player_id unknown")
 
-    def get_other_player(self, player_id: pid) -> PlayerState:
+    def get_other_player(self, player_id: GameState.pid) -> PlayerState:
         if player_id is self.pid.P1:
             return self._player2
         elif player_id is self.pid.P2:
@@ -72,10 +78,7 @@ class GameState:
         else:
             raise Exception("player_id unknown")
 
-    def waiting_for(self) -> Optional[pid]:
-        # TODO
-        # Return any parties that the game is waiting for input
-        # Return none if game can drive itself at least one step more
+    def waiting_for(self) -> Optional[GameState.pid]:
         return self._phase.waiting_for(self)
 
     def run(self) -> GameState:
@@ -84,7 +87,7 @@ class GameState:
     def run_action(self, pid, action) -> GameState:
         return self._phase.run_action(self, pid, action)
 
-    def get_winner(self) -> Optional[pid]:
+    def get_winner(self) -> Optional[GameState.pid]:
         if self._round > self.ROUND_LIMIT:
             return None
         # TODO
@@ -97,6 +100,34 @@ class GameState:
         # TODO
         # check player's health
         return False
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, GameState):
+            return False
+        return self._phase == other._phase \
+            and self._round == other._round \
+            and self._player1 == other._player1 \
+            and self._player2 == other._player2 \
+            and self._mode == other._mode
+
+    def __hash__(self) -> int:
+        return hash((
+            self._phase,
+            self._round,
+            self._player1,
+            self._player2,
+            self._mode,
+        ))
+
+    def __str__(self) -> str:
+        return (
+            f"[Mode]: {str(self._mode)}\n"
+            f"[Phase]: {str(self._phase)}\n"
+            f"[Round]: {str(self._round)}\n"
+            f"[Player1]: {str(self._player1)}\n"
+            f"[Player2]: {str(self._player2)}\n"
+        )
+
 
 class GameStateFactory:
     def __init__(self, game_state: GameState):
@@ -152,3 +183,10 @@ class GameStateFactory:
             player1=self._player1,
             player2=self._player2
         )
+
+if __name__ == "__main__":
+    initial_state = GameState.from_default()
+    pid = initial_state.waiting_for()
+    assert pid is None
+    state = initial_state.run()
+    pass

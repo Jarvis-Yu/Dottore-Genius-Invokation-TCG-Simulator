@@ -31,6 +31,18 @@ class PlayerState:
             card_redraw_chances=0
         )
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, PlayerState):
+            return False
+        return self._phase == other._phase \
+            and self._card_redraw_chances == other._card_redraw_chances
+
+    def __hash__(self) -> int:
+        return hash((
+            self._phase,
+            self._card_redraw_chances,
+        ))
+
 
 class PlayerStateFactory:
     def __init__(self, player_state: PlayerState) -> None:

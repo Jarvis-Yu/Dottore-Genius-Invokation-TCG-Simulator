@@ -1,8 +1,7 @@
 from typing import Optional
-from dgisim.src.state.game_state import GameState
-from dgisim.src.state.player_state import PlayerState
+from dgisim.src.state.game import GameState
+from dgisim.src.state.player import PlayerState
 from dgisim.src.phase.phase import Phase
-from dgisim.src.mode.mode import Mode
 
 
 class CardSelectPhase(Phase):
@@ -25,7 +24,7 @@ class CardSelectPhase(Phase):
         ).build()
 
     def run_action(self, game_state: GameState, pid: GameState.pid, action) -> GameState:
-        # TODO: actually implement something when there is actually deck
+        # TODO: actually implement something when there is an actually deck
         player: PlayerState = game_state.get_player(pid)
         reducedChances: int = player.get_card_redraw_chances() - 1
         if reducedChances > 0:
@@ -43,3 +42,9 @@ class CardSelectPhase(Phase):
             if player.get_phase() is PlayerState.act.ACTION_PHASE:
                 return game_state.get_pid(player)
         return None
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, CardSelectPhase)
+
+    def __hash__(self) -> int:
+        return hash(self.__class__.__name__)
