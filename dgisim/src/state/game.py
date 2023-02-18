@@ -29,6 +29,7 @@ class GameState:
             player1: pl.PlayerState,
             player2: pl.PlayerState,
         ):
+        # REMINDER: don't forget to update factory when adding new fields
         self._phase = phase
         self._round = round
         self._active_player = self.pid.P1
@@ -54,6 +55,9 @@ class GameState:
 
     def get_round(self) -> int:
         return self._round
+
+    def get_active_player(self) -> GameState.pid:
+        return self._active_player
 
     def get_mode(self) -> md.Mode:
         return self._mode
@@ -149,6 +153,7 @@ class GameStateFactory:
     def __init__(self, game_state: GameState):
         self._phase = game_state.get_phase()
         self._round = game_state.get_round()
+        self._active_player = game_state.get_active_player()
         self._player1 = game_state.get_player1()
         self._player2 = game_state.get_player2()
         self._mode = game_state.get_mode()
@@ -163,6 +168,10 @@ class GameStateFactory:
 
     def mode(self, new_mode: md.Mode) -> GameStateFactory:
         self._mode = new_mode
+        return self
+
+    def active_player(self, pid: GameState.pid) -> GameStateFactory:
+        self._active_player = pid
         return self
 
     def player1(self, new_player: pl.PlayerState) -> GameStateFactory:

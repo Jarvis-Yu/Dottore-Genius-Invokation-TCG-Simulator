@@ -12,6 +12,7 @@ class PlayerState:
         END_PHASE = "End Phase"
 
     def __init__(self, phase: act, card_redraw_chances: int):
+        # REMINDER: don't forget to update factory when adding new fields
         self._phase = phase
         self._card_redraw_chances = card_redraw_chances
 
