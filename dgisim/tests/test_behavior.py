@@ -2,9 +2,9 @@ import unittest
 from typing import Tuple, Callable
 
 from dgisim.src.state.game import GameState
+from dgisim.src.state.player import PlayerState
 from dgisim.src.player_agent import PlayerAgent
 from dgisim.src.phase.starting_hand_select import StartingHandSelectPhase
-from dgisim.src.helper.level_print import level_print, INDENT
 
 from dgisim.tests.agents import NoneAgent
 
@@ -55,6 +55,8 @@ class TestGameStateMachine(unittest.TestCase):
             stop_condition=lambda st: isinstance(st.get_phase(), StartingHandSelectPhase)
         )
         self.assertTrue(isinstance(state.get_phase(), StartingHandSelectPhase))
+        self.assertIs(state.get_player1().get_phase(), PlayerState.act.WAIT_PHASE)
+        self.assertIs(state.get_player2().get_phase(), PlayerState.act.WAIT_PHASE)
 
 
 if __name__ == "__main__":

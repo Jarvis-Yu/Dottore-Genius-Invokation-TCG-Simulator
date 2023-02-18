@@ -20,9 +20,13 @@ class CardSelectPhase(ph.Phase):
             ).player2(
                 p2.factory().phase(PlayerState.act.ACTION_PHASE).card_redraw_chances(1).build()
             ).build()
-        # Otherwise move to the next game phase
+        # Otherwise move to the next game phase making both players wait
         return game_state.factory().phase(
             game_state.get_mode().starting_hand_select_phase()
+        ).player1(
+            game_state.get_player1().factory().phase(PlayerState.act.WAIT_PHASE).build()
+        ).player2(
+            game_state.get_player2().factory().phase(PlayerState.act.WAIT_PHASE).build()
         ).build()
 
     def run_action(self, game_state: gm.GameState, pid: gm.GameState.pid, action) -> gm.GameState:

@@ -2,6 +2,7 @@ from __future__ import annotations
 from enum import Enum
 
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
+import dgisim.src.card.card
 
 
 class PlayerState:

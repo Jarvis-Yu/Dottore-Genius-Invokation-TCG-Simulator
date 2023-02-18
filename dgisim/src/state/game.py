@@ -31,6 +31,7 @@ class GameState:
         ):
         self._phase = phase
         self._round = round
+        self._active_player = self.pid.P1
         self._player1 = player1
         self._player2 = player2
         self._mode = mode
@@ -101,7 +102,7 @@ class GameState:
             return None
         # TODO
         # based on player's health
-        return self.pid.P1
+        return None
 
     def game_end(self) -> bool:
         if self._round > self.ROUND_LIMIT:
@@ -115,6 +116,7 @@ class GameState:
             return False
         return self._phase == other._phase \
             and self._round == other._round \
+            and self._active_player == other._active_player \
             and self._player1 == other._player1 \
             and self._player2 == other._player2 \
             and self._mode == other._mode
@@ -137,6 +139,7 @@ class GameState:
             "Mode": self._mode.to_string(new_indent),
             "Phase": self._phase.to_string(new_indent),
             "Round": level_print_single(str(self._round), new_indent),
+            "Active Player": level_print_single(str(self._active_player), new_indent),
             "Player1": self._player1.to_string(new_indent),
             "Player2": self._player2.to_string(new_indent),
         }, indent)
