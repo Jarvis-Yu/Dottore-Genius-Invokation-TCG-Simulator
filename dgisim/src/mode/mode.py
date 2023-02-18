@@ -24,6 +24,7 @@ class Mode:
 
 
 class DefaultMode(Mode):
+    # Initial phase of this mode
     def card_select_phase(self) -> ph.Phase:
         return cs.CardSelectPhase()
 

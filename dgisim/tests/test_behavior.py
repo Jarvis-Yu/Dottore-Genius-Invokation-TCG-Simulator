@@ -17,19 +17,22 @@ def keep_running_until(
         do_print: bool = False,
         stop_condition: Callable[[GameState], bool] = lambda _: False
 ) -> GameState:
-    if round >= max_rounds or stop_condition(state):
-        return state
     if do_print:
         print(f"#### State {round}")
     if do_print:
         print(state)
+    if round >= max_rounds or stop_condition(state):
+        return state
     pid = state.waiting_for()
     if do_print:
         print(f"#### Waiting for {pid}")
     if pid is not None:
         if do_print:
-            print("#### Some Action")
-        new_state = state.run_action(pid, None)
+            print("#### Some Action Submitted")
+        if pid is GameState.pid.P1:
+            new_state = state.run_action(pid, agents[0].chooseAction(state))
+        else:
+            new_state = state.run_action(pid, agents[1].chooseAction(state))
     else:
         new_state = state.run()
     return keep_running_until(
@@ -42,7 +45,7 @@ def keep_running_until(
     )
 
 
-class TestGameStateMachine(unittest.TestCase):
+class TestBehavior(unittest.TestCase):
     _intitialState = GameState.from_default()
 
     def test_first_step(self):
@@ -51,12 +54,12 @@ class TestGameStateMachine(unittest.TestCase):
             0,
             4,
             (NoneAgent(), NoneAgent()),
-            do_print=False,
+            do_print=True,
             stop_condition=lambda st: isinstance(st.get_phase(), StartingHandSelectPhase)
         )
         self.assertTrue(isinstance(state.get_phase(), StartingHandSelectPhase))
-        self.assertIs(state.get_player1().get_phase(), PlayerState.act.WAIT_PHASE)
-        self.assertIs(state.get_player2().get_phase(), PlayerState.act.WAIT_PHASE)
+        self.assertIs(state.get_player1().get_phase(), PlayerState.act.PASSIVE_WAIT_PHASE)
+        self.assertIs(state.get_player2().get_phase(), PlayerState.act.PASSIVE_WAIT_PHASE)
 
 
 if __name__ == "__main__":

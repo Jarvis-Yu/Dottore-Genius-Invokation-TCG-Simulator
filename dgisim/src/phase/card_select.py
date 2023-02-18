@@ -14,7 +14,7 @@ class CardSelectPhase(ph.Phase):
         p1: PlayerState = game_state.get_player1()
         p2: PlayerState = game_state.get_player2()
         # If both players just entered waiting, make them take actions
-        if p1.get_phase() is PlayerState.act.WAIT_PHASE and p2.get_phase() is PlayerState.act.WAIT_PHASE:
+        if p1.get_phase() is PlayerState.act.PASSIVE_WAIT_PHASE and p2.get_phase() is PlayerState.act.PASSIVE_WAIT_PHASE:
             return game_state.factory().player1(  # TODO The chances here can be buffed
                 p1.factory().phase(PlayerState.act.ACTION_PHASE).card_redraw_chances(1).build()
             ).player2(
@@ -24,9 +24,9 @@ class CardSelectPhase(ph.Phase):
         return game_state.factory().phase(
             game_state.get_mode().starting_hand_select_phase()
         ).player1(
-            game_state.get_player1().factory().phase(PlayerState.act.WAIT_PHASE).build()
+            game_state.get_player1().factory().phase(PlayerState.act.PASSIVE_WAIT_PHASE).build()
         ).player2(
-            game_state.get_player2().factory().phase(PlayerState.act.WAIT_PHASE).build()
+            game_state.get_player2().factory().phase(PlayerState.act.PASSIVE_WAIT_PHASE).build()
         ).build()
 
     def run_action(self, game_state: gm.GameState, pid: gm.GameState.pid, action) -> gm.GameState:

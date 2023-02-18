@@ -2,19 +2,23 @@ from __future__ import annotations
 from enum import Enum
 
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
-import dgisim.src.card.card
+from dgisim.src.card.cards import Cards
 
 
 class PlayerState:
     class act(Enum):
         ACTION_PHASE = "Action Phase"
-        WAIT_PHASE = "Wait Phase"
+        PASSIVE_WAIT_PHASE = "Passive Wait Phase"
+        AGGRESSIVE_WAIT_PHASE = "Aggressive Wait Phase"
         END_PHASE = "End Phase"
 
     def __init__(self, phase: act, card_redraw_chances: int):
         # REMINDER: don't forget to update factory when adding new fields
         self._phase = phase
         self._card_redraw_chances = card_redraw_chances
+        self._hand_cards = Cards.empty()  # to factory
+        self._deck_cards = Cards.empty()  # to factory
+        self._publicly_used_cards = Cards.empty()  # to facotry
 
     def factory(self) -> PlayerStateFactory:
         return PlayerStateFactory(self)
@@ -31,7 +35,7 @@ class PlayerState:
     @staticmethod
     def examplePlayer():
         return PlayerState(
-            phase=PlayerState.act.WAIT_PHASE,
+            phase=PlayerState.act.PASSIVE_WAIT_PHASE,
             card_redraw_chances=0
         )
 
@@ -53,7 +57,7 @@ class PlayerState:
     def to_string(self, indent: int = 0):
         new_indent = indent + INDENT
         return level_print({
-            "Phase": level_print_single(str(self._phase), new_indent),
+            "Phase": level_print_single(self._phase.value, new_indent),
             "Card Redraw Chances": level_print_single(str(self._card_redraw_chances), new_indent),
         }, indent)
 

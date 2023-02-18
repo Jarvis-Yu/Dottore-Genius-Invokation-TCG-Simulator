@@ -1,6 +1,8 @@
 # Dottore Genius Invokation TCG Simulator
 
-A Genshin Impact Genius Invokation TCG simulator intended to be used fro AI training (for now).
+A Genshin Impact Genius Invokation TCG simulator intended to be used for AI training (for now).
+
+The simulator is modeled as a finite state machine, where all game states are immutable.
 
 - [Dottore Genius Invokation TCG Simulator](#dottore-genius-invokation-tcg-simulator)
   - [Development Milestones](#development-milestones)
