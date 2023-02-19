@@ -14,6 +14,7 @@ The simulator is modeled as a finite state machine, where all game states are im
 The aim of my first stage is to make the games runs with characters Oceanid, Kaeya and Keqing,
 with black action cards and all omni dices.
 
+- [x] Set up the framework for maintaining game states
 - [ ] Implement game phase of Card Selection (card selection at the start of the game)
   - [x] Basiclly work and can continue to next phase of the game
   - [ ] Can work with real cards
