@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Dict, Tuple
+from collections import Counter
 
 from dgisim.src.card.card import Card
 from dgisim.src.helper.hashable_dict import HashableDict
@@ -15,13 +16,14 @@ class Cards:
         return Cards({})
 
     def new_with(self, cards: Dict[Card, int]) -> Cards:
-        return Cards(self._cards | cards)
+        return Cards(self._cards + cards)
 
     def pick_random_cards(self, num: int) -> Tuple[Dict[Card, int], Dict[Card, int]]:
-        # TODO
         import random
-        tmp = random.sample(list(self._cards.keys()), counts=self._cards.values(), k=num)
-        return ({}, {})
+        picked_cards = dict(Counter(
+            random.sample(list(self._cards.keys()), counts=self._cards.values(), k=num)
+        ))
+        return (self._cards - picked_cards, picked_cards)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Cards):

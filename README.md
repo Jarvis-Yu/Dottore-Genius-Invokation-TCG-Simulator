@@ -12,7 +12,7 @@ The simulator is modeled as a finite state machine, where all game states are im
 ## Development Milestones
 
 The aim of my first stage is to make the games runs with characters Oceanid, Kaeya and Keqing,
-with black action cards and all omni dices.
+with limited action cards and all omni dices.
 
 - [x] Set up the framework for maintaining game states
 - [ ] Implement game phase of Card Selection (card selection at the start of the game)
@@ -36,7 +36,7 @@ The final stage is to include more characters and eventually all.
 ## Other Plans
 
 The fully developed project will be publish to PyPI (beta versions will be available once all that
-is left are adding more characters)
+are left is adding more characters)
 
 Once this project is done, I'll be reading relative papers and develop an AI for this game. The AI
 is supposed to be used for learning strategies and making decks, but not against another player
