@@ -30,14 +30,43 @@ class EventCard(Card):
     pass
 
 
-class SweetMadame(EventCard):
+class FoodCard(EventCard):
+    pass
+
+
+class SweetMadame(FoodCard):
     def another(self) -> SweetMadame:
         return SweetMadame()
 
 
-class MondstadtHashBrown(EventCard):
+class MondstadtHashBrown(FoodCard):
     def another(self) -> MondstadtHashBrown:
         return MondstadtHashBrown()
+
+
+class JueyunGuoba(FoodCard):
+    def another(self) -> JueyunGuoba:
+        return JueyunGuoba()
+
+
+class LotusFlowerCrisp(FoodCard):
+    def another(self) -> LotusFlowerCrisp:
+        return LotusFlowerCrisp()
+
+
+class MintyMeatRolls(FoodCard):
+    def another(self) -> MintyMeatRolls:
+        return MintyMeatRolls()
+
+
+class MushroomPizza(FoodCard):
+    def another(self) -> MushroomPizza:
+        return MushroomPizza()
+
+
+class NorthernSmokedChicken(FoodCard):
+    def another(self) -> NorthernSmokedChicken:
+        return NorthernSmokedChicken()
 
 
 class Starsigns(EventCard):

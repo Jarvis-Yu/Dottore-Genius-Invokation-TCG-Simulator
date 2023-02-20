@@ -1,15 +1,16 @@
 from __future__ import annotations
 from typing import Optional
 
-import dgisim.src.state.game as gm
+import dgisim.src.state.game_state as gm
 from dgisim.src.helper.level_print import level_print_single
+from dgisim.src.action import Action
 
 
 class Phase:
-    def run(self, game_state: gm.GameState) -> gm.GameState:
+    def step(self, game_state: gm.GameState) -> gm.GameState:
         raise Exception("Not Overriden")
 
-    def run_action(self, game_state: gm.GameState, pid: gm.GameState.pid, action) -> gm.GameState:
+    def step_action(self, game_state: gm.GameState, pid: gm.GameState.pid, action: Action) -> gm.GameState:
         raise Exception("Not Overriden")
 
     def waiting_for(self, game_state: gm.GameState) -> Optional[gm.GameState.pid]:

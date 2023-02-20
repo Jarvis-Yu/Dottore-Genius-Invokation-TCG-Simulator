@@ -1,4 +1,4 @@
-from dgisim.src.state.game import GameState
+from dgisim.src.state.game_state import GameState
 from dgisim.src.player_agent import PlayerAgent
 
 
@@ -15,10 +15,10 @@ class GameStateMachine:
     def one_step(self):
         pid = self._game_state.waiting_for()
         if pid is None:
-            self._game_state = self._game_state.run()
+            self._game_state = self._game_state.step()
         else:
-            self._game_state = self._game_state.run_action(
-                pid, self.player(pid).chooseAction(self._game_state))
+            self._game_state = self._game_state.action_step(
+                pid, self.player(pid).choose_action(self._game_state, pid))
 
     def run(self):
         while (not self.game_end()):

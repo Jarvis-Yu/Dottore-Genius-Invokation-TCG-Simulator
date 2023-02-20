@@ -4,8 +4,9 @@ from enum import Enum
 
 import dgisim.src.mode.mode as md
 import dgisim.src.phase.phase as ph
-import dgisim.src.state.player as pl
+import dgisim.src.state.player_state as pl
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
+from dgisim.src.action import Action
 
 
 class GameState:
@@ -95,11 +96,11 @@ class GameState:
     def waiting_for(self) -> Optional[GameState.pid]:
         return self._phase.waiting_for(self)
 
-    def run(self) -> GameState:
-        return self._phase.run(self)
+    def step(self) -> GameState:
+        return self._phase.step(self)
 
-    def run_action(self, pid, action) -> GameState:
-        return self._phase.run_action(self, pid, action)
+    def action_step(self, pid: GameState.pid, action: Action) -> GameState:
+        return self._phase.step_action(self, pid, action)
 
     def get_winner(self) -> Optional[GameState.pid]:
         if self._round > self.ROUND_LIMIT:
@@ -214,5 +215,5 @@ if __name__ == "__main__":
     initial_state = GameState.from_default()
     pid = initial_state.waiting_for()
     assert pid is None
-    state = initial_state.run()
+    state = initial_state.step()
     pass

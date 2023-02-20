@@ -15,15 +15,24 @@ class Cards:
     def empty(cls) -> Cards:
         return Cards({})
 
-    def new_with(self, cards: Dict[Card, int]) -> Cards:
-        return Cards(self._cards + cards)
+    def __add__(self, other: Cards) -> Cards:
+        return Cards(self._cards + other._cards)
 
-    def pick_random_cards(self, num: int) -> Tuple[Dict[Card, int], Dict[Card, int]]:
+    def __sub__(self, other: Cards) -> Cards:
+        return Cards(self._cards - other._cards)
+
+    def pick_random_cards(self, num: int) -> Tuple[Cards, Cards]:
+        """
+        Returns the left cards and selected cards
+        """
         import random
         picked_cards = dict(Counter(
             random.sample(list(self._cards.keys()), counts=self._cards.values(), k=num)
         ))
-        return (self._cards - picked_cards, picked_cards)
+        return Cards(self._cards - picked_cards), Cards(picked_cards)
+
+    def num_cards(self) -> int:
+        return sum(self._cards.values())
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Cards):

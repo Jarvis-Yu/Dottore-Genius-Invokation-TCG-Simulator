@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import dgisim.src.phase.phase as ph
-import  dgisim.src.phase.card_select as cs
-import  dgisim.src.phase.starting_hand_select as shs
+import dgisim.src.phase.card_select_phase as cs
+import dgisim.src.phase.starting_hand_select_phase as shs
 from dgisim.src.helper.level_print import level_print_single
 
 
