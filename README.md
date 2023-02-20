@@ -6,7 +6,7 @@ The simulator is modeled as a finite state machine, where all game states are im
 
 - [Dottore Genius Invokation TCG Simulator](#dottore-genius-invokation-tcg-simulator)
   - [Development Milestones](#development-milestones)
-  - [Other Plans](#other-plans)
+  - [Future Plans](#future-plans)
   - [QA](#qa)
 
 ## Development Milestones
@@ -15,9 +15,9 @@ The aim of my first stage is to make the games runs with characters Oceanid, Kae
 with limited action cards and all omni dices.
 
 - [x] Set up the framework for maintaining game states
-- [ ] Implement game phase of Card Selection (card selection at the start of the game)
+- [x] Implement game phase of Card Selection (card selection at the start of the game)
   - [x] Basiclly work and can continue to next phase of the game
-  - [ ] Can work with real cards
+  - [x] Can work with real cards
   - [ ] Allow both players to act simultaneously instead of in turns (trivial for AI training)
 - [ ] Implement game phase of Starting Hand Select Phase (select active character)
 - [ ] Implement game phase of Roll (Dice) Phase (roll dices between rounds)
@@ -33,9 +33,9 @@ The second stage of development will be focusing on including all action cards.
 
 The final stage is to include more characters and eventually all.
 
-## Other Plans
+## Future Plans
 
-The fully developed project will be publish to PyPI (beta versions will be available once all that
+The fully developed project will be published to PyPI (beta versions will be available once all that
 are left is adding more characters)
 
 Once this project is done, I'll be reading relative papers and develop an AI for this game. The AI
