@@ -31,9 +31,9 @@ def keep_running_until(
         if do_print:
             print("#### Some Action Submitted")
         if pid is GameState.pid.P1:
-            new_state = state.action_step(pid, agents[0].choose_action(state, pid))
+            new_state = state.action_step(pid, agents[0].choose_action([state], pid))
         elif pid is GameState.pid.P2:
-            new_state = state.action_step(pid, agents[1].choose_action(state, pid))
+            new_state = state.action_step(pid, agents[1].choose_action([state], pid))
         else:
             raise Exception("Unknown pid")
     else:
@@ -57,7 +57,7 @@ class TestBehavior(unittest.TestCase):
             0,
             4,
             (BasicAgent(), BasicAgent()),
-            do_print=False,
+            do_print=True,
             stop_condition=lambda st: isinstance(st.get_phase(), StartingHandSelectPhase)
         )
         self.assertTrue(isinstance(state.get_phase(), StartingHandSelectPhase))

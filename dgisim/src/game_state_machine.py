@@ -45,3 +45,6 @@ class GameStateMachine:
 
     def game_end(self) -> bool:
         return self._game_state.game_end()
+
+    def get_game_state(self) -> GameState:
+        return self._game_state

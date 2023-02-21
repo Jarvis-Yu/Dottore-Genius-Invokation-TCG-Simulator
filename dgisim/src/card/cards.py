@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Type
 from collections import Counter
 
 from dgisim.src.card.card import Card
@@ -8,7 +8,7 @@ from dgisim.src.helper.level_print import level_print, INDENT, level_print_singl
 
 
 class Cards:
-    def __init__(self, mapping: Dict[Card, int]) -> None:
+    def __init__(self, mapping: Dict[Type[Card], int]) -> None:
         self._cards = HashableDict(mapping)
 
     @classmethod
@@ -45,9 +45,9 @@ class Cards:
     def __str__(self) -> str:
         return self.to_string(0)
 
-    def to_string(self, indent: int = 0):
+    def to_string(self, indent: int = 0) -> str:
         existing_cards = dict([
-            (str(card), level_print_single(str(num), indent + INDENT))
+            (card.name(), level_print_single(str(num), indent + INDENT))
             for card, num in self._cards.items()
             if num != 0
         ])
