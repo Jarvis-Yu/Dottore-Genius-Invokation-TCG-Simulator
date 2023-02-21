@@ -77,6 +77,7 @@ class PlayerState:
             and self._deck_cards == other._deck_cards \
             and self._publicly_used_cards == other._publicly_used_cards \
 
+
     def __hash__(self) -> int:
         return hash((
             self._phase,

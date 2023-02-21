@@ -13,6 +13,17 @@ class Characters:
     def get_characters(self) -> Tuple:
         return tuple(self._characters)
 
+    def get_active_character(self) -> Optional[Character]:
+        if self._active_character is None:
+            return None
+        return self._characters[self._active_character]
+
+    def get_active_character_name(self) -> str:
+        char = self.get_active_character()
+        if char is None:
+            return "None"
+        return char.name()
+
     def set_active_character(self, character: Type[Character]) -> bool:
         # if new active character is current active character
         if self._active_character is not None and isinstance(self._characters[self._active_character], character):
@@ -41,4 +52,8 @@ class Characters:
         return self.to_string(0)
 
     def to_string(self, indent: int = 0) -> str:
-        return ''.join([char.to_string(indent) for char in self._characters])
+        new_indent = indent + INDENT
+        return level_print({
+            "Active Character": level_print_single(self.get_active_character_name(), new_indent),
+            "Characters": ''.join([char.to_string(new_indent) for char in self._characters]),
+        }, indent)

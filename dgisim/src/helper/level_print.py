@@ -12,5 +12,8 @@ def level_print(strs: Dict[str, str], indent: int = 0) -> str:
     return ''.join(str_builder)
 
 def level_print_single(s: str, indent: int = 0) -> str:
+    """
+    format prints one line of string
+    """
     indentation = _INDENTATION * (indent // INDENT)
     return indentation + s + '\n'

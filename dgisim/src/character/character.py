@@ -4,11 +4,14 @@ class Character:
     def defeated(self) -> bool:
         raise Exception("Not Implemented")
 
+    def name(self) -> str:
+        return self.__class__.__name__
+
     def __str__(self) -> str:
         return self.to_string(0)
     
     def to_string(self, indent: int) -> str:
-        return level_print_single("BaseCharacter", indent)
+        return level_print_single(self.name(), indent)
 
 class Keqing(Character):
     pass
