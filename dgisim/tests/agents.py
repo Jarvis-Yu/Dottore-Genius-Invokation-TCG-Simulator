@@ -1,3 +1,5 @@
+from typing import List
+
 from dgisim.src.player_agent import PlayerAgent
 from dgisim.src.state.game_state import GameState
 from dgisim.src.action import Action, CardSelectAction
@@ -10,8 +12,9 @@ class NoneAgent(PlayerAgent):
 class BasicAgent(PlayerAgent):
     _NUM_PICKED_CARDS = 3
 
-    def choose_action(self, game_state: GameState, pid: GameState.pid) -> Action:
+    def choose_action(self, history: List[GameState], pid: GameState.pid) -> Action:
+        game_state = history[-1]
         if isinstance(game_state.get_phase(), CardSelectPhase):
             _, selected_cards = game_state.get_player(pid).get_hand_cards().pick_random_cards(self._NUM_PICKED_CARDS)
             return CardSelectAction(selected_cards)
-        return super().choose_action(game_state, pid)
+        return super().choose_action(history, pid)

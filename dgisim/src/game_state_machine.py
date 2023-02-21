@@ -4,6 +4,7 @@ from dgisim.src.player_agent import PlayerAgent
 
 class GameStateMachine:
     def __init__(self, game_state: GameState, player1: PlayerAgent, player2: PlayerAgent):
+        self._history = [game_state]
         self._game_state = game_state
         self._playerAgent1 = player1
         self._playerAgent2 = player2
@@ -18,7 +19,8 @@ class GameStateMachine:
             self._game_state = self._game_state.step()
         else:
             self._game_state = self._game_state.action_step(
-                pid, self.player(pid).choose_action(self._game_state, pid))
+                pid, self.player(pid).choose_action(self._history, pid))
+        self._history.append(self._game_state)
 
     def run(self):
         while (not self.game_end()):

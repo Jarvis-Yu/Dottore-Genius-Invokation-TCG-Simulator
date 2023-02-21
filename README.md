@@ -18,7 +18,7 @@ with limited action cards and all omni dices.
 - [x] Implement game phase of Card Selection (card selection at the start of the game)
   - [x] Basiclly work and can continue to next phase of the game
   - [x] Can work with real cards
-  - [ ] Allow both players to act simultaneously instead of in turns (trivial for AI training)
+  - [ ] ~~Allow both players to act simultaneously instead of in turns~~ (trivial for AI training)
 - [ ] Implement game phase of Starting Hand Select Phase (select active character)
 - [ ] Implement game phase of Roll (Dice) Phase (roll dices between rounds)
 - [ ] Implement game phase of Action Phase (players beat each other)
