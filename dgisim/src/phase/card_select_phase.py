@@ -12,9 +12,6 @@ from dgisim.src.helper.level_print import level_print
 class CardSelectPhase(ph.Phase):
     _NUM_CARDS: int = 5
 
-    def __init__(self) -> None:
-        super().__init__()
-
     def _assign_cards_and_inform_action(self, p1: PlayerState, p2: PlayerState) -> Tuple[PlayerState, PlayerState]:
         p1_deck, p1_hand = p1.get_deck_cards().pick_random_cards(self._NUM_CARDS)
         p2_deck, p2_hand = p2.get_deck_cards().pick_random_cards(self._NUM_CARDS)
@@ -72,13 +69,6 @@ class CardSelectPhase(ph.Phase):
             .hand_cards(new_hand)
             .build()
         ).build()
-
-    def waiting_for(self, game_state: gm.GameState) -> Optional[gm.GameState.pid]:
-        players = [game_state.get_player1(), game_state.get_player2()]
-        for player in players:
-            if player.get_phase() is PlayerState.act.ACTION_PHASE:
-                return game_state.get_pid(player)
-        return None
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, CardSelectPhase)
