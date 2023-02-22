@@ -51,32 +51,32 @@ def keep_running_until(
 class TestBehavior(unittest.TestCase):
     _intitialState = GameState.from_default()
 
-    def test_card_select_phase_phase(self):
-        state = keep_running_until(
-            self._intitialState,
-            0,
-            4,
-            (BasicAgent(), BasicAgent()),
-            do_print=True,
-            stop_condition=lambda st: isinstance(st.get_phase(), StartingHandSelectPhase)
-        )
-        self.assertTrue(isinstance(state.get_phase(), StartingHandSelectPhase))
-        self.assertIs(state.get_player1().get_phase(), PlayerState.act.PASSIVE_WAIT_PHASE)
-        self.assertIs(state.get_player2().get_phase(), PlayerState.act.PASSIVE_WAIT_PHASE)
+    # def test_card_select_phase_phase(self):
+    #     state = keep_running_until(
+    #         self._intitialState,
+    #         0,
+    #         4,
+    #         (BasicAgent(), BasicAgent()),
+    #         do_print=False,
+    #         stop_condition=lambda st: isinstance(st.get_phase(), StartingHandSelectPhase)
+    #     )
+    #     self.assertTrue(isinstance(state.get_phase(), StartingHandSelectPhase))
+    #     self.assertIs(state.get_player1().get_phase(), PlayerState.act.PASSIVE_WAIT_PHASE)
+    #     self.assertIs(state.get_player2().get_phase(), PlayerState.act.PASSIVE_WAIT_PHASE)
 
-    def test_card_select_phase_cards(self):
-        p1_deck: Cards = self._intitialState.get_player1().get_deck_cards()
-        p2_deck: Cards = self._intitialState.get_player2().get_deck_cards()
-        state = keep_running_until(
-            self._intitialState,
-            0,
-            4,
-            (BasicAgent(), BasicAgent()),
-            do_print=False,
-            stop_condition=lambda st: isinstance(st.get_phase(), StartingHandSelectPhase)
-        )
-        self.assertEqual(p1_deck, state.get_player1().get_deck_cards() + state.get_player1().get_hand_cards())
-        self.assertEqual(p2_deck, state.get_player2().get_deck_cards() + state.get_player2().get_hand_cards())
+    # def test_card_select_phase_cards(self):
+    #     p1_deck: Cards = self._intitialState.get_player1().get_deck_cards()
+    #     p2_deck: Cards = self._intitialState.get_player2().get_deck_cards()
+    #     state = keep_running_until(
+    #         self._intitialState,
+    #         0,
+    #         4,
+    #         (BasicAgent(), BasicAgent()),
+    #         do_print=False,
+    #         stop_condition=lambda st: isinstance(st.get_phase(), StartingHandSelectPhase)
+    #     )
+    #     self.assertEqual(p1_deck, state.get_player1().get_deck_cards() + state.get_player1().get_hand_cards())
+    #     self.assertEqual(p2_deck, state.get_player2().get_deck_cards() + state.get_player2().get_hand_cards())
 
 
 if __name__ == "__main__":

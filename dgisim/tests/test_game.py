@@ -6,7 +6,9 @@ from dgisim.src.state.game_state import GameState
 class TestGameState(unittest.TestCase):
 
     def test_eq(self):
-        self.assertEqual(GameState.from_default(), GameState.from_default())
+        game_state = GameState.from_default()
+        other_state = game_state.factory().build()
+        self.assertEqual(game_state, other_state)
 
 
 if __name__ == "__main__":

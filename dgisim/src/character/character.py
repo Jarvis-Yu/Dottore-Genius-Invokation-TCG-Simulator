@@ -2,7 +2,8 @@ from dgisim.src.helper.level_print import level_print_single
 
 class Character:
     def defeated(self) -> bool:
-        raise Exception("Not Implemented")
+        # TODO
+        return False
 
     def name(self) -> str:
         return self.__class__.__name__
