@@ -1,18 +1,54 @@
 from __future__ import annotations
-from typing import Dict, Tuple, Type
-from collections import Counter
+from typing import Dict
+from enum import Enum
 
-from dgisim.src.card.card import Card
 from dgisim.src.helper.hashable_dict import HashableDict
-from dgisim.src.helper.level_print import level_print, INDENT, level_print_single
+from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
+from dgisim.src.element.element import Element
 
+class Dices:
+    def __init__(self, dices: Dict[Element, int]) -> None:
+        self._dices = HashableDict(dices)
 
+    @classmethod
+    def from_empty(cls) -> Dices:
+        return Dices({})
+
+    def __add__(self, other: Dices) -> Dices:
+        return Dices(self._dices + other._dices)
+
+    def __sub__(self, other: Dices) -> Dices:
+        return Dices(self._dices - other._dices)
+
+    def num_dices(self) -> int:
+        return sum(self._dices.values())
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Dices):
+            return False
+        return self._dices == other._dices
+
+    def __hash__(self) -> int:
+        return hash(self._dices)
+
+    def __str__(self) -> str:
+        return self.to_string(0)
+
+    def to_string(self, indent: int = 0) -> str:
+        existing_dices = dict([
+            (dice.name, level_print_single(str(num), indent + INDENT))
+            for dice, num in self._dices.items()
+            if num != 0
+        ])
+        return level_print(existing_dices, indent)
+
+"""
 class Cards:
     def __init__(self, mapping: Dict[Type[Card], int]) -> None:
         self._cards = HashableDict(mapping)
 
     @classmethod
-    def from_empty(cls) -> Cards:
+    def empty(cls) -> Cards:
         return Cards({})
 
     def __add__(self, other: Cards) -> Cards:
@@ -22,9 +58,6 @@ class Cards:
         return Cards(self._cards - other._cards)
 
     def pick_random_cards(self, num: int) -> Tuple[Cards, Cards]:
-        """
-        Returns the left cards and selected cards
-        """
         import random
         picked_cards = dict(Counter(
             random.sample(list(self._cards.keys()), counts=self._cards.values(), k=num)
@@ -52,3 +85,4 @@ class Cards:
             if num != 0
         ])
         return level_print(existing_cards, indent)
+"""

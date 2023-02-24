@@ -1,4 +1,4 @@
-from typing import List, Type
+from typing import List, Type, Tuple
 
 from dgisim.src.state.game_state import GameState
 from dgisim.src.player_agent import PlayerAgent
@@ -18,11 +18,11 @@ class GameStateMachine:
     def from_default(cls, player1: PlayerAgent, player2: PlayerAgent):
         return cls(GameState.from_default(), player1, player2)
 
-    def get_history(self) -> List[GameState]:
-        return self._history
+    def get_history(self) -> Tuple[GameState]:
+        return tuple(self._history)
 
-    def get_action_history(self) -> List[GameState]:
-        return self._action_history
+    def get_action_history(self) -> Tuple[GameState]:
+        return tuple(self._action_history)
 
     def get_game_state(self) -> GameState:
         return self._game_state
@@ -32,9 +32,9 @@ class GameStateMachine:
         self._history.append(self._game_state)
 
     def _action_step(self, pid: GameState.pid, action: Action) -> None:
+        self._action_history.append(self._game_state)
         self._game_state = self._game_state.action_step(pid, action)
         self._history.append(self._game_state)
-        self._action_history.append(self._game_state)
 
     def step_until_phase(self, phase: Type[Phase]) -> None:
         while isinstance(self._game_state.get_phase(), phase):
@@ -49,13 +49,17 @@ class GameStateMachine:
         else:
             self._action_step(pid, self.player_agent(pid).choose_action(self._history, pid))
 
-    def auto_step(self):
+    def auto_step(self) -> None:
         pid = self._game_state.waiting_for()
         while pid is None:
             self._step()
             pid = self._game_state.waiting_for()
 
-    def run(self):
+    def player_step(self) -> None:
+        self.auto_step()
+        self.one_step()
+
+    def run(self) -> None:
         while (not self.game_end()):
             self.one_step()
         winner_id = self._game_state.get_winner()

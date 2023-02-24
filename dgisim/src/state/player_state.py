@@ -1,10 +1,12 @@
 from __future__ import annotations
 from enum import Enum
+from typing import Tuple
 
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
 from dgisim.src.card.cards import Cards
 import dgisim.src.card.card as card
 from dgisim.src.character.characters import Characters
+from dgisim.src.dices import Dices
 from dgisim.src.card.cards_set import DEFAULT_CARDS
 from dgisim.src.character.characters_set import DEFAULT_CHARACTERS
 
@@ -21,6 +23,7 @@ class PlayerState:
         phase: act,
         characters: Characters,
         card_redraw_chances: int,
+        dices: Dices,
         hand_cards: Cards,
         deck_cards: Cards,
         publicly_used_cards: Cards,
@@ -29,9 +32,10 @@ class PlayerState:
         self._phase = phase
         self._card_redraw_chances = card_redraw_chances
         self._characters = characters
-        self._hand_cards = hand_cards  # to factory
-        self._deck_cards = deck_cards  # to factory
-        self._publicly_used_cards = publicly_used_cards  # to facotry
+        self._dices = dices
+        self._hand_cards = hand_cards
+        self._deck_cards = deck_cards
+        self._publicly_used_cards = publicly_used_cards
 
     def factory(self) -> PlayerStateFactory:
         return PlayerStateFactory(self)
@@ -44,6 +48,9 @@ class PlayerState:
 
     def get_characters(self) -> Characters:
         return self._characters
+
+    def get_dices(self) -> Dices:
+        return self._dices
 
     def get_hand_cards(self) -> Cards:
         return self._hand_cards
@@ -64,28 +71,30 @@ class PlayerState:
             card_redraw_chances=0,
             characters=Characters.from_default(tuple([char() for char in DEFAULT_CHARACTERS][:3])),
             hand_cards=Cards(dict([(card, 0) for card in DEFAULT_CARDS])),
+            dices=Dices({}),
             deck_cards=Cards(dict([(card, 2) for card in DEFAULT_CARDS])),
             publicly_used_cards=Cards(dict([(card, 0) for card in DEFAULT_CARDS])),
+        )
+
+    def _all_unique_data(self) -> Tuple:
+        return (
+            self._phase,
+            self._card_redraw_chances,
+            self._characters,
+            self._dices,
+            self._hand_cards,
+            self._deck_cards,
+            self._publicly_used_cards,
         )
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, PlayerState):
             return False
-        return self._phase == other._phase \
-            and self._card_redraw_chances == other._card_redraw_chances \
-            and self._hand_cards == other._hand_cards \
-            and self._deck_cards == other._deck_cards \
-            and self._publicly_used_cards == other._publicly_used_cards \
+        return self._all_unique_data() == other._all_unique_data()
 
 
     def __hash__(self) -> int:
-        return hash((
-            self._phase,
-            self._card_redraw_chances,
-            self._hand_cards,
-            self._deck_cards,
-            self._publicly_used_cards,
-        ))
+        return hash(self._all_unique_data())
 
     def __str__(self) -> str:
         return self.to_string(0)
@@ -96,9 +105,10 @@ class PlayerState:
             "Phase": level_print_single(self._phase.value, new_indent),
             "Card Redraw Chances": level_print_single(str(self._card_redraw_chances), new_indent),
             "Characters": self._characters.to_string(new_indent),
+            "Dices": self._dices.to_string(new_indent),
             "Hand Cards": self._hand_cards.to_string(new_indent),
             "Deck Cards": self._deck_cards.to_string(new_indent),
-            # TODO: cards
+            "Publicly Used Cards": self._publicly_used_cards.to_string(new_indent),
         }, indent)
 
 
@@ -108,6 +118,7 @@ class PlayerStateFactory:
         self._card_redraw_chances = player_state.get_card_redraw_chances()
         self._characters = player_state.get_characters()
         self._hand_cards = player_state.get_hand_cards()
+        self._dices = player_state.get_dices()
         self._deck_cards = player_state.get_deck_cards()
         self._publicly_used_cards = player_state.get_publicly_used_cards()
 
@@ -127,6 +138,10 @@ class PlayerStateFactory:
         self._hand_cards = cards
         return self
 
+    def dices(self, dices: Dices) -> PlayerStateFactory:
+        self._dices = dices
+        return self
+
     def deck_cards(self, cards: Cards) -> PlayerStateFactory:
         self._deck_cards = cards
         return self
@@ -141,6 +156,7 @@ class PlayerStateFactory:
             card_redraw_chances=self._card_redraw_chances,
             characters=self._characters,
             hand_cards=self._hand_cards,
+            dices=self._dices,
             deck_cards=self._deck_cards,
             publicly_used_cards=self._publicly_used_cards,
         )
