@@ -1,4 +1,4 @@
-from typing import List, Type, Tuple
+from typing import List, Type, Tuple, Optional
 
 from dgisim.src.state.game_state import GameState
 from dgisim.src.player_agent import PlayerAgent
@@ -82,3 +82,6 @@ class GameStateMachine:
 
     def game_end(self) -> bool:
         return self._game_state.game_end()
+
+    def get_winner(self) -> Optional[GameState.pid]:
+        return self._game_state.get_winner()

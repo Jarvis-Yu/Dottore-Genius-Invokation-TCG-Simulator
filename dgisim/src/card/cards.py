@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Dict, Tuple, Type
 from collections import Counter
+import random
 
 from dgisim.src.card.card import Card
 from dgisim.src.helper.hashable_dict import HashableDict
@@ -25,7 +26,9 @@ class Cards:
         """
         Returns the left cards and selected cards
         """
-        import random
+        num = min(self.num_cards(), num)
+        if num == 0:
+            return (self, Cards.from_empty())
         picked_cards = dict(Counter(
             random.sample(list(self._cards.keys()), counts=self._cards.values(), k=num)
         ))

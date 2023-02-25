@@ -6,7 +6,10 @@ from dgisim.tests.agents import BasicAgent
 from dgisim.src.phase.card_select_phase import CardSelectPhase
 from dgisim.src.phase.phase import Phase
 from dgisim.src.phase.starting_hand_select_phase import StartingHandSelectPhase
+from dgisim.src.phase.roll_phase import RollPhase
 from dgisim.src.phase.action_phase import ActionPhase
+from dgisim.src.phase.end_phase import EndPhase
+from dgisim.src.phase.game_end_phase import GameEndPhase
 from dgisim.src.state.player_state import PlayerState
 from dgisim.src.card.cards import Cards
 
@@ -74,10 +77,59 @@ class TestGameStateMachine(unittest.TestCase):
             BasicAgent(),
             BasicAgent(),
         )
+        state_machine.step_until_phase(RollPhase)
         state_machine.step_until_phase(ActionPhase)
         state = state_machine.get_game_state()
         self.assertEqual(state.get_player1().get_dices().num_dices(), 8)
         self.assertEqual(state.get_player2().get_dices().num_dices(), 8)
+
+    def test_action_phase_basic_behavior(self):
+        state_machine = GameStateMachine(
+            self._initial_state,
+            BasicAgent(),
+            BasicAgent(),
+        )
+        state_machine.step_until_phase(ActionPhase)
+        # cmd = ""
+        # while cmd == "":
+        #     print("===========================================")
+        #     print(state_machine.get_game_state())
+        #     state_machine.one_step()
+        #     cd = input()
+        state_machine.step_until_phase(EndPhase)
+        state = state_machine.get_game_state()
+        self.assertIs(state.get_player1().get_phase(), PlayerState.act.PASSIVE_WAIT_PHASE)
+        self.assertIs(state.get_player2().get_phase(), PlayerState.act.PASSIVE_WAIT_PHASE)
+
+    def test_end_phase_basic_behavior(self):
+        p1_deck: Cards = self._initial_state.get_player1().get_deck_cards()
+        p2_deck: Cards = self._initial_state.get_player2().get_deck_cards()
+        state_machine = GameStateMachine(
+            self._initial_state,
+            BasicAgent(),
+            BasicAgent(),
+        )
+        state_machine.step_until_phase(EndPhase)
+        state_machine.step_until_phase(RollPhase)
+        state = state_machine.get_game_state()
+        p1 = state.get_player1()
+        p2 = state.get_player2()
+        self.assertEqual(p1.get_hand_cards().num_cards(), 7)
+        self.assertEqual(p2.get_hand_cards().num_cards(), 7)
+        self.assertEqual(p1.get_hand_cards().num_cards() + p1.get_deck_cards().num_cards(), p1_deck.num_cards())
+        self.assertEqual(p2.get_hand_cards().num_cards() + p2.get_deck_cards().num_cards(), p2_deck.num_cards())
+        self.assertIs(state.get_player1().get_phase(), PlayerState.act.PASSIVE_WAIT_PHASE)
+        self.assertIs(state.get_player2().get_phase(), PlayerState.act.PASSIVE_WAIT_PHASE)
+
+    def test_game_end_phase_basic_behavior(self):
+        state_machine = GameStateMachine(
+            self._initial_state,
+            BasicAgent(),
+            BasicAgent(),
+        )
+        state_machine.step_until_phase(GameEndPhase)
+        self.assertTrue(state_machine.game_end())
+        self.assertIsNone(state_machine.get_winner())
 
 if __name__ == "__main__":
     unittest.main()

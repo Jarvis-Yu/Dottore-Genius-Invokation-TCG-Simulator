@@ -22,3 +22,6 @@ class CharacterSelectAction(Action):
 
     def get_selected_character_id(self) -> Characters.CharId:
         return self._selected_character_id
+
+class EndRoundAction(Action):
+    pass

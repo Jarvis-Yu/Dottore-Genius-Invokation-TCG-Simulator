@@ -4,6 +4,7 @@ from enum import Enum
 
 import dgisim.src.mode.mode as md
 import dgisim.src.phase.phase as ph
+import dgisim.src.phase.game_end_phase as gep
 import dgisim.src.state.player_state as pl
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
 from dgisim.src.action import Action
@@ -18,28 +19,29 @@ class GameState:
             return self == GameState.pid.P1
 
         def is_player2(self) -> bool:
-            return self == GameState.pid.P2
+            return self is GameState.pid.P2
 
-    ROUND_LIMIT = 15
-    # CARD_SELECT_PHASE = "Card Selection Phase"
-    # STARTING_HAND_SELECT_PHASE = "Starting Hand Selection Phase"
-    # ROLL_PHASE = "Roll Phase"
-    # ACTION_PHASE = "Action Phase"
-    # END_PHASE = "End Phase"
-    # GAME_END_PHASE = "Game End Phase"
+        def other(self) -> GameState.pid:
+            if self is GameState.pid.P1:
+                return GameState.pid.P2
+            elif self is GameState.pid.P2:
+                return GameState.pid.P1
+            else:
+                raise Exception("Unknown situation of pid")
 
     def __init__(
-            self,
-            phase: ph.Phase,
-            round: int,
-            mode: md.Mode,
-            player1: pl.PlayerState,
-            player2: pl.PlayerState,
-        ):
+        self,
+        phase: ph.Phase,
+        round: int,
+        active_player: GameState.pid,
+        mode: md.Mode,
+        player1: pl.PlayerState,
+        player2: pl.PlayerState,
+    ):
         # REMINDER: don't forget to update factory when adding new fields
         self._phase = phase
         self._round = round
-        self._active_player = self.pid.P1
+        self._active_player = active_player
         self._player1 = player1
         self._player2 = player2
         self._mode = mode
@@ -47,11 +49,12 @@ class GameState:
     @classmethod
     def from_default(cls):
         return cls(
-            md.DefaultMode().card_select_phase(),
-            0,
-            md.DefaultMode(),
-            pl.PlayerState.examplePlayer(),
-            pl.PlayerState.examplePlayer()
+            phase=md.DefaultMode().card_select_phase(),
+            round=0,
+            active_player=GameState.pid.P1,
+            mode=md.DefaultMode(),
+            player1=pl.PlayerState.examplePlayer(),
+            player2=pl.PlayerState.examplePlayer()
         )
 
     def factory(self):
@@ -63,7 +66,7 @@ class GameState:
     def get_round(self) -> int:
         return self._round
 
-    def get_active_player(self) -> GameState.pid:
+    def get_active_player_id(self) -> GameState.pid:
         return self._active_player
 
     def get_mode(self) -> md.Mode:
@@ -84,17 +87,17 @@ class GameState:
             raise Exception("player unknown")
 
     def get_player(self, player_id: GameState.pid) -> pl.PlayerState:
-        if player_id is self.pid.P1:
+        if player_id.is_player1():
             return self._player1
-        elif player_id is self.pid.P2:
+        elif player_id.is_player2():
             return self._player2
         else:
             raise Exception("player_id unknown")
 
     def get_other_player(self, player_id: GameState.pid) -> pl.PlayerState:
-        if player_id is self.pid.P1:
+        if player_id.is_player1():
             return self._player2
-        elif player_id is self.pid.P2:
+        elif player_id.is_player2():
             return self._player1
         else:
             raise Exception("player_id unknown")
@@ -109,18 +112,14 @@ class GameState:
         return self._phase.step_action(self, pid, action)
 
     def get_winner(self) -> Optional[GameState.pid]:
-        if self._round > self.ROUND_LIMIT:
+        assert self.game_end()
+        if isinstance(self._phase, gep.GameEndPhase):
             return None
-        # TODO
-        # based on player's health
-        return None
+        # TODO: based on player's health
+        raise Exception("Not Implemented")
 
     def game_end(self) -> bool:
-        if self._round > self.ROUND_LIMIT:
-            return True
-        # TODO
-        # check player's health
-        return False
+        return isinstance(self._phase, gep.GameEndPhase)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, GameState):
@@ -160,7 +159,7 @@ class GameStateFactory:
     def __init__(self, game_state: GameState):
         self._phase = game_state.get_phase()
         self._round = game_state.get_round()
-        self._active_player = game_state.get_active_player()
+        self._active_player = game_state.get_active_player_id()
         self._player1 = game_state.get_player1()
         self._player2 = game_state.get_player2()
         self._mode = game_state.get_mode()
@@ -198,7 +197,7 @@ class GameStateFactory:
             raise Exception("player_id unknown")
         return self
 
-    def otherPlayer(self, pid: GameState.pid, new_player: pl.PlayerState) -> GameStateFactory:
+    def other_player(self, pid: GameState.pid, new_player: pl.PlayerState) -> GameStateFactory:
         if pid is GameState.pid.P1:
             self._player2 = new_player
         elif pid is GameState.pid.P2:
@@ -211,6 +210,7 @@ class GameStateFactory:
         return GameState(
             phase=self._phase,
             round=self._round,
+            active_player=self._active_player,
             mode=self._mode,
             player1=self._player1,
             player2=self._player2
