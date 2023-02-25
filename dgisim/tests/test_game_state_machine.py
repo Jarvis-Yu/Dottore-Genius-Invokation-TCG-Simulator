@@ -2,7 +2,7 @@ import unittest
 
 from dgisim.src.game_state_machine import GameStateMachine
 from dgisim.src.state.game_state import GameState
-from dgisim.tests.agents import BasicAgent
+from dgisim.tests.agents import LazyAgent
 from dgisim.src.phase.card_select_phase import CardSelectPhase
 from dgisim.src.phase.phase import Phase
 from dgisim.src.phase.starting_hand_select_phase import StartingHandSelectPhase
@@ -20,8 +20,8 @@ class TestGameStateMachine(unittest.TestCase):
     def test_card_select_phase_runs(self):
         state_machine = GameStateMachine(
             self._initial_state,
-            BasicAgent(),
-            BasicAgent(),
+            LazyAgent(),
+            LazyAgent(),
         )
         state_machine.auto_step()  # skip initialization
         state_machine.one_step()  # one player swap cards
@@ -36,8 +36,8 @@ class TestGameStateMachine(unittest.TestCase):
         p2_deck: Cards = self._initial_state.get_player2().get_deck_cards()
         state_machine = GameStateMachine(
             self._initial_state,
-            BasicAgent(),
-            BasicAgent(),
+            LazyAgent(),
+            LazyAgent(),
         )
         state_machine.auto_step()  # skip initialization
         state_machine.one_step()  # one player swap cards
@@ -49,8 +49,8 @@ class TestGameStateMachine(unittest.TestCase):
     def test_entering_starting_hand_select_phase(self):
         state_machine = GameStateMachine(
             self._initial_state,
-            BasicAgent(),
-            BasicAgent(),
+            LazyAgent(),
+            LazyAgent(),
         )
         state_machine.step_until_phase(StartingHandSelectPhase)
         state = state_machine.get_game_state()
@@ -59,8 +59,8 @@ class TestGameStateMachine(unittest.TestCase):
     def test_starting_hand_select_phase_behavior(self):
         state_machine = GameStateMachine(
             self._initial_state,
-            BasicAgent(),
-            BasicAgent(),
+            LazyAgent(),
+            LazyAgent(),
         )
         state_machine.step_until_phase(StartingHandSelectPhase)
         state_machine.auto_step()
@@ -74,8 +74,8 @@ class TestGameStateMachine(unittest.TestCase):
         """ Temporary for the fake roll phase """
         state_machine = GameStateMachine(
             self._initial_state,
-            BasicAgent(),
-            BasicAgent(),
+            LazyAgent(),
+            LazyAgent(),
         )
         state_machine.step_until_phase(RollPhase)
         state_machine.step_until_phase(ActionPhase)
@@ -86,8 +86,8 @@ class TestGameStateMachine(unittest.TestCase):
     def test_action_phase_basic_behavior(self):
         state_machine = GameStateMachine(
             self._initial_state,
-            BasicAgent(),
-            BasicAgent(),
+            LazyAgent(),
+            LazyAgent(),
         )
         state_machine.step_until_phase(ActionPhase)
         # cmd = ""
@@ -106,8 +106,8 @@ class TestGameStateMachine(unittest.TestCase):
         p2_deck: Cards = self._initial_state.get_player2().get_deck_cards()
         state_machine = GameStateMachine(
             self._initial_state,
-            BasicAgent(),
-            BasicAgent(),
+            LazyAgent(),
+            LazyAgent(),
         )
         state_machine.step_until_phase(EndPhase)
         state_machine.step_until_phase(RollPhase)
@@ -120,12 +120,23 @@ class TestGameStateMachine(unittest.TestCase):
         self.assertEqual(p2.get_hand_cards().num_cards() + p2.get_deck_cards().num_cards(), p2_deck.num_cards())
         self.assertIs(state.get_player1().get_phase(), PlayerState.act.PASSIVE_WAIT_PHASE)
         self.assertIs(state.get_player2().get_phase(), PlayerState.act.PASSIVE_WAIT_PHASE)
+        state_machine.step_until_phase(EndPhase)
+        state_machine.step_until_phase(RollPhase)
+        state = state_machine.get_game_state()
+        p1 = state.get_player1()
+        p2 = state.get_player2()
+        self.assertEqual(p1.get_hand_cards().num_cards(), 9)
+        self.assertEqual(p2.get_hand_cards().num_cards(), 9)
+        self.assertEqual(p1.get_hand_cards().num_cards() + p1.get_deck_cards().num_cards(), p1_deck.num_cards())
+        self.assertEqual(p2.get_hand_cards().num_cards() + p2.get_deck_cards().num_cards(), p2_deck.num_cards())
+        self.assertIs(state.get_player1().get_phase(), PlayerState.act.PASSIVE_WAIT_PHASE)
+        self.assertIs(state.get_player2().get_phase(), PlayerState.act.PASSIVE_WAIT_PHASE)
 
     def test_game_end_phase_basic_behavior(self):
         state_machine = GameStateMachine(
             self._initial_state,
-            BasicAgent(),
-            BasicAgent(),
+            LazyAgent(),
+            LazyAgent(),
         )
         state_machine.step_until_phase(GameEndPhase)
         self.assertTrue(state_machine.game_end())

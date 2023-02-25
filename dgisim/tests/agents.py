@@ -12,7 +12,7 @@ from dgisim.src.card.cards import Cards
 class NoneAgent(PlayerAgent):
     pass
 
-class BasicAgent(PlayerAgent):
+class LazyAgent(PlayerAgent):
     _NUM_PICKED_CARDS = 3
 
     def choose_action(self, history: List[GameState], pid: GameState.pid) -> Action:

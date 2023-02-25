@@ -7,7 +7,7 @@ from dgisim.src.player_agent import PlayerAgent
 from dgisim.src.phase.starting_hand_select_phase import StartingHandSelectPhase
 from dgisim.src.card.cards import Cards
 
-from dgisim.tests.agents import NoneAgent, BasicAgent
+from dgisim.tests.agents import NoneAgent, LazyAgent
 
 
 def keep_running_until(

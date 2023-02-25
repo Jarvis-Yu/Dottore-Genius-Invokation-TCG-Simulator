@@ -1,4 +1,4 @@
-from typing import List, Type, Tuple, Optional
+from typing import List, Type, Tuple, Optional, Callable
 
 from dgisim.src.state.game_state import GameState
 from dgisim.src.player_agent import PlayerAgent
@@ -40,6 +40,10 @@ class GameStateMachine:
         while isinstance(self._game_state.get_phase(), phase):
             self.one_step()
         while not isinstance(self._game_state.get_phase(), phase):
+            self.one_step()
+
+    def step_until_holds(self, predicate: Callable[[GameState], bool]) -> None:
+        while not predicate(self._game_state):
             self.one_step()
 
     def one_step(self) -> None:
