@@ -15,7 +15,7 @@ class PlayerState:
     class act(Enum):
         ACTION_PHASE = "Action Phase"
         PASSIVE_WAIT_PHASE = "Passive Wait Phase"
-        AGGRESSIVE_WAIT_PHASE = "Aggressive Wait Phase"
+        ACTIVE_WAIT_PHASE = "Aggressive Wait Phase"
         END_PHASE = "End Phase"
 
     def __init__(

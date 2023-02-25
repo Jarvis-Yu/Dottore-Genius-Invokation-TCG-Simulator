@@ -14,6 +14,12 @@ class GameState:
         P1 = 1
         P2 = 2
 
+        def is_player1(self) -> bool:
+            return self == GameState.pid.P1
+
+        def is_player2(self) -> bool:
+            return self == GameState.pid.P2
+
     ROUND_LIMIT = 15
     # CARD_SELECT_PHASE = "Card Selection Phase"
     # STARTING_HAND_SELECT_PHASE = "Starting Hand Selection Phase"

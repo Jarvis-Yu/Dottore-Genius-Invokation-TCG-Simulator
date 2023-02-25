@@ -1,18 +1,47 @@
 from __future__ import annotations
 from typing import Dict
 from enum import Enum
+import random
 
 from dgisim.src.helper.hashable_dict import HashableDict
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
 from dgisim.src.element.element import Element
 
 class Dices:
+    _LEGAL_ELEMS = frozenset({
+        Element.OMNI,
+        Element.PYRO,
+        Element.HYDRO,
+        Element.ANEMO,
+        Element.ELECTRO,
+        Element.DENDRO,
+        Element.CRYO,
+        Element.GEO,
+    })
+
     def __init__(self, dices: Dict[Element, int]) -> None:
         self._dices = HashableDict(dices)
 
     @classmethod
     def from_empty(cls) -> Dices:
-        return Dices({})
+        return Dices(dict([
+            (elem, 0)
+            for elem in Dices._LEGAL_ELEMS
+        ]))
+
+    @classmethod
+    def from_random(cls, size: int) -> Dices:
+        dices = Dices.from_empty()
+        for i in range(size):
+            elem = random.choice(tuple(Dices._LEGAL_ELEMS))
+            dices._dices[elem] += 1
+        return dices
+
+    @classmethod
+    def from_all(cls, size: int, elem: Element) -> Dices:
+        dices = Dices.from_empty()
+        dices._dices[Element.OMNI] = size
+        return dices
 
     def __add__(self, other: Dices) -> Dices:
         return Dices(self._dices + other._dices)

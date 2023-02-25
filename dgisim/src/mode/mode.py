@@ -4,6 +4,7 @@ import dgisim.src.phase.phase as ph
 import dgisim.src.phase.card_select_phase as cs
 import dgisim.src.phase.starting_hand_select_phase as shs
 import dgisim.src.phase.roll_phase as rp
+import dgisim.src.phase.action_phase as ap
 from dgisim.src.helper.level_print import level_print_single
 
 
@@ -15,6 +16,9 @@ class Mode:
         raise Exception("Not Overridden")
 
     def roll_phase(self) -> ph.Phase:
+        raise Exception("Not Overridden")
+
+    def action_phase(self) -> ph.Phase:
         raise Exception("Not Overridden")
 
     def __eq__(self, other: object) -> bool:
@@ -37,6 +41,9 @@ class DefaultMode(Mode):
 
     def roll_phase(self) -> ph.Phase:
         return rp.RollPhase()
+
+    def action_phase(self) -> ph.Phase:
+        return ap.ActionPhase()
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, DefaultMode)
