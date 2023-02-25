@@ -21,9 +21,20 @@ with limited action cards and all omni dices.
   - [ ] ~~Allow both players to act simultaneously instead of in turns~~ (trivial for AI training)
 - [x] Implement game phase of Starting Hand Select Phase (select active character)
 - [ ] Implement game phase of Roll (Dice) Phase (roll dices between rounds)
+  - [x] Can provide all omni dices
+  - [x] Can proceed to next phase
 - [ ] Implement game phase of Action Phase (players beat each other)
+  - [x] Allow players to end action phase right away
+  - [ ] Implement the pipeline for buff handling
+  - [ ] Allow players to normal attack
+  - [ ] Allow players to cast skills
+  - [ ] Allow players to cast elemental burst
+  - [x] Can proceed to next phase
 - [ ] Implement game phase of End Phase (summons and some support card or buffs take action)
-- [ ] Implement game phase of Game End Phase (one player wins or draw)
+  - [x] Can pull cards by the end
+  - [x] Can proceed to next phase
+- [x] Implement game phase of Game End Phase (one player wins or draw)
+- [x] Implement lazy player agent for minimal testing purposes
 - [ ] Implement random player agent for testing purposes
 - [ ] Implement greedy player agent for testing purposes
 
