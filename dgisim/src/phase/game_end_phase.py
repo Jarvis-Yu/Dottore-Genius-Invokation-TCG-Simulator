@@ -4,4 +4,8 @@ import dgisim.src.state.game_state as gm
 import dgisim.src.phase.phase as ph
 
 class GameEndPhase(ph.Phase):
-    pass
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, GameEndPhase)
+
+    def __hash__(self) -> int:
+        return hash(self.__class__.__name__)

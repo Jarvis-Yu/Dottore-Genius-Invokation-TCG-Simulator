@@ -9,16 +9,14 @@ from dgisim.src.state.player_state import PlayerState
 
 class StartingHandSelectPhase(ph.Phase):
 
-    def step(self, game_state: gm.GameState) -> gm.GameState:
-        p1: PlayerState = game_state.get_player1()
-        p2: PlayerState = game_state.get_player2()
-        if p1.get_phase() == PlayerState.act.PASSIVE_WAIT_PHASE and p2.get_phase() == PlayerState.act.PASSIVE_WAIT_PHASE:
-            return game_state.factory().player1(
-                p1.factory().phase(PlayerState.act.ACTION_PHASE).build()
-            ).player2(
-                p2.factory().phase(PlayerState.act.ACTION_PHASE).build()
-            ).build()
-        assert p1.get_phase() is PlayerState.act.END_PHASE and p2.get_phase() is PlayerState.act.END_PHASE
+    def _activate(self, game_state: gm.GameState) -> gm.GameState:
+        return game_state.factory().player1(
+            game_state.get_player1().factory().phase(PlayerState.act.ACTION_PHASE).build()
+        ).player2(
+            game_state.get_player2().factory().phase(PlayerState.act.ACTION_PHASE).build()
+        ).build()
+
+    def _to_roll_phase(self, game_state: gm.GameState) -> gm.GameState:
         return game_state.factory().phase(
             game_state.get_mode().roll_phase()
         ).player1(
@@ -27,8 +25,17 @@ class StartingHandSelectPhase(ph.Phase):
             game_state.get_player2().factory().phase(PlayerState.act.PASSIVE_WAIT_PHASE).build()
         ).build()
 
-    def step_action(self, game_state: gm.GameState, pid: gm.GameState.pid, action: Action) -> gm.GameState:
-        assert isinstance(action, CharacterSelectAction)
+    def step(self, game_state: gm.GameState) -> gm.GameState:
+        p1: PlayerState = game_state.get_player1()
+        p2: PlayerState = game_state.get_player2()
+        if p1.get_phase() == PlayerState.act.PASSIVE_WAIT_PHASE and p2.get_phase() == PlayerState.act.PASSIVE_WAIT_PHASE:
+            return self._activate(game_state)
+        elif p1.get_phase() is PlayerState.act.END_PHASE and p2.get_phase() is PlayerState.act.END_PHASE:
+            return self._to_roll_phase(game_state)
+        else:
+            raise Exception("Unknown Game State to process")
+
+    def _handle_picking_starting_hand(self, game_state: gm.GameState, pid: gm.GameState.pid, action: CharacterSelectAction) -> gm.GameState:
         swap_action: CharacterSelectAction = action
         char_id = swap_action.get_selected_character_id()
         player: PlayerState = game_state.get_player(pid)
@@ -43,6 +50,12 @@ class StartingHandSelectPhase(ph.Phase):
             .phase(PlayerState.act.END_PHASE)
             .build()
         ).build()
+
+    def step_action(self, game_state: gm.GameState, pid: gm.GameState.pid, action: Action) -> gm.GameState:
+        if isinstance(action, CharacterSelectAction):
+            return self._handle_picking_starting_hand(game_state, pid, action)
+        else:
+            raise Exception("Unknown Game State to process")
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, StartingHandSelectPhase)

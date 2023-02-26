@@ -74,3 +74,9 @@ class ActionPhase(ph.Phase):
         TODO: override this to handle death swap
         """
         return super().waiting_for(game_state)
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, ActionPhase)
+
+    def __hash__(self) -> int:
+        return hash(self.__class__.__name__)
