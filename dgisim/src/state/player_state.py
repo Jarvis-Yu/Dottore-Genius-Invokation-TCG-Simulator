@@ -69,7 +69,7 @@ class PlayerState:
         return PlayerState(
             phase=PlayerState.act.PASSIVE_WAIT_PHASE,
             card_redraw_chances=0,
-            characters=Characters.from_default(tuple([char() for char in DEFAULT_CHARACTERS][:3])),
+            characters=Characters.from_default(tuple([char.from_default() for char in DEFAULT_CHARACTERS][:3])),
             hand_cards=Cards(dict([(card, 0) for card in DEFAULT_CARDS])),
             dices=Dices({}),
             deck_cards=Cards(dict([(card, 2) for card in DEFAULT_CARDS])),
@@ -102,8 +102,8 @@ class PlayerState:
     def to_string(self, indent: int = 0):
         new_indent = indent + INDENT
         return level_print({
-            "Phase": level_print_single(self._phase.value, new_indent),
-            "Card Redraw Chances": level_print_single(str(self._card_redraw_chances), new_indent),
+            "Phase": self._phase.value,
+            "Card Redraw Chances": str(self._card_redraw_chances),
             "Characters": self._characters.to_string(new_indent),
             "Dices": self._dices.to_string(new_indent),
             "Hand Cards": self._hand_cards.to_string(new_indent),

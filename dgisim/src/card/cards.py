@@ -50,7 +50,7 @@ class Cards:
 
     def to_string(self, indent: int = 0) -> str:
         existing_cards = dict([
-            (card.name(), level_print_single(str(num), indent + INDENT))
+            (card.name(), str(num))
             for card, num in self._cards.items()
             if num != 0
         ])

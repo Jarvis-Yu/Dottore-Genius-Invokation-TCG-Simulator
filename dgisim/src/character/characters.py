@@ -55,9 +55,13 @@ class Characters:
 
     def to_string(self, indent: int = 0) -> str:
         new_indent = indent + INDENT
+        new_new_indent = new_indent + INDENT
         return level_print({
-            "Active Character": level_print_single(self.get_active_character_name(), new_indent),
-            "Characters": ''.join([char.to_string(new_indent) for char in self._characters]),
+            "Active Character": self.get_active_character_name(),
+            "Characters": level_print(dict([
+                (char.name(), char.to_string(new_new_indent))
+                for char in self._characters
+            ]), new_indent),
         }, indent)
 
 

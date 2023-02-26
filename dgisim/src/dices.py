@@ -65,7 +65,7 @@ class Dices:
 
     def to_string(self, indent: int = 0) -> str:
         existing_dices = dict([
-            (dice.name, level_print_single(str(num), indent + INDENT))
+            (dice.name, str(num))
             for dice, num in self._dices.items()
             if num != 0
         ])
