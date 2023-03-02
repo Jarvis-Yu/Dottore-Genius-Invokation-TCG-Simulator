@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Tuple, Optional
 
 from dgisim.src.character.character import Character
+from dgisim.src.event.event_pre import EventPre
 from dgisim.src.helper.level_print import level_print, INDENT, level_print_single
 
 
@@ -33,8 +34,24 @@ class Characters:
             return "None"
         return char.name()
 
+    def get_skills(self) -> Tuple[EventPre]:
+        active_character = self.get_active_character()
+        if active_character is None:
+            return tuple()
+        return active_character.skills()
+
     def char_id_valid(self, char_id: Characters.CharId) -> bool:
         return char_id >= 0 and char_id < len(self._characters)
+
+    def get_swappable_ids(self) -> Tuple[Characters.CharId]:
+        return tuple([
+            i
+            for i, c in enumerate(self._characters)
+            if not c.defeated()
+        ])
+
+    def num_characters(self) -> int:
+        return len(self._characters)
 
     def factory(self) -> CharactersFactory:
         return CharactersFactory(self)

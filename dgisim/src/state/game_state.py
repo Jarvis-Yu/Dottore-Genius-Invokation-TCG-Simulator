@@ -54,7 +54,7 @@ class GameState:
             active_player=GameState.pid.P1,
             mode=md.DefaultMode(),
             player1=pl.PlayerState.examplePlayer(),
-            player2=pl.PlayerState.examplePlayer()
+            player2=pl.PlayerState.examplePlayer(),
         )
 
     def factory(self):

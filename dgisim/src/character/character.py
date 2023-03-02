@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Tuple, FrozenSet
+from typing import Tuple
 
 from dgisim.src.buff.buffs import Buffs, EquipmentBuffs
 from dgisim.src.element.element import ElementalAura
@@ -11,7 +11,7 @@ from dgisim.src.helper.level_print import level_print_single, INDENT, level_prin
 
 class Character:
 
-    SKILLS = frozenset()
+    SKILLS = tuple()
 
     def __init__(
         self,
@@ -32,7 +32,7 @@ class Character:
     def from_default(cls) -> Character:
         raise Exception("Not Overriden")
 
-    def skills(self) -> FrozenSet[EventPre]:
+    def skills(self) -> Tuple[EventPre]:
         return self.SKILLS
 
     def defeated(self) -> bool:
@@ -76,9 +76,9 @@ class Keqing(Character):
         Dices.from_pre(1, 2),
         TypicalNormalAttackEvent(2, Element.PHYSICAL, 1)
     )
-    SKILLS = frozenset({
+    SKILLS = (
         NORMAL_ATTACK,
-    })
+    )
 
     @classmethod
     def from_default(cls) -> Keqing:
@@ -104,9 +104,9 @@ class Kaeya(Character):
         Dices.from_pre(1, 2),
         TypicalNormalAttackEvent(2, Element.PHYSICAL, 1)
     )
-    SKILLS = frozenset({
+    SKILLS = (
         NORMAL_ATTACK,
-    })
+    )
 
     @classmethod
     def from_default(cls) -> Kaeya:
@@ -132,9 +132,9 @@ class Oceanid(Character):
         Dices.from_pre(1, 2),
         TypicalNormalAttackEvent(1, Element.HYDRO, 1)
     )
-    SKILLS = frozenset({
+    SKILLS = (
         NORMAL_ATTACK,
-    })
+    )
 
     @classmethod
     def from_default(cls) -> Oceanid:

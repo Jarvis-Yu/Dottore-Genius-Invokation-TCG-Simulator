@@ -1,6 +1,8 @@
 from __future__ import annotations
 from enum import Enum
 from typing import Tuple
+from dgisim.src.event.event import TypicalSwapCharacterEvent
+from dgisim.src.event.event_pre import EventPre
 
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
 from dgisim.src.card.cards import Cards
@@ -61,8 +63,29 @@ class PlayerState:
     def get_publicly_used_cards(self) -> Cards:
         return self._publicly_used_cards
 
-    def isEndPhase(self):
+    def is_action_phase(self):
+        return self._phase is self.act.ACTION_PHASE
+
+    def is_passive_wait_phase(self):
+        return self._phase is self.act.PASSIVE_WAIT_PHASE
+
+    def is_active_wait_phase(self):
+        return self._phase is self.act.ACTIVE_WAIT_PHASE
+
+    def is_end_phase(self):
         return self._phase is self.act.END_PHASE
+
+    def get_possible_actions(self) -> Tuple[EventPre]:
+        character_skills = self._characters.get_skills()
+        swaps = [
+            TypicalSwapCharacterEvent(id)
+            for id in self._characters.get_swappable_ids()
+        ]
+        return tuple([
+            action
+            for actions in [character_skills, swaps]
+            for action in actions
+        ])
 
     @staticmethod
     def examplePlayer():
