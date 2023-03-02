@@ -1,12 +1,18 @@
 from __future__ import annotations
-from typing import Tuple
+from typing import Tuple, FrozenSet
 
 from dgisim.src.buff.buffs import Buffs, EquipmentBuffs
 from dgisim.src.element.element import ElementalAura
+from dgisim.src.event.event_pre import EventPre
+from dgisim.src.dices import Dices
+from dgisim.src.event.event import *
 from dgisim.src.helper.level_print import level_print_single, INDENT, level_print
 
 
 class Character:
+
+    SKILLS = frozenset()
+
     def __init__(
         self,
         hp: int,
@@ -25,6 +31,9 @@ class Character:
     @classmethod
     def from_default(cls) -> Character:
         raise Exception("Not Overriden")
+
+    def skills(self) -> FrozenSet[EventPre]:
+        return self.SKILLS
 
     def defeated(self) -> bool:
         # TODO
@@ -63,6 +72,14 @@ class Character:
 
 
 class Keqing(Character):
+    NORMAL_ATTACK = EventPre(
+        Dices.from_pre(1, 2),
+        TypicalNormalAttackEvent(2, Element.PHYSICAL, 1)
+    )
+    SKILLS = frozenset({
+        NORMAL_ATTACK,
+    })
+
     @classmethod
     def from_default(cls) -> Keqing:
         return cls(
@@ -82,6 +99,15 @@ class Keqing(Character):
 
 
 class Kaeya(Character):
+
+    NORMAL_ATTACK = EventPre(
+        Dices.from_pre(1, 2),
+        TypicalNormalAttackEvent(2, Element.PHYSICAL, 1)
+    )
+    SKILLS = frozenset({
+        NORMAL_ATTACK,
+    })
+
     @classmethod
     def from_default(cls) -> Kaeya:
         return cls(
@@ -101,6 +127,15 @@ class Kaeya(Character):
 
 
 class Oceanid(Character):
+
+    NORMAL_ATTACK = EventPre(
+        Dices.from_pre(1, 2),
+        TypicalNormalAttackEvent(1, Element.HYDRO, 1)
+    )
+    SKILLS = frozenset({
+        NORMAL_ATTACK,
+    })
+
     @classmethod
     def from_default(cls) -> Oceanid:
         return cls(

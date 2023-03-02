@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict
+from typing import Dict, Optional
 from enum import Enum
 import random
 
@@ -19,6 +19,18 @@ class Dices:
         Element.GEO,
     })
 
+    _PRE_ELEMS = frozenset({
+        Element.OMNI,
+        Element.PYRO,
+        Element.HYDRO,
+        Element.ANEMO,
+        Element.ELECTRO,
+        Element.DENDRO,
+        Element.CRYO,
+        Element.GEO,
+        Element.ANY,
+    })
+
     def __init__(self, dices: Dict[Element, int]) -> None:
         self._dices = HashableDict(dices)
 
@@ -28,6 +40,14 @@ class Dices:
             (elem, 0)
             for elem in Dices._LEGAL_ELEMS
         ]))
+
+    @classmethod
+    def from_pre(cls, omni: int, any: int, element: Optional[Element] = None, num: Optional[int] = None) -> Dices:
+        assert element is None or element in Dices._PRE_ELEMS
+        dices = { Element.OMNI: omni, Element.ANY: any, }
+        if element is not None and num is not None:
+            dices[element] = num
+        return Dices(dices)
 
     @classmethod
     def from_random(cls, size: int) -> Dices:
