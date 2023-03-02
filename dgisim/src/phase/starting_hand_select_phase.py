@@ -3,7 +3,7 @@ from typing import Optional
 
 import dgisim.src.state.game_state as gm
 import dgisim.src.phase.phase as ph
-from dgisim.src.action import Action, CharacterSelectAction
+from dgisim.src.action import PlayerAction, CharacterSelectAction
 from dgisim.src.state.player_state import PlayerState
 
 
@@ -51,7 +51,7 @@ class StartingHandSelectPhase(ph.Phase):
             .build()
         ).build()
 
-    def step_action(self, game_state: gm.GameState, pid: gm.GameState.pid, action: Action) -> gm.GameState:
+    def step_action(self, game_state: gm.GameState, pid: gm.GameState.pid, action: PlayerAction) -> gm.GameState:
         if isinstance(action, CharacterSelectAction):
             return self._handle_picking_starting_hand(game_state, pid, action)
         else:

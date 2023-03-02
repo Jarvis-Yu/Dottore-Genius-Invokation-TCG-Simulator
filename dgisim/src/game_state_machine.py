@@ -2,7 +2,7 @@ from typing import List, Type, Tuple, Optional, Callable
 
 from dgisim.src.state.game_state import GameState
 from dgisim.src.player_agent import PlayerAgent
-from dgisim.src.action import Action
+from dgisim.src.action import PlayerAction
 from dgisim.src.phase.phase import Phase
 
 
@@ -31,7 +31,7 @@ class GameStateMachine:
         self._game_state = self._game_state.step()
         self._history.append(self._game_state)
 
-    def _action_step(self, pid: GameState.pid, action: Action) -> None:
+    def _action_step(self, pid: GameState.pid, action: PlayerAction) -> None:
         self._action_history.append(self._game_state)
         self._game_state = self._game_state.action_step(pid, action)
         self._history.append(self._game_state)

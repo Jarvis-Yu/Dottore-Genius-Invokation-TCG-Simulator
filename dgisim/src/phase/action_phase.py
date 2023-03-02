@@ -4,35 +4,42 @@ from typing import Optional
 import dgisim.src.state.game_state as gm
 import dgisim.src.phase.phase as ph
 from dgisim.src.state.player_state import PlayerState
-from dgisim.src.action import Action, EndRoundAction
+from dgisim.src.action import PlayerAction, EndRoundAction
 
 class ActionPhase(ph.Phase):
+    def _start_up_phase(self, game_state: gm.GameState) -> gm.GameState:
+        active_player_id = game_state.get_active_player_id()
+        return game_state.factory().player(
+            active_player_id,
+            game_state.get_player(active_player_id).factory().phase(
+                PlayerState.act.ACTION_PHASE
+            ).build()
+        ).build()
+
+    def _to_end_phase(self, game_state: gm.GameState) -> gm.GameState:
+        active_player_id = game_state.get_active_player_id()
+        return game_state.factory().phase(
+            game_state.get_mode().end_phase()
+        ).player(
+            active_player_id,
+            game_state.get_player(active_player_id).factory().phase(
+                PlayerState.act.PASSIVE_WAIT_PHASE
+            ).build()
+        ).other_player(
+            active_player_id,
+            game_state.get_other_player(active_player_id).factory().phase(
+                PlayerState.act.PASSIVE_WAIT_PHASE
+            ).build()
+        ).build()
+
     def step(self, game_state: gm.GameState) -> gm.GameState:
         p1 = game_state.get_player1()
         p2 = game_state.get_player2()
-        active_player_id = game_state.get_active_player_id()
         if p1.get_phase() is PlayerState.act.PASSIVE_WAIT_PHASE and p2.get_phase() is PlayerState.act.PASSIVE_WAIT_PHASE:
             # TODO: Handle before action buffs
-            return game_state.factory().player(
-                active_player_id,
-                game_state.get_player(active_player_id).factory().phase(
-                    PlayerState.act.ACTION_PHASE
-                ).build()
-            ).build()
+            return self._start_up_phase(game_state)
         elif p1.get_phase() is PlayerState.act.END_PHASE and p2.get_phase() is PlayerState.act.END_PHASE:
-            return game_state.factory().phase(
-                game_state.get_mode().end_phase()
-            ).player(
-                active_player_id,
-                game_state.get_player(active_player_id).factory().phase(
-                    PlayerState.act.PASSIVE_WAIT_PHASE
-                ).build()
-            ).other_player(
-                active_player_id,
-                game_state.get_other_player(active_player_id).factory().phase(
-                    PlayerState.act.PASSIVE_WAIT_PHASE
-                ).build()
-            ).build()
+            return self._to_end_phase(game_state)
         raise Exception("Unknown Game State to process")
 
     def _handle_end_round(self, game_state: gm.GameState, pid: gm.GameState.pid, action: EndRoundAction) -> gm.GameState:
@@ -61,7 +68,7 @@ class ActionPhase(ph.Phase):
             ).build()
         raise Exception("Unknown Game State to process")
 
-    def step_action(self, game_state: gm.GameState, pid: gm.GameState.pid, action: Action) -> gm.GameState:
+    def step_action(self, game_state: gm.GameState, pid: gm.GameState.pid, action: PlayerAction) -> gm.GameState:
         """
         TODO: Currently only allows player to end their round
         """

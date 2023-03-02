@@ -7,7 +7,7 @@ import dgisim.src.phase.phase as ph
 import dgisim.src.phase.game_end_phase as gep
 import dgisim.src.state.player_state as pl
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
-from dgisim.src.action import Action
+from dgisim.src.action import PlayerAction
 
 
 class GameState:
@@ -108,7 +108,7 @@ class GameState:
     def step(self) -> GameState:
         return self._phase.step(self)
 
-    def action_step(self, pid: GameState.pid, action: Action) -> GameState:
+    def action_step(self, pid: GameState.pid, action: PlayerAction) -> GameState:
         return self._phase.step_action(self, pid, action)
 
     def get_winner(self) -> Optional[GameState.pid]:

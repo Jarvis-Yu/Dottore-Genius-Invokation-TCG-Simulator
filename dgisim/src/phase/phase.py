@@ -3,7 +3,7 @@ from typing import Optional
 
 import dgisim.src.state.game_state as gm
 from dgisim.src.helper.level_print import level_print_single
-from dgisim.src.action import Action
+from dgisim.src.action import PlayerAction
 from dgisim.src.state.player_state import PlayerState
 
 
@@ -11,7 +11,7 @@ class Phase:
     def step(self, game_state: gm.GameState) -> gm.GameState:
         raise Exception("Not Overriden")
 
-    def step_action(self, game_state: gm.GameState, pid: gm.GameState.pid, action: Action) -> gm.GameState:
+    def step_action(self, game_state: gm.GameState, pid: gm.GameState.pid, action: PlayerAction) -> gm.GameState:
         raise Exception("Not Overriden")
 
     def waiting_for(self, game_state: gm.GameState) -> Optional[gm.GameState.pid]:
