@@ -15,7 +15,7 @@ class NoneAgent(PlayerAgent):
 class LazyAgent(PlayerAgent):
     _NUM_PICKED_CARDS = 3
 
-    def choose_action(self, history: List[GameState], pid: GameState.pid) -> PlayerAction:
+    def choose_action(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
         game_state = history[-1]
         curr_phase = game_state.get_phase()
         if isinstance(curr_phase, CardSelectPhase):

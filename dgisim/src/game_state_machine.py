@@ -31,7 +31,7 @@ class GameStateMachine:
         self._game_state = self._game_state.step()
         self._history.append(self._game_state)
 
-    def _action_step(self, pid: GameState.pid, action: PlayerAction) -> None:
+    def _action_step(self, pid: GameState.Pid, action: PlayerAction) -> None:
         self._action_history.append(self._game_state)
         self._game_state = self._game_state.action_step(pid, action)
         self._history.append(self._game_state)
@@ -76,10 +76,10 @@ class GameStateMachine:
             # TODO
             pass
 
-    def player_agent(self, id: GameState.pid) -> PlayerAgent:
-        if id is GameState.pid.P1:
+    def player_agent(self, id: GameState.Pid) -> PlayerAgent:
+        if id is GameState.Pid.P1:
             return self._playerAgent1
-        elif id is GameState.pid.P2:
+        elif id is GameState.Pid.P2:
             return self._playerAgent2
         else:
             raise Exception("GameStateMachine.player(): Invalid player id")
@@ -87,5 +87,5 @@ class GameStateMachine:
     def game_end(self) -> bool:
         return self._game_state.game_end()
 
-    def get_winner(self) -> Optional[GameState.pid]:
+    def get_winner(self) -> Optional[GameState.Pid]:
         return self._game_state.get_winner()

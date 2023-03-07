@@ -14,7 +14,7 @@ from dgisim.src.character.characters_set import DEFAULT_CHARACTERS
 
 
 class PlayerState:
-    class act(Enum):
+    class Act(Enum):
         ACTION_PHASE = "Action Phase"
         PASSIVE_WAIT_PHASE = "Passive Wait Phase"
         ACTIVE_WAIT_PHASE = "Aggressive Wait Phase"
@@ -22,7 +22,7 @@ class PlayerState:
 
     def __init__(
         self,
-        phase: act,
+        phase: Act,
         characters: Characters,
         card_redraw_chances: int,
         dices: Dices,
@@ -42,7 +42,7 @@ class PlayerState:
     def factory(self) -> PlayerStateFactory:
         return PlayerStateFactory(self)
 
-    def get_phase(self) -> act:
+    def get_phase(self) -> Act:
         return self._phase
 
     def get_card_redraw_chances(self) -> int:
@@ -64,16 +64,16 @@ class PlayerState:
         return self._publicly_used_cards
 
     def is_action_phase(self):
-        return self._phase is self.act.ACTION_PHASE
+        return self._phase is self.Act.ACTION_PHASE
 
     def is_passive_wait_phase(self):
-        return self._phase is self.act.PASSIVE_WAIT_PHASE
+        return self._phase is self.Act.PASSIVE_WAIT_PHASE
 
     def is_active_wait_phase(self):
-        return self._phase is self.act.ACTIVE_WAIT_PHASE
+        return self._phase is self.Act.ACTIVE_WAIT_PHASE
 
     def is_end_phase(self):
-        return self._phase is self.act.END_PHASE
+        return self._phase is self.Act.END_PHASE
 
     def get_possible_actions(self) -> Tuple[EventPre]:
         character_skills = self._characters.get_skills()
@@ -90,7 +90,7 @@ class PlayerState:
     @staticmethod
     def examplePlayer():
         return PlayerState(
-            phase=PlayerState.act.PASSIVE_WAIT_PHASE,
+            phase=PlayerState.Act.PASSIVE_WAIT_PHASE,
             card_redraw_chances=0,
             characters=Characters.from_default(tuple([char.from_default() for char in DEFAULT_CHARACTERS][:3])),
             hand_cards=Cards(dict([(card, 0) for card in DEFAULT_CARDS])),
@@ -145,7 +145,7 @@ class PlayerStateFactory:
         self._deck_cards = player_state.get_deck_cards()
         self._publicly_used_cards = player_state.get_publicly_used_cards()
 
-    def phase(self, phase: PlayerState.act) -> PlayerStateFactory:
+    def phase(self, phase: PlayerState.Act) -> PlayerStateFactory:
         self._phase = phase
         return self
 

@@ -6,5 +6,5 @@ from dgisim.src.action import PlayerAction
 
 
 class PlayerAgent:
-    def choose_action(self, history: List[GameState], pid: GameState.pid) -> PlayerAction:
+    def choose_action(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
         return PlayerAction()

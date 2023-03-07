@@ -23,7 +23,7 @@ class EndPhase(ph.Phase):
         ).player(
             active_player_id,
             game_state.get_player(active_player_id).factory().phase(
-                PlayerState.act.PASSIVE_WAIT_PHASE
+                PlayerState.Act.PASSIVE_WAIT_PHASE
             ).dices(
                 Dices.from_empty()
             ).hand_cards(
@@ -34,7 +34,7 @@ class EndPhase(ph.Phase):
         ).other_player(
             active_player_id,
             game_state.get_other_player(active_player_id).factory().phase(
-                PlayerState.act.PASSIVE_WAIT_PHASE
+                PlayerState.Act.PASSIVE_WAIT_PHASE
             ).dices(
                 Dices.from_empty()
             ).hand_cards(
@@ -47,11 +47,11 @@ class EndPhase(ph.Phase):
     def _end_both_players(self, game_state: gm.GameState) -> gm.GameState:
         return game_state.factory().player1(
             game_state.get_player1().factory().phase(
-                PlayerState.act.END_PHASE
+                PlayerState.Act.END_PHASE
             ).build()
         ).player2(
             game_state.get_player2().factory().phase(
-                PlayerState.act.END_PHASE
+                PlayerState.Act.END_PHASE
             ).build()
         ).build()
 
@@ -64,9 +64,9 @@ class EndPhase(ph.Phase):
         p1 = game_state.get_player1()
         p2 = game_state.get_player2()
         active_player_id = game_state.get_active_player_id()
-        if p1.get_phase() is PlayerState.act.PASSIVE_WAIT_PHASE and p2.get_phase() is PlayerState.act.PASSIVE_WAIT_PHASE:
+        if p1.get_phase() is PlayerState.Act.PASSIVE_WAIT_PHASE and p2.get_phase() is PlayerState.Act.PASSIVE_WAIT_PHASE:
             return self._end_both_players(game_state)
-        elif p1.get_phase() is PlayerState.act.END_PHASE and p2.get_phase() is PlayerState.act.END_PHASE:
+        elif p1.get_phase() is PlayerState.Act.END_PHASE and p2.get_phase() is PlayerState.Act.END_PHASE:
             new_round = game_state.get_round() + 1
             if new_round > game_state.get_mode().get_round_limit():
                 return self._end_game(game_state)

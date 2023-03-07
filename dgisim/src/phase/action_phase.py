@@ -12,7 +12,7 @@ class ActionPhase(ph.Phase):
         return game_state.factory().player(
             active_player_id,
             game_state.get_player(active_player_id).factory().phase(
-                PlayerState.act.ACTION_PHASE
+                PlayerState.Act.ACTION_PHASE
             ).build()
         ).build()
 
@@ -23,33 +23,33 @@ class ActionPhase(ph.Phase):
         ).player(
             active_player_id,
             game_state.get_player(active_player_id).factory().phase(
-                PlayerState.act.PASSIVE_WAIT_PHASE
+                PlayerState.Act.PASSIVE_WAIT_PHASE
             ).build()
         ).other_player(
             active_player_id,
             game_state.get_other_player(active_player_id).factory().phase(
-                PlayerState.act.PASSIVE_WAIT_PHASE
+                PlayerState.Act.PASSIVE_WAIT_PHASE
             ).build()
         ).build()
 
     def step(self, game_state: gm.GameState) -> gm.GameState:
         p1 = game_state.get_player1()
         p2 = game_state.get_player2()
-        if p1.get_phase() is PlayerState.act.PASSIVE_WAIT_PHASE and p2.get_phase() is PlayerState.act.PASSIVE_WAIT_PHASE:
+        if p1.get_phase() is PlayerState.Act.PASSIVE_WAIT_PHASE and p2.get_phase() is PlayerState.Act.PASSIVE_WAIT_PHASE:
             # TODO: Handle before action buffs
             return self._start_up_phase(game_state)
-        elif p1.get_phase() is PlayerState.act.END_PHASE and p2.get_phase() is PlayerState.act.END_PHASE:
+        elif p1.get_phase() is PlayerState.Act.END_PHASE and p2.get_phase() is PlayerState.Act.END_PHASE:
             return self._to_end_phase(game_state)
         raise Exception("Unknown Game State to process")
 
-    def _handle_end_round(self, game_state: gm.GameState, pid: gm.GameState.pid, action: EndRoundAction) -> gm.GameState:
+    def _handle_end_round(self, game_state: gm.GameState, pid: gm.GameState.Pid, action: EndRoundAction) -> gm.GameState:
         active_player_id = game_state.get_active_player_id()
         active_player = game_state.get_player(active_player_id)
         other_player = game_state.get_other_player(active_player_id)
-        if other_player.get_phase() is PlayerState.act.END_PHASE:
-            other_player_new_phase = PlayerState.act.END_PHASE
-        elif other_player.get_phase() is PlayerState.act.PASSIVE_WAIT_PHASE:
-            other_player_new_phase = PlayerState.act.ACTION_PHASE
+        if other_player.get_phase() is PlayerState.Act.END_PHASE:
+            other_player_new_phase = PlayerState.Act.END_PHASE
+        elif other_player.get_phase() is PlayerState.Act.PASSIVE_WAIT_PHASE:
+            other_player_new_phase = PlayerState.Act.ACTION_PHASE
         else:
             raise Exception(f"Unknown Game State to process {other_player.get_phase()}")
         if pid is active_player_id:
@@ -58,7 +58,7 @@ class ActionPhase(ph.Phase):
             ).player(
                 active_player_id,
                 active_player.factory().phase(
-                    PlayerState.act.END_PHASE
+                    PlayerState.Act.END_PHASE
                 ).build()
             ).other_player(
                 active_player_id,
@@ -68,7 +68,7 @@ class ActionPhase(ph.Phase):
             ).build()
         raise Exception("Unknown Game State to process")
 
-    def step_action(self, game_state: gm.GameState, pid: gm.GameState.pid, action: PlayerAction) -> gm.GameState:
+    def step_action(self, game_state: gm.GameState, pid: gm.GameState.Pid, action: PlayerAction) -> gm.GameState:
         """
         TODO: Currently only allows player to end their round
         """
@@ -76,7 +76,7 @@ class ActionPhase(ph.Phase):
             return self._handle_end_round(game_state, pid, action)
         raise Exception("Unknown Game State to process")
 
-    def waiting_for(self, game_state: gm.GameState) -> Optional[gm.GameState.pid]:
+    def waiting_for(self, game_state: gm.GameState) -> Optional[gm.GameState.Pid]:
         """
         TODO: override this to handle death swap
         """

@@ -30,9 +30,9 @@ def keep_running_until(
     if pid is not None:
         if do_print:
             print("#### Some Action Submitted")
-        if pid is GameState.pid.P1:
+        if pid is GameState.Pid.P1:
             new_state = state.action_step(pid, agents[0].choose_action([state], pid))
-        elif pid is GameState.pid.P2:
+        elif pid is GameState.Pid.P2:
             new_state = state.action_step(pid, agents[1].choose_action([state], pid))
         else:
             raise Exception("Unknown pid")
