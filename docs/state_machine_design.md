@@ -8,6 +8,14 @@ stateDiagram-v2
     shand   : Starting Hand Select Phase
     roll    : Roll Phase
     action  : Action Phase
+    state action {
+        start  : Start Phase
+        combat : Combat Phase
+        [*]    --> start
+        start  --> combat
+        combat --> combat
+        combat --> [*]
+    }
     end     : End Phase
     gameEnd : Game End Phase
 
@@ -26,6 +34,8 @@ stateDiagram-v2
 
 `p1,w,a` means this is player1's turn. Player1 is in waiting phase and player2 is in action phase.
 
+`px,w,a` means player `x` is one of player 1 or player 2, and player `y` is the opponent. So both `p1,w,a` and `p2,a,w` can be fit into `px,w,a`.
+
 - `a` is action phase
 - `w` is waiting phase
 - `e` is end phase
@@ -37,34 +47,39 @@ stateDiagram-v2
     end     : End Phase
     ds      : Death Swap Phase
     gameEnd : Game End Phase
+    pxy     : Swap to Active Player
 
-    state combat {
-        [*] --> p1,w,w    : given
-        [*] --> p2,w,w    : given
-        p1,w,w --> p1,a,w
-        p2,w,w --> p2,w,a
-
-        p1,a,w --> p1,a,w : fast action
-        p1,a,w --> p2,w,a : combat action
-        p1,a,w --> p2,e,a : end action
-
-        p2,w,a --> p2,w,a : fast action
-        p2,w,a --> p1,a,w : combat action
-        p2,w,a --> p1,a,e : end action
-
-        p2,e,a --> p2,e,a : any action
-        p2,e,a --> p1,e,e : end action
-
-        p1,a,e --> p1,a,e : any action
-        p1,a,e --> p2,e,e : end action
-
-        p1,e,e --> [*]    : p1,w,w
-        p2,e,e --> [*]    : p2,w,w
+    state start {
+        [*] --> px,w,w
+        px,w,w --> [*]    : go through all pre-action-phase buffs
     }
 
-    [*]    --> start
-    start  --> combat  : go through all pre-action-phase buffs
-    combat --> end     : p1,w,w or p2,w,w
+    state combat {
+        state pxy {
+            cc : Clear Combat Log Cache
+
+            [*]  --> Swap    : px,m,n or py,n,m
+            Swap --> cc      : px,m,n
+            cc   --> [*]     : px,m,n
+        }
+
+        [*]    -->  pxy
+        pxy    -->  px,a,w   : translated
+        pxy    -->  px,a,e   : translated
+        px,a,w --> px,a,w    : fast action
+        px,a,w --> py,w,a    : combat action
+        px,a,w --> py,e,a    : end action
+        px,a,e --> px,a,e    : fast action
+        px,a,e --> pxy       : combat action
+        px,a,e --> py,e,e    : end action
+        py,w,a --> pxy
+        py,e,a --> pxy
+        py,e,e --> [*]       : py,w,w
+    }
+
+    [*]    --> start   : from Roll Phase
+    start  --> combat  : px,a,w
+    combat --> end     : py,w,w
     combat --> ds      : if any action caused character death
     ds     --> ds      : if swap caused character death
     ds     --> combat  : back to last state
@@ -128,13 +143,13 @@ stateDiagram-v2
         ab  : Add Buff To Effect
 
         [*]  --> sq
-        sq   --> [*]   : if all buffs executed
+        sq   --> [*]   : if all buffs checked
         sq   --> ab    : next buff
         ab   --> sq    : updated effect and game state
     }
     ex  : Effect Execution
 
-    [*]  --> es
+    [*]  --> es    : an action contains a sequence of effects
     es   --> [*]   : no effects unexecuted
     es   --> pp    : pops an effect to execute
     pp   --> ex    : updated effect
