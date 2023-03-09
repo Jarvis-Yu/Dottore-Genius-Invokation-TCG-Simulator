@@ -6,6 +6,7 @@ The simulator is modeled as a finite state machine, where all game states are im
 
 - [Dottore Genius Invokation TCG Simulator](#dottore-genius-invokation-tcg-simulator)
   - [Development Milestones](#development-milestones)
+  - [Currently Working On](#currently-working-on)
   - [Future Plans](#future-plans)
   - [QA](#qa)
 
@@ -43,6 +44,12 @@ The third stage is to implement real dices system.
 The second stage of development will be focusing on including all action cards.
 
 The final stage is to include more characters and eventually all.
+
+## Currently Working On
+
+Designing action phase as a state machine (and a mix of flow chart).
+
+The design doc can be read [here](docs/state_machine_design.md).
 
 ## Future Plans
 
