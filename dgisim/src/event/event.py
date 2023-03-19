@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List
+from typing import List, Tuple
 from enum import Enum
 
 from dgisim.src.event.effect import *
@@ -18,7 +18,7 @@ class EventType(Enum):
 
 
 class GameEvent:
-    def __init__(self, event_speed: EventSpeed, effects: List[Effect]) -> None:
+    def __init__(self, event_speed: EventSpeed, effects: Tuple[Effect, ...]) -> None:
         self._event_speed = event_speed
         self._effects = effects
 
@@ -39,10 +39,10 @@ class TypicalNormalAttackEvent(CompoundEvent):
         recharge_effect = EnergyRechargeEffect(EffectTarget.SELF_SELF, recharge)
         super().__init__(
             EventSpeed.COMBAT,
-            [
+            (
                 damage_effect,
                 recharge_effect,
-            ]
+            )
         )
 
 
@@ -52,7 +52,7 @@ class TypicalSwapCharacterEvent(CompoundEvent):
     def __init__(self, index: chars.Characters.CharId) -> None:
         super().__init__(
             EventSpeed.COMBAT,
-            [
-                SwapCharacterEffect(EffectTarget.SELF_ABS, index)
-            ]
+            (
+                SwapCharacterEffect(EffectTarget.SELF_ABS, index),
+            )
         )

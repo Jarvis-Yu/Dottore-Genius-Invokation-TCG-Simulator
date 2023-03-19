@@ -11,4 +11,5 @@ class EventPre:
         energy: int = 0,
     ):
         self._dices = dices
+        self._event = event
         self._energy = energy

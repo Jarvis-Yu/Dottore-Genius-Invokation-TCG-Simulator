@@ -23,5 +23,13 @@ class CharacterSelectAction(PlayerAction):
     def get_selected_character_id(self) -> Characters.CharId:
         return self._selected_character_id
 
+class GameAction(PlayerAction):
+    def __init__(self, action_id, action_type, dices, instruction, effects):
+        self._action_id = action_id
+        self._action_type = action_type
+        self._dices = dices
+        self._instruction = instruction
+        self._effects = effects
+
 class EndRoundAction(PlayerAction):
     pass

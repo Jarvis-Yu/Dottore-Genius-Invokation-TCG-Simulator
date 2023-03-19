@@ -8,6 +8,7 @@ import dgisim.src.phase.game_end_phase as gep
 import dgisim.src.state.player_state as pl
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
 from dgisim.src.action import PlayerAction
+from dgisim.src.event.effect_stack import EffectStack
 
 
 class GameState:
@@ -37,6 +38,7 @@ class GameState:
         mode: md.Mode,
         player1: pl.PlayerState,
         player2: pl.PlayerState,
+        effect_stack: EffectStack
     ):
         # REMINDER: don't forget to update factory when adding new fields
         self._phase = phase
@@ -44,6 +46,7 @@ class GameState:
         self._active_player = active_player
         self._player1 = player1
         self._player2 = player2
+        self._effect_stack = effect_stack
         self._mode = mode
 
     @classmethod
@@ -55,6 +58,7 @@ class GameState:
             mode=md.DefaultMode(),
             player1=pl.PlayerState.examplePlayer(),
             player2=pl.PlayerState.examplePlayer(),
+            effect_stack=EffectStack(()),
         )
 
     def factory(self):
@@ -71,6 +75,9 @@ class GameState:
 
     def get_mode(self) -> md.Mode:
         return self._mode
+
+    def get_effect_stack(self) -> EffectStack:
+        return self._effect_stack
 
     def get_player1(self) -> pl.PlayerState:
         return self._player1
@@ -121,24 +128,24 @@ class GameState:
     def game_end(self) -> bool:
         return isinstance(self._phase, gep.GameEndPhase)
 
+    def _all_unique_data(self) -> tuple:
+        return (
+            self._phase,
+            self._round,
+            self._active_player,
+            self._player1,
+            self._player2,
+            self._effect_stack,
+            self._mode,
+        )
+
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, GameState):
             return False
-        return self._phase == other._phase \
-            and self._round == other._round \
-            and self._active_player == other._active_player \
-            and self._player1 == other._player1 \
-            and self._player2 == other._player2 \
-            and self._mode == other._mode
+        return self._all_unique_data() == other._all_unique_data()
 
     def __hash__(self) -> int:
-        return hash((
-            self._phase,
-            self._round,
-            self._player1,
-            self._player2,
-            self._mode,
-        ))
+        return hash(self._all_unique_data())
 
     def __str__(self) -> str:
         return self.to_string(0)
@@ -162,6 +169,7 @@ class GameStateFactory:
         self._active_player = game_state.get_active_player_id()
         self._player1 = game_state.get_player1()
         self._player2 = game_state.get_player2()
+        self._effect_stack = game_state.get_effect_stack()
         self._mode = game_state.get_mode()
 
     def phase(self, new_phase: ph.Phase) -> GameStateFactory:
@@ -174,6 +182,10 @@ class GameStateFactory:
 
     def mode(self, new_mode: md.Mode) -> GameStateFactory:
         self._mode = new_mode
+        return self
+
+    def effect_stack(self, effect_stack: EffectStack) -> GameStateFactory:
+        self._effect_stack = effect_stack
         return self
 
     def active_player(self, pid: GameState.Pid) -> GameStateFactory:
@@ -212,8 +224,9 @@ class GameStateFactory:
             round=self._round,
             active_player=self._active_player,
             mode=self._mode,
+            effect_stack=self._effect_stack,
             player1=self._player1,
-            player2=self._player2
+            player2=self._player2,
         )
 
 

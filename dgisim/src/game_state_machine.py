@@ -47,15 +47,23 @@ class GameStateMachine:
             self.one_step()
 
     def one_step(self) -> None:
+        if self.game_end():
+            return
         pid = self._game_state.waiting_for()
         if pid is None:
             self._step()
         else:
             self._action_step(pid, self.player_agent(pid).choose_action(self._history, pid))
 
+    def changing_step(self) -> None:
+        game_state = self._game_state
+        self.one_step()
+        while not self.game_end() and game_state is self._game_state:
+            self.one_step()
+
     def auto_step(self) -> None:
         pid = self._game_state.waiting_for()
-        while pid is None:
+        while not self.game_end() and pid is None:
             self._step()
             pid = self._game_state.waiting_for()
 
