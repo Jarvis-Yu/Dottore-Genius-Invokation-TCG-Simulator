@@ -4,7 +4,7 @@ from typing import Optional
 import dgisim.src.state.game_state as gm
 from dgisim.src.helper.level_print import level_print_single
 from dgisim.src.action import PlayerAction
-from dgisim.src.state.player_state import PlayerState
+from dgisim.src.event.event_pre import EventPre
 
 
 class Phase:
@@ -17,9 +17,13 @@ class Phase:
     def waiting_for(self, game_state: gm.GameState) -> Optional[gm.GameState.Pid]:
         players = [game_state.get_player1(), game_state.get_player2()]
         for player in players:
+            from dgisim.src.state.player_state import PlayerState
             if player.get_phase() is PlayerState.Act.ACTION_PHASE:
                 return game_state.get_pid(player)
         return None
+
+    def possible_actions(self, game_state: gm.GameState) -> dict[int, EventPre]:
+        return {}
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Phase)

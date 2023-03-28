@@ -1,12 +1,20 @@
 from __future__ import annotations
 from typing import FrozenSet, Optional
 from enum import Enum
+from dataclasses import dataclass
 
 from dgisim.src.element.element import Element
 import dgisim.src.state.game_state as gm
 
 
-class EffectTarget(Enum):
+class Zone(Enum):
+    CHARACTER = 0
+    SUMMONS = 1
+    SUPPORT = 2
+    HAND = 3
+
+
+class DynamicEffectTarget(Enum):
     SELF_SELF = 0
     SELF_ACTIVE = 1
     SELF_OFF_FIELD = 2
@@ -14,6 +22,13 @@ class EffectTarget(Enum):
     SELF_ABS = 4
     OPPO_ACTIVE = 5
     OPPO_OFF_FIELD = 6
+
+
+@dataclass(frozen=True)
+class StaticEffectTarget:
+    pid: gm.GameState.Pid
+    zone: Zone
+    id: int
 
 
 class Effect:
@@ -53,13 +68,18 @@ class SwapCharacterEffect(DirectEffect):
 
     import dgisim.src.character.characters as chars
 
-    def __init__(self, target: EffectTarget, index: Optional[chars.Characters.CharId] = None):
-        assert target != EffectTarget.SELF_ABS or index is not None
+    def __init__(self, target: DynamicEffectTarget, index: Optional[chars.Characters.CharId] = None):
+        assert target != DynamicEffectTarget.SELF_ABS or index is not None
         self._target = target
         self._index = index
 
 
+@dataclass(frozen=True)
 class DamageEffect(Effect):
+    source: StaticEffectTarget
+    target: DynamicEffectTarget
+    element: Element
+    damage: int
 
     DAMAGE_ELEMENTS: FrozenSet[Element] = frozenset({
         Element.PYRO,
@@ -73,15 +93,11 @@ class DamageEffect(Effect):
         Element.PIERCING,
     })
 
-    def __init__(self, target: EffectTarget, element: Element, damage: int):
-        assert element in DamageEffect.DAMAGE_ELEMENTS
-        self._element = element
-        self._damage = damage
-        self._target = target
+    def legal(self) -> bool:
+        return self.element in DamageEffect.DAMAGE_ELEMENTS
 
 
+@dataclass(frozen=True)
 class EnergyRechargeEffect(Effect):
-
-    def __init__(self, target: EffectTarget, recharge: int):
-        self._recharge = recharge
-        self._target = target
+    target: StaticEffectTarget
+    recharge: int

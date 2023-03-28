@@ -9,6 +9,7 @@ import dgisim.src.state.player_state as pl
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
 from dgisim.src.action import PlayerAction
 from dgisim.src.event.effect_stack import EffectStack
+from dgisim.src.event.event_pre import EventPre
 
 
 class GameState:
@@ -51,13 +52,14 @@ class GameState:
 
     @classmethod
     def from_default(cls):
+        mode = md.DefaultMode()
         return cls(
-            phase=md.DefaultMode().card_select_phase(),
+            phase=mode.card_select_phase(),
             round=0,
             active_player=GameState.Pid.P1,
-            mode=md.DefaultMode(),
-            player1=pl.PlayerState.examplePlayer(),
-            player2=pl.PlayerState.examplePlayer(),
+            mode=mode,
+            player1=pl.PlayerState.examplePlayer(mode),
+            player2=pl.PlayerState.examplePlayer(mode),
             effect_stack=EffectStack(()),
         )
 
@@ -111,6 +113,9 @@ class GameState:
 
     def waiting_for(self) -> Optional[GameState.Pid]:
         return self._phase.waiting_for(self)
+
+    def possible_actions(self, pid: GameState.Pid) -> dict[int, EventPre]:
+        return self._phase.possible_actions(self)
 
     def step(self) -> GameState:
         return self._phase.step(self)

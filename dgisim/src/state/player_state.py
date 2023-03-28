@@ -1,7 +1,7 @@
 from __future__ import annotations
 from enum import Enum
 from typing import Tuple
-from dgisim.src.event.event import TypicalSwapCharacterEvent
+# from dgisim.src.event.event import TypicalSwapCharacterEvent
 from dgisim.src.event.event_pre import EventPre
 
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
@@ -78,8 +78,8 @@ class PlayerState:
     def get_possible_actions(self) -> Tuple[EventPre]:
         character_skills = self._characters.get_skills()
         swaps = [
-            TypicalSwapCharacterEvent(id)
-            for id in self._characters.get_swappable_ids()
+            # TypicalSwapCharacterEvent(id)
+            # for id in self._characters.get_swappable_ids()
         ]
         return tuple([
             action
@@ -87,16 +87,21 @@ class PlayerState:
             for action in actions
         ])
 
+    import dgisim.src.mode.mode as md
     @staticmethod
-    def examplePlayer():
+    def examplePlayer(mode: md.Mode):
+        cards = mode.all_cards()
+        chars = mode.all_chars()
         return PlayerState(
             phase=PlayerState.Act.PASSIVE_WAIT_PHASE,
             card_redraw_chances=0,
-            characters=Characters.from_default(tuple([char.from_default() for char in DEFAULT_CHARACTERS][:3])),
-            hand_cards=Cards(dict([(card, 0) for card in DEFAULT_CARDS])),
+            characters=Characters.from_default(
+                tuple([char.from_default(i+1) for i, char in enumerate(chars)][:3])
+            ),
+            hand_cards=Cards(dict([(card, 0) for card in cards])),
             dices=Dices({}),
-            deck_cards=Cards(dict([(card, 2) for card in DEFAULT_CARDS])),
-            publicly_used_cards=Cards(dict([(card, 0) for card in DEFAULT_CARDS])),
+            deck_cards=Cards(dict([(card, 2) for card in cards])),
+            publicly_used_cards=Cards(dict([(card, 0) for card in cards])),
         )
 
     def _all_unique_data(self) -> Tuple:
@@ -114,7 +119,6 @@ class PlayerState:
         if not isinstance(other, PlayerState):
             return False
         return self._all_unique_data() == other._all_unique_data()
-
 
     def __hash__(self) -> int:
         return hash(self._all_unique_data())

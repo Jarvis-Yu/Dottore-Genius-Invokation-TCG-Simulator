@@ -3,7 +3,7 @@ from __future__ import annotations
 import dgisim.src.state.game_state as gm
 import dgisim.src.phase.phase as ph
 from dgisim.src.state.player_state import PlayerState
-from dgisim.src.dices import Dices
+from dgisim.src.dices import ActualDices
 
 class EndPhase(ph.Phase):
     _CARDS_DRAWN = 2
@@ -25,7 +25,7 @@ class EndPhase(ph.Phase):
             game_state.get_player(active_player_id).factory().phase(
                 PlayerState.Act.PASSIVE_WAIT_PHASE
             ).dices(
-                Dices.from_empty()
+                ActualDices.from_empty()
             ).hand_cards(
                 active_player_hand
             ).deck_cards(
@@ -36,7 +36,7 @@ class EndPhase(ph.Phase):
             game_state.get_other_player(active_player_id).factory().phase(
                 PlayerState.Act.PASSIVE_WAIT_PHASE
             ).dices(
-                Dices.from_empty()
+                ActualDices.from_empty()
             ).hand_cards(
                 other_player_hand
             ).deck_cards(

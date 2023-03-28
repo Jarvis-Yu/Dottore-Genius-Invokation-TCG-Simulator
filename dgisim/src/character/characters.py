@@ -38,7 +38,9 @@ class Characters:
         active_character = self.get_active_character()
         if active_character is None:
             return tuple()
-        return active_character.skills()
+        # TODO
+        # return active_character.skills()
+        return tuple()
 
     def char_id_valid(self, char_id: Characters.CharId) -> bool:
         return char_id >= 0 and char_id < len(self._characters)
