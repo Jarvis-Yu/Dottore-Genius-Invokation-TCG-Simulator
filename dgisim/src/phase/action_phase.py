@@ -4,7 +4,7 @@ from typing import Optional, cast
 import dgisim.src.state.game_state as gm
 import dgisim.src.phase.phase as ph
 from dgisim.src.state.player_state import PlayerState
-from dgisim.src.action import GameAction, PlayerAction, EndRoundAction
+from dgisim.src.action import *
 from dgisim.src.event.effect import DeathSwapPhaseEffect
 
 
@@ -88,6 +88,8 @@ class ActionPhase(ph.Phase):
 
     def _handle_game_action(self, game_state: gm.GameState, pid: gm.GameState.Pid, action: GameAction) -> gm.GameState:
         # TODO
+        if isinstance(action, SkillAction):
+            print("Got skill", action)
         return game_state
 
     def step_action(self, game_state: gm.GameState, pid: gm.GameState.Pid, action: PlayerAction) -> gm.GameState:

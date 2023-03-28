@@ -18,7 +18,7 @@ class GameState:
         P2 = 2
 
         def is_player1(self) -> bool:
-            return self == GameState.Pid.P1
+            return self is GameState.Pid.P1
 
         def is_player2(self) -> bool:
             return self is GameState.Pid.P2
@@ -120,7 +120,10 @@ class GameState:
     def step(self) -> GameState:
         return self._phase.step(self)
 
-    def action_step(self, pid: GameState.Pid, action: PlayerAction) -> GameState:
+    def action_step(self, pid: GameState.Pid, action: PlayerAction) -> Optional[GameState]:
+        """
+        Returns None if the action is illegal or undefined
+        """
         return self._phase.step_action(self, pid, action)
 
     def get_winner(self) -> Optional[GameState.Pid]:

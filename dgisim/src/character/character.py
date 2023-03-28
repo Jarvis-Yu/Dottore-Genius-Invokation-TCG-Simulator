@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Tuple
+from enum import Enum
 
 import dgisim.src.state.game_state as gm
 from dgisim.src.buff.buffs import Buffs, EquipmentBuffs
@@ -8,6 +9,13 @@ from dgisim.src.event.event_pre import EventPre
 from dgisim.src.dices import AbstractDices
 from dgisim.src.event.event import *
 from dgisim.src.helper.level_print import level_print_single, INDENT, level_print
+
+
+class CharacterSkill(Enum):
+    NORMAL_ATTACK = 0
+    BURST = 1
+    SKILL1 = 2
+    SKILL2 = 3
 
 
 class Character:

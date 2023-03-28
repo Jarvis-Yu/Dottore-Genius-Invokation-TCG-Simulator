@@ -1,11 +1,12 @@
 from __future__ import annotations
-from typing import Dict, Optional
+from typing import Dict, Optional, Iterator, Iterable
 from enum import Enum
 import random
 
 from dgisim.src.helper.hashable_dict import HashableDict
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
 from dgisim.src.element.element import Element
+
 
 class Dices:
 
@@ -20,6 +21,18 @@ class Dices:
 
     def num_dices(self) -> int:
         return sum(self._dices.values())
+
+    def is_legal(self) -> bool:
+        return all(map(lambda x: x >= 0, self._dices.values()))
+
+    def elems(self) -> Iterable[Element]:
+        return self._dices.keys()
+
+    def __iter__(self) -> Iterator[Element]:
+        return self._dices.__iter__()
+
+    def __getitem__(self, index: Element) -> int:
+        return self._dices[index]
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Dices):
@@ -40,6 +53,18 @@ class Dices:
         ])
         return level_print(existing_dices, indent)
 
+
+_PURE_ELEMS = frozenset({
+    Element.PYRO,
+    Element.HYDRO,
+    Element.ANEMO,
+    Element.ELECTRO,
+    Element.DENDRO,
+    Element.CRYO,
+    Element.GEO,
+})
+
+
 class ActualDices(Dices):
     """
     Used for the actual dices a player can have.
@@ -55,15 +80,75 @@ class ActualDices(Dices):
         Element.GEO,
     })
 
+    import dgisim.src.state.game_state as gs
+
+    def basically_satisfy(
+            self,
+            requirement: AbstractDices,
+            game_state: Optional[gs.GameState] = None,
+    ) -> Optional[ActualDices]:
+        if requirement.num_dices() > self.num_dices():
+            return None
+        # TODO: optimize for having game_state
+        from collections import defaultdict
+        remaining: dict[Element, int] = self._dices.copy()
+        answer: dict[Element, int] = defaultdict(int)
+        pures: dict[Element, int] = HashableDict()
+        omni = 0
+        any = 0
+        for elem in requirement:
+            if elem in _PURE_ELEMS:
+                pures[elem] = requirement[elem]
+            elif elem is Element.OMNI:
+                omni = requirement[elem]
+            elif elem is Element.ANY:
+                any = requirement[elem]
+            else:
+                raise Exception("Unknown element")
+        if len(pures) > 0:
+            for elem in pures:
+                if remaining.get(elem, 0) < pures[elem]:
+                    return None
+                answer[elem] += pures[elem]
+                remaining[elem] -= pures[elem]
+        if omni > 0:
+            best_elem: Optional[Element] = None
+            count = 0x7fffffff
+            for elem in _PURE_ELEMS:
+                this_count = remaining.get(elem, 0)
+                if this_count >= omni and this_count < count:
+                    best_elem = elem
+                    count = this_count
+            if best_elem is None:
+                return None
+            else:
+                answer[best_elem] += omni
+                remaining[best_elem] -= omni
+        if any > 0:
+            from operator import itemgetter
+            sorted_elems = sorted(remaining.items(), key=itemgetter(1))
+            for elem, num in sorted_elems:
+                if elem in _PURE_ELEMS:
+                    num = min(num, any)
+                    answer[elem] += num
+                    remaining[elem] -= num
+                    any -= num
+                    if any == 0:
+                        break
+            if any > 0:
+                answer[Element.OMNI] += any
+                remaining[Element.OMNI] -= any
+        return ActualDices(answer)
+
     @classmethod
-    def from_empty(cls) -> Dices:
-        return Dices(dict([
+    def from_empty(cls) -> ActualDices:
+        return ActualDices(dict([
             (elem, 0)
             for elem in ActualDices._LEGAL_ELEMS
         ]))
 
     @classmethod
-    def from_random(cls, size: int) -> Dices:
+    def from_random(cls, size: int) -> ActualDices:
         dices = ActualDices.from_empty()
         for i in range(size):
             elem = random.choice(tuple(ActualDices._LEGAL_ELEMS))
@@ -71,16 +156,17 @@ class ActualDices(Dices):
         return dices
 
     @classmethod
-    def from_all(cls, size: int, elem: Element) -> Dices:
+    def from_all(cls, size: int, elem: Element) -> ActualDices:
         dices = ActualDices.from_empty()
         dices._dices[Element.OMNI] = size
         return dices
+
 
 class AbstractDices(Dices):
     """
     Used for the dice cost of cards and other actions
     """
-    _PRE_ELEMS = frozenset({
+    _LEGAL_ELEMS = frozenset({
         Element.OMNI,
         Element.PYRO,
         Element.HYDRO,
@@ -93,9 +179,9 @@ class AbstractDices(Dices):
     })
 
     @classmethod
-    def from_pre(cls, omni: int, any: int, element: Optional[Element] = None, num: Optional[int] = None) -> Dices:
-        assert element is None or element in AbstractDices._PRE_ELEMS
-        dices = { Element.OMNI: omni, Element.ANY: any, }
+    def from_pre(cls, omni: int, any: int, element: Optional[Element] = None, num: Optional[int] = None) -> AbstractDices:
+        assert element is None or element in AbstractDices._LEGAL_ELEMS
+        dices = {Element.OMNI: omni, Element.ANY: any, }
         if element is not None and num is not None:
             dices[element] = num
-        return Dices(dices)
+        return AbstractDices(dices)

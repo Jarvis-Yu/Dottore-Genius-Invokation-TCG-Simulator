@@ -31,10 +31,14 @@ class GameStateMachine:
         self._game_state = self._game_state.step()
         self._history.append(self._game_state)
 
-    def _action_step(self, pid: GameState.Pid, action: PlayerAction) -> None:
+    def _action_step(self, pid: GameState.Pid, action: PlayerAction) -> bool:
+        next_state = self._game_state.action_step(pid, action)
+        if next_state is None:
+            return False
         self._action_history.append(self._game_state)
-        self._game_state = self._game_state.action_step(pid, action)
+        self._game_state = next_state
         self._history.append(self._game_state)
+        return True
 
     def step_until_phase(self, phase: Type[Phase]) -> None:
         while isinstance(self._game_state.get_phase(), phase):
@@ -53,7 +57,13 @@ class GameStateMachine:
         if pid is None:
             self._step()
         else:
-            self._action_step(pid, self.player_agent(pid).choose_action(self._history, pid))
+            patience = 5
+            while patience > 0 \
+                    and not self._action_step(
+                        pid,
+                        self.player_agent(pid).choose_action(self._history, pid)
+                    ):
+                patience -= 1
 
     def changing_step(self) -> None:
         game_state = self._game_state

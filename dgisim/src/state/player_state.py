@@ -8,9 +8,9 @@ from dgisim.src.helper.level_print import level_print, level_print_single, INDEN
 from dgisim.src.card.cards import Cards
 import dgisim.src.card.card as card
 from dgisim.src.character.characters import Characters
-from dgisim.src.dices import Dices
-from dgisim.src.card.cards_set import DEFAULT_CARDS
-from dgisim.src.character.characters_set import DEFAULT_CHARACTERS
+from dgisim.src.dices import ActualDices
+# from dgisim.src.card.cards_set import DEFAULT_CARDS
+# from dgisim.src.character.characters_set import DEFAULT_CHARACTERS
 
 
 class PlayerState:
@@ -25,7 +25,7 @@ class PlayerState:
         phase: Act,
         characters: Characters,
         card_redraw_chances: int,
-        dices: Dices,
+        dices: ActualDices,
         hand_cards: Cards,
         deck_cards: Cards,
         publicly_used_cards: Cards,
@@ -51,7 +51,7 @@ class PlayerState:
     def get_characters(self) -> Characters:
         return self._characters
 
-    def get_dices(self) -> Dices:
+    def get_dices(self) -> ActualDices:
         return self._dices
 
     def get_hand_cards(self) -> Cards:
@@ -99,7 +99,7 @@ class PlayerState:
                 tuple([char.from_default(i+1) for i, char in enumerate(chars)][:3])
             ),
             hand_cards=Cards(dict([(card, 0) for card in cards])),
-            dices=Dices({}),
+            dices=ActualDices({}),
             deck_cards=Cards(dict([(card, 2) for card in cards])),
             publicly_used_cards=Cards(dict([(card, 0) for card in cards])),
         )
@@ -165,7 +165,7 @@ class PlayerStateFactory:
         self._hand_cards = cards
         return self
 
-    def dices(self, dices: Dices) -> PlayerStateFactory:
+    def dices(self, dices: ActualDices) -> PlayerStateFactory:
         self._dices = dices
         return self
 
