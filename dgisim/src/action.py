@@ -62,6 +62,12 @@ class SkillAction(GameAction):
         self._skill = skill
         self._instruction = instruction
 
+    def skill(self) -> CharacterSkill:
+        return self._skill
+
+    def instruction(self) -> Instruction:
+        return self._instruction
+
     def __str__(self) -> str:
         return f"<{self._skill}, {self._instruction}>"
 

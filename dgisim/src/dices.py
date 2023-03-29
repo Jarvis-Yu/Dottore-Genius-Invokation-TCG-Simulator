@@ -105,6 +105,7 @@ class ActualDices(Dices):
                 any = requirement[elem]
             else:
                 raise Exception("Unknown element")
+        # TODO: bugs when not sufficient pure
         if len(pures) > 0:
             for elem in pures:
                 if remaining.get(elem, 0) < pures[elem]:
@@ -113,7 +114,7 @@ class ActualDices(Dices):
                 remaining[elem] -= pures[elem]
         if omni > 0:
             best_elem: Optional[Element] = None
-            count = 0x7fffffff
+            count = 0x7fffffff  # Sufficiently large number
             for elem in _PURE_ELEMS:
                 this_count = remaining.get(elem, 0)
                 if this_count >= omni and this_count < count:

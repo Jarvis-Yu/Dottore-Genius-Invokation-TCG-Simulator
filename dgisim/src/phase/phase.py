@@ -11,7 +11,7 @@ class Phase:
     def step(self, game_state: gm.GameState) -> gm.GameState:
         raise Exception("Not Overriden")
 
-    def step_action(self, game_state: gm.GameState, pid: gm.GameState.Pid, action: PlayerAction) -> gm.GameState:
+    def step_action(self, game_state: gm.GameState, pid: gm.GameState.Pid, action: PlayerAction) -> Optional[gm.GameState]:
         raise Exception("Not Overriden")
 
     def waiting_for(self, game_state: gm.GameState) -> Optional[gm.GameState.Pid]:

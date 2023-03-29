@@ -51,7 +51,7 @@ class StartingHandSelectPhase(ph.Phase):
             .build()
         ).build()
 
-    def step_action(self, game_state: gm.GameState, pid: gm.GameState.Pid, action: PlayerAction) -> gm.GameState:
+    def step_action(self, game_state: gm.GameState, pid: gm.GameState.Pid, action: PlayerAction) -> Optional[gm.GameState]:
         if isinstance(action, CharacterSelectAction):
             return self._handle_picking_starting_hand(game_state, pid, action)
         else:

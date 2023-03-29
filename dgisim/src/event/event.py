@@ -7,11 +7,11 @@ import dgisim.src.character.character as Cr
 from dgisim.src.event.effect import *
 
 
-def normal_attack_template(source: StaticEffectTarget, id: int, element: Element, damage: int) -> tuple[Effect, ...]:
+def normal_attack_template(source: StaticTarget, id: int, element: Element, damage: int) -> tuple[Effect, ...]:
     return (
         DamageEffect(
             source=source,
-            target=DynamicEffectTarget.OPPO_ACTIVE,
+            target=DynamicCharacterTarget.OPPO_ACTIVE,
             element=element,
             damage=damage,
         ),

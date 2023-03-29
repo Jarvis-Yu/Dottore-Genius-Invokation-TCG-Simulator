@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional
+from typing import Optional, Union, cast
 from enum import Enum
 
 import dgisim.src.mode.mode as md
@@ -10,6 +10,7 @@ from dgisim.src.helper.level_print import level_print, level_print_single, INDEN
 from dgisim.src.action import PlayerAction
 from dgisim.src.event.effect_stack import EffectStack
 from dgisim.src.event.event_pre import EventPre
+from dgisim.src.character.character import Character
 
 
 class GameState:
@@ -110,6 +111,14 @@ class GameState:
             return self._player1
         else:
             raise Exception("player_id unknown")
+
+    def belongs_to(self, object: Union[Character, int]) -> Optional[GameState.Pid]:
+        if self._player1.is_mine(object):
+            return GameState.Pid.P1
+        elif self._player2.is_mine(object):
+            return GameState.Pid.P2
+        else:
+            return None
 
     def waiting_for(self) -> Optional[GameState.Pid]:
         return self._phase.waiting_for(self)

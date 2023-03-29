@@ -20,7 +20,16 @@ class EffectStack:
     def push_one(self, effect: Effect) -> EffectStack:
         return EffectStack(self._effects + (effect, ))
 
-    def push_many(self, effects: tuple[Effect, ...]) -> EffectStack:
+    def push_many_lf(self, effects: tuple[Effect, ...]) -> EffectStack:
+        """
+        lf means the effects passed in are executed from the last to the first
+        """
+        return EffectStack(self._effects + effects)
+
+    def push_many_fl(self, effects: tuple[Effect, ...]) -> EffectStack:
+        """
+        fl means the effects passed in are executed from the first to the last
+        """
         return EffectStack(self._effects + effects)
 
     def __eq__(self, other: object) -> bool:

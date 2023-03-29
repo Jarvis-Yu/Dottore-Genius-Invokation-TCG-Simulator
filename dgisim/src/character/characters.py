@@ -32,6 +32,12 @@ class Characters:
             return "None"
         return char.name()
 
+    def get_id(self, character: Character) -> Optional[int]:
+        for c in self._characters:
+            if character is c:
+                return c.get_id()
+        return None
+
     def get_skills(self) -> tuple[EventPre, ...]:
         active_character = self.get_active_character()
         if active_character is None:
@@ -87,6 +93,15 @@ class CharactersFactory:
     def __init__(self, characters: Characters):
         self._characters = characters.get_characters()
         self._active_character_id = characters.get_active_character_id()
+
+    def character(self, char: Character) -> CharactersFactory:
+        chars = list(self._characters)
+        for i, c in enumerate(chars):
+            if c.get_id() == char.get_id():
+                chars[i] = char
+                break
+        self._characters = tuple(chars)
+        return self
 
     def characters(self, chars: tuple[Character]) -> CharactersFactory:
         self._characters = chars

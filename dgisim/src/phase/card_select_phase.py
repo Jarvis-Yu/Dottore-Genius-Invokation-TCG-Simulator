@@ -89,7 +89,7 @@ class CardSelectPhase(ph.Phase):
             .build()
         ).build()
 
-    def step_action(self, game_state: gm.GameState, pid: gm.GameState.Pid, action: PlayerAction) -> gm.GameState:
+    def step_action(self, game_state: gm.GameState, pid: gm.GameState.Pid, action: PlayerAction) -> Optional[gm.GameState]:
         if isinstance(action, CardSelectAction):
             return self._handle_card_drawing(game_state, pid, action)
         elif isinstance(action, EndRoundAction):

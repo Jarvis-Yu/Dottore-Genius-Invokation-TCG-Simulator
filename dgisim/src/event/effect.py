@@ -1,7 +1,7 @@
 from __future__ import annotations
-from typing import FrozenSet, Optional
+from typing import FrozenSet, Optional, cast
 from enum import Enum
-from dataclasses import dataclass
+from dataclasses import InitVar, dataclass
 
 from dgisim.src.element.element import Element
 import dgisim.src.state.game_state as gm
@@ -12,9 +12,10 @@ class Zone(Enum):
     SUMMONS = 1
     SUPPORT = 2
     HAND = 3
+    EFFECT = 4
 
 
-class DynamicEffectTarget(Enum):
+class DynamicCharacterTarget(Enum):
     SELF_SELF = 0
     SELF_ACTIVE = 1
     SELF_OFF_FIELD = 2
@@ -25,7 +26,7 @@ class DynamicEffectTarget(Enum):
 
 
 @dataclass(frozen=True)
-class StaticEffectTarget:
+class StaticTarget:
     pid: gm.GameState.Pid
     zone: Zone
     id: int
@@ -66,36 +67,60 @@ class DeathSwapPhaseEffect(PhaseEffect):
 
 class SwapCharacterEffect(DirectEffect):
 
-    def __init__(self, target: DynamicEffectTarget, index: Optional[int] = None):
-        assert target != DynamicEffectTarget.SELF_ABS or index is not None
+    def __init__(self, target: DynamicCharacterTarget, index: Optional[int] = None):
+        assert target != DynamicCharacterTarget.SELF_ABS or index is not None
         self._target = target
         self._index = index
 
 
+_DAMAGE_ELEMENTS: FrozenSet[Element] = frozenset({
+    Element.PYRO,
+    Element.HYDRO,
+    Element.ANEMO,
+    Element.ELECTRO,
+    Element.DENDRO,
+    Element.CRYO,
+    Element.GEO,
+    Element.PHYSICAL,
+    Element.PIERCING,
+})
+
+
 @dataclass(frozen=True)
 class DamageEffect(Effect):
-    source: StaticEffectTarget
-    target: DynamicEffectTarget
+    source: StaticTarget
+    target: DynamicCharacterTarget
     element: Element
     damage: int
 
-    DAMAGE_ELEMENTS: FrozenSet[Element] = frozenset({
-        Element.PYRO,
-        Element.HYDRO,
-        Element.ANEMO,
-        Element.ELECTRO,
-        Element.DENDRO,
-        Element.CRYO,
-        Element.GEO,
-        Element.PHYSICAL,
-        Element.PIERCING,
-    })
-
     def legal(self) -> bool:
-        return self.element in DamageEffect.DAMAGE_ELEMENTS
+        return self.element in _DAMAGE_ELEMENTS
+
+    def execute(self, game_state: gm.GameState) -> gm.GameState:
+        print("executed")
+        pid = self.source.pid
+        from dgisim.src.character.character import Character
+        opponent: Character
+        if self.target is DynamicCharacterTarget.OPPO_ACTIVE:
+            optional_opponent = game_state.get_other_player(pid).get_characters().get_active_character()
+            if optional_opponent is None:
+                raise Exception("Not implemented yet")
+            opponent = optional_opponent
+        else:
+            raise Exception("Not implemented yet")
+        # TODO: Preprocessing
+        # Damage Calculation
+        hp = opponent.get_hp()
+        hp = max(0, hp - self.damage)
+
+        opponent = opponent.factory().hp(hp).build()
+        other_player = game_state.get_other_player(pid)
+        other_characters = other_player.get_characters().factory().character(opponent).build()
+        other_player = other_player.factory().characters(other_characters).build()
+        return game_state.factory().other_player(pid, other_player).build()
 
 
 @dataclass(frozen=True)
 class EnergyRechargeEffect(Effect):
-    target: StaticEffectTarget
+    target: StaticTarget
     recharge: int

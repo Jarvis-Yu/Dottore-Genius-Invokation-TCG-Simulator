@@ -5,7 +5,7 @@ import dgisim.src.state.game_state as gm
 import dgisim.src.phase.phase as ph
 from dgisim.src.state.player_state import PlayerState
 from dgisim.src.action import *
-from dgisim.src.event.effect import DeathSwapPhaseEffect
+from dgisim.src.event.effect import DeathSwapPhaseEffect, Effect
 
 
 class ActionPhase(ph.Phase):
@@ -50,8 +50,7 @@ class ActionPhase(ph.Phase):
         p2 = game_state.get_player2()
         p1p = p1.get_phase()
         p2p = p2.get_phase()
-        if (p1p is PlayerState.Act.ACTION_PHASE and p2p is PlayerState.Act.PASSIVE_WAIT_PHASE) \
-                or (p1p is PlayerState.Act.PASSIVE_WAIT_PHASE and p2p is PlayerState.Act.ACTION_PHASE):
+        if p1p is PlayerState.Act.ACTION_PHASE or p2p is PlayerState.Act.ACTION_PHASE:
             assert self._is_executing_effects(game_state)
             return self._execute_effect(game_state)
         elif p1p is PlayerState.Act.PASSIVE_WAIT_PHASE and p2p is PlayerState.Act.PASSIVE_WAIT_PHASE:
@@ -86,14 +85,28 @@ class ActionPhase(ph.Phase):
             ).build()
         raise Exception("Unknown Game State to process")
 
-    def _handle_game_action(self, game_state: gm.GameState, pid: gm.GameState.Pid, action: GameAction) -> gm.GameState:
+    def _handle_game_action(self, game_state: gm.GameState, pid: gm.GameState.Pid, action: GameAction) -> Optional[gm.GameState]:
         # TODO
+        player = game_state.get_player(pid)
         if isinstance(action, SkillAction):
+            action = cast(SkillAction, action)
             # TODO: check validity of the action
-            print("Got skill", action)
+            effect_stack = game_state.get_effect_stack()
+            instruction = action.instruction()
+            new_effects: tuple[Effect, ...] = ()
+            # TODO: put pre checks
+            # TODO: Costs
+            # Skill Effect
+            active_character = player.get_characters().get_active_character()
+            if active_character is None:
+                return None
+            new_effects += active_character.skill(game_state, action.skill(), instruction)
+            # Afterwards
+            print("ACCEPTED ACTION")
+            return game_state.factory().effect_stack(effect_stack.push_many_fl(new_effects)).build()
         return game_state
 
-    def step_action(self, game_state: gm.GameState, pid: gm.GameState.Pid, action: PlayerAction) -> gm.GameState:
+    def step_action(self, game_state: gm.GameState, pid: gm.GameState.Pid, action: PlayerAction) -> Optional[gm.GameState]:
         """
         TODO: Currently only allows player to end their round
         """

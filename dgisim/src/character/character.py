@@ -37,21 +37,44 @@ class Character:
         self._energy = energy
         self._max_energy = max_energy
 
+    def get_id(self) -> int:
+        return self._id
+
+    def get_hp(self) -> int:
+        return self._hp
+
+    def get_max_hp(self) -> int:
+        return self._max_hp
+
+    def get_energy(self) -> int:
+        return self._energy
+
+    def get_max_energy(self) -> int:
+        return self._max_energy
+
+    def factory(self) -> CharacterFactory:
+        raise Exception("Not Overriden")
+
+    def address(self, game_state: gm.GameState) -> StaticTarget:
+        pid = game_state.belongs_to(self)
+        if pid is None:
+            raise Exception("target character is not in the current game state")
+        me = StaticTarget(pid, Zone.CHARACTER, self.get_id())
+        return me
+
     @classmethod
     def from_default(cls, id: int = -1) -> Character:
         raise Exception("Not Overriden")
 
-    def normal_attack(self, game_state: gm.GameState) -> tuple[Effect, ...]:
-        return ()
+    import dgisim.src.action as act
 
-    def skill1(self, game_state: gm.GameState) -> tuple[Effect, ...]:
-        return ()
+    def skill(self, game_state: gm.GameState, skill_type: CharacterSkill, instruction: act.Instruction) -> tuple[Effect, ...]:
+        if skill_type is CharacterSkill.NORMAL_ATTACK:
+            return self.normal_attack(game_state, skill_type)
+        raise Exception("Not Overriden")
 
-    def skill2(self, game_state: gm.GameState) -> tuple[Effect, ...]:
-        return ()
-
-    def burst(self, game_state: gm.GameState) -> tuple[Effect, ...]:
-        return ()
+    def normal_attack(self, game_state: gm.GameState, skill_type: CharacterSkill) -> tuple[Effect, ...]:
+        raise Exception("Not Overriden")
 
     def defeated(self) -> bool:
         # TODO
@@ -91,6 +114,32 @@ class Character:
         }, indent)
 
 
+class CharacterFactory:
+    def __init__(self, character: Character, char_type: type[Character]) -> None:
+        self._char = char_type
+        self._id = character.get_id()
+        self._hp = character.get_hp()
+        self._max_hp = character.get_max_hp()
+        self._energy = character.get_energy()
+        self._max_energy = character.get_max_energy()
+
+    def hp(self, hp: int) -> CharacterFactory:
+        self._hp = hp
+        return self
+
+    def build(self) -> Character:
+        return self._char(
+            id=self._id,
+            hp=self._hp,
+            max_hp=self._max_hp,
+            energy=self._energy,
+            max_energy=self._max_energy,
+            buffs=Buffs(),  # TODO
+            equipments=EquipmentBuffs(),
+            elemental_aura=ElementalAura(),
+        )
+
+
 class Keqing(Character):
     # NORMAL_ATTACK = EventPre(
     #     AbstractDices.from_pre(1, 2),
@@ -99,6 +148,19 @@ class Keqing(Character):
     # SKILLS = (
     #     NORMAL_ATTACK,
     # )
+
+    def normal_attack(self, game_state: gm.GameState, skill_type: CharacterSkill) -> tuple[Effect, ...]:
+        return (
+            DamageEffect(
+                source=self.address(game_state),
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.PHYSICAL,
+                damage=2,
+            ),
+        )
+
+    def factory(self) -> CharacterFactory:
+        return CharacterFactory(self, type(self))
 
     @classmethod
     def from_default(cls, id: int = -1) -> Keqing:
@@ -112,10 +174,6 @@ class Keqing(Character):
             equipments=EquipmentBuffs(),
             elemental_aura=ElementalAura(),
         )
-
-    def normal_attack(self, game_state: gm.GameState) -> tuple[Effect, ...]:
-        # return normal_attack_template(game_state)
-        return super().normal_attack(game_state)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Keqing):
@@ -132,6 +190,19 @@ class Kaeya(Character):
     # SKILLS = (
     #     NORMAL_ATTACK,
     # )
+
+    def normal_attack(self, game_state: gm.GameState, skill_type: CharacterSkill) -> tuple[Effect, ...]:
+        return (
+            DamageEffect(
+                source=self.address(game_state),
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.PHYSICAL,
+                damage=2,
+            ),
+        )
+
+    def factory(self) -> CharacterFactory:
+        return CharacterFactory(self, type(self))
 
     @classmethod
     def from_default(cls, id: int = -1) -> Kaeya:
@@ -161,6 +232,18 @@ class Oceanid(Character):
     # SKILLS = (
     #     NORMAL_ATTACK,
     # )
+    def normal_attack(self, game_state: gm.GameState, skill_type: CharacterSkill) -> tuple[Effect, ...]:
+        return (
+            DamageEffect(
+                source=self.address(game_state),
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.HYDRO,
+                damage=1,
+            ),
+        )
+
+    def factory(self) -> CharacterFactory:
+        return CharacterFactory(self, type(self))
 
     @classmethod
     def from_default(cls, id: int = -1) -> Oceanid:
