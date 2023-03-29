@@ -26,8 +26,9 @@ with limited action cards and all omni dices.
   - [x] Can proceed to next phase
 - [ ] Implement game phase of Action Phase (players beat each other)
   - [x] Allow players to end action phase right away
-  - [ ] Implement the pipeline for buff handling
-  - [ ] Allow players to normal attack
+  - [x] Partially implement the pipeline for buff handling
+  - [x] Allow players to normal attack
+  - [ ] Implement elemental reaction
   - [ ] Allow players to cast skills
   - [ ] Allow players to cast elemental burst
   - [x] Can proceed to next phase
@@ -47,9 +48,7 @@ The final stage is to include more characters and eventually all.
 
 ## Currently Working On
 
-Designing action phase as a state machine (and a mix of flow chart).
-
-The design doc can be read [here](docs/state_machine_design.md).
+Implementing the combat system in the action phase.
 
 ## Future Plans
 
