@@ -102,7 +102,6 @@ class ActionPhase(ph.Phase):
                 return None
             new_effects += active_character.skill(game_state, action.skill(), instruction)
             # Afterwards
-            print("ACCEPTED ACTION")
             return game_state.factory().effect_stack(effect_stack.push_many_fl(new_effects)).build()
         return game_state
 

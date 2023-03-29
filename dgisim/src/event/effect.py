@@ -97,7 +97,6 @@ class DamageEffect(Effect):
         return self.element in _DAMAGE_ELEMENTS
 
     def execute(self, game_state: gm.GameState) -> gm.GameState:
-        print("executed")
         pid = self.source.pid
         from dgisim.src.character.character import Character
         opponent: Character

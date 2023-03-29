@@ -41,7 +41,6 @@ class LazyAgent(PlayerAgent):
                     Element.ANY: 2,
                 }))
                 if dices is not None:
-                    print("TTK")
                     return SkillAction(
                         CharacterSkill.NORMAL_ATTACK,
                         DiceOnlyInstruction(dices),
