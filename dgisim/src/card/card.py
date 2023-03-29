@@ -2,12 +2,8 @@ from __future__ import annotations
 from enum import Enum
 from typing_extensions import override
 
-from dgisim.src.cost import Cost
-
 
 class Card:
-    cost: Cost
-
     def another(self) -> Card:
         raise Exception("Not implemented")
 

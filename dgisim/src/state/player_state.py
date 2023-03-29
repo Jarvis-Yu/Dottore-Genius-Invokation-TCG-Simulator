@@ -93,7 +93,7 @@ class PlayerState:
             for action in actions
         ])
 
-    import dgisim.src.mode.mode as md
+    import dgisim.src.mode as md
     @staticmethod
     def examplePlayer(mode: md.Mode):
         cards = mode.all_cards()

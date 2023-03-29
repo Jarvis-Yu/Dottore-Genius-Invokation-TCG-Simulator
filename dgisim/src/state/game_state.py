@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Optional, Union, cast
 from enum import Enum
 
-import dgisim.src.mode.mode as md
+import dgisim.src.mode as md
 import dgisim.src.phase.phase as ph
 import dgisim.src.phase.game_end_phase as gep
 import dgisim.src.state.player_state as pl
