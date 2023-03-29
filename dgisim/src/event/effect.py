@@ -4,6 +4,7 @@ from enum import Enum
 from dataclasses import InitVar, dataclass
 
 from dgisim.src.element.element import Element
+import dgisim.src.character.character as char
 import dgisim.src.state.game_state as gm
 
 
@@ -123,3 +124,22 @@ class DamageEffect(Effect):
 class EnergyRechargeEffect(Effect):
     target: StaticTarget
     recharge: int
+
+    def execute(self, game_state: gm.GameState) -> gm.GameState:
+        print("energy recharge")
+        character = game_state.get_target(self.target)
+        if not isinstance(character, char.Character):
+            return game_state
+        character = cast(char.Character, character)
+        energy = min(character.get_energy() + self.recharge, character.get_max_energy())
+        print(character.get_energy(), energy, character.get_max_energy())
+        if energy == character.get_energy():
+            return game_state
+        character = character.factory().energy(energy).build()
+        player = game_state.get_player(self.target.pid)
+        characters = player.get_characters().factory().character(character).build()
+        player = player.factory().characters(characters).build()
+        return game_state.factory().player(
+            self.target.pid,
+            player
+        ).build()

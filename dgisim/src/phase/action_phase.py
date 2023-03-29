@@ -96,13 +96,22 @@ class ActionPhase(ph.Phase):
             new_effects: tuple[Effect, ...] = ()
             # TODO: put pre checks
             # TODO: Costs
+            dices = player.get_dices()
+            new_dices = ActualDices.from_dices(dices - action.instruction().dices())
+            if new_dices is None:
+                return None
             # Skill Effect
             active_character = player.get_characters().get_active_character()
             if active_character is None:
                 return None
             new_effects += active_character.skill(game_state, action.skill(), instruction)
             # Afterwards
-            return game_state.factory().effect_stack(effect_stack.push_many_fl(new_effects)).build()
+            return game_state.factory().effect_stack(
+                effect_stack.push_many_fl(new_effects)
+            ).player(
+                pid, 
+                player.factory().dices(new_dices).build()
+            ).build()
         return game_state
 
     def step_action(self, game_state: gm.GameState, pid: gm.GameState.Pid, action: PlayerAction) -> Optional[gm.GameState]:

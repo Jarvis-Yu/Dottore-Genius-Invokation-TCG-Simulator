@@ -77,8 +77,7 @@ class Character:
         raise Exception("Not Overriden")
 
     def defeated(self) -> bool:
-        # TODO
-        return False
+        return self._hp == 0
 
     def name(self) -> str:
         return self.__class__.__name__
@@ -127,6 +126,10 @@ class CharacterFactory:
         self._hp = hp
         return self
 
+    def energy(self, energy: int) -> CharacterFactory:
+        self._energy = energy
+        return self
+
     def build(self) -> Character:
         return self._char(
             id=self._id,
@@ -141,22 +144,12 @@ class CharacterFactory:
 
 
 class Keqing(Character):
-    # NORMAL_ATTACK = EventPre(
-    #     AbstractDices.from_pre(1, 2),
-    #     TypicalNormalAttackEvent(2, Element.PHYSICAL, 1)
-    # )
-    # SKILLS = (
-    #     NORMAL_ATTACK,
-    # )
 
     def normal_attack(self, game_state: gm.GameState, skill_type: CharacterSkill) -> tuple[Effect, ...]:
-        return (
-            DamageEffect(
-                source=self.address(game_state),
-                target=DynamicCharacterTarget.OPPO_ACTIVE,
-                element=Element.PHYSICAL,
-                damage=2,
-            ),
+        return normal_attack_template(
+            source=self.address(game_state),
+            element=Element.PHYSICAL,
+            damage=2,
         )
 
     def factory(self) -> CharacterFactory:
@@ -183,22 +176,11 @@ class Keqing(Character):
 
 class Kaeya(Character):
 
-    # NORMAL_ATTACK = EventPre(
-    #     AbstractDices.from_pre(1, 2),
-    #     TypicalNormalAttackEvent(2, Element.PHYSICAL, 1)
-    # )
-    # SKILLS = (
-    #     NORMAL_ATTACK,
-    # )
-
     def normal_attack(self, game_state: gm.GameState, skill_type: CharacterSkill) -> tuple[Effect, ...]:
-        return (
-            DamageEffect(
-                source=self.address(game_state),
-                target=DynamicCharacterTarget.OPPO_ACTIVE,
-                element=Element.PHYSICAL,
-                damage=2,
-            ),
+        return normal_attack_template(
+            source=self.address(game_state),
+            element=Element.PHYSICAL,
+            damage=2,
         )
 
     def factory(self) -> CharacterFactory:
@@ -225,21 +207,11 @@ class Kaeya(Character):
 
 class Oceanid(Character):
 
-    # NORMAL_ATTACK = EventPre(
-    #     AbstractDices.from_pre(1, 2),
-    #     TypicalNormalAttackEvent(1, Element.HYDRO, 1)
-    # )
-    # SKILLS = (
-    #     NORMAL_ATTACK,
-    # )
     def normal_attack(self, game_state: gm.GameState, skill_type: CharacterSkill) -> tuple[Effect, ...]:
-        return (
-            DamageEffect(
-                source=self.address(game_state),
-                target=DynamicCharacterTarget.OPPO_ACTIVE,
-                element=Element.HYDRO,
-                damage=1,
-            ),
+        return normal_attack_template(
+            source=self.address(game_state),
+            element=Element.HYDRO,
+            damage=1,
         )
 
     def factory(self) -> CharacterFactory:

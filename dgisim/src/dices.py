@@ -141,6 +141,9 @@ class ActualDices(Dices):
                 remaining[Element.OMNI] -= any
         return ActualDices(answer)
 
+    def is_legal(self) -> bool:
+        return super().is_legal() and all([(elem in self._LEGAL_ELEMS) for elem in self._dices])
+
     @classmethod
     def from_empty(cls) -> ActualDices:
         return ActualDices(dict([
@@ -162,6 +165,14 @@ class ActualDices(Dices):
         dices._dices[Element.OMNI] = size
         return dices
 
+    @classmethod
+    def from_dices(cls, dices: Dices) -> Optional[ActualDices]:
+        new_dices = ActualDices(dices._dices)
+        if not new_dices.is_legal():
+            return None
+        else:
+            return new_dices
+
 
 class AbstractDices(Dices):
     """
@@ -179,6 +190,9 @@ class AbstractDices(Dices):
         Element.ANY,
     })
 
+    def is_legal(self) -> bool:
+        return super().is_legal() and all([(elem in self._LEGAL_ELEMS) for elem in self._dices])
+
     @classmethod
     def from_pre(cls, omni: int, any: int, element: Optional[Element] = None, num: Optional[int] = None) -> AbstractDices:
         assert element is None or element in AbstractDices._LEGAL_ELEMS
@@ -186,3 +200,11 @@ class AbstractDices(Dices):
         if element is not None and num is not None:
             dices[element] = num
         return AbstractDices(dices)
+
+    @classmethod
+    def from_dices(cls, dices: Dices) -> Optional[AbstractDices]:
+        new_dices = AbstractDices(dices._dices)
+        if not new_dices.is_legal():
+            return None
+        else:
+            return new_dices

@@ -7,19 +7,25 @@ import dgisim.src.character.character as Cr
 from dgisim.src.event.effect import *
 
 
-def normal_attack_template(source: StaticTarget, id: int, element: Element, damage: int) -> tuple[Effect, ...]:
-    return (
-        DamageEffect(
-            source=source,
-            target=DynamicCharacterTarget.OPPO_ACTIVE,
-            element=element,
-            damage=damage,
-        ),
-        EnergyRechargeEffect(
+def normal_attack_template(
+        source: StaticTarget,
+        element: Element,
+        damage: int,
+        recharge: int = 1,
+) -> tuple[Effect, ...]:
+    effects: list[Effect] = []
+    effects.append(DamageEffect(
+        source=source,
+        target=DynamicCharacterTarget.OPPO_ACTIVE,
+        element=element,
+        damage=damage,
+    ))
+    if recharge > 0:
+        effects.append(EnergyRechargeEffect(
             target=source,
-            recharge=1,
-        ),
-    )
+            recharge=recharge,
+        ))
+    return tuple(effects)
 
 
 # class EventSpeed(Enum):

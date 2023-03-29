@@ -11,6 +11,7 @@ from dgisim.src.action import PlayerAction
 from dgisim.src.event.effect_stack import EffectStack
 from dgisim.src.event.event_pre import EventPre
 from dgisim.src.character.character import Character
+from dgisim.src.event.effect import StaticTarget, Zone
 
 
 class GameState:
@@ -119,6 +120,15 @@ class GameState:
             return GameState.Pid.P2
         else:
             return None
+
+    def get_target(self, target: StaticTarget) -> Optional[Union[Character, int]]:
+        player = self.get_player(target.pid)
+        if target.zone is Zone.CHARACTER:
+            characters = player.get_characters()
+            return characters.get_by_id(target.id)
+        else:
+            raise Exception("Not Implemented Yet")
+        return None
 
     def waiting_for(self) -> Optional[GameState.Pid]:
         return self._phase.waiting_for(self)

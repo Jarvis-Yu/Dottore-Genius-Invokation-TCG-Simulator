@@ -38,6 +38,12 @@ class Characters:
                 return c.get_id()
         return None
 
+    def get_by_id(self, id: int) -> Optional[Character]:
+        for c in self._characters:
+            if c.get_id() == id:
+                return c
+        return None
+
     def get_skills(self) -> tuple[EventPre, ...]:
         active_character = self.get_active_character()
         if active_character is None:
