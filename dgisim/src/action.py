@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dgisim.src.card.cards import Cards
-from dgisim.src.character.characters import Characters
 from dgisim.src.dices import ActualDices
 import dgisim.src.state.game_state as gs
 
@@ -33,10 +32,10 @@ class CardSelectAction(PlayerAction):
 
 
 class CharacterSelectAction(PlayerAction):
-    def __init__(self, selected_character_id: Characters.CharId):
+    def __init__(self, selected_character_id: int):
         self._selected_character_id = selected_character_id
 
-    def get_selected_character_id(self) -> Characters.CharId:
+    def get_selected_character_id(self) -> int:
         return self._selected_character_id
 
 
@@ -68,16 +67,17 @@ class SkillAction(GameAction):
 
 
 class SwapAction(GameAction):
-    def __init__(self, selected_character_id: Characters.CharId, instruction: Instruction):
+    def __init__(self, selected_character_id: int, instruction: Instruction):
         self._selected_character_id = selected_character_id
         self._instruction = instruction
 
-    def get_selected_character_id(self) -> Characters.CharId:
+    def get_selected_character_id(self) -> int:
         return self._selected_character_id
 
 
 class Instruction:
-    pass
+    def dices(self) -> ActualDices:
+        return ActualDices({})
 
 
 class DiceOnlyInstruction(Instruction):

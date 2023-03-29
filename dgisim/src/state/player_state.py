@@ -75,7 +75,7 @@ class PlayerState:
     def is_end_phase(self):
         return self._phase is self.Act.END_PHASE
 
-    def get_possible_actions(self) -> Tuple[EventPre]:
+    def get_possible_actions(self) -> Tuple[EventPre, ...]:
         character_skills = self._characters.get_skills()
         swaps = [
             # TypicalSwapCharacterEvent(id)

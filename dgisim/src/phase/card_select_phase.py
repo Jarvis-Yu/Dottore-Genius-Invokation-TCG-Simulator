@@ -64,10 +64,11 @@ class CardSelectPhase(ph.Phase):
         new_hand = player.get_hand_cards() - action.get_selected_cards()
         new_hand = new_hand + new_cards
         reducedChances: int = player.get_card_redraw_chances() - 1
+        phase: PlayerState.Act
         if reducedChances > 0:
-            phase: PlayerState.Act = player.get_phase()
+            phase = player.get_phase()
         else:
-            phase: PlayerState.Act = PlayerState.Act.END_PHASE
+            phase = PlayerState.Act.END_PHASE
         return game_state.factory().player(
             pid,
             player.factory()

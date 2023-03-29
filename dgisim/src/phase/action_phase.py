@@ -89,6 +89,7 @@ class ActionPhase(ph.Phase):
     def _handle_game_action(self, game_state: gm.GameState, pid: gm.GameState.Pid, action: GameAction) -> gm.GameState:
         # TODO
         if isinstance(action, SkillAction):
+            # TODO: check validity of the action
             print("Got skill", action)
         return game_state
 
@@ -97,10 +98,10 @@ class ActionPhase(ph.Phase):
         TODO: Currently only allows player to end their round
         """
         if isinstance(action, EndRoundAction):
-            # action = cast(EndRoundAction, action)
+            action = cast(EndRoundAction, action)
             return self._handle_end_round(game_state, pid, action)
         if isinstance(action, GameAction):
-            # action = cast(GameAction, action)
+            action = cast(GameAction, action)
             return self._handle_game_action(game_state, pid, action)
         raise Exception("Unknown Game State to process")
 

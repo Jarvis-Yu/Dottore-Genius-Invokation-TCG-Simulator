@@ -66,9 +66,7 @@ class DeathSwapPhaseEffect(PhaseEffect):
 
 class SwapCharacterEffect(DirectEffect):
 
-    import dgisim.src.character.characters as chars
-
-    def __init__(self, target: DynamicEffectTarget, index: Optional[chars.Characters.CharId] = None):
+    def __init__(self, target: DynamicEffectTarget, index: Optional[int] = None):
         assert target != DynamicEffectTarget.SELF_ABS or index is not None
         self._target = target
         self._index = index

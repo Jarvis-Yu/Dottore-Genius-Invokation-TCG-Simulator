@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Tuple, Optional
+from typing import Optional
 
 from dgisim.src.character.character import Character
 from dgisim.src.event.event_pre import EventPre
@@ -7,20 +7,18 @@ from dgisim.src.helper.level_print import level_print, INDENT, level_print_singl
 
 
 class Characters:
-    CharId = int
-
-    def __init__(self, characters: Tuple[Character], active_character: Optional[Characters.CharId]):
+    def __init__(self, characters: tuple[Character, ...], active_character_id: Optional[int]):
         self._characters = characters
-        self._active_character_id = active_character
+        self._active_character_id = active_character_id
 
     @classmethod
-    def from_default(cls, characters: Tuple[Character]) -> Characters:
+    def from_default(cls, characters: tuple[Character, ...]) -> Characters:
         return cls(characters, None)
 
-    def get_characters(self) -> Tuple[Character]:
+    def get_characters(self) -> tuple[Character, ...]:
         return self._characters
 
-    def get_active_character_id(self) -> Optional[Characters.CharId]:
+    def get_active_character_id(self) -> Optional[int]:
         return self._active_character_id
 
     def get_active_character(self) -> Optional[Character]:
@@ -34,7 +32,7 @@ class Characters:
             return "None"
         return char.name()
 
-    def get_skills(self) -> Tuple[EventPre]:
+    def get_skills(self) -> tuple[EventPre, ...]:
         active_character = self.get_active_character()
         if active_character is None:
             return tuple()
@@ -42,10 +40,10 @@ class Characters:
         # return active_character.skills()
         return tuple()
 
-    def char_id_valid(self, char_id: Characters.CharId) -> bool:
+    def char_id_valid(self, char_id: int) -> bool:
         return char_id >= 0 and char_id < len(self._characters)
 
-    def get_swappable_ids(self) -> Tuple[Characters.CharId]:
+    def get_swappable_ids(self) -> tuple[int, ...]:
         return tuple([
             i
             for i, c in enumerate(self._characters)
@@ -58,7 +56,7 @@ class Characters:
     def factory(self) -> CharactersFactory:
         return CharactersFactory(self)
 
-    def _all_unique_data(self) -> Tuple:
+    def _all_unique_data(self) -> tuple:
         return (self._characters, self._active_character_id)
 
     def __eq__(self, other: object) -> bool:
@@ -90,11 +88,11 @@ class CharactersFactory:
         self._characters = characters.get_characters()
         self._active_character_id = characters.get_active_character_id()
 
-    def characters(self, chars: Tuple[Character]) -> CharactersFactory:
+    def characters(self, chars: tuple[Character]) -> CharactersFactory:
         self._characters = chars
         return self
 
-    def active_character_id(self, id: Characters.CharId) -> CharactersFactory:
+    def active_character_id(self, id: int) -> CharactersFactory:
         self._active_character_id = id
         return self
 
