@@ -59,6 +59,7 @@ class SwapCharacterCheckerEffect(CheckerEffect):
     pass
 
 
+@dataclass(frozen=True)
 class DeathCheckCheckerEffect(CheckerEffect):
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         # return game_state
@@ -76,7 +77,11 @@ class DeathCheckCheckerEffect(CheckerEffect):
         effects: list[Effect] = []
         # TODO: trigger other death based effects
         effects.append(DeathSwapPhaseStartEffect())
-        effects.append(DeathSwapPhaseEndEffect())
+        effects.append(DeathSwapPhaseEndEffect(
+            pid,
+            game_state.get_player(pid).get_phase(),
+            game_state.get_other_player(pid).get_phase(),
+        ))
         return game_state.factory().effect_stack(
             game_state.get_effect_stack().push_many_fl(tuple(effects))
         ).player(
@@ -93,14 +98,30 @@ class DeathCheckCheckerEffect(CheckerEffect):
     pass
 
 
+@dataclass(frozen=True)
 class DeathSwapPhaseStartEffect(PhaseEffect):
     def __str__(self) -> str:
         return self.__class__.__name__
 
 
+@dataclass(frozen=True)
 class DeathSwapPhaseEndEffect(PhaseEffect):
+    my_pid: gs.GameState.Pid
+    my_last_phase: ps.PlayerState.Act
+    other_last_phase: ps.PlayerState.Act
+
     def execute(self, game_state: gs.GameState) -> gs.GameState:
-        return game_state
+        player = game_state.get_player(self.my_pid)
+        other_player = game_state.get_other_player(self.my_pid)
+        player = player.factory().phase(self.my_last_phase).build()
+        other_player = other_player.factory().phase(self.other_last_phase).build()
+        return game_state.factory().player(
+            self.my_pid,
+            player
+        ).other_player(
+            self.my_pid,
+            other_player
+        ).build()
 
     def __str__(self) -> str:
         return self.__class__.__name__
