@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Optional, Tuple
 
-import dgisim.src.state.game_state as gm
+import dgisim.src.state.game_state as gs
 from dgisim.src.state.player_state import PlayerState
 import dgisim.src.phase.phase as ph
 from dgisim.src.action import CardSelectAction, PlayerAction, EndRoundAction
@@ -12,7 +12,7 @@ from dgisim.src.helper.level_print import level_print
 class CardSelectPhase(ph.Phase):
     _NUM_CARDS: int = 5
 
-    def _draw_cards_and_activate(self, game_state: gm.GameState) -> gm.GameState:
+    def _draw_cards_and_activate(self, game_state: gs.GameState) -> gs.GameState:
         p1: PlayerState = game_state.get_player1()
         p2: PlayerState = game_state.get_player2()
         p1_deck, p1_hand = p1.get_deck_cards().pick_random_cards(self._NUM_CARDS)
@@ -37,7 +37,7 @@ class CardSelectPhase(ph.Phase):
         ).build()
         return game_state.factory().player1(new_p1).player2(new_p2).build()
 
-    def _to_starting_hand_select_phase(self, game_state: gm.GameState) -> gm.GameState:
+    def _to_starting_hand_select_phase(self, game_state: gs.GameState) -> gs.GameState:
         return game_state.factory().phase(
             game_state.get_mode().starting_hand_select_phase()
         ).player1(
@@ -46,7 +46,7 @@ class CardSelectPhase(ph.Phase):
             game_state.get_player2().factory().phase(PlayerState.Act.PASSIVE_WAIT_PHASE).build()
         ).build()
 
-    def step(self, game_state: gm.GameState) -> gm.GameState:
+    def step(self, game_state: gs.GameState) -> gs.GameState:
         p1: PlayerState = game_state.get_player1()
         p2: PlayerState = game_state.get_player2()
         # If both players just entered waiting, assign them cards and make them take actions
@@ -57,7 +57,7 @@ class CardSelectPhase(ph.Phase):
         else:
             raise Exception("Unknown Game State to process")
 
-    def _handle_card_drawing(self, game_state: gm.GameState, pid: gm.GameState.Pid, action: CardSelectAction) -> gm.GameState:
+    def _handle_card_drawing(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: CardSelectAction) -> gs.GameState:
         player: PlayerState = game_state.get_player(pid)
         new_deck, new_cards = player.get_deck_cards().pick_random_cards(action.num_cards())
         new_deck = new_deck + action.get_selected_cards()
@@ -79,7 +79,7 @@ class CardSelectPhase(ph.Phase):
             .build()
         ).build()
 
-    def _handle_end_round(self, game_state: gm.GameState, pid: gm.GameState.Pid, action: EndRoundAction) -> gm.GameState:
+    def _handle_end_round(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: EndRoundAction) -> gs.GameState:
         player = game_state.get_player(pid)
         return game_state.factory().player(
             pid,
@@ -89,7 +89,7 @@ class CardSelectPhase(ph.Phase):
             .build()
         ).build()
 
-    def step_action(self, game_state: gm.GameState, pid: gm.GameState.Pid, action: PlayerAction) -> Optional[gm.GameState]:
+    def step_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: PlayerAction) -> Optional[gs.GameState]:
         if isinstance(action, CardSelectAction):
             return self._handle_card_drawing(game_state, pid, action)
         elif isinstance(action, EndRoundAction):

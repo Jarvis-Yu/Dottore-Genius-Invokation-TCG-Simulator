@@ -1,5 +1,5 @@
 from typing import List
-from random import random
+from random import random, choice
 
 from dgisim.src.player_agent import PlayerAgent
 from dgisim.src.state.game_state import GameState
@@ -36,13 +36,28 @@ class LazyAgent(PlayerAgent):
             selection = random()
             me = game_state.get_player(pid)
             available_dices = me.get_dices()
-            if available_dices.num_dices() > 0 and selection < 0.5:
+            if selection < 0.3:
                 dices = available_dices.basically_satisfy(AbstractDices({
                     Element.ANY: 2,
                 }))
                 if dices is not None:
                     return SkillAction(
                         CharacterSkill.NORMAL_ATTACK,
+                        DiceOnlyInstruction(dices),
+                    )
+            elif selection < 0.4:
+                dices = available_dices.basically_satisfy(AbstractDices({
+                    Element.ANY: 1,
+                }))
+                characters = me.get_characters()
+                alive_ids = characters.alive_ids()
+                active_id = characters.get_active_character_id()
+                assert active_id is not None
+                if active_id in alive_ids:
+                    alive_ids.remove(active_id)
+                if dices is not None and alive_ids:
+                    return SwapAction(
+                        choice(alive_ids),
                         DiceOnlyInstruction(dices),
                     )
             return EndRoundAction()

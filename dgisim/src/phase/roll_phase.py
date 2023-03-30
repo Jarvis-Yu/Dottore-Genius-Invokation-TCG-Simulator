@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import dgisim.src.phase.phase as ph
-import dgisim.src.state.game_state as gm
+import dgisim.src.state.game_state as gs
 from dgisim.src.dices import ActualDices
 from dgisim.src.element.element import Element
 from dgisim.src.state.player_state import PlayerState
@@ -10,7 +10,7 @@ from dgisim.src.state.player_state import PlayerState
 class RollPhase(ph.Phase):
     _NUM_DICES = 8
 
-    def _get_all_omni_and_to_action_phase(self, game_state: gm.GameState) -> gm.GameState:
+    def _get_all_omni_and_to_action_phase(self, game_state: gs.GameState) -> gs.GameState:
         return game_state.factory().phase(
             game_state.get_mode().action_phase()
         ).player1(
@@ -25,7 +25,7 @@ class RollPhase(ph.Phase):
             .build()
         ).build()
 
-    def step(self, game_state: gm.GameState) -> gm.GameState:
+    def step(self, game_state: gs.GameState) -> gs.GameState:
         # if game_state.get_active_player().is_player1():
         #     p1_phase = PlayerState.act.ACTIVE_WAIT_PHASE
         #     p2_phase = PlayerState.act.PASSIVE_WAIT_PHASE

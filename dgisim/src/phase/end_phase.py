@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import dgisim.src.state.game_state as gm
+import dgisim.src.state.game_state as gs
 import dgisim.src.phase.phase as ph
 from dgisim.src.state.player_state import PlayerState
 from dgisim.src.dices import ActualDices
@@ -8,7 +8,7 @@ from dgisim.src.dices import ActualDices
 class EndPhase(ph.Phase):
     _CARDS_DRAWN = 2
 
-    def _to_roll_phase(self, game_state: gm.GameState, new_round: int) -> gm.GameState:
+    def _to_roll_phase(self, game_state: gs.GameState, new_round: int) -> gs.GameState:
         active_player_id = game_state.get_active_player_id()
         active_player = game_state.get_player(active_player_id)
         other_player = game_state.get_other_player(active_player_id)
@@ -44,7 +44,7 @@ class EndPhase(ph.Phase):
             ).build()
         ).build()
 
-    def _end_both_players(self, game_state: gm.GameState) -> gm.GameState:
+    def _end_both_players(self, game_state: gs.GameState) -> gs.GameState:
         return game_state.factory().player1(
             game_state.get_player1().factory().phase(
                 PlayerState.Act.END_PHASE
@@ -55,12 +55,12 @@ class EndPhase(ph.Phase):
             ).build()
         ).build()
 
-    def _end_game(self, game_state: gm.GameState) -> gm.GameState:
+    def _end_game(self, game_state: gs.GameState) -> gs.GameState:
         return game_state.factory().phase(
             game_state.get_mode().game_end_phase()
         ).build()
 
-    def step(self, game_state: gm.GameState) -> gm.GameState:
+    def step(self, game_state: gs.GameState) -> gs.GameState:
         p1 = game_state.get_player1()
         p2 = game_state.get_player2()
         active_player_id = game_state.get_active_player_id()

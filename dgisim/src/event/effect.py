@@ -1,11 +1,12 @@
 from __future__ import annotations
-from typing import FrozenSet, Optional, cast
+from typing import FrozenSet, Optional, cast, Union
 from enum import Enum
 from dataclasses import InitVar, dataclass
 
 from dgisim.src.element.element import Element
 import dgisim.src.character.character as char
-import dgisim.src.state.game_state as gm
+import dgisim.src.state.game_state as gs
+import dgisim.src.state.player_state as ps
 
 
 class Zone(Enum):
@@ -28,13 +29,13 @@ class DynamicCharacterTarget(Enum):
 
 @dataclass(frozen=True)
 class StaticTarget:
-    pid: gm.GameState.Pid
+    pid: gs.GameState.Pid
     zone: Zone
     id: int
 
 
 class Effect:
-    def execute(self, game_state: gm.GameState) -> gm.GameState:
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
         raise Exception("Not Overriden or Implemented")
 
 
@@ -59,6 +60,32 @@ class SwapCharacterCheckerEffect(CheckerEffect):
 
 
 class DeathCheckCheckerEffect(CheckerEffect):
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        return game_state
+        p1_character = game_state.get_player1().get_characters().get_active_character()
+        p2_character = game_state.get_player2().get_characters().get_active_character()
+        assert p1_character is not None and p2_character is not None
+        pid: gs.GameState.Pid
+        if p1_character.defeated():
+            pid = gs.GameState.Pid.P1
+        elif p2_character.defeated():
+            pid = gs.GameState.Pid.P2
+        else:  # if no one defeated, continue
+            return game_state
+        # TODO: check if game ends
+        effects: list[Effect] = []
+        # TODO: trigger other death based effects
+        effects.append(DeathSwapPhaseEffect())
+        return game_state.factory().effect_stack(
+            game_state.get_effect_stack().push_many_fl(tuple(effects))
+        ).player(
+            pid,
+            game_state.get_player(pid).factory().phase(ps.PlayerState.Act.ACTION_PHASE).build()
+        ).other_player(
+            pid,
+            game_state.get_other_player(pid).factory().phase(
+                ps.PlayerState.Act.PASSIVE_WAIT_PHASE).build()
+        ).build()
     pass
 
 
@@ -66,12 +93,23 @@ class DeathSwapPhaseEffect(PhaseEffect):
     pass
 
 
+@dataclass(frozen=True)
 class SwapCharacterEffect(DirectEffect):
+    source: StaticTarget
+    target: StaticTarget
 
-    def __init__(self, target: DynamicCharacterTarget, index: Optional[int] = None):
-        assert target != DynamicCharacterTarget.SELF_ABS or index is not None
-        self._target = target
-        self._index = index
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        assert self.source.pid == self.target.pid \
+            and self.source.zone == Zone.CHARACTER \
+            and self.target.zone == Zone.CHARACTER \
+            and self.source.id != self.target.id
+        pid = self.source.pid
+        player = game_state.get_player(pid)
+        characters = player.get_characters()
+        characters = characters.factory().active_character_id(self.target.id).build()
+        player = player.factory().characters(characters).build()
+        # TODO: Trigger swap event
+        return game_state.factory().player(pid, player).build()
 
 
 _DAMAGE_ELEMENTS: FrozenSet[Element] = frozenset({
@@ -97,18 +135,20 @@ class DamageEffect(Effect):
     def legal(self) -> bool:
         return self.element in _DAMAGE_ELEMENTS
 
-    def execute(self, game_state: gm.GameState) -> gm.GameState:
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
         pid = self.source.pid
         from dgisim.src.character.character import Character
+        # Get damage target
         opponent: Character
         if self.target is DynamicCharacterTarget.OPPO_ACTIVE:
-            optional_opponent = game_state.get_other_player(pid).get_characters().get_active_character()
+            optional_opponent = game_state.get_other_player(
+                pid).get_characters().get_active_character()
             if optional_opponent is None:
                 raise Exception("Not implemented yet")
             opponent = optional_opponent
         else:
             raise Exception("Not implemented yet")
-        # TODO: Preprocessing
+        # TODO: Preprocess Damage
         # Damage Calculation
         hp = opponent.get_hp()
         hp = max(0, hp - self.damage)
@@ -125,14 +165,12 @@ class EnergyRechargeEffect(Effect):
     target: StaticTarget
     recharge: int
 
-    def execute(self, game_state: gm.GameState) -> gm.GameState:
-        print("energy recharge")
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
         character = game_state.get_target(self.target)
         if not isinstance(character, char.Character):
             return game_state
         character = cast(char.Character, character)
         energy = min(character.get_energy() + self.recharge, character.get_max_energy())
-        print(character.get_energy(), energy, character.get_max_energy())
         if energy == character.get_energy():
             return game_state
         character = character.factory().energy(energy).build()

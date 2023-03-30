@@ -7,7 +7,7 @@ from dgisim.src.card.cards import Cards
 import dgisim.src.card.card as card
 from dgisim.src.character.characters import Characters
 from dgisim.src.dices import ActualDices
-from dgisim.src.character.character import Character
+import dgisim.src.character.character as char
 from dgisim.src.event.event_pre import EventPre
 # from dgisim.src.card.cards_set import DEFAULT_CARDS
 # from dgisim.src.character.characters_set import DEFAULT_CHARACTERS
@@ -75,9 +75,9 @@ class PlayerState:
     def is_end_phase(self):
         return self._phase is self.Act.END_PHASE
 
-    def is_mine(self, object: Union[Character, int]) -> bool:
-        if isinstance(object, Character):
-            character = cast(Character, object)
+    def is_mine(self, object: Union[char.Character, int]) -> bool:
+        if isinstance(object, char.Character):
+            character = cast(char.Character, object)
             return self._characters.get_id(character) is not None
         return False
 

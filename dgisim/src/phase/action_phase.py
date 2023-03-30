@@ -1,15 +1,15 @@
 from __future__ import annotations
 from typing import Optional, cast
 
-import dgisim.src.state.game_state as gm
+import dgisim.src.state.game_state as gs
 import dgisim.src.phase.phase as ph
 from dgisim.src.state.player_state import PlayerState
 from dgisim.src.action import *
-from dgisim.src.event.effect import DeathSwapPhaseEffect, Effect
+from dgisim.src.event.effect import *
 
 
 class ActionPhase(ph.Phase):
-    def _start_up_phase(self, game_state: gm.GameState) -> gm.GameState:
+    def _start_up_phase(self, game_state: gs.GameState) -> gs.GameState:
         # TODO: Handle before action buffs
         active_player_id = game_state.get_active_player_id()
         return game_state.factory().player(
@@ -19,7 +19,7 @@ class ActionPhase(ph.Phase):
             ).build()
         ).build()
 
-    def _to_end_phase(self, game_state: gm.GameState) -> gm.GameState:
+    def _to_end_phase(self, game_state: gs.GameState) -> gs.GameState:
         active_player_id = game_state.get_active_player_id()
         return game_state.factory().phase(
             game_state.get_mode().end_phase()
@@ -35,17 +35,17 @@ class ActionPhase(ph.Phase):
             ).build()
         ).build()
 
-    def _execute_effect(self, game_state: gm.GameState) -> gm.GameState:
+    def _execute_effect(self, game_state: gs.GameState) -> gs.GameState:
         effect_stack, effect = game_state.get_effect_stack().pop()
         new_game_state = game_state.factory().effect_stack(effect_stack).build()
         return effect.execute(new_game_state)
 
-    def _is_executing_effects(self, game_state: gm.GameState) -> bool:
+    def _is_executing_effects(self, game_state: gs.GameState) -> bool:
         effect_stack = game_state.get_effect_stack()
         return not effect_stack.is_empty() \
             and not isinstance(effect_stack.peek(), DeathSwapPhaseEffect)
 
-    def step(self, game_state: gm.GameState) -> gm.GameState:
+    def step(self, game_state: gs.GameState) -> gs.GameState:
         p1 = game_state.get_player1()
         p2 = game_state.get_player2()
         p1p = p1.get_phase()
@@ -59,7 +59,7 @@ class ActionPhase(ph.Phase):
             return self._to_end_phase(game_state)
         raise Exception("Unknown Game State to process")
 
-    def _handle_end_round(self, game_state: gm.GameState, pid: gm.GameState.Pid, action: EndRoundAction) -> gm.GameState:
+    def _handle_end_round(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: EndRoundAction) -> gs.GameState:
         active_player_id = game_state.get_active_player_id()
         active_player = game_state.get_player(active_player_id)
         other_player = game_state.get_other_player(active_player_id)
@@ -85,7 +85,7 @@ class ActionPhase(ph.Phase):
             ).build()
         raise Exception("Unknown Game State to process")
 
-    def _handle_game_action(self, game_state: gm.GameState, pid: gm.GameState.Pid, action: GameAction) -> Optional[gm.GameState]:
+    def _handle_game_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: GameAction) -> Optional[gs.GameState]:
         # TODO
         player = game_state.get_player(pid)
         if isinstance(action, SkillAction):
@@ -105,16 +105,40 @@ class ActionPhase(ph.Phase):
             if active_character is None:
                 return None
             new_effects += active_character.skill(game_state, action.skill(), instruction)
+            new_effects += (DeathCheckCheckerEffect(), )
             # Afterwards
             return game_state.factory().effect_stack(
                 effect_stack.push_many_fl(new_effects)
             ).player(
-                pid, 
+                pid,
                 player.factory().dices(new_dices).build()
             ).build()
+        elif isinstance(action, SwapAction):
+            action = cast(SwapAction, action)
+            effect_stack = game_state.get_effect_stack()
+            # Costs
+            dices = player.get_dices()
+            new_dices = ActualDices.from_dices(dices - action.instruction().dices())
+            if new_dices is None:
+                return None
+            # Add Effects
+            active_character = player.get_characters().get_active_character()
+            assert active_character is not None
+            effect_stack = effect_stack.push_one(SwapCharacterEffect(
+                StaticTarget(pid, Zone.CHARACTER, active_character.get_id()),
+                StaticTarget(pid, Zone.CHARACTER, action.seleted_character_id()),
+            ))
+            # TODO: posts
+            return game_state.factory().effect_stack(
+                effect_stack
+            ).player(
+                pid,
+                player.factory().dices(new_dices).build()
+            ).build()
+        raise Exception("Unhandld action", action)
         return game_state
 
-    def step_action(self, game_state: gm.GameState, pid: gm.GameState.Pid, action: PlayerAction) -> Optional[gm.GameState]:
+    def step_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: PlayerAction) -> Optional[gs.GameState]:
         """
         TODO: Currently only allows player to end their round
         """
@@ -126,7 +150,7 @@ class ActionPhase(ph.Phase):
             return self._handle_game_action(game_state, pid, action)
         raise Exception("Unknown Game State to process")
 
-    def waiting_for(self, game_state: gm.GameState) -> Optional[gm.GameState.Pid]:
+    def waiting_for(self, game_state: gs.GameState) -> Optional[gs.GameState.Pid]:
         """
         TODO: override this to handle death swap
         """

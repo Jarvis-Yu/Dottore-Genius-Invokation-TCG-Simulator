@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Tuple
 from enum import Enum
 
-import dgisim.src.state.game_state as gm
+import dgisim.src.state.game_state as gs
 from dgisim.src.buff.buffs import Buffs, EquipmentBuffs
 from dgisim.src.element.element import ElementalAura
 from dgisim.src.event.event_pre import EventPre
@@ -55,7 +55,7 @@ class Character:
     def factory(self) -> CharacterFactory:
         raise Exception("Not Overriden")
 
-    def address(self, game_state: gm.GameState) -> StaticTarget:
+    def address(self, game_state: gs.GameState) -> StaticTarget:
         pid = game_state.belongs_to(self)
         if pid is None:
             raise Exception("target character is not in the current game state")
@@ -68,13 +68,16 @@ class Character:
 
     import dgisim.src.action as act
 
-    def skill(self, game_state: gm.GameState, skill_type: CharacterSkill, instruction: act.Instruction) -> tuple[Effect, ...]:
+    def skill(self, game_state: gs.GameState, skill_type: CharacterSkill, instruction: act.Instruction) -> tuple[Effect, ...]:
         if skill_type is CharacterSkill.NORMAL_ATTACK:
             return self.normal_attack(game_state, skill_type)
         raise Exception("Not Overriden")
 
-    def normal_attack(self, game_state: gm.GameState, skill_type: CharacterSkill) -> tuple[Effect, ...]:
+    def normal_attack(self, game_state: gs.GameState, skill_type: CharacterSkill) -> tuple[Effect, ...]:
         raise Exception("Not Overriden")
+
+    def alive(self) -> bool:
+        return not self.defeated()
 
     def defeated(self) -> bool:
         return self._hp == 0
@@ -145,7 +148,7 @@ class CharacterFactory:
 
 class Keqing(Character):
 
-    def normal_attack(self, game_state: gm.GameState, skill_type: CharacterSkill) -> tuple[Effect, ...]:
+    def normal_attack(self, game_state: gs.GameState, skill_type: CharacterSkill) -> tuple[Effect, ...]:
         return normal_attack_template(
             source=self.address(game_state),
             element=Element.PHYSICAL,
@@ -176,7 +179,7 @@ class Keqing(Character):
 
 class Kaeya(Character):
 
-    def normal_attack(self, game_state: gm.GameState, skill_type: CharacterSkill) -> tuple[Effect, ...]:
+    def normal_attack(self, game_state: gs.GameState, skill_type: CharacterSkill) -> tuple[Effect, ...]:
         return normal_attack_template(
             source=self.address(game_state),
             element=Element.PHYSICAL,
@@ -207,7 +210,7 @@ class Kaeya(Character):
 
 class Oceanid(Character):
 
-    def normal_attack(self, game_state: gm.GameState, skill_type: CharacterSkill) -> tuple[Effect, ...]:
+    def normal_attack(self, game_state: gs.GameState, skill_type: CharacterSkill) -> tuple[Effect, ...]:
         return normal_attack_template(
             source=self.address(game_state),
             element=Element.HYDRO,

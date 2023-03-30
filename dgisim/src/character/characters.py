@@ -1,30 +1,36 @@
 from __future__ import annotations
 from typing import Optional
 
-from dgisim.src.character.character import Character
+import dgisim.src.character.character as char
 from dgisim.src.event.event_pre import EventPre
 from dgisim.src.helper.level_print import level_print, INDENT, level_print_single
 
 
 class Characters:
-    def __init__(self, characters: tuple[Character, ...], active_character_id: Optional[int]):
+    def __init__(self, characters: tuple[char.Character, ...], active_character_id: Optional[int]):
         self._characters = characters
         self._active_character_id = active_character_id
 
     @classmethod
-    def from_default(cls, characters: tuple[Character, ...]) -> Characters:
+    def from_default(cls, characters: tuple[char.Character, ...]) -> Characters:
         return cls(characters, None)
 
-    def get_characters(self) -> tuple[Character, ...]:
+    def get_characters(self) -> tuple[char.Character, ...]:
         return self._characters
 
     def get_active_character_id(self) -> Optional[int]:
         return self._active_character_id
 
-    def get_active_character(self) -> Optional[Character]:
+    def get_character(self, id: int) -> Optional[char.Character]:
+        for character in self._characters:
+            if id == character.get_id():
+                return character
+        return None
+
+    def get_active_character(self) -> Optional[char.Character]:
         if self._active_character_id is None:
             return None
-        return self._characters[self._active_character_id]
+        return self.get_character(self._active_character_id)
 
     def get_active_character_name(self) -> str:
         char = self.get_active_character()
@@ -32,17 +38,24 @@ class Characters:
             return "None"
         return char.name()
 
-    def get_id(self, character: Character) -> Optional[int]:
+    def get_id(self, character: char.Character) -> Optional[int]:
         for c in self._characters:
             if character is c:
                 return c.get_id()
         return None
 
-    def get_by_id(self, id: int) -> Optional[Character]:
+    def get_by_id(self, id: int) -> Optional[char.Character]:
         for c in self._characters:
             if c.get_id() == id:
                 return c
         return None
+
+    def alive_ids(self) -> list[int]:
+        ids: list[int] = []
+        for character in self._characters:
+            if character.alive():
+                ids.append(character.get_id())
+        return ids
 
     def get_skills(self) -> tuple[EventPre, ...]:
         active_character = self.get_active_character()
@@ -100,7 +113,7 @@ class CharactersFactory:
         self._characters = characters.get_characters()
         self._active_character_id = characters.get_active_character_id()
 
-    def character(self, char: Character) -> CharactersFactory:
+    def character(self, char: char.Character) -> CharactersFactory:
         chars = list(self._characters)
         for i, c in enumerate(chars):
             if c.get_id() == char.get_id():
@@ -109,7 +122,7 @@ class CharactersFactory:
         self._characters = tuple(chars)
         return self
 
-    def characters(self, chars: tuple[Character]) -> CharactersFactory:
+    def characters(self, chars: tuple[char.Character]) -> CharactersFactory:
         self._characters = chars
         return self
 

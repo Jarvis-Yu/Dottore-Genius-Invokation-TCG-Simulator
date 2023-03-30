@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import List, Tuple
 from enum import Enum
 
-import dgisim.src.state.game_state as gm
+import dgisim.src.state.game_state as gs
 import dgisim.src.character.character as Cr
 from dgisim.src.event.effect import *
 

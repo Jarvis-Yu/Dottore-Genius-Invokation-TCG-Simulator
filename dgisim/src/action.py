@@ -77,8 +77,11 @@ class SwapAction(GameAction):
         self._selected_character_id = selected_character_id
         self._instruction = instruction
 
-    def get_selected_character_id(self) -> int:
+    def seleted_character_id(self) -> int:
         return self._selected_character_id
+
+    def instruction(self) -> Instruction:
+        return self._instruction
 
 
 class Instruction:
