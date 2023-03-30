@@ -143,5 +143,20 @@ class TestGameStateMachine(unittest.TestCase):
         self.assertIsNone(state_machine.get_winner())
         print(state_machine.get_game_state())
 
+    def test_inspect(self):
+        state_machine = GameStateMachine(
+            self._initial_state,
+            LazyAgent(),
+            LazyAgent(),
+        )
+        i = 0
+        while not state_machine.game_end():
+            print(f"########## {i} ##########")
+            i += 1
+            state_machine.auto_step()
+            print(state_machine.get_game_state())
+            state_machine.one_step()
+            input()
+
 if __name__ == "__main__":
     unittest.main()

@@ -73,6 +73,7 @@ class SkillAction(GameAction):
 
 
 class SwapAction(GameAction):
+    
     def __init__(self, selected_character_id: int, instruction: Instruction):
         self._selected_character_id = selected_character_id
         self._instruction = instruction
@@ -84,12 +85,23 @@ class SwapAction(GameAction):
         return self._instruction
 
 
+class DeathSwapAction(GameAction):
+
+    def __init__(self, selected_character_id: int):
+        self._selected_character_id = selected_character_id
+
+    def seleted_character_id(self) -> int:
+        return self._selected_character_id
+
+
 class Instruction:
+
     def dices(self) -> ActualDices:
         return ActualDices({})
 
 
 class DiceOnlyInstruction(Instruction):
+
     def __init__(self, dices: ActualDices) -> None:
         self._dices = dices
 

@@ -36,16 +36,34 @@ class LazyAgent(PlayerAgent):
             selection = random()
             me = game_state.get_player(pid)
             available_dices = me.get_dices()
-            if selection < 0.3:
+            active_character = me.get_active_character()
+            assert active_character is not None
+            # death swap
+            if active_character.defeated():
+                characters = me.get_characters()
+                alive_ids = characters.alive_ids()
+                active_id = characters.get_active_character_id()
+                assert active_id is not None
+                if active_id in alive_ids:
+                    alive_ids.remove(active_id)
+                if alive_ids:
+                    print("DeathSwap")
+                    return DeathSwapAction(choice(alive_ids))
+                else:
+                    raise Exception("Game should end here but not implemented(NOT REACHED)")
+            # normal attack
+            if selection < 0.6:
                 dices = available_dices.basically_satisfy(AbstractDices({
                     Element.ANY: 2,
                 }))
                 if dices is not None:
+                    print("NormalAttack")
                     return SkillAction(
                         CharacterSkill.NORMAL_ATTACK,
                         DiceOnlyInstruction(dices),
                     )
-            elif selection < 0.4:
+            # swap character
+            elif selection < 0.7:
                 dices = available_dices.basically_satisfy(AbstractDices({
                     Element.ANY: 1,
                 }))
@@ -56,10 +74,12 @@ class LazyAgent(PlayerAgent):
                 if active_id in alive_ids:
                     alive_ids.remove(active_id)
                 if dices is not None and alive_ids:
+                    print("SWAP")
                     return SwapAction(
                         choice(alive_ids),
                         DiceOnlyInstruction(dices),
                     )
+            print("EndRound")
             return EndRoundAction()
         else:
             raise Exception("No Action Defined")

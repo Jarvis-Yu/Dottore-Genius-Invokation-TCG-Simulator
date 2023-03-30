@@ -186,6 +186,7 @@ class GameState:
             "Active Player": level_print_single(str(self._active_player), new_indent),
             "Player1": self._player1.to_string(new_indent),
             "Player2": self._player2.to_string(new_indent),
+            "Effects": self._effect_stack.to_string(new_indent),
         }, indent)
 
 

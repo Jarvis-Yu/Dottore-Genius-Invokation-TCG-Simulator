@@ -61,7 +61,7 @@ class SwapCharacterCheckerEffect(CheckerEffect):
 
 class DeathCheckCheckerEffect(CheckerEffect):
     def execute(self, game_state: gs.GameState) -> gs.GameState:
-        return game_state
+        # return game_state
         p1_character = game_state.get_player1().get_characters().get_active_character()
         p2_character = game_state.get_player2().get_characters().get_active_character()
         assert p1_character is not None and p2_character is not None
@@ -80,17 +80,22 @@ class DeathCheckCheckerEffect(CheckerEffect):
             game_state.get_effect_stack().push_many_fl(tuple(effects))
         ).player(
             pid,
-            game_state.get_player(pid).factory().phase(ps.PlayerState.Act.ACTION_PHASE).build()
+            game_state.get_player(pid).factory().phase(
+                ps.PlayerState.Act.ACTION_PHASE
+            ).build()
         ).other_player(
             pid,
             game_state.get_other_player(pid).factory().phase(
-                ps.PlayerState.Act.PASSIVE_WAIT_PHASE).build()
+                ps.PlayerState.Act.PASSIVE_WAIT_PHASE
+            ).build()
         ).build()
     pass
 
 
 class DeathSwapPhaseEffect(PhaseEffect):
-    pass
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        # TODO
+        return game_state
 
 
 @dataclass(frozen=True)

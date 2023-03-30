@@ -30,7 +30,7 @@ class EffectStack:
         """
         fl means the effects passed in are executed from the first to the last
         """
-        return EffectStack(self._effects + effects)
+        return EffectStack(self._effects + effects[::-1])
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, EffectStack):
@@ -39,3 +39,9 @@ class EffectStack:
 
     def __hash__(self) -> int:
         return hash(self._effects)
+
+    def to_string(self, indent: int) -> str:
+        return str(self)
+
+    def __str__(self) -> str:
+        return str(self._effects)

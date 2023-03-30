@@ -1,11 +1,12 @@
 from __future__ import annotations
 from enum import Enum
-from typing import Tuple, Union, cast
+from typing import Tuple, Union, cast, Optional
 
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
 from dgisim.src.card.cards import Cards
 import dgisim.src.card.card as card
 from dgisim.src.character.characters import Characters
+import dgisim.src.character.character as char
 from dgisim.src.dices import ActualDices
 import dgisim.src.character.character as char
 from dgisim.src.event.event_pre import EventPre
@@ -62,6 +63,9 @@ class PlayerState:
 
     def get_publicly_used_cards(self) -> Cards:
         return self._publicly_used_cards
+
+    def get_active_character(self) -> Optional[char.Character]:
+        return self._characters.get_active_character()
 
     def is_action_phase(self):
         return self._phase is self.Act.ACTION_PHASE
@@ -136,12 +140,12 @@ class PlayerState:
         new_indent = indent + INDENT
         return level_print({
             "Phase": self._phase.value,
-            "Card Redraw Chances": str(self._card_redraw_chances),
+            # "Card Redraw Chances": str(self._card_redraw_chances),
             "Characters": self._characters.to_string(new_indent),
             "Dices": self._dices.to_string(new_indent),
-            "Hand Cards": self._hand_cards.to_string(new_indent),
-            "Deck Cards": self._deck_cards.to_string(new_indent),
-            "Publicly Used Cards": self._publicly_used_cards.to_string(new_indent),
+            # "Hand Cards": self._hand_cards.to_string(new_indent),
+            # "Deck Cards": self._deck_cards.to_string(new_indent),
+            # "Publicly Used Cards": self._publicly_used_cards.to_string(new_indent),
         }, indent)
 
 

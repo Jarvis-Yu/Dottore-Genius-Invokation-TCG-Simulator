@@ -38,6 +38,8 @@ class ActionPhase(ph.Phase):
     def _execute_effect(self, game_state: gs.GameState) -> gs.GameState:
         effect_stack, effect = game_state.get_effect_stack().pop()
         new_game_state = game_state.factory().effect_stack(effect_stack).build()
+        if isinstance(effect, DeathSwapPhaseEffect):
+            print("AFTER DEATH:", new_game_state)
         return effect.execute(new_game_state)
 
     def _is_executing_effects(self, game_state: gs.GameState) -> bool:
@@ -61,6 +63,7 @@ class ActionPhase(ph.Phase):
 
     def _handle_end_round(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: EndRoundAction) -> gs.GameState:
         active_player_id = game_state.get_active_player_id()
+        assert active_player_id == pid
         active_player = game_state.get_player(active_player_id)
         other_player = game_state.get_other_player(active_player_id)
         if other_player.get_phase() is PlayerState.Act.END_PHASE:
@@ -68,6 +71,7 @@ class ActionPhase(ph.Phase):
         elif other_player.get_phase() is PlayerState.Act.PASSIVE_WAIT_PHASE:
             other_player_new_phase = PlayerState.Act.ACTION_PHASE
         else:
+            print(f"ERROR pid={pid}\n {game_state}")
             raise Exception(f"Unknown Game State to process {other_player.get_phase()}")
         if pid is active_player_id:
             return game_state.factory().active_player(
@@ -85,56 +89,82 @@ class ActionPhase(ph.Phase):
             ).build()
         raise Exception("Unknown Game State to process")
 
+    def _handle_skill_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: SkillAction) -> Optional[gs.GameState]:
+        player = game_state.get_player(pid)
+        # TODO: check validity of the action
+        effect_stack = game_state.get_effect_stack()
+        instruction = action.instruction()
+        new_effects: tuple[Effect, ...] = ()
+        # TODO: put pre checks
+        # TODO: Costs
+        dices = player.get_dices()
+        new_dices = ActualDices.from_dices(dices - action.instruction().dices())
+        if new_dices is None:
+            return None
+        # Skill Effect
+        active_character = player.get_characters().get_active_character()
+        if active_character is None:
+            return None
+        new_effects += active_character.skill(game_state, action.skill(), instruction)
+        new_effects += (DeathCheckCheckerEffect(), )
+        # Afterwards
+        return game_state.factory().effect_stack(
+            effect_stack.push_many_fl(new_effects)
+        ).player(
+            pid,
+            player.factory().dices(new_dices).build()
+        ).build()
+
+    def _handle_swap_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: SwapAction) -> Optional[gs.GameState]:
+        player = game_state.get_player(pid)
+        effect_stack = game_state.get_effect_stack()
+        # Costs
+        dices = player.get_dices()
+        new_dices = ActualDices.from_dices(dices - action.instruction().dices())
+        if new_dices is None:
+            return None
+        # Add Effects
+        active_character = player.get_characters().get_active_character()
+        assert active_character is not None
+        effect_stack = effect_stack.push_one(SwapCharacterEffect(
+            StaticTarget(pid, Zone.CHARACTER, active_character.get_id()),
+            StaticTarget(pid, Zone.CHARACTER, action.seleted_character_id()),
+        ))
+        # TODO: posts
+        return game_state.factory().effect_stack(
+            effect_stack
+        ).player(
+            pid,
+            player.factory().dices(new_dices).build()
+        ).build()
+
+    def _handle_death_swap_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: DeathSwapAction) -> Optional[gs.GameState]:
+        player = game_state.get_player(pid)
+        effect_stack = game_state.get_effect_stack()
+        # Add Effects
+        active_character = player.get_characters().get_active_character()
+        assert active_character is not None
+        effect_stack = effect_stack.push_one(SwapCharacterEffect(
+            StaticTarget(pid, Zone.CHARACTER, active_character.get_id()),
+            StaticTarget(pid, Zone.CHARACTER, action.seleted_character_id()),
+        ))
+        # TODO: posts
+        return game_state.factory().effect_stack(
+            effect_stack
+        ).build()
+    
     def _handle_game_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: GameAction) -> Optional[gs.GameState]:
         # TODO
         player = game_state.get_player(pid)
         if isinstance(action, SkillAction):
             action = cast(SkillAction, action)
-            # TODO: check validity of the action
-            effect_stack = game_state.get_effect_stack()
-            instruction = action.instruction()
-            new_effects: tuple[Effect, ...] = ()
-            # TODO: put pre checks
-            # TODO: Costs
-            dices = player.get_dices()
-            new_dices = ActualDices.from_dices(dices - action.instruction().dices())
-            if new_dices is None:
-                return None
-            # Skill Effect
-            active_character = player.get_characters().get_active_character()
-            if active_character is None:
-                return None
-            new_effects += active_character.skill(game_state, action.skill(), instruction)
-            new_effects += (DeathCheckCheckerEffect(), )
-            # Afterwards
-            return game_state.factory().effect_stack(
-                effect_stack.push_many_fl(new_effects)
-            ).player(
-                pid,
-                player.factory().dices(new_dices).build()
-            ).build()
+            return self._handle_skill_action(game_state, pid, action)
         elif isinstance(action, SwapAction):
             action = cast(SwapAction, action)
-            effect_stack = game_state.get_effect_stack()
-            # Costs
-            dices = player.get_dices()
-            new_dices = ActualDices.from_dices(dices - action.instruction().dices())
-            if new_dices is None:
-                return None
-            # Add Effects
-            active_character = player.get_characters().get_active_character()
-            assert active_character is not None
-            effect_stack = effect_stack.push_one(SwapCharacterEffect(
-                StaticTarget(pid, Zone.CHARACTER, active_character.get_id()),
-                StaticTarget(pid, Zone.CHARACTER, action.seleted_character_id()),
-            ))
-            # TODO: posts
-            return game_state.factory().effect_stack(
-                effect_stack
-            ).player(
-                pid,
-                player.factory().dices(new_dices).build()
-            ).build()
+            return self._handle_swap_action(game_state, pid, action)
+        elif isinstance(action, DeathSwapAction):
+            action = cast(DeathSwapAction, action)
+            return self._handle_death_swap_action(game_state, pid, action)
         raise Exception("Unhandld action", action)
         return game_state
 
