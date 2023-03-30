@@ -147,10 +147,12 @@ class GameState:
 
     def get_winner(self) -> Optional[GameState.Pid]:
         assert self.game_end()
-        if isinstance(self._phase, gep.GameEndPhase):
+        if self.get_player1().defeated():
+            return GameState.Pid.P2
+        elif self.get_player2().defeated():
+            return GameState.Pid.P1
+        else:
             return None
-        # TODO: based on player's health
-        raise Exception("Not Implemented")
 
     def game_end(self) -> bool:
         return isinstance(self._phase, gep.GameEndPhase)

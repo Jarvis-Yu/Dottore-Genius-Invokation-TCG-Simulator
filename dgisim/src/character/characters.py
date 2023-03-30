@@ -57,6 +57,9 @@ class Characters:
                 ids.append(character.get_id())
         return ids
 
+    def all_defeated(self) -> bool:
+        return all([c.defeated() for c in self._characters])
+
     def get_skills(self) -> tuple[EventPre, ...]:
         active_character = self.get_active_character()
         if active_character is None:

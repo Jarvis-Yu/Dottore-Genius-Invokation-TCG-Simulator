@@ -73,14 +73,18 @@ class DeathCheckCheckerEffect(CheckerEffect):
             pid = gs.GameState.Pid.P2
         else:  # if no one defeated, continue
             return game_state
+        death_swap_player = game_state.get_player(pid)
+        waiting_player = game_state.get_other_player(pid)
         # TODO: check if game ends
+        if death_swap_player.defeated():
+            return game_state.factory().phase(game_state.get_mode().game_end_phase()).build()
         effects: list[Effect] = []
         # TODO: trigger other death based effects
         effects.append(DeathSwapPhaseStartEffect())
         effects.append(DeathSwapPhaseEndEffect(
             pid,
-            game_state.get_player(pid).get_phase(),
-            game_state.get_other_player(pid).get_phase(),
+            death_swap_player.get_phase(),
+            waiting_player.get_phase(),
         ))
         return game_state.factory().effect_stack(
             game_state.get_effect_stack().push_many_fl(tuple(effects))

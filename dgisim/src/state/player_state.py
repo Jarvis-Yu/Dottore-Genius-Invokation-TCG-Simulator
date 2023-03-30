@@ -85,6 +85,9 @@ class PlayerState:
             return self._characters.get_id(character) is not None
         return False
 
+    def defeated(self) -> bool:
+        return self._characters.all_defeated()
+
     def get_possible_actions(self) -> Tuple[EventPre, ...]:
         character_skills = self._characters.get_skills()
         swaps = [
