@@ -38,14 +38,14 @@ class ActionPhase(ph.Phase):
     def _execute_effect(self, game_state: gs.GameState) -> gs.GameState:
         effect_stack, effect = game_state.get_effect_stack().pop()
         new_game_state = game_state.factory().effect_stack(effect_stack).build()
-        if isinstance(effect, DeathSwapPhaseEffect):
+        if isinstance(effect, DeathSwapPhaseStartEffect):
             print("AFTER DEATH:", new_game_state)
         return effect.execute(new_game_state)
 
     def _is_executing_effects(self, game_state: gs.GameState) -> bool:
         effect_stack = game_state.get_effect_stack()
         return not effect_stack.is_empty() \
-            and not isinstance(effect_stack.peek(), DeathSwapPhaseEffect)
+            and not isinstance(effect_stack.peek(), DeathSwapPhaseStartEffect)
 
     def step(self, game_state: gs.GameState) -> gs.GameState:
         p1 = game_state.get_player1()
@@ -172,6 +172,9 @@ class ActionPhase(ph.Phase):
         """
         TODO: Currently only allows player to end their round
         """
+        effect_stack = game_state.get_effect_stack()
+        if effect_stack.is_not_empty() and isinstance(effect_stack.peek(), DeathSwapPhaseStartEffect):
+            game_state = game_state.factory().effect_stack(effect_stack.pop()[0]).build()
         if isinstance(action, EndRoundAction):
             action = cast(EndRoundAction, action)
             return self._handle_end_round(game_state, pid, action)
@@ -187,7 +190,7 @@ class ActionPhase(ph.Phase):
         effect_stack = game_state.get_effect_stack()
         # if no effects are to be executed or death swap phase is inserted
         if effect_stack.is_empty() \
-                or isinstance(effect_stack.peek(), DeathSwapPhaseEffect):
+                or isinstance(effect_stack.peek(), DeathSwapPhaseStartEffect):
             return super().waiting_for(game_state)
         else:
             return None

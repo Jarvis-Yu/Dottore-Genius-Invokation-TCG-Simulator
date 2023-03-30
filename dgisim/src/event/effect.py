@@ -75,7 +75,8 @@ class DeathCheckCheckerEffect(CheckerEffect):
         # TODO: check if game ends
         effects: list[Effect] = []
         # TODO: trigger other death based effects
-        effects.append(DeathSwapPhaseEffect())
+        effects.append(DeathSwapPhaseStartEffect())
+        effects.append(DeathSwapPhaseEndEffect())
         return game_state.factory().effect_stack(
             game_state.get_effect_stack().push_many_fl(tuple(effects))
         ).player(
@@ -92,10 +93,17 @@ class DeathCheckCheckerEffect(CheckerEffect):
     pass
 
 
-class DeathSwapPhaseEffect(PhaseEffect):
+class DeathSwapPhaseStartEffect(PhaseEffect):
+    def __str__(self) -> str:
+        return self.__class__.__name__
+
+
+class DeathSwapPhaseEndEffect(PhaseEffect):
     def execute(self, game_state: gs.GameState) -> gs.GameState:
-        # TODO
         return game_state
+
+    def __str__(self) -> str:
+        return self.__class__.__name__
 
 
 @dataclass(frozen=True)

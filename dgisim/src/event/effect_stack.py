@@ -6,6 +6,9 @@ class EffectStack:
     def __init__(self, effects: tuple[Effect, ...]) -> None:
         self._effects = effects
 
+    def is_not_empty(self) -> bool:
+        return not self.is_empty()
+
     def is_empty(self) -> bool:
         return len(self._effects) == 0
 
