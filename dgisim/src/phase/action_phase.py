@@ -107,6 +107,7 @@ class ActionPhase(ph.Phase):
             return None
         new_effects += active_character.skill(game_state, action.skill(), instruction)
         new_effects += (DeathCheckCheckerEffect(), )
+        new_effects += (TurnEndEffect(), )
         # Afterwards
         return game_state.factory().effect_stack(
             effect_stack.push_many_fl(new_effects)
@@ -117,7 +118,7 @@ class ActionPhase(ph.Phase):
 
     def _handle_swap_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: SwapAction) -> Optional[gs.GameState]:
         player = game_state.get_player(pid)
-        effect_stack = game_state.get_effect_stack()
+        new_effects: tuple[Effect, ...] = ()
         # Costs
         dices = player.get_dices()
         new_dices = ActualDices.from_dices(dices - action.instruction().dices())
@@ -126,13 +127,14 @@ class ActionPhase(ph.Phase):
         # Add Effects
         active_character = player.get_characters().get_active_character()
         assert active_character is not None
-        effect_stack = effect_stack.push_one(SwapCharacterEffect(
+        new_effects += (SwapCharacterEffect(
             StaticTarget(pid, Zone.CHARACTER, active_character.get_id()),
             StaticTarget(pid, Zone.CHARACTER, action.seleted_character_id()),
-        ))
+        ), )
+        new_effects += (TurnEndEffect(), )
         # TODO: posts
         return game_state.factory().effect_stack(
-            effect_stack
+            game_state.get_effect_stack().push_many_fl(new_effects)
         ).player(
             pid,
             player.factory().dices(new_dices).build()
@@ -152,7 +154,7 @@ class ActionPhase(ph.Phase):
         return game_state.factory().effect_stack(
             effect_stack
         ).build()
-    
+
     def _handle_game_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: GameAction) -> Optional[gs.GameState]:
         # TODO
         player = game_state.get_player(pid)

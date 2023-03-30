@@ -73,7 +73,7 @@ class SkillAction(GameAction):
 
 
 class SwapAction(GameAction):
-    
+
     def __init__(self, selected_character_id: int, instruction: Instruction):
         self._selected_character_id = selected_character_id
         self._instruction = instruction

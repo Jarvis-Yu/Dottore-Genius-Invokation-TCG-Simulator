@@ -132,6 +132,27 @@ class DeathSwapPhaseEndEffect(PhaseEffect):
 
 
 @dataclass(frozen=True)
+class TurnEndEffect(PhaseEffect):
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        active_player_id = game_state.get_active_player_id()
+        player = game_state.get_player(active_player_id)
+        other_player = game_state.get_other_player(active_player_id)
+        assert player.get_phase() is ps.PlayerState.Act.ACTION_PHASE
+        # TODO: other tidy up
+        if other_player.get_phase() is ps.PlayerState.Act.END_PHASE:
+            return game_state
+        return game_state.factory().active_player(
+            active_player_id.other()
+        ).player(
+            active_player_id,
+            player.factory().phase(ps.PlayerState.Act.PASSIVE_WAIT_PHASE).build()
+        ).other_player(
+            active_player_id,
+            other_player.factory().phase(ps.PlayerState.Act.ACTION_PHASE).build()
+        ).build()
+
+
+@dataclass(frozen=True)
 class SwapCharacterEffect(DirectEffect):
     source: StaticTarget
     target: StaticTarget
