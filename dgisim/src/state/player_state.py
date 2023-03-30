@@ -1,6 +1,6 @@
 from __future__ import annotations
 from enum import Enum
-from typing import Tuple, Union, cast, Optional
+from typing import Tuple, Union, cast, Optional, Callable
 
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
 from dgisim.src.card.cards import Cards
@@ -172,6 +172,10 @@ class PlayerStateFactory:
 
     def characters(self, characters: Characters) -> PlayerStateFactory:
         self._characters = characters
+        return self
+
+    def f_characters(self, f: Callable[[Characters], Characters]) -> PlayerStateFactory:
+        self._characters = f(self._characters)
         return self
 
     def hand_cards(self, cards: Cards) -> PlayerStateFactory:

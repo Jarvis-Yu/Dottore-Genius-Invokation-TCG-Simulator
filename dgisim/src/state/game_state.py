@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional, Union, cast
+from typing import Optional, Union, cast, Callable
 from enum import Enum
 
 import dgisim.src.mode as md
@@ -206,6 +206,9 @@ class GameStateFactory:
         self._phase = new_phase
         return self
 
+    def f_phase(self, f: Callable[[md.Mode], ph.Phase]) -> GameStateFactory:
+        return self.phase(f(self._mode))
+
     def round(self, new_round: int) -> GameStateFactory:
         self._round = new_round
         return self
@@ -218,6 +221,9 @@ class GameStateFactory:
         self._effect_stack = effect_stack
         return self
 
+    def f_effect_stack(self, f: Callable[[EffectStack], EffectStack]) -> GameStateFactory:
+        return self.effect_stack(f(self._effect_stack))
+
     def active_player(self, pid: GameState.Pid) -> GameStateFactory:
         self._active_player = pid
         return self
@@ -226,27 +232,47 @@ class GameStateFactory:
         self._player1 = new_player
         return self
 
+    def f_player1(self, f: Callable[[pl.PlayerState], pl.PlayerState]) -> GameStateFactory:
+        return self.player1(f(self._player1))
+
     def player2(self, new_player: pl.PlayerState) -> GameStateFactory:
         self._player2 = new_player
         return self
 
+    def f_player2(self, f: Callable[[pl.PlayerState], pl.PlayerState]) -> GameStateFactory:
+        return self.player2(f(self._player2))
+
     def player(self, pid: GameState.Pid, new_player: pl.PlayerState) -> GameStateFactory:
         if pid is GameState.Pid.P1:
-            self._player1 = new_player
+            return self.player1(new_player)
         elif pid is GameState.Pid.P2:
-            self._player2 = new_player
+            return self.player2(new_player)
         else:
             raise Exception("player_id unknown")
-        return self
+
+    def f_player(self, pid: GameState.Pid, f: Callable[[pl.PlayerState], pl.PlayerState]) -> GameStateFactory:
+        if pid is GameState.Pid.P1:
+            return self.player1(f(self._player1))
+        elif pid is GameState.Pid.P2:
+            return self.player2(f(self._player2))
+        else:
+            raise Exception("player_id unknown")
 
     def other_player(self, pid: GameState.Pid, new_player: pl.PlayerState) -> GameStateFactory:
         if pid is GameState.Pid.P1:
-            self._player2 = new_player
+            return self.player2(new_player)
         elif pid is GameState.Pid.P2:
-            self._player1 = new_player
+            return self.player1(new_player)
         else:
             raise Exception("player_id unknown")
-        return self
+
+    def f_other_player(self, pid: GameState.Pid, f: Callable[[pl.PlayerState], pl.PlayerState]) -> GameStateFactory:
+        if pid is GameState.Pid.P1:
+            return self.player2(f(self._player2))
+        elif pid is GameState.Pid.P2:
+            return self.player1(f(self._player1))
+        else:
+            raise Exception("player_id unknown")
 
     def build(self) -> GameState:
         return GameState(

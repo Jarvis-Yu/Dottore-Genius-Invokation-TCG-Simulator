@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional
+from typing import Optional, Callable
 
 import dgisim.src.character.character as char
 from dgisim.src.event.event_pre import EventPre
@@ -125,8 +125,21 @@ class CharactersFactory:
         self._characters = tuple(chars)
         return self
 
-    def characters(self, chars: tuple[char.Character]) -> CharactersFactory:
+    def f_character(self, id: int, f: Callable[[char.Character], char.Character]) -> CharactersFactory:
+        chars = list(self._characters)
+        for i, c in enumerate(chars):
+            if c.get_id() == id:
+                chars[i] = f(c)
+                break
+        self._characters = tuple(chars)
+        return self
+
+    def characters(self, chars: tuple[char.Character, ...]) -> CharactersFactory:
         self._characters = chars
+        return self
+
+    def f_characters(self, f: Callable[[tuple[char.Character, ...]], tuple[char.Character, ...]]) -> CharactersFactory:
+        self._characters = f(self._characters)
         return self
 
     def active_character_id(self, id: int) -> CharactersFactory:

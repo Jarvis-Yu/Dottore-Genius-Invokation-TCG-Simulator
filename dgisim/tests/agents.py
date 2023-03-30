@@ -33,6 +33,25 @@ class LazyAgent(PlayerAgent):
         elif isinstance(curr_phase, RollPhase):
             raise Exception("No Action Defined")
         elif isinstance(curr_phase, ActionPhase):
+            return EndRoundAction()
+        else:
+            raise Exception("No Action Defined")
+
+class HardCodedRandomAgent(PlayerAgent):
+    _NUM_PICKED_CARDS = 3
+
+    def choose_action(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
+        game_state = history[-1]
+        curr_phase = game_state.get_phase()
+        if isinstance(curr_phase, CardSelectPhase):
+            _, selected_cards = game_state.get_player(
+                pid).get_hand_cards().pick_random_cards(self._NUM_PICKED_CARDS)
+            return CardSelectAction(selected_cards)
+        elif isinstance(curr_phase, StartingHandSelectPhase):
+            return CharacterSelectAction(1)
+        elif isinstance(curr_phase, RollPhase):
+            raise Exception("No Action Defined")
+        elif isinstance(curr_phase, ActionPhase):
             selection = random()
             me = game_state.get_player(pid)
             available_dices = me.get_dices()

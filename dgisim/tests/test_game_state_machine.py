@@ -140,15 +140,19 @@ class TestGameStateMachine(unittest.TestCase):
         )
         state_machine.step_until_phase(GameEndPhase)
         self.assertTrue(state_machine.game_end())
-        # self.assertIsNone(state_machine.get_winner())
-        print(state_machine.get_game_state())
+        self.assertIsNone(state_machine.get_winner())
+        # print(state_machine.get_game_state())
 
     def test_inspect(self):
+        """
+        Only turned on manually to inspect cases
+        """
         return
+        from dgisim.tests.agents import HardCodedRandomAgent
         state_machine = GameStateMachine(
             self._initial_state,
-            LazyAgent(),
-            LazyAgent(),
+            HardCodedRandomAgent(),
+            HardCodedRandomAgent(),
         )
         i = 0
         while not state_machine.game_end():
