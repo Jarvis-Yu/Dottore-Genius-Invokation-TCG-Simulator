@@ -240,3 +240,26 @@ class EnergyRechargeEffect(Effect):
             self.target.pid,
             player
         ).build()
+
+@dataclass(frozen=True)
+class RecoverHPEffect(Effect):
+    target: StaticTarget
+    recovery: int
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        character = game_state.get_target(self.target)
+        if not isinstance(character, char.Character):
+            return game_state
+        character = cast(char.Character, character)
+        hp = min(character.get_hp() + self.recovery, character.get_max_hp())
+        if hp == character.get_hp():
+            return game_state
+        return game_state.factory().f_player(
+            self.target.pid,
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().f_character(
+                    character.get_id(),
+                    lambda c: c.factory().hp(hp).build()
+                ).build()
+            ).build()
+        ).build()
