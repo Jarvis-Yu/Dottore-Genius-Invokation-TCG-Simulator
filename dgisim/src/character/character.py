@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Tuple
+from typing import Tuple, Callable
 from enum import Enum
 
 import dgisim.src.state.game_state as gs
@@ -87,6 +87,10 @@ class Character:
     def defeated(self) -> bool:
         return self._hp == 0
 
+    def stuffed(self) -> bool:
+        from dgisim.src.buff.buff import StuffedBuff
+        return self._buffs.contains(StuffedBuff)
+
     def name(self) -> str:
         return self.__class__.__name__
 
@@ -139,6 +143,13 @@ class CharacterFactory:
     def energy(self, energy: int) -> CharacterFactory:
         self._energy = energy
         return self
+
+    def buffs(self, buffs: Buffs) -> CharacterFactory:
+        self._buffs = buffs
+        return self
+
+    def f_buffs(self, f: Callable[[Buffs], Buffs]) -> CharacterFactory:
+        return self.buffs(f(self._buffs))
 
     def build(self) -> Character:
         return self._char(

@@ -71,7 +71,7 @@ class HardCodedRandomAgent(PlayerAgent):
                     return DeathSwapAction(choice(alive_ids))
                 else:
                     raise Exception("Game should end here but not implemented(NOT REACHED)")
-            # card
+            # food card
             character_injured = active_character.get_hp() < active_character.get_max_hp()
             if selection < 1:
                 cards = me.get_hand_cards()
@@ -86,7 +86,7 @@ class HardCodedRandomAgent(PlayerAgent):
                 #     card = MondstadtHashBrown
                 else:
                     card = None
-                if card is not None:
+                if card is not None and not active_character.stuffed():
                     tmp_dices = ActualDices({})
                     print(card().name())
                     return CardAction(

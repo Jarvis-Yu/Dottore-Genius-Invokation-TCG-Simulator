@@ -38,6 +38,16 @@ class EventCard(Card):
 
 
 class FoodCard(EventCard):
+    @override
+    @classmethod
+    def effects(cls, instruction: ac.Instruction) -> tuple[Effect, ...]:
+        assert isinstance(instruction, ac.CharacterTargetInstruction)
+        es = (
+            StuffedBuffEffect(
+                instruction.target()
+            ),
+        )
+        return es
     pass
 
 
@@ -49,8 +59,9 @@ class _DirectHealCard(FoodCard):
     @override
     @classmethod
     def effects(cls, instruction: ac.Instruction) -> tuple[Effect, ...]:
+        es = super().effects(instruction)
         assert isinstance(instruction, ac.CharacterTargetInstruction)
-        es = (
+        es += (
             RecoverHPEffect(
                 instruction.target(),
                 cls.heal_amount()

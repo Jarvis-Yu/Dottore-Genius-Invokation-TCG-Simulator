@@ -4,6 +4,7 @@ from enum import Enum
 from dataclasses import InitVar, dataclass
 
 from dgisim.src.element.element import Element
+from dgisim.src.buff.buff import *
 import dgisim.src.character.character as char
 import dgisim.src.state.game_state as gs
 import dgisim.src.state.player_state as ps
@@ -276,7 +277,7 @@ class RemoveCardEffect(Effect):
         pid = self.pid
         card = self.card
         hand_cards = game_state.get_player(pid).get_hand_cards()
-        if not hand_cards.contains(card):
+        if not hand_cards.contains(card) or hand_cards[card] <= 0:
             return game_state
         return game_state.factory().f_player(
             pid,
@@ -300,4 +301,21 @@ class RemoveDiceEffect(Effect):
         return game_state.factory().f_player(
             pid,
             lambda p: p.factory().dices(new_dices).build()
+        ).build()
+
+@dataclass(frozen=True)
+class StuffedBuffEffect(Effect):
+    target: StaticTarget
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        character = game_state.get_target(self.target)
+        assert isinstance(character, char.Character)
+        character = character.factory().f_buffs(
+            lambda bs: bs.update_buffs(StuffedBuff())
+        ).build()
+        return game_state.factory().f_player(
+            self.target.pid,
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().character(character).build()
+            ).build()
         ).build()
