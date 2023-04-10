@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, Optional, Iterator, Iterable
+from typing import Dict, Optional, Iterator, Iterable, TypeVar
 from enum import Enum
 import random
 
@@ -8,16 +8,19 @@ from dgisim.src.helper.level_print import level_print, level_print_single, INDEN
 from dgisim.src.element.element import Element
 
 
+T = TypeVar('T', bound='Dices')
+
+
 class Dices:
 
     def __init__(self, dices: Dict[Element, int]) -> None:
         self._dices = HashableDict(dices)
 
-    def __add__(self, other: Dices) -> Dices:
-        return Dices(self._dices + other._dices)
+    def __add__(self: T, other: Dices) -> T:
+        return type(self)(self._dices + other._dices)
 
-    def __sub__(self, other: Dices) -> Dices:
-        return Dices(self._dices - other._dices)
+    def __sub__(self: T, other: Dices) -> T:
+        return type(self)(self._dices - other._dices)
 
     def num_dices(self) -> int:
         return sum(self._dices.values())
@@ -142,7 +145,7 @@ class ActualDices(Dices):
         return ActualDices(answer)
 
     def is_legal(self) -> bool:
-        return super().is_legal() and all([(elem in self._LEGAL_ELEMS) for elem in self._dices])
+        return super().is_legal() and all(elem in self._LEGAL_ELEMS for elem in self._dices)
 
     @classmethod
     def from_empty(cls) -> ActualDices:

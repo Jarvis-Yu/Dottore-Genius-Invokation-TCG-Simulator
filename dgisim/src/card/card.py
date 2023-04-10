@@ -1,17 +1,24 @@
 from __future__ import annotations
 from enum import Enum
+from typing import TypeVar
 from typing_extensions import override
 
 
-class Card:
-    def another(self) -> Card:
-        raise Exception("Not implemented")
+import dgisim.src.state.game_state as gs
+from dgisim.src.event.effect import *
+import dgisim.src.action as ac
 
+
+class Card:
     # def __eq__(self, other: object) -> bool:
     #     return isinstance(other, Card)
 
     # def __hash__(self) -> int:
     #     return hash(self.__class__.__name__)
+
+    @classmethod
+    def effects(cls, instruction: ac.Instruction) -> tuple[Effect, ...]:
+        raise NotImplementedError
 
     def __str__(self) -> str:
         return self.__class__.__name__
@@ -34,11 +41,31 @@ class FoodCard(EventCard):
     pass
 
 
-class SweetMadame(FoodCard):
+class _DirectHealCard(FoodCard):
+    @classmethod
+    def heal_amount(cls) -> int:
+        return 0
+
+    @override
+    @classmethod
+    def effects(cls, instruction: ac.Instruction) -> tuple[Effect, ...]:
+        assert isinstance(instruction, ac.CharacterTargetInstruction)
+        es = (
+            RecoverHPEffect(
+                instruction.target(),
+                cls.heal_amount()
+            ),
+        )
+        return es
+
+
+class SweetMadame(_DirectHealCard):
     _name = "SweetMadame"
 
-    def another(self) -> SweetMadame:
-        return SweetMadame()
+    @override
+    @classmethod
+    def heal_amount(cls) -> int:
+        return 1
 
     @staticmethod
     def name() -> str:
@@ -46,63 +73,42 @@ class SweetMadame(FoodCard):
 
 
 class MondstadtHashBrown(FoodCard):
-    def another(self) -> MondstadtHashBrown:
-        return MondstadtHashBrown()
-
     @staticmethod
     def name() -> str:
         return "MondstadtHashBrown"
 
 
 class JueyunGuoba(FoodCard):
-    def another(self) -> JueyunGuoba:
-        return JueyunGuoba()
-
     @staticmethod
     def name() -> str:
         return "JueyunGuoba"
 
 
 class LotusFlowerCrisp(FoodCard):
-    def another(self) -> LotusFlowerCrisp:
-        return LotusFlowerCrisp()
-
     @staticmethod
     def name() -> str:
         return "LotusFlowerCrisp"
 
 
 class MintyMeatRolls(FoodCard):
-    def another(self) -> MintyMeatRolls:
-        return MintyMeatRolls()
-
     @staticmethod
     def name() -> str:
         return "MintyMeatRolls"
 
 
 class MushroomPizza(FoodCard):
-    def another(self) -> MushroomPizza:
-        return MushroomPizza()
-
     @staticmethod
     def name() -> str:
         return "MushroomPizza"
 
 
 class NorthernSmokedChicken(FoodCard):
-    def another(self) -> NorthernSmokedChicken:
-        return NorthernSmokedChicken()
-
     @staticmethod
     def name() -> str:
         return "NorthernSmokedChicken"
 
 
 class Starsigns(EventCard):
-    def another(self) -> Starsigns:
-        return Starsigns()
-
     @staticmethod
     def name() -> str:
         return "Starsigns"

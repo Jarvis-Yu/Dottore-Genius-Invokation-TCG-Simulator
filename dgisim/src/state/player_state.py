@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Tuple, Union, cast, Optional, Callable
 
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
-from dgisim.src.card.cards import Cards
+import dgisim.src.card.cards as cds
 import dgisim.src.card.card as card
 from dgisim.src.character.characters import Characters
 import dgisim.src.character.character as char
@@ -27,9 +27,9 @@ class PlayerState:
         characters: Characters,
         card_redraw_chances: int,
         dices: ActualDices,
-        hand_cards: Cards,
-        deck_cards: Cards,
-        publicly_used_cards: Cards,
+        hand_cards: cds.Cards,
+        deck_cards: cds.Cards,
+        publicly_used_cards: cds.Cards,
     ):
         # REMINDER: don't forget to update factory when adding new fields
         self._phase = phase
@@ -55,13 +55,13 @@ class PlayerState:
     def get_dices(self) -> ActualDices:
         return self._dices
 
-    def get_hand_cards(self) -> Cards:
+    def get_hand_cards(self) -> cds.Cards:
         return self._hand_cards
 
-    def get_deck_cards(self) -> Cards:
+    def get_deck_cards(self) -> cds.Cards:
         return self._deck_cards
 
-    def get_publicly_used_cards(self) -> Cards:
+    def get_publicly_used_cards(self) -> cds.Cards:
         return self._publicly_used_cards
 
     def get_active_character(self) -> Optional[char.Character]:
@@ -111,10 +111,10 @@ class PlayerState:
             characters=Characters.from_default(
                 tuple([char.from_default(i+1) for i, char in enumerate(chars)][:3])
             ),
-            hand_cards=Cards(dict([(card, 0) for card in cards])),
+            hand_cards=cds.Cards(dict([(card, 0) for card in cards])),
             dices=ActualDices({}),
-            deck_cards=Cards(dict([(card, 2) for card in cards])),
-            publicly_used_cards=Cards(dict([(card, 0) for card in cards])),
+            deck_cards=cds.Cards(dict([(card, 2) for card in cards])),
+            publicly_used_cards=cds.Cards(dict([(card, 0) for card in cards])),
         )
 
     def _all_unique_data(self) -> Tuple:
@@ -178,22 +178,22 @@ class PlayerStateFactory:
         self._characters = f(self._characters)
         return self
 
-    def hand_cards(self, cards: Cards) -> PlayerStateFactory:
+    def hand_cards(self, cards: cds.Cards) -> PlayerStateFactory:
         self._hand_cards = cards
         return self
 
-    def f_hand_cards(self, f: Callable[[Cards], Cards]) -> PlayerStateFactory:
+    def f_hand_cards(self, f: Callable[[cds.Cards], cds.Cards]) -> PlayerStateFactory:
         return self.hand_cards(f(self._hand_cards))
 
     def dices(self, dices: ActualDices) -> PlayerStateFactory:
         self._dices = dices
         return self
 
-    def deck_cards(self, cards: Cards) -> PlayerStateFactory:
+    def deck_cards(self, cards: cds.Cards) -> PlayerStateFactory:
         self._deck_cards = cards
         return self
 
-    def publicly_used_cards(self, cards: Cards) -> PlayerStateFactory:
+    def publicly_used_cards(self, cards: cds.Cards) -> PlayerStateFactory:
         self._publicly_used_cards = cards
         return self
 

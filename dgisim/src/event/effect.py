@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import FrozenSet, Optional, cast, Union
+from typing import FrozenSet, Optional, cast, Union, ClassVar
 from enum import Enum
 from dataclasses import InitVar, dataclass
 
@@ -7,6 +7,8 @@ from dgisim.src.element.element import Element
 import dgisim.src.character.character as char
 import dgisim.src.state.game_state as gs
 import dgisim.src.state.player_state as ps
+import dgisim.src.card.card as cd
+import dgisim.src.dices as ds
 
 
 class Zone(Enum):
@@ -171,19 +173,6 @@ class SwapCharacterEffect(DirectEffect):
         return game_state.factory().player(pid, player).build()
 
 
-_DAMAGE_ELEMENTS: FrozenSet[Element] = frozenset({
-    Element.PYRO,
-    Element.HYDRO,
-    Element.ANEMO,
-    Element.ELECTRO,
-    Element.DENDRO,
-    Element.CRYO,
-    Element.GEO,
-    Element.PHYSICAL,
-    Element.PIERCING,
-})
-
-
 @dataclass(frozen=True)
 class DamageEffect(Effect):
     source: StaticTarget
@@ -191,8 +180,20 @@ class DamageEffect(Effect):
     element: Element
     damage: int
 
+    _DAMAGE_ELEMENTS: ClassVar[FrozenSet[Element]] = frozenset({
+        Element.PYRO,
+        Element.HYDRO,
+        Element.ANEMO,
+        Element.ELECTRO,
+        Element.DENDRO,
+        Element.CRYO,
+        Element.GEO,
+        Element.PHYSICAL,
+        Element.PIERCING,
+    })
+
     def legal(self) -> bool:
-        return self.element in _DAMAGE_ELEMENTS
+        return self.element in self._DAMAGE_ELEMENTS
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         pid = self.source.pid
@@ -241,6 +242,7 @@ class EnergyRechargeEffect(Effect):
             player
         ).build()
 
+
 @dataclass(frozen=True)
 class RecoverHPEffect(Effect):
     target: StaticTarget
@@ -262,4 +264,40 @@ class RecoverHPEffect(Effect):
                     lambda c: c.factory().hp(hp).build()
                 ).build()
             ).build()
+        ).build()
+
+
+@dataclass(frozen=True)
+class RemoveCardEffect(Effect):
+    pid: gs.GameState.Pid
+    card: type[cd.Card]
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        pid = self.pid
+        card = self.card
+        hand_cards = game_state.get_player(pid).get_hand_cards()
+        if not hand_cards.contains(card):
+            return game_state
+        return game_state.factory().f_player(
+            pid,
+            lambda p: p.factory().f_hand_cards(
+                lambda cs: cs.remove(card)
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True)
+class RemoveDiceEffect(Effect):
+    pid: gs.GameState.Pid
+    dices: ds.ActualDices
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        pid = self.pid
+        dices = self.dices
+        new_dices = game_state.get_player(pid).get_dices() - dices
+        if not new_dices.is_legal():
+            raise Exception("Not enough dices for this effect")
+        return game_state.factory().f_player(
+            pid,
+            lambda p: p.factory().dices(new_dices).build()
         ).build()

@@ -8,6 +8,7 @@ from dgisim.src.element.element import ElementalAura
 from dgisim.src.event.event_pre import EventPre
 from dgisim.src.dices import AbstractDices
 from dgisim.src.event.event import *
+import dgisim.src.event.effect as efft
 from dgisim.src.helper.level_print import level_print_single, INDENT, level_print
 
 
@@ -59,11 +60,11 @@ class Character:
     def factory(self) -> CharacterFactory:
         raise Exception("Not Overriden")
 
-    def address(self, game_state: gs.GameState) -> StaticTarget:
+    def address(self, game_state: gs.GameState) -> efft.StaticTarget:
         pid = game_state.belongs_to(self)
         if pid is None:
             raise Exception("target character is not in the current game state")
-        me = StaticTarget(pid, Zone.CHARACTER, self.get_id())
+        me = efft.StaticTarget(pid, efft.Zone.CHARACTER, self.get_id())
         return me
 
     @classmethod
@@ -72,12 +73,12 @@ class Character:
 
     import dgisim.src.action as act
 
-    def skill(self, game_state: gs.GameState, skill_type: CharacterSkill, instruction: act.Instruction) -> tuple[Effect, ...]:
+    def skill(self, game_state: gs.GameState, skill_type: CharacterSkill, instruction: act.Instruction) -> tuple[efft.Effect, ...]:
         if skill_type is CharacterSkill.NORMAL_ATTACK:
             return self.normal_attack(game_state, skill_type)
         raise Exception("Not Overriden")
 
-    def normal_attack(self, game_state: gs.GameState, skill_type: CharacterSkill) -> tuple[Effect, ...]:
+    def normal_attack(self, game_state: gs.GameState, skill_type: CharacterSkill) -> tuple[efft.Effect, ...]:
         raise Exception("Not Overriden")
 
     def alive(self) -> bool:
@@ -154,10 +155,10 @@ class CharacterFactory:
 
 class Keqing(Character):
 
-    def normal_attack(self, game_state: gs.GameState, skill_type: CharacterSkill) -> tuple[Effect, ...]:
+    def normal_attack(self, game_state: gs.GameState, skill_type: CharacterSkill) -> tuple[efft.Effect, ...]:
         return normal_attack_template(
             source=self.address(game_state),
-            element=Element.PHYSICAL,
+            element=efft.Element.PHYSICAL,
             damage=2,
         )
 
@@ -185,10 +186,10 @@ class Keqing(Character):
 
 class Kaeya(Character):
 
-    def normal_attack(self, game_state: gs.GameState, skill_type: CharacterSkill) -> tuple[Effect, ...]:
+    def normal_attack(self, game_state: gs.GameState, skill_type: CharacterSkill) -> tuple[efft.Effect, ...]:
         return normal_attack_template(
             source=self.address(game_state),
-            element=Element.PHYSICAL,
+            element=efft.Element.PHYSICAL,
             damage=2,
         )
 
@@ -216,10 +217,10 @@ class Kaeya(Character):
 
 class Oceanid(Character):
 
-    def normal_attack(self, game_state: gs.GameState, skill_type: CharacterSkill) -> tuple[Effect, ...]:
+    def normal_attack(self, game_state: gs.GameState, skill_type: CharacterSkill) -> tuple[efft.Effect, ...]:
         return normal_attack_template(
             source=self.address(game_state),
-            element=Element.HYDRO,
+            element=efft.Element.HYDRO,
             damage=1,
         )
 

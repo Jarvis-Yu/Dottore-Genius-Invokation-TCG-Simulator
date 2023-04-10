@@ -147,6 +147,7 @@ class TestGameStateMachine(unittest.TestCase):
         """
         Only turned on manually to inspect cases
         """
+        return
         from dgisim.tests.agents import HardCodedRandomAgent
         state_machine = GameStateMachine(
             self._initial_state,

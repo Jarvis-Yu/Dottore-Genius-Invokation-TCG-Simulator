@@ -98,7 +98,7 @@ class ActionPhase(ph.Phase):
         # TODO: put pre checks
         # TODO: Costs
         dices = player.get_dices()
-        new_dices = ActualDices.from_dices(dices - action.instruction().dices())
+        new_dices = dices - action.instruction().dices()
         if new_dices is None:
             return None
         # Skill Effect
@@ -121,7 +121,7 @@ class ActionPhase(ph.Phase):
         new_effects: tuple[Effect, ...] = ()
         # Costs
         dices = player.get_dices()
-        new_dices = ActualDices.from_dices(dices - action.instruction().dices())
+        new_dices = dices - action.instruction().dices()
         if new_dices is None:
             return None
         # Add Effects
@@ -142,11 +142,13 @@ class ActionPhase(ph.Phase):
 
     def _handle_card_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: CardAction) -> Optional[gs.GameState]:
         player = game_state.get_player(pid)
+        new_effects: list[Effect] = []
         card = action.card()
-        player = player.factory().f_hand_cards(
-            lambda cs: cs.remove(card)
+        new_effects.append(RemoveCardEffect(pid, card))
+        new_effects += list(card.effects(action.instruction()))
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_many_fl(new_effects)
         ).build()
-        return game_state.factory().player(pid, player).build()
 
     def _handle_death_swap_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: DeathSwapAction) -> Optional[gs.GameState]:
         player = game_state.get_player(pid)

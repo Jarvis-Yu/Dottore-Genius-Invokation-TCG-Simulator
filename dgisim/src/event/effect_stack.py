@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Iterable
 
 from dgisim.src.event.effect import Effect
 
@@ -23,16 +24,18 @@ class EffectStack:
     def push_one(self, effect: Effect) -> EffectStack:
         return EffectStack(self._effects + (effect, ))
 
-    def push_many_lf(self, effects: tuple[Effect, ...]) -> EffectStack:
+    def push_many_lf(self, effects: Iterable[Effect]) -> EffectStack:
         """
         lf means the effects passed in are executed from the last to the first
         """
+        effects = tuple(effects)
         return EffectStack(self._effects + effects)
 
-    def push_many_fl(self, effects: tuple[Effect, ...]) -> EffectStack:
+    def push_many_fl(self, effects: Iterable[Effect]) -> EffectStack:
         """
         fl means the effects passed in are executed from the first to the last
         """
+        effects = tuple(effects)
         return EffectStack(self._effects + effects[::-1])
 
     def __eq__(self, other: object) -> bool:

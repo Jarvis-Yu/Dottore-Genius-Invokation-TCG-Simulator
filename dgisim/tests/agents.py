@@ -91,7 +91,14 @@ class HardCodedRandomAgent(PlayerAgent):
                     print(card().name())
                     return CardAction(
                         card,
-                        DiceOnlyInstruction(tmp_dices)
+                        CharacterTargetInstruction(
+                            tmp_dices,
+                            StaticTarget(
+                                pid,
+                                Zone.CHARACTER,
+                                active_character.get_id(),
+                            )
+                        )
                     )
             # normal attack
             if selection < 0.6:
