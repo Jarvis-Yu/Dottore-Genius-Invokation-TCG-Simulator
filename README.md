@@ -28,16 +28,20 @@ with limited action cards and all omni dices.
   - [x] Allow players to end action phase right away
   - [x] Partially implement the pipeline for buff handling
   - [x] Allow players to normal attack
+  - [x] Allow players to use some cards
+  - [ ] Implement player action validity checker
+  - [ ] Implement player action choices provider
   - [ ] Implement elemental reaction
-  - [ ] Allow players to cast skills
-  - [ ] Allow players to cast elemental burst
+  - [ ] Allow players to cast skills (easy task once all other parts are done)
+  - [ ] Allow players to cast elemental burst (same as above)
+  - [ ] Allow players to use all cards
   - [x] Can proceed to next phase
 - [ ] Implement game phase of End Phase (summons and some support card or buffs take action)
   - [x] Can pull cards by the end
   - [x] Can proceed to next phase
 - [x] Implement game phase of Game End Phase (one player wins or draw)
 - [x] Implement lazy player agent for minimal testing purposes
-- [ ] Implement random player agent for testing purposes
+- [x] Implement random player agent for testing purposes
 - [ ] Implement greedy player agent for testing purposes
 
 The third stage is to implement real dices system.
