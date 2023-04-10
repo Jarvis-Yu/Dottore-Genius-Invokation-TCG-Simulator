@@ -37,6 +37,21 @@ class Cards:
     def num_cards(self) -> int:
         return sum(self._cards.values())
 
+    def contains(self, card: type[Card]) -> bool:
+        for c in self._cards:
+            if c == card and self._cards[c] >= 1:
+                return True
+        return False
+
+    def remove(self, card: type[Card]) -> Cards:
+        assert card in self._cards
+        assert self._cards[card] >= 1
+        return self - Cards({card: 1})
+
+    def __getitem__(self, card: type[Card]) -> int:
+        assert card in self._cards
+        return self._cards[card]
+
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Cards):
             return False

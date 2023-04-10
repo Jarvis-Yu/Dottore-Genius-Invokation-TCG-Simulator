@@ -140,6 +140,14 @@ class ActionPhase(ph.Phase):
             player.factory().dices(new_dices).build()
         ).build()
 
+    def _handle_card_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: CardAction) -> Optional[gs.GameState]:
+        player = game_state.get_player(pid)
+        card = action.card()
+        player = player.factory().f_hand_cards(
+            lambda cs: cs.remove(card)
+        ).build()
+        return game_state.factory().player(pid, player).build()
+
     def _handle_death_swap_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: DeathSwapAction) -> Optional[gs.GameState]:
         player = game_state.get_player(pid)
         effect_stack = game_state.get_effect_stack()
@@ -164,6 +172,9 @@ class ActionPhase(ph.Phase):
         elif isinstance(action, SwapAction):
             action = cast(SwapAction, action)
             return self._handle_swap_action(game_state, pid, action)
+        elif isinstance(action, CardAction):
+            action = cast(CardAction, action)
+            return self._handle_card_action(game_state, pid, action)
         elif isinstance(action, DeathSwapAction):
             action = cast(DeathSwapAction, action)
             return self._handle_death_swap_action(game_state, pid, action)

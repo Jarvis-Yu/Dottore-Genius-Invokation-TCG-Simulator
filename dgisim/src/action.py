@@ -52,7 +52,17 @@ class CardAction(GameAction):
     from dgisim.src.card.card import Card
 
     def __init__(self, card: type[Card], instruction: Instruction) -> None:
-        pass
+        self._card = card
+        self._instruction = instruction
+
+    def card(self) -> type[Card]:
+        return self._card
+    
+    def instruction(self) -> Instruction:
+        return self._instruction
+
+    def __str__(self) -> str:
+        return f"<{self._card().__class__.__name__}, {self._instruction}>"
 
 
 class SkillAction(GameAction):

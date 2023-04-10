@@ -146,7 +146,7 @@ class PlayerState:
             # "Card Redraw Chances": str(self._card_redraw_chances),
             "Characters": self._characters.to_string(new_indent),
             "Dices": self._dices.to_string(new_indent),
-            # "Hand Cards": self._hand_cards.to_string(new_indent),
+            "Hand Cards": self._hand_cards.to_string(new_indent),
             # "Deck Cards": self._deck_cards.to_string(new_indent),
             # "Publicly Used Cards": self._publicly_used_cards.to_string(new_indent),
         }, indent)
@@ -181,6 +181,9 @@ class PlayerStateFactory:
     def hand_cards(self, cards: Cards) -> PlayerStateFactory:
         self._hand_cards = cards
         return self
+
+    def f_hand_cards(self, f: Callable[[Cards], Cards]) -> PlayerStateFactory:
+        return self.hand_cards(f(self._hand_cards))
 
     def dices(self, dices: ActualDices) -> PlayerStateFactory:
         self._dices = dices

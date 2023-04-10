@@ -3,7 +3,7 @@ from typing import Tuple
 from enum import Enum
 
 import dgisim.src.state.game_state as gs
-from dgisim.src.buff.buffs import Buffs, EquipmentBuffs
+from dgisim.src.buff.buffs import Buffs, EquipmentBuffs, OrderedBuffs
 from dgisim.src.element.element import ElementalAura
 from dgisim.src.event.event_pre import EventPre
 from dgisim.src.dices import AbstractDices
@@ -36,6 +36,7 @@ class Character:
         self._max_hp = max_hp
         self._energy = energy
         self._max_energy = max_energy
+        self._buffs = buffs
 
     def get_id(self) -> int:
         return self._id
@@ -51,6 +52,9 @@ class Character:
 
     def get_max_energy(self) -> int:
         return self._max_energy
+
+    def get_buffs(self) -> Buffs:
+        return self._buffs
 
     def factory(self) -> CharacterFactory:
         raise Exception("Not Overriden")
@@ -113,6 +117,7 @@ class Character:
             "Max HP": str(self._max_hp),
             "Energy": str(self._energy),
             "Max Energy": str(self._max_energy),
+            "Buffs": str(self._buffs),
         }, indent)
 
 
@@ -124,6 +129,7 @@ class CharacterFactory:
         self._max_hp = character.get_max_hp()
         self._energy = character.get_energy()
         self._max_energy = character.get_max_energy()
+        self._buffs = character.get_buffs()
 
     def hp(self, hp: int) -> CharacterFactory:
         self._hp = hp
@@ -140,8 +146,8 @@ class CharacterFactory:
             max_hp=self._max_hp,
             energy=self._energy,
             max_energy=self._max_energy,
-            buffs=Buffs(),  # TODO
-            equipments=EquipmentBuffs(),
+            buffs=self._buffs,
+            equipments=EquipmentBuffs(()),
             elemental_aura=ElementalAura(),
         )
 
@@ -166,8 +172,8 @@ class Keqing(Character):
             max_hp=10,
             energy=0,
             max_energy=3,
-            buffs=Buffs(),
-            equipments=EquipmentBuffs(),
+            buffs=OrderedBuffs(()),
+            equipments=EquipmentBuffs(()),
             elemental_aura=ElementalAura(),
         )
 
@@ -197,8 +203,8 @@ class Kaeya(Character):
             max_hp=10,
             energy=0,
             max_energy=2,
-            buffs=Buffs(),
-            equipments=EquipmentBuffs(),
+            buffs=OrderedBuffs(()),
+            equipments=EquipmentBuffs(()),
             elemental_aura=ElementalAura(),
         )
 
@@ -228,8 +234,8 @@ class Oceanid(Character):
             max_hp=10,
             energy=0,
             max_energy=3,
-            buffs=Buffs(),
-            equipments=EquipmentBuffs(),
+            buffs=OrderedBuffs(()),
+            equipments=EquipmentBuffs(()),
             elemental_aura=ElementalAura(),
         )
 

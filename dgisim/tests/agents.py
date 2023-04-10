@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from random import random, choice
 
 from dgisim.src.player_agent import PlayerAgent
@@ -12,6 +12,7 @@ from dgisim.src.card.cards import Cards
 from dgisim.src.character.character import CharacterSkill
 from dgisim.src.dices import AbstractDices, ActualDices
 from dgisim.src.element.element import Element
+from dgisim.src.card.card import *
 
 
 class NoneAgent(PlayerAgent):
@@ -70,6 +71,28 @@ class HardCodedRandomAgent(PlayerAgent):
                     return DeathSwapAction(choice(alive_ids))
                 else:
                     raise Exception("Game should end here but not implemented(NOT REACHED)")
+            # card
+            character_injured = active_character.get_hp() < active_character.get_max_hp()
+            if selection < 1:
+                cards = me.get_hand_cards()
+                card: Optional[type[Card]]
+                if cards.contains(SweetMadame):
+                    print(f"{pid} has SweetMadame")
+                else:
+                    print(f"{pid} doesn't have SweetMadame")
+                if cards.contains(SweetMadame) and character_injured:
+                    card = SweetMadame
+                # elif cards.contains_type(MondstadtHashBrown) and character_injured:
+                #     card = MondstadtHashBrown
+                else:
+                    card = None
+                if card is not None:
+                    tmp_dices = ActualDices({})
+                    print(card().name())
+                    return CardAction(
+                        card,
+                        DiceOnlyInstruction(tmp_dices)
+                    )
             # normal attack
             if selection < 0.6:
                 dices = available_dices.basically_satisfy(AbstractDices({
@@ -82,7 +105,7 @@ class HardCodedRandomAgent(PlayerAgent):
                         DiceOnlyInstruction(dices),
                     )
             # swap character
-            elif selection < 0.7:
+            if selection < 0.7:
                 dices = available_dices.basically_satisfy(AbstractDices({
                     Element.ANY: 1,
                 }))

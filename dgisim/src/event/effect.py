@@ -13,8 +13,8 @@ class Zone(Enum):
     CHARACTER = 0
     SUMMONS = 1
     SUPPORT = 2
-    HAND = 3
-    EFFECT = 4
+    # HAND = 3
+    # EFFECT = 4
 
 
 class DynamicCharacterTarget(Enum):
