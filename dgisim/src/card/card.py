@@ -61,12 +61,12 @@ class _DirectHealCard(FoodCard):
     def effects(cls, instruction: ac.Instruction) -> tuple[Effect, ...]:
         es = super().effects(instruction)
         assert isinstance(instruction, ac.CharacterTargetInstruction)
-        es += (
+        es = (
             RecoverHPEffect(
                 instruction.target(),
                 cls.heal_amount()
             ),
-        )
+        ) + es
         return es
 
 

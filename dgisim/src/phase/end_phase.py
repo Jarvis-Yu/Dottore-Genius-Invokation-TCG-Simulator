@@ -2,11 +2,25 @@ from __future__ import annotations
 
 import dgisim.src.state.game_state as gs
 import dgisim.src.phase.phase as ph
+from dgisim.src.event.effect import *
 from dgisim.src.state.player_state import PlayerState
 from dgisim.src.dices import ActualDices
 
 class EndPhase(ph.Phase):
     _CARDS_DRAWN = 2
+
+    def _initialize_end_phase(self, game_state: gs.GameState) -> gs.GameState:
+        active_pid = game_state.get_active_player_id()
+        effects: list[Effect] = []
+        effects += [
+            EndPhaseCheckoutEffect(active_pid),
+            EndPhaseCheckoutEffect(active_pid.other()),
+            EndRoundEffect(active_pid),
+            EndRoundEffect(active_pid.other()),
+        ]
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_many_fl(effects)
+        ).build()
 
     def _to_roll_phase(self, game_state: gs.GameState, new_round: int) -> gs.GameState:
         active_player_id = game_state.get_active_player_id()
@@ -20,9 +34,9 @@ class EndPhase(ph.Phase):
             new_round
         ).phase(
             game_state.get_mode().roll_phase()
-        ).player(
+        ).f_player(
             active_player_id,
-            game_state.get_player(active_player_id).factory().phase(
+            lambda p: p.factory().phase(
                 PlayerState.Act.PASSIVE_WAIT_PHASE
             ).dices(
                 ActualDices.from_empty()
@@ -31,9 +45,9 @@ class EndPhase(ph.Phase):
             ).deck_cards(
                 active_player_deck
             ).build()
-        ).other_player(
+        ).f_other_player(
             active_player_id,
-            game_state.get_other_player(active_player_id).factory().phase(
+            lambda p: p.factory().phase(
                 PlayerState.Act.PASSIVE_WAIT_PHASE
             ).dices(
                 ActualDices.from_empty()
@@ -45,12 +59,12 @@ class EndPhase(ph.Phase):
         ).build()
 
     def _end_both_players(self, game_state: gs.GameState) -> gs.GameState:
-        return game_state.factory().player1(
-            game_state.get_player1().factory().phase(
+        return game_state.factory().f_player1(
+            lambda p: p.factory().phase(
                 PlayerState.Act.END_PHASE
             ).build()
-        ).player2(
-            game_state.get_player2().factory().phase(
+        ).f_player2(
+            lambda p: p.factory().phase(
                 PlayerState.Act.END_PHASE
             ).build()
         ).build()

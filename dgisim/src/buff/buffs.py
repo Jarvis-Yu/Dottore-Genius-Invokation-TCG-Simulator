@@ -24,6 +24,9 @@ class Buffs:
     def contains(self, buff: type[Buffable]) -> bool:
         return any(type(b) is buff for b in self._buffs)
 
+    def get_buffs(self) -> tuple[Buffable, ...]:
+        return self._buffs
+
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Buffs):
             return False
@@ -41,4 +44,7 @@ class EquipmentBuffs(Buffs):
 
 
 class OrderedBuffs(Buffs):
+    pass
+
+class TalentBuffs(Buffs):
     pass

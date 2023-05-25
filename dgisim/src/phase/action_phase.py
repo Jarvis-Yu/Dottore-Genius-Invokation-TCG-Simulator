@@ -73,21 +73,21 @@ class ActionPhase(ph.Phase):
         else:
             print(f"ERROR pid={pid}\n {game_state}")
             raise Exception(f"Unknown Game State to process {other_player.get_phase()}")
-        if pid is active_player_id:
-            return game_state.factory().active_player(
-                active_player_id.other()
-            ).player(
-                active_player_id,
-                active_player.factory().phase(
-                    PlayerState.Act.END_PHASE
-                ).build()
-            ).other_player(
-                active_player_id,
-                other_player.factory().phase(
-                    other_player_new_phase
-                ).build()
+        if pid is not active_player_id:
+            raise Exception("Unknown Game State to process")
+        return game_state.factory().active_player(
+            active_player_id.other()
+        ).player(
+            active_player_id,
+            active_player.factory().phase(
+                PlayerState.Act.END_PHASE
             ).build()
-        raise Exception("Unknown Game State to process")
+        ).other_player(
+            active_player_id,
+            other_player.factory().phase(
+                other_player_new_phase
+            ).build()
+        ).build()
 
     def _handle_skill_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: SkillAction) -> Optional[gs.GameState]:
         player = game_state.get_player(pid)
@@ -181,7 +181,6 @@ class ActionPhase(ph.Phase):
             action = cast(DeathSwapAction, action)
             return self._handle_death_swap_action(game_state, pid, action)
         raise Exception("Unhandld action", action)
-        return game_state
 
     def step_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: PlayerAction) -> Optional[gs.GameState]:
         """

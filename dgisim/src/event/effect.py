@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import FrozenSet, Optional, cast, Union, ClassVar
 from enum import Enum
 from dataclasses import InitVar, dataclass
+from itertools import chain
 
 from dgisim.src.element.element import Element
 from dgisim.src.buff.buff import *
@@ -18,6 +19,16 @@ class Zone(Enum):
     SUPPORT = 2
     # HAND = 3
     # EFFECT = 4
+
+
+class TriggeringSignal(Enum):
+    FAST_ACTION = 0
+    COMBAT_ACTION = 1
+    DEATH_EVENT = 2
+    SWAP_EVENT = 3
+    ROUND_START = 4
+    END_ROUND_CHECK_OUT = 5
+    ROUND_END = 6
 
 
 class DynamicCharacterTarget(Enum):
@@ -37,27 +48,81 @@ class StaticTarget:
     id: int
 
 
+@dataclass(frozen=True)
 class Effect:
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         raise Exception("Not Overriden or Implemented")
 
+    def __str__(self) -> str:
+        return self.__class__.__name__
 
-class TrigerrbleEffect(Effect):
+
+@dataclass(frozen=True)
+class TriggerrbleEffect(Effect):
     pass
 
 
+@dataclass(frozen=True)
 class DirectEffect(Effect):
     pass
 
 
+@dataclass(frozen=True)
 class CheckerEffect(Effect):
     pass
 
 
+@dataclass(frozen=True)
 class PhaseEffect(Effect):
     pass
 
 
+@dataclass(frozen=True)
+class TriggerBuffEffect(Effect):
+    pid: gs.GameState.Pid
+    target: StaticTarget
+    buff: type[Buffable]
+    signal: TriggeringSignal
+    pass
+
+
+@dataclass(frozen=True)
+class CharacterBuffTriggerEffect(TriggerrbleEffect):
+    """
+    This effect triggers the characters' buffs with the provided signal in order.
+    """
+    pid: gs.GameState.Pid
+    signal: TriggeringSignal
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        player = game_state.get_player(self.pid)
+        characters = player.get_characters()
+        ordered_characters = characters.get_character_in_activity_order()
+
+        effects: list[Effect] = []
+
+        for character in ordered_characters:
+            # get character's private buffs and add triggerBuffEffect to global effect_stack
+            buffs = character.get_all_buffs_ordered_flattened()
+            character_id = character.get_id()
+            for buff in buffs:
+                buff_type: type[Buffable] = type(buff)
+                effects.append(TriggerBuffEffect(
+                    self.pid,
+                    StaticTarget(
+                        self.pid,
+                        Zone.CHARACTER,
+                        character_id,
+                    ),
+                    buff_type,
+                    self.signal
+                ))
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_many_fl(effects)
+        ).build()
+
+
+@dataclass(frozen=True)
 class SwapCharacterCheckerEffect(CheckerEffect):
     pass
 
@@ -107,8 +172,7 @@ class DeathCheckCheckerEffect(CheckerEffect):
 
 @dataclass(frozen=True)
 class DeathSwapPhaseStartEffect(PhaseEffect):
-    def __str__(self) -> str:
-        return self.__class__.__name__
+    pass
 
 
 @dataclass(frozen=True)
@@ -130,8 +194,31 @@ class DeathSwapPhaseEndEffect(PhaseEffect):
             other_player
         ).build()
 
-    def __str__(self) -> str:
-        return self.__class__.__name__
+
+@dataclass(frozen=True)
+class EndPhaseCheckoutEffect(PhaseEffect):
+    """
+    This is responsible for triggering character buffs/summons/supports by the
+    end of the round.
+    """
+    pid: gs.GameState.Pid
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        # TODO
+        return game_state
+
+
+@dataclass(frozen=True)
+class EndRoundEffect(PhaseEffect):
+    """
+    This is responsible for triggering other clean ups (e.g. remove stuffed)
+    """
+    pid: gs.GameState.Pid
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        # TODO
+        player = game_state.get_player(self.pid)
+        return game_state
 
 
 @dataclass(frozen=True)
@@ -302,6 +389,7 @@ class RemoveDiceEffect(Effect):
             pid,
             lambda p: p.factory().dices(new_dices).build()
         ).build()
+
 
 @dataclass(frozen=True)
 class StuffedBuffEffect(Effect):

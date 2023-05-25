@@ -21,6 +21,12 @@ class Characters:
     def get_active_character_id(self) -> Optional[int]:
         return self._active_character_id
 
+    def get_character_in_activity_order(self) -> tuple[char.Character, ...]:
+        for i, character in enumerate(self._characters):
+            if character.get_id() == self._active_character_id:
+                return self._characters[i:] + self._characters[:i]
+        return tuple()
+
     def get_character(self, id: int) -> Optional[char.Character]:
         for character in self._characters:
             if id == character.get_id():
@@ -31,6 +37,12 @@ class Characters:
         if self._active_character_id is None:
             return None
         return self.get_character(self._active_character_id)
+
+    def just_get_active_character(self) -> char.Character:
+        assert self._active_character_id is not None
+        character = self.get_character(self._active_character_id)
+        assert character is not None
+        return character
 
     def get_active_character_name(self) -> str:
         char = self.get_active_character()
