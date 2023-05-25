@@ -8,6 +8,7 @@ The simulator is modeled as a finite state machine, where all game states are im
   - [Development Milestones](#development-milestones)
   - [Currently Working On](#currently-working-on)
   - [Future Plans](#future-plans)
+  - [Interested in the Project](#interested-in-the-project)
   - [QA](#qa)
 
 ## Development Milestones
@@ -62,6 +63,11 @@ are left is adding more characters)
 Once this project is done, I'll be reading relative papers and develop an AI for this game. The AI
 is supposed to be used for learning strategies and making decks, but not against another player
 directly.
+
+## Interested in the Project
+
+I suggest you start reading the code from `dgisim/tests/test_game_state_machine.py`,
+which contains tests for the whole game flow.
 
 ## QA
 
