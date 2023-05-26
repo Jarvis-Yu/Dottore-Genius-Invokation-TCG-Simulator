@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import FrozenSet, Optional, cast, Union, ClassVar
+from typing import FrozenSet, Optional, cast, Union, ClassVar, Iterable
 from enum import Enum
 from dataclasses import InitVar, dataclass
 from itertools import chain
@@ -88,7 +88,7 @@ class TriggerBuffEffect(Effect):
         if not isinstance(character, char.Character):
             return game_state
         character = cast(char.Character, character)
-        effects = []
+        effects: Iterable[Effect] = []
 
         # LATEST_TODO: find the buff
         if issubclass(self.buff, buf.CharacterTalentBuff):
