@@ -58,7 +58,13 @@ class Character:
     def get_max_energy(self) -> int:
         return self._max_energy
 
-    def get_buffs(self) -> Buffs:
+    def get_talent_buffs(self) -> Buffs:
+        return self._talents
+
+    def get_equipment_buffs(self) -> Buffs:
+        return self._equipments
+
+    def get_character_buffs(self) -> Buffs:
         return self._buffs
 
     def get_all_buffs_ordered(self) -> list[Buffs]:
@@ -144,7 +150,7 @@ class CharacterFactory:
         self._max_hp = character.get_max_hp()
         self._energy = character.get_energy()
         self._max_energy = character.get_max_energy()
-        self._buffs = character.get_buffs()
+        self._buffs = character.get_character_buffs()
 
     def hp(self, hp: int) -> CharacterFactory:
         self._hp = hp
@@ -154,12 +160,12 @@ class CharacterFactory:
         self._energy = energy
         return self
 
-    def buffs(self, buffs: Buffs) -> CharacterFactory:
+    def character_buffs(self, buffs: Buffs) -> CharacterFactory:
         self._buffs = buffs
         return self
 
-    def f_buffs(self, f: Callable[[Buffs], Buffs]) -> CharacterFactory:
-        return self.buffs(f(self._buffs))
+    def f_character_buffs(self, f: Callable[[Buffs], Buffs]) -> CharacterFactory:
+        return self.character_buffs(f(self._buffs))
 
     def build(self) -> Character:
         return self._char(

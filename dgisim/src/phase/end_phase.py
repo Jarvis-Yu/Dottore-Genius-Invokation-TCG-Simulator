@@ -14,12 +14,20 @@ class EndPhase(ph.Phase):
         effects: list[Effect] = []
         effects += [
             EndPhaseCheckoutEffect(active_pid),
+            EndPhaseTurnEndEffect(),
             EndPhaseCheckoutEffect(active_pid.other()),
+            EndPhaseTurnEndEffect(),
             EndRoundEffect(active_pid),
+            EndPhaseTurnEndEffect(),
             EndRoundEffect(active_pid.other()),
+            EndPhaseTurnEndEffect(),
+            SetBothPlayerPhaseEffect(PlayerState.Act.END_PHASE),
         ]
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
+        ).f_player(
+            active_pid,
+            lambda p: p.factory().phase(PlayerState.Act.ACTIVE_WAIT_PHASE).build()
         ).build()
 
     def _to_roll_phase(self, game_state: gs.GameState, new_round: int) -> gs.GameState:
@@ -74,12 +82,27 @@ class EndPhase(ph.Phase):
             game_state.get_mode().game_end_phase()
         ).build()
 
+    def _execute_effect(self, game_state: gs.GameState) -> gs.GameState:
+        effect_stack, effect = game_state.get_effect_stack().pop()
+        new_game_state = game_state.factory().effect_stack(effect_stack).build()
+        if isinstance(effect, DeathSwapPhaseStartEffect):
+            print("AFTER DEATH:", new_game_state)
+        return effect.execute(new_game_state)
+
+    def _is_executing_effects(self, game_state: gs.GameState) -> bool:
+        effect_stack = game_state.get_effect_stack()
+        return not effect_stack.is_empty() \
+            and not isinstance(effect_stack.peek(), DeathSwapPhaseStartEffect)
+
     def step(self, game_state: gs.GameState) -> gs.GameState:
         p1 = game_state.get_player1()
         p2 = game_state.get_player2()
         active_player_id = game_state.get_active_player_id()
         if p1.get_phase() is PlayerState.Act.PASSIVE_WAIT_PHASE and p2.get_phase() is PlayerState.Act.PASSIVE_WAIT_PHASE:
-            return self._end_both_players(game_state)
+            return self._initialize_end_phase(game_state)
+        elif p1.get_phase() is PlayerState.Act.ACTIVE_WAIT_PHASE or p2.get_phase() is PlayerState.Act.ACTIVE_WAIT_PHASE:
+            assert self._is_executing_effects(game_state)
+            return self._execute_effect(game_state)
         elif p1.get_phase() is PlayerState.Act.END_PHASE and p2.get_phase() is PlayerState.Act.END_PHASE:
             new_round = game_state.get_round() + 1
             if new_round > game_state.get_mode().get_round_limit():

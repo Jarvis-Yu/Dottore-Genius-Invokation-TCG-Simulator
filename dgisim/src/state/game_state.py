@@ -130,6 +130,12 @@ class GameState:
             raise Exception("Not Implemented Yet")
         return None
 
+    def get_character_target(self, target: StaticTarget) -> Optional[Character]:
+        character = self.get_target(target)
+        if not isinstance(character, Character):
+            return None
+        return cast(Character, character)
+
     def waiting_for(self) -> Optional[GameState.Pid]:
         return self._phase.waiting_for(self)
 

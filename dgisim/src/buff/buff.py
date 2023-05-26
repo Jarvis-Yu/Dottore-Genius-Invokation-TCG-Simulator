@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import TypeVar
 from enum import Enum
 
+import dgisim.src.event.effect as eft
 import dgisim.src.state.game_state as gs
 
 
@@ -13,7 +14,10 @@ class Buffable:
     def preprocess(self):
         raise Exception("TODO")
 
-    def react_to_signal(self, game_state: gs.GameState, signal: TriggerringEvent) -> gs.GameState:
+    def react_to_event(self, game_state: gs.GameState, event: TriggerringEvent) -> gs.GameState:
+        raise Exception("TODO")
+
+    def react_to_signal(self, source: eft.StaticTarget, signal: eft.TriggeringSignal) -> tuple[eft.Effect, ...]:
         raise Exception("TODO")
 
     def same_type_as(self, buff: Buffable) -> bool:
@@ -51,4 +55,10 @@ class TeamBuff(Buffable):
 
 
 class StuffedBuff(CharacterBuff):
-    pass
+    def react_to_signal(self, source: eft.StaticTarget, signal: eft.TriggeringSignal) -> tuple[eft.Effect, ...]:
+        if signal is eft.TriggeringSignal.ROUND_END:
+            return (eft.RemoveCharacterBuffEffect(
+                source,
+                type(self),
+            ),)
+        return ()

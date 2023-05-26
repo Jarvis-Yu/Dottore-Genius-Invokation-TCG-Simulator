@@ -146,7 +146,7 @@ class PlayerState:
             # "Card Redraw Chances": str(self._card_redraw_chances),
             "Characters": self._characters.to_string(new_indent),
             "Dices": self._dices.to_string(new_indent),
-            "Hand Cards": self._hand_cards.to_string(new_indent),
+            # "Hand Cards": self._hand_cards.to_string(new_indent),
             # "Deck Cards": self._deck_cards.to_string(new_indent),
             # "Publicly Used Cards": self._publicly_used_cards.to_string(new_indent),
         }, indent)

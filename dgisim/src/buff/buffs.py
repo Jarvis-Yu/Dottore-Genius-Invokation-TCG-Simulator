@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TypeVar
+from typing import TypeVar, Optional
 
 from dgisim.src.buff.buff import Buffable
 
@@ -24,6 +24,14 @@ class Buffs:
     def contains(self, buff: type[Buffable]) -> bool:
         return any(type(b) is buff for b in self._buffs)
 
+    def find(self, buff: type[Buffable]) -> Optional[Buffable]:
+        return next((bf for bf in self._buffs if type(bf) is buff), None)
+
+    def remove(self, buff: type[Buffable]) -> Buffs:
+        return Buffs(tuple(
+            filter(lambda bf: type(bf) != buff, self._buffs)
+        ))
+
     def get_buffs(self) -> tuple[Buffable, ...]:
         return self._buffs
 
@@ -45,6 +53,7 @@ class EquipmentBuffs(Buffs):
 
 class OrderedBuffs(Buffs):
     pass
+
 
 class TalentBuffs(Buffs):
     pass

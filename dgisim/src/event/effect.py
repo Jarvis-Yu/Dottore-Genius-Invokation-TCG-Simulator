@@ -4,8 +4,8 @@ from enum import Enum
 from dataclasses import InitVar, dataclass
 from itertools import chain
 
+import dgisim.src.buff.buff as buf
 from dgisim.src.element.element import Element
-from dgisim.src.buff.buff import *
 import dgisim.src.character.character as char
 import dgisim.src.state.game_state as gs
 import dgisim.src.state.player_state as ps
@@ -79,11 +79,33 @@ class PhaseEffect(Effect):
 
 @dataclass(frozen=True)
 class TriggerBuffEffect(Effect):
-    pid: gs.GameState.Pid
     target: StaticTarget
-    buff: type[Buffable]
+    buff: type[buf.Buffable]
     signal: TriggeringSignal
-    pass
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        character = game_state.get_target(self.target)
+        if not isinstance(character, char.Character):
+            return game_state
+        character = cast(char.Character, character)
+        effects = []
+
+        # LATEST_TODO: find the buff
+        if issubclass(self.buff, buf.CharacterTalentBuff):
+            pass
+        elif issubclass(self.buff, buf.EquipmentBuff):
+            pass
+        elif issubclass(self.buff, buf.CharacterBuff):
+            buffs = character.get_character_buffs()
+            buff = buffs.find(self.buff)
+            if buff is None:
+                return game_state
+            effects = buff.react_to_signal(self.target, self.signal)
+        else:
+            raise Exception("Unexpected Buff Type to Trigger", self.buff)
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_many_fl(effects)
+        ).build()
 
 
 @dataclass(frozen=True)
@@ -106,9 +128,8 @@ class CharacterBuffTriggerEffect(TriggerrbleEffect):
             buffs = character.get_all_buffs_ordered_flattened()
             character_id = character.get_id()
             for buff in buffs:
-                buff_type: type[Buffable] = type(buff)
+                buff_type: type[buf.Buffable] = type(buff)
                 effects.append(TriggerBuffEffect(
-                    self.pid,
                     StaticTarget(
                         self.pid,
                         Zone.CHARACTER,
@@ -204,8 +225,18 @@ class EndPhaseCheckoutEffect(PhaseEffect):
     pid: gs.GameState.Pid
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
-        # TODO
-        return game_state
+        active_id = game_state.get_active_player_id()
+        active_player = game_state.get_player(active_id)
+        effects = [
+            CharacterBuffTriggerEffect(
+                active_id,
+                TriggeringSignal.END_ROUND_CHECK_OUT
+            ),
+            # TODO: add active_player's team buff, summons buff... here
+        ]
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_many_fl(effects)
+        ).build()
 
 
 @dataclass(frozen=True)
@@ -216,9 +247,18 @@ class EndRoundEffect(PhaseEffect):
     pid: gs.GameState.Pid
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
-        # TODO
-        player = game_state.get_player(self.pid)
-        return game_state
+        active_id = game_state.get_active_player_id()
+        active_player = game_state.get_player(active_id)
+        effects = [
+            CharacterBuffTriggerEffect(
+                active_id,
+                TriggeringSignal.ROUND_END
+            ),
+            # TODO: add active_player's team buff, summons buff... here
+        ]
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_many_fl(effects)
+        ).build()
 
 
 @dataclass(frozen=True)
@@ -239,6 +279,62 @@ class TurnEndEffect(PhaseEffect):
         ).other_player(
             active_player_id,
             other_player.factory().phase(ps.PlayerState.Act.ACTION_PHASE).build()
+        ).build()
+
+
+@dataclass(frozen=True)
+class EndPhaseTurnEndEffect(PhaseEffect):
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        active_player_id = game_state.get_active_player_id()
+        player = game_state.get_player(active_player_id)
+        other_player = game_state.get_other_player(active_player_id)
+        assert player.get_phase() is ps.PlayerState.Act.ACTIVE_WAIT_PHASE
+        return game_state.factory().active_player(
+            active_player_id.other()
+        ).player(
+            active_player_id,
+            player.factory().phase(ps.PlayerState.Act.PASSIVE_WAIT_PHASE).build()
+        ).other_player(
+            active_player_id,
+            other_player.factory().phase(ps.PlayerState.Act.ACTIVE_WAIT_PHASE).build()
+        ).build()
+
+
+@dataclass(frozen=True)
+class SetBothPlayerPhaseEffect(PhaseEffect):
+    phase: ps.PlayerState.Act
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        return game_state.factory().f_player1(
+            lambda p: p.factory().phase(self.phase).build()
+        ).f_player2(
+            lambda p: p.factory().phase(self.phase).build()
+        ).build()
+
+
+@dataclass(frozen=True)
+class RemoveCharacterBuffEffect(DirectEffect):
+    target: StaticTarget
+    buff: type[buf.Buffable]
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        character = game_state.get_character_target(self.target)
+        if character is None:
+            return game_state
+        new_character = character
+        if issubclass(self.buff, buf.CharacterTalentBuff):
+            pass
+        elif issubclass(self.buff, buf.EquipmentBuff):
+            pass
+        elif issubclass(self.buff, buf.CharacterBuff):
+            buffs = character.get_character_buffs()
+            new_buffs = buffs.remove(self.buff)
+            new_character = new_character.factory().character_buffs(new_buffs).build()
+        return game_state.factory().f_player(
+            self.target.pid,
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().character(new_character).build()
+            ).build()
         ).build()
 
 
@@ -398,8 +494,8 @@ class StuffedBuffEffect(Effect):
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         character = game_state.get_target(self.target)
         assert isinstance(character, char.Character)
-        character = character.factory().f_buffs(
-            lambda bs: bs.update_buffs(StuffedBuff())
+        character = character.factory().f_character_buffs(
+            lambda bs: bs.update_buffs(buf.StuffedBuff())
         ).build()
         return game_state.factory().f_player(
             self.target.pid,
