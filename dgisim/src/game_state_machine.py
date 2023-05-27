@@ -33,6 +33,44 @@ class GameStateMachine:
     def get_game_state(self) -> GameState:
         return self._game_state
 
+    def curr_index(self) -> int:
+        return len(self._history) - 1
+
+    def is_latest_index(self, index: int) -> bool:
+        return index == self.latest_index()
+
+    def latest_index(self) -> int:
+        return len(self._history) - 1
+
+    def prev_action_index(self, index: int) -> int:
+        if not self._action_history:
+            return 0
+        if index <= self._action_history[0]:
+            return self._action_history[0]
+        for i in reversed(self._action_history):
+            if i < index:
+                return i
+        raise Exception("Not Reached")
+
+    def next_action_index(self, index: int) -> int:
+        if not self._action_history:
+            return 0
+        if index >= self._action_history[-1]:
+            return self._action_history[-1]
+        for i in reversed(self._action_history):
+            if i > index:
+                return i
+        raise Exception("Not Reached")
+
+    def prev_index(self, index: int) -> int:
+        return max(0, index - 1)
+
+    def next_index(self, index: int) -> int:
+        return min(self.latest_index(), index + 1)
+
+    def get_game_state_at(self, index: int) -> GameState:
+        return self._history[index]
+
     def _step(self) -> None:
         self._game_state = self._game_state.step()
         self._history.append(self._game_state)
