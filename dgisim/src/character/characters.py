@@ -33,6 +33,12 @@ class Characters:
                 return character
         return None
 
+    def get_just_character(self, id: int) -> char.Character:
+        character = self.get_character(id)
+        if character is None:
+            raise Exception("Character not found")
+        return character
+
     def get_active_character(self) -> Optional[char.Character]:
         if self._active_character_id is None:
             return None
@@ -57,10 +63,7 @@ class Characters:
         return None
 
     def get_by_id(self, id: int) -> Optional[char.Character]:
-        for c in self._characters:
-            if c.get_id() == id:
-                return c
-        return None
+        return self.get_character(id)
 
     def alive_ids(self) -> list[int]:
         ids: list[int] = []

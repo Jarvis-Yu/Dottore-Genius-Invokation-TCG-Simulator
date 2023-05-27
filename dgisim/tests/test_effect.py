@@ -4,6 +4,8 @@ from dgisim.src.state.game_state import GameState
 from dgisim.src.state.player_state import PlayerState
 from dgisim.src.event.effect_stack import EffectStack
 from dgisim.src.event.effect import *
+from dgisim.src.buff.buffs import *
+from dgisim.src.buff.buff import *
 
 
 class TestEffect(unittest.TestCase):
@@ -47,6 +49,26 @@ class TestEffect(unittest.TestCase):
             lambda cs: cs.factory().active_character_id(1).build()
         )
         .phase(PlayerState.Act.ACTION_PHASE)
+        .build()
+    ).f_player2(
+        lambda p: p.factory()
+        .f_characters(
+            lambda cs: cs.factory().active_character_id(1).build()
+        )
+        .phase(PlayerState.Act.PASSIVE_WAIT_PHASE)
+        .build()
+    ).build()
+
+    END_TEMPLATE = GameState.from_default().factory().f_phase(
+        lambda mode: mode.end_phase()
+    ).active_player(
+        GameState.Pid.P1
+    ).f_player1(
+        lambda p: p.factory()
+        .f_characters(
+            lambda cs: cs.factory().active_character_id(1).build()
+        )
+        .phase(PlayerState.Act.PASSIVE_WAIT_PHASE)
         .build()
     ).f_player2(
         lambda p: p.factory()
@@ -114,7 +136,7 @@ class TestEffect(unittest.TestCase):
             ))
         ).build()
         g1 = g1.step()
-        c = g1.get_player1().get_characters().get_by_id(2)
+        c = g1.get_player1().get_characters().get_character(2)
         assert c is not None
         self.assertEqual(c.get_hp(), 9)
 
@@ -126,6 +148,28 @@ class TestEffect(unittest.TestCase):
             ))
         ).build()
         g2 = g2.step()
-        c = g2.get_player1().get_characters().get_by_id(2)
+        c = g2.get_player1().get_characters().get_character(2)
         assert c is not None
         self.assertEqual(c.get_hp(), 10)
+
+    def testStuffedEffectRemovedDuringEndRound(self):
+        game_state = self.END_TEMPLATE.factory().f_player1(
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().f_character(
+                    2,
+                    lambda c: c.factory().character_buffs(
+                        Buffs((StuffedBuff(), ))
+                    ).build()
+                ).build()
+            ).build()
+        ).build()
+        while game_state.get_phase() == game_state.get_mode().end_phase():
+            game_state = game_state.step()
+        self.assertFalse(
+            game_state
+            .get_player1()
+            .get_characters()
+            .get_just_character(2)
+            .get_character_buffs()
+            .contains(StuffedBuff)
+        )

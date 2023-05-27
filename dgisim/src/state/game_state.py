@@ -125,7 +125,7 @@ class GameState:
         player = self.get_player(target.pid)
         if target.zone is Zone.CHARACTER:
             characters = player.get_characters()
-            return characters.get_by_id(target.id)
+            return characters.get_character(target.id)
         else:
             raise Exception("Not Implemented Yet")
         return None
