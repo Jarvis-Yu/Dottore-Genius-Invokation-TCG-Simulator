@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Iterable
+from typing import Iterable, Union
 
 from dgisim.src.event.effect import Effect
 
@@ -51,3 +51,9 @@ class EffectStack:
 
     def __str__(self) -> str:
         return str(self._effects)
+
+    def dict_str(self) -> Union[dict, str]:
+        content = {}
+        for effect in reversed(self._effects):
+            content[effect.name()] = effect.dict_str()
+        return content

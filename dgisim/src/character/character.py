@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Tuple, Callable
+from typing import Tuple, Callable, Union
 from enum import Enum
 
 import dgisim.src.state.game_state as gs
@@ -140,6 +140,18 @@ class Character:
             "Max Energy": str(self._max_energy),
             "Buffs": str(self._buffs),
         }, indent)
+
+    def dict_str(self) -> Union[dict, str]:
+        return {
+            "id": str(self._id),
+            "HP": str(self._hp),
+            "Max HP": str(self._max_hp),
+            "Energy": str(self._energy),
+            "Max Energy": str(self._max_energy),
+            "Talents": str(self._talents),
+            "Equipments": str(self._equipments),
+            "Buffs": str(self._buffs),
+        }
 
 
 class CharacterFactory:

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional
+from typing import Optional, Union
 
 import dgisim.src.state.game_state as gs
 from dgisim.src.helper.level_print import level_print_single
@@ -36,3 +36,6 @@ class Phase:
 
     def to_string(self, indent: int = 0) -> str:
         return level_print_single(self.__class__.__name__, indent)
+
+    def dict_str(self) -> Union[dict, str]:
+        return self.__class__.__name__

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, Optional, Iterator, Iterable, TypeVar
+from typing import Dict, Optional, Iterator, Iterable, TypeVar, Union
 from enum import Enum
 import random
 
@@ -55,6 +55,14 @@ class Dices:
             if num != 0
         ])
         return level_print(existing_dices, indent)
+
+    def dict_str(self) -> Union[dict, str]:
+        existing_dices = dict([
+            (dice.name, str(num))
+            for dice, num in self._dices.items()
+            if num != 0
+        ])
+        return existing_dices
 
 
 _PURE_ELEMS = frozenset({

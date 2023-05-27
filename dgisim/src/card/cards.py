@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, Tuple, Type
+from typing import Dict, Tuple, Type, Union
 from collections import Counter
 import random
 
@@ -70,3 +70,11 @@ class Cards:
             if num != 0
         ])
         return level_print(existing_cards, indent)
+
+    def dict_str(self) -> Union[dict, str]:
+        existing_cards = dict([
+            (card.name(), str(num))
+            for card, num in self._cards.items()
+            if num != 0
+        ])
+        return existing_cards

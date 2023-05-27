@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional, Callable
+from typing import Optional, Callable, Union
 
 import dgisim.src.character.character as char
 from dgisim.src.event.event_pre import EventPre
@@ -123,6 +123,15 @@ class Characters:
                 for char in self._characters
             ]), new_indent),
         }, indent)
+
+    def dict_str(self) -> Union[dict, str]:
+        return {
+            "Active Character": self.get_active_character_name(),
+            "Characters": dict([
+                (char.name(), char.dict_str())
+                for char in self._characters
+            ]),
+        }
 
 
 class CharactersFactory:

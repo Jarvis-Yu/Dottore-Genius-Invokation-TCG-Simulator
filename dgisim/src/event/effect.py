@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import FrozenSet, Optional, cast, Union, ClassVar, Iterable
 from enum import Enum
-from dataclasses import InitVar, dataclass
+from dataclasses import InitVar, dataclass, asdict
 from itertools import chain
 
 import dgisim.src.buff.buff as buf
@@ -52,6 +52,12 @@ class StaticTarget:
 class Effect:
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         raise Exception("Not Overriden or Implemented")
+
+    def name(self) -> str:
+        return self.__class__.__name__
+
+    def dict_str(self) -> Union[dict, str]:
+        return str(asdict(self))
 
     def __str__(self) -> str:
         return self.__class__.__name__

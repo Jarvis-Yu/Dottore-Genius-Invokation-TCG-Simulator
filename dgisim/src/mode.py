@@ -47,6 +47,9 @@ class Mode:
     def to_string(self, indent: int = 0) -> str:
         return level_print_single(self.__class__.__name__, indent)
 
+    def dict_str(self) -> Union[dict, str]:
+        return self.__class__.__name__
+
 
 class DefaultMode(Mode):
 

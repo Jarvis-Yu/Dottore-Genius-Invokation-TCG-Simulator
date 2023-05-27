@@ -151,6 +151,17 @@ class PlayerState:
             # "Publicly Used Cards": self._publicly_used_cards.to_string(new_indent),
         }, indent)
 
+    def dict_str(self) -> Union[dict, str]:
+        return {
+            "Phase": self._phase.value,
+            "Card Redraw Chances": str(self._card_redraw_chances),
+            "Characters": self._characters.dict_str(),
+            "Dices": self._dices.dict_str(),
+            "Hand Cards": self._hand_cards.dict_str(),
+            "Deck Cards": self._deck_cards.dict_str(),
+            "Publicly Used Cards": self._publicly_used_cards.dict_str(),
+        }
+
 
 class PlayerStateFactory:
     def __init__(self, player_state: PlayerState) -> None:
