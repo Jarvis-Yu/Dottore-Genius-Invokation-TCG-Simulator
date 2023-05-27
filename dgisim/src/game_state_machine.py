@@ -9,7 +9,8 @@ from dgisim.src.phase.phase import Phase
 class GameStateMachine:
     def __init__(self, game_state: GameState, player1: PlayerAgent, player2: PlayerAgent):
         self._history = [game_state]
-        self._action_history: list[GameState] = []
+        self._action_history: list[int] = []
+        self._actions: dict[int, PlayerAction] = {}
         self._game_state = game_state
         self._playerAgent1 = player1
         self._playerAgent2 = player2
@@ -22,7 +23,12 @@ class GameStateMachine:
         return tuple(self._history)
 
     def get_action_history(self) -> Tuple[GameState, ...]:
-        return tuple(self._action_history)
+        return tuple([self._history[i] for i in self._action_history])
+
+    def get_last_action(self) -> Optional[PlayerAction]:
+        if self._action_history:
+            return self._actions[self._action_history[-1]]
+        return None
 
     def get_game_state(self) -> GameState:
         return self._game_state
@@ -35,7 +41,9 @@ class GameStateMachine:
         next_state = self._game_state.action_step(pid, action)
         if next_state is None:
             return False
-        self._action_history.append(self._game_state)
+        action_idx = len(self._history) - 1
+        self._action_history.append(action_idx)
+        self._actions[action_idx] = action
         self._game_state = next_state
         self._history.append(self._game_state)
         return True

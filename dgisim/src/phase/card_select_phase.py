@@ -60,8 +60,8 @@ class CardSelectPhase(ph.Phase):
     def _handle_card_drawing(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: CardSelectAction) -> gs.GameState:
         player: PlayerState = game_state.get_player(pid)
         new_deck, new_cards = player.get_deck_cards().pick_random_cards(action.num_cards())
-        new_deck = new_deck + action.get_selected_cards()
-        new_hand = player.get_hand_cards() - action.get_selected_cards()
+        new_deck = new_deck + action.selected_cards
+        new_hand = player.get_hand_cards() - action.selected_cards
         new_hand = new_hand + new_cards
         reducedChances: int = player.get_card_redraw_chances() - 1
         phase: PlayerState.Act

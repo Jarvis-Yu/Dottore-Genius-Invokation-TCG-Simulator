@@ -2,7 +2,7 @@ import unittest
 
 from dgisim.src.game_state_machine import GameStateMachine
 from dgisim.src.state.game_state import GameState
-from dgisim.tests.agents import LazyAgent
+from dgisim.src.agents import LazyAgent
 from dgisim.src.phase.card_select_phase import CardSelectPhase
 from dgisim.src.phase.phase import Phase
 from dgisim.src.phase.starting_hand_select_phase import StartingHandSelectPhase
@@ -148,7 +148,7 @@ class TestGameStateMachine(unittest.TestCase):
         Only turned on manually to inspect cases
         """
         return
-        from dgisim.tests.agents import HardCodedRandomAgent
+        from dgisim.src.agents import HardCodedRandomAgent
         state_machine = GameStateMachine(
             self._initial_state,
             HardCodedRandomAgent(),
