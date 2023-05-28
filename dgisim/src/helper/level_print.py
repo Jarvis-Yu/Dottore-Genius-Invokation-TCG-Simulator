@@ -113,12 +113,12 @@ class GamePrinter:
     @staticmethod
     def _insert_characters(characters: dict) -> StrDrawer:
         board = StrDrawer()
-        board.insert_at(0, 0, GamePrinter._pair(characters, "Active Character"))
-        board.insert_at_nextline(0, "<Characters>")
+        # board.insert_at(0, 0, GamePrinter._pair(characters, "Active Character"))
+        board.insert_at(0, 0, "<Characters>")
         character_boards = []
         for name, character in characters["Characters"].items():
             character_boards.append(GamePrinter._insert_character(
-                name + ('*' if name == characters["Active Character"] else ''),
+                ('*' if name == characters["Active Character"] else '') + name,
                 character,
             ))
         for c_board in character_boards:
@@ -200,15 +200,15 @@ class GamePrinter:
         x, y = board.insert_at(x, y + 2, GamePrinter._pair(game_state, "Mode"))
         x, y = board.insert_at(x, y + 2, GamePrinter._pair(game_state, "Phase"))
         x, y = board.insert_at(x, y + 2, GamePrinter._pair(game_state, "Round"))
-        x, y = board.insert_at(x, y + 2, GamePrinter._pair(game_state, "Active Player"))
+        # x, y = board.insert_at(x, y + 2, GamePrinter._pair(game_state, "Active Player"))
 
         p1_active = '1' in game_state["Active Player"]
         p1_board = GamePrinter._insert_player(
-            f"Player1{'*' if p1_active else ''}",
+            f"{'*' if p1_active else ''}Player1",
             game_state["Player1"]
         )
         p2_board = GamePrinter._insert_player(
-            f"Player2{'*' if not p1_active else ''}",
+            f"{'*' if not p1_active else ''}Player2",
             game_state["Player2"]
         )
         player_row_start = 2
@@ -217,11 +217,11 @@ class GamePrinter:
         for i in range(player_row_start, board.lim_x()+1):
             board.insert_at(i, p1_board.lim_y() + 2, '|')
             board.insert_at(i, py + 2, '|')
-        board.insert_at_nextline(0, "-" * (board.lim_y()+1))
+        board.insert_at_nextline(0, "-" * (board.lim_y()))
+        board.insert_at(1, 0, "-" * (board.lim_y()))
 
         board.insert_board_at_nextline(
             0,
             GamePrinter._insert_effects("Effects", game_state["Effects"]),
         )
-        board.insert_at(1, 0, "-" * (board.lim_y()+1))
         return board.draw()

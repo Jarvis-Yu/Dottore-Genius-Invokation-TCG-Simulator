@@ -18,6 +18,17 @@ class CLISession:
         )
         self._state_idx = 0
 
+    def _help(self) -> None:
+        print("==================================================")
+        print("a - to forward to an autostep")
+        print("n - to forward to next step")
+        print("ba - to previous autostep")
+        print("bn - to previous step")
+        print("q - to quit this session")
+        print("- enter nothing to repeat last step")
+        print("Note: any invalid commands are ignored")
+        print("==================================================")
+
     def run(self) -> None:
         print("==================================================")
         print("Welcome to the Dottore Genius Invokation TCG Simulator CLI ver.")
@@ -27,13 +38,15 @@ class CLISession:
         print("n - to forward to next step")
         print("ba - to previous autostep")
         print("bn - to previous step")
-        print("end - to end this session")
-        print("- enter nothing to repeat last step")
+        print("h - to get help")
+        print("q - to quit this session")
+        print("- enter nothing to repeat last valid command")
         print("Note: any invalid commands are ignored")
         print("==================================================")
         last_cmd = ""
         self._print_latest_game_state()
-        while last_cmd != "end":
+        wrong_cmd_counter = 0
+        while last_cmd != "q":
             new_cmd = input("\n>>> ")
             if new_cmd == "":
                 new_cmd = last_cmd
@@ -42,11 +55,14 @@ class CLISession:
                 next_idx = self._game_session.next_action_index(self._state_idx)
                 if self._state_idx >= next_idx:
                     # should actually proceed
-                    self._game_session.auto_step()
-                    self._print_latest_game_state()
-                    self._state_idx = self._game_session.latest_index()
-                    self._game_session.one_step()
-                    self._print_latest_action()
+                    if self._game_session.game_end():
+                        print("[i] Game has ended")
+                    else:
+                        self._game_session.auto_step()
+                        self._print_latest_game_state()
+                        self._state_idx = self._game_session.latest_index()
+                        self._game_session.one_step()
+                        self._print_latest_action()
                 else:
                     # get history
                     self._state_idx = next_idx
@@ -55,9 +71,12 @@ class CLISession:
                 next_idx = self._game_session.next_index(self._state_idx)
                 if self._state_idx >= next_idx:
                     # should actually proceed
-                    self._game_session.one_step()
-                    self._print_latest_game_state()
-                    self._state_idx = self._game_session.latest_index()
+                    if self._game_session.game_end():
+                        print("[i] Game has ended")
+                    else:
+                        self._game_session.one_step()
+                        self._print_latest_game_state()
+                        self._state_idx = self._game_session.latest_index()
                 else:
                     # get history
                     self._state_idx = next_idx
@@ -76,7 +95,18 @@ class CLISession:
                 else:
                     self._state_idx = prev_idx
                     self._print_game_state_at(self._state_idx)
+            elif new_cmd == "h":
+                self._help()
+            elif new_cmd == "q":
+                pass
+            else:
+                wrong_cmd_counter += 1
+                if wrong_cmd_counter >= 3:
+                    self._help()
+                    wrong_cmd_counter = 0
+                continue
 
+            wrong_cmd_counter = 0
             if new_cmd != "":
                 last_cmd = new_cmd
             # LATEST_TODO
