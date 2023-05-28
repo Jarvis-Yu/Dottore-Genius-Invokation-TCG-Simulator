@@ -7,6 +7,7 @@ The simulator is modeled as a finite state machine, where all game states are im
 - [Dottore Genius Invokation TCG Simulator](#dottore-genius-invokation-tcg-simulator)
   - [Development Milestones](#development-milestones)
   - [Currently Working On](#currently-working-on)
+  - [CLI (How to try the simulator)](#cli-how-to-try-the-simulator)
   - [Future Plans](#future-plans)
   - [Interested in the Project](#interested-in-the-project)
   - [QA](#qa)
@@ -40,6 +41,7 @@ with limited action cards and all omni dices.
 - [ ] Implement game phase of End Phase (summons and some support card or buffs take action)
   - [x] Can pull cards by the end
   - [x] Can proceed to next phase
+- [x] Implement CLI for better debugging experience
 - [x] Implement game phase of Game End Phase (one player wins or draw)
 - [x] Implement lazy player agent for minimal testing purposes
 - [x] Implement random player agent for testing purposes
@@ -54,6 +56,28 @@ The final stage is to include more characters and eventually all.
 ## Currently Working On
 
 Implementing the combat system in the action phase.
+
+## CLI (How to try the simulator)
+
+There's currently a CLI available to try this project.
+
+Here are the steps for you to follow to try the developing project.
+
+1. Clone the project
+2. Make sure your Python version >= 3.9.16
+3. Set up the environment with `venv` or otherwise
+4. If you don't know how to setup `venv`, google it or run the following commands under the project directory
+
+```sh
+source venv.sh
+pip install -r requirements.txt
+```
+
+5. With the environment set up run the following command to run the CLI
+
+```sh
+./cli.sh
+```
 
 ## Future Plans
 
