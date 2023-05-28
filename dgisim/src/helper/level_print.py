@@ -81,7 +81,7 @@ class StrDrawer:
         for insertion in self._insertions:
             for i, c in enumerate(insertion.s):
                 board[insertion.x][insertion.y + i] = c
-        return '\n'.join(''.join(cs) for cs in board)
+        return '\n'.join(''.join(cs).rstrip() for cs in board)
 
 class GamePrinter:
 

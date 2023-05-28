@@ -30,6 +30,11 @@ class GameStateMachine:
             return self._actions[self._action_history[-1]]
         return None
 
+    def get_last_action_idx(self) -> Optional[int]:
+        if self._action_history:
+            return self._action_history[-1]
+        return None
+
     def get_game_state(self) -> GameState:
         return self._game_state
 

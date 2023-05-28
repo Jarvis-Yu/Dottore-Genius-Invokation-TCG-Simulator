@@ -94,9 +94,13 @@ class CLISession:
         print(output)
 
     def _print_latest_action(self) -> None:
+        idx = self._game_session.get_last_action_idx()
+        assert idx is not None
+        game_state = self._game_session.get_game_state_at(idx)
+        p1_active = game_state.get_active_player_id().is_player1()
         action = self._game_session.get_last_action()
         assert action is not None
-        print("**** Player Action:", action)
+        print(f"**** Player{'1' if p1_active else '2'} Action:", action)
 
 if __name__ == "__main__":
     cli_session = CLISession()

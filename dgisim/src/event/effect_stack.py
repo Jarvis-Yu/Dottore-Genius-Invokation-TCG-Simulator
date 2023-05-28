@@ -54,6 +54,6 @@ class EffectStack:
 
     def dict_str(self) -> Union[dict, str]:
         content = {}
-        for effect in reversed(self._effects):
-            content[effect.name()] = effect.dict_str()
+        for i, effect in enumerate(reversed(self._effects)):
+            content[f"{effect.name()}-{str(i)}"] = effect.dict_str()
         return content
