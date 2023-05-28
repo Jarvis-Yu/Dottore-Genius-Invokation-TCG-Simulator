@@ -19,30 +19,28 @@ class CLISession:
         self._state_idx = 0
 
     def _help(self) -> None:
-        print("==================================================")
-        print("a - to forward to an autostep")
-        print("n - to forward to next step")
-        print("ba - to previous autostep")
-        print("bn - to previous step")
-        print("q - to quit this session")
-        print("- enter nothing to repeat last step")
-        print("Note: any invalid commands are ignored")
-        print("==================================================")
-
-    def run(self) -> None:
-        print("==================================================")
-        print("Welcome to the Dottore Genius Invokation TCG Simulator CLI ver.")
-        print("This is currently just a basic version for debugging only.")
-        print("==================================================")
         print("a - to forward to an autostep")
         print("n - to forward to next step")
         print("ba - to previous autostep")
         print("bn - to previous step")
         print("h - to get help")
         print("q - to quit this session")
-        print("- enter nothing to repeat last valid command")
+        print("- enter nothing to repeat last step")
         print("Note: any invalid commands are ignored")
+
+    def _equals_sep_bar(self) -> None:
         print("==================================================")
+
+    def _welcome(self) -> None:
+        print("Welcome to the Dottore Genius Invokation TCG Simulator CLI ver.")
+        print("This is currently just a basic version for debugging only.")
+
+    def run(self) -> None:
+        self._equals_sep_bar()
+        self._welcome()
+        self._equals_sep_bar()
+        self._help()
+        self._equals_sep_bar()
         last_cmd = ""
         self._print_latest_game_state()
         wrong_cmd_counter = 0
