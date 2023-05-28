@@ -25,7 +25,7 @@ class Buffable:
         return type(self) == type(buff)
 
     def __str__(self) -> str:
-        return self.__class__.__name__
+        return self.__class__.__name__.removesuffix("Buff")
 
 
 class CharacterTalentBuff(Buffable):
@@ -65,6 +65,9 @@ class NumberedBuff(Buffable):
 
     def num(self) -> int:
         return self._num
+
+    def __str__(self) -> str:
+        return super().__str__() + f"({self._num})"
 
 
 class NumberedAutoDestroyBuff(NumberedBuff):
