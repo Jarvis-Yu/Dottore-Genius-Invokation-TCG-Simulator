@@ -116,6 +116,7 @@ class CLISession:
         self._print_game_state(self._game_session.get_game_state_at(index))
 
     def _print_game_state(self, game_state: GameState) -> None:
+        game_state.waiting_for()
         game_state_dict = game_state.dict_str() 
         assert type(game_state_dict) is dict
         output = GamePrinter.dict_game_printer(game_state_dict)

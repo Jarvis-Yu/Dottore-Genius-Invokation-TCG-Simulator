@@ -174,11 +174,12 @@ class GamePrinter:
         board = StrDrawer()
         board.insert_at(0, 0, f"<{name}>")
         if type(effect) is str:
-            board.insert_at_nextline(2, f"<{effect}>")
+            if effect != "{}":
+                board.insert_at_nextline(2, f"<{effect}>")
         else:
             assert type(effect) is dict
             for field, content in effect.items():
-                content = [c for c in str(content) if c != '\n']
+                content = ''.join(c for c in str(content) if c != '\n')
                 board.insert_at_nextline(2, f"<{field}: {content}>")
         return board
     

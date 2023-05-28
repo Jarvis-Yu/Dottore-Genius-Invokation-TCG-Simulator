@@ -57,7 +57,7 @@ class Effect:
         return self.__class__.__name__
 
     def dict_str(self) -> Union[dict, str]:
-        return str(asdict(self))
+        return asdict(self)
 
     def __str__(self) -> str:
         return self.__class__.__name__
