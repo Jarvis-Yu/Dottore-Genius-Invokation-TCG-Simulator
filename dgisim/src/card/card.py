@@ -2,11 +2,13 @@ from __future__ import annotations
 from enum import Enum
 from typing import TypeVar
 from typing_extensions import override
+from dgisim.src.event.effect import Effect
 
 
 import dgisim.src.state.game_state as gs
 from dgisim.src.event.effect import *
 import dgisim.src.action as ac
+import dgisim.src.buff.buff as buf
 
 
 class Card:
@@ -42,13 +44,17 @@ class FoodCard(EventCard):
     @classmethod
     def effects(cls, instruction: ac.Instruction) -> tuple[Effect, ...]:
         assert isinstance(instruction, ac.CharacterTargetInstruction)
-        es = (
-            StuffedBuffEffect(
-                instruction.target()
+        return cls.food_effects(instruction) + (
+            AddBuffEffect(
+                instruction.target(),
+                buf.SatiatedBuff,
             ),
         )
-        return es
-    pass
+
+    @classmethod
+    def food_effects(cls, instruction: ac.Instruction) -> tuple[Effect, ...]:
+        assert isinstance(instruction, ac.CharacterTargetInstruction)
+        return ()
 
 
 class _DirectHealCard(FoodCard):
@@ -58,16 +64,14 @@ class _DirectHealCard(FoodCard):
 
     @override
     @classmethod
-    def effects(cls, instruction: ac.Instruction) -> tuple[Effect, ...]:
-        es = super().effects(instruction)
+    def food_effects(cls, instruction: ac.Instruction) -> tuple[Effect, ...]:
         assert isinstance(instruction, ac.CharacterTargetInstruction)
-        es = (
+        return (
             RecoverHPEffect(
                 instruction.target(),
                 cls.heal_amount()
             ),
-        ) + es
-        return es
+        )
 
 
 class SweetMadame(_DirectHealCard):
@@ -77,8 +81,11 @@ class SweetMadame(_DirectHealCard):
         return 1
 
 
-class MondstadtHashBrown(FoodCard):
-    pass
+class MondstadtHashBrown(_DirectHealCard):
+    @override
+    @classmethod
+    def heal_amount(cls) -> int:
+        return 2
 
 
 class JueyunGuoba(FoodCard):
@@ -94,7 +101,23 @@ class MintyMeatRolls(FoodCard):
 
 
 class MushroomPizza(FoodCard):
-    pass
+    """
+    Heal first then the buff
+    """
+    @override
+    @classmethod
+    def food_effects(cls, instruction: ac.Instruction) -> tuple[Effect, ...]:
+        assert isinstance(instruction, ac.CharacterTargetInstruction)
+        return (
+            RecoverHPEffect(
+                instruction.target(),
+                1
+            ),
+            AddBuffEffect(
+                instruction.target(),
+                buf.MushroomPizzaBuff,
+            )
+        )
 
 
 class NorthernSmokedChicken(FoodCard):
@@ -105,5 +128,7 @@ class Starsigns(EventCard):
     pass
 
 # TODO: change to the correct parent class
+
+
 class LightningStiletto(Card):
     pass

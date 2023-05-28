@@ -249,7 +249,7 @@ class EndPhaseCheckoutEffect(PhaseEffect):
 @dataclass(frozen=True)
 class EndRoundEffect(PhaseEffect):
     """
-    This is responsible for triggering other clean ups (e.g. remove stuffed)
+    This is responsible for triggering other clean ups (e.g. remove satiated)
     """
     pid: gs.GameState.Pid
 
@@ -495,15 +495,21 @@ class RemoveDiceEffect(Effect):
 
 
 @dataclass(frozen=True)
-class StuffedBuffEffect(Effect):
+class AddBuffEffect(Effect):
     target: StaticTarget
+    buff: type[buf.Buffable]
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         character = game_state.get_target(self.target)
         assert isinstance(character, char.Character)
-        character = character.factory().f_character_buffs(
-            lambda bs: bs.update_buffs(buf.StuffedBuff())
-        ).build()
+        if issubclass(self.buff, buf.CharacterTalentBuff):
+            pass
+        elif issubclass(self.buff, buf.EquipmentBuff):
+            pass
+        elif issubclass(self.buff, buf.CharacterBuff):
+            character = character.factory().f_character_buffs(
+                lambda bs: bs.update_buffs(self.buff())
+            ).build()
         return game_state.factory().f_player(
             self.target.pid,
             lambda p: p.factory().f_characters(
@@ -511,8 +517,33 @@ class StuffedBuffEffect(Effect):
             ).build()
         ).build()
 
+
 @dataclass(frozen=True)
-class GainCardEffect(Effect):
+class UpdateBuffEffect(Effect):
+    target: StaticTarget
+    buff: buf.Buffable
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        character = game_state.get_target(self.target)
+        assert isinstance(character, char.Character)
+        if isinstance(self.buff, buf.CharacterTalentBuff):
+            pass
+        elif isinstance(self.buff, buf.EquipmentBuff):
+            pass
+        elif isinstance(self.buff, buf.CharacterBuff):
+            character = character.factory().f_character_buffs(
+                lambda bs: bs.update_buffs(self.buff)
+            ).build()
+        return game_state.factory().f_player(
+            self.target.pid,
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().character(character).build()
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True)
+class AddCardEffect(Effect):
     target: StaticTarget
     card: type[cd.Card]
 

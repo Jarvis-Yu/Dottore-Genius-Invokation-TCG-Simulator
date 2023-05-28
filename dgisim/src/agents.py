@@ -76,18 +76,19 @@ class HardCodedRandomAgent(PlayerAgent):
             if selection < 1:
                 cards = me.get_hand_cards()
                 card: Optional[type[Card]]
-                if cards.contains(SweetMadame):
-                    print(f"{pid} has SweetMadame")
-                else:
-                    print(f"{pid} doesn't have SweetMadame")
+                tmp_dices = ActualDices({})
                 if cards.contains(SweetMadame) and character_injured:
                     card = SweetMadame
-                # elif cards.contains_type(MondstadtHashBrown) and character_injured:
-                #     card = MondstadtHashBrown
+                    tmp_dices = ActualDices({Element.OMNI: 0})
+                elif cards.contains(MondstadtHashBrown) and character_injured:
+                    tmp_dices = ActualDices({Element.OMNI: 1})
+                    card = MondstadtHashBrown
+                elif cards.contains(MushroomPizza) and character_injured:
+                    tmp_dices = ActualDices({Element.OMNI: 1})
+                    card = MushroomPizza
                 else:
                     card = None
-                if card is not None and not active_character.stuffed():
-                    tmp_dices = ActualDices({})
+                if card is not None and not active_character.satiated():
                     print(card().name())
                     return CardAction(
                         card,

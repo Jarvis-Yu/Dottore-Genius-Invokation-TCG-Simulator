@@ -143,11 +143,20 @@ class ActionPhase(ph.Phase):
     def _handle_card_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: CardAction) -> Optional[gs.GameState]:
         player = game_state.get_player(pid)
         new_effects: list[Effect] = []
+        # Costs
+        dices = player.get_dices()
+        new_dices = dices - action.instruction.dices()
+        if new_dices is None:
+            return None
+        # Card
         card = action.card
         new_effects.append(RemoveCardEffect(pid, card))
         new_effects += list(card.effects(action.instruction))
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(new_effects)
+        ).player(
+            pid,
+            player.factory().dices(new_dices).build()
         ).build()
 
     def _handle_death_swap_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: DeathSwapAction) -> Optional[gs.GameState]:

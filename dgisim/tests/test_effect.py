@@ -152,13 +152,13 @@ class TestEffect(unittest.TestCase):
         assert c is not None
         self.assertEqual(c.get_hp(), 10)
 
-    def testStuffedEffectRemovedDuringEndRound(self):
+    def testSatiatedEffectRemovedDuringEndRound(self):
         game_state = self.END_TEMPLATE.factory().f_player1(
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().f_character(
                     2,
                     lambda c: c.factory().character_buffs(
-                        Buffs((StuffedBuff(), ))
+                        Buffs((SatiatedBuff(), ))
                     ).build()
                 ).build()
             ).build()
@@ -171,5 +171,5 @@ class TestEffect(unittest.TestCase):
             .get_characters()
             .get_just_character(2)
             .get_character_buffs()
-            .contains(StuffedBuff)
+            .contains(SatiatedBuff)
         )

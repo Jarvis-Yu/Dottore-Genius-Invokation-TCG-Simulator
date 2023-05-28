@@ -108,9 +108,9 @@ class Character:
     def defeated(self) -> bool:
         return self._hp == 0
 
-    def stuffed(self) -> bool:
-        from dgisim.src.buff.buff import StuffedBuff
-        return self._buffs.contains(StuffedBuff)
+    def satiated(self) -> bool:
+        from dgisim.src.buff.buff import SatiatedBuff
+        return self._buffs.contains(SatiatedBuff)
 
     def name(self) -> str:
         return self.__class__.__name__
@@ -219,7 +219,7 @@ class Keqing(Character):
                 element=efft.Element.ELECTRO,
                 damage=3,
             ),
-            efft.GainCardEffect(
+            efft.AddCardEffect(
                 target=source,
                 card=LightningStiletto,
             ),
