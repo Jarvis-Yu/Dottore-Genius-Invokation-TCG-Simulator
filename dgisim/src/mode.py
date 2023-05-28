@@ -9,10 +9,14 @@ from dgisim.src.helper.level_print import level_print_single
 
 class Mode:
 
+    _HAND_CARD_LIMIT = 10
     _ROUND_LIMIT = 15
 
     def get_round_limit(self) -> int:
         return self._ROUND_LIMIT
+
+    def get_hand_card_limit(self) -> int:
+        return self._HAND_CARD_LIMIT
 
     def all_cards(self) -> frozenset[type[card.Card]]:
         raise Exception("Not Overridden")

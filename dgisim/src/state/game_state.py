@@ -35,31 +35,31 @@ class GameState:
 
     def __init__(
         self,
+        mode: md.Mode,
         phase: ph.Phase,
         round: int,
         active_player: GameState.Pid,
-        mode: md.Mode,
         player1: pl.PlayerState,
         player2: pl.PlayerState,
         effect_stack: EffectStack
     ):
         # REMINDER: don't forget to update factory when adding new fields
+        self._mode = mode
         self._phase = phase
         self._round = round
         self._active_player = active_player
         self._player1 = player1
         self._player2 = player2
         self._effect_stack = effect_stack
-        self._mode = mode
 
     @classmethod
     def from_default(cls):
         mode = md.DefaultMode()
         return cls(
+            mode=mode,
             phase=mode.card_select_phase(),
             round=0,
             active_player=GameState.Pid.P1,
-            mode=mode,
             player1=pl.PlayerState.examplePlayer(mode),
             player2=pl.PlayerState.examplePlayer(mode),
             effect_stack=EffectStack(()),
@@ -67,6 +67,9 @@ class GameState:
 
     def factory(self):
         return GameStateFactory(self)
+
+    def get_mode(self) -> md.Mode:
+        return self._mode
 
     def get_phase(self) -> ph.Phase:
         return self._phase
@@ -76,9 +79,6 @@ class GameState:
 
     def get_active_player_id(self) -> GameState.Pid:
         return self._active_player
-
-    def get_mode(self) -> md.Mode:
-        return self._mode
 
     def get_effect_stack(self) -> EffectStack:
         return self._effect_stack
@@ -211,13 +211,17 @@ class GameState:
 
 class GameStateFactory:
     def __init__(self, game_state: GameState):
+        self._mode = game_state.get_mode()
         self._phase = game_state.get_phase()
         self._round = game_state.get_round()
         self._active_player = game_state.get_active_player_id()
         self._player1 = game_state.get_player1()
         self._player2 = game_state.get_player2()
         self._effect_stack = game_state.get_effect_stack()
-        self._mode = game_state.get_mode()
+
+    def mode(self, new_mode: md.Mode) -> GameStateFactory:
+        self._mode = new_mode
+        return self
 
     def phase(self, new_phase: ph.Phase) -> GameStateFactory:
         self._phase = new_phase
@@ -228,10 +232,6 @@ class GameStateFactory:
 
     def round(self, new_round: int) -> GameStateFactory:
         self._round = new_round
-        return self
-
-    def mode(self, new_mode: md.Mode) -> GameStateFactory:
-        self._mode = new_mode
         return self
 
     def effect_stack(self, effect_stack: EffectStack) -> GameStateFactory:
@@ -293,10 +293,10 @@ class GameStateFactory:
 
     def build(self) -> GameState:
         return GameState(
+            mode=self._mode,
             phase=self._phase,
             round=self._round,
             active_player=self._active_player,
-            mode=self._mode,
             effect_stack=self._effect_stack,
             player1=self._player1,
             player2=self._player2,

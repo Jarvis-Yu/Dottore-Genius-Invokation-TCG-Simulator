@@ -23,9 +23,9 @@ class Card:
     def __str__(self) -> str:
         return self.__class__.__name__
 
-    @staticmethod
-    def name() -> str:
-        return "card"
+    @classmethod
+    def name(cls) -> str:
+        return cls.__name__
 
 
 # for test only
@@ -71,55 +71,39 @@ class _DirectHealCard(FoodCard):
 
 
 class SweetMadame(_DirectHealCard):
-    _name = "SweetMadame"
-
     @override
     @classmethod
     def heal_amount(cls) -> int:
         return 1
 
-    @staticmethod
-    def name() -> str:
-        return "SweetMadame"
-
 
 class MondstadtHashBrown(FoodCard):
-    @staticmethod
-    def name() -> str:
-        return "MondstadtHashBrown"
+    pass
 
 
 class JueyunGuoba(FoodCard):
-    @staticmethod
-    def name() -> str:
-        return "JueyunGuoba"
+    pass
 
 
 class LotusFlowerCrisp(FoodCard):
-    @staticmethod
-    def name() -> str:
-        return "LotusFlowerCrisp"
+    pass
 
 
 class MintyMeatRolls(FoodCard):
-    @staticmethod
-    def name() -> str:
-        return "MintyMeatRolls"
+    pass
 
 
 class MushroomPizza(FoodCard):
-    @staticmethod
-    def name() -> str:
-        return "MushroomPizza"
+    pass
 
 
 class NorthernSmokedChicken(FoodCard):
-    @staticmethod
-    def name() -> str:
-        return "NorthernSmokedChicken"
+    pass
 
 
 class Starsigns(EventCard):
-    @staticmethod
-    def name() -> str:
-        return "Starsigns"
+    pass
+
+# TODO: change to the correct parent class
+class LightningStiletto(Card):
+    pass

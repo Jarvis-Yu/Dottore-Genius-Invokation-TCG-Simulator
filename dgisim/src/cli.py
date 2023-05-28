@@ -107,7 +107,6 @@ class CLISession:
             wrong_cmd_counter = 0
             if new_cmd != "":
                 last_cmd = new_cmd
-            # LATEST_TODO
 
     def _print_latest_game_state(self) -> None:
         self._print_game_state(self._game_session.get_game_state())

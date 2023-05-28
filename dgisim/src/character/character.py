@@ -16,8 +16,8 @@ from dgisim.src.helper.level_print import level_print_single, INDENT, level_prin
 class CharacterSkill(Enum):
     NORMAL_ATTACK = 0
     BURST = 1
-    SKILL1 = 2
-    SKILL2 = 3
+    ELEMENTAL_SKILL1 = 2
+    ELEMENTAL_SKILL2 = 3
 
 
 class Character:
@@ -74,7 +74,7 @@ class Character:
         return sum([buffs.get_buffs() for buffs in self.get_all_buffs_ordered()], ())
 
     def factory(self) -> CharacterFactory:
-        raise Exception("Not Overriden")
+        return CharacterFactory(self, type(self))
 
     def address(self, game_state: gs.GameState) -> efft.StaticTarget:
         pid = game_state.belongs_to(self)
@@ -92,9 +92,14 @@ class Character:
     def skill(self, game_state: gs.GameState, skill_type: CharacterSkill, instruction: act.Instruction) -> tuple[efft.Effect, ...]:
         if skill_type is CharacterSkill.NORMAL_ATTACK:
             return self.normal_attack(game_state, skill_type)
+        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
+            return self.elemental_skill1(game_state, skill_type)
         raise Exception("Not Overriden")
 
     def normal_attack(self, game_state: gs.GameState, skill_type: CharacterSkill) -> tuple[efft.Effect, ...]:
+        raise Exception("Not Overriden")
+
+    def elemental_skill1(self, game_state: gs.GameState, skill_type: CharacterSkill) -> tuple[efft.Effect, ...]:
         raise Exception("Not Overriden")
 
     def alive(self) -> bool:
@@ -202,8 +207,27 @@ class Keqing(Character):
             damage=2,
         )
 
-    def factory(self) -> CharacterFactory:
-        return CharacterFactory(self, type(self))
+    def elemental_skill1(self, game_state: gs.GameState, skill_type: CharacterSkill) -> tuple[efft.Effect, ...]:
+        from dgisim.src.card.card import LightningStiletto
+
+        source = self.address(game_state)
+        # TODO: check for talent card and balabala
+        return (
+            efft.DamageEffect(
+                source=source,
+                target=efft.DynamicCharacterTarget.OPPO_ACTIVE,
+                element=efft.Element.ELECTRO,
+                damage=3,
+            ),
+            efft.GainCardEffect(
+                target=source,
+                card=LightningStiletto,
+            ),
+            efft.EnergyRechargeEffect(
+                target=source,
+                recharge=1,
+            )
+        )
 
     @classmethod
     def from_default(cls, id: int = -1) -> Keqing:
@@ -234,8 +258,22 @@ class Kaeya(Character):
             damage=2,
         )
 
-    def factory(self) -> CharacterFactory:
-        return CharacterFactory(self, type(self))
+    def elemental_skill1(self, game_state: gs.GameState, skill_type: CharacterSkill) -> tuple[efft.Effect, ...]:
+        from dgisim.src.card.card import LightningStiletto
+
+        source = self.address(game_state)
+        return (
+            efft.DamageEffect(
+                source=source,
+                target=efft.DynamicCharacterTarget.OPPO_ACTIVE,
+                element=efft.Element.CRYO,
+                damage=3,
+            ),
+            efft.EnergyRechargeEffect(
+                target=source,
+                recharge=1,
+            )
+        )
 
     @classmethod
     def from_default(cls, id: int = -1) -> Kaeya:
@@ -266,8 +304,9 @@ class Oceanid(Character):
             damage=1,
         )
 
-    def factory(self) -> CharacterFactory:
-        return CharacterFactory(self, type(self))
+    def elemental_skill1(self, game_state: gs.GameState, skill_type: CharacterSkill) -> tuple[efft.Effect, ...]:
+        # TODO: add summons
+        return ()
 
     @classmethod
     def from_default(cls, id: int = -1) -> Oceanid:

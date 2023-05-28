@@ -96,10 +96,11 @@ class TriggerBuffEffect(Effect):
         character = cast(char.Character, character)
         effects: Iterable[Effect] = []
 
-        # LATEST_TODO: find the buff
         if issubclass(self.buff, buf.CharacterTalentBuff):
+            # TODO
             pass
         elif issubclass(self.buff, buf.EquipmentBuff):
+            # TODO
             pass
         elif issubclass(self.buff, buf.CharacterBuff):
             buffs = character.get_character_buffs()
@@ -509,3 +510,12 @@ class StuffedBuffEffect(Effect):
                 lambda cs: cs.factory().character(character).build()
             ).build()
         ).build()
+
+@dataclass(frozen=True)
+class GainCardEffect(Effect):
+    target: StaticTarget
+    card: type[cd.Card]
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        # TODO: add card
+        return super().execute(game_state)
