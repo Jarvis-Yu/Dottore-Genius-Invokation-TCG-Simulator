@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Dict, Any
 from typing_extensions import override
 
@@ -17,3 +18,10 @@ class HashableDict(dict):
 
     def __hash__(self) -> int:  # type: ignore
         return hash(frozenset(self.items()))
+
+    @classmethod
+    def from_dict(cls, d: dict) -> HashableDict:
+        if isinstance(d, HashableDict):
+            return d
+        else:
+            return HashableDict(d)

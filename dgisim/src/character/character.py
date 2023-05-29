@@ -42,6 +42,7 @@ class Character:
         self._talents = talents
         self._equipments = equipments
         self._buffs = buffs
+        self._aura = elemental_aura
 
     def get_id(self) -> int:
         return self._id
@@ -61,11 +62,14 @@ class Character:
     def get_talent_buffs(self) -> Buffs:
         return self._talents
 
-    def get_equipment_buffs(self) -> Buffs:
+    def get_equipment_buffs(self) -> EquipmentBuffs:
         return self._equipments
 
     def get_character_buffs(self) -> Buffs:
         return self._buffs
+
+    def get_elemental_aura(self) -> ElementalAura:
+        return self._aura
 
     def get_all_buffs_ordered(self) -> list[Buffs]:
         return [self._talents, self._equipments, self._buffs]
@@ -167,7 +171,10 @@ class CharacterFactory:
         self._max_hp = character.get_max_hp()
         self._energy = character.get_energy()
         self._max_energy = character.get_max_energy()
+        self._talents = character.get_talent_buffs()
+        self._equipments = character.get_equipment_buffs()
         self._buffs = character.get_character_buffs()
+        self._aura = character.get_elemental_aura()
 
     def hp(self, hp: int) -> CharacterFactory:
         self._hp = hp
@@ -184,6 +191,10 @@ class CharacterFactory:
     def f_character_buffs(self, f: Callable[[Buffs], Buffs]) -> CharacterFactory:
         return self.character_buffs(f(self._buffs))
 
+    def elemental_aura(self, aura: ElementalAura) -> CharacterFactory:
+        self._aura = aura
+        return self
+
     def build(self) -> Character:
         return self._char(
             id=self._id,
@@ -191,10 +202,10 @@ class CharacterFactory:
             max_hp=self._max_hp,
             energy=self._energy,
             max_energy=self._max_energy,
-            talents=TalentBuffs(()),
-            equipments=EquipmentBuffs(()),
+            talents=self._talents,
+            equipments=self._equipments,
             buffs=self._buffs,
-            elemental_aura=ElementalAura(),
+            elemental_aura=self._aura,
         )
 
 
@@ -240,7 +251,7 @@ class Keqing(Character):
             buffs=OrderedBuffs(()),
             talents=TalentBuffs(()),
             equipments=EquipmentBuffs(()),
-            elemental_aura=ElementalAura(),
+            elemental_aura=ElementalAura.from_default(),
         )
 
     def __eq__(self, other: object) -> bool:
@@ -286,7 +297,7 @@ class Kaeya(Character):
             talents=TalentBuffs(()),
             equipments=EquipmentBuffs(()),
             buffs=OrderedBuffs(()),
-            elemental_aura=ElementalAura(),
+            elemental_aura=ElementalAura.from_default(),
         )
 
     def __eq__(self, other: object) -> bool:
@@ -319,7 +330,7 @@ class Oceanid(Character):
             talents=TalentBuffs(()),
             equipments=EquipmentBuffs(()),
             buffs=OrderedBuffs(()),
-            elemental_aura=ElementalAura(),
+            elemental_aura=ElementalAura.from_default(),
         )
 
     def __eq__(self, other: object) -> bool:

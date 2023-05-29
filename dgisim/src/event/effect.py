@@ -399,7 +399,7 @@ class DamageEffect(Effect):
             opponent = optional_opponent
         else:
             raise Exception("Not implemented yet")
-        # TODO: Preprocess Damage
+        # LATEST_TODO: Preprocess Damage
         # Damage Calculation
         hp = opponent.get_hp()
         hp = max(0, hp - self.damage)
