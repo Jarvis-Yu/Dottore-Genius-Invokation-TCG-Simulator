@@ -100,10 +100,11 @@ class GamePrinter:
         board.insert_at(0, 0, f"<{name}>")
         GamePrinter._insert_lines(board, 2, character, [
             "id",
-            "HP",
-            "Max HP",
-            "Energy",
-            "Max Energy",
+            "Aura",
+        ])
+        board.insert_at_nextline(2, f"<HP: {character['HP']}/{character['Max HP']}>")
+        board.insert_at_nextline(2, f"<Energy: {character['Energy']}/{character['Max Energy']}>")
+        GamePrinter._insert_lines(board, 2, character, [
             "Talents",
             "Equipments",
             "Buffs",

@@ -143,16 +143,20 @@ class Character:
         new_indent = indent + INDENT
         return level_print({
             "id": str(self._id),
+            "Aura": str(self._aura.elem_auras()),
             "HP": str(self._hp),
             "Max HP": str(self._max_hp),
             "Energy": str(self._energy),
             "Max Energy": str(self._max_energy),
+            "Talents": str(self._talents),
+            "Equipments": str(self._equipments),
             "Buffs": str(self._buffs),
         }, indent)
 
     def dict_str(self) -> Union[dict, str]:
         return {
             "id": str(self._id),
+            "Aura": str(self._aura.elem_auras()),
             "HP": str(self._hp),
             "Max HP": str(self._max_hp),
             "Energy": str(self._energy),
