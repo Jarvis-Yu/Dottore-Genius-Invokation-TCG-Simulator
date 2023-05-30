@@ -1,5 +1,6 @@
 from typing import List, Optional
 from random import random, choice
+from dgisim.src.action import PlayerAction
 
 from dgisim.src.player_agent import PlayerAgent
 from dgisim.src.state.game_state import GameState
@@ -37,6 +38,19 @@ class LazyAgent(PlayerAgent):
             return EndRoundAction()
         else:
             raise Exception("No Action Defined")
+
+
+class PuppetAgent(PlayerAgent):
+    def __init__(self, actions: list[PlayerAction] = []) -> None:
+        self._actions = actions
+
+    def inject_action(self, action: PlayerAction) -> None:
+        self._actions.append(action)
+
+    def choose_action(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
+        assert self._actions
+        return self._actions.pop(0)
+
 
 class HardCodedRandomAgent(PlayerAgent):
     _NUM_PICKED_CARDS = 3
