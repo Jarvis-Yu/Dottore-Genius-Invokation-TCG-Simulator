@@ -229,14 +229,17 @@ class EndPhaseCheckoutEffect(PhaseEffect):
     This is responsible for triggering character buffs/summons/supports by the
     end of the round.
     """
-    pid: gs.GameState.Pid
-
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         active_id = game_state.get_active_player_id()
-        active_player = game_state.get_player(active_id)
+        # active_player = game_state.get_player(active_id)
         effects = [
             CharacterBuffTriggerEffect(
                 active_id,
+                TriggeringSignal.END_ROUND_CHECK_OUT
+            ),
+            # TODO: add active_player's team buff, summons buff... here
+            CharacterBuffTriggerEffect(
+                active_id.other(),
                 TriggeringSignal.END_ROUND_CHECK_OUT
             ),
             # TODO: add active_player's team buff, summons buff... here
@@ -251,14 +254,17 @@ class EndRoundEffect(PhaseEffect):
     """
     This is responsible for triggering other clean ups (e.g. remove satiated)
     """
-    pid: gs.GameState.Pid
-
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         active_id = game_state.get_active_player_id()
         active_player = game_state.get_player(active_id)
         effects = [
             CharacterBuffTriggerEffect(
                 active_id,
+                TriggeringSignal.ROUND_END
+            ),
+            # TODO: add active_player's team buff, summons buff... here
+            CharacterBuffTriggerEffect(
+                active_id.other(),
                 TriggeringSignal.ROUND_END
             ),
             # TODO: add active_player's team buff, summons buff... here

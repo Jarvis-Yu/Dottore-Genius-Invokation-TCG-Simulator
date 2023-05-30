@@ -13,14 +13,8 @@ class EndPhase(ph.Phase):
         active_pid = game_state.get_active_player_id()
         effects: list[Effect] = []
         effects += [
-            EndPhaseCheckoutEffect(active_pid),
-            EndPhaseTurnEndEffect(),
-            EndPhaseCheckoutEffect(active_pid.other()),
-            EndPhaseTurnEndEffect(),
-            EndRoundEffect(active_pid),
-            EndPhaseTurnEndEffect(),
-            EndRoundEffect(active_pid.other()),
-            EndPhaseTurnEndEffect(),
+            EndPhaseCheckoutEffect(),
+            EndRoundEffect(),
             SetBothPlayerPhaseEffect(PlayerState.Act.END_PHASE),
         ]
         return game_state.factory().f_effect_stack(
