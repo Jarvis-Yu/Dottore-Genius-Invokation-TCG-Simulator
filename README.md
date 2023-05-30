@@ -23,7 +23,7 @@ with limited action cards and all omni dices.
   - [x] Can work with real cards
   - [ ] ~~Allow both players to act simultaneously instead of in turns~~ (trivial for AI training)
 - [x] Implement game phase of Starting Hand Select Phase (select active character)
-- [ ] Implement game phase of Roll (Dice) Phase (roll dices between rounds)
+- [x] Implement game phase of Roll (Dice) Phase (roll dices between rounds)
   - [x] Can provide all omni dices
   - [x] Can proceed to next phase
 - [ ] Implement game phase of Action Phase (players beat each other)
@@ -31,14 +31,13 @@ with limited action cards and all omni dices.
   - [x] Partially implement the pipeline for status handling
   - [x] Allow players to normal attack
   - [x] Allow players to use some cards
-  - [ ] Implement player action validity checker
-  - [ ] Implement player action choices provider
   - [ ] Implement elemental reaction
   - [ ] Allow players to cast skills (easy task once all other parts are done)
   - [ ] Allow players to cast elemental burst (same as above)
+  - [x] Allow players to use some cards
   - [ ] Allow players to use all cards
   - [x] Can proceed to next phase
-- [ ] Implement game phase of End Phase (summons and some support card or statuses take action)
+- [x] Implement game phase of End Phase (summons and some support card or statuses take action)
   - [x] Can pull cards by the end
   - [x] Can proceed to next phase
 - [x] Implement CLI for better debugging experience
@@ -46,6 +45,8 @@ with limited action cards and all omni dices.
 - [x] Implement lazy player agent for minimal testing purposes
 - [x] Implement random player agent for testing purposes
 - [ ] Implement greedy player agent for testing purposes
+- [ ] Implement player action validity checker
+- [ ] Implement player action choices provider
 
 The third stage is to implement real dices system.
 
@@ -105,5 +106,4 @@ So you don't want any teammates?
 
 How to contact you?
 
-- I assume you can find my email somewhere, if not, raise an issue on this project so I'll be
-  notified.
+- I assume you can find my email somewhere ~~(hint: `git log`)~~
