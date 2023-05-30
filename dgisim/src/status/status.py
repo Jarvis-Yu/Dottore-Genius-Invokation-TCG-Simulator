@@ -3,7 +3,7 @@ from typing import TypeVar
 from typing_extensions import override
 from enum import Enum
 
-import dgisim.src.event.effect as eft
+import dgisim.src.effect.effect as eft
 import dgisim.src.state.game_state as gs
 
 

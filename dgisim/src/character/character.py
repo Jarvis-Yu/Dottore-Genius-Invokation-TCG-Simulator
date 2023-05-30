@@ -6,10 +6,10 @@ import dgisim.src.state.game_state as gs
 from dgisim.src.status.status import Status
 from dgisim.src.status.statuses import Statuses, EquipmentStatuses, OrderedStatuses, TalentStatuses
 from dgisim.src.element.element import ElementalAura
-from dgisim.src.event.event_pre import EventPre
+from dgisim.src.effect.event_pre import EventPre
 from dgisim.src.dices import AbstractDices
-from dgisim.src.event.event import *
-import dgisim.src.event.effect as efft
+from dgisim.src.effect.event import *
+import dgisim.src.effect.effect as efft
 from dgisim.src.helper.level_print import level_print_single, INDENT, level_print
 
 

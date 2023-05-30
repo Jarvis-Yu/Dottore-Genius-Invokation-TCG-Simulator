@@ -9,7 +9,7 @@ from dgisim.src.character.characters import Characters
 import dgisim.src.character.character as char
 from dgisim.src.dices import ActualDices
 import dgisim.src.character.character as char
-from dgisim.src.event.event_pre import EventPre
+from dgisim.src.effect.event_pre import EventPre
 # from dgisim.src.card.cards_set import DEFAULT_CARDS
 # from dgisim.src.character.characters_set import DEFAULT_CHARACTERS
 

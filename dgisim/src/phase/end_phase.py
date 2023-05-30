@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dgisim.src.state.game_state as gs
 import dgisim.src.phase.phase as ph
-from dgisim.src.event.effect import *
+from dgisim.src.effect.effect import *
 from dgisim.src.state.player_state import PlayerState
 from dgisim.src.dices import ActualDices
 

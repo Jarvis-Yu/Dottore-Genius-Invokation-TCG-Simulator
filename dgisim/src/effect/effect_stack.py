@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Iterable, Union
 
-from dgisim.src.event.effect import Effect
+from dgisim.src.effect.effect import Effect
 
 class EffectStack:
     def __init__(self, effects: tuple[Effect, ...]) -> None:

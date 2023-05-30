@@ -2,8 +2,8 @@ import unittest
 
 from dgisim.src.state.game_state import GameState
 from dgisim.src.state.player_state import PlayerState
-from dgisim.src.event.effect_stack import EffectStack
-from dgisim.src.event.effect import *
+from dgisim.src.effect.effect_stack import EffectStack
+from dgisim.src.effect.effect import *
 from dgisim.src.status.statuses import *
 from dgisim.src.status.status import *
 

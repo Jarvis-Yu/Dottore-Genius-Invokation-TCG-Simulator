@@ -2,11 +2,11 @@ from __future__ import annotations
 from enum import Enum
 from typing import TypeVar
 from typing_extensions import override
-from dgisim.src.event.effect import Effect
+from dgisim.src.effect.effect import Effect
 
 
 import dgisim.src.state.game_state as gs
-from dgisim.src.event.effect import *
+from dgisim.src.effect.effect import *
 import dgisim.src.action as ac
 import dgisim.src.status.status as stt
 

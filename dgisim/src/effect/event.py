@@ -4,7 +4,7 @@ from enum import Enum
 
 import dgisim.src.state.game_state as gs
 import dgisim.src.character.character as Cr
-import dgisim.src.event.effect as efft
+import dgisim.src.effect.effect as efft
 
 
 def normal_attack_template(

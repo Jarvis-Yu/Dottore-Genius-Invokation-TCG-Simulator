@@ -8,10 +8,10 @@ import dgisim.src.phase.game_end_phase as gep
 import dgisim.src.state.player_state as pl
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
 from dgisim.src.action import PlayerAction
-from dgisim.src.event.effect_stack import EffectStack
-from dgisim.src.event.event_pre import EventPre
+from dgisim.src.effect.effect_stack import EffectStack
+from dgisim.src.effect.event_pre import EventPre
 from dgisim.src.character.character import Character
-from dgisim.src.event.effect import StaticTarget, Zone
+from dgisim.src.effect.effect import StaticTarget, Zone
 
 
 class GameState:

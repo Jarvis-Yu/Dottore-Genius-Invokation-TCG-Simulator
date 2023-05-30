@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from dgisim.src.card.cards import Cards
 from dgisim.src.dices import ActualDices
-from dgisim.src.event.effect import StaticTarget
+from dgisim.src.effect.effect import StaticTarget
 import dgisim.src.state.game_state as gs
 
 
