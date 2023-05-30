@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import FrozenSet, Optional, cast, Union, ClassVar, Iterable
+from typing import FrozenSet, Optional, cast, Union, ClassVar, Iterable, Callable
 from enum import Enum
 from dataclasses import InitVar, dataclass, asdict
 from itertools import chain
@@ -115,8 +115,67 @@ class TriggerStatusEffect(Effect):
         ).build()
 
 
+def _loopAllStatuses(
+        game_state: gs.GameState,
+        pid: gs.GameState.Pid,
+        f: Callable[[gs.GameState, stt.Status, StaticTarget], gs.GameState]
+) -> gs.GameState:
+    """
+    Perform f on all statuses of player pid in order
+    """
+    player = game_state.get_player(pid)
+
+    # characters first
+    characters = player.get_characters()
+    ordered_characters = characters.get_character_in_activity_order()
+    for character in ordered_characters:
+        # get character's private statuses and add triggerStatusEffect to global effect_stack
+        statuses = character.get_all_statuses_ordered_flattened()
+        character_id = character.get_id()
+        target = StaticTarget(
+            pid,
+            Zone.CHARACTER,
+            character_id
+        )
+        for status in statuses:
+            game_state = f(game_state, status, target)
+
+    # combat status TODO
+    # summons TODO
+    # supports TODO
+
+    return game_state
+
+
+def _triggerAllStatusesEffects(
+        game_state: gs.GameState, pid: gs.GameState.Pid, signal: TriggeringSignal
+) -> list[Effect]:
+    """
+    Takes the current game_state, trigger all statuses in order of player pid
+    Returns the triggering effects in order (first to last)
+    """
+    effects: list[Effect] = []
+
+    def f(game_state: gs.GameState, status: stt.Status, target: StaticTarget) -> gs.GameState:
+        nonlocal effects
+        effects.append(TriggerStatusEffect( target, type(status), signal))
+        return game_state
+
+    _loopAllStatuses(game_state, pid, f)
+    return effects
+
+
+def _preprocessByAllStatuses(
+        game_state: gs.GameState,
+        pid: gs.GameState.Pid,
+        item: Preprocessable,
+        pp_type: stt.Status.PPType,
+) -> tuple[gs.GameState, Preprocessable]:
+    raise Exception("TODO")
+
+
 @dataclass(frozen=True)
-class CharacterStatusTriggerEffect(TriggerrbleEffect):
+class AllStatusTriggererEffect(TriggerrbleEffect):
     """
     This effect triggers the characters' statuses with the provided signal in order.
     """
@@ -124,27 +183,7 @@ class CharacterStatusTriggerEffect(TriggerrbleEffect):
     signal: TriggeringSignal
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
-        player = game_state.get_player(self.pid)
-        characters = player.get_characters()
-        ordered_characters = characters.get_character_in_activity_order()
-
-        effects: list[Effect] = []
-
-        for character in ordered_characters:
-            # get character's private statuses and add triggerStatusEffect to global effect_stack
-            statuses = character.get_all_statuses_ordered_flattened()
-            character_id = character.get_id()
-            for status in statuses:
-                status_type: type[stt.Status] = type(status)
-                effects.append(TriggerStatusEffect(
-                    StaticTarget(
-                        self.pid,
-                        Zone.CHARACTER,
-                        character_id,
-                    ),
-                    status_type,
-                    self.signal
-                ))
+        effects = _triggerAllStatusesEffects(game_state, self.pid, self.signal)
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
@@ -229,16 +268,17 @@ class EndPhaseCheckoutEffect(PhaseEffect):
     This is responsible for triggering character statuses/summons/supports by the
     end of the round.
     """
+
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         active_id = game_state.get_active_player_id()
         # active_player = game_state.get_player(active_id)
         effects = [
-            CharacterStatusTriggerEffect(
+            AllStatusTriggererEffect(
                 active_id,
                 TriggeringSignal.END_ROUND_CHECK_OUT
             ),
             # TODO: add active_player's team status, summons status... here
-            CharacterStatusTriggerEffect(
+            AllStatusTriggererEffect(
                 active_id.other(),
                 TriggeringSignal.END_ROUND_CHECK_OUT
             ),
@@ -254,16 +294,17 @@ class EndRoundEffect(PhaseEffect):
     """
     This is responsible for triggering other clean ups (e.g. remove satiated)
     """
+
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         active_id = game_state.get_active_player_id()
         active_player = game_state.get_player(active_id)
         effects = [
-            CharacterStatusTriggerEffect(
+            AllStatusTriggererEffect(
                 active_id,
                 TriggeringSignal.ROUND_END
             ),
             # TODO: add active_player's team status, summons status... here
-            CharacterStatusTriggerEffect(
+            AllStatusTriggererEffect(
                 active_id.other(),
                 TriggeringSignal.ROUND_END
             ),
@@ -391,6 +432,15 @@ class DamageEffect(Effect):
 
     def legal(self) -> bool:
         return self.element in self._DAMAGE_ELEMENTS
+
+    def _reaction_confirmation(
+            self, game_state: gs.GameState, damage: DamageEffect
+    ) -> tuple[gs.GameState, DamageEffect]:
+        source_id = damage.source.pid
+        oppo_id = source_id.other()
+        source_statuses = game_state.get_player(source_id).get_characters()
+        raise Exception("TODO")
+        return game_state, damage
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         pid = self.source.pid
@@ -556,3 +606,7 @@ class AddCardEffect(Effect):
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         # TODO: add card
         return super().execute(game_state)
+
+
+# This has to be by the end of the file or there's cyclic import error
+Preprocessable = Union[DamageEffect, int]

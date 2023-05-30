@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TypeVar
+from typing import TypeVar, Union
 from typing_extensions import override
 from enum import Enum
 
@@ -14,18 +14,28 @@ class TriggerringEvent(Enum):
 T = TypeVar('T', bound="Status")
 
 
+
 class Status:
+    class PPType(Enum):
+        # Damages
+        DmgElement = "DmgElement"
+        DmgNumber = "DmgNumber"
+
     def __init__(self) -> None:
         if type(self) is Status:
             raise Exception("class Status is not instantiable")
 
-    def preprocess(self: T, damage_effect: eft.DamageEffect) -> tuple[eft.DamageEffect, T]:
-        return (damage_effect, self)
+    def preprocess(
+            self: T, item: eft.Preprocessable, signal: Status.PPType
+    ) -> tuple[eft.Preprocessable, T]:
+        return (item, self)
 
     # def react_to_event(self, game_state: gs.GameState, event: TriggerringEvent) -> gs.GameState:
     #     raise Exception("TODO")
 
-    def react_to_signal(self, source: eft.StaticTarget, signal: eft.TriggeringSignal) -> tuple[eft.Effect, ...]:
+    def react_to_signal(
+            self, source: eft.StaticTarget, signal: eft.TriggeringSignal
+    ) -> tuple[eft.Effect, ...]:
         raise Exception("TODO")
 
     def same_type_as(self, status: Status) -> bool:
