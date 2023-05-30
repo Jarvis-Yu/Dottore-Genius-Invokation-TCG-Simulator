@@ -3,8 +3,8 @@ from typing import Tuple, Callable, Union
 from enum import Enum
 
 import dgisim.src.state.game_state as gs
-from dgisim.src.buff.buff import Buffable
-from dgisim.src.buff.buffs import Buffs, EquipmentBuffs, OrderedBuffs, TalentBuffs
+from dgisim.src.status.status import Status
+from dgisim.src.status.statuses import Statuses, EquipmentStatuses, OrderedStatuses, TalentStatuses
 from dgisim.src.element.element import ElementalAura
 from dgisim.src.event.event_pre import EventPre
 from dgisim.src.dices import AbstractDices
@@ -29,9 +29,9 @@ class Character:
         max_hp: int,
         energy: int,
         max_energy: int,
-        talents: Buffs,
-        equipments: EquipmentBuffs,
-        buffs: Buffs,
+        talents: Statuses,
+        equipments: EquipmentStatuses,
+        statuses: Statuses,
         elemental_aura: ElementalAura,
     ):
         self._id = id
@@ -41,7 +41,7 @@ class Character:
         self._max_energy = max_energy
         self._talents = talents
         self._equipments = equipments
-        self._buffs = buffs
+        self._statuses = statuses
         self._aura = elemental_aura
 
     def get_id(self) -> int:
@@ -59,23 +59,23 @@ class Character:
     def get_max_energy(self) -> int:
         return self._max_energy
 
-    def get_talent_buffs(self) -> Buffs:
+    def get_talent_statuses(self) -> Statuses:
         return self._talents
 
-    def get_equipment_buffs(self) -> EquipmentBuffs:
+    def get_equipment_statuses(self) -> EquipmentStatuses:
         return self._equipments
 
-    def get_character_buffs(self) -> Buffs:
-        return self._buffs
+    def get_character_statuses(self) -> Statuses:
+        return self._statuses
 
     def get_elemental_aura(self) -> ElementalAura:
         return self._aura
 
-    def get_all_buffs_ordered(self) -> list[Buffs]:
-        return [self._talents, self._equipments, self._buffs]
+    def get_all_statuses_ordered(self) -> list[Statuses]:
+        return [self._talents, self._equipments, self._statuses]
 
-    def get_all_buffs_ordered_flattened(self) -> tuple[Buffable, ...]:
-        return sum([buffs.get_buffs() for buffs in self.get_all_buffs_ordered()], ())
+    def get_all_statuses_ordered_flattened(self) -> tuple[Status, ...]:
+        return sum([statuses.get_statuses() for statuses in self.get_all_statuses_ordered()], ())
 
     def factory(self) -> CharacterFactory:
         return CharacterFactory(self, type(self))
@@ -113,8 +113,8 @@ class Character:
         return self._hp == 0
 
     def satiated(self) -> bool:
-        from dgisim.src.buff.buff import SatiatedBuff
-        return self._buffs.contains(SatiatedBuff)
+        from dgisim.src.status.status import SatiatedStatus
+        return self._statuses.contains(SatiatedStatus)
 
     def name(self) -> str:
         return self.__class__.__name__
@@ -150,7 +150,7 @@ class Character:
             "Max Energy": str(self._max_energy),
             "Talents": str(self._talents),
             "Equipments": str(self._equipments),
-            "Buffs": str(self._buffs),
+            "Statuses": str(self._statuses),
         }, indent)
 
     def dict_str(self) -> Union[dict, str]:
@@ -163,7 +163,7 @@ class Character:
             "Max Energy": str(self._max_energy),
             "Talents": str(self._talents),
             "Equipments": str(self._equipments),
-            "Buffs": str(self._buffs),
+            "Statuses": str(self._statuses),
         }
 
 
@@ -175,9 +175,9 @@ class CharacterFactory:
         self._max_hp = character.get_max_hp()
         self._energy = character.get_energy()
         self._max_energy = character.get_max_energy()
-        self._talents = character.get_talent_buffs()
-        self._equipments = character.get_equipment_buffs()
-        self._buffs = character.get_character_buffs()
+        self._talents = character.get_talent_statuses()
+        self._equipments = character.get_equipment_statuses()
+        self._statuses = character.get_character_statuses()
         self._aura = character.get_elemental_aura()
 
     def hp(self, hp: int) -> CharacterFactory:
@@ -188,12 +188,12 @@ class CharacterFactory:
         self._energy = energy
         return self
 
-    def character_buffs(self, buffs: Buffs) -> CharacterFactory:
-        self._buffs = buffs
+    def character_statuses(self, statuses: Statuses) -> CharacterFactory:
+        self._statuses = statuses
         return self
 
-    def f_character_buffs(self, f: Callable[[Buffs], Buffs]) -> CharacterFactory:
-        return self.character_buffs(f(self._buffs))
+    def f_character_statuses(self, f: Callable[[Statuses], Statuses]) -> CharacterFactory:
+        return self.character_statuses(f(self._statuses))
 
     def elemental_aura(self, aura: ElementalAura) -> CharacterFactory:
         self._aura = aura
@@ -208,7 +208,7 @@ class CharacterFactory:
             max_energy=self._max_energy,
             talents=self._talents,
             equipments=self._equipments,
-            buffs=self._buffs,
+            statuses=self._statuses,
             elemental_aura=self._aura,
         )
 
@@ -252,9 +252,9 @@ class Keqing(Character):
             max_hp=10,
             energy=0,
             max_energy=3,
-            buffs=OrderedBuffs(()),
-            talents=TalentBuffs(()),
-            equipments=EquipmentBuffs(()),
+            statuses=OrderedStatuses(()),
+            talents=TalentStatuses(()),
+            equipments=EquipmentStatuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
 
@@ -298,9 +298,9 @@ class Kaeya(Character):
             max_hp=10,
             energy=0,
             max_energy=2,
-            talents=TalentBuffs(()),
-            equipments=EquipmentBuffs(()),
-            buffs=OrderedBuffs(()),
+            talents=TalentStatuses(()),
+            equipments=EquipmentStatuses(()),
+            statuses=OrderedStatuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
 
@@ -331,9 +331,9 @@ class Oceanid(Character):
             max_hp=10,
             energy=0,
             max_energy=3,
-            talents=TalentBuffs(()),
-            equipments=EquipmentBuffs(()),
-            buffs=OrderedBuffs(()),
+            talents=TalentStatuses(()),
+            equipments=EquipmentStatuses(()),
+            statuses=OrderedStatuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
 

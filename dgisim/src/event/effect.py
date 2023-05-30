@@ -4,7 +4,7 @@ from enum import Enum
 from dataclasses import InitVar, dataclass, asdict
 from itertools import chain
 
-import dgisim.src.buff.buff as buf
+import dgisim.src.status.status as stt
 from dgisim.src.element.element import Element
 import dgisim.src.character.character as char
 import dgisim.src.state.game_state as gs
@@ -84,9 +84,9 @@ class PhaseEffect(Effect):
 
 
 @dataclass(frozen=True)
-class TriggerBuffEffect(Effect):
+class TriggerStatusEffect(Effect):
     target: StaticTarget
-    buff: type[buf.Buffable]
+    status: type[stt.Status]
     signal: TriggeringSignal
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
@@ -96,29 +96,29 @@ class TriggerBuffEffect(Effect):
         character = cast(char.Character, character)
         effects: Iterable[Effect] = []
 
-        if issubclass(self.buff, buf.CharacterTalentBuff):
+        if issubclass(self.status, stt.CharacterTalentStatus):
             # TODO
             pass
-        elif issubclass(self.buff, buf.EquipmentBuff):
+        elif issubclass(self.status, stt.EquipmentStatus):
             # TODO
             pass
-        elif issubclass(self.buff, buf.CharacterBuff):
-            buffs = character.get_character_buffs()
-            buff = buffs.find(self.buff)
-            if buff is None:
+        elif issubclass(self.status, stt.CharacterStatus):
+            statuses = character.get_character_statuses()
+            status = statuses.find(self.status)
+            if status is None:
                 return game_state
-            effects = buff.react_to_signal(self.target, self.signal)
+            effects = status.react_to_signal(self.target, self.signal)
         else:
-            raise Exception("Unexpected Buff Type to Trigger", self.buff)
+            raise Exception("Unexpected Status Type to Trigger", self.status)
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
 
 
 @dataclass(frozen=True)
-class CharacterBuffTriggerEffect(TriggerrbleEffect):
+class CharacterStatusTriggerEffect(TriggerrbleEffect):
     """
-    This effect triggers the characters' buffs with the provided signal in order.
+    This effect triggers the characters' statuses with the provided signal in order.
     """
     pid: gs.GameState.Pid
     signal: TriggeringSignal
@@ -131,18 +131,18 @@ class CharacterBuffTriggerEffect(TriggerrbleEffect):
         effects: list[Effect] = []
 
         for character in ordered_characters:
-            # get character's private buffs and add triggerBuffEffect to global effect_stack
-            buffs = character.get_all_buffs_ordered_flattened()
+            # get character's private statuses and add triggerStatusEffect to global effect_stack
+            statuses = character.get_all_statuses_ordered_flattened()
             character_id = character.get_id()
-            for buff in buffs:
-                buff_type: type[buf.Buffable] = type(buff)
-                effects.append(TriggerBuffEffect(
+            for status in statuses:
+                status_type: type[stt.Status] = type(status)
+                effects.append(TriggerStatusEffect(
                     StaticTarget(
                         self.pid,
                         Zone.CHARACTER,
                         character_id,
                     ),
-                    buff_type,
+                    status_type,
                     self.signal
                 ))
         return game_state.factory().f_effect_stack(
@@ -226,23 +226,23 @@ class DeathSwapPhaseEndEffect(PhaseEffect):
 @dataclass(frozen=True)
 class EndPhaseCheckoutEffect(PhaseEffect):
     """
-    This is responsible for triggering character buffs/summons/supports by the
+    This is responsible for triggering character statuses/summons/supports by the
     end of the round.
     """
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         active_id = game_state.get_active_player_id()
         # active_player = game_state.get_player(active_id)
         effects = [
-            CharacterBuffTriggerEffect(
+            CharacterStatusTriggerEffect(
                 active_id,
                 TriggeringSignal.END_ROUND_CHECK_OUT
             ),
-            # TODO: add active_player's team buff, summons buff... here
-            CharacterBuffTriggerEffect(
+            # TODO: add active_player's team status, summons status... here
+            CharacterStatusTriggerEffect(
                 active_id.other(),
                 TriggeringSignal.END_ROUND_CHECK_OUT
             ),
-            # TODO: add active_player's team buff, summons buff... here
+            # TODO: add active_player's team status, summons status... here
         ]
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
@@ -258,16 +258,16 @@ class EndRoundEffect(PhaseEffect):
         active_id = game_state.get_active_player_id()
         active_player = game_state.get_player(active_id)
         effects = [
-            CharacterBuffTriggerEffect(
+            CharacterStatusTriggerEffect(
                 active_id,
                 TriggeringSignal.ROUND_END
             ),
-            # TODO: add active_player's team buff, summons buff... here
-            CharacterBuffTriggerEffect(
+            # TODO: add active_player's team status, summons status... here
+            CharacterStatusTriggerEffect(
                 active_id.other(),
                 TriggeringSignal.ROUND_END
             ),
-            # TODO: add active_player's team buff, summons buff... here
+            # TODO: add active_player's team status, summons status... here
         ]
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
@@ -326,23 +326,23 @@ class SetBothPlayerPhaseEffect(PhaseEffect):
 
 
 @dataclass(frozen=True)
-class RemoveCharacterBuffEffect(DirectEffect):
+class RemoveCharacterStatusEffect(DirectEffect):
     target: StaticTarget
-    buff: type[buf.Buffable]
+    status: type[stt.Status]
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         character = game_state.get_character_target(self.target)
         if character is None:
             return game_state
         new_character = character
-        if issubclass(self.buff, buf.CharacterTalentBuff):
+        if issubclass(self.status, stt.CharacterTalentStatus):
             pass
-        elif issubclass(self.buff, buf.EquipmentBuff):
+        elif issubclass(self.status, stt.EquipmentStatus):
             pass
-        elif issubclass(self.buff, buf.CharacterBuff):
-            buffs = character.get_character_buffs()
-            new_buffs = buffs.remove(self.buff)
-            new_character = new_character.factory().character_buffs(new_buffs).build()
+        elif issubclass(self.status, stt.CharacterStatus):
+            statuses = character.get_character_statuses()
+            new_statuses = statuses.remove(self.status)
+            new_character = new_character.factory().character_statuses(new_statuses).build()
         return game_state.factory().f_player(
             self.target.pid,
             lambda p: p.factory().f_characters(
@@ -501,20 +501,20 @@ class RemoveDiceEffect(Effect):
 
 
 @dataclass(frozen=True)
-class AddBuffEffect(Effect):
+class AddStatusEffect(Effect):
     target: StaticTarget
-    buff: type[buf.Buffable]
+    status: type[stt.Status]
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         character = game_state.get_target(self.target)
         assert isinstance(character, char.Character)
-        if issubclass(self.buff, buf.CharacterTalentBuff):
+        if issubclass(self.status, stt.CharacterTalentStatus):
             pass
-        elif issubclass(self.buff, buf.EquipmentBuff):
+        elif issubclass(self.status, stt.EquipmentStatus):
             pass
-        elif issubclass(self.buff, buf.CharacterBuff):
-            character = character.factory().f_character_buffs(
-                lambda bs: bs.update_buffs(self.buff())
+        elif issubclass(self.status, stt.CharacterStatus):
+            character = character.factory().f_character_statuses(
+                lambda bs: bs.update_statuses(self.status())
             ).build()
         return game_state.factory().f_player(
             self.target.pid,
@@ -525,20 +525,20 @@ class AddBuffEffect(Effect):
 
 
 @dataclass(frozen=True)
-class UpdateBuffEffect(Effect):
+class UpdateStatusEffect(Effect):
     target: StaticTarget
-    buff: buf.Buffable
+    status: stt.Status
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         character = game_state.get_target(self.target)
         assert isinstance(character, char.Character)
-        if isinstance(self.buff, buf.CharacterTalentBuff):
+        if isinstance(self.status, stt.CharacterTalentStatus):
             pass
-        elif isinstance(self.buff, buf.EquipmentBuff):
+        elif isinstance(self.status, stt.EquipmentStatus):
             pass
-        elif isinstance(self.buff, buf.CharacterBuff):
-            character = character.factory().f_character_buffs(
-                lambda bs: bs.update_buffs(self.buff)
+        elif isinstance(self.status, stt.CharacterStatus):
+            character = character.factory().f_character_statuses(
+                lambda bs: bs.update_statuses(self.status)
             ).build()
         return game_state.factory().f_player(
             self.target.pid,

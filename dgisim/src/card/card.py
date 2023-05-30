@@ -8,7 +8,7 @@ from dgisim.src.event.effect import Effect
 import dgisim.src.state.game_state as gs
 from dgisim.src.event.effect import *
 import dgisim.src.action as ac
-import dgisim.src.buff.buff as buf
+import dgisim.src.status.status as stt
 
 
 class Card:
@@ -45,9 +45,9 @@ class FoodCard(EventCard):
     def effects(cls, instruction: ac.Instruction) -> tuple[Effect, ...]:
         assert isinstance(instruction, ac.CharacterTargetInstruction)
         return cls.food_effects(instruction) + (
-            AddBuffEffect(
+            AddStatusEffect(
                 instruction.target(),
-                buf.SatiatedBuff,
+                stt.SatiatedStatus,
             ),
         )
 
@@ -102,7 +102,7 @@ class MintyMeatRolls(FoodCard):
 
 class MushroomPizza(FoodCard):
     """
-    Heal first then the buff
+    Heal first then the status
     """
     @override
     @classmethod
@@ -113,9 +113,9 @@ class MushroomPizza(FoodCard):
                 instruction.target(),
                 1
             ),
-            AddBuffEffect(
+            AddStatusEffect(
                 instruction.target(),
-                buf.MushroomPizzaBuff,
+                stt.MushroomPizzaStatus,
             )
         )
 

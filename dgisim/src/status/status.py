@@ -11,51 +11,58 @@ class TriggerringEvent(Enum):
     pass
 
 
-class Buffable:
-    def preprocess(self):
-        raise Exception("TODO")
+T = TypeVar('T', bound="Status")
 
-    def react_to_event(self, game_state: gs.GameState, event: TriggerringEvent) -> gs.GameState:
-        raise Exception("TODO")
+
+class Status:
+    def __init__(self) -> None:
+        if type(self) is Status:
+            raise Exception("class Status is not instantiable")
+
+    def preprocess(self: T, damage_effect: eft.DamageEffect) -> tuple[eft.DamageEffect, T]:
+        return (damage_effect, self)
+
+    # def react_to_event(self, game_state: gs.GameState, event: TriggerringEvent) -> gs.GameState:
+    #     raise Exception("TODO")
 
     def react_to_signal(self, source: eft.StaticTarget, signal: eft.TriggeringSignal) -> tuple[eft.Effect, ...]:
         raise Exception("TODO")
 
-    def same_type_as(self, buff: Buffable) -> bool:
-        return type(self) == type(buff)
+    def same_type_as(self, status: Status) -> bool:
+        return type(self) == type(status)
 
     def __str__(self) -> str:
-        return self.__class__.__name__.removesuffix("Buff")
+        return self.__class__.__name__.removesuffix("Status")
 
 
-class CharacterTalentBuff(Buffable):
+class CharacterTalentStatus(Status):
     """
-    Basic buff, describing character talents
-    """
-    pass
-
-
-class EquipmentBuff(Buffable):
-    """
-    Basic buff, describing weapon, artifact and character unique talents
-    """
-
-
-class CharacterBuff(Buffable):
-    """
-    Basic buff, private buff to each character
+    Basic status, describing character talents
     """
     pass
 
 
-class TeamBuff(Buffable):
+class EquipmentStatus(Status):
     """
-    Basic buff, buff shared across the team
+    Basic status, describing weapon, artifact and character unique talents
+    """
+
+
+class CharacterStatus(Status):
+    """
+    Basic status, private status to each character
     """
     pass
 
 
-class NumberedBuff(Buffable):
+class CombatStatus(Status):
+    """
+    Basic status, status shared across the team
+    """
+    pass
+
+
+class NumberedStatus(Status):
     """
     This class has a num which acts as a counter
     """
@@ -70,32 +77,32 @@ class NumberedBuff(Buffable):
         return super().__str__() + f"({self._num})"
 
 
-class NumberedAutoDestroyBuff(NumberedBuff):
+class NumberedAutoDestroyStatus(NumberedStatus):
     """
-    This class destroys the buff if the new counter <= 0;
-    To set how the buff react to signal, override the method `actual_react_to_signal`
+    This class destroys the status if the new counter <= 0;
+    To set how the status react to signal, override the method `actual_react_to_signal`
     """
 
     def react_to_signal(
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
     ) -> tuple[eft.Effect, ...]:
         """
-        This method adds effects destorying or updating the current buff based on the new number
+        This method adds effects destorying or updating the current status based on the new number
         provided
         """
         num, es = self.actual_react_to_signal(source, signal)
         if num <= 0:
             es += (
-                eft.RemoveCharacterBuffEffect(
+                eft.RemoveCharacterStatusEffect(
                     source,
                     type(self),
                 ),
             )
         elif num != self.num():
             es += (
-                eft.UpdateBuffEffect(
+                eft.UpdateStatusEffect(
                     source,
-                    MushroomPizzaBuff(num),
+                    MushroomPizzaStatus(num),
                 ),
             )
         return es
@@ -104,28 +111,28 @@ class NumberedAutoDestroyBuff(NumberedBuff):
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
     ) -> tuple[int, tuple[eft.Effect, ...]]:
         """
-        This method should provide what this buff actually does
+        This method should provide what this status actually does
         It is supposed to be overriden
         Return value is (new_num, effects):
-        - The new_num is the new num the reacted buff should have
+        - The new_num is the new num the reacted status should have
         - The effects are just the effects generated according to the signal
         """
         raise Exception("Not overriden")
 
 
-class SatiatedBuff(CharacterBuff):
+class SatiatedStatus(CharacterStatus):
     def react_to_signal(
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
     ) -> tuple[eft.Effect, ...]:
         if signal is eft.TriggeringSignal.ROUND_END:
-            return (eft.RemoveCharacterBuffEffect(
+            return (eft.RemoveCharacterStatusEffect(
                 source,
                 type(self),
             ),)
         return ()
 
 
-class MushroomPizzaBuff(CharacterBuff, NumberedAutoDestroyBuff):
+class MushroomPizzaStatus(CharacterStatus, NumberedAutoDestroyStatus):
     def __init__(self, num: int = 2) -> None:
         super().__init__(num)
 

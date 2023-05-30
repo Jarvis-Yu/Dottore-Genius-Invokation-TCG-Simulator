@@ -4,8 +4,8 @@ from dgisim.src.state.game_state import GameState
 from dgisim.src.state.player_state import PlayerState
 from dgisim.src.event.effect_stack import EffectStack
 from dgisim.src.event.effect import *
-from dgisim.src.buff.buffs import *
-from dgisim.src.buff.buff import *
+from dgisim.src.status.statuses import *
+from dgisim.src.status.status import *
 
 
 class TestEffect(unittest.TestCase):
@@ -157,8 +157,8 @@ class TestEffect(unittest.TestCase):
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().f_character(
                     2,
-                    lambda c: c.factory().character_buffs(
-                        Buffs((SatiatedBuff(), ))
+                    lambda c: c.factory().character_statuses(
+                        Statuses((SatiatedStatus(), ))
                     ).build()
                 ).build()
             ).build()
@@ -170,6 +170,6 @@ class TestEffect(unittest.TestCase):
             .get_player1()
             .get_characters()
             .get_just_character(2)
-            .get_character_buffs()
-            .contains(SatiatedBuff)
+            .get_character_statuses()
+            .contains(SatiatedStatus)
         )

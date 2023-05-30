@@ -10,7 +10,7 @@ from dgisim.src.event.effect import *
 
 class ActionPhase(ph.Phase):
     def _start_up_phase(self, game_state: gs.GameState) -> gs.GameState:
-        # TODO: Handle before action buffs
+        # TODO: Handle before action statuses
         active_player_id = game_state.get_active_player_id()
         return game_state.factory().player(
             active_player_id,

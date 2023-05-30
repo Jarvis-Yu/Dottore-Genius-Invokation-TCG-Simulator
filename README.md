@@ -28,7 +28,7 @@ with limited action cards and all omni dices.
   - [x] Can proceed to next phase
 - [ ] Implement game phase of Action Phase (players beat each other)
   - [x] Allow players to end action phase right away
-  - [x] Partially implement the pipeline for buff handling
+  - [x] Partially implement the pipeline for status handling
   - [x] Allow players to normal attack
   - [x] Allow players to use some cards
   - [ ] Implement player action validity checker
@@ -38,7 +38,7 @@ with limited action cards and all omni dices.
   - [ ] Allow players to cast elemental burst (same as above)
   - [ ] Allow players to use all cards
   - [x] Can proceed to next phase
-- [ ] Implement game phase of End Phase (summons and some support card or buffs take action)
+- [ ] Implement game phase of End Phase (summons and some support card or statuses take action)
   - [x] Can pull cards by the end
   - [x] Can proceed to next phase
 - [x] Implement CLI for better debugging experience

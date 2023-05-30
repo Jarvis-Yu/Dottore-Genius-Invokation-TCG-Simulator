@@ -107,7 +107,7 @@ class GamePrinter:
         GamePrinter._insert_lines(board, 2, character, [
             "Talents",
             "Equipments",
-            "Buffs",
+            "Statuses",
         ])
         return board
 
