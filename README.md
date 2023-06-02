@@ -64,6 +64,13 @@ There's currently a CLI available to try this project.
 
 Here are the steps for you to follow to try the developing project.
 
+For Windows based systems:
+1. Clone the project
+2. Make sure your Python version >= 3.9.16
+3. Run venv.ps1
+4. After venv is installed, run cli.ps1
+
+For unix based systems:
 1. Clone the project
 2. Make sure your Python version >= 3.9.16
 3. Set up the environment with `venv` or otherwise
@@ -74,7 +81,7 @@ source venv.sh
 pip install -r requirements.txt
 ```
 
-5. With the environment set up run the following command to run the CLI
+1. With the environment set up run the following command to run the CLI
 
 ```sh
 ./cli.sh
