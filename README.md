@@ -81,7 +81,7 @@ source venv.sh
 pip install -r requirements.txt
 ```
 
-1. With the environment set up run the following command to run the CLI
+5. With the environment set up run the following command to run the CLI
 
 ```sh
 ./cli.sh
