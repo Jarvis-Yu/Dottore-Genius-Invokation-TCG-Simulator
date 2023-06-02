@@ -1,16 +1,17 @@
 from __future__ import annotations
 from typing import FrozenSet, Optional, cast, Union, ClassVar, Iterable, Callable
 from enum import Enum
-from dataclasses import InitVar, dataclass, asdict
+from dataclasses import InitVar, dataclass, asdict, replace
 from itertools import chain
 
 import dgisim.src.status.status as stt
-from dgisim.src.element.element import Element
+from dgisim.src.element.element import Element, Reaction, ReactionDetail
 import dgisim.src.character.character as char
 import dgisim.src.state.game_state as gs
 import dgisim.src.state.player_state as ps
 import dgisim.src.card.card as cd
 import dgisim.src.dices as ds
+from dgisim.src.helper.quality_of_life import just
 
 
 class Zone(Enum):
@@ -158,7 +159,7 @@ def _triggerAllStatusesEffects(
 
     def f(game_state: gs.GameState, status: stt.Status, target: StaticTarget) -> gs.GameState:
         nonlocal effects
-        effects.append(TriggerStatusEffect( target, type(status), signal))
+        effects.append(TriggerStatusEffect(target, type(status), signal))
         return game_state
 
     _loopAllStatuses(game_state, pid, f)
@@ -171,7 +172,15 @@ def _preprocessByAllStatuses(
         item: Preprocessable,
         pp_type: stt.Status.PPType,
 ) -> tuple[gs.GameState, Preprocessable]:
-    raise Exception("TODO")
+    def f(game_state: gs.GameState, status: stt.Status, target: StaticTarget) -> gs.GameState:
+        nonlocal item
+        item, new_status = status.preprocess(item, pp_type)
+        if new_status == status:
+            game_state = UpdateStatusEffect(target, new_status).execute(game_state)
+        return game_state
+
+    game_state = _loopAllStatuses(game_state, pid, f)
+    return game_state, item
 
 
 @dataclass(frozen=True)
@@ -417,6 +426,7 @@ class DamageEffect(Effect):
     target: DynamicCharacterTarget
     element: Element
     damage: int
+    reaction: Optional[ReactionDetail] = None
 
     _DAMAGE_ELEMENTS: ClassVar[FrozenSet[Element]] = frozenset({
         Element.PYRO,
@@ -433,32 +443,97 @@ class DamageEffect(Effect):
     def legal(self) -> bool:
         return self.element in self._DAMAGE_ELEMENTS
 
-    def _reaction_confirmation(
-            self, game_state: gs.GameState, damage: DamageEffect
+    @staticmethod
+    def _get_opponent(game_state: gs.GameState, damage: DamageEffect) -> Optional[char.Character]:
+        if damage.target is DynamicCharacterTarget.OPPO_ACTIVE:
+            return game_state.get_other_player(
+                damage.source.pid
+            ).get_characters().get_active_character()
+        else:
+            raise Exception("Not implemented yet")
+
+    @staticmethod
+    def _damage_preprocess(
+            game_state: gs.GameState, damage: DamageEffect, pp_type: stt.Status.PPType
     ) -> tuple[gs.GameState, DamageEffect]:
         source_id = damage.source.pid
-        oppo_id = source_id.other()
-        source_statuses = game_state.get_player(source_id).get_characters()
-        raise Exception("TODO")
+        game_state, item = _preprocessByAllStatuses(game_state, source_id, damage, pp_type)
+        game_state, item = _preprocessByAllStatuses(game_state, source_id.other(), damage, pp_type)
+        assert type(item) == DamageEffect
+        damage = item
         return game_state, damage
+
+    @classmethod
+    def _element_confirmation(
+            cls, game_state: gs.GameState, damage: DamageEffect
+    ) -> tuple[gs.GameState, DamageEffect]:
+        return cls._damage_preprocess(game_state, damage, stt.Status.PPType.DmgElement)
+
+    @classmethod
+    def _reaction_confirmation(
+            cls, game_state: gs.GameState, damage: DamageEffect
+    ) -> tuple[gs.GameState, DamageEffect, Optional[ReactionDetail]]:
+        target_char = cls._get_opponent(game_state, damage)
+        assert target_char is not None
+
+        # try to identify the reaction
+        second_elem = damage.element
+        all_aura = target_char.get_elemental_aura()
+        reaction: Optional[Reaction] = None
+        reactionDetail: Optional[ReactionDetail] = None
+        first_elem: Optional[Element] = None
+        for first_elem in all_aura:
+            reaction = Reaction.consult_reaction(first_elem, second_elem)
+            if reaction is not None:
+                break
+
+        # generate & update new aura
+        new_aura = all_aura
+        if reaction is not None:
+            assert first_elem is not None
+            new_aura.remove(first_elem)
+            reactionDetail = ReactionDetail(reaction, first_elem, second_elem)
+            damage = replace(damage, reaction=reactionDetail)
+        elif new_aura.aurable(second_elem):
+            new_aura.add(second_elem)
+
+        if new_aura != all_aura:
+            game_state = game_state.factory().f_player(
+                just(game_state.belongs_to(target_char)),
+                lambda p: p.factory().f_characters(
+                    lambda cs: cs.factory().character(
+                        target_char.factory().elemental_aura(new_aura).build()
+                    ).build()
+                ).build()
+            ).build()
+
+        game_state, damage = cls._damage_preprocess(
+            game_state, damage, stt.Status.PPType.DmgReaction
+        )
+        return game_state, damage, reactionDetail
+
+    @classmethod
+    def _damage_confirmation(
+            cls, game_state: gs.GameState, damage: DamageEffect
+    ) -> tuple[gs.GameState, DamageEffect]:
+        return cls._damage_preprocess(game_state, damage, stt.Status.PPType.DmgAmount)
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         pid = self.source.pid
         from dgisim.src.character.character import Character
         # Get damage target
-        opponent: Character
-        if self.target is DynamicCharacterTarget.OPPO_ACTIVE:
-            optional_opponent = game_state.get_other_player(
-                pid).get_characters().get_active_character()
-            if optional_opponent is None:
-                raise Exception("Not implemented yet")
-            opponent = optional_opponent
-        else:
-            raise Exception("Not implemented yet")
-        # LATEST_TODO: Preprocess Damage
+        opponent = self._get_opponent(game_state, self)
+        if opponent is None:
+            return game_state
+        game_state, elemented_damage = self._element_confirmation(game_state, self)
+        game_state, reactioned_damage, reaction = self._reaction_confirmation(
+            game_state, elemented_damage)
+        game_state, actual_damage = self._damage_confirmation(game_state, reactioned_damage)
         # Damage Calculation
         hp = opponent.get_hp()
-        hp = max(0, hp - self.damage)
+        hp = max(0, hp - actual_damage.damage)
+
+        # LATESET_TODO: use the reaction information to generate further effects
 
         opponent = opponent.factory().hp(hp).build()
         other_player = game_state.get_other_player(pid)

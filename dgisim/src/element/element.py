@@ -1,6 +1,7 @@
 from __future__ import annotations
-from typing import FrozenSet, Optional
+from typing import FrozenSet, Optional, Iterator
 from enum import Enum
+from dataclasses import dataclass
 
 from dgisim.src.helper.hashable_dict import HashableDict
 
@@ -31,18 +32,57 @@ AURA_ELEMENTS: FrozenSet[Element] = frozenset(AURA_ELEMENTS_ORDERED)
 
 
 class Reaction(Enum):
-    BLOOM = 0
-    BURNING = 1
-    CRYSTALLIZE = 2
-    ELECTRO_CHARGED = 3
-    FROZEN = 4
-    MELT = 5
-    OVERLOADED = 6
-    QUICKEN = 7
-    SUPERCONDUCT = 8
-    SWIRL = 9
-    VAPORIZE = 10
-    SHATTER = 11
+    BLOOM = ({Element.DENDRO}, {Element.HYDRO})
+    BURNING = ({Element.DENDRO}, {Element.PYRO})
+    CRYSTALLIZE = ({
+        Element.PYRO,
+        Element.HYDRO,
+        Element.CRYO,
+        Element.ELECTRO,
+    }, {
+        Element.GEO
+    })
+    ELECTRO_CHARGED = ({Element.HYDRO}, {Element.ELECTRO})
+    FROZEN = ({Element.HYDRO}, {Element.CRYO})
+    MELT = ({Element.PYRO}, {Element.CRYO})
+    OVERLOADED = ({Element.PYRO}, {Element.ELECTRO})
+    QUICKEN = ({Element.DENDRO}, {Element.ELECTRO})
+    SUPERCONDUCT = ({Element.CRYO}, {Element.ELECTRO})
+    SWIRL = ({
+        Element.PYRO,
+        Element.HYDRO,
+        Element.CRYO,
+        Element.ELECTRO,
+    }, {
+        Element.ANEMO
+    })
+    VAPORIZE = ({Element.HYDRO}, {Element.PYRO})
+
+    @classmethod
+    def consult_reaction(cls, first: Element, second: Element) -> Optional[Reaction]:
+        for reaction in cls:
+            e1, e2 = reaction.value
+            if (first in e1 and second in e2) or (first in e2 and second in e1):
+                return reaction
+        return None
+
+
+@dataclass(frozen=True)
+class ReactionDetail:
+    reaction: Reaction
+    first_elem: Element
+    second_elem: Element
+
+    def __post_init__(self):
+        if Reaction.consult_reaction(self.first_elem, self.second_elem) != self.reaction:
+            raise Exception(
+                "Trying to init invalid ReactionDetail",
+                str([
+                    self.reaction,
+                    self.first_elem,
+                    self.second_elem,
+                ])
+            )
 
 
 class ElementalAura:
@@ -57,6 +97,10 @@ class ElementalAura:
             for elem in AURA_ELEMENTS_ORDERED
         ))
 
+    @staticmethod
+    def aurable(elem: Element) -> bool:
+        return elem in AURA_ELEMENTS
+
     def peek(self) -> Optional[Element]:
         for elem, aura in self._aura.items():
             if aura:
@@ -70,13 +114,33 @@ class ElementalAura:
             for e, aura in self._aura.items()
         ))
 
+    def add(self, elem: Element) -> ElementalAura:
+        assert elem in AURA_ELEMENTS
+        if elem in self._aura and self._aura[elem]:
+            return self
+        return ElementalAura(HashableDict(
+            (e, aura if e != elem else True)
+            for e, aura in self._aura.items()
+        ))
+
     def has(self, elem: Element) -> ElementalAura:
         assert elem in AURA_ELEMENTS
         return self._aura[elem]
 
     def elem_auras(self) -> tuple[Element, ...]:
-        return tuple(
+        return tuple(iter(self))
+
+    def __iter__(self) -> Iterator[Element]:
+        return (
             elem
             for elem, aura in self._aura.items()
             if aura
         )
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, ElementalAura):
+            return False
+        return self._aura == other._aura
+
+    def __hash__(self) -> int:
+        return hash(self._aura)
