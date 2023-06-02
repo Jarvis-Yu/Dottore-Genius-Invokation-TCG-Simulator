@@ -19,7 +19,8 @@ class Status:
     class PPType(Enum):
         # Damages
         DmgElement = "DmgElement"
-        DmgNumber = "DmgNumber"
+        DmgReaction = "DmgReaction"
+        DmgAmount = "DmgNumber"
 
     def __init__(self) -> None:
         if type(self) is Status:
