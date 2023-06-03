@@ -114,13 +114,14 @@ class GameState:
             raise Exception("player_id unknown")
 
     def belongs_to(self, object: Union[Character, int]) -> Optional[GameState.Pid]:
+        """ int in object type is just place holder """
         if self._player1.is_mine(object):
             return GameState.Pid.P1
         elif self._player2.is_mine(object):
             return GameState.Pid.P2
         else:
             return None
-
+    
     def get_target(self, target: StaticTarget) -> Optional[Union[Character, int]]:
         player = self.get_player(target.pid)
         if target.zone is Zone.CHARACTER:

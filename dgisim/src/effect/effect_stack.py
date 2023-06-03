@@ -29,6 +29,8 @@ class EffectStack:
         lf means the effects passed in are executed from the last to the first
         """
         effects = tuple(effects)
+        if not effects:
+            return self
         return EffectStack(self._effects + effects)
 
     def push_many_fl(self, effects: Iterable[Effect]) -> EffectStack:
@@ -36,6 +38,8 @@ class EffectStack:
         fl means the effects passed in are executed from the first to the last
         """
         effects = tuple(effects)
+        if not effects:
+            return self
         return EffectStack(self._effects + effects[::-1])
 
     def __eq__(self, other: object) -> bool:

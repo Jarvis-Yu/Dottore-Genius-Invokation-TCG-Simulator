@@ -228,7 +228,7 @@ class Keqing(Character):
         source = self.address(game_state)
         # TODO: check for talent card and balabala
         return (
-            efft.DamageEffect(
+            efft.ReferredDamageEffect(
                 source=source,
                 target=efft.DynamicCharacterTarget.OPPO_ACTIVE,
                 element=efft.Element.ELECTRO,
@@ -278,7 +278,7 @@ class Kaeya(Character):
 
         source = self.address(game_state)
         return (
-            efft.DamageEffect(
+            efft.ReferredDamageEffect(
                 source=source,
                 target=efft.DynamicCharacterTarget.OPPO_ACTIVE,
                 element=efft.Element.CRYO,
