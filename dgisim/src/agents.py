@@ -132,11 +132,10 @@ class HardCodedRandomAgent(PlayerAgent):
                 
             # starsigns
             if cards.contains(Starsigns):
-                card = Starsigns
-                tmp_dices = ActualDices({Element.ANY: 2})
-                print(card().name())
-
                 if active_character.get_energy() < active_character.get_max_energy():
+                    card = Starsigns
+                    tmp_dices = ActualDices({Element.ANY: 2})
+                    print(card().name())
                     return CardAction(
                         card,
                         CharacterTargetInstruction(
