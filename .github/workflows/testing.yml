@@ -1,5 +1,5 @@
 # This is based on GitHub "Python Package using Anaconda"
-on: push
+on: [push, pull_request]
 
 jobs:
   test:
