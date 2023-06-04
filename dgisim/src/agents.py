@@ -26,16 +26,21 @@ class LazyAgent(PlayerAgent):
     def choose_action(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
         game_state = history[-1]
         curr_phase = game_state.get_phase()
+
         if isinstance(curr_phase, CardSelectPhase):
             _, selected_cards = game_state.get_player(
                 pid).get_hand_cards().pick_random_cards(self._NUM_PICKED_CARDS)
             return CardSelectAction(selected_cards)
+        
         elif isinstance(curr_phase, StartingHandSelectPhase):
             return CharacterSelectAction(1)
+        
         elif isinstance(curr_phase, RollPhase):
             raise Exception("No Action Defined")
+        
         elif isinstance(curr_phase, ActionPhase):
             return EndRoundAction()
+        
         else:
             raise Exception("No Action Defined")
 
@@ -58,6 +63,7 @@ class HardCodedRandomAgent(PlayerAgent):
     def choose_action(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
         game_state = history[-1]
         curr_phase = game_state.get_phase()
+
         if isinstance(curr_phase, CardSelectPhase):
             _, selected_cards = game_state.get_player(
                 pid).get_hand_cards().pick_random_cards(self._NUM_PICKED_CARDS)
@@ -74,7 +80,9 @@ class HardCodedRandomAgent(PlayerAgent):
             me = game_state.get_player(pid)
             available_dices = me.get_dices()
             active_character = me.get_active_character()
+
             assert active_character is not None
+
             # death swap
             if active_character.defeated():
                 characters = me.get_characters()
@@ -88,6 +96,7 @@ class HardCodedRandomAgent(PlayerAgent):
                     return DeathSwapAction(choice(alive_ids))
                 else:
                     raise Exception("Game should end here but not implemented(NOT REACHED)")
+                
             # food card
             character_injured = active_character.get_hp() < active_character.get_max_hp()
             if selection < 1:
@@ -126,17 +135,19 @@ class HardCodedRandomAgent(PlayerAgent):
                 card = Starsigns
                 tmp_dices = ActualDices({Element.ANY: 2})
                 print(card().name())
-                return CardAction(
-                    card,
-                    CharacterTargetInstruction(
-                        tmp_dices,
-                        StaticTarget(
-                            pid,
-                            Zone.CHARACTER,
-                            active_character.get_id(),
+
+                if active_character.get_energy() < active_character.get_max_energy():
+                    return CardAction(
+                        card,
+                        CharacterTargetInstruction(
+                            tmp_dices,
+                            StaticTarget(
+                                pid,
+                                Zone.CHARACTER,
+                                active_character.get_id(),
+                            )
                         )
                     )
-                )
 
             # normal attack
             if selection < 0.6:
