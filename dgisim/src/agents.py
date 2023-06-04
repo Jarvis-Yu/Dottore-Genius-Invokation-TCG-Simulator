@@ -62,10 +62,13 @@ class HardCodedRandomAgent(PlayerAgent):
             _, selected_cards = game_state.get_player(
                 pid).get_hand_cards().pick_random_cards(self._NUM_PICKED_CARDS)
             return CardSelectAction(selected_cards)
+        
         elif isinstance(curr_phase, StartingHandSelectPhase):
             return CharacterSelectAction(1)
+        
         elif isinstance(curr_phase, RollPhase):
             raise Exception("No Action Defined")
+        
         elif isinstance(curr_phase, ActionPhase):
             selection = random()
             me = game_state.get_player(pid)
@@ -91,6 +94,7 @@ class HardCodedRandomAgent(PlayerAgent):
                 cards = me.get_hand_cards()
                 card: Optional[type[Card]]
                 tmp_dices = ActualDices({})
+
                 if cards.contains(SweetMadame) and character_injured:
                     card = SweetMadame
                     tmp_dices = ActualDices({Element.OMNI: 0})
@@ -102,6 +106,7 @@ class HardCodedRandomAgent(PlayerAgent):
                     card = MushroomPizza
                 else:
                     card = None
+                
                 if card is not None and not active_character.satiated():
                     print(card().name())
                     return CardAction(
@@ -115,6 +120,24 @@ class HardCodedRandomAgent(PlayerAgent):
                             )
                         )
                     )
+                
+            # starsigns
+            if cards.contains(Starsigns):
+                card = Starsigns
+                tmp_dices = ActualDices({Element.ANY: 2})
+                print(card().name())
+                return CardAction(
+                    card,
+                    CharacterTargetInstruction(
+                        tmp_dices,
+                        StaticTarget(
+                            pid,
+                            Zone.CHARACTER,
+                            active_character.get_id(),
+                        )
+                    )
+                )
+
             # normal attack
             if selection < 0.6:
                 dices = available_dices.basically_satisfy(AbstractDices({
@@ -126,6 +149,7 @@ class HardCodedRandomAgent(PlayerAgent):
                         CharacterSkill.NORMAL_ATTACK,
                         DiceOnlyInstruction(dices),
                     )
+            
             # swap character
             if selection < 0.7:
                 dices = available_dices.basically_satisfy(AbstractDices({
@@ -143,7 +167,9 @@ class HardCodedRandomAgent(PlayerAgent):
                         choice(alive_ids),
                         DiceOnlyInstruction(dices),
                     )
+            
             print("EndRound")
             return EndRoundAction()
+        
         else:
             raise Exception("No Action Defined")
