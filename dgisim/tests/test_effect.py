@@ -214,10 +214,10 @@ class TestEffect(unittest.TestCase):
             ))
         ).build()
         
-        #move game state up
+        # move game state up
         game_state = game_state.step()
 
-        #check if energy is equal to max energy
+        # check if energy is equal to max energy
         c = game_state.get_player1().get_characters().get_character(1)
         assert c is not None
         self.assertEqual(c.get_energy(), c.get_max_energy())
