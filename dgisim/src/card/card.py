@@ -125,6 +125,19 @@ class NorthernSmokedChicken(FoodCard):
 
 
 class Starsigns(EventCard):
+    @override
+    @classmethod
+    def effects(cls, instruction: ac.Instruction) -> tuple[Effect, ...]:
+        assert isinstance(instruction, ac.CharacterTargetInstruction)
+        return (
+            EnergyRechargeEffect(
+                instruction.target(),
+                1
+            )
+        )
+    
+
+class CalxsArts(EventCard):
     pass
 
 # TODO: change to the correct parent class

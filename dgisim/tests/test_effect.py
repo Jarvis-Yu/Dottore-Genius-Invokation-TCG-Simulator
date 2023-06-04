@@ -173,3 +173,57 @@ class TestEffect(unittest.TestCase):
             .get_character_statuses()
             .contains(SatiatedStatus)
         )
+    
+    def testEnergyRechargeEffect(self):
+        #set up game
+        game_state = self.ACTION_TEMPLATE.factory().f_player1(
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().active_character_id(1).build()
+            ).build()
+        ).build()
+
+        # initial energy
+        initial_energy = game_state.get_player1().get_characters().get_active_character().get_energy()
+
+        # increase energy by 1
+        g1 = game_state.factory().f_effect_stack(
+            lambda es: es.push_one(EnergyRechargeEffect(
+                StaticTarget(GameState.Pid.P1, Zone.CHARACTER, 1),
+                1
+            ))
+        ).build()
+
+        #move game state up
+        g1 = g1.step()
+
+        #check if energy increased by 1
+        c = g1.get_player1().get_characters().get_active_character()
+        assert c is not None
+        self.assertEqual(c.get_energy(), initial_energy + 1)
+
+    def testEnergyDrainEffect(self):
+        # create game state where char has 3 energy
+        game_state = self.ACTION_TEMPLATE.factory().f_player1(
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().f_character(
+                    1,
+                    lambda c: c.factory().energy(3).build()
+                ).build()
+            ).build()
+        ).build()
+
+        # apply energy drain effect [3]
+        game_state = game_state.factory().f_effect_stack(
+            lambda es: es.push_one(EnergyDrainEffect(
+                StaticTarget(GameState.Pid.P1, Zone.CHARACTER, 1),
+                3
+            ))
+        ).build()
+        game_state = game_state.step()
+
+        # check if energy is 0
+        c = game_state.get_player1().get_characters().get_character(1)
+        assert c is not None
+        self.assertEqual(c.get_energy(), 0)
+
+
