@@ -563,6 +563,28 @@ class EnergyRechargeEffect(Effect):
             self.target.pid,
             player
         ).build()
+    
+@dataclass(frozen=True)
+class EnergyDrainEffect(Effect):
+    target: StaticTarget
+    drain: int
+    
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        character = game_state.get_target(self.target)
+        if not isinstance(character, char.Character):
+            return game_state
+        character = cast(char.Character, character)
+        energy = max(character.get_energy() - self.drain, 0)
+        if energy == character.get_energy():
+            return game_state
+        character = character.factory().energy(energy).build()
+        player = game_state.get_player(self.target.pid)
+        characters = player.get_characters().factory().character(character).build()
+        player = player.factory().characters(characters).build()
+        return game_state.factory().player(
+            self.target.pid,
+            player
+        ).build()
 
 
 @dataclass(frozen=True)
