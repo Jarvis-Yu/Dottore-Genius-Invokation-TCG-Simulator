@@ -133,7 +133,7 @@ class Starsigns(EventCard):
             EnergyRechargeEffect(
                 instruction.target(),
                 1
-            )
+            ),
         )
     
 
