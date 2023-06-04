@@ -11,7 +11,7 @@ class TriggerringEvent(Enum):
     pass
 
 
-T = TypeVar('T', bound="Status")
+_T = TypeVar('_T', bound="Status")
 
 
 
@@ -27,8 +27,8 @@ class Status:
             raise Exception("class Status is not instantiable")
 
     def preprocess(
-            self: T, item: eft.Preprocessable, signal: Status.PPType
-    ) -> tuple[eft.Preprocessable, T]:
+            self: _T, item: eft.Preprocessable, signal: Status.PPType
+    ) -> tuple[eft.Preprocessable, _T]:
         return (item, self)
 
     # def react_to_event(self, game_state: gs.GameState, event: TriggerringEvent) -> gs.GameState:
