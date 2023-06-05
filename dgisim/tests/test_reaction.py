@@ -32,7 +32,7 @@ def _add_damage_effect(game_state: GameState, damage: int, elem: Element) -> Gam
                 ),
                 target=DynamicCharacterTarget.OPPO_ACTIVE,
                 element=elem,
-                damage=1,
+                damage=damage,
             ),
         ))
     ).build()
@@ -236,6 +236,23 @@ class TestStatus(unittest.TestCase):
         )
         self.assertFalse(chars.just_get_character(1).get_elemental_aura().elem_auras())
         self.assertTrue(game_state.get_effect_stack().is_empty())
+
+        # kill character 1 with no reaction causes death swap effect
+        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
+        game_state = _add_damage_effect(game_state, 10, Element.PYRO)
+        game_state = _kill_character(game_state, 1, hp=2)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 2)
+        self.assertEqual(ac.get_id(), 1)
+
+        game_state = _auto_step(game_state)
+        chars = game_state.get_player2().get_characters()
+        self.assertTrue(chars.just_get_character(1).defeated())
+        self.assertEqual(
+            chars.get_active_character_id(),
+            1,
+        )
+        self.assertTrue(game_state.get_effect_stack().is_not_empty())
 
     def testElectroCharged(self):
         # HYDRO to ELECTRO
