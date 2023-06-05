@@ -1,7 +1,8 @@
 from __future__ import annotations
-from typing import TypeVar, Union
+from typing import TypeVar, Union, Optional
 from typing_extensions import override
 from enum import Enum
+from dataclasses import dataclass, replace
 
 import dgisim.src.effect.effect as eft
 import dgisim.src.state.game_state as gs
@@ -14,13 +15,13 @@ class TriggerringEvent(Enum):
 _T = TypeVar('_T', bound="Status")
 
 
-
+@dataclass(frozen=True)
 class Status:
     class PPType(Enum):
         # Damages
-        DmgElement = "DmgElement"
-        DmgReaction = "DmgReaction"
-        DmgAmount = "DmgNumber"
+        DmgElement = "DmgElement"    # To determine the element
+        DmgReaction = "DmgReaction"  # To determine the reaction
+        DmgAmount = "DmgNumber"      # To determine final amount of damage
 
     def __init__(self) -> None:
         if type(self) is Status:
@@ -28,7 +29,7 @@ class Status:
 
     def preprocess(
             self: _T, item: eft.Preprocessable, signal: Status.PPType
-    ) -> tuple[eft.Preprocessable, _T]:
+    ) -> tuple[eft.Preprocessable, Optional[_T]]:
         return (item, self)
 
     # def react_to_event(self, game_state: gs.GameState, event: TriggerringEvent) -> gs.GameState:
@@ -46,6 +47,7 @@ class Status:
         return self.__class__.__name__.removesuffix("Status")
 
 
+@dataclass(frozen=True)
 class CharacterTalentStatus(Status):
     """
     Basic status, describing character talents
@@ -53,12 +55,14 @@ class CharacterTalentStatus(Status):
     pass
 
 
+@dataclass(frozen=True)
 class EquipmentStatus(Status):
     """
     Basic status, describing weapon, artifact and character unique talents
     """
 
 
+@dataclass(frozen=True)
 class CharacterStatus(Status):
     """
     Basic status, private status to each character
@@ -66,6 +70,7 @@ class CharacterStatus(Status):
     pass
 
 
+@dataclass(frozen=True)
 class CombatStatus(Status):
     """
     Basic status, status shared across the team
@@ -73,91 +78,97 @@ class CombatStatus(Status):
     pass
 
 
-class DurationStatus(Status):
+@dataclass(frozen=True)
+class _DurationStatus(Status):
     """
     This class has a duration which acts as a counter
     """
+    duration: int
 
-    def __init__(self, duration: int = 0) -> None:
-        self._duration = duration
-
-    def duration(self) -> int:
-        return self._duration
-
-    def __str__(self) -> str:
-        return super().__str__() + f"({self._duration})"
-
-
-class DurationAutoDestroyStatus(DurationStatus):
-    """
-    This class destroys the status if the new counter <= 0;
-    To set how the status react to signal, override the method `actual_react_to_signal`
-    """
-
-    def react_to_signal(
-            self, source: eft.StaticTarget, signal: eft.TriggeringSignal
-    ) -> tuple[eft.Effect, ...]:
+    def auto_destory(self, source: eft.StaticTarget, new_duration: int) -> list[eft.Effect]:
         """
-        This method adds effects destorying or updating the current status based on the new duration
-        provided
+        Automatically updates the duration or destroy the status based on the new_duration
+        (when new_duration <= 0, the status is scheduled to be destroyed)
         """
-        duration, es = self.actual_react_to_signal(source, signal)
-        if duration <= 0:
-            es += (
-                eft.RemoveCharacterStatusEffect(
+        es: list[eft.Effect] = []
+        if new_duration <= 0:
+            if isinstance(self, CharacterStatus) \
+                    or isinstance(self, CharacterTalentStatus) \
+                    or isinstance(self, EquipmentStatus):
+                es.append(eft.RemoveStatusEffect(
                     source,
                     type(self),
-                ),
-            )
-        elif duration != self.duration():
-            es += (
-                eft.UpdateStatusEffect(
-                    source,
-                    MushroomPizzaStatus(duration),
-                ),
-            )
+                ))
+            else:
+                raise NotImplementedError
+        elif new_duration != self.duration:
+            es.append(eft.UpdateStatusEffect(
+                source,
+                replace(self, duration=new_duration),
+            ))
         return es
 
-    def actual_react_to_signal(
-            self, source: eft.StaticTarget, signal: eft.TriggeringSignal
-    ) -> tuple[int, tuple[eft.Effect, ...]]:
-        """
-        This method should provide what this status actually does
-        It is supposed to be overriden
-        Return value is (new_duration, effects):
-        - The new_duration is the new duration the reacted status should have
-        - The effects are just the effects generated according to the signal
-        """
-        raise Exception("Not overriden")
+    def __str__(self) -> str:
+        return super().__str__() + f"({self.duration})"
 
 
+@dataclass(frozen=True)
 class SatiatedStatus(CharacterStatus):
     def react_to_signal(
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
     ) -> tuple[eft.Effect, ...]:
         if signal is eft.TriggeringSignal.ROUND_END:
-            return (eft.RemoveCharacterStatusEffect(
+            return (eft.RemoveStatusEffect(
                 source,
                 type(self),
             ),)
         return ()
 
 
-class MushroomPizzaStatus(CharacterStatus, DurationAutoDestroyStatus):
-    def __init__(self, duration: int = 2) -> None:
-        super().__init__(duration)
+@dataclass(frozen=True)
+class MushroomPizzaStatus(CharacterStatus, _DurationStatus):
+    duration: int = 2
 
     @override
-    def actual_react_to_signal(
+    def react_to_signal(
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
-    ) -> tuple[int, tuple[eft.Effect, ...]]:
+    ) -> tuple[eft.Effect, ...]:
+        es: list[eft.Effect] = []
+        new_duration = self.duration
         if signal is eft.TriggeringSignal.END_ROUND_CHECK_OUT:
-            new_duration = self.duration() - 1
-            es = (
+            new_duration -= 1
+            es.append(
                 eft.RecoverHPEffect(
                     source,
                     1,
-                ),
+                )
             )
-            return new_duration, es
-        return (self.duration(), ())
+        es += self.auto_destory(source, new_duration)
+        return tuple(es)
+
+
+@dataclass(frozen=True)
+class JueyunGuobaStatus(CharacterStatus, _DurationStatus):
+    duration: int = 1
+
+    @override
+    def preprocess(
+            self: _T, item: eft.Preprocessable, signal: Status.PPType
+    ) -> tuple[eft.Preprocessable, Optional[_T]]:
+        if signal is Status.PPType.DmgAmount:
+            assert isinstance(item, eft.SpecificDamageEffect)
+            # TODO: check damage type
+            item = replace(item, damage=item.damage+1)
+            return item, None
+        return super().preprocess(item, signal)
+
+    @override
+    def react_to_signal(
+            self, source: eft.StaticTarget, signal: eft.TriggeringSignal
+    ) -> tuple[eft.Effect, ...]:
+        es: list[eft.Effect] = []
+        new_duration = self.duration
+        if signal is eft.TriggeringSignal.END_ROUND_CHECK_OUT:
+            new_duration -= 1
+        es += self.auto_destory(source, new_duration)
+        return tuple(es)

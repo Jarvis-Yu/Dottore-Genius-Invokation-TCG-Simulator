@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import TypeVar, Optional
 
 from dgisim.src.status.status import Status
+from dgisim.src.helper.quality_of_life import just
 
 
 _T = TypeVar('_T', bound='Statuses')
@@ -26,6 +27,9 @@ class Statuses:
 
     def find(self, status: type[Status]) -> Optional[Status]:
         return next((bf for bf in self._statuses if type(bf) is status), None)
+
+    def just_find(self, status: type[Status]) -> Status:
+        return just(self.find(status))
 
     def remove(self, status: type[Status]) -> Statuses:
         return Statuses(tuple(

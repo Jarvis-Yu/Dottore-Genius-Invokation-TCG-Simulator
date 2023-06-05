@@ -14,7 +14,7 @@ def normal_attack_template(
         recharge: int = 1,
 ) -> tuple[efft.Effect, ...]:
     effects: list[efft.Effect] = []
-    effects.append(efft.DamageEffect(
+    effects.append(efft.ReferredDamageEffect(
         source=source,
         target=efft.DynamicCharacterTarget.OPPO_ACTIVE,
         element=element,

@@ -1,4 +1,4 @@
-from typing import List, Type, Tuple, Optional, Callable
+from typing import List, Type, Tuple, Optional, Callable, Union
 
 from dgisim.src.state.game_state import GameState
 from dgisim.src.player_agent import PlayerAgent
@@ -91,10 +91,17 @@ class GameStateMachine:
         self._history.append(self._game_state)
         return True
 
-    def step_until_phase(self, phase: Type[Phase]) -> None:
+    def step_until_phase(self, phase: Union[type[Phase], Phase]) -> None:
+        if isinstance(phase, Phase):
+            phase = type(phase)
         while isinstance(self._game_state.get_phase(), phase):
             self.one_step()
         while not isinstance(self._game_state.get_phase(), phase):
+            self.one_step()
+
+    def step_until_next_phase(self) -> None:
+        phase = self._game_state.get_phase()
+        while self._game_state.get_phase() == phase:
             self.one_step()
 
     def step_until_holds(self, predicate: Callable[[GameState], bool]) -> None:

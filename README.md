@@ -67,14 +67,14 @@ Here are the steps for you to follow to try the developing project.
 For Windows based systems:
 
 1. Clone the project
-2. Make sure your Python version >= 3.9.16
+2. Make sure your Python version >= 3.10.11
 3. Run venv.ps1
 4. After venv is installed, run cli.ps1
 
-For unix based systems:
+For unix based systems (MacOS, Linux...):
 
 1. Clone the project
-2. Make sure your Python version >= 3.9.16
+2. Make sure your Python version >= 3.10.11
 3. Set up the environment with `venv` or otherwise
 4. If you don't know how to setup `venv`, google it or run the following commands under the project directory
 
