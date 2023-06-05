@@ -35,7 +35,7 @@ class TestStatus(unittest.TestCase):
             .get_game_state()
             .get_player1()
             .get_characters()
-            .get_just_character(2)
+            .just_get_character(2)
             .get_character_statuses()
             .contains(SatiatedStatus)
         )
@@ -59,7 +59,7 @@ class TestStatus(unittest.TestCase):
             .get_game_state() \
             .get_player1() \
             .get_characters() \
-            .get_just_character(2)
+            .just_get_character(2)
         self.assertEqual(character.get_hp(), 3)
         self.assertFalse(
             character
@@ -86,7 +86,7 @@ class TestStatus(unittest.TestCase):
             .get_game_state() \
             .get_player1() \
             .get_characters() \
-            .get_just_character(2)
+            .just_get_character(2)
         status = character \
             .get_character_statuses() \
             .just_find(MushroomPizzaStatus)

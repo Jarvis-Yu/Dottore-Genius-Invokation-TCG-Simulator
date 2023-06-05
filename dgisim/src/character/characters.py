@@ -1,50 +1,50 @@
 from __future__ import annotations
 from typing import Optional, Callable, Union
 
-import dgisim.src.character.character as char
+import dgisim.src.character.character as chr
 from dgisim.src.effect.event_pre import EventPre
 from dgisim.src.helper.level_print import level_print, INDENT, level_print_single
 
 
 class Characters:
-    def __init__(self, characters: tuple[char.Character, ...], active_character_id: Optional[int]):
+    def __init__(self, characters: tuple[chr.Character, ...], active_character_id: Optional[int]):
         self._characters = characters
         self._active_character_id = active_character_id
 
     @classmethod
-    def from_default(cls, characters: tuple[char.Character, ...]) -> Characters:
+    def from_default(cls, characters: tuple[chr.Character, ...]) -> Characters:
         return cls(characters, None)
 
-    def get_characters(self) -> tuple[char.Character, ...]:
+    def get_characters(self) -> tuple[chr.Character, ...]:
         return self._characters
 
     def get_active_character_id(self) -> Optional[int]:
         return self._active_character_id
 
-    def get_character_in_activity_order(self) -> tuple[char.Character, ...]:
+    def get_character_in_activity_order(self) -> tuple[chr.Character, ...]:
         for i, character in enumerate(self._characters):
             if character.get_id() == self._active_character_id:
                 return self._characters[i:] + self._characters[:i]
         return tuple()
 
-    def get_character(self, id: int) -> Optional[char.Character]:
+    def get_character(self, id: int) -> Optional[chr.Character]:
         for character in self._characters:
             if id == character.get_id():
                 return character
         return None
 
-    def get_just_character(self, id: int) -> char.Character:
+    def just_get_character(self, id: int) -> chr.Character:
         character = self.get_character(id)
         if character is None:
             raise Exception("Character not found")
         return character
 
-    def get_active_character(self) -> Optional[char.Character]:
+    def get_active_character(self) -> Optional[chr.Character]:
         if self._active_character_id is None:
             return None
         return self.get_character(self._active_character_id)
 
-    def just_get_active_character(self) -> char.Character:
+    def just_get_active_character(self) -> chr.Character:
         assert self._active_character_id is not None
         character = self.get_character(self._active_character_id)
         assert character is not None
@@ -56,13 +56,13 @@ class Characters:
             return "None"
         return char.name()
 
-    def get_id(self, character: char.Character) -> Optional[int]:
+    def get_id(self, character: chr.Character) -> Optional[int]:
         for c in self._characters:
             if character is c:
                 return c.get_id()
         return None
 
-    def get_by_id(self, id: int) -> Optional[char.Character]:
+    def get_by_id(self, id: int) -> Optional[chr.Character]:
         return self.get_character(id)
 
     def alive_ids(self) -> list[int]:
@@ -140,7 +140,7 @@ class CharactersFactory:
         self._characters = characters.get_characters()
         self._active_character_id = characters.get_active_character_id()
 
-    def character(self, char: char.Character) -> CharactersFactory:
+    def character(self, char: chr.Character) -> CharactersFactory:
         chars = list(self._characters)
         for i, c in enumerate(chars):
             if c.get_id() == char.get_id():
@@ -149,7 +149,7 @@ class CharactersFactory:
         self._characters = tuple(chars)
         return self
 
-    def f_character(self, id: int, f: Callable[[char.Character], char.Character]) -> CharactersFactory:
+    def f_character(self, id: int, f: Callable[[chr.Character], chr.Character]) -> CharactersFactory:
         chars = list(self._characters)
         for i, c in enumerate(chars):
             if c.get_id() == id:
@@ -158,11 +158,15 @@ class CharactersFactory:
         self._characters = tuple(chars)
         return self
 
-    def characters(self, chars: tuple[char.Character, ...]) -> CharactersFactory:
+    def f_active_character(self, f: Callable[[chr.Character], chr.Character]) -> CharactersFactory:
+        assert self._active_character_id is not None
+        return self.f_character(self._active_character_id, f)
+
+    def characters(self, chars: tuple[chr.Character, ...]) -> CharactersFactory:
         self._characters = chars
         return self
 
-    def f_characters(self, f: Callable[[tuple[char.Character, ...]], tuple[char.Character, ...]]) -> CharactersFactory:
+    def f_characters(self, f: Callable[[tuple[chr.Character, ...]], tuple[chr.Character, ...]]) -> CharactersFactory:
         self._characters = f(self._characters)
         return self
 
