@@ -121,7 +121,7 @@ class GameState:
             return GameState.Pid.P2
         else:
             return None
-    
+
     def get_target(self, target: StaticTarget) -> Optional[Union[Character, int]]:
         player = self.get_player(target.pid)
         if target.zone is Zone.CHARACTER:
