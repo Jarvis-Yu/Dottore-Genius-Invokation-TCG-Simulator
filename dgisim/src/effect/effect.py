@@ -175,8 +175,12 @@ def _preprocessByAllStatuses(
     def f(game_state: gs.GameState, status: stt.Status, target: StaticTarget) -> gs.GameState:
         nonlocal item
         item, new_status = status.preprocess(item, pp_type)
-        if new_status == status:
+
+        if new_status is None:
+            game_state = RemoveStatusEffect(target, type(status)).execute(game_state)
+        elif new_status != status:
             game_state = UpdateStatusEffect(target, new_status).execute(game_state)
+
         return game_state
 
     game_state = _loopAllStatuses(game_state, pid, f)
@@ -376,7 +380,7 @@ class SetBothPlayerPhaseEffect(PhaseEffect):
 
 
 @dataclass(frozen=True)
-class RemoveCharacterStatusEffect(DirectEffect):
+class RemoveStatusEffect(DirectEffect):
     target: StaticTarget
     status: type[stt.Status]
 
