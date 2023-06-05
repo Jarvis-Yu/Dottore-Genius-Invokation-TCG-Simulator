@@ -1,5 +1,5 @@
 # This is based on GitHub "Python Package using Anaconda"
-on: push
+on: [push, pull_request]
 
 jobs:
   test:
@@ -20,4 +20,4 @@ jobs:
         python -m unittest
     - name: MypyCheck
       run: |
-        mypy dgisim/tests/test_game_state_machine.py --check-untyped-defs
+        mypy dgisim/ --check-untyped-defs

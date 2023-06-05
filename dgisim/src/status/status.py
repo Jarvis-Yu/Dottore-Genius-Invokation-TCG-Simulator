@@ -12,7 +12,7 @@ class TriggerringEvent(Enum):
     pass
 
 
-T = TypeVar('T', bound="Status")
+_T = TypeVar('_T', bound="Status")
 
 
 @dataclass(frozen=True)
@@ -28,8 +28,8 @@ class Status:
             raise Exception("class Status is not instantiable")
 
     def preprocess(
-            self: T, item: eft.Preprocessable, signal: Status.PPType
-    ) -> tuple[eft.Preprocessable, Optional[T]]:
+            self: _T, item: eft.Preprocessable, signal: Status.PPType
+    ) -> tuple[eft.Preprocessable, Optional[_T]]:
         return (item, self)
 
     # def react_to_event(self, game_state: gs.GameState, event: TriggerringEvent) -> gs.GameState:
@@ -153,8 +153,8 @@ class JueyunGuobaStatus(CharacterStatus, _DurationStatus):
 
     @override
     def preprocess(
-            self: T, item: eft.Preprocessable, signal: Status.PPType
-    ) -> tuple[eft.Preprocessable, Optional[T]]:
+            self: _T, item: eft.Preprocessable, signal: Status.PPType
+    ) -> tuple[eft.Preprocessable, Optional[_T]]:
         if signal is Status.PPType.DmgAmount:
             assert isinstance(item, eft.SpecificDamageEffect)
             # TODO: check damage type

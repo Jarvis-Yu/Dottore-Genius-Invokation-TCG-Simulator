@@ -5,14 +5,14 @@ from dgisim.src.status.status import Status
 from dgisim.src.helper.quality_of_life import just
 
 
-T = TypeVar('T', bound='Statuses')
+_T = TypeVar('_T', bound='Statuses')
 
 
 class Statuses:
     def __init__(self, statuses: tuple[Status, ...]):
         self._statuses = statuses
 
-    def update_statuses(self: T, status: Status) -> T:
+    def update_statuses(self: _T, status: Status) -> _T:
         cls = type(self)
         statuses = list(self._statuses)
         for i, b in enumerate(statuses):
