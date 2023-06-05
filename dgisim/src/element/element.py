@@ -190,3 +190,8 @@ class ElementalAura:
 
     def __hash__(self) -> int:
         return hash(self._aura)
+
+    def __str__(self) -> str:
+        return '[' + ','.join(map(
+            lambda elem: elem.name, self.elem_auras()
+        )) + ']'
