@@ -198,7 +198,7 @@ class GameState:
             "Effects": self._effect_stack.to_string(new_indent),
         }, indent)
 
-    def dict_str(self) -> Union[dict, str]:
+    def dict_str(self) -> dict:
         return {
             "Mode": self._mode.dict_str(),
             "Phase": self._phase.dict_str(),

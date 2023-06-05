@@ -67,6 +67,9 @@ class PlayerState:
     def get_active_character(self) -> Optional[char.Character]:
         return self._characters.get_active_character()
 
+    def just_get_active_character(self) -> char.Character:
+        return self._characters.just_get_active_character()
+
     def is_action_phase(self):
         return self._phase is self.Act.ACTION_PHASE
 

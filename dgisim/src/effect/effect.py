@@ -451,7 +451,8 @@ class SpecificDamageEffect(Effect):
     ) -> tuple[gs.GameState, SpecificDamageEffect]:
         source_id = damage.source.pid
         game_state, item = _preprocessByAllStatuses(game_state, source_id, damage, pp_type)
-        game_state, item = _preprocessByAllStatuses(game_state, source_id.other(), damage, pp_type)
+        assert type(item) == SpecificDamageEffect
+        game_state, item = _preprocessByAllStatuses(game_state, source_id.other(), item, pp_type)
         assert type(item) == SpecificDamageEffect
         damage = item
         return game_state, damage

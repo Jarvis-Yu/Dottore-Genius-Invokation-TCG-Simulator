@@ -3,9 +3,16 @@ import unittest
 
 from dgisim.tests.game_state_templates import *
 from dgisim.src.game_state_machine import GameStateMachine
+from dgisim.src.character.character import CharacterSkill
+from dgisim.src.card.card import *
+from dgisim.src.card.cards import Cards
+from dgisim.src.dices import ActualDices
+from dgisim.src.action import *
 from dgisim.src.agents import PuppetAgent
 from dgisim.src.status.statuses import *
 from dgisim.src.status.status import *
+from dgisim.src.helper.level_print import GamePrinter
+from dgisim.src.helper.quality_of_life import just
 
 
 class TestStatus(unittest.TestCase):
@@ -86,3 +93,68 @@ class TestStatus(unittest.TestCase):
         assert isinstance(status, MushroomPizzaStatus)
         self.assertEqual(character.get_hp(), 3)
         self.assertEqual(status.duration, 1)
+
+    def testJueyunGuobaCardTakesEffect(self):
+        """
+        Pre: active character of both players are Oceanid
+        TODO: move to test_card.py
+        """
+        game_state = ACTION_TEMPLATE.factory().f_player1(
+            lambda p: p.factory().hand_cards(
+                Cards({JueyunGuoba: 1})
+            ).build()
+        ).build()
+        char1 = game_state.get_player1().just_get_active_character()
+        p1, p2 = PuppetAgent(), PuppetAgent()
+
+        # without JueyunGuoba
+        gsm = GameStateMachine(game_state, p1, p2)
+        p1.inject_action(SkillAction(
+            CharacterSkill.NORMAL_ATTACK,
+            DiceOnlyInstruction(ActualDices({})),
+        ))
+        gsm.one_step()  # p1 normal attacks
+        gsm.auto_step()  # process normal attack
+        hp = gsm.get_game_state().get_player2().just_get_active_character().get_hp()
+
+        # with JueyunGuoba
+        gsm = GameStateMachine(game_state, p1, p2)
+        p1.inject_action(CardAction(
+            JueyunGuoba,
+            CharacterTargetInstruction(
+                ActualDices({}),
+                StaticTarget(
+                    GameState.Pid.P1,
+                    Zone.CHARACTER,
+                    char1.get_id(),
+                )
+            )
+        ))
+        p1.inject_action(SkillAction(
+            CharacterSkill.NORMAL_ATTACK,
+            DiceOnlyInstruction(ActualDices({})),
+        ))
+        gsm.one_step()  # p1 has JueyunGuoba
+        gsm.auto_step()
+        self.assertTrue(
+            gsm
+            .get_game_state()
+            .get_player1()
+            .just_get_active_character()
+            .get_character_statuses()
+            .contains(JueyunGuobaStatus)
+        )
+        gsm.one_step()  # p1 normal attacks
+        gsm.auto_step()  # process normal attack
+        self.assertEqual(
+            gsm.get_game_state().get_player2().just_get_active_character().get_hp(),
+            hp - 1
+        )
+        self.assertFalse(
+            gsm
+            .get_game_state()
+            .get_player1()
+            .just_get_active_character()
+            .get_character_statuses()
+            .contains(JueyunGuobaStatus)
+        )

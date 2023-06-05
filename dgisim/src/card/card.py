@@ -89,7 +89,16 @@ class MondstadtHashBrown(_DirectHealCard):
 
 
 class JueyunGuoba(FoodCard):
-    pass
+    @override
+    @classmethod
+    def food_effects(cls, instruction: ac.Instruction) -> tuple[Effect, ...]:
+        assert isinstance(instruction, ac.CharacterTargetInstruction)
+        return (
+            AddStatusEffect(
+                instruction.target(),
+                stt.JueyunGuobaStatus,
+            ),
+        )
 
 
 class LotusFlowerCrisp(FoodCard):

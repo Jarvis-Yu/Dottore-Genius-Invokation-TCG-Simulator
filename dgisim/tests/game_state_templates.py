@@ -2,10 +2,31 @@ from __future__ import annotations
 
 from dgisim.src.state.game_state import GameState
 from dgisim.src.state.player_state import PlayerState
+from dgisim.src.character.characters import Characters
+from dgisim.src.character.character import *
 from dgisim.src.effect.effect import *
 
 
-OPPO_DEATH_WAIT = GameState.from_default().factory().f_phase(
+BASE_GAME = GameState.from_default().factory().f_player1(
+    lambda p: p.factory().characters(
+        Characters((
+            Oceanid.from_default(1),
+            Kaeya.from_default(2),
+            Keqing.from_default(3),
+        ), None)
+    ).build()
+).f_player2(
+    lambda p: p.factory().characters(
+        Characters((
+            Oceanid.from_default(1),
+            Kaeya.from_default(2),
+            Keqing.from_default(3),
+        ), None)
+    ).build()
+).build()
+
+
+OPPO_DEATH_WAIT = BASE_GAME.factory().f_phase(
     lambda mode: mode.action_phase()
 ).active_player(
     GameState.Pid.P1
@@ -36,7 +57,7 @@ OPPO_DEATH_END = OPPO_DEATH_WAIT.factory().f_player2(
 ).build()
 
 
-ACTION_TEMPLATE = GameState.from_default().factory().f_phase(
+ACTION_TEMPLATE = BASE_GAME.factory().f_phase(
     lambda mode: mode.action_phase()
 ).active_player(
     GameState.Pid.P1
@@ -57,7 +78,7 @@ ACTION_TEMPLATE = GameState.from_default().factory().f_phase(
 ).build()
 
 
-END_TEMPLATE = GameState.from_default().factory().f_phase(
+END_TEMPLATE = BASE_GAME.factory().f_phase(
     lambda mode: mode.end_phase()
 ).active_player(
     GameState.Pid.P1
