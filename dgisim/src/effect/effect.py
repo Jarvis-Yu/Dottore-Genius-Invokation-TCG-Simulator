@@ -6,7 +6,7 @@ from itertools import chain
 
 import dgisim.src.status.status as stt
 from dgisim.src.element.element import Element, Reaction, ReactionDetail
-import dgisim.src.character.character as char
+import dgisim.src.character.character as chr
 import dgisim.src.state.game_state as gs
 import dgisim.src.state.player_state as ps
 import dgisim.src.card.card as cd
@@ -92,9 +92,9 @@ class TriggerStatusEffect(Effect):
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         character = game_state.get_target(self.target)
-        if not isinstance(character, char.Character):
+        if not isinstance(character, chr.Character):
             return game_state
-        character = cast(char.Character, character)
+        character = cast(chr.Character, character)
         effects: Iterable[Effect] = []
 
         if issubclass(self.status, stt.CharacterTalentStatus):
@@ -210,7 +210,6 @@ class SwapCharacterCheckerEffect(CheckerEffect):
 @dataclass(frozen=True)
 class DeathCheckCheckerEffect(CheckerEffect):
     def execute(self, game_state: gs.GameState) -> gs.GameState:
-        # return game_state
         p1_character = game_state.get_player1().get_characters().get_active_character()
         p2_character = game_state.get_player2().get_characters().get_active_character()
         assert p1_character is not None and p2_character is not None
@@ -225,7 +224,7 @@ class DeathCheckCheckerEffect(CheckerEffect):
         waiting_player = game_state.get_other_player(pid)
         # TODO: check if game ends
         if death_swap_player.defeated():
-            return game_state.factory().phase(game_state.get_mode().game_end_phase()).build()
+            raise Exception("Not reached, should be caught by DefeatedCheckerEffect")
         effects: list[Effect] = []
         # TODO: trigger other death based effects
         effects.append(DeathSwapPhaseStartEffect())
@@ -247,7 +246,15 @@ class DeathCheckCheckerEffect(CheckerEffect):
                 ps.PlayerState.Act.PASSIVE_WAIT_PHASE
             ).build()
         ).build()
-    pass
+
+
+@dataclass(frozen=True)
+class DefeatedCheckerEffect(CheckerEffect):
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        if game_state.get_player1().defeated() \
+                or game_state.get_player2().defeated():
+            return game_state.factory().phase(game_state.get_mode().game_end_phase()).build()
+        return game_state
 
 
 @dataclass(frozen=True)
@@ -424,6 +431,28 @@ class SwapCharacterEffect(DirectEffect):
         return game_state.factory().player(pid, player).build()
 
 
+@dataclass(frozen=True)
+class ForwardSwapCharacterEffect(DirectEffect):
+    target_player: gs.GameState.Pid
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        characters = game_state.get_player(self.target_player).get_characters()
+        ordered_chars = characters.get_character_in_activity_order()
+        next_char: Optional[chr.Character] = None
+        for char in ordered_chars[1:] + ordered_chars[:1]:
+            if char.alive():
+                next_char = char
+                break
+        if next_char is None:
+            raise Exception("Not reached, there should be defeat checker before")
+        return game_state.factory().f_player(
+            self.target_player,
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().active_character_id(next_char.get_id()).build()
+            ).build()
+        ).build()
+
+
 _DAMAGE_ELEMENTS: FrozenSet[Element] = frozenset({
     Element.PYRO,
     Element.HYDRO,
@@ -487,11 +516,11 @@ class SpecificDamageEffect(Effect):
         new_aura = all_aura
         if reaction is not None:
             assert first_elem is not None
-            new_aura.remove(first_elem)
+            new_aura = new_aura.remove(first_elem)
             reactionDetail = ReactionDetail(reaction, first_elem, second_elem)
             damage = replace(damage, reaction=reactionDetail)
         elif new_aura.aurable(second_elem):
-            new_aura.add(second_elem)
+            new_aura = new_aura.add(second_elem)
 
         if new_aura != all_aura:
             game_state = game_state.factory().f_player(
@@ -521,6 +550,11 @@ class SpecificDamageEffect(Effect):
         game_state, reactioned_damage, reaction = self._reaction_confirmation(
             game_state, elemented_damage
         )
+        if reaction is not None:
+            reactioned_damage = replace(
+                reactioned_damage,
+                damage=reactioned_damage.damage + reaction.reaction_type.damage_boost(),
+            )
         game_state, actual_damage = self._damage_confirmation(game_state, reactioned_damage)
 
         # Get damage target
@@ -532,10 +566,33 @@ class SpecificDamageEffect(Effect):
         hp = target.get_hp()
         hp = max(0, hp - actual_damage.damage)
 
-        effects: list[Effect] = []
-        # LATESET_TODO: use the reaction information to generate further effects
-
         pid = self.target.pid
+        effects: list[Effect] = [DefeatedCheckerEffect()]
+        # LATESET_TODO: use the reaction information to generate further effects
+        if reaction is None:
+            pass
+        elif reaction.reaction_type is Reaction.VAPORIZE \
+                or reaction.reaction_type is Reaction.MELT:
+            pass
+        elif reaction.reaction_type is Reaction.OVERLOADED:
+            effects.append(
+                ForwardSwapCharacterEffect(pid)
+            )
+        elif reaction.reaction_type is Reaction.SUPERCONDUCT \
+                or reaction.reaction_type is Reaction.ELECTRO_CHARGED:
+            effects.append(
+                ReferredDamageEffect(
+                    source=self.source,
+                    target=DynamicCharacterTarget.OPPO_OFF_FIELD,
+                    element=Element.PIERCING,
+                    damage=1,
+                )
+            )
+        else:
+            raise Exception(f"Reaction {reaction.reaction_type} not handled")
+        
+        effects.append(DeathCheckCheckerEffect())
+
         if hp != target.get_hp():
             target = target.factory().hp(hp).build()
 
@@ -560,13 +617,19 @@ class ReferredDamageEffect(Effect):
         return self.element in _DAMAGE_ELEMENTS
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
-        targets: list[Optional[char.Character]] = []
+        targets: list[Optional[chr.Character]] = []
         effects: list[Effect] = []
+        char: Optional[chr.Character]
 
         if self.target is DynamicCharacterTarget.OPPO_ACTIVE:
             targets.append(
                 game_state.get_other_player(self.source.pid).get_characters().get_active_character()
             )
+        elif self.target is DynamicCharacterTarget.OPPO_OFF_FIELD:
+            opponenet_characters = game_state.get_other_player(self.source.pid).get_characters()
+            for char in opponenet_characters.get_characters():
+                if char.get_id() != opponenet_characters.get_active_character_id():
+                    targets.append(char)
         else:
             raise Exception("Not implemented yet")
 
@@ -602,9 +665,9 @@ class EnergyRechargeEffect(Effect):
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         character = game_state.get_target(self.target)
-        if not isinstance(character, char.Character):
+        if not isinstance(character, chr.Character):
             return game_state
-        character = cast(char.Character, character)
+        character = cast(chr.Character, character)
         energy = min(character.get_energy() + self.recharge, character.get_max_energy())
         if energy == character.get_energy():
             return game_state
@@ -616,17 +679,18 @@ class EnergyRechargeEffect(Effect):
             self.target.pid,
             player
         ).build()
-    
+
+
 @dataclass(frozen=True)
 class EnergyDrainEffect(Effect):
     target: StaticTarget
     drain: int
-    
+
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         character = game_state.get_target(self.target)
-        if not isinstance(character, char.Character):
+        if not isinstance(character, chr.Character):
             return game_state
-        character = cast(char.Character, character)
+        character = cast(chr.Character, character)
         energy = max(character.get_energy() - self.drain, 0)
         if energy == character.get_energy():
             return game_state
@@ -647,9 +711,9 @@ class RecoverHPEffect(Effect):
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         character = game_state.get_target(self.target)
-        if not isinstance(character, char.Character):
+        if not isinstance(character, chr.Character):
             return game_state
-        character = cast(char.Character, character)
+        character = cast(chr.Character, character)
         hp = min(character.get_hp() + self.recovery, character.get_max_hp())
         if hp == character.get_hp():
             return game_state
@@ -707,7 +771,7 @@ class AddStatusEffect(Effect):
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         character = game_state.get_target(self.target)
-        assert isinstance(character, char.Character)
+        assert isinstance(character, chr.Character)
         if issubclass(self.status, stt.CharacterTalentStatus):
             pass
         elif issubclass(self.status, stt.EquipmentStatus):
@@ -731,7 +795,7 @@ class UpdateStatusEffect(Effect):
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         character = game_state.get_target(self.target)
-        assert isinstance(character, char.Character)
+        assert isinstance(character, chr.Character)
         if isinstance(self.status, stt.CharacterTalentStatus):
             pass
         elif isinstance(self.status, stt.EquipmentStatus):

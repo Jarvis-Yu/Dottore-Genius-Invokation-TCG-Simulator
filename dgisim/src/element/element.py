@@ -31,54 +31,100 @@ AURA_ELEMENTS_ORDERED: tuple[Element, ...] = (
 AURA_ELEMENTS: FrozenSet[Element] = frozenset(AURA_ELEMENTS_ORDERED)
 
 
+@dataclass(frozen=True)
+class _ReactionData:
+    reaction_elems: tuple[set[Element], set[Element]]
+    damage_boost: int
+
+
 class Reaction(Enum):
-    BLOOM = ({Element.DENDRO}, {Element.HYDRO})
-    BURNING = ({Element.DENDRO}, {Element.PYRO})
-    CRYSTALLIZE = ({
-        Element.PYRO,
-        Element.HYDRO,
-        Element.CRYO,
-        Element.ELECTRO,
-    }, {
-        Element.GEO
-    })
-    ELECTRO_CHARGED = ({Element.HYDRO}, {Element.ELECTRO})
-    FROZEN = ({Element.HYDRO}, {Element.CRYO})
-    MELT = ({Element.PYRO}, {Element.CRYO})
-    OVERLOADED = ({Element.PYRO}, {Element.ELECTRO})
-    QUICKEN = ({Element.DENDRO}, {Element.ELECTRO})
-    SUPERCONDUCT = ({Element.CRYO}, {Element.ELECTRO})
-    SWIRL = ({
-        Element.PYRO,
-        Element.HYDRO,
-        Element.CRYO,
-        Element.ELECTRO,
-    }, {
-        Element.ANEMO
-    })
-    VAPORIZE = ({Element.HYDRO}, {Element.PYRO})
+    BLOOM = _ReactionData(
+        reaction_elems=({Element.DENDRO}, {Element.HYDRO}),
+        damage_boost=1,
+    )
+    BURNING = _ReactionData(
+        reaction_elems=({Element.DENDRO}, {Element.PYRO}),
+        damage_boost=1,
+    )
+    CRYSTALLIZE = _ReactionData(
+        reaction_elems=(
+            {
+                Element.PYRO,
+                Element.HYDRO,
+                Element.CRYO,
+                Element.ELECTRO,
+            }, {
+                Element.GEO
+            }
+        ),
+        damage_boost=1,
+    )
+    ELECTRO_CHARGED = _ReactionData(
+        reaction_elems=({Element.HYDRO}, {Element.ELECTRO}),
+        damage_boost=1,
+    )
+    FROZEN = _ReactionData(
+        reaction_elems=({Element.HYDRO}, {Element.CRYO}),
+        damage_boost=1,
+    )
+    MELT = _ReactionData(
+        reaction_elems=({Element.PYRO}, {Element.CRYO}),
+        damage_boost=2,
+    )
+    OVERLOADED = _ReactionData(
+        reaction_elems=({Element.PYRO}, {Element.ELECTRO}),
+        damage_boost=2,
+    )
+    QUICKEN = _ReactionData(
+        reaction_elems=({Element.DENDRO}, {Element.ELECTRO}),
+        damage_boost=1,
+    )
+    SUPERCONDUCT = _ReactionData(
+        reaction_elems=({Element.CRYO}, {Element.ELECTRO}),
+        damage_boost=1,
+    )
+    SWIRL = _ReactionData(
+        reaction_elems=(
+            {
+                Element.PYRO,
+                Element.HYDRO,
+                Element.CRYO,
+                Element.ELECTRO,
+            }, {
+                Element.ANEMO
+            }
+        ),
+        damage_boost=0,
+    )
+    VAPORIZE = _ReactionData(
+        reaction_elems=({Element.HYDRO}, {Element.PYRO}),
+        damage_boost=2,
+    )
 
     @classmethod
     def consult_reaction(cls, first: Element, second: Element) -> Optional[Reaction]:
         for reaction in cls:
-            e1, e2 = reaction.value
+            e1, e2 = reaction.value.reaction_elems
             if (first in e1 and second in e2) or (first in e2 and second in e1):
                 return reaction
         return None
 
+    def damage_boost(self) -> int:
+        return self.value.damage_boost
+
 
 @dataclass(frozen=True)
 class ReactionDetail:
-    reaction: Reaction
+    reaction_type: Reaction
     first_elem: Element
     second_elem: Element
 
     def __post_init__(self):
-        if Reaction.consult_reaction(self.first_elem, self.second_elem) != self.reaction:
+        if Reaction.consult_reaction(self.first_elem, self.second_elem) != self.reaction_type:
             raise Exception(
                 "Trying to init invalid ReactionDetail",
                 str([
-                    self.reaction,
+                    self.reaction_type,
                     self.first_elem,
                     self.second_elem,
                 ])

@@ -3,7 +3,7 @@ from typing import Union
 
 import dgisim.src.phase.phase as ph
 import dgisim.src.card.card as card
-import dgisim.src.character.character as char
+import dgisim.src.character.character as chr
 from dgisim.src.helper.level_print import level_print_single
 
 
@@ -21,7 +21,7 @@ class Mode:
     def all_cards(self) -> frozenset[type[card.Card]]:
         raise Exception("Not Overridden")
 
-    def all_chars(self) -> frozenset[type[char.Character]]:
+    def all_chars(self) -> frozenset[type[chr.Character]]:
         raise Exception("Not Overridden")
 
     def card_select_phase(self) -> ph.Phase:
@@ -61,7 +61,7 @@ class DefaultMode(Mode):
         from dgisim.src.card.cards_set import default_cards
         return default_cards()
 
-    def all_chars(self) -> frozenset[type[char.Character]]:
+    def all_chars(self) -> frozenset[type[chr.Character]]:
         from dgisim.src.character.characters_set import default_characters
         return default_characters()
 

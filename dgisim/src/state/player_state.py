@@ -6,9 +6,9 @@ from dgisim.src.helper.level_print import level_print, level_print_single, INDEN
 import dgisim.src.card.cards as cds
 import dgisim.src.card.card as card
 from dgisim.src.character.characters import Characters
-import dgisim.src.character.character as char
+import dgisim.src.character.character as chr
 from dgisim.src.dices import ActualDices
-import dgisim.src.character.character as char
+import dgisim.src.character.character as chr
 from dgisim.src.effect.event_pre import EventPre
 # from dgisim.src.card.cards_set import DEFAULT_CARDS
 # from dgisim.src.character.characters_set import DEFAULT_CHARACTERS
@@ -64,10 +64,10 @@ class PlayerState:
     def get_publicly_used_cards(self) -> cds.Cards:
         return self._publicly_used_cards
 
-    def get_active_character(self) -> Optional[char.Character]:
+    def get_active_character(self) -> Optional[chr.Character]:
         return self._characters.get_active_character()
 
-    def just_get_active_character(self) -> char.Character:
+    def just_get_active_character(self) -> chr.Character:
         return self._characters.just_get_active_character()
 
     def is_action_phase(self):
@@ -82,9 +82,9 @@ class PlayerState:
     def is_end_phase(self):
         return self._phase is self.Act.END_PHASE
 
-    def is_mine(self, object: Union[char.Character, int]) -> bool:
-        if isinstance(object, char.Character):
-            character = cast(char.Character, object)
+    def is_mine(self, object: Union[chr.Character, int]) -> bool:
+        if isinstance(object, chr.Character):
+            character = cast(chr.Character, object)
             return self._characters.get_id(character) is not None
         return False
 
