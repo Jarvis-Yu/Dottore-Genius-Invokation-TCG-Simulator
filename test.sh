@@ -1,3 +1,3 @@
 #!/bin/bash
-python -m unittest
-mypy dgisim/ --check-untyped-defs
+./venv/bin/python -m unittest
+./venv/bin/mypy dgisim/ --check-untyped-defs

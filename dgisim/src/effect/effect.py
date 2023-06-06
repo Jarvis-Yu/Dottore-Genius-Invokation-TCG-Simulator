@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import FrozenSet, Optional, cast, Union, ClassVar, Iterable, Callable
 from enum import Enum
-from dataclasses import InitVar, dataclass, asdict, replace
+from dataclasses import InitVar, dataclass, asdict, replace, field
 from itertools import chain
 
 import dgisim.src.status.status as stt
@@ -593,8 +593,20 @@ class SpecificDamageEffect(Effect):
             effects.append(
                 ReferredDamageEffect(
                     source=self.source,
+                    reference_target=actual_damage.target,
                     target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                     element=Element.PIERCING,
+                    damage=1,
+                )
+            )
+
+        elif reaction.reaction_type is Reaction.SWIRL:
+            effects.append(
+                ReferredDamageEffect(
+                    source=self.source,
+                    reference_target=actual_damage.target,
+                    target=DynamicCharacterTarget.OPPO_OFF_FIELD,
+                    element=reaction.first_elem,
                     damage=1,
                 )
             )
@@ -623,6 +635,7 @@ class ReferredDamageEffect(Effect):
     target: DynamicCharacterTarget
     element: Element
     damage: int
+    reference_target: Optional[StaticTarget] = field(kw_only=True, default=None)
 
     def legal(self) -> bool:
         return self.element in _DAMAGE_ELEMENTS
@@ -638,8 +651,15 @@ class ReferredDamageEffect(Effect):
             )
         elif self.target is DynamicCharacterTarget.OPPO_OFF_FIELD:
             opponenet_characters = game_state.get_other_player(self.source.pid).get_characters()
+            avoided_id: int
+            if self.reference_target is None:
+                avoided_id = just(opponenet_characters.get_active_character_id())
+            else:
+                assert self.reference_target.pid is self.source.pid.other()
+                assert self.reference_target.zone is Zone.CHARACTER
+                avoided_id = self.reference_target.id
             for char in opponenet_characters.get_characters():
-                if char.get_id() != opponenet_characters.get_active_character_id():
+                if char.get_id() != avoided_id:
                     targets.append(char)
         else:
             raise Exception("Not implemented yet")

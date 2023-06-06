@@ -62,6 +62,8 @@ def _auto_step(game_state: GameState, observe: bool = False) -> GameState:
 
 
 class TestStatus(unittest.TestCase):
+
+    ############################## Vaporize ##############################
     def testVaporize(self):
         # PYRO to HYDRO
         game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.HYDRO)
@@ -86,6 +88,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 7)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
 
+    ############################## Melt ##############################
     def testMelt(self):
         # PYRO to CRYO
         game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.CRYO)
@@ -113,6 +116,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 7)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
 
+    ############################## Overloaded ##############################
     def testOverloadedBasics(self):
         # ELECTRO to PYRO
         game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
@@ -280,7 +284,7 @@ class TestStatus(unittest.TestCase):
                 )
             )
         ).build()
-        
+
         # checks execution
         p2_active_id = game_state.get_player2().just_get_active_character().get_id() != aura_char_id
         p2_c2 = game_state.get_player2().get_characters().just_get_character(2)
@@ -293,6 +297,7 @@ class TestStatus(unittest.TestCase):
         p2_c2 = game_state.get_player2().get_characters().just_get_character(2)
         self.assertEqual(p2_c2.get_hp(), 7)
 
+    ############################## ElectroCharged ##############################
     def testElectroCharged(self):
         # HYDRO to ELECTRO
         game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO)
@@ -324,6 +329,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(chars.just_get_character(3).get_hp(), 9)
         self.assertFalse(chars.just_get_active_character().get_elemental_aura().elem_auras())
 
+    ############################## SuperConduct ##############################
     def testSuperConduct(self):
         # CRYO to ELECTRO
         game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO)
@@ -354,3 +360,96 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(chars.just_get_character(2).get_hp(), 9)
         self.assertEqual(chars.just_get_character(3).get_hp(), 9)
         self.assertFalse(chars.just_get_active_character().get_elemental_aura().elem_auras())
+
+    ############################## Swirl ##############################
+    def testSwirl(self):
+        elems = [
+            Element.PYRO,
+            Element.HYDRO,
+            Element.ELECTRO,
+            Element.CRYO,
+        ]
+        for aura_elem in elems:
+            game_state = _oppo_aura_elem(ACTION_TEMPLATE, aura_elem)
+            game_state = _add_damage_effect(game_state, 1, Element.ANEMO)
+
+            game_state = _auto_step(game_state)
+            chars = game_state.get_player2().get_characters()
+            self.assertFalse(chars.just_get_character(1).get_elemental_aura().elem_auras())
+            self.assertEqual(chars.just_get_character(1).get_hp(), 9)
+            self.assertTrue(chars.just_get_character(2).get_elemental_aura().has(aura_elem))
+            self.assertEqual(chars.just_get_character(2).get_hp(), 9)
+            self.assertTrue(chars.just_get_character(3).get_elemental_aura().has(aura_elem))
+            self.assertEqual(chars.just_get_character(3).get_hp(), 9)
+
+        aura_elem = Element.DENDRO
+        game_state = _oppo_aura_elem(ACTION_TEMPLATE, aura_elem)
+        game_state = _add_damage_effect(game_state, 1, Element.ANEMO)
+
+        game_state = _auto_step(game_state)
+        chars = game_state.get_player2().get_characters()
+        self.assertTrue(chars.just_get_character(1).get_elemental_aura().has(aura_elem))
+        self.assertEqual(chars.just_get_character(1).get_hp(), 9)
+        self.assertFalse(chars.just_get_character(2).get_elemental_aura().elem_auras())
+        self.assertEqual(chars.just_get_character(2).get_hp(), 10)
+        self.assertFalse(chars.just_get_character(3).get_elemental_aura().elem_auras())
+        self.assertEqual(chars.just_get_character(3).get_hp(), 10)
+
+    @staticmethod
+    def swirlElem1ToElem2(elem1: Element, elem2: Element) -> GameState:
+        game_state = _oppo_aura_elem(ACTION_TEMPLATE, elem1)
+        game_state = _add_damage_effect(game_state, 1, Element.ANEMO)
+        game_state = game_state.factory().f_player2(
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().f_character(
+                    2,
+                    lambda c: c.factory().elemental_aura(
+                        ElementalAura.from_default().add(elem2)
+                    ).build()
+                ).f_character(
+                    3,
+                    lambda c: c.factory().elemental_aura(
+                        ElementalAura.from_default().add(elem2)
+                    ).build()
+                ).build()
+            ).build()
+        ).build()
+        return game_state
+
+    def testSwirledReaction(self):
+        # Superconduct
+        game_state = self.swirlElem1ToElem2(Element.ELECTRO, Element.CRYO)
+
+        game_state = _auto_step(game_state)
+        chars = game_state.get_player2().get_characters()
+        self.assertFalse(chars.just_get_character(1).get_elemental_aura().elem_auras())
+        self.assertEqual(chars.just_get_character(1).get_hp(), 7)
+        self.assertFalse(chars.just_get_character(2).get_elemental_aura().elem_auras())
+        self.assertEqual(chars.just_get_character(2).get_hp(), 7)
+        self.assertFalse(chars.just_get_character(3).get_elemental_aura().elem_auras())
+        self.assertEqual(chars.just_get_character(3).get_hp(), 7)
+
+        # Overloaded
+        game_state = self.swirlElem1ToElem2(Element.ELECTRO, Element.PYRO)
+
+        game_state = _auto_step(game_state)
+        chars = game_state.get_player2().get_characters()
+        self.assertEqual(just(chars.get_active_character_id()), 1)
+        self.assertFalse(chars.just_get_character(1).get_elemental_aura().elem_auras())
+        self.assertEqual(chars.just_get_character(1).get_hp(), 9)
+        self.assertFalse(chars.just_get_character(2).get_elemental_aura().elem_auras())
+        self.assertEqual(chars.just_get_character(2).get_hp(), 7)
+        self.assertFalse(chars.just_get_character(3).get_elemental_aura().elem_auras())
+        self.assertEqual(chars.just_get_character(3).get_hp(), 7)
+
+        # Melt
+        game_state = self.swirlElem1ToElem2(Element.CRYO, Element.PYRO)
+
+        game_state = _auto_step(game_state)
+        chars = game_state.get_player2().get_characters()
+        self.assertFalse(chars.just_get_character(1).get_elemental_aura().elem_auras())
+        self.assertEqual(chars.just_get_character(1).get_hp(), 9)
+        self.assertFalse(chars.just_get_character(2).get_elemental_aura().elem_auras())
+        self.assertEqual(chars.just_get_character(2).get_hp(), 7)
+        self.assertFalse(chars.just_get_character(3).get_elemental_aura().elem_auras())
+        self.assertEqual(chars.just_get_character(3).get_hp(), 7)
