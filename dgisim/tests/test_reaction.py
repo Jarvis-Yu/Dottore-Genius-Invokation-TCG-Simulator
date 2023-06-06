@@ -38,7 +38,7 @@ def _add_damage_effect(game_state: GameState, damage: int, elem: Element) -> Gam
     ).build()
 
 
-def _kill_character(game_state: GameState, character_id: int, hp: int=0) -> GameState:
+def _kill_character(game_state: GameState, character_id: int, hp: int = 0) -> GameState:
     return game_state.factory().f_player2(
         lambda p: p.factory().f_characters(
             lambda cs: cs.factory().f_character(
@@ -253,6 +253,45 @@ class TestStatus(unittest.TestCase):
             1,
         )
         self.assertTrue(game_state.get_effect_stack().is_not_empty())
+
+    def testOverloadOffField(self):
+        # cause overloaded to an offfield character
+        aura_char_id = 2
+        game_state = ACTION_TEMPLATE.factory().f_player2(
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().f_character(
+                    aura_char_id,
+                    lambda c: c.factory().elemental_aura(
+                        ElementalAura.from_default().add(Element.PYRO)
+                    ).build()
+                ).build()
+            ).build()
+        ).f_effect_stack(
+            lambda es: es.push_one(
+                ReferredDamageEffect(
+                    source=StaticTarget(
+                        pid=GameState.Pid.P1,
+                        zone=Zone.CHARACTER,
+                        id=1,
+                    ),
+                    target=DynamicCharacterTarget.OPPO_OFF_FIELD,
+                    element=Element.ELECTRO,
+                    damage=1,
+                )
+            )
+        ).build()
+        
+        # checks execution
+        p2_active_id = game_state.get_player2().just_get_active_character().get_id() != aura_char_id
+        p2_c2 = game_state.get_player2().get_characters().just_get_character(2)
+        self.assertEqual(p2_active_id, 1)
+        self.assertEqual(p2_c2.get_hp(), 10)
+
+        game_state = _auto_step(game_state)
+        p2_active_id = game_state.get_player2().just_get_active_character().get_id() != aura_char_id
+        self.assertEqual(p2_active_id, 1)
+        p2_c2 = game_state.get_player2().get_characters().just_get_character(2)
+        self.assertEqual(p2_c2.get_hp(), 7)
 
     def testElectroCharged(self):
         # HYDRO to ELECTRO

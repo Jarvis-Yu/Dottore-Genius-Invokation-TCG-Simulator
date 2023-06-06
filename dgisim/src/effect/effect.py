@@ -568,16 +568,26 @@ class SpecificDamageEffect(Effect):
 
         pid = self.target.pid
         effects: list[Effect] = [DefeatedCheckerEffect()]
+
         # LATESET_TODO: use the reaction information to generate further effects
         if reaction is None:
             pass
+
         elif reaction.reaction_type is Reaction.VAPORIZE \
                 or reaction.reaction_type is Reaction.MELT:
             pass
+
         elif reaction.reaction_type is Reaction.OVERLOADED:
-            effects.append(
-                ForwardSwapCharacterEffect(pid)
-            )
+            oppo_active_id = game_state \
+                .get_player(actual_damage.target.pid) \
+                .just_get_active_character() \
+                .get_id()
+            assert actual_damage.target.zone is Zone.CHARACTER
+            if actual_damage.target.id is oppo_active_id:
+                effects.append(
+                    ForwardSwapCharacterEffect(pid)
+                )
+
         elif reaction.reaction_type is Reaction.SUPERCONDUCT \
                 or reaction.reaction_type is Reaction.ELECTRO_CHARGED:
             effects.append(
@@ -588,9 +598,10 @@ class SpecificDamageEffect(Effect):
                     damage=1,
                 )
             )
+
         else:
             raise Exception(f"Reaction {reaction.reaction_type} not handled")
-        
+
         effects.append(DeathCheckCheckerEffect())
 
         if hp != target.get_hp():
