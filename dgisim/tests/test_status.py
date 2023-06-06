@@ -1,7 +1,7 @@
 
 import unittest
 
-from dgisim.tests.game_state_templates import *
+from dgisim.tests.helpers.game_state_templates import *
 from dgisim.src.game_state_machine import GameStateMachine
 from dgisim.src.character.character import CharacterSkill
 from dgisim.src.card.card import *

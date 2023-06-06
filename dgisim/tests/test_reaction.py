@@ -1,6 +1,7 @@
 import unittest
 
-from dgisim.tests.game_state_templates import *
+from dgisim.tests.helpers.game_state_templates import *
+from dgisim.tests.helpers.quality_of_life import auto_step
 from dgisim.src.state.game_state import GameState
 from dgisim.src.game_state_machine import GameStateMachine
 from dgisim.src.agents import *
@@ -49,18 +50,6 @@ def _kill_character(game_state: GameState, character_id: int, hp: int = 0) -> Ga
     ).build()
 
 
-def _auto_step(game_state: GameState, observe: bool = False) -> GameState:
-    gsm = GameStateMachine(game_state, PuppetAgent(), PuppetAgent())
-    if not observe:
-        gsm.auto_step()
-    else:
-        while gsm.get_game_state().waiting_for() is None:
-            gsm.one_step()
-            print(GamePrinter.dict_game_printer(gsm.get_game_state().dict_str()))
-            input(">>> ")
-    return gsm.get_game_state()
-
-
 class TestStatus(unittest.TestCase):
 
     ############################## Vaporize ##############################
@@ -72,7 +61,7 @@ class TestStatus(unittest.TestCase):
             game_state.get_player2().just_get_active_character().get_hp(),
             10,
         )
-        game_state = _auto_step(game_state)
+        game_state = auto_step(game_state)
         ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 7)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
@@ -84,7 +73,7 @@ class TestStatus(unittest.TestCase):
             game_state.get_player2().just_get_active_character().get_hp(),
             10,
         )
-        game_state = _auto_step(game_state)
+        game_state = auto_step(game_state)
         self.assertEqual(ac.get_hp(), 7)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
 
@@ -98,7 +87,7 @@ class TestStatus(unittest.TestCase):
             10,
         )
 
-        game_state = _auto_step(game_state)
+        game_state = auto_step(game_state)
         ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 7)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
@@ -111,7 +100,7 @@ class TestStatus(unittest.TestCase):
             10,
         )
 
-        game_state = _auto_step(game_state)
+        game_state = auto_step(game_state)
         ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 7)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
@@ -125,7 +114,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 10)
         self.assertEqual(ac.get_id(), 1)
 
-        game_state = _auto_step(game_state)
+        game_state = auto_step(game_state)
         chars = game_state.get_player2().get_characters()
         self.assertEqual(
             chars.just_get_character(1).get_hp(),
@@ -144,7 +133,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 10)
         self.assertEqual(ac.get_id(), 1)
 
-        game_state = _auto_step(game_state)
+        game_state = auto_step(game_state)
         chars = game_state.get_player2().get_characters()
         self.assertEqual(
             chars.just_get_character(1).get_hp(),
@@ -165,7 +154,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 10)
         self.assertEqual(ac.get_id(), 1)
 
-        game_state = _auto_step(game_state)
+        game_state = auto_step(game_state)
         chars = game_state.get_player2().get_characters()
         self.assertEqual(
             chars.just_get_character(1).get_hp(),
@@ -186,7 +175,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 10)
         self.assertEqual(ac.get_id(), 1)
 
-        game_state = _auto_step(game_state)
+        game_state = auto_step(game_state)
         chars = game_state.get_player2().get_characters()
         self.assertEqual(
             chars.just_get_character(1).get_hp(),
@@ -210,7 +199,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 10)
         self.assertEqual(ac.get_id(), 3)
 
-        game_state = _auto_step(game_state)
+        game_state = auto_step(game_state)
         chars = game_state.get_player2().get_characters()
         self.assertEqual(
             chars.just_get_character(3).get_hp(),
@@ -231,7 +220,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 2)
         self.assertEqual(ac.get_id(), 1)
 
-        game_state = _auto_step(game_state)
+        game_state = auto_step(game_state)
         chars = game_state.get_player2().get_characters()
         self.assertTrue(chars.just_get_character(1).defeated())
         self.assertEqual(
@@ -249,7 +238,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 2)
         self.assertEqual(ac.get_id(), 1)
 
-        game_state = _auto_step(game_state)
+        game_state = auto_step(game_state)
         chars = game_state.get_player2().get_characters()
         self.assertTrue(chars.just_get_character(1).defeated())
         self.assertEqual(
@@ -291,7 +280,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(p2_active_id, 1)
         self.assertEqual(p2_c2.get_hp(), 10)
 
-        game_state = _auto_step(game_state)
+        game_state = auto_step(game_state)
         p2_active_id = game_state.get_player2().just_get_active_character().get_id() != aura_char_id
         self.assertEqual(p2_active_id, 1)
         p2_c2 = game_state.get_player2().get_characters().just_get_character(2)
@@ -307,7 +296,7 @@ class TestStatus(unittest.TestCase):
             10,
         )
 
-        game_state = _auto_step(game_state)
+        game_state = auto_step(game_state)
         chars = game_state.get_player2().get_characters()
         self.assertEqual(chars.just_get_character(1).get_hp(), 8)
         self.assertEqual(chars.just_get_character(2).get_hp(), 9)
@@ -322,7 +311,7 @@ class TestStatus(unittest.TestCase):
             10,
         )
 
-        game_state = _auto_step(game_state)
+        game_state = auto_step(game_state)
         chars = game_state.get_player2().get_characters()
         self.assertEqual(chars.just_get_character(1).get_hp(), 8)
         self.assertEqual(chars.just_get_character(2).get_hp(), 9)
@@ -339,7 +328,7 @@ class TestStatus(unittest.TestCase):
             10,
         )
 
-        game_state = _auto_step(game_state)
+        game_state = auto_step(game_state)
         chars = game_state.get_player2().get_characters()
         self.assertEqual(chars.just_get_character(1).get_hp(), 8)
         self.assertEqual(chars.just_get_character(2).get_hp(), 9)
@@ -354,7 +343,7 @@ class TestStatus(unittest.TestCase):
             10,
         )
 
-        game_state = _auto_step(game_state)
+        game_state = auto_step(game_state)
         chars = game_state.get_player2().get_characters()
         self.assertEqual(chars.just_get_character(1).get_hp(), 8)
         self.assertEqual(chars.just_get_character(2).get_hp(), 9)
@@ -373,7 +362,7 @@ class TestStatus(unittest.TestCase):
             game_state = _oppo_aura_elem(ACTION_TEMPLATE, aura_elem)
             game_state = _add_damage_effect(game_state, 1, Element.ANEMO)
 
-            game_state = _auto_step(game_state)
+            game_state = auto_step(game_state)
             chars = game_state.get_player2().get_characters()
             self.assertFalse(chars.just_get_character(1).get_elemental_aura().elem_auras())
             self.assertEqual(chars.just_get_character(1).get_hp(), 9)
@@ -386,7 +375,7 @@ class TestStatus(unittest.TestCase):
         game_state = _oppo_aura_elem(ACTION_TEMPLATE, aura_elem)
         game_state = _add_damage_effect(game_state, 1, Element.ANEMO)
 
-        game_state = _auto_step(game_state)
+        game_state = auto_step(game_state)
         chars = game_state.get_player2().get_characters()
         self.assertTrue(chars.just_get_character(1).get_elemental_aura().has(aura_elem))
         self.assertEqual(chars.just_get_character(1).get_hp(), 9)
@@ -420,7 +409,7 @@ class TestStatus(unittest.TestCase):
         # Superconduct
         game_state = self.swirlElem1ToElem2(Element.ELECTRO, Element.CRYO)
 
-        game_state = _auto_step(game_state)
+        game_state = auto_step(game_state)
         chars = game_state.get_player2().get_characters()
         self.assertFalse(chars.just_get_character(1).get_elemental_aura().elem_auras())
         self.assertEqual(chars.just_get_character(1).get_hp(), 7)
@@ -432,7 +421,7 @@ class TestStatus(unittest.TestCase):
         # Overloaded
         game_state = self.swirlElem1ToElem2(Element.ELECTRO, Element.PYRO)
 
-        game_state = _auto_step(game_state)
+        game_state = auto_step(game_state)
         chars = game_state.get_player2().get_characters()
         self.assertEqual(just(chars.get_active_character_id()), 1)
         self.assertFalse(chars.just_get_character(1).get_elemental_aura().elem_auras())
@@ -445,7 +434,7 @@ class TestStatus(unittest.TestCase):
         # Melt
         game_state = self.swirlElem1ToElem2(Element.CRYO, Element.PYRO)
 
-        game_state = _auto_step(game_state)
+        game_state = auto_step(game_state)
         chars = game_state.get_player2().get_characters()
         self.assertFalse(chars.just_get_character(1).get_elemental_aura().elem_auras())
         self.assertEqual(chars.just_get_character(1).get_hp(), 9)
