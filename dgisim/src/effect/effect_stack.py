@@ -42,6 +42,12 @@ class EffectStack:
             return self
         return EffectStack(self._effects + effects[::-1])
 
+    def contains(self, effect_type: type[Effect]) -> bool:
+        for effect in self._effects:
+            if type(effect) == effect_type:
+                return True
+        return False
+
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, EffectStack):
             return False

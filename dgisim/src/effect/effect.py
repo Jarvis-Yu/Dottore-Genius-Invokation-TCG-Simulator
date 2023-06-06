@@ -593,7 +593,7 @@ class SpecificDamageEffect(Effect):
             effects.append(
                 ReferredDamageEffect(
                     source=self.source,
-                    reference_target=actual_damage.target,
+                    target_ref=actual_damage.target,
                     target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                     element=Element.PIERCING,
                     damage=1,
@@ -604,7 +604,7 @@ class SpecificDamageEffect(Effect):
             effects.append(
                 ReferredDamageEffect(
                     source=self.source,
-                    reference_target=actual_damage.target,
+                    target_ref=actual_damage.target,
                     target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                     element=reaction.first_elem,
                     damage=1,
@@ -614,7 +614,10 @@ class SpecificDamageEffect(Effect):
         else:
             raise Exception(f"Reaction {reaction.reaction_type} not handled")
 
-        effects.append(DeathCheckCheckerEffect())
+        # This is to prevent DeathCheckCheckerEffect being added before a chain
+        # of reactions caused by swirl has finished executing
+        if not game_state.get_effect_stack().contains(DeathCheckCheckerEffect):
+            effects.append(DeathCheckCheckerEffect())
 
         if hp != target.get_hp():
             target = target.factory().hp(hp).build()
@@ -635,7 +638,9 @@ class ReferredDamageEffect(Effect):
     target: DynamicCharacterTarget
     element: Element
     damage: int
-    reference_target: Optional[StaticTarget] = field(kw_only=True, default=None)
+    # this field is used as a reference if the target is OFF_FIELD
+    # e.g. super-conduct caused by swirl
+    target_ref: Optional[StaticTarget] = field(kw_only=True, default=None)
 
     def legal(self) -> bool:
         return self.element in _DAMAGE_ELEMENTS
@@ -652,12 +657,12 @@ class ReferredDamageEffect(Effect):
         elif self.target is DynamicCharacterTarget.OPPO_OFF_FIELD:
             opponenet_characters = game_state.get_other_player(self.source.pid).get_characters()
             avoided_id: int
-            if self.reference_target is None:
+            if self.target_ref is None:
                 avoided_id = just(opponenet_characters.get_active_character_id())
             else:
-                assert self.reference_target.pid is self.source.pid.other()
-                assert self.reference_target.zone is Zone.CHARACTER
-                avoided_id = self.reference_target.id
+                assert self.target_ref.pid is self.source.pid.other()
+                assert self.target_ref.zone is Zone.CHARACTER
+                avoided_id = self.target_ref.id
             for char in opponenet_characters.get_characters():
                 if char.get_id() != avoided_id:
                     targets.append(char)
