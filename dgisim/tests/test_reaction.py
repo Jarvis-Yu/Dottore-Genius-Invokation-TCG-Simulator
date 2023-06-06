@@ -8,6 +8,8 @@ from dgisim.src.agents import *
 from dgisim.src.element.element import Reaction, ElementalAura
 from dgisim.src.effect.effect import *
 from dgisim.src.helper.level_print import GamePrinter
+from dgisim.src.status.status import *
+from dgisim.src.action import *
 
 
 def _oppo_aura_elem(game_state: GameState, elem: Element) -> GameState:
@@ -442,3 +444,43 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(chars.just_get_character(2).get_hp(), 7)
         self.assertFalse(chars.just_get_character(3).get_elemental_aura().elem_auras())
         self.assertEqual(chars.just_get_character(3).get_hp(), 7)
+
+    ############################## Frozen ##############################
+    def testFrozen(self):
+        # HYDRO to CRYO
+        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.CRYO)
+        game_state = _add_damage_effect(game_state, 1, Element.HYDRO)
+        self.assertEqual(
+            game_state.get_player2().just_get_active_character().get_hp(),
+            10,
+        )
+
+        game_state = auto_step(game_state)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 8)
+        self.assertFalse(ac.get_elemental_aura().elem_auras())
+        self.assertTrue(ac.get_character_statuses().contains(FrozenStatus))
+
+        # CRYO to HYDRO
+        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.HYDRO)
+        game_state = _add_damage_effect(game_state, 1, Element.CRYO)
+        self.assertEqual(
+            game_state.get_player2().just_get_active_character().get_hp(),
+            10,
+        )
+
+        game_state = auto_step(game_state)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 8)
+        self.assertFalse(ac.get_elemental_aura().elem_auras())
+        self.assertTrue(ac.get_character_statuses().contains(FrozenStatus))
+
+        # defrost after round end
+        p1, p2 = PuppetAgent(), PuppetAgent()
+        gsm = GameStateMachine(game_state, p1, p2)
+        p1.inject_action(EndRoundAction())
+        p2.inject_action(EndRoundAction())
+        gsm.step_until_phase(game_state.get_mode().end_phase())
+        gsm.step_until_next_phase()
+        ac = gsm.get_game_state().get_player2().just_get_active_character()
+        self.assertFalse(ac.get_character_statuses().contains(FrozenStatus))

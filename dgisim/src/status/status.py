@@ -1,11 +1,12 @@
 from __future__ import annotations
-from typing import TypeVar, Union, Optional
+from typing import TypeVar, Union, Optional, ClassVar
 from typing_extensions import override
 from enum import Enum
 from dataclasses import dataclass, replace
 
 import dgisim.src.effect.effect as eft
 import dgisim.src.state.game_state as gs
+from dgisim.src.element.element import Element
 
 
 class TriggerringEvent(Enum):
@@ -117,7 +118,41 @@ class _DurationStatus(Status):
 
 
 @dataclass(frozen=True)
+class FrozenStatus(CharacterStatus):
+    damage_boost: ClassVar[int] = 2
+
+    @override
+    def preprocess(
+            self: _T,
+            game_state: gs.GameState,
+            status_source: eft.StaticTarget,
+            item: eft.Preprocessable,
+            signal: Status.PPType,
+    ) -> tuple[eft.Preprocessable, Optional[_T]]:
+        if signal is Status.PPType.DmgAmount:
+            assert isinstance(item, eft.SpecificDamageEffect)
+            can_reaction = item.element is Element.PYRO or item.element is Element.PHYSICAL
+            is_damage_target = item.target == status_source
+            if is_damage_target and can_reaction:
+                return replace(item, damage=item.damage + FrozenStatus.damage_boost), None
+        return super().preprocess(game_state, status_source, item, signal)
+
+    @override
+    def react_to_signal(
+            self, source: eft.StaticTarget, signal: eft.TriggeringSignal
+    ) -> tuple[eft.Effect, ...]:
+        if signal is eft.TriggeringSignal.ROUND_END:
+            return (eft.RemoveStatusEffect(
+                source,
+                type(self),
+            ),)
+        return ()
+
+
+@dataclass(frozen=True)
 class SatiatedStatus(CharacterStatus):
+
+    @override
     def react_to_signal(
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
     ) -> tuple[eft.Effect, ...]:
@@ -152,7 +187,8 @@ class MushroomPizzaStatus(CharacterStatus, _DurationStatus):
 
 
 @dataclass(frozen=True)
-class JueyunGuobaStatus(CharacterStatus, _DurationStatus):
+class JueyunGuobaStatus(CharacterStatus):
+    damage_boost: ClassVar[int] = 1
     duration: int = 1
 
     @override
@@ -167,7 +203,7 @@ class JueyunGuobaStatus(CharacterStatus, _DurationStatus):
             assert isinstance(item, eft.SpecificDamageEffect)
             # TODO: check damage type
             if item.source == status_source:
-                item = replace(item, damage=item.damage+1)
+                item = replace(item, damage=item.damage + JueyunGuobaStatus.damage_boost)
                 return item, None
         return super().preprocess(game_state, status_source, item, signal)
 
@@ -175,9 +211,9 @@ class JueyunGuobaStatus(CharacterStatus, _DurationStatus):
     def react_to_signal(
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
     ) -> tuple[eft.Effect, ...]:
-        es: list[eft.Effect] = []
-        new_duration = self.duration
-        if signal is eft.TriggeringSignal.END_ROUND_CHECK_OUT:
-            new_duration -= 1
-        es += self.auto_destory(source, new_duration)
-        return tuple(es)
+        if signal is eft.TriggeringSignal.ROUND_END:
+            return (eft.RemoveStatusEffect(
+                source,
+                type(self),
+            ),)
+        return ()

@@ -105,6 +105,7 @@ class ActionPhase(ph.Phase):
         active_character = player.get_characters().get_active_character()
         if active_character is None:
             return None
+        assert active_character.can_cast_skill()
         new_effects += active_character.skill(game_state, action.skill, instruction)
         new_effects += (DeathCheckCheckerEffect(), )
         new_effects += (TurnEndEffect(), )

@@ -12,14 +12,16 @@ class Statuses:
     def __init__(self, statuses: tuple[Status, ...]):
         self._statuses = statuses
 
-    def update_statuses(self: _T, status: Status) -> _T:
+    def update_statuses(self: _T, new_status: Status) -> _T:
         cls = type(self)
         statuses = list(self._statuses)
-        for i, b in enumerate(statuses):
-            if type(b) is type(status):
-                statuses[i] = status
+        for i, status in enumerate(statuses):
+            if type(status) is type(new_status):
+                if status == new_status:
+                    return self
+                statuses[i] = new_status
                 return cls(tuple(statuses))
-        statuses.append(status)
+        statuses.append(new_status)
         return cls(tuple(statuses))
 
     def contains(self, status: type[Status]) -> bool:

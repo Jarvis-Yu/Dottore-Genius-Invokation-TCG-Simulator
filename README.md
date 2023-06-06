@@ -35,7 +35,7 @@ with limited action cards and all omni dices.
     - [ ] Burning
     - [ ] Crystallize
     - [x] Electro-charged
-    - [ ] Frozen
+    - [x] Frozen
     - [x] Melt
     - [x] Overloaded
     - [ ] Quicken

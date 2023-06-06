@@ -149,7 +149,7 @@ class HardCodedRandomAgent(PlayerAgent):
                     )
 
             # normal attack
-            if selection < 0.6:
+            if selection < 0.6 and active_character.can_cast_skill():
                 dices = available_dices.basically_satisfy(AbstractDices({
                     Element.ANY: 2,
                 }))

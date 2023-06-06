@@ -611,6 +611,14 @@ class SpecificDamageEffect(Effect):
                 )
             )
 
+        elif reaction.reaction_type is Reaction.FROZEN:
+            effects.append(
+                AddStatusEffect(
+                    target=actual_damage.target,
+                    status=stt.FrozenStatus,
+                )
+            )
+
         else:
             raise Exception(f"Reaction {reaction.reaction_type} not handled")
 

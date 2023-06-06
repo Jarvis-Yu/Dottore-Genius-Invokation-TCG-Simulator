@@ -116,6 +116,10 @@ class Character:
         from dgisim.src.status.status import SatiatedStatus
         return self._statuses.contains(SatiatedStatus)
 
+    def can_cast_skill(self) -> bool:
+        from dgisim.src.status.status import FrozenStatus
+        return not self._statuses.contains(FrozenStatus)
+
     def name(self) -> str:
         return self.__class__.__name__
 
