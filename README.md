@@ -30,8 +30,18 @@ with limited action cards and all omni dices.
   - [x] Allow players to end action phase right away
   - [x] Partially implement the pipeline for status handling
   - [x] Allow players to normal attack
-  - [x] Allow players to use some cards
   - [ ] Implement elemental reaction
+    - [ ] Bloom
+    - [ ] Burning
+    - [ ] Crystallize
+    - [x] Electro-charged
+    - [ ] Frozen
+    - [x] Melt
+    - [x] Overloaded
+    - [ ] Quicken
+    - [x] Superconduct
+    - [x] Swirl
+    - [x] Vaporize
   - [ ] Allow players to cast skills (easy task once all other parts are done)
   - [ ] Allow players to cast elemental burst (same as above)
   - [x] Allow players to use some cards
