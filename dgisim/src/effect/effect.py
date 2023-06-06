@@ -172,14 +172,14 @@ def _preprocessByAllStatuses(
         item: Preprocessable,
         pp_type: stt.Status.PPType,
 ) -> tuple[gs.GameState, Preprocessable]:
-    def f(game_state: gs.GameState, status: stt.Status, target: StaticTarget) -> gs.GameState:
+    def f(game_state: gs.GameState, status: stt.Status, status_source: StaticTarget) -> gs.GameState:
         nonlocal item
-        item, new_status = status.preprocess(item, pp_type)
+        item, new_status = status.preprocess(game_state, status_source, item, pp_type)
 
         if new_status is None:
-            game_state = RemoveStatusEffect(target, type(status)).execute(game_state)
+            game_state = RemoveStatusEffect(status_source, type(status)).execute(game_state)
         elif new_status != status:
-            game_state = UpdateStatusEffect(target, new_status).execute(game_state)
+            game_state = UpdateStatusEffect(status_source, new_status).execute(game_state)
 
         return game_state
 

@@ -28,7 +28,11 @@ class Status:
             raise Exception("class Status is not instantiable")
 
     def preprocess(
-            self: _T, item: eft.Preprocessable, signal: Status.PPType
+            self: _T,
+            game_state: gs.GameState,
+            status_source: eft.StaticTarget,
+            item: eft.Preprocessable,
+            signal: Status.PPType,
     ) -> tuple[eft.Preprocessable, Optional[_T]]:
         return (item, self)
 
@@ -153,14 +157,19 @@ class JueyunGuobaStatus(CharacterStatus, _DurationStatus):
 
     @override
     def preprocess(
-            self: _T, item: eft.Preprocessable, signal: Status.PPType
+            self: _T,
+            game_state: gs.GameState,
+            status_source: eft.StaticTarget,
+            item: eft.Preprocessable,
+            signal: Status.PPType,
     ) -> tuple[eft.Preprocessable, Optional[_T]]:
         if signal is Status.PPType.DmgAmount:
             assert isinstance(item, eft.SpecificDamageEffect)
             # TODO: check damage type
-            item = replace(item, damage=item.damage+1)
-            return item, None
-        return super().preprocess(item, signal)
+            if item.source == status_source:
+                item = replace(item, damage=item.damage+1)
+                return item, None
+        return super().preprocess(game_state, status_source, item, signal)
 
     @override
     def react_to_signal(

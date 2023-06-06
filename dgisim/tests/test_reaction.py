@@ -270,7 +270,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(chars.just_get_character(3).get_hp(), 9)
         self.assertFalse(chars.just_get_active_character().get_elemental_aura().elem_auras())
 
-        # HYDRO to ELECTRO
+        # ELECTRO to HYDRO
         game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.HYDRO)
         game_state = _add_damage_effect(game_state, 1, Element.ELECTRO)
         self.assertEqual(
@@ -301,7 +301,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(chars.just_get_character(3).get_hp(), 9)
         self.assertFalse(chars.just_get_active_character().get_elemental_aura().elem_auras())
 
-        # CRYO to ELECTRO
+        # ELECTRO to CRYO
         game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.CRYO)
         game_state = _add_damage_effect(game_state, 1, Element.ELECTRO)
         self.assertEqual(
