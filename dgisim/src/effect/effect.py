@@ -18,8 +18,8 @@ class Zone(Enum):
     CHARACTER = 0
     SUMMONS = 1
     SUPPORT = 2
-    # HAND = 3
-    # EFFECT = 4
+    COMBAT_STATUSES = 3
+    # HAND = 4
 
 
 class TriggeringSignal(Enum):
@@ -154,6 +154,14 @@ def _loopAllStatuses(
             game_state = f(game_state, status, target)
 
     # combat status TODO
+    combat_statuses = player.get_combat_statuses()
+    target = StaticTarget(
+        pid,
+        Zone.COMBAT_STATUSES,
+        -1,  # not used
+    )
+    for status in combat_statuses:
+        game_state = f(game_state, status, target)
     # summons TODO
     # supports TODO
 

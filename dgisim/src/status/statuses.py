@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TypeVar, Optional
+from typing import TypeVar, Optional, Iterator
 
 from dgisim.src.status.status import Status
 from dgisim.src.helper.quality_of_life import just
@@ -44,6 +44,9 @@ class Statuses:
 
     def get_statuses(self) -> tuple[Status, ...]:
         return self._statuses
+
+    def __iter__(self) -> Iterator[Status]:
+        return iter(self._statuses)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Statuses):
