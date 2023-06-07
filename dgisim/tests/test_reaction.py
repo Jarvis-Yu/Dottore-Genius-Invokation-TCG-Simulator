@@ -469,18 +469,32 @@ class TestStatus(unittest.TestCase):
             10,
         )
 
-        game_state = auto_step(game_state)
-        ac = game_state.get_player2().just_get_active_character()
+        frozen_game_state = auto_step(game_state)
+        ac = frozen_game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 8)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
         self.assertTrue(ac.get_character_statuses().contains(FrozenStatus))
 
         # defrost after round end
         p1, p2 = PuppetAgent(), PuppetAgent()
-        gsm = GameStateMachine(game_state, p1, p2)
+        gsm = GameStateMachine(frozen_game_state, p1, p2)
         p1.inject_action(EndRoundAction())
         p2.inject_action(EndRoundAction())
-        gsm.step_until_phase(game_state.get_mode().end_phase())
+        gsm.step_until_phase(frozen_game_state.get_mode().end_phase())
         gsm.step_until_next_phase()
         ac = gsm.get_game_state().get_player2().just_get_active_character()
+        self.assertFalse(ac.get_character_statuses().contains(FrozenStatus))
+
+        # boost physical damage
+        game_state = _add_damage_effect(frozen_game_state, 1, Element.PHYSICAL)
+        game_state = auto_step(game_state)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 5)
+        self.assertFalse(ac.get_character_statuses().contains(FrozenStatus))
+
+        # boost physical damage
+        game_state = _add_damage_effect(frozen_game_state, 1, Element.PYRO)
+        game_state = auto_step(game_state)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 5)
         self.assertFalse(ac.get_character_statuses().contains(FrozenStatus))
