@@ -27,6 +27,9 @@ class CLISession:
         print("q - to quit this session")
         print("- enter nothing to repeat last step")
         print("Note: any invalid commands are ignored")
+        print("Definitions:")
+        print("* autostep jumps to the next game-state where player interaction is required")
+        print("* step jumps to the next game-state")
 
     def _equals_sep_bar(self) -> None:
         print("==================================================")

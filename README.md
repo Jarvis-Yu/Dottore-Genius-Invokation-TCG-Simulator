@@ -99,6 +99,9 @@ pip install -r requirements.txt
 ./scripts/cli.sh
 ```
 
+Note that currently when playing with the CLI, it is the hardcoded agents that are playing the game.
+You are just the observer overseeing their gameplay.
+
 ## Future Plans
 
 The fully developed project will be published to PyPI (beta versions will be available once all that
