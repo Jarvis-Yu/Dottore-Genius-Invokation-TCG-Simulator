@@ -13,6 +13,10 @@ class Statuses:
         self._statuses = statuses
 
     def update_statuses(self: _T, new_status: Status) -> _T:
+        """
+        Replaces existing status of the same type with the new_status,
+        or append the new_status to the end of current statuses
+        """
         cls = type(self)
         statuses = list(self._statuses)
         for i, status in enumerate(statuses):

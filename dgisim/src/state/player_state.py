@@ -10,6 +10,7 @@ import dgisim.src.character.character as chr
 from dgisim.src.dices import ActualDices
 import dgisim.src.character.character as chr
 from dgisim.src.effect.event_pre import EventPre
+import dgisim.src.status.statuses as sts
 # from dgisim.src.card.cards_set import DEFAULT_CARDS
 # from dgisim.src.character.characters_set import DEFAULT_CHARACTERS
 
@@ -25,6 +26,7 @@ class PlayerState:
         self,
         phase: Act,
         characters: Characters,
+        combat_statuses: sts.Statuses,
         card_redraw_chances: int,
         dices: ActualDices,
         hand_cards: cds.Cards,
@@ -35,6 +37,7 @@ class PlayerState:
         self._phase = phase
         self._card_redraw_chances = card_redraw_chances
         self._characters = characters
+        self._combat_statuses = combat_statuses
         self._dices = dices
         self._hand_cards = hand_cards
         self._deck_cards = deck_cards
@@ -51,6 +54,9 @@ class PlayerState:
 
     def get_characters(self) -> Characters:
         return self._characters
+
+    def get_combat_statuses(self) -> sts.Statuses:
+        return self._combat_statuses
 
     def get_dices(self) -> ActualDices:
         return self._dices
@@ -104,6 +110,7 @@ class PlayerState:
         ])
 
     import dgisim.src.mode as md
+
     @staticmethod
     def examplePlayer(mode: md.Mode):
         cards = mode.all_cards()
@@ -112,8 +119,9 @@ class PlayerState:
             phase=PlayerState.Act.PASSIVE_WAIT_PHASE,
             card_redraw_chances=0,
             characters=Characters.from_default(
-                tuple([char.from_default(i+1) for i, char in enumerate(chars)][:3])
+                tuple([char.from_default(i + 1) for i, char in enumerate(chars)][:3])
             ),
+            combat_statuses=sts.Statuses(()),
             hand_cards=cds.Cards(dict([(card, 0) for card in cards])),
             dices=ActualDices({}),
             deck_cards=cds.Cards(dict([(card, 2) for card in cards])),
@@ -171,6 +179,7 @@ class PlayerStateFactory:
         self._phase = player_state.get_phase()
         self._card_redraw_chances = player_state.get_card_redraw_chances()
         self._characters = player_state.get_characters()
+        self._combat_statuses = player_state.get_combat_statuses()
         self._hand_cards = player_state.get_hand_cards()
         self._dices = player_state.get_dices()
         self._deck_cards = player_state.get_deck_cards()
@@ -191,6 +200,13 @@ class PlayerStateFactory:
     def f_characters(self, f: Callable[[Characters], Characters]) -> PlayerStateFactory:
         self._characters = f(self._characters)
         return self
+
+    def combat_statuses(self, combat_statuses: sts.Statuses) -> PlayerStateFactory:
+        self._combat_statuses = combat_statuses
+        return self
+
+    def f_combat_statuses(self, f: Callable[[sts.Statuses], sts.Statuses]) -> PlayerStateFactory:
+        return self.combat_statuses(f(self._combat_statuses))
 
     def hand_cards(self, cards: cds.Cards) -> PlayerStateFactory:
         self._hand_cards = cards
@@ -216,6 +232,7 @@ class PlayerStateFactory:
             phase=self._phase,
             card_redraw_chances=self._card_redraw_chances,
             characters=self._characters,
+            combat_statuses=self._combat_statuses,
             hand_cards=self._hand_cards,
             dices=self._dices,
             deck_cards=self._deck_cards,

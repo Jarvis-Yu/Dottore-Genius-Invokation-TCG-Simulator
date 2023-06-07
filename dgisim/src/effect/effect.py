@@ -42,6 +42,18 @@ class DynamicCharacterTarget(Enum):
     OPPO_OFF_FIELD = 6
 
 
+# TODO: postpone this until further tests are done
+#       needs to investigate how Klee's burst and Mona's or Sucrose's Talent co-work
+@dataclass(frozen=True, kw_only=True)
+class DamageType:
+    normal_attack: bool = False
+    charged_attack: bool = False
+    plunge_attack: bool = False
+    elemental_skill: bool = False
+    elemental_burst: bool = False
+    summon: bool = False
+
+
 @dataclass(frozen=True)
 class StaticTarget:
     pid: gs.GameState.Pid
