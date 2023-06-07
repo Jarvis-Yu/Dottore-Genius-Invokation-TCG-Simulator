@@ -13,6 +13,9 @@ from dgisim.src.action import *
 
 
 def _oppo_aura_elem(game_state: GameState, elem: Element) -> GameState:
+    """
+    Gives Player2's active character `elem` aura
+    """
     return game_state.factory().f_player2(
         lambda p: p.factory().f_characters(
             lambda cs: cs.factory().f_active_character(
@@ -25,6 +28,10 @@ def _oppo_aura_elem(game_state: GameState, elem: Element) -> GameState:
 
 
 def _add_damage_effect(game_state: GameState, damage: int, elem: Element) -> GameState:
+    """
+    Adds ReferredDamageEffect to Player2's active character with `damage` and `elem` from Player1's
+    active character (id=1)
+    """
     return game_state.factory().f_effect_stack(
         lambda es: es.push_many_fl((
             ReferredDamageEffect(
@@ -42,6 +49,9 @@ def _add_damage_effect(game_state: GameState, damage: int, elem: Element) -> Gam
 
 
 def _kill_character(game_state: GameState, character_id: int, hp: int = 0) -> GameState:
+    """
+    Sets Player2's active character's hp to `hp` (default=0)
+    """
     return game_state.factory().f_player2(
         lambda p: p.factory().f_characters(
             lambda cs: cs.factory().f_character(
@@ -56,6 +66,9 @@ class TestStatus(unittest.TestCase):
 
     ############################## Vaporize ##############################
     def testVaporize(self):
+        """
+        Tests that dealing 1 Pyro damage to char with Hydro aura deals 3 damage, vice versa
+        """
         # PYRO to HYDRO
         game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.HYDRO)
         game_state = _add_damage_effect(game_state, 1, Element.PYRO)
@@ -81,6 +94,9 @@ class TestStatus(unittest.TestCase):
 
     ############################## Melt ##############################
     def testMelt(self):
+        """
+        Tests that dealing 1 Pyro damage to char with Cryo aura deals 3 damage, vice versa
+        """
         # PYRO to CRYO
         game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.CRYO)
         game_state = _add_damage_effect(game_state, 1, Element.PYRO)
@@ -109,6 +125,10 @@ class TestStatus(unittest.TestCase):
 
     ############################## Overloaded ##############################
     def testOverloadedBasics(self):
+        """
+        Tests that dealing 1 Electro damage to char with Pyro aura deals 3 damage, and force switch
+        to next character, vice versa
+        """
         # ELECTRO to PYRO
         game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
         game_state = _add_damage_effect(game_state, 1, Element.ELECTRO)
@@ -148,6 +168,10 @@ class TestStatus(unittest.TestCase):
         self.assertFalse(chars.just_get_character(1).get_elemental_aura().elem_auras())
 
     def testOverloadedAdvanced(self):
+        """
+        Tests that the Overloaded's force switch skips defeated characters and loops back to the
+        first character when 'next' the last character
+        """
         # start from character 1, kill character 2
         game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
         game_state = _add_damage_effect(game_state, 1, Element.ELECTRO)
@@ -214,6 +238,9 @@ class TestStatus(unittest.TestCase):
         self.assertFalse(chars.just_get_character(3).get_elemental_aura().elem_auras())
 
     def testOverloadedDeathPriority(self):
+        """
+        Tests that Overloaded kill doesn't trigger opponent's Deathswap phase
+        """
         # kill character 1 with overloaded doesn't trigger death swap
         game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
         game_state = _add_damage_effect(game_state, 1, Element.ELECTRO)
@@ -249,8 +276,11 @@ class TestStatus(unittest.TestCase):
         )
         self.assertTrue(game_state.get_effect_stack().is_not_empty())
 
-    def testOverloadOffField(self):
-        # cause overloaded to an offfield character
+    def testOverloadedOffField(self):
+        """
+        Tests that Overloaded to non-active characters doesn't trigger force switch
+        """
+        # cause overloaded to an off-field character
         aura_char_id = 2
         game_state = ACTION_TEMPLATE.factory().f_player2(
             lambda p: p.factory().f_characters(
@@ -290,6 +320,10 @@ class TestStatus(unittest.TestCase):
 
     ############################## ElectroCharged ##############################
     def testElectroCharged(self):
+        """
+        Tests that dealing 1 Hydro damage to char with Electro aura deals 2 damage, and 1 Piercing
+        damage to off-field characters, vice versa
+        """
         # HYDRO to ELECTRO
         game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO)
         game_state = _add_damage_effect(game_state, 1, Element.HYDRO)
@@ -322,6 +356,10 @@ class TestStatus(unittest.TestCase):
 
     ############################## SuperConduct ##############################
     def testSuperConduct(self):
+        """
+        Tests that dealing 1 Cryo damage to char with Electro aura deals 2 damage, and 1 Piercing
+        damage to off-field characters, vice versa
+        """
         # CRYO to ELECTRO
         game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO)
         game_state = _add_damage_effect(game_state, 1, Element.CRYO)
@@ -354,6 +392,9 @@ class TestStatus(unittest.TestCase):
 
     ############################## Swirl ##############################
     def testSwirl(self):
+        """
+        Tests that Swirl swirls all aurable elements except Dendro, damage value is also checked
+        """
         elems = [
             Element.PYRO,
             Element.HYDRO,
@@ -408,6 +449,9 @@ class TestStatus(unittest.TestCase):
         return game_state
 
     def testSwirledReaction(self):
+        """
+        Tests that Swirl's behaviour when secondary reactions are triggered
+        """
         # Superconduct
         game_state = self.swirlElem1ToElem2(Element.ELECTRO, Element.CRYO)
 
@@ -447,6 +491,12 @@ class TestStatus(unittest.TestCase):
 
     ############################## Frozen ##############################
     def testFrozen(self):
+        """
+        Tests that dealing 1 Hydro damage to char with Cryo aura deals 2 damage, and give character
+        FrozenStatus, vice versa.
+        Tests after the EndRound, FrozenStatus is removed.
+        Tests FrozenStatus boosts Physical and Pyro damage correctly (by 2).
+        """
         # HYDRO to CRYO
         game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.CRYO)
         game_state = _add_damage_effect(game_state, 1, Element.HYDRO)
