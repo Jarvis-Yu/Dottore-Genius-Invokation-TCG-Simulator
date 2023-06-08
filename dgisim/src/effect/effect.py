@@ -196,10 +196,31 @@ def _preprocessByAllStatuses(
         nonlocal item
         item, new_status = status.preprocess(game_state, status_source, item, pp_type)
 
-        if new_status is None:
-            game_state = RemoveStatusEffect(status_source, type(status)).execute(game_state)
-        elif new_status != status:
-            game_state = UpdateStatusEffect(status_source, new_status).execute(game_state)
+        if isinstance(status, stt.CharacterTalentStatus) \
+                or isinstance(status, stt.EquipmentStatus) \
+                or isinstance(status, stt.CharacterStatus):
+            if new_status is None:
+                game_state = RemoveCharacterStatusEffect(
+                    status_source, type(status)).execute(game_state)
+            elif new_status != status:
+                assert type(status) == type(new_status)
+                game_state = UpdateCharacterStatusEffect(
+                    status_source,
+                    new_status,  # type: ignore
+                ).execute(game_state)
+
+        elif isinstance(status, stt.CombatStatus):
+            if new_status is None:
+                game_state = RemoveCombatStatusEffect(
+                    status_source.pid,
+                    type(status),
+                ).execute(game_state)
+            elif new_status != status:
+                assert type(status) == type(new_status)
+                game_state = UpdateCombatStatusEffect(
+                    status_source.pid,
+                    new_status,  # type: ignore
+                ).execute(game_state)
 
         return game_state
 
@@ -407,32 +428,6 @@ class SetBothPlayerPhaseEffect(PhaseEffect):
 
 
 @dataclass(frozen=True)
-class RemoveStatusEffect(DirectEffect):
-    target: StaticTarget
-    status: type[stt.Status]
-
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
-        character = game_state.get_character_target(self.target)
-        if character is None:
-            return game_state
-        new_character = character
-        if issubclass(self.status, stt.CharacterTalentStatus):
-            pass
-        elif issubclass(self.status, stt.EquipmentStatus):
-            pass
-        elif issubclass(self.status, stt.CharacterStatus):
-            statuses = character.get_character_statuses()
-            new_statuses = statuses.remove(self.status)
-            new_character = new_character.factory().character_statuses(new_statuses).build()
-        return game_state.factory().f_player(
-            self.target.pid,
-            lambda p: p.factory().f_characters(
-                lambda cs: cs.factory().character(new_character).build()
-            ).build()
-        ).build()
-
-
-@dataclass(frozen=True)
 class SwapCharacterEffect(DirectEffect):
     source: StaticTarget
     target: StaticTarget
@@ -633,9 +628,17 @@ class SpecificDamageEffect(Effect):
 
         elif reaction.reaction_type is Reaction.FROZEN:
             effects.append(
-                AddStatusEffect(
+                AddCharacterStatusEffect(
                     target=actual_damage.target,
                     status=stt.FrozenStatus,
+                )
+            )
+
+        elif reaction.reaction_type is Reaction.QUICKEN:
+            effects.append(
+                AddCombatStatusEffect(
+                    target_pid=actual_damage.source.pid,
+                    status=stt.CatalyzingFieldStatus,
                 )
             )
 
@@ -829,9 +832,9 @@ class RemoveDiceEffect(Effect):
 
 
 @dataclass(frozen=True)
-class AddStatusEffect(Effect):
+class AddCharacterStatusEffect(Effect):
     target: StaticTarget
-    status: type[stt.Status]
+    status: type[Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]]
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         character = game_state.get_target(self.target)
@@ -853,9 +856,35 @@ class AddStatusEffect(Effect):
 
 
 @dataclass(frozen=True)
-class UpdateStatusEffect(Effect):
+class RemoveCharacterStatusEffect(DirectEffect):
     target: StaticTarget
-    status: stt.Status
+    status: type[Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]]
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        character = game_state.get_character_target(self.target)
+        if character is None:
+            return game_state
+        new_character = character
+        if issubclass(self.status, stt.CharacterTalentStatus):
+            pass
+        elif issubclass(self.status, stt.EquipmentStatus):
+            pass
+        elif issubclass(self.status, stt.CharacterStatus):
+            statuses = character.get_character_statuses()
+            new_statuses = statuses.remove(self.status)
+            new_character = new_character.factory().character_statuses(new_statuses).build()
+        return game_state.factory().f_player(
+            self.target.pid,
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().character(new_character).build()
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True)
+class UpdateCharacterStatusEffect(Effect):
+    target: StaticTarget
+    status: Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         character = game_state.get_target(self.target)
@@ -872,6 +901,48 @@ class UpdateStatusEffect(Effect):
             self.target.pid,
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().character(character).build()
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True)
+class AddCombatStatusEffect(Effect):
+    target_pid: gs.GameState.Pid
+    status: type[stt.CombatStatus]
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        return game_state.factory().f_player(
+            self.target_pid,
+            lambda p: p.factory().f_combat_statuses(
+                lambda ss: ss.update_statuses(self.status())
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True)
+class RemoveCombatStatusEffect(Effect):
+    target_pid: gs.GameState.Pid
+    status: type[stt.CombatStatus]
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        return game_state.factory().f_player(
+            self.target_pid,
+            lambda p: p.factory().f_combat_statuses(
+                lambda ss: ss.remove(self.status)
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True)
+class UpdateCombatStatusEffect(Effect):
+    target_pid: gs.GameState.Pid
+    status: stt.CombatStatus
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        return game_state.factory().f_player(
+            self.target_pid,
+            lambda p: p.factory().f_combat_statuses(
+                lambda ss: ss.update_statuses(self.status)
             ).build()
         ).build()
 

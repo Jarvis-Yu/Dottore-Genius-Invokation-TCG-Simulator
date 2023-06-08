@@ -548,3 +548,88 @@ class TestStatus(unittest.TestCase):
         ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 5)
         self.assertFalse(ac.get_character_statuses().contains(FrozenStatus))
+
+    ############################## Quicken ##############################
+    def testQuicken(self):
+        """
+        Tests that dealing 1 Electro damage to char with Dendro aura deals 2 damage, and give character
+        CatalyzingFieldStatus, vice versa.
+        Tests that CayalyzingFieldStatus boosts damage.
+        Tests that CayalyzingFieldStatus can be consumed to disappering.
+        Tests that usages of CayalyzingFieldStatus don't exceed 2.
+        """
+        # ELECTRO to DENDRO
+        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.DENDRO)
+        game_state = _add_damage_effect(game_state, 1, Element.ELECTRO)
+        self.assertEqual(
+            game_state.get_player2().just_get_active_character().get_hp(),
+            10,
+        )
+
+        game_state = auto_step(game_state)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 8)
+        self.assertFalse(ac.get_elemental_aura().elem_auras())
+        self.assertTrue(game_state.get_player1(
+        ).get_combat_statuses().contains(CatalyzingFieldStatus))
+
+        # DENDRO to ELECTRO
+        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO)
+        game_state = _add_damage_effect(game_state, 1, Element.DENDRO)
+        self.assertEqual(
+            game_state.get_player2().just_get_active_character().get_hp(),
+            10,
+        )
+
+        game_state = auto_step(game_state)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 8)
+        self.assertFalse(ac.get_elemental_aura().elem_auras())
+        self.assertTrue(game_state.get_player1(
+        ).get_combat_statuses().contains(CatalyzingFieldStatus))
+
+    def testCatalyzingFieldStatus(self):
+        """
+        Tests that CayalyzingFieldStatus boosts damage.
+        Tests that CayalyzingFieldStatus can be consumed to disappering.
+        Tests that usages of CayalyzingFieldStatus don't exceed 2.
+        """
+        base_game_state = ACTION_TEMPLATE.factory().f_player1(
+            lambda p: p.factory().f_combat_statuses(
+                lambda ss: ss.update_statuses(CatalyzingFieldStatus())
+            ).build()
+        ).build()
+        electro_game_state = _add_damage_effect(base_game_state, 1, Element.ELECTRO)
+        self.assertEqual(
+            electro_game_state.get_player2().just_get_active_character().get_hp(),
+            10,
+        )
+
+        # deals 1 electro damage with CatalyzingFieldStatus(2)
+        electro_game_state = auto_step(electro_game_state)
+        ac = electro_game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 8)
+        self.assertTrue(ac.get_elemental_aura().has(Element.ELECTRO))
+        self.assertTrue(
+            electro_game_state.get_player1().get_combat_statuses().contains(CatalyzingFieldStatus)
+        )
+
+        # deals 1 electro damage with CatalyzingFieldStatus(1)
+        game_state = _add_damage_effect(electro_game_state, 1, Element.ELECTRO)
+        game_state = auto_step(game_state)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 6)
+        self.assertTrue(ac.get_elemental_aura().has(Element.ELECTRO))
+        self.assertFalse(
+            game_state.get_player1().get_combat_statuses().contains(CatalyzingFieldStatus)
+        )
+
+        # deals 1 dendro damage with CatalyzingFieldStatus(1) and electro aura
+        game_state = _add_damage_effect(electro_game_state, 1, Element.DENDRO)
+        game_state = auto_step(game_state)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 5)
+        self.assertFalse(ac.get_elemental_aura().elem_auras())
+        self.assertTrue(
+            game_state.get_player1().get_combat_statuses().contains(CatalyzingFieldStatus)
+        )

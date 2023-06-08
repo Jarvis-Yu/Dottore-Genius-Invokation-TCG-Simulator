@@ -45,7 +45,7 @@ class FoodCard(EventCard):
     def effects(cls, instruction: ac.Instruction) -> tuple[Effect, ...]:
         assert isinstance(instruction, ac.CharacterTargetInstruction)
         return cls.food_effects(instruction) + (
-            AddStatusEffect(
+            AddCharacterStatusEffect(
                 instruction.target(),
                 stt.SatiatedStatus,
             ),
@@ -94,7 +94,7 @@ class JueyunGuoba(FoodCard):
     def food_effects(cls, instruction: ac.Instruction) -> tuple[Effect, ...]:
         assert isinstance(instruction, ac.CharacterTargetInstruction)
         return (
-            AddStatusEffect(
+            AddCharacterStatusEffect(
                 instruction.target(),
                 stt.JueyunGuobaStatus,
             ),
@@ -122,7 +122,7 @@ class MushroomPizza(FoodCard):
                 instruction.target(),
                 1
             ),
-            AddStatusEffect(
+            AddCharacterStatusEffect(
                 instruction.target(),
                 stt.MushroomPizzaStatus,
             )

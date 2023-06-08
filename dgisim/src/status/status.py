@@ -96,25 +96,65 @@ class _DurationStatus(Status):
         (when new_duration <= 0, the status is scheduled to be destroyed)
         """
         es: list[eft.Effect] = []
-        if new_duration <= 0:
-            if isinstance(self, CharacterStatus) \
-                    or isinstance(self, CharacterTalentStatus) \
-                    or isinstance(self, EquipmentStatus):
-                es.append(eft.RemoveStatusEffect(
+        if isinstance(self, CharacterTalentStatus) \
+                or isinstance(self, EquipmentStatus) \
+                or isinstance(self, CharacterStatus):
+            if new_duration <= 0:
+                es.append(eft.RemoveCharacterStatusEffect(
                     source,
                     type(self),
                 ))
-            else:
-                raise NotImplementedError
-        elif new_duration != self.duration:
-            es.append(eft.UpdateStatusEffect(
-                source,
-                replace(self, duration=new_duration),
-            ))
+            elif new_duration != self.duration:
+                es.append(eft.UpdateCharacterStatusEffect(
+                    source,
+                    replace(self, duration=new_duration),
+                ))
+
+        elif isinstance(self, CombatStatus):
+            if new_duration <= 0:
+                es.append(eft.RemoveCombatStatusEffect(
+                    source.pid,
+                    type(self),
+                ))
+            elif new_duration != self.duration:
+                es.append(eft.UpdateCombatStatusEffect(
+                    source.pid,
+                    replace(self, duration=new_duration),
+                ))
         return es
 
     def __str__(self) -> str:
         return super().__str__() + f"({self.duration})"
+
+
+@dataclass(frozen=True)
+class CatalyzingFieldStatus(CombatStatus):
+    damage_boost: ClassVar[int] = 1
+    count: int = 2
+
+    @override
+    def preprocess(
+            self,
+            game_state: gs.GameState,
+            status_source: eft.StaticTarget,
+            item: eft.Preprocessable,
+            signal: Status.PPType,
+    ) -> tuple[eft.Preprocessable, Optional[CatalyzingFieldStatus]]:
+        if signal is Status.PPType.DmgAmount:
+            assert isinstance(item, eft.SpecificDamageEffect)
+            assert self.count >= 1
+            elem_can_boost = item.element is Element.ELECTRO or item.element is Element.DENDRO
+            legal_to_boost = status_source.pid is item.source.pid
+            if elem_can_boost and legal_to_boost:
+                new_damage = replace(item, damage=item.damage + CatalyzingFieldStatus.damage_boost)
+                if self.count == 1:
+                    return new_damage, None
+                else:
+                    return new_damage, CatalyzingFieldStatus(self.count - 1)
+        return super().preprocess(game_state, status_source, item, signal)
+
+    def __str__(self) -> str:
+        return super().__str__() + f"({self.count})"
 
 
 @dataclass(frozen=True)
@@ -142,7 +182,7 @@ class FrozenStatus(CharacterStatus):
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
     ) -> tuple[eft.Effect, ...]:
         if signal is eft.TriggeringSignal.ROUND_END:
-            return (eft.RemoveStatusEffect(
+            return (eft.RemoveCharacterStatusEffect(
                 source,
                 type(self),
             ),)
@@ -157,7 +197,7 @@ class SatiatedStatus(CharacterStatus):
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
     ) -> tuple[eft.Effect, ...]:
         if signal is eft.TriggeringSignal.ROUND_END:
-            return (eft.RemoveStatusEffect(
+            return (eft.RemoveCharacterStatusEffect(
                 source,
                 type(self),
             ),)
@@ -212,7 +252,7 @@ class JueyunGuobaStatus(CharacterStatus):
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
     ) -> tuple[eft.Effect, ...]:
         if signal is eft.TriggeringSignal.ROUND_END:
-            return (eft.RemoveStatusEffect(
+            return (eft.RemoveCharacterStatusEffect(
                 source,
                 type(self),
             ),)
