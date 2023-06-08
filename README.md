@@ -31,14 +31,14 @@ with limited action cards and all omni dices.
   - [x] Partially implement the pipeline for status handling
   - [x] Allow players to normal attack
   - [ ] Implement elemental reaction
-    - [ ] Bloom
+    - [x] Bloom
     - [ ] Burning
     - [ ] Crystallize
     - [x] Electro-charged
     - [x] Frozen
     - [x] Melt
     - [x] Overloaded
-    - [ ] Quicken
+    - [x] Quicken
     - [x] Superconduct
     - [x] Swirl
     - [x] Vaporize
