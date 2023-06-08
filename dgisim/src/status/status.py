@@ -48,6 +48,9 @@ class Status:
     def same_type_as(self, status: Status) -> bool:
         return type(self) == type(status)
 
+    def update(self: _T, other: _T) -> _T:
+        return self
+
     def __str__(self) -> str:
         return self.__class__.__name__.removesuffix("Status")
 
@@ -125,6 +128,40 @@ class _DurationStatus(Status):
 
     def __str__(self) -> str:
         return super().__str__() + f"({self.duration})"
+
+@dataclass(frozen=True)
+class DendroCoreStatus(CombatStatus):
+    damage_boost: ClassVar[int] = 2
+    count: int = 1
+
+    @override
+    def preprocess(
+            self,
+            game_state: gs.GameState,
+            status_source: eft.StaticTarget,
+            item: eft.Preprocessable,
+            signal: Status.PPType,
+    ) -> tuple[eft.Preprocessable, Optional[DendroCoreStatus]]:
+        if signal is Status.PPType.DmgAmount:
+            assert isinstance(item, eft.SpecificDamageEffect)
+            assert self.count >= 1
+            elem_can_boost = item.element is Element.ELECTRO or item.element is Element.PYRO
+            legal_to_boost = status_source.pid is item.source.pid
+            if elem_can_boost and legal_to_boost:
+                new_damage = replace(item, damage=item.damage + DendroCoreStatus.damage_boost)
+                if self.count == 1:
+                    return new_damage, None
+                else:
+                    return new_damage, DendroCoreStatus(self.count - 1)
+        return super().preprocess(game_state, status_source, item, signal)
+
+    @override
+    def update(self, other: DendroCoreStatus) -> DendroCoreStatus:
+        total_count = min(self.count + other.count, 2)
+        return DendroCoreStatus(total_count)
+
+    def __str__(self) -> str:
+        return super().__str__() + f"({self.count})"
 
 
 @dataclass(frozen=True)

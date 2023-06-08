@@ -554,9 +554,6 @@ class TestStatus(unittest.TestCase):
         """
         Tests that dealing 1 Electro damage to char with Dendro aura deals 2 damage, and give character
         CatalyzingFieldStatus, vice versa.
-        Tests that CayalyzingFieldStatus boosts damage.
-        Tests that CayalyzingFieldStatus can be consumed to disappering.
-        Tests that usages of CayalyzingFieldStatus don't exceed 2.
         """
         # ELECTRO to DENDRO
         game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.DENDRO)
@@ -570,8 +567,10 @@ class TestStatus(unittest.TestCase):
         ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 8)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
-        self.assertTrue(game_state.get_player1(
-        ).get_combat_statuses().contains(CatalyzingFieldStatus))
+        self.assertEqual(
+            game_state.get_player1().get_combat_statuses().just_find(CatalyzingFieldStatus).count,  # type: ignore
+            2
+        )
 
         # DENDRO to ELECTRO
         game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO)
@@ -585,8 +584,10 @@ class TestStatus(unittest.TestCase):
         ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 8)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
-        self.assertTrue(game_state.get_player1(
-        ).get_combat_statuses().contains(CatalyzingFieldStatus))
+        self.assertEqual(
+            game_state.get_player1().get_combat_statuses().just_find(CatalyzingFieldStatus).count,  # type: ignore
+            2
+        )
 
     def testCatalyzingFieldStatus(self):
         """
@@ -600,6 +601,7 @@ class TestStatus(unittest.TestCase):
             ).build()
         ).build()
         electro_game_state = _add_damage_effect(base_game_state, 1, Element.ELECTRO)
+        dendro_game_state = _add_damage_effect(base_game_state, 1, Element.DENDRO)
         self.assertEqual(
             electro_game_state.get_player2().just_get_active_character().get_hp(),
             10,
@@ -610,8 +612,19 @@ class TestStatus(unittest.TestCase):
         ac = electro_game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 8)
         self.assertTrue(ac.get_elemental_aura().has(Element.ELECTRO))
-        self.assertTrue(
-            electro_game_state.get_player1().get_combat_statuses().contains(CatalyzingFieldStatus)
+        self.assertEqual(
+            electro_game_state.get_player1().get_combat_statuses().just_find(CatalyzingFieldStatus).count,  # type: ignore
+            1
+        )
+
+        # deals 1 dendro damage with CatalyzingFieldStatus(2)
+        dendro_game_state = auto_step(dendro_game_state)
+        ac = dendro_game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 8)
+        self.assertTrue(ac.get_elemental_aura().has(Element.DENDRO))
+        self.assertEqual(
+            dendro_game_state.get_player1().get_combat_statuses().just_find(CatalyzingFieldStatus).count,  # type: ignore
+            1
         )
 
         # deals 1 electro damage with CatalyzingFieldStatus(1)
@@ -630,6 +643,106 @@ class TestStatus(unittest.TestCase):
         ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 5)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
-        self.assertTrue(
-            game_state.get_player1().get_combat_statuses().contains(CatalyzingFieldStatus)
+        self.assertEqual(
+            game_state.get_player1().get_combat_statuses().just_find(CatalyzingFieldStatus).count,  # type: ignore
+            2
+        )
+
+    ############################## Bloom ##############################
+    def testBloom(self):
+        """
+        Tests that dealing 1 Hydro damage to char with Dendro aura deals 2 damage, and give character
+        CatalyzingFieldStatus, vice versa.
+        """
+        # HYDRO to DENDRO
+        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.DENDRO)
+        game_state = _add_damage_effect(game_state, 1, Element.HYDRO)
+        self.assertEqual(
+            game_state.get_player2().just_get_active_character().get_hp(),
+            10,
+        )
+
+        game_state = auto_step(game_state)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 8)
+        self.assertFalse(ac.get_elemental_aura().elem_auras())
+        self.assertEqual(
+            game_state.get_player1().get_combat_statuses().just_find(DendroCoreStatus).count,  # type: ignore
+            1
+        )
+
+        # DENDRO to HYDRO
+        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.HYDRO)
+        game_state = _add_damage_effect(game_state, 1, Element.DENDRO)
+        self.assertEqual(
+            game_state.get_player2().just_get_active_character().get_hp(),
+            10,
+        )
+
+        game_state = auto_step(game_state)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 8)
+        self.assertFalse(ac.get_elemental_aura().elem_auras())
+        self.assertEqual(
+            game_state.get_player1().get_combat_statuses().just_find(DendroCoreStatus).count,  # type: ignore
+            1
+        )
+
+    def testDendroCoreStatus(self):
+        """
+        Tests that DendroCoreStatus boosts damage.
+        Tests that DendroCoreStatus can be consumed to disappering.
+        Tests that usages of DendroCoreStatus don't exceed 2.
+        """
+        base_game_state = ACTION_TEMPLATE.factory().f_player1(
+            lambda p: p.factory().f_combat_statuses(
+                lambda ss: ss.update_statuses(DendroCoreStatus())
+            ).build()
+        ).build()
+        electro_game_state = _add_damage_effect(base_game_state, 1, Element.ELECTRO)
+        pyro_game_state = _add_damage_effect(base_game_state, 1, Element.PYRO)
+        self.assertEqual(
+            electro_game_state.get_player2().just_get_active_character().get_hp(),
+            10,
+        )
+
+        # deals 1 electro damage with DendroCoreStatus(2)
+        electro_game_state = auto_step(electro_game_state)
+        ac = electro_game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 7)
+        self.assertTrue(ac.get_elemental_aura().has(Element.ELECTRO))
+        self.assertFalse(
+            electro_game_state.get_player1().get_combat_statuses().contains(DendroCoreStatus)
+        )
+
+        # deals 1 pyro damage with DendroCoreStatus(2)
+        pyro_game_state = auto_step(pyro_game_state)
+        ac = pyro_game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 7)
+        self.assertTrue(ac.get_elemental_aura().has(Element.PYRO))
+        self.assertFalse(
+            electro_game_state.get_player1().get_combat_statuses().contains(DendroCoreStatus)
+        )
+
+        # deals 1 electro damage with DendroCoreStatus(1)
+        game_state = _oppo_aura_elem(base_game_state, elem=Element.DENDRO)
+        game_state = _add_damage_effect(game_state, 1, Element.HYDRO)
+        game_state = auto_step(game_state)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 8)
+        self.assertFalse(ac.get_elemental_aura().elem_auras())
+        self.assertEqual(
+            game_state.get_player1().get_combat_statuses().just_find(DendroCoreStatus).count,  # type: ignore
+            2
+        )
+
+        # deals 1 electro damage with DendroCoreStatus(2)
+        game_state = _add_damage_effect(game_state, 1, Element.ELECTRO)
+        game_state = auto_step(game_state)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 5)
+        self.assertTrue(ac.get_elemental_aura().has(Element.ELECTRO))
+        self.assertEqual(
+            game_state.get_player1().get_combat_statuses().just_find(DendroCoreStatus).count,  # type: ignore
+            1
         )

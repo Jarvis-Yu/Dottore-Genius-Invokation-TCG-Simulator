@@ -12,7 +12,7 @@ class Statuses:
     def __init__(self, statuses: tuple[Status, ...]):
         self._statuses = statuses
 
-    def update_statuses(self: _T, new_status: Status) -> _T:
+    def update_statuses(self: _T, incoming_status: Status, force: bool=False) -> _T:
         """
         Replaces existing status of the same type with the new_status,
         or append the new_status to the end of current statuses
@@ -20,12 +20,16 @@ class Statuses:
         cls = type(self)
         statuses = list(self._statuses)
         for i, status in enumerate(statuses):
-            if type(status) is type(new_status):
+            if type(status) is type(incoming_status):
+                if force:
+                    new_status = incoming_status
+                else:
+                    new_status = incoming_status.update(status)
                 if status == new_status:
                     return self
                 statuses[i] = new_status
                 return cls(tuple(statuses))
-        statuses.append(new_status)
+        statuses.append(incoming_status)
         return cls(tuple(statuses))
 
     def contains(self, status: type[Status]) -> bool:

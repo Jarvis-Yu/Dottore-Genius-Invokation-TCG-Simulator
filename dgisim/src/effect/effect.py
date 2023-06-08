@@ -204,7 +204,7 @@ def _preprocessByAllStatuses(
                     status_source, type(status)).execute(game_state)
             elif new_status != status:
                 assert type(status) == type(new_status)
-                game_state = UpdateCharacterStatusEffect(
+                game_state = ForceUpdateCharacterStatusEffect(
                     status_source,
                     new_status,  # type: ignore
                 ).execute(game_state)
@@ -217,7 +217,7 @@ def _preprocessByAllStatuses(
                 ).execute(game_state)
             elif new_status != status:
                 assert type(status) == type(new_status)
-                game_state = UpdateCombatStatusEffect(
+                game_state = ForceUpdateCombatStatusEffect(
                     status_source.pid,
                     new_status,  # type: ignore
                 ).execute(game_state)
@@ -642,6 +642,14 @@ class SpecificDamageEffect(Effect):
                 )
             )
 
+        elif reaction.reaction_type is Reaction.BLOOM:
+            effects.append(
+                AddCombatStatusEffect(
+                    target_pid=actual_damage.source.pid,
+                    status=stt.DendroCoreStatus,
+                )
+            )
+
         else:
             raise Exception(f"Reaction {reaction.reaction_type} not handled")
 
@@ -906,6 +914,30 @@ class UpdateCharacterStatusEffect(Effect):
 
 
 @dataclass(frozen=True)
+class ForceUpdateCharacterStatusEffect(Effect):
+    target: StaticTarget
+    status: Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        character = game_state.get_target(self.target)
+        assert isinstance(character, chr.Character)
+        if isinstance(self.status, stt.CharacterTalentStatus):
+            pass
+        elif isinstance(self.status, stt.EquipmentStatus):
+            pass
+        elif isinstance(self.status, stt.CharacterStatus):
+            character = character.factory().f_character_statuses(
+                lambda bs: bs.update_statuses(self.status, force=True)
+            ).build()
+        return game_state.factory().f_player(
+            self.target.pid,
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().character(character).build()
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True)
 class AddCombatStatusEffect(Effect):
     target_pid: gs.GameState.Pid
     status: type[stt.CombatStatus]
@@ -943,6 +975,20 @@ class UpdateCombatStatusEffect(Effect):
             self.target_pid,
             lambda p: p.factory().f_combat_statuses(
                 lambda ss: ss.update_statuses(self.status)
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True)
+class ForceUpdateCombatStatusEffect(Effect):
+    target_pid: gs.GameState.Pid
+    status: stt.CombatStatus
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        return game_state.factory().f_player(
+            self.target_pid,
+            lambda p: p.factory().f_combat_statuses(
+                lambda ss: ss.update_statuses(self.status, force=True)
             ).build()
         ).build()
 
