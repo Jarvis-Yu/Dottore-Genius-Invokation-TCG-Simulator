@@ -129,6 +129,16 @@ class _DurationStatus(Status):
     def __str__(self) -> str:
         return super().__str__() + f"({self.duration})"
 
+
+"""
+When you deal Pyro DMG or Electro DMG to an opposing active character, DMG dealt +2.
+Usage(s): 1
+=====
+Experiment results:
+- normally the maxinum num of usage(s) is 1
+"""
+
+
 @dataclass(frozen=True)
 class DendroCoreStatus(CombatStatus):
     damage_boost: ClassVar[int] = 2
@@ -147,7 +157,10 @@ class DendroCoreStatus(CombatStatus):
             assert self.count >= 1
             elem_can_boost = item.element is Element.ELECTRO or item.element is Element.PYRO
             legal_to_boost = status_source.pid is item.source.pid
-            if elem_can_boost and legal_to_boost:
+            target_is_active = item.target.id == game_state.get_player(
+                item.target.pid
+            ).just_get_active_character().get_id()
+            if elem_can_boost and legal_to_boost and target_is_active:
                 new_damage = replace(item, damage=item.damage + DendroCoreStatus.damage_boost)
                 if self.count == 1:
                     return new_damage, None
@@ -155,10 +168,10 @@ class DendroCoreStatus(CombatStatus):
                     return new_damage, DendroCoreStatus(self.count - 1)
         return super().preprocess(game_state, status_source, item, signal)
 
-    @override
-    def update(self, other: DendroCoreStatus) -> DendroCoreStatus:
-        total_count = min(self.count + other.count, 2)
-        return DendroCoreStatus(total_count)
+    # @override
+    # def update(self, other: DendroCoreStatus) -> DendroCoreStatus:
+    #     total_count = min(self.count + other.count, 2)
+    #     return DendroCoreStatus(total_count)
 
     def __str__(self) -> str:
         return super().__str__() + f"({self.count})"
@@ -182,7 +195,10 @@ class CatalyzingFieldStatus(CombatStatus):
             assert self.count >= 1
             elem_can_boost = item.element is Element.ELECTRO or item.element is Element.DENDRO
             legal_to_boost = status_source.pid is item.source.pid
-            if elem_can_boost and legal_to_boost:
+            target_is_active = item.target.id == game_state.get_player(
+                item.target.pid
+            ).just_get_active_character().get_id()
+            if elem_can_boost and legal_to_boost and target_is_active:
                 new_damage = replace(item, damage=item.damage + CatalyzingFieldStatus.damage_boost)
                 if self.count == 1:
                     return new_damage, None

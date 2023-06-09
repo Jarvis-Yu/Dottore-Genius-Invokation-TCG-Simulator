@@ -591,9 +591,10 @@ class TestStatus(unittest.TestCase):
 
     def testCatalyzingFieldStatus(self):
         """
-        Tests that CayalyzingFieldStatus boosts damage.
-        Tests that CayalyzingFieldStatus can be consumed to disappering.
-        Tests that usages of CayalyzingFieldStatus don't exceed 2.
+        Tests that CatalyzingFieldStatus boosts damage.
+        Tests that CatalyzingFieldStatus can be consumed to disappering.
+        Tests that usages of CatalyzingFieldStatus don't exceed 2.
+        Tests that CatalyzingFieldStatus doesn't boost DMG to inactive character
         """
         base_game_state = ACTION_TEMPLATE.factory().f_player1(
             lambda p: p.factory().f_combat_statuses(
@@ -648,6 +649,21 @@ class TestStatus(unittest.TestCase):
             2
         )
 
+        # deals 1 electro damage to off-field characters
+        game_state = base_game_state.factory().f_effect_stack(
+            lambda es: es.push_one(ReferredDamageEffect(
+                source=StaticTarget(GameState.Pid.P1, Zone.CHARACTER, 1),
+                target=DynamicCharacterTarget.OPPO_OFF_FIELD,
+                element=Element.ELECTRO,
+                damage=1,
+            ))
+        ).build()
+        oc = game_state.get_player2().get_characters().just_get_character(3)
+        self.assertEqual(oc.get_hp(), 10)
+        game_state = auto_step(game_state)
+        oc = game_state.get_player2().get_characters().just_get_character(3)
+        self.assertEqual(oc.get_hp(), 9)
+
     ############################## Bloom ##############################
     def testBloom(self):
         """
@@ -693,6 +709,7 @@ class TestStatus(unittest.TestCase):
         Tests that DendroCoreStatus boosts damage.
         Tests that DendroCoreStatus can be consumed to disappering.
         Tests that usages of DendroCoreStatus don't exceed 2.
+        Tests that DendroCoreStatus doesn't boost DMG to inactive character
         """
         base_game_state = ACTION_TEMPLATE.factory().f_player1(
             lambda p: p.factory().f_combat_statuses(
@@ -724,7 +741,7 @@ class TestStatus(unittest.TestCase):
             electro_game_state.get_player1().get_combat_statuses().contains(DendroCoreStatus)
         )
 
-        # deals 1 electro damage with DendroCoreStatus(1)
+        # bloom with DendroCoreStatus(1)
         game_state = _oppo_aura_elem(base_game_state, elem=Element.DENDRO)
         game_state = _add_damage_effect(game_state, 1, Element.HYDRO)
         game_state = auto_step(game_state)
@@ -733,16 +750,20 @@ class TestStatus(unittest.TestCase):
         self.assertFalse(ac.get_elemental_aura().elem_auras())
         self.assertEqual(
             game_state.get_player1().get_combat_statuses().just_find(DendroCoreStatus).count,  # type: ignore
-            2
-        )
-
-        # deals 1 electro damage with DendroCoreStatus(2)
-        game_state = _add_damage_effect(game_state, 1, Element.ELECTRO)
-        game_state = auto_step(game_state)
-        ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(ac.get_hp(), 5)
-        self.assertTrue(ac.get_elemental_aura().has(Element.ELECTRO))
-        self.assertEqual(
-            game_state.get_player1().get_combat_statuses().just_find(DendroCoreStatus).count,  # type: ignore
             1
         )
+
+        # deals 1 electro damage to off-field characters
+        game_state = base_game_state.factory().f_effect_stack(
+            lambda es: es.push_one(ReferredDamageEffect(
+                source=StaticTarget(GameState.Pid.P1, Zone.CHARACTER, 1),
+                target=DynamicCharacterTarget.OPPO_OFF_FIELD,
+                element=Element.ELECTRO,
+                damage=1,
+            ))
+        ).build()
+        oc = game_state.get_player2().get_characters().just_get_character(3)
+        self.assertEqual(oc.get_hp(), 10)
+        game_state = auto_step(game_state)
+        oc = game_state.get_player2().get_characters().just_get_character(3)
+        self.assertEqual(oc.get_hp(), 9)
