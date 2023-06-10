@@ -138,7 +138,7 @@ class HardCodedRandomAgent(PlayerAgent):
                     (SweetMadame, character_injured, dice(Element.OMNI, 0)),
                     (MondstadtHashBrown, character_injured, dice(Element.OMNI, 1)),
                     (MushroomPizza, character_injured, dice(Element.OMNI, 1)),
-                    (Starsigns, missing_energy, dice(Element.OMNI, 1)),
+                    (Starsigns, missing_energy, dice(Element.ANY, 2)),
                 ]
 
                 for card, condition, dices in cardstuff:
