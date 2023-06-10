@@ -15,10 +15,9 @@ from dgisim.src.dices import AbstractDices, ActualDices
 from dgisim.src.element.element import Element
 from dgisim.src.card.card import *
 
-
+# Empty Agent
 class NoneAgent(PlayerAgent):
     pass
-
 
 class LazyAgent(PlayerAgent):
     _NUM_PICKED_CARDS = 3
@@ -97,56 +96,50 @@ class HardCodedRandomAgent(PlayerAgent):
                 else:
                     raise Exception("Game should end here but not implemented(NOT REACHED)")
                 
-            # food card
-            character_injured = active_character.get_hp() < active_character.get_max_hp()
+            # card action
             if selection < 1:
                 cards = me.get_hand_cards()
                 card: Optional[type[Card]]
-                tmp_dices = ActualDices({})
 
-                if cards.contains(SweetMadame) and character_injured:
-                    card = SweetMadame
-                    tmp_dices = ActualDices({Element.OMNI: 0})
-                elif cards.contains(MondstadtHashBrown) and character_injured:
-                    tmp_dices = ActualDices({Element.OMNI: 1})
-                    card = MondstadtHashBrown
-                elif cards.contains(MushroomPizza) and character_injured:
-                    tmp_dices = ActualDices({Element.OMNI: 1})
-                    card = MushroomPizza
-                else:
-                    card = None
-                
-                if card is not None and not active_character.satiated():
-                    print(card().name())
-                    return CardAction(
-                        card,
-                        CharacterTargetInstruction(
-                            tmp_dices,
-                            StaticTarget(
-                                pid,
-                                Zone.CHARACTER,
-                                active_character.get_id(),
+                # Consolidation Functions / Helpers
+                def try_card_action(card_class, condition, tmp_dices):
+                    if cards.contains(card_class) and condition():
+                        action = CardAction(
+                            card_class,
+                            CharacterTargetInstruction(
+                                tmp_dices,
+                                StaticTarget(
+                                    pid,
+                                    Zone.CHARACTER,
+                                    active_character.get_id()
+                                )
                             )
                         )
-                    )
+                        if action is None:
+                            return None
+                        else:
+                            print(card_class().name())
+                            return action
                 
-            # starsigns
-            if cards.contains(Starsigns):
-                if active_character.get_energy() < active_character.get_max_energy():
-                    card = Starsigns
-                    tmp_dices = ActualDices({Element.ANY: 2})
-                    print(card().name())
-                    return CardAction(
-                        card,
-                        CharacterTargetInstruction(
-                            tmp_dices,
-                            StaticTarget(
-                                pid,
-                                Zone.CHARACTER,
-                                active_character.get_id(),
-                            )
-                        )
-                    )
+                def dice(element, amount):
+                    return available_dices.basically_satisfy(AbstractDices({element: amount}))
+                
+                # Conditions
+                character_injured = lambda: active_character.get_hp() < active_character.get_max_hp()
+                missing_energy = lambda: active_character.get_energy() < active_character.get_max_energy()
+
+                # Cards / Conditions / Dices
+                cardstuff = [
+                    (SweetMadame, character_injured, dice(Element.OMNI, 0)),
+                    (MondstadtHashBrown, character_injured, dice(Element.OMNI, 1)),
+                    (MushroomPizza, character_injured, dice(Element.OMNI, 1)),
+                    (Starsigns, missing_energy, dice(Element.OMNI, 1)),
+                ]
+
+                for card, condition, dices in cardstuff:
+                    action = try_card_action(card, condition, dices)
+                    if action is not None:
+                        return action
 
             # normal attack
             if selection < 0.6 and active_character.can_cast_skill():
