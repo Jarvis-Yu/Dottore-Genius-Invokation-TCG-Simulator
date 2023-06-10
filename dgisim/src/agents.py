@@ -104,22 +104,27 @@ class HardCodedRandomAgent(PlayerAgent):
                 # Consolidation Functions / Helpers
                 def try_card_action(card_class, condition, tmp_dices):
                     if cards.contains(card_class) and condition():
-                        action = CardAction(
-                            card_class,
-                            CharacterTargetInstruction(
-                                tmp_dices,
-                                StaticTarget(
-                                    pid,
-                                    Zone.CHARACTER,
-                                    active_character.get_id()
+                        if active_character is not None:
+                            action = CardAction(
+                                card_class,
+                                CharacterTargetInstruction(
+                                    tmp_dices,
+                                    StaticTarget(
+                                        pid,
+                                        Zone.CHARACTER,
+                                        active_character.get_id()
+                                    )
                                 )
                             )
-                        )
-                        if action is None:
-                            return None
+                            if action is None:
+                                return None
+                            else:
+                                print(card_class().name())
+                                return action
                         else:
-                            print(card_class().name())
-                            return action
+                            print("No Active Character")
+                            return None
+                        
                 
                 def dice(element, amount):
                     return available_dices.basically_satisfy(AbstractDices({element: amount}))
