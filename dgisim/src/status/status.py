@@ -3,10 +3,12 @@ from typing import TypeVar, Union, Optional, ClassVar
 from typing_extensions import override
 from enum import Enum
 from dataclasses import dataclass, replace
+from math import ceil
 
 import dgisim.src.effect.effect as eft
 import dgisim.src.state.game_state as gs
 from dgisim.src.element.element import Element
+from dgisim.src.helper.quality_of_life import just
 
 
 class TriggerringEvent(Enum):
@@ -19,6 +21,7 @@ _T = TypeVar('_T', bound="Status")
 @dataclass(frozen=True)
 class Status:
     class PPType(Enum):
+        """ PreProcessType """
         # Damages
         DmgElement = "DmgElement"    # To determine the element
         DmgReaction = "DmgReaction"  # To determine the reaction
@@ -35,6 +38,9 @@ class Status:
             item: eft.Preprocessable,
             signal: Status.PPType,
     ) -> tuple[eft.Preprocessable, Optional[_T]]:
+        """
+        Returns the processed Preprocessable and possibly updated or deleted self
+        """
         return (item, self)
 
     # def react_to_event(self, game_state: gs.GameState, event: TriggerringEvent) -> gs.GameState:
@@ -42,8 +48,52 @@ class Status:
 
     def react_to_signal(
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
-    ) -> tuple[eft.Effect, ...]:
-        raise Exception("TODO")
+    ) -> list[eft.Effect]:
+        es, new_status = self._react_to_signal(source, signal)
+        es, new_status = self._preprocessed_react_to_signal(es, new_status)
+
+        if isinstance(self, CharacterTalentStatus) \
+                or isinstance(self, EquipmentStatus) \
+                or isinstance(self, CharacterStatus):
+            if new_status is None:
+                es.append(eft.RemoveCharacterStatusEffect(
+                    source,
+                    type(self),
+                ))
+            elif new_status != self:
+                assert type(self) == type(new_status)
+                es.append(eft.UpdateCharacterStatusEffect(
+                    source,
+                    new_status  # type: ignore
+                ))
+
+        elif isinstance(self, CombatStatus):
+            if new_status is None:
+                es.append(eft.RemoveCombatStatusEffect(
+                    source.pid,
+                    type(self),
+                ))
+            elif new_status != self:
+                assert type(self) == type(new_status)
+                es.append(eft.UpdateCombatStatusEffect(
+                    source.pid,
+                    new_status  # type: ignore
+                ))
+
+        return es
+
+    def _preprocessed_react_to_signal(
+            self: _T, effects: list[eft.Effect], new_status: Optional[_T]
+    ) -> tuple[list[eft.Effect], Optional[_T]]:
+        return effects, new_status
+
+    def _react_to_signal(
+            self: _T, source: eft.StaticTarget, signal: eft.TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[_T]]:
+        """
+        Returns a tuple, containg the effects and updated self (or None if should be removed)
+        """
+        raise NotImplementedError
 
     def same_type_as(self, status: Status) -> bool:
         return type(self) == type(status)
@@ -93,41 +143,52 @@ class _DurationStatus(Status):
     """
     duration: int
 
-    def auto_destory(self, source: eft.StaticTarget, new_duration: int) -> list[eft.Effect]:
-        """
-        Automatically updates the duration or destroy the status based on the new_duration
-        (when new_duration <= 0, the status is scheduled to be destroyed)
-        """
-        es: list[eft.Effect] = []
-        if isinstance(self, CharacterTalentStatus) \
-                or isinstance(self, EquipmentStatus) \
-                or isinstance(self, CharacterStatus):
-            if new_duration <= 0:
-                es.append(eft.RemoveCharacterStatusEffect(
-                    source,
-                    type(self),
-                ))
-            elif new_duration != self.duration:
-                es.append(eft.UpdateCharacterStatusEffect(
-                    source,
-                    replace(self, duration=new_duration),
-                ))
-
-        elif isinstance(self, CombatStatus):
-            if new_duration <= 0:
-                es.append(eft.RemoveCombatStatusEffect(
-                    source.pid,
-                    type(self),
-                ))
-            elif new_duration != self.duration:
-                es.append(eft.UpdateCombatStatusEffect(
-                    source.pid,
-                    replace(self, duration=new_duration),
-                ))
-        return es
+    @override
+    def _preprocessed_react_to_signal(
+            self, effects: list[eft.Effect], new_status: Optional[_DurationStatus]
+    ) -> tuple[list[eft.Effect], Optional[_DurationStatus]]:
+        """ remove the status if duration <= 0 """
+        if new_status is None or new_status.duration <= 0:
+            new_status = None
+        return super()._preprocessed_react_to_signal(effects, new_status)
 
     def __str__(self) -> str:
         return super().__str__() + f"({self.duration})"
+
+
+@dataclass(frozen=True)
+class ShieldStatus(Status):
+    pass
+
+
+@dataclass(frozen=True, kw_only=True)
+class StackedShieldStatus(ShieldStatus):
+    stacks: int
+    max_stack: ClassVar[Optional[int]] = None
+    shield_amount: ClassVar[int] = 1
+
+    @override
+    def preprocess(
+            self,
+            game_state: gs.GameState,
+            status_source: eft.StaticTarget,
+            item: eft.Preprocessable,
+            signal: Status.PPType,
+    ) -> tuple[eft.Preprocessable, Optional[StackedShieldStatus]]:
+        cls = type(self)
+        if signal is Status.PPType.DmgAmount:
+            assert isinstance(item, eft.SpecificDamageEffect)
+            assert cls.max_stack is None or self.stacks <= type(self).max_stack  # type: ignore
+            target_is_me = item.target == status_source
+            damage_not_zero = item.damage > 0
+            damage_not_piercing = item.element != Element.PIERCING
+            if target_is_me and damage_not_zero and damage_not_piercing:
+                stacks_consumed = min(ceil(item.damage / cls.shield_amount), self.stacks)
+                new_dmg = max(0, item.damage - stacks_consumed * cls.shield_amount)
+                new_stacks = self.stacks - stacks_consumed
+                # TODO: WIP
+
+        return super().preprocess(game_state, status_source, item, signal)
 
 
 """
@@ -231,30 +292,24 @@ class FrozenStatus(CharacterStatus):
         return super().preprocess(game_state, status_source, item, signal)
 
     @override
-    def react_to_signal(
+    def _react_to_signal(
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
-    ) -> tuple[eft.Effect, ...]:
+    ) -> tuple[list[eft.Effect], Optional[FrozenStatus]]:
         if signal is eft.TriggeringSignal.ROUND_END:
-            return (eft.RemoveCharacterStatusEffect(
-                source,
-                type(self),
-            ),)
-        return ()
+            return [], None
+        return [], self
 
 
 @dataclass(frozen=True)
 class SatiatedStatus(CharacterStatus):
 
     @override
-    def react_to_signal(
+    def _react_to_signal(
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
-    ) -> tuple[eft.Effect, ...]:
+    ) -> tuple[list[eft.Effect], Optional[SatiatedStatus]]:
         if signal is eft.TriggeringSignal.ROUND_END:
-            return (eft.RemoveCharacterStatusEffect(
-                source,
-                type(self),
-            ),)
-        return ()
+            return [], None
+        return [], self
 
 
 @dataclass(frozen=True)
@@ -262,9 +317,9 @@ class MushroomPizzaStatus(CharacterStatus, _DurationStatus):
     duration: int = 2
 
     @override
-    def react_to_signal(
+    def _react_to_signal(
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
-    ) -> tuple[eft.Effect, ...]:
+    ) -> tuple[list[eft.Effect], Optional[MushroomPizzaStatus]]:
         es: list[eft.Effect] = []
         new_duration = self.duration
         if signal is eft.TriggeringSignal.END_ROUND_CHECK_OUT:
@@ -275,8 +330,7 @@ class MushroomPizzaStatus(CharacterStatus, _DurationStatus):
                     1,
                 )
             )
-        es += self.auto_destory(source, new_duration)
-        return tuple(es)
+        return es, replace(self, duration=new_duration)
 
 
 @dataclass(frozen=True)
@@ -301,12 +355,9 @@ class JueyunGuobaStatus(CharacterStatus):
         return super().preprocess(game_state, status_source, item, signal)
 
     @override
-    def react_to_signal(
+    def _react_to_signal(
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
-    ) -> tuple[eft.Effect, ...]:
+    ) -> tuple[list[eft.Effect], Optional[JueyunGuobaStatus]]:
         if signal is eft.TriggeringSignal.ROUND_END:
-            return (eft.RemoveCharacterStatusEffect(
-                source,
-                type(self),
-            ),)
-        return ()
+            return [], None
+        return [], self
