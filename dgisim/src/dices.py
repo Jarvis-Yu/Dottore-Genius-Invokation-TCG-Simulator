@@ -5,6 +5,7 @@ import random
 
 from dgisim.src.helper.hashable_dict import HashableDict
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
+from dgisim.src.helper.quality_of_life import BIG_INT
 from dgisim.src.element.element import Element
 
 
@@ -125,7 +126,7 @@ class ActualDices(Dices):
                 remaining[elem] -= pures[elem]
         if omni > 0:
             best_elem: Optional[Element] = None
-            count = 0x7fffffff  # Sufficiently large number
+            count = BIG_INT
             for elem in _PURE_ELEMS:
                 this_count = remaining.get(elem, 0)
                 if this_count >= omni and this_count < count:
@@ -190,7 +191,7 @@ class AbstractDices(Dices):
     Used for the dice cost of cards and other actions
     """
     _LEGAL_ELEMS = frozenset({
-        Element.OMNI,
+        Element.OMNI,  # represents the request for dices of the same type
         Element.PYRO,
         Element.HYDRO,
         Element.ANEMO,

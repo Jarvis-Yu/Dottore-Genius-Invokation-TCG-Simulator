@@ -8,7 +8,7 @@ from math import ceil
 import dgisim.src.effect.effect as eft
 import dgisim.src.state.game_state as gs
 from dgisim.src.element.element import Element
-from dgisim.src.helper.quality_of_life import just
+from dgisim.src.helper.quality_of_life import just, BIG_INT
 
 
 class TriggerringEvent(Enum):
@@ -52,6 +52,7 @@ class Status:
         es, new_status = self._react_to_signal(source, signal)
         es, new_status = self._preprocessed_react_to_signal(es, new_status)
 
+        # do the removal or update of the status
         if isinstance(self, CharacterTalentStatus) \
                 or isinstance(self, EquipmentStatus) \
                 or isinstance(self, CharacterStatus):
@@ -165,7 +166,31 @@ class ShieldStatus(Status):
 class StackedShieldStatus(ShieldStatus):
     stacks: int
     max_stack: ClassVar[Optional[int]] = None
-    shield_amount: ClassVar[int] = 1
+    shield_amount: ClassVar[int] = 1  # shield amount per stack
+
+    def _is_target(
+            self,
+            game_state: gs.GameState,
+            status_source: eft.StaticTarget,
+            item: eft.Preprocessable,
+            signal: Status.PPType,
+    ) -> bool:
+        assert isinstance(item, eft.SpecificDamageEffect)
+        if isinstance(self, CharacterTalentStatus) \
+                or isinstance(self, EquipmentStatus) \
+                or isinstance(self, CharacterStatus):
+            return item.target == status_source
+        
+        elif isinstance(self, CombatStatus):
+            attached_active_character = eft.StaticTarget(
+                status_source.pid,
+                zone=eft.Zone.CHARACTER,
+                id=game_state.get_player(status_source.pid).just_get_active_character().get_id(),
+            )
+            return item.target == attached_active_character
+        
+        else:
+            raise NotImplementedError
 
     @override
     def preprocess(
@@ -179,29 +204,44 @@ class StackedShieldStatus(ShieldStatus):
         if signal is Status.PPType.DmgAmount:
             assert isinstance(item, eft.SpecificDamageEffect)
             assert cls.max_stack is None or self.stacks <= type(self).max_stack  # type: ignore
-            target_is_me = item.target == status_source
-            damage_not_zero = item.damage > 0
-            damage_not_piercing = item.element != Element.PIERCING
-            if target_is_me and damage_not_zero and damage_not_piercing:
+            if item.damage > 0 \
+                    and item.element != Element.PIERCING \
+                    and self._is_target(game_state, status_source, item, signal):
                 stacks_consumed = min(ceil(item.damage / cls.shield_amount), self.stacks)
                 new_dmg = max(0, item.damage - stacks_consumed * cls.shield_amount)
+                new_item = replace(item, damage=new_dmg)
                 new_stacks = self.stacks - stacks_consumed
-                # TODO: WIP
+                if new_stacks == 0:
+                    return new_item, None
+                else:
+                    return new_item, replace(self, stacks=new_stacks)
 
         return super().preprocess(game_state, status_source, item, signal)
 
+    def __str__(self) -> str:
+        return super().__str__() + f"({self.stacks})"
 
-"""
-When you deal Pyro DMG or Electro DMG to an opposing active character, DMG dealt +2.
-Usage(s): 1
-=====
-Experiment results:
-- normally the maxinum num of usage(s) is 1
-"""
+
+@dataclass(frozen=True, kw_only=True)
+class CrystallizeStatus(CombatStatus, StackedShieldStatus):
+    stacks: int = 1
+    max_stack: ClassVar[Optional[int]] = 2
+
+    @override
+    def update(self, other: CrystallizeStatus) -> CrystallizeStatus:
+        new_stacks = min(just(type(self).max_stack, BIG_INT), self.stacks + other.stacks)
+        return type(self)(stacks=new_stacks)
 
 
 @dataclass(frozen=True)
 class DendroCoreStatus(CombatStatus):
+    """
+    When you deal Pyro DMG or Electro DMG to an opposing active character, DMG dealt +2.
+    Usage(s): 1
+    =====
+    Experiment results:
+    - normally the maxinum num of usage(s) is 1
+    """
     damage_boost: ClassVar[int] = 2
     count: int = 1
 

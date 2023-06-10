@@ -169,7 +169,7 @@ class ElementalAura:
             for e, aura in self._aura.items()
         ))
 
-    def has(self, elem: Element) -> ElementalAura:
+    def contains(self, elem: Element) -> ElementalAura:
         assert elem in AURA_ELEMENTS
         return self._aura[elem]
 

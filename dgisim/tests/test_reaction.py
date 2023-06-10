@@ -409,9 +409,9 @@ class TestStatus(unittest.TestCase):
             chars = game_state.get_player2().get_characters()
             self.assertFalse(chars.just_get_character(1).get_elemental_aura().elem_auras())
             self.assertEqual(chars.just_get_character(1).get_hp(), 9)
-            self.assertTrue(chars.just_get_character(2).get_elemental_aura().has(aura_elem))
+            self.assertTrue(chars.just_get_character(2).get_elemental_aura().contains(aura_elem))
             self.assertEqual(chars.just_get_character(2).get_hp(), 9)
-            self.assertTrue(chars.just_get_character(3).get_elemental_aura().has(aura_elem))
+            self.assertTrue(chars.just_get_character(3).get_elemental_aura().contains(aura_elem))
             self.assertEqual(chars.just_get_character(3).get_hp(), 9)
 
         aura_elem = Element.DENDRO
@@ -420,7 +420,7 @@ class TestStatus(unittest.TestCase):
 
         game_state = auto_step(game_state)
         chars = game_state.get_player2().get_characters()
-        self.assertTrue(chars.just_get_character(1).get_elemental_aura().has(aura_elem))
+        self.assertTrue(chars.just_get_character(1).get_elemental_aura().contains(aura_elem))
         self.assertEqual(chars.just_get_character(1).get_hp(), 9)
         self.assertFalse(chars.just_get_character(2).get_elemental_aura().elem_auras())
         self.assertEqual(chars.just_get_character(2).get_hp(), 10)
@@ -612,9 +612,10 @@ class TestStatus(unittest.TestCase):
         electro_game_state = auto_step(electro_game_state)
         ac = electro_game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 8)
-        self.assertTrue(ac.get_elemental_aura().has(Element.ELECTRO))
+        self.assertTrue(ac.get_elemental_aura().contains(Element.ELECTRO))
         self.assertEqual(
-            electro_game_state.get_player1().get_combat_statuses().just_find(CatalyzingFieldStatus).count,  # type: ignore
+            electro_game_state.get_player1().get_combat_statuses().just_find(
+                CatalyzingFieldStatus).count,  # type: ignore
             1
         )
 
@@ -622,9 +623,10 @@ class TestStatus(unittest.TestCase):
         dendro_game_state = auto_step(dendro_game_state)
         ac = dendro_game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 8)
-        self.assertTrue(ac.get_elemental_aura().has(Element.DENDRO))
+        self.assertTrue(ac.get_elemental_aura().contains(Element.DENDRO))
         self.assertEqual(
-            dendro_game_state.get_player1().get_combat_statuses().just_find(CatalyzingFieldStatus).count,  # type: ignore
+            dendro_game_state.get_player1().get_combat_statuses().just_find(
+                CatalyzingFieldStatus).count,  # type: ignore
             1
         )
 
@@ -633,7 +635,7 @@ class TestStatus(unittest.TestCase):
         game_state = auto_step(game_state)
         ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 6)
-        self.assertTrue(ac.get_elemental_aura().has(Element.ELECTRO))
+        self.assertTrue(ac.get_elemental_aura().contains(Element.ELECTRO))
         self.assertFalse(
             game_state.get_player1().get_combat_statuses().contains(CatalyzingFieldStatus)
         )
@@ -727,7 +729,7 @@ class TestStatus(unittest.TestCase):
         electro_game_state = auto_step(electro_game_state)
         ac = electro_game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 7)
-        self.assertTrue(ac.get_elemental_aura().has(Element.ELECTRO))
+        self.assertTrue(ac.get_elemental_aura().contains(Element.ELECTRO))
         self.assertFalse(
             electro_game_state.get_player1().get_combat_statuses().contains(DendroCoreStatus)
         )
@@ -736,7 +738,7 @@ class TestStatus(unittest.TestCase):
         pyro_game_state = auto_step(pyro_game_state)
         ac = pyro_game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 7)
-        self.assertTrue(ac.get_elemental_aura().has(Element.PYRO))
+        self.assertTrue(ac.get_elemental_aura().contains(Element.PYRO))
         self.assertFalse(
             electro_game_state.get_player1().get_combat_statuses().contains(DendroCoreStatus)
         )
@@ -767,3 +769,134 @@ class TestStatus(unittest.TestCase):
         game_state = auto_step(game_state)
         oc = game_state.get_player2().get_characters().just_get_character(3)
         self.assertEqual(oc.get_hp(), 9)
+
+    ############################## Crystallize ##############################
+
+    def testCrystallize(self):
+        """
+        Tests that dealing 1 Geo damage to char with Pyro aura deals 2 damage, and give character
+        CrystallizeStatus
+        """
+        # GEO to PYRO
+        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
+        game_state = _add_damage_effect(game_state, 1, Element.GEO)
+        self.assertEqual(
+            game_state.get_player2().just_get_active_character().get_hp(),
+            10,
+        )
+
+        game_state = auto_step(game_state)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 8)
+        self.assertFalse(ac.get_elemental_aura().elem_auras())
+        self.assertEqual(
+            game_state.get_player1().get_combat_statuses().just_find(CrystallizeStatus).stacks,  # type: ignore
+            1
+        )
+
+        # GEO to HYDRO (with CrystallizeStatus{1})
+        game_state = _oppo_aura_elem(game_state, Element.HYDRO)
+        game_state = _add_damage_effect(game_state, 1, Element.GEO)
+
+        game_state = auto_step(game_state)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 6)
+        self.assertFalse(ac.get_elemental_aura().elem_auras())
+        self.assertEqual(
+            game_state.get_player1().get_combat_statuses().just_find(CrystallizeStatus).stacks,  # type: ignore
+            2
+        )
+
+        # GEO to HYDRO (with CrystallizeStatus{2})
+        game_state = _oppo_aura_elem(game_state, Element.HYDRO)
+        game_state = _add_damage_effect(game_state, 1, Element.GEO)
+
+        game_state = auto_step(game_state)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 4)
+        self.assertFalse(ac.get_elemental_aura().elem_auras())
+        self.assertEqual(
+            game_state.get_player1().get_combat_statuses().just_find(CrystallizeStatus).stacks,  # type: ignore
+            2
+        )
+
+    def testCrystallizeStatus(self):
+        """
+        tests that CrystallizeStatus does take dmg for characters
+        """
+        base_game_state_1 = ACTION_TEMPLATE.factory().f_player2(
+            lambda p: p.factory().f_combat_statuses(
+                lambda ss: ss.update_statuses(CrystallizeStatus(stacks=1))
+            ).build()
+        ).build()
+        base_game_state_2 = ACTION_TEMPLATE.factory().f_player2(
+            lambda p: p.factory().f_combat_statuses(
+                lambda ss: ss.update_statuses(CrystallizeStatus(stacks=2))
+            ).build()
+        ).build()
+
+        # 0 dmg test
+        game_state = _add_damage_effect(base_game_state_1, 0, Element.CRYO)
+
+        game_state = auto_step(game_state)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertTrue(ac.get_elemental_aura().contains(Element.CRYO))
+        self.assertEqual(ac.get_hp(), 10)
+        self.assertEqual(
+            game_state.get_player2().get_combat_statuses().just_find(CrystallizeStatus).stacks,  # type: ignore
+            1
+        )
+
+        # 1 dmg test
+        game_state = _add_damage_effect(base_game_state_1, 1, Element.CRYO)
+
+        game_state = auto_step(game_state)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertTrue(ac.get_elemental_aura().contains(Element.CRYO))
+        self.assertEqual(ac.get_hp(), 10)
+        self.assertFalse(game_state.get_player2().get_combat_statuses().contains(CrystallizeStatus))
+
+        game_state = _add_damage_effect(base_game_state_2, 1, Element.CRYO)
+
+        game_state = auto_step(game_state)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertTrue(ac.get_elemental_aura().contains(Element.CRYO))
+        self.assertEqual(ac.get_hp(), 10)
+        self.assertEqual(
+            game_state.get_player2().get_combat_statuses().just_find(CrystallizeStatus).stacks,  # type: ignore
+            1
+        )
+
+        # 2 dmg test
+        game_state = _add_damage_effect(base_game_state_1, 2, Element.CRYO)
+
+        game_state = auto_step(game_state)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertTrue(ac.get_elemental_aura().contains(Element.CRYO))
+        self.assertEqual(ac.get_hp(), 9)
+        self.assertFalse(game_state.get_player2().get_combat_statuses().contains(CrystallizeStatus))
+
+        game_state = _add_damage_effect(base_game_state_2, 2, Element.CRYO)
+
+        game_state = auto_step(game_state)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertTrue(ac.get_elemental_aura().contains(Element.CRYO))
+        self.assertEqual(ac.get_hp(), 10)
+        self.assertFalse(game_state.get_player2().get_combat_statuses().contains(CrystallizeStatus))
+
+        # 2 dmg test
+        game_state = _add_damage_effect(base_game_state_1, 3, Element.CRYO)
+
+        game_state = auto_step(game_state)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertTrue(ac.get_elemental_aura().contains(Element.CRYO))
+        self.assertEqual(ac.get_hp(), 8)
+        self.assertFalse(game_state.get_player2().get_combat_statuses().contains(CrystallizeStatus))
+
+        game_state = _add_damage_effect(base_game_state_2, 3, Element.CRYO)
+
+        game_state = auto_step(game_state)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertTrue(ac.get_elemental_aura().contains(Element.CRYO))
+        self.assertEqual(ac.get_hp(), 9)
+        self.assertFalse(game_state.get_player2().get_combat_statuses().contains(CrystallizeStatus))

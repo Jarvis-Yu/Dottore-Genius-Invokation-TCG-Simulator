@@ -33,7 +33,7 @@ with limited action cards and all omni dices.
   - [ ] Implement elemental reaction
     - [x] Bloom
     - [ ] Burning
-    - [ ] Crystallize
+    - [x] Crystallize
     - [x] Electro-charged
     - [x] Frozen
     - [x] Melt

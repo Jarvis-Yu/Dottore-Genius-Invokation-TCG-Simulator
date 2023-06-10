@@ -204,7 +204,7 @@ def _preprocessByAllStatuses(
                     status_source, type(status)).execute(game_state)
             elif new_status != status:
                 assert type(status) == type(new_status)
-                game_state = ForceUpdateCharacterStatusEffect(
+                game_state = OverrideCharacterStatusEffect(
                     status_source,
                     new_status,  # type: ignore
                 ).execute(game_state)
@@ -650,6 +650,14 @@ class SpecificDamageEffect(Effect):
                 )
             )
 
+        elif reaction.reaction_type is Reaction.CRYSTALLIZE:
+            effects.append(
+                AddCombatStatusEffect(
+                    target_pid=actual_damage.source.pid,
+                    status=stt.CrystallizeStatus,
+                )
+            )
+
         else:
             raise Exception(f"Reaction {reaction.reaction_type} not handled")
 
@@ -914,7 +922,7 @@ class UpdateCharacterStatusEffect(Effect):
 
 
 @dataclass(frozen=True)
-class ForceUpdateCharacterStatusEffect(Effect):
+class OverrideCharacterStatusEffect(Effect):
     target: StaticTarget
     status: Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]
 
