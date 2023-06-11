@@ -50,8 +50,9 @@ class Status:
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
     ) -> list[eft.Effect]:
         es, new_status = self._react_to_signal(source, signal)
-        es, new_status = self._preprocessed_react_to_signal(es, new_status)
+        es, new_status = self._preprocess_react_to_signal(es, new_status)
 
+        import dgisim.src.summon.summon as sm
         # do the removal or update of the status
         if isinstance(self, CharacterTalentStatus) \
                 or isinstance(self, EquipmentStatus) \
@@ -63,9 +64,9 @@ class Status:
                 ))
             elif new_status != self:
                 assert type(self) == type(new_status)
-                es.append(eft.UpdateCharacterStatusEffect(
+                es.append(eft.OverrideCharacterStatusEffect(  # TODO: make this an update
                     source,
-                    new_status  # type: ignore
+                    new_status,  # type: ignore
                 ))
 
         elif isinstance(self, CombatStatus):
@@ -76,14 +77,30 @@ class Status:
                 ))
             elif new_status != self:
                 assert type(self) == type(new_status)
-                es.append(eft.UpdateCombatStatusEffect(
+                es.append(eft.OverrideCombatStatusEffect(  # TODO: make this an update
                     source.pid,
-                    new_status  # type: ignore
+                    new_status,  # type: ignore
                 ))
+
+        elif isinstance(self, sm.Summon):
+            if new_status is None:
+                es.append(eft.RemoveSummonEffect(
+                    source.pid,
+                    type(self),
+                ))
+            elif new_status != self:
+                assert type(self) == type(new_status)
+                es.append(eft.UpdateSummonEffect(
+                    source.pid,
+                    new_status,  # type: ignore
+                ))
+
+        else:
+            raise NotImplementedError
 
         return es
 
-    def _preprocessed_react_to_signal(
+    def _preprocess_react_to_signal(
             self: _T, effects: list[eft.Effect], new_status: Optional[_T]
     ) -> tuple[list[eft.Effect], Optional[_T]]:
         return effects, new_status
@@ -99,7 +116,14 @@ class Status:
     def same_type_as(self, status: Status) -> bool:
         return type(self) == type(status)
 
-    def update(self: _T, other: _T) -> _T:
+    def update(self: _T, other: _T) -> Optional[_T]:
+        new_self = self._update(other)
+        return self._preprocess_update(new_self)
+
+    def _preprocess_update(self: _T, new_self: Optional[_T]) -> Optional[_T]:
+        return new_self
+
+    def _update(self: _T, other: _T) -> Optional[_T]:
         return self
 
     def __str__(self) -> str:
@@ -145,13 +169,13 @@ class _DurationStatus(Status):
     duration: int
 
     @override
-    def _preprocessed_react_to_signal(
+    def _preprocess_react_to_signal(
             self, effects: list[eft.Effect], new_status: Optional[_DurationStatus]
     ) -> tuple[list[eft.Effect], Optional[_DurationStatus]]:
         """ remove the status if duration <= 0 """
         if new_status is None or new_status.duration <= 0:
             new_status = None
-        return super()._preprocessed_react_to_signal(effects, new_status)
+        return super()._preprocess_react_to_signal(effects, new_status)
 
     def __str__(self) -> str:
         return super().__str__() + f"({self.duration})"
@@ -165,8 +189,8 @@ class ShieldStatus(Status):
 @dataclass(frozen=True, kw_only=True)
 class StackedShieldStatus(ShieldStatus):
     stacks: int
-    max_stack: ClassVar[Optional[int]] = None
-    shield_amount: ClassVar[int] = 1  # shield amount per stack
+    STACK_LIMIT: ClassVar[Optional[int]] = None
+    SHIELD_AMOUNT: ClassVar[int] = 1  # shield amount per stack
 
     def _is_target(
             self,
@@ -203,12 +227,12 @@ class StackedShieldStatus(ShieldStatus):
         cls = type(self)
         if signal is Status.PPType.DmgAmount:
             assert isinstance(item, eft.SpecificDamageEffect)
-            assert cls.max_stack is None or self.stacks <= type(self).max_stack  # type: ignore
+            assert cls.STACK_LIMIT is None or self.stacks <= type(self).STACK_LIMIT  # type: ignore
             if item.damage > 0 \
                     and item.element != Element.PIERCING \
                     and self._is_target(game_state, status_source, item, signal):
-                stacks_consumed = min(ceil(item.damage / cls.shield_amount), self.stacks)
-                new_dmg = max(0, item.damage - stacks_consumed * cls.shield_amount)
+                stacks_consumed = min(ceil(item.damage / cls.SHIELD_AMOUNT), self.stacks)
+                new_dmg = max(0, item.damage - stacks_consumed * cls.SHIELD_AMOUNT)
                 new_item = replace(item, damage=new_dmg)
                 new_stacks = self.stacks - stacks_consumed
                 if new_stacks == 0:
@@ -225,11 +249,11 @@ class StackedShieldStatus(ShieldStatus):
 @dataclass(frozen=True, kw_only=True)
 class CrystallizeStatus(CombatStatus, StackedShieldStatus):
     stacks: int = 1
-    max_stack: ClassVar[Optional[int]] = 2
+    STACK_LIMIT: ClassVar[Optional[int]] = 2
 
     @override
-    def update(self, other: CrystallizeStatus) -> CrystallizeStatus:
-        new_stacks = min(just(type(self).max_stack, BIG_INT), self.stacks + other.stacks)
+    def update(self, other: CrystallizeStatus) -> Optional[CrystallizeStatus]:
+        new_stacks = min(just(type(self).STACK_LIMIT, BIG_INT), self.stacks + other.stacks)
         return type(self)(stacks=new_stacks)
 
 

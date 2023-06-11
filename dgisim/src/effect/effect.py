@@ -744,7 +744,16 @@ class SpecificDamageEffect(Effect):
                 )
             )
 
+        elif reaction.reaction_type is Reaction.BURNING:
+            effects.append(
+                AddSummonEffect(
+                    target_pid=actual_damage.source.pid,
+                    summon=sm.BurningFlameSummon,
+                )
+            )
+
         else:
+            # this exception shouldn't be reached by now, but leave it here just to be safe
             raise Exception(f"Reaction {reaction.reaction_type} not handled")
 
         # This is to prevent DeathCheckCheckerEffect being added before a chain

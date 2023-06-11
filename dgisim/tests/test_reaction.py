@@ -2,6 +2,7 @@ import unittest
 
 from dgisim.tests.helpers.game_state_templates import *
 from dgisim.tests.helpers.quality_of_life import auto_step
+from dgisim.tests.helpers.dummy_objects import *
 from dgisim.src.state.game_state import GameState
 from dgisim.src.game_state_machine import GameStateMachine
 from dgisim.src.agents import *
@@ -9,6 +10,7 @@ from dgisim.src.element.element import Reaction, ElementalAura
 from dgisim.src.effect.effect import *
 from dgisim.src.helper.level_print import GamePrinter
 from dgisim.src.status.status import *
+from dgisim.src.summon.summon import *
 from dgisim.src.action import *
 
 
@@ -899,3 +901,125 @@ class TestStatus(unittest.TestCase):
         self.assertTrue(ac.get_elemental_aura().contains(Element.CRYO))
         self.assertEqual(ac.get_hp(), 9)
         self.assertFalse(game_state.get_player2().get_combat_statuses().contains(CrystallizeStatus))
+
+    ############################## Burning ##############################
+    def testBurning(self):
+        """
+        Tests that dealing 1 Pyro damage to char with Dendro aura deals 2 damage, and adds Burning to
+        Summons, vice versa
+        """
+        # PYRO to DENDRO
+        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.DENDRO)
+        game_state = _add_damage_effect(game_state, 1, Element.PYRO)
+        self.assertEqual(
+            game_state.get_player2().just_get_active_character().get_hp(),
+            10,
+        )
+
+        game_state_1 = auto_step(game_state)
+        ac = game_state_1.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 8)
+        self.assertFalse(ac.get_elemental_aura().elem_auras())
+        self.assertEqual(
+            game_state_1.get_player1().get_summons().just_find(BurningFlameSummon).usages,
+            1
+        )
+
+        # DENDRO to PYRO with BurningFieldSummon(1) already
+        game_state_2 = _oppo_aura_elem(game_state_1, Element.PYRO)
+        game_state_2 = _add_damage_effect(game_state_2, 1, Element.DENDRO)
+
+        game_state_2 = auto_step(game_state_2)
+        ac = game_state_2.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 6)
+        self.assertFalse(ac.get_elemental_aura().elem_auras())
+        self.assertEqual(
+            game_state_2.get_player1().get_summons().just_find(BurningFlameSummon).usages,
+            2
+        )
+
+        # DENDRO to PYRO with BurningFieldSummon(2) already, usages should stay at 2
+        game_state_3 = _oppo_aura_elem(game_state_2, Element.PYRO)
+        game_state_3 = _add_damage_effect(game_state_3, 1, Element.DENDRO)
+
+        game_state_3 = auto_step(game_state_3)
+        ac = game_state_3.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 4)
+        self.assertFalse(ac.get_elemental_aura().elem_auras())
+        self.assertEqual(
+            game_state_3.get_player1().get_summons().just_find(BurningFlameSummon).usages,
+            2
+        )
+
+    def testBurningFlameSummon(self):
+        """
+        Tests that burning attacks when at end round normally
+        """
+        base_game_state_1 = END_TEMPLATE.factory().f_player1(
+            lambda p: p.factory().f_summons(
+                lambda ss: ss.update_summon(BurningFlameSummon(usages=1))
+            ).build()
+        ).build()
+        base_game_state_2 = END_TEMPLATE.factory().f_player1(
+            lambda p: p.factory().f_summons(
+                lambda ss: ss.update_summon(BurningFlameSummon(usages=2))
+            ).build()
+        ).build()
+
+        # test BurningFlameSummon(1)
+        game_state = auto_step(base_game_state_1)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 9)
+        self.assertTrue(ac.get_elemental_aura().contains(Element.PYRO))
+        self.assertFalse(game_state.get_player1().get_summons().contains(BurningFlameSummon))
+
+        # test BurningFlameSummon(2)
+        game_state = auto_step(base_game_state_2)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 9)
+        self.assertTrue(ac.get_elemental_aura().contains(Element.PYRO))
+        self.assertEqual(
+            game_state.get_player1().get_summons().just_find(BurningFlameSummon).usages,
+            1
+        )
+
+    def testBurningFlameSummonTriggeringBurning(self):
+        """
+        tests the behaviour when the burning attack triggers reaction Burning
+        """
+        base_game_state_1 = END_TEMPLATE.factory().f_player1(
+            lambda p: p.factory().f_summons(
+                lambda ss: ss.update_summon(BurningFlameSummon(usages=1)).update_summon(TestSummon())
+            ).build()
+        ).f_player2(
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().f_active_character(
+                    lambda ac: ac.factory().elemental_aura(
+                        ElementalAura.from_default().add(Element.DENDRO)
+                    ).build()
+                ).build()
+            ).build()
+        ).build()
+        base_game_state_2 = base_game_state_1.factory().f_player1(
+            lambda p: p.factory().f_summons(
+                lambda ss: ss.update_summon(BurningFlameSummon(usages=2)).update_summon(TestSummon())
+            ).build()
+        ).build()
+
+        # test BurningFlameSummon(1), position shouldn't change, usages should be 1
+        game_state = auto_step(base_game_state_1)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 8)
+        self.assertFalse(ac.get_elemental_aura().elem_auras())
+        summons = list(game_state.get_player1().get_summons())
+        self.assertEqual(summons[0], BurningFlameSummon(usages=1))
+        self.assertEqual(summons[1], TestSummon())
+
+        # test BurningFlameSummon(2), position shouldn't change, usages should be 1
+        game_state = auto_step(base_game_state_2)
+        ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(ac.get_hp(), 8)
+        self.assertFalse(ac.get_elemental_aura().elem_auras())
+        summons = list(game_state.get_player1().get_summons())
+        self.assertEqual(summons[0], BurningFlameSummon(usages=1))
+        self.assertEqual(summons[1], TestSummon())

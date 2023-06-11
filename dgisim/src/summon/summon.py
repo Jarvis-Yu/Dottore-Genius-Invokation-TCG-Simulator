@@ -10,8 +10,8 @@ from dgisim.src.element.element import Element
 
 @dataclass(frozen=True, kw_only=True)
 class Summon(stt.Status):
-    num: int = -1
-    
+    usages: int = -1
+
     def __str__(self) -> str:
         return self.__class__.__name__.removesuffix("Summon")
 
@@ -19,23 +19,21 @@ class Summon(stt.Status):
 @dataclass(frozen=True, kw_only=True)
 class _DestroyOnNumSummon(Summon):
     @override
-    def _preprocessed_react_to_signal(
-            self, effects: list[eft.Effect], new_summon: Optional[_DestroyOnNumSummon]
-    ) -> tuple[list[eft.Effect], Optional[_DestroyOnNumSummon]]:
-        """ remove the status if num <= 0 """
-        if new_summon is None or new_summon.num <= 0:
-            new_summon = None
-        return super()._preprocessed_react_to_signal(effects, new_summon)
+    def _preprocess_update(self, new_self: Optional[_DestroyOnNumSummon]) -> Optional[_DestroyOnNumSummon]:
+        """ remove the status if usages <= 0 """
+        if new_self is not None and new_self.usages <= 0:
+            new_self = None
+        return super()._preprocess_update(new_self)
 
     def __str__(self) -> str:
-        return super().__str__() + f"({self.num})"
-
+        return super().__str__() + f"({self.usages})"
 
 
 @dataclass(frozen=True)
-class BurningFlameSummon(Summon):
-    num: int = 1
-    dmg: ClassVar[int] = 1
+class BurningFlameSummon(_DestroyOnNumSummon):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 1
 
     def _react_to_signal(
             self,
@@ -43,15 +41,19 @@ class BurningFlameSummon(Summon):
             signal: eft.TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[BurningFlameSummon]]:
         es: list[eft.Effect] = []
-        new_num = self.num
+        d_usages = 0
         if signal is eft.TriggeringSignal.END_ROUND_CHECK_OUT:
-            new_num -= 1
+            d_usages = -1
             es.append(
                 eft.ReferredDamageEffect(
                     source=source,
                     target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
                     element=Element.PYRO,
-                    damage=self.dmg,
+                    damage=self.DMG,
                 )
             )
-        return es, replace(self, num=new_num)
+        return es, replace(self, usages=d_usages)
+
+    def _update(self, other: BurningFlameSummon) -> Optional[BurningFlameSummon]:
+        new_usages = min(self.MAX_USAGES, self.usages + other.usages)
+        return type(self)(usages=new_usages)

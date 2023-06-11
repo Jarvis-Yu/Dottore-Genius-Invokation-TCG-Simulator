@@ -153,6 +153,7 @@ class GamePrinter:
             GamePrinter._insert_characters(player["Characters"]),
         )
         board.insert_at_nextline(0, GamePrinter._pair(player, "Combat Statuses"))
+        board.insert_at_nextline(0, GamePrinter._pair(player, "Summons"))
         board.insert_board_at_nextline(
             0,
             GamePrinter._insert_dices("Dices", player["Dices"]),

@@ -21,12 +21,15 @@ class Statuses:
         statuses = list(self._statuses)
         for i, status in enumerate(statuses):
             if type(status) is type(incoming_status):
+                new_status: Optional[Status]
                 if force:
                     new_status = incoming_status
                 else:
                     new_status = incoming_status.update(status)
                 if status == new_status:
                     return self
+                if new_status is None:
+                    return self.remove(type(status))
                 statuses[i] = new_status
                 return cls(tuple(statuses))
         statuses.append(incoming_status)
@@ -41,8 +44,8 @@ class Statuses:
     def just_find(self, status: type[Status]) -> Status:
         return just(self.find(status))
 
-    def remove(self, status: type[Status]) -> Statuses:
-        return Statuses(tuple(
+    def remove(self: _T, status: type[Status]) -> _T:
+        return type(self)(tuple(
             filter(lambda bf: type(bf) != status, self._statuses)
         ))
 
