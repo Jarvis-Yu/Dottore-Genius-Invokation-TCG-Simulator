@@ -103,29 +103,25 @@ class HardCodedRandomAgent(PlayerAgent):
 
                 # Consolidation Functions / Helpers
                 def try_card_action(card_class, condition, tmp_dices):
-                    if cards.contains(card_class) and condition():
-                        if active_character is not None:
-                            action = CardAction(
-                                card_class,
-                                CharacterTargetInstruction(
-                                    tmp_dices,
-                                    StaticTarget(
-                                        pid,
-                                        Zone.CHARACTER,
-                                        active_character.get_id()
-                                    )
-                                )
+                    assert active_character is not None
+                    
+                    if not cards.contains(card_class) and not condition():
+                        return None
+                    
+                    action = CardAction(
+                        card_class,
+                        CharacterSelectAction(
+                            tmp_dices,
+                            StaticTarget(
+                                pid,
+                                Zone.CHARACTER,
+                                active_character.get_id()
                             )
-                            if action is None:
-                                return None
-                            else:
-                                print(card_class().name())
-                                return action
-                        else:
-                            print("No Active Character")
-                            return None
+                        )
+                    )
+
+                    return action
                         
-                
                 def dice(element, amount):
                     return available_dices.basically_satisfy(AbstractDices({element: amount}))
                 
