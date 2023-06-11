@@ -102,10 +102,13 @@ class HardCodedRandomAgent(PlayerAgent):
                 card: Optional[type[Card]]
 
                 # Consolidation Functions / Helpers
-                def try_card_action(card_class, condition, tmp_dices):
+                def try_card_action(card_class, condition, tmp_dices) -> Optional[CardAction]:
                     assert active_character is not None
                     
                     if not cards.contains(card_class) and not condition():
+                        return None
+                    
+                    if not tmp_dices:
                         return None
                     
                     action = CardAction(
@@ -122,7 +125,7 @@ class HardCodedRandomAgent(PlayerAgent):
 
                     return action
                         
-                def dice(element, amount):
+                def dice(element, amount) -> Optional[ActualDices]:
                     return available_dices.basically_satisfy(AbstractDices({element: amount}))
                 
                 # Conditions
