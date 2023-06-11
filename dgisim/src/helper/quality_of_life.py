@@ -1,9 +1,9 @@
 from __future__ import annotations
 from typing import TypeVar, Optional
 
-T = TypeVar('T')
+_T = TypeVar('_T')
 
-def just(optional_val: Optional[T], backup: Optional[T]=None) -> T:
+def just(optional_val: Optional[_T], backup: Optional[_T]=None) -> _T:
     """
     Removes Optional and get value directly
     Throws exception if it is indeed None
