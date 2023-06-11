@@ -771,7 +771,6 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(oc.get_hp(), 9)
 
     ############################## Crystallize ##############################
-
     def testCrystallize(self):
         """
         Tests that dealing 1 Geo damage to char with Pyro aura deals 2 damage, and give character
@@ -884,7 +883,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 10)
         self.assertFalse(game_state.get_player2().get_combat_statuses().contains(CrystallizeStatus))
 
-        # 2 dmg test
+        # 3 dmg test
         game_state = _add_damage_effect(base_game_state_1, 3, Element.CRYO)
 
         game_state = auto_step(game_state)
