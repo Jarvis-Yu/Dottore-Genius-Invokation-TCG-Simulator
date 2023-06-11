@@ -1,18 +1,15 @@
 from __future__ import annotations
 from enum import Enum
-from typing import Tuple, Union, cast, Optional, Callable
+from typing import Union, cast, Optional, Callable
 
-from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
+from dgisim.src.helper.level_print import level_print, INDENT
 import dgisim.src.card.cards as cds
-import dgisim.src.card.card as card
 from dgisim.src.character.characters import Characters
 import dgisim.src.character.character as chr
 from dgisim.src.dices import ActualDices
-import dgisim.src.character.character as chr
 from dgisim.src.effect.event_pre import EventPre
 import dgisim.src.status.statuses as sts
-# from dgisim.src.card.cards_set import DEFAULT_CARDS
-# from dgisim.src.character.characters_set import DEFAULT_CHARACTERS
+from dgisim.src.summon.summons import Summons
 
 
 class PlayerState:
@@ -27,6 +24,7 @@ class PlayerState:
         phase: Act,
         characters: Characters,
         combat_statuses: sts.Statuses,
+        summons: Summons,
         card_redraw_chances: int,
         dices: ActualDices,
         hand_cards: cds.Cards,
@@ -38,6 +36,7 @@ class PlayerState:
         self._card_redraw_chances = card_redraw_chances
         self._characters = characters
         self._combat_statuses = combat_statuses
+        self._summons = summons
         self._dices = dices
         self._hand_cards = hand_cards
         self._deck_cards = deck_cards
@@ -57,6 +56,9 @@ class PlayerState:
 
     def get_combat_statuses(self) -> sts.Statuses:
         return self._combat_statuses
+
+    def get_summons(self) -> Summons:
+        return self._summons
 
     def get_dices(self) -> ActualDices:
         return self._dices
@@ -97,7 +99,7 @@ class PlayerState:
     def defeated(self) -> bool:
         return self._characters.all_defeated()
 
-    def get_possible_actions(self) -> Tuple[EventPre, ...]:
+    def get_possible_actions(self) -> tuple[EventPre, ...]:
         character_skills = self._characters.get_skills()
         swaps = [
             # TypicalSwapCharacterEvent(id)
@@ -122,13 +124,14 @@ class PlayerState:
                 tuple([char.from_default(i + 1) for i, char in enumerate(chars)][:3])
             ),
             combat_statuses=sts.Statuses(()),
+            summons=Summons((), mode.summons_limit()),
             hand_cards=cds.Cards(dict([(card, 0) for card in cards])),
             dices=ActualDices({}),
             deck_cards=cds.Cards(dict([(card, 2) for card in cards])),
             publicly_used_cards=cds.Cards(dict([(card, 0) for card in cards])),
         )
 
-    def _all_unique_data(self) -> Tuple:
+    def _all_unique_data(self) -> tuple:
         return (
             self._phase,
             self._card_redraw_chances,
@@ -181,6 +184,7 @@ class PlayerStateFactory:
         self._card_redraw_chances = player_state.get_card_redraw_chances()
         self._characters = player_state.get_characters()
         self._combat_statuses = player_state.get_combat_statuses()
+        self._summons = player_state.get_summons()
         self._hand_cards = player_state.get_hand_cards()
         self._dices = player_state.get_dices()
         self._deck_cards = player_state.get_deck_cards()
@@ -206,8 +210,16 @@ class PlayerStateFactory:
         self._combat_statuses = combat_statuses
         return self
 
+
     def f_combat_statuses(self, f: Callable[[sts.Statuses], sts.Statuses]) -> PlayerStateFactory:
         return self.combat_statuses(f(self._combat_statuses))
+
+    def summons(self, summons: Summons) -> PlayerStateFactory:
+        self._summons = summons
+        return self
+
+    def f_summons(self, f: Callable[[Summons], Summons]) -> PlayerStateFactory:
+        return self.summons(f(self._summons))
 
     def hand_cards(self, cards: cds.Cards) -> PlayerStateFactory:
         self._hand_cards = cards
@@ -234,6 +246,7 @@ class PlayerStateFactory:
             card_redraw_chances=self._card_redraw_chances,
             characters=self._characters,
             combat_statuses=self._combat_statuses,
+            summons=self._summons,
             hand_cards=self._hand_cards,
             dices=self._dices,
             deck_cards=self._deck_cards,

@@ -92,7 +92,6 @@ class HardCodedRandomAgent(PlayerAgent):
                 if active_id in alive_ids:
                     alive_ids.remove(active_id)
                 if alive_ids:
-                    print("DeathSwap")
                     return DeathSwapAction(choice(alive_ids))
                 else:
                     raise Exception("Game should end here but not implemented(NOT REACHED)")
@@ -117,7 +116,6 @@ class HardCodedRandomAgent(PlayerAgent):
                     card = None
                 
                 if card is not None and not active_character.satiated():
-                    print(card().name())
                     return CardAction(
                         card,
                         CharacterTargetInstruction(
@@ -135,7 +133,6 @@ class HardCodedRandomAgent(PlayerAgent):
                 if active_character.get_energy() < active_character.get_max_energy():
                     card = Starsigns
                     tmp_dices = ActualDices({Element.ANY: 2})
-                    print(card().name())
                     return CardAction(
                         card,
                         CharacterTargetInstruction(
@@ -154,7 +151,6 @@ class HardCodedRandomAgent(PlayerAgent):
                     Element.ANY: 2,
                 }))
                 if dices is not None:
-                    print("NormalAttack")
                     return SkillAction(
                         CharacterSkill.NORMAL_ATTACK,
                         DiceOnlyInstruction(dices),
@@ -172,13 +168,11 @@ class HardCodedRandomAgent(PlayerAgent):
                 if active_id in alive_ids:
                     alive_ids.remove(active_id)
                 if dices is not None and alive_ids:
-                    print("SWAP")
                     return SwapAction(
                         choice(alive_ids),
                         DiceOnlyInstruction(dices),
                     )
             
-            print("EndRound")
             return EndRoundAction()
         
         else:

@@ -12,7 +12,7 @@ class Statuses:
     def __init__(self, statuses: tuple[Status, ...]):
         self._statuses = statuses
 
-    def update_statuses(self: _T, incoming_status: Status, force: bool=False) -> _T:
+    def update_status(self: _T, incoming_status: Status, force: bool=False) -> _T:
         """
         Replaces existing status of the same type with the new_status,
         or append the new_status to the end of current statuses

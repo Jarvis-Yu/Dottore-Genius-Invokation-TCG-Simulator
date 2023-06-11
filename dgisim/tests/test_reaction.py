@@ -598,7 +598,7 @@ class TestStatus(unittest.TestCase):
         """
         base_game_state = ACTION_TEMPLATE.factory().f_player1(
             lambda p: p.factory().f_combat_statuses(
-                lambda ss: ss.update_statuses(CatalyzingFieldStatus())
+                lambda ss: ss.update_status(CatalyzingFieldStatus())
             ).build()
         ).build()
         electro_game_state = _add_damage_effect(base_game_state, 1, Element.ELECTRO)
@@ -715,7 +715,7 @@ class TestStatus(unittest.TestCase):
         """
         base_game_state = ACTION_TEMPLATE.factory().f_player1(
             lambda p: p.factory().f_combat_statuses(
-                lambda ss: ss.update_statuses(DendroCoreStatus())
+                lambda ss: ss.update_status(DendroCoreStatus())
             ).build()
         ).build()
         electro_game_state = _add_damage_effect(base_game_state, 1, Element.ELECTRO)
@@ -825,12 +825,12 @@ class TestStatus(unittest.TestCase):
         """
         base_game_state_1 = ACTION_TEMPLATE.factory().f_player2(
             lambda p: p.factory().f_combat_statuses(
-                lambda ss: ss.update_statuses(CrystallizeStatus(stacks=1))
+                lambda ss: ss.update_status(CrystallizeStatus(stacks=1))
             ).build()
         ).build()
         base_game_state_2 = ACTION_TEMPLATE.factory().f_player2(
             lambda p: p.factory().f_combat_statuses(
-                lambda ss: ss.update_statuses(CrystallizeStatus(stacks=2))
+                lambda ss: ss.update_status(CrystallizeStatus(stacks=2))
             ).build()
         ).build()
 

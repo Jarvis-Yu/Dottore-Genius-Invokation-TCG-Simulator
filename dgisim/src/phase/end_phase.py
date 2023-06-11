@@ -99,7 +99,7 @@ class EndPhase(ph.Phase):
             return self._execute_effect(game_state)
         elif p1.get_phase() is PlayerState.Act.END_PHASE and p2.get_phase() is PlayerState.Act.END_PHASE:
             new_round = game_state.get_round() + 1
-            if new_round > game_state.get_mode().get_round_limit():
+            if new_round > game_state.get_mode().round_limit():
                 return self._end_game(game_state)
             else:
                 return self._to_roll_phase(game_state, new_round)

@@ -143,39 +143,18 @@ class TestGameStateMachine(unittest.TestCase):
         self.assertIsNone(state_machine.get_winner())
         # print(state_machine.get_game_state())
 
-    def test_inspect(self):
+    def test_random_agents_not_break_game(self):
         """
         Only turned on manually to inspect cases
         """
-        return
         from dgisim.src.agents import HardCodedRandomAgent
         state_machine = GameStateMachine(
             self._initial_state,
             HardCodedRandomAgent(),
             HardCodedRandomAgent(),
         )
-        i = 0
-        cmd = ""
-        while not state_machine.game_end():
-            print(f"########## {i} ##########")
-            i += 1
-            if cmd == "a":
-                pid = state_machine.get_game_state().waiting_for()
-                state_machine.auto_step()
-                print(state_machine.get_game_state())
-                state_machine.one_step()
-            elif cmd == "n" or cmd == "":
-                print(state_machine.get_game_state())
-                state_machine.one_step()
-            elif cmd == "x":
-                state_machine.step_until_phase(EndPhase)
-                print(state_machine.get_game_state())
-                state_machine.one_step()
-            elif cmd == "e":
-                state_machine.step_until_phase(GameEndPhase)
-                print(state_machine.get_game_state())
-                return
-            cmd = input()
+        game_end_phase = state_machine.get_game_state().get_mode().game_end_phase()
+        state_machine.step_until_phase(game_end_phase)
 
 if __name__ == "__main__":
     unittest.main()

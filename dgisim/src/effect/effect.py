@@ -5,6 +5,7 @@ from dataclasses import InitVar, dataclass, asdict, replace, field
 from itertools import chain
 
 import dgisim.src.status.status as stt
+import dgisim.src.summon.summon as sm
 from dgisim.src.element.element import Element, Reaction, ReactionDetail
 import dgisim.src.character.character as chr
 import dgisim.src.state.game_state as gs
@@ -28,8 +29,8 @@ class TriggeringSignal(Enum):
     DEATH_EVENT = 2
     SWAP_EVENT = 3
     ROUND_START = 4
-    END_ROUND_CHECK_OUT = 5
-    ROUND_END = 6
+    END_ROUND_CHECK_OUT = 5  # summons etc.
+    ROUND_END = 6  # remove frozen etc.
 
 
 class DynamicCharacterTarget(Enum):
@@ -99,7 +100,7 @@ class PhaseEffect(Effect):
 @dataclass(frozen=True)
 class TriggerStatusEffect(Effect):
     target: StaticTarget
-    status: type[stt.Status]
+    status: type[Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]]
     signal: TriggeringSignal
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
@@ -110,19 +111,67 @@ class TriggerStatusEffect(Effect):
         effects: Iterable[Effect] = []
 
         if issubclass(self.status, stt.CharacterTalentStatus):
-            # TODO
-            pass
+            statuses = character.get_talent_statuses()
         elif issubclass(self.status, stt.EquipmentStatus):
-            # TODO
-            pass
+            statuses = character.get_equipment_statuses()
         elif issubclass(self.status, stt.CharacterStatus):
             statuses = character.get_character_statuses()
-            status = statuses.find(self.status)
-            if status is None:
-                return game_state
-            effects = status.react_to_signal(self.target, self.signal)
         else:
             raise Exception("Unexpected Status Type to Trigger", self.status)
+        status = statuses.find(self.status)
+        if status is None:
+            return game_state
+        effects = status.react_to_signal(self.target, self.signal)
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_many_fl(effects)
+        ).build()
+
+
+@dataclass(frozen=True)
+class TriggerCombatStatusEffect(Effect):
+    target_pid: gs.GameState.Pid  # the player the status belongs to
+    status: type[stt.CombatStatus]
+    signal: TriggeringSignal
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        effects: Iterable[Effect] = []
+        statuses = game_state.get_player(self.target_pid).get_combat_statuses()
+        status = statuses.find(self.status)
+        if status is None:
+            return game_state
+        effects = status.react_to_signal(
+            StaticTarget(
+                pid=self.target_pid,
+                zone=Zone.COMBAT_STATUSES,
+                id=-1,
+            ),
+            self.signal,
+        )
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_many_fl(effects)
+        ).build()
+
+
+@dataclass(frozen=True)
+class TriggerSummonEffect(Effect):
+    target_pid: gs.GameState.Pid
+    summon: type[sm.Summon]
+    signal: TriggeringSignal
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        effects: Iterable[Effect] = []
+        summons = game_state.get_player(self.target_pid).get_summons()
+        summon = summons.find(self.summon)
+        if summon is None:
+            return game_state
+        effects = summon.react_to_signal(
+            StaticTarget(
+                pid=self.target_pid,
+                zone=Zone.SUMMONS,
+                id=-1,
+            ),
+            self.signal,
+        )
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
@@ -135,6 +184,7 @@ def _loopAllStatuses(
 ) -> gs.GameState:
     """
     Perform f on all statuses of player pid in order
+    f(game_state, status, status_source) -> game_state
     """
     player = game_state.get_player(pid)
 
@@ -153,7 +203,7 @@ def _loopAllStatuses(
         for status in statuses:
             game_state = f(game_state, status, target)
 
-    # combat status TODO
+    # combat status
     combat_statuses = player.get_combat_statuses()
     target = StaticTarget(
         pid,
@@ -162,7 +212,17 @@ def _loopAllStatuses(
     )
     for status in combat_statuses:
         game_state = f(game_state, status, target)
-    # summons TODO
+
+    # summons
+    summons = player.get_summons()
+    target = StaticTarget(
+        pid,
+        Zone.SUMMONS,
+        -1
+    )
+    for summon in summons:
+        game_state = f(game_state, summon, target)
+
     # supports TODO
 
     return game_state
@@ -179,7 +239,17 @@ def _triggerAllStatusesEffects(
 
     def f(game_state: gs.GameState, status: stt.Status, target: StaticTarget) -> gs.GameState:
         nonlocal effects
-        effects.append(TriggerStatusEffect(target, type(status), signal))
+        if isinstance(status, stt.CharacterTalentStatus) \
+                or isinstance(status, stt.EquipmentStatus) \
+                or isinstance(status, stt.CharacterStatus):
+            effects.append(TriggerStatusEffect(target, type(status), signal))
+
+        elif isinstance(status, stt.CombatStatus):
+            effects.append(TriggerCombatStatusEffect(target.pid, type(status), signal))
+
+        elif isinstance(status, sm.Summon):
+            effects.append(TriggerSummonEffect(target.pid, type(status), signal))
+
         return game_state
 
     _loopAllStatuses(game_state, pid, f)
@@ -217,9 +287,25 @@ def _preprocessByAllStatuses(
                 ).execute(game_state)
             elif new_status != status:
                 assert type(status) == type(new_status)
-                game_state = ForceUpdateCombatStatusEffect(
+                game_state = OverrideCombatStatusEffect(
                     status_source.pid,
                     new_status,  # type: ignore
+                ).execute(game_state)
+
+        elif isinstance(status, sm.Summon):
+            summon = status
+            new_summon = new_status
+            pid = status_source.pid
+            if new_summon is None:
+                game_state = RemoveSummonEffect(
+                    pid,
+                    type(summon),
+                ).execute(game_state)
+            elif new_summon != summon:
+                assert type(summon) == type(new_summon)
+                game_state = OverrideSummonEffect(
+                    pid,
+                    new_summon,  # type: ignore
                 ).execute(game_state)
 
         return game_state
@@ -861,7 +947,7 @@ class AddCharacterStatusEffect(Effect):
             pass
         elif issubclass(self.status, stt.CharacterStatus):
             character = character.factory().f_character_statuses(
-                lambda bs: bs.update_statuses(self.status())
+                lambda bs: bs.update_status(self.status())
             ).build()
         return game_state.factory().f_player(
             self.target.pid,
@@ -911,7 +997,7 @@ class UpdateCharacterStatusEffect(Effect):
             pass
         elif isinstance(self.status, stt.CharacterStatus):
             character = character.factory().f_character_statuses(
-                lambda bs: bs.update_statuses(self.status)
+                lambda bs: bs.update_status(self.status)
             ).build()
         return game_state.factory().f_player(
             self.target.pid,
@@ -935,7 +1021,7 @@ class OverrideCharacterStatusEffect(Effect):
             pass
         elif isinstance(self.status, stt.CharacterStatus):
             character = character.factory().f_character_statuses(
-                lambda bs: bs.update_statuses(self.status, force=True)
+                lambda bs: bs.update_status(self.status, force=True)
             ).build()
         return game_state.factory().f_player(
             self.target.pid,
@@ -954,7 +1040,7 @@ class AddCombatStatusEffect(Effect):
         return game_state.factory().f_player(
             self.target_pid,
             lambda p: p.factory().f_combat_statuses(
-                lambda ss: ss.update_statuses(self.status())
+                lambda ss: ss.update_status(self.status())
             ).build()
         ).build()
 
@@ -982,13 +1068,13 @@ class UpdateCombatStatusEffect(Effect):
         return game_state.factory().f_player(
             self.target_pid,
             lambda p: p.factory().f_combat_statuses(
-                lambda ss: ss.update_statuses(self.status)
+                lambda ss: ss.update_status(self.status)
             ).build()
         ).build()
 
 
 @dataclass(frozen=True)
-class ForceUpdateCombatStatusEffect(Effect):
+class OverrideCombatStatusEffect(Effect):
     target_pid: gs.GameState.Pid
     status: stt.CombatStatus
 
@@ -996,7 +1082,63 @@ class ForceUpdateCombatStatusEffect(Effect):
         return game_state.factory().f_player(
             self.target_pid,
             lambda p: p.factory().f_combat_statuses(
-                lambda ss: ss.update_statuses(self.status, force=True)
+                lambda ss: ss.update_status(self.status, force=True)
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True)
+class AddSummonEffect(Effect):
+    target_pid: gs.GameState.Pid
+    summon: type[sm.Summon]
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        return game_state.factory().f_player(
+            self.target_pid,
+            lambda p: p.factory().f_summons(
+                lambda ss: ss.update_summon(self.summon())
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True)
+class RemoveSummonEffect(Effect):
+    target_pid: gs.GameState.Pid
+    summon: type[sm.Summon]
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        return game_state.factory().f_player(
+            self.target_pid,
+            lambda p: p.factory().f_summons(
+                lambda ss: ss.remove_summon(self.summon)
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True)
+class UpdateSummonEffect(Effect):
+    target_pid: gs.GameState.Pid
+    summon: sm.Summon
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        return game_state.factory().f_player(
+            self.target_pid,
+            lambda p: p.factory().f_summons(
+                lambda ss: ss.update_summon(self.summon)
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True)
+class OverrideSummonEffect(Effect):
+    target_pid: gs.GameState.Pid
+    summon: sm.Summon
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        return game_state.factory().f_player(
+            self.target_pid,
+            lambda p: p.factory().f_summons(
+                lambda ss: ss.update_summon(self.summon, force=True)
             ).build()
         ).build()
 

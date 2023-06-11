@@ -11,12 +11,16 @@ class Mode:
 
     _HAND_CARD_LIMIT = 10
     _ROUND_LIMIT = 15
+    _SUMMONS_LIMIT = 4
 
-    def get_round_limit(self) -> int:
+    def round_limit(self) -> int:
         return self._ROUND_LIMIT
 
-    def get_hand_card_limit(self) -> int:
+    def hand_card_limit(self) -> int:
         return self._HAND_CARD_LIMIT
+
+    def summons_limit(self) -> int:
+        return self._SUMMONS_LIMIT
 
     def all_cards(self) -> frozenset[type[card.Card]]:
         raise Exception("Not Overridden")
