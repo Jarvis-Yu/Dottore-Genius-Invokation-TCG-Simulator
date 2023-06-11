@@ -20,18 +20,19 @@ class Statuses:
         cls = type(self)
         statuses = list(self._statuses)
         for i, status in enumerate(statuses):
-            if type(status) is type(incoming_status):
-                new_status: Optional[Status]
-                if force:
-                    new_status = incoming_status
-                else:
-                    new_status = incoming_status.update(status)
-                if status == new_status:
-                    return self
-                if new_status is None:
-                    return self.remove(type(status))
-                statuses[i] = new_status
-                return cls(tuple(statuses))
+            if type(status) is not type(incoming_status):
+                continue
+            new_status: Optional[Status]
+            if force:
+                new_status = incoming_status
+            else:
+                new_status = incoming_status.update(status)
+            if status == new_status:
+                return self
+            if new_status is None:
+                return self.remove(type(status))
+            statuses[i] = new_status
+            return cls(tuple(statuses))
         statuses.append(incoming_status)
         return cls(tuple(statuses))
 

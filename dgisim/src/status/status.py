@@ -64,7 +64,7 @@ class Status:
                 ))
             elif new_status != self:
                 assert type(self) == type(new_status)
-                es.append(eft.OverrideCharacterStatusEffect(  # TODO: make this an update
+                es.append(eft.UpdateCharacterStatusEffect(
                     source,
                     new_status,  # type: ignore
                 ))
@@ -77,7 +77,7 @@ class Status:
                 ))
             elif new_status != self:
                 assert type(self) == type(new_status)
-                es.append(eft.OverrideCombatStatusEffect(  # TODO: make this an update
+                es.append(eft.UpdateCombatStatusEffect(
                     source.pid,
                     new_status,  # type: ignore
                 ))
@@ -169,13 +169,16 @@ class _DurationStatus(Status):
     duration: int
 
     @override
-    def _preprocess_react_to_signal(
-            self, effects: list[eft.Effect], new_status: Optional[_DurationStatus]
-    ) -> tuple[list[eft.Effect], Optional[_DurationStatus]]:
+    def _preprocess_update(self, new_self: Optional[_DurationStatus]) -> Optional[_DurationStatus]:
         """ remove the status if duration <= 0 """
-        if new_status is None or new_status.duration <= 0:
-            new_status = None
-        return super()._preprocess_react_to_signal(effects, new_status)
+        if new_self is not None and new_self.duration <= 0:
+            new_self = None
+        return super()._preprocess_update(new_self)
+
+    @override
+    def _update(self, other: _DurationStatus) -> Optional[_DurationStatus]:
+        new_duration = self.duration + other.duration
+        return type(self)(duration=new_duration)
 
     def __str__(self) -> str:
         return super().__str__() + f"({self.duration})"
@@ -204,7 +207,7 @@ class StackedShieldStatus(ShieldStatus):
                 or isinstance(self, EquipmentStatus) \
                 or isinstance(self, CharacterStatus):
             return item.target == status_source
-        
+
         elif isinstance(self, CombatStatus):
             attached_active_character = eft.StaticTarget(
                 status_source.pid,
@@ -212,7 +215,7 @@ class StackedShieldStatus(ShieldStatus):
                 id=game_state.get_player(status_source.pid).just_get_active_character().get_id(),
             )
             return item.target == attached_active_character
-        
+
         else:
             raise NotImplementedError
 
@@ -385,16 +388,16 @@ class MushroomPizzaStatus(CharacterStatus, _DurationStatus):
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[MushroomPizzaStatus]]:
         es: list[eft.Effect] = []
-        new_duration = self.duration
+        d_duration = 0
         if signal is eft.TriggeringSignal.END_ROUND_CHECK_OUT:
-            new_duration -= 1
+            d_duration = -1
             es.append(
                 eft.RecoverHPEffect(
                     source,
                     1,
                 )
             )
-        return es, replace(self, duration=new_duration)
+        return es, replace(self, duration=d_duration)
 
 
 @dataclass(frozen=True)

@@ -19,7 +19,10 @@ class Summon(stt.Status):
 @dataclass(frozen=True, kw_only=True)
 class _DestroyOnNumSummon(Summon):
     @override
-    def _preprocess_update(self, new_self: Optional[_DestroyOnNumSummon]) -> Optional[_DestroyOnNumSummon]:
+    def _preprocess_update(
+            self,
+            new_self: Optional[_DestroyOnNumSummon]
+    ) -> Optional[_DestroyOnNumSummon]:
         """ remove the status if usages <= 0 """
         if new_self is not None and new_self.usages <= 0:
             new_self = None
