@@ -67,7 +67,7 @@ For Windows based systems:
 
 1. Clone the project
 2. Make sure your Python version >= 3.10.11
-3. Run venv.ps1
+3. Run scripts\venv.ps1
 4. After venv is installed, run ./scripts/cli.ps1
 
 For unix based systems (MacOS, Linux...):
