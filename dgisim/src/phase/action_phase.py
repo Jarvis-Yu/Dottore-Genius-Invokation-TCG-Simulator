@@ -98,7 +98,7 @@ class ActionPhase(ph.Phase):
         # TODO: put pre checks
         # TODO: Costs
         dices = player.get_dices()
-        new_dices = dices - action.instruction.dices()
+        new_dices = dices - action.instruction.dices
         if new_dices is None:
             return None
         # Skill Effect
@@ -106,8 +106,7 @@ class ActionPhase(ph.Phase):
         if active_character is None:
             return None
         assert active_character.can_cast_skill()
-        new_effects += active_character.skill(game_state, action.skill, instruction)
-        new_effects += (DeathCheckCheckerEffect(), )
+        new_effects += active_character.skill(game_state, action.skill)
         new_effects += (TurnEndEffect(), )
         # Afterwards
         return game_state.factory().effect_stack(
@@ -122,15 +121,14 @@ class ActionPhase(ph.Phase):
         new_effects: tuple[Effect, ...] = ()
         # Costs
         dices = player.get_dices()
-        new_dices = dices - action.instruction.dices()
+        new_dices = dices - action.instruction.dices
         if new_dices is None:
             return None
         # Add Effects
         active_character = player.get_characters().get_active_character()
         assert active_character is not None
         new_effects += (SwapCharacterEffect(
-            StaticTarget(pid, Zone.CHARACTER, active_character.get_id()),
-            StaticTarget(pid, Zone.CHARACTER, action.selected_character_id),
+            StaticTarget(pid, Zone.CHARACTER, action.selected_character_id)
         ), )
         new_effects += (TurnEndEffect(), )
         # TODO: posts
@@ -146,7 +144,7 @@ class ActionPhase(ph.Phase):
         new_effects: list[Effect] = []
         # Costs
         dices = player.get_dices()
-        new_dices = dices - action.instruction.dices()
+        new_dices = dices - action.instruction.dices
         if new_dices is None:
             return None
         # Card
@@ -167,8 +165,7 @@ class ActionPhase(ph.Phase):
         active_character = player.get_characters().get_active_character()
         assert active_character is not None
         effect_stack = effect_stack.push_one(SwapCharacterEffect(
-            StaticTarget(pid, Zone.CHARACTER, active_character.get_id()),
-            StaticTarget(pid, Zone.CHARACTER, action.selected_character_id),
+            StaticTarget(pid, Zone.CHARACTER, action.selected_character_id)
         ))
         # TODO: posts
         return game_state.factory().effect_stack(

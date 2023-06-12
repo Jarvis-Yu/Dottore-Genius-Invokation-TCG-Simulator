@@ -4,24 +4,24 @@ from enum import Enum
 
 import dgisim.src.state.game_state as gs
 import dgisim.src.character.character as Cr
-import dgisim.src.effect.effect as efft
+import dgisim.src.effect.effect as eft
 
 
 def normal_attack_template(
-        source: efft.StaticTarget,
-        element: efft.Element,
+        source: eft.StaticTarget,
+        element: eft.Element,
         damage: int,
         recharge: int = 1,
-) -> tuple[efft.Effect, ...]:
-    effects: list[efft.Effect] = []
-    effects.append(efft.ReferredDamageEffect(
+) -> tuple[eft.Effect, ...]:
+    effects: list[eft.Effect] = []
+    effects.append(eft.ReferredDamageEffect(
         source=source,
-        target=efft.DynamicCharacterTarget.OPPO_ACTIVE,
+        target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
         element=element,
         damage=damage,
     ))
     if recharge > 0:
-        effects.append(efft.EnergyRechargeEffect(
+        effects.append(eft.EnergyRechargeEffect(
             target=source,
             recharge=recharge,
         ))

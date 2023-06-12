@@ -6,6 +6,7 @@ from dgisim.src.helper.quality_of_life import just
 
 
 _T = TypeVar('_T', bound='Statuses')
+_U = TypeVar('_U')
 
 
 class Statuses:
@@ -42,8 +43,12 @@ class Statuses:
     def find(self, status: type[Status]) -> Optional[Status]:
         return next((bf for bf in self._statuses if type(bf) is status), None)
 
-    def just_find(self, status: type[Status]) -> Status:
-        return just(self.find(status))
+    def just_find(self, status: type[_U]) -> _U:
+        """ _U should be a subclass of type[Status] """
+        assert issubclass(status, Status)
+        found_status = just(self.find(status))
+        assert isinstance(found_status, status)
+        return found_status  # type: ignore
 
     def remove(self: _T, status: type[Status]) -> _T:
         return type(self)(tuple(

@@ -570,7 +570,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 8)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
         self.assertEqual(
-            game_state.get_player1().get_combat_statuses().just_find(CatalyzingFieldStatus).count,  # type: ignore
+            game_state.get_player1().get_combat_statuses().just_find(CatalyzingFieldStatus).count,
             2
         )
 
@@ -587,7 +587,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 8)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
         self.assertEqual(
-            game_state.get_player1().get_combat_statuses().just_find(CatalyzingFieldStatus).count,  # type: ignore
+            game_state.get_player1().get_combat_statuses().just_find(CatalyzingFieldStatus).count,
             2
         )
 
@@ -617,7 +617,8 @@ class TestStatus(unittest.TestCase):
         self.assertTrue(ac.get_elemental_aura().contains(Element.ELECTRO))
         self.assertEqual(
             electro_game_state.get_player1().get_combat_statuses().just_find(
-                CatalyzingFieldStatus).count,  # type: ignore
+                CatalyzingFieldStatus
+            ).count,
             1
         )
 
@@ -628,7 +629,8 @@ class TestStatus(unittest.TestCase):
         self.assertTrue(ac.get_elemental_aura().contains(Element.DENDRO))
         self.assertEqual(
             dendro_game_state.get_player1().get_combat_statuses().just_find(
-                CatalyzingFieldStatus).count,  # type: ignore
+                CatalyzingFieldStatus
+            ).count,
             1
         )
 
@@ -649,7 +651,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 5)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
         self.assertEqual(
-            game_state.get_player1().get_combat_statuses().just_find(CatalyzingFieldStatus).count,  # type: ignore
+            game_state.get_player1().get_combat_statuses().just_find(CatalyzingFieldStatus).count,
             2
         )
 
@@ -687,7 +689,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 8)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
         self.assertEqual(
-            game_state.get_player1().get_combat_statuses().just_find(DendroCoreStatus).count,  # type: ignore
+            game_state.get_player1().get_combat_statuses().just_find(DendroCoreStatus).count,
             1
         )
 
@@ -704,7 +706,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 8)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
         self.assertEqual(
-            game_state.get_player1().get_combat_statuses().just_find(DendroCoreStatus).count,  # type: ignore
+            game_state.get_player1().get_combat_statuses().just_find(DendroCoreStatus).count,
             1
         )
 
@@ -753,7 +755,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 8)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
         self.assertEqual(
-            game_state.get_player1().get_combat_statuses().just_find(DendroCoreStatus).count,  # type: ignore
+            game_state.get_player1().get_combat_statuses().just_find(DendroCoreStatus).count,
             1
         )
 
@@ -791,7 +793,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 8)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
         self.assertEqual(
-            game_state.get_player1().get_combat_statuses().just_find(CrystallizeStatus).stacks,  # type: ignore
+            game_state.get_player1().get_combat_statuses().just_find(CrystallizeStatus).stacks,
             1
         )
 
@@ -804,7 +806,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 6)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
         self.assertEqual(
-            game_state.get_player1().get_combat_statuses().just_find(CrystallizeStatus).stacks,  # type: ignore
+            game_state.get_player1().get_combat_statuses().just_find(CrystallizeStatus).stacks,
             2
         )
 
@@ -817,7 +819,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 4)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
         self.assertEqual(
-            game_state.get_player1().get_combat_statuses().just_find(CrystallizeStatus).stacks,  # type: ignore
+            game_state.get_player1().get_combat_statuses().just_find(CrystallizeStatus).stacks,
             2
         )
 
@@ -844,7 +846,7 @@ class TestStatus(unittest.TestCase):
         self.assertTrue(ac.get_elemental_aura().contains(Element.CRYO))
         self.assertEqual(ac.get_hp(), 10)
         self.assertEqual(
-            game_state.get_player2().get_combat_statuses().just_find(CrystallizeStatus).stacks,  # type: ignore
+            game_state.get_player2().get_combat_statuses().just_find(CrystallizeStatus).stacks,
             1
         )
 
@@ -864,7 +866,7 @@ class TestStatus(unittest.TestCase):
         self.assertTrue(ac.get_elemental_aura().contains(Element.CRYO))
         self.assertEqual(ac.get_hp(), 10)
         self.assertEqual(
-            game_state.get_player2().get_combat_statuses().just_find(CrystallizeStatus).stacks,  # type: ignore
+            game_state.get_player2().get_combat_statuses().just_find(CrystallizeStatus).stacks,
             1
         )
 
@@ -989,7 +991,8 @@ class TestStatus(unittest.TestCase):
         """
         base_game_state_1 = END_TEMPLATE.factory().f_player1(
             lambda p: p.factory().f_summons(
-                lambda ss: ss.update_summon(BurningFlameSummon(usages=1)).update_summon(TestSummon())
+                lambda ss: ss.update_summon(BurningFlameSummon(usages=1)
+                                            ).update_summon(TestSummon())
             ).build()
         ).f_player2(
             lambda p: p.factory().f_characters(
@@ -1002,7 +1005,8 @@ class TestStatus(unittest.TestCase):
         ).build()
         base_game_state_2 = base_game_state_1.factory().f_player1(
             lambda p: p.factory().f_summons(
-                lambda ss: ss.update_summon(BurningFlameSummon(usages=2)).update_summon(TestSummon())
+                lambda ss: ss.update_summon(BurningFlameSummon(usages=2)
+                                            ).update_summon(TestSummon())
             ).build()
         ).build()
 

@@ -4,6 +4,7 @@ from dgisim.src.state.game_state import GameState
 from dgisim.src.player_agent import PlayerAgent
 from dgisim.src.action import PlayerAction
 from dgisim.src.phase.phase import Phase
+from dgisim.src.helper.level_print import GamePrinter
 
 
 class GameStateMachine:
@@ -76,11 +77,14 @@ class GameStateMachine:
     def get_game_state_at(self, index: int) -> GameState:
         return self._history[index]
 
-    def _step(self) -> None:
+    def _step(self, observe=False) -> None:
         self._game_state = self._game_state.step()
+        if observe:
+            print(GamePrinter.dict_game_printer(self._game_state.dict_str()))
+            input(">>> ")
         self._history.append(self._game_state)
 
-    def _action_step(self, pid: GameState.Pid, action: PlayerAction) -> bool:
+    def _action_step(self, pid: GameState.Pid, action: PlayerAction, observe=False) -> bool:
         next_state = self._game_state.action_step(pid, action)
         if next_state is None:
             return False
@@ -88,56 +92,60 @@ class GameStateMachine:
         self._action_history.append(action_idx)
         self._actions[action_idx] = action
         self._game_state = next_state
+        if observe:
+            print(GamePrinter.dict_game_printer(self._game_state.dict_str()))
+            input(">>> ")
         self._history.append(self._game_state)
         return True
 
-    def step_until_phase(self, phase: Union[type[Phase], Phase]) -> None:
+    def step_until_phase(self, phase: Union[type[Phase], Phase], observe=False) -> None:
         if isinstance(phase, Phase):
             phase = type(phase)
         while isinstance(self._game_state.get_phase(), phase):
-            self.one_step()
+            self.one_step(observe=observe)
         while not isinstance(self._game_state.get_phase(), phase):
-            self.one_step()
+            self.one_step(observe=observe)
 
-    def step_until_next_phase(self) -> None:
+    def step_until_next_phase(self, observe=False) -> None:
         phase = self._game_state.get_phase()
         while self._game_state.get_phase() == phase:
-            self.one_step()
+            self.one_step(observe=observe)
 
-    def step_until_holds(self, predicate: Callable[[GameState], bool]) -> None:
+    def step_until_holds(self, predicate: Callable[[GameState], bool], observe=False) -> None:
         while not predicate(self._game_state):
-            self.one_step()
+            self.one_step(observe=observe)
 
-    def one_step(self) -> None:
+    def one_step(self, observe=False) -> None:
         if self.game_end():
             return
         pid = self._game_state.waiting_for()
         if pid is None:
-            self._step()
+            self._step(observe=observe)
         else:
             patience = 5
             while patience > 0 \
                     and not self._action_step(
                         pid,
-                        self.player_agent(pid).choose_action(self._history, pid)
+                        self.player_agent(pid).choose_action(self._history, pid),
+                        observe=observe,
                     ):
                 patience -= 1
 
-    def changing_step(self) -> None:
+    def changing_step(self, observe=False) -> None:
         game_state = self._game_state
-        self.one_step()
+        self.one_step(observe=observe)
         while not self.game_end() and game_state is self._game_state:
-            self.one_step()
+            self.one_step(observe=observe)
 
-    def auto_step(self) -> None:
+    def auto_step(self, observe=False) -> None:
         pid = self._game_state.waiting_for()
         while not self.game_end() and pid is None:
-            self._step()
+            self._step(observe=observe)
             pid = self._game_state.waiting_for()
 
-    def player_step(self) -> None:
-        self.auto_step()
-        self.one_step()
+    def player_step(self, observe=False) -> None:
+        self.auto_step(observe=observe)
+        self.one_step(observe=observe)
 
     def run(self) -> None:
         while (not self.game_end()):

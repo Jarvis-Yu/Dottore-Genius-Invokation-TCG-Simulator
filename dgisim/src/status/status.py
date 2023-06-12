@@ -8,7 +8,7 @@ from math import ceil
 import dgisim.src.effect.effect as eft
 import dgisim.src.state.game_state as gs
 from dgisim.src.element.element import Element
-from dgisim.src.helper.quality_of_life import just, BIG_INT
+from dgisim.src.helper.quality_of_life import just, BIG_INT, case_val
 
 
 class TriggerringEvent(Enum):
@@ -103,7 +103,9 @@ class Status:
     def _preprocess_react_to_signal(
             self: _T, effects: list[eft.Effect], new_status: Optional[_T]
     ) -> tuple[list[eft.Effect], Optional[_T]]:
-        return effects, new_status
+        if new_status != self:
+            return effects, new_status
+        return effects, self
 
     def _react_to_signal(
             self: _T, source: eft.StaticTarget, signal: eft.TriggeringSignal
@@ -167,6 +169,7 @@ class _DurationStatus(Status):
     This class has a duration which acts as a counter
     """
     duration: int
+    max_duration: ClassVar[int] = BIG_INT
 
     @override
     def _preprocess_update(self, new_self: Optional[_DurationStatus]) -> Optional[_DurationStatus]:
@@ -177,7 +180,7 @@ class _DurationStatus(Status):
 
     @override
     def _update(self, other: _DurationStatus) -> Optional[_DurationStatus]:
-        new_duration = self.duration + other.duration
+        new_duration = min(self.duration + other.duration, self.max_duration)
         return type(self)(duration=new_duration)
 
     def __str__(self) -> str:
@@ -428,3 +431,56 @@ class JueyunGuobaStatus(CharacterStatus):
         if signal is eft.TriggeringSignal.ROUND_END:
             return [], None
         return [], self
+
+
+############################## Infusions ##############################
+
+@dataclass(frozen=True, kw_only=True)
+class ElectroInfusionStatus(CharacterStatus, _DurationStatus):
+    max_duration: ClassVar[int] = 2
+
+    @override
+    def preprocess(
+            self,
+            game_state: gs.GameState,
+            status_source: eft.StaticTarget,
+            item: eft.Preprocessable,
+            signal: Status.PPType,
+    ) -> tuple[eft.Preprocessable, Optional[ElectroInfusionStatus]]:
+        new_item: Optional[eft.SpecificDamageEffect] = None
+        if signal is Status.PPType.DmgElement:
+            assert isinstance(item, eft.SpecificDamageEffect)
+            if item.element is Element.PHYSICAL:
+                new_item = replace(item, element=Element.ELECTRO)
+        if new_item is not None:
+            return new_item, self
+        else:
+            return item, self
+
+    @override
+    def _react_to_signal(
+            self, source: eft.StaticTarget, signal: eft.TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[ElectroInfusionStatus]]:
+        d_duration = 0
+        if signal is eft.TriggeringSignal.ROUND_END:
+            d_duration = -1
+        return [], replace(self, duration=d_duration)
+
+
+############################## Character intrinsic talent ##############################
+
+@dataclass(frozen=True, kw_only=True)
+class KeqingTalentStatus(CharacterTalentStatus):
+    can_infuse: bool
+
+    def _react_to_signal(
+            self,
+            source: eft.StaticTarget,
+            signal: eft.TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[KeqingTalentStatus]]:
+        if signal is eft.TriggeringSignal.COMBAT_ACTION:
+            return [], type(self)(can_infuse=False)
+        return [], self
+
+    def __str__(self) -> str:
+        return super().__str__() + f"({case_val(self.can_infuse, 1, 0)})"

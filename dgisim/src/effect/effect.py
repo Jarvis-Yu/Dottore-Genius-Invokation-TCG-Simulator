@@ -4,6 +4,7 @@ from enum import Enum
 from dataclasses import InitVar, dataclass, asdict, replace, field
 from itertools import chain
 
+import dgisim.src.status.statuses as stts
 import dgisim.src.status.status as stt
 import dgisim.src.summon.summon as sm
 from dgisim.src.element.element import Element, Reaction, ReactionDetail
@@ -110,6 +111,7 @@ class TriggerStatusEffect(Effect):
         character = cast(chr.Character, character)
         effects: Iterable[Effect] = []
 
+        statuses: stts.Statuses
         if issubclass(self.status, stt.CharacterTalentStatus):
             statuses = character.get_talent_statuses()
         elif issubclass(self.status, stt.EquipmentStatus):
@@ -515,15 +517,11 @@ class SetBothPlayerPhaseEffect(PhaseEffect):
 
 @dataclass(frozen=True)
 class SwapCharacterEffect(DirectEffect):
-    source: StaticTarget
     target: StaticTarget
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
-        assert self.source.pid == self.target.pid \
-            and self.source.zone == Zone.CHARACTER \
-            and self.target.zone == Zone.CHARACTER \
-            and self.source.id != self.target.id
-        pid = self.source.pid
+        assert self.target.zone == Zone.CHARACTER
+        pid = self.target.pid
         player = game_state.get_player(pid)
         characters = player.get_characters()
         characters = characters.factory().active_character_id(self.target.id).build()
@@ -926,6 +924,25 @@ class RemoveCardEffect(Effect):
 
 
 @dataclass(frozen=True)
+class RemoveAllCardEffect(Effect):
+    pid: gs.GameState.Pid
+    card: type[cd.Card]
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        pid = self.pid
+        card = self.card
+        hand_cards = game_state.get_player(pid).get_hand_cards()
+        if not hand_cards.contains(card) or hand_cards[card] <= 0:
+            return game_state
+        return game_state.factory().f_player(
+            pid,
+            lambda p: p.factory().f_hand_cards(
+                lambda cs: cs.remove_all(card)
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True)
 class RemoveDiceEffect(Effect):
     pid: gs.GameState.Pid
     dices: ds.ActualDices
@@ -951,12 +968,16 @@ class AddCharacterStatusEffect(Effect):
         character = game_state.get_target(self.target)
         assert isinstance(character, chr.Character)
         if issubclass(self.status, stt.CharacterTalentStatus):
-            pass
+            character = character.factory().f_talents(
+                lambda ts: ts.update_status(self.status())
+            ).build()
         elif issubclass(self.status, stt.EquipmentStatus):
-            pass
+            character = character.factory().f_equipments(
+                lambda es: es.update_status(self.status())
+            ).build()
         elif issubclass(self.status, stt.CharacterStatus):
             character = character.factory().f_character_statuses(
-                lambda bs: bs.update_status(self.status())
+                lambda cs: cs.update_status(self.status())
             ).build()
         return game_state.factory().f_player(
             self.target.pid,
@@ -977,13 +998,17 @@ class RemoveCharacterStatusEffect(DirectEffect):
             return game_state
         new_character = character
         if issubclass(self.status, stt.CharacterTalentStatus):
-            pass
+            new_character = character.factory().f_talents(
+                lambda ts: ts.remove(self.status)
+            ).build()
         elif issubclass(self.status, stt.EquipmentStatus):
-            pass
+            new_character = character.factory().f_equipments(
+                lambda es: es.remove(self.status)
+            ).build()
         elif issubclass(self.status, stt.CharacterStatus):
-            statuses = character.get_character_statuses()
-            new_statuses = statuses.remove(self.status)
-            new_character = new_character.factory().character_statuses(new_statuses).build()
+            new_character = character.factory().f_character_statuses(
+                lambda cs: cs.remove(self.status)
+            ).build()
         return game_state.factory().f_player(
             self.target.pid,
             lambda p: p.factory().f_characters(
@@ -1001,12 +1026,16 @@ class UpdateCharacterStatusEffect(Effect):
         character = game_state.get_target(self.target)
         assert isinstance(character, chr.Character)
         if isinstance(self.status, stt.CharacterTalentStatus):
-            pass
+            character = character.factory().f_talents(
+                lambda ts: ts.update_status(self.status)
+            ).build()
         elif isinstance(self.status, stt.EquipmentStatus):
-            pass
+            character = character.factory().f_equipments(
+                lambda es: es.update_status(self.status)
+            ).build()
         elif isinstance(self.status, stt.CharacterStatus):
             character = character.factory().f_character_statuses(
-                lambda bs: bs.update_status(self.status)
+                lambda cs: cs.update_status(self.status)
             ).build()
         return game_state.factory().f_player(
             self.target.pid,
@@ -1025,12 +1054,16 @@ class OverrideCharacterStatusEffect(Effect):
         character = game_state.get_target(self.target)
         assert isinstance(character, chr.Character)
         if isinstance(self.status, stt.CharacterTalentStatus):
-            pass
+            character = character.factory().f_talents(
+                lambda ts: ts.update_status(self.status, force=True)
+            ).build()
         elif isinstance(self.status, stt.EquipmentStatus):
-            pass
+            character = character.factory().f_equipments(
+                lambda es: es.update_status(self.status, force=True)
+            ).build()
         elif isinstance(self.status, stt.CharacterStatus):
             character = character.factory().f_character_statuses(
-                lambda bs: bs.update_status(self.status, force=True)
+                lambda cs: cs.update_status(self.status, force=True)
             ).build()
         return game_state.factory().f_player(
             self.target.pid,
@@ -1154,12 +1187,34 @@ class OverrideSummonEffect(Effect):
 
 @dataclass(frozen=True)
 class AddCardEffect(Effect):
-    target: StaticTarget
+    pid: gs.GameState.Pid
     card: type[cd.Card]
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
-        # TODO: add card
-        return super().execute(game_state)
+        return game_state.factory().f_player(
+            self.pid,
+            lambda p: p.factory().f_hand_cards(
+                lambda cs: cs.add(self.card)
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True)
+class CastSkillEffect(Effect):
+    target: StaticTarget
+    skill: chr.CharacterSkill
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        character = game_state.get_target(self.target)
+        assert isinstance(character, chr.Character)
+        if not character.can_cast_skill():
+            return game_state
+        effects = character.skill(game_state, self.skill)
+        if not effects:
+            return game_state
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_many_fl(effects)
+        ).build()
 
 
 # This has to be by the end of the file or there's cyclic import error

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, Tuple, Type, Union
+from typing import Union
 from collections import Counter
 import random
 
@@ -9,7 +9,7 @@ from dgisim.src.helper.level_print import level_print, INDENT, level_print_singl
 
 
 class Cards:
-    def __init__(self, mapping: Dict[Type[Card], int]) -> None:
+    def __init__(self, mapping: dict[type[Card], int]) -> None:
         self._cards = HashableDict(mapping)
 
     @classmethod
@@ -22,14 +22,14 @@ class Cards:
     def __sub__(self, other: Cards) -> Cards:
         return Cards(self._cards - other._cards)
 
-    def pick_random_cards(self, num: int) -> Tuple[Cards, Cards]:
+    def pick_random_cards(self, num: int) -> tuple[Cards, Cards]:
         """
         Returns the left cards and selected cards
         """
         num = min(self.num_cards(), num)
         if num == 0:
             return (self, Cards.from_empty())
-        picked_cards = dict(Counter(
+        picked_cards: dict[type[Card], int] = dict(Counter(
             random.sample(list(self._cards.keys()), counts=self._cards.values(), k=num)
         ))
         return Cards(self._cards - picked_cards), Cards(picked_cards)
@@ -43,10 +43,18 @@ class Cards:
                 return True
         return False
 
+    def add(self, card: type[Card]) -> Cards:
+        return self + Cards({card: 1})
+
     def remove(self, card: type[Card]) -> Cards:
         assert card in self._cards
         assert self._cards[card] >= 1
         return self - Cards({card: 1})
+
+    def remove_all(self, card: type[Card]) -> Cards:
+        assert card in self._cards
+        assert self._cards[card] >= 1
+        return self - Cards({card: self._cards[card]})
 
     def __getitem__(self, card: type[Card]) -> int:
         assert card in self._cards

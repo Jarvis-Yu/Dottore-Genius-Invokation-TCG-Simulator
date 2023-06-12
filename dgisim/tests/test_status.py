@@ -111,7 +111,7 @@ class TestStatus(unittest.TestCase):
         gsm = GameStateMachine(base_game_state, p1, p2)
         p1.inject_action(SkillAction(
             CharacterSkill.NORMAL_ATTACK,
-            DiceOnlyInstruction(ActualDices({})),
+            DiceOnlyInstruction(dices=ActualDices({})),
         ))
         gsm.one_step()  # p1 normal attacks
         gsm.auto_step()  # process normal attack
@@ -122,8 +122,8 @@ class TestStatus(unittest.TestCase):
         p1.inject_action(CardAction(
             JueyunGuoba,
             CharacterTargetInstruction(
-                ActualDices({}),
-                StaticTarget(
+                dices=ActualDices({}),
+                target=StaticTarget(
                     GameState.Pid.P1,
                     Zone.CHARACTER,
                     char1.get_id(),
@@ -132,7 +132,7 @@ class TestStatus(unittest.TestCase):
         ))
         p1.inject_action(SkillAction(
             CharacterSkill.NORMAL_ATTACK,
-            DiceOnlyInstruction(ActualDices({})),
+            DiceOnlyInstruction(dices=ActualDices({})),
         ))
         gsm.one_step()  # p1 has JueyunGuoba
         gsm.auto_step()
@@ -165,8 +165,8 @@ class TestStatus(unittest.TestCase):
         p1.inject_action(CardAction(
             JueyunGuoba,
             CharacterTargetInstruction(
-                ActualDices({}),
-                StaticTarget(
+                dices=ActualDices({}),
+                target=StaticTarget(
                     GameState.Pid.P1,
                     Zone.CHARACTER,
                     guobaed_char_id,
@@ -175,7 +175,7 @@ class TestStatus(unittest.TestCase):
         ))
         p1.inject_action(SkillAction(
             CharacterSkill.NORMAL_ATTACK,
-            DiceOnlyInstruction(ActualDices({})),
+            DiceOnlyInstruction(dices=ActualDices({})),
         ))
         gsm.one_step()  # p1 has JueyunGuoba
         gsm.auto_step()

@@ -46,15 +46,27 @@ class LazyAgent(PlayerAgent):
 
 
 class PuppetAgent(PlayerAgent):
-    def __init__(self, actions: list[PlayerAction] = []) -> None:
-        self._actions = actions
+    def __init__(self, actions: Optional[list[PlayerAction]] = None) -> None:
+        if actions is None:
+            self._actions = []
+        else:
+            self._actions = actions
 
     def inject_action(self, action: PlayerAction) -> None:
         self._actions.append(action)
 
+    def inject_actions(self, actions: list[PlayerAction]) -> None:
+        self._actions += actions
+
     def choose_action(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
         assert self._actions
         return self._actions.pop(0)
+
+    def clear(self) -> None:
+        self._actions = []
+
+    def __str__(self) -> str:
+        return f"PuppetAgent[{', '.join(str(action) for action in self._actions)}]"
 
 
 class HardCodedRandomAgent(PlayerAgent):
@@ -119,8 +131,8 @@ class HardCodedRandomAgent(PlayerAgent):
                     return CardAction(
                         card,
                         CharacterTargetInstruction(
-                            tmp_dices,
-                            StaticTarget(
+                            dices=tmp_dices,
+                            target=StaticTarget(
                                 pid,
                                 Zone.CHARACTER,
                                 active_character.get_id(),
@@ -136,8 +148,8 @@ class HardCodedRandomAgent(PlayerAgent):
                     return CardAction(
                         card,
                         CharacterTargetInstruction(
-                            tmp_dices,
-                            StaticTarget(
+                            dices=tmp_dices,
+                            target=StaticTarget(
                                 pid,
                                 Zone.CHARACTER,
                                 active_character.get_id(),
@@ -145,15 +157,26 @@ class HardCodedRandomAgent(PlayerAgent):
                         )
                     )
 
+            # elemental skill1
+            if selection < 0.5 and active_character.can_cast_skill():
+                dices = available_dices.basically_satisfy(AbstractDices({
+                    Element.ANY: 2,
+                }))
+                if dices is not None:
+                    return SkillAction(
+                        CharacterSkill.ELEMENTAL_SKILL1,
+                        DiceOnlyInstruction(dices=dices),
+                    )
+
             # normal attack
-            if selection < 0.6 and active_character.can_cast_skill():
+            if selection < 0.5 and active_character.can_cast_skill():
                 dices = available_dices.basically_satisfy(AbstractDices({
                     Element.ANY: 2,
                 }))
                 if dices is not None:
                     return SkillAction(
                         CharacterSkill.NORMAL_ATTACK,
-                        DiceOnlyInstruction(dices),
+                        DiceOnlyInstruction(dices=dices),
                     )
             
             # swap character
@@ -170,7 +193,7 @@ class HardCodedRandomAgent(PlayerAgent):
                 if dices is not None and alive_ids:
                     return SwapAction(
                         choice(alive_ids),
-                        DiceOnlyInstruction(dices),
+                        DiceOnlyInstruction(dices=dices),
                     )
             
             return EndRoundAction()

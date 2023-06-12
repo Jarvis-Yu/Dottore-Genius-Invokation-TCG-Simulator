@@ -46,7 +46,7 @@ class FoodCard(EventCard):
         assert isinstance(instruction, ac.CharacterTargetInstruction)
         return cls.food_effects(instruction) + (
             AddCharacterStatusEffect(
-                instruction.target(),
+                instruction.target,
                 stt.SatiatedStatus,
             ),
         )
@@ -68,7 +68,7 @@ class _DirectHealCard(FoodCard):
         assert isinstance(instruction, ac.CharacterTargetInstruction)
         return (
             RecoverHPEffect(
-                instruction.target(),
+                instruction.target,
                 cls.heal_amount()
             ),
         )
@@ -95,7 +95,7 @@ class JueyunGuoba(FoodCard):
         assert isinstance(instruction, ac.CharacterTargetInstruction)
         return (
             AddCharacterStatusEffect(
-                instruction.target(),
+                instruction.target,
                 stt.JueyunGuobaStatus,
             ),
         )
@@ -119,11 +119,11 @@ class MushroomPizza(FoodCard):
         assert isinstance(instruction, ac.CharacterTargetInstruction)
         return (
             RecoverHPEffect(
-                instruction.target(),
+                instruction.target,
                 1
             ),
             AddCharacterStatusEffect(
-                instruction.target(),
+                instruction.target,
                 stt.MushroomPizzaStatus,
             )
         )
@@ -140,11 +140,11 @@ class Starsigns(EventCard):
         assert isinstance(instruction, ac.CharacterTargetInstruction)
         return (
             EnergyRechargeEffect(
-                instruction.target(),
+                instruction.target,
                 1
             ),
         )
-    
+
 
 class CalxsArts(EventCard):
     pass
@@ -153,4 +153,21 @@ class CalxsArts(EventCard):
 
 
 class LightningStiletto(Card):
-    pass
+    @override
+    @classmethod
+    def effects(cls, instruction: ac.Instruction) -> tuple[Effect, ...]:
+        assert isinstance(instruction, ac.CharacterTargetInstruction)
+        effects: tuple[Effect, ...] = (
+            SwapCharacterEffect(
+                target=instruction.target,
+            ),
+            OverrideCharacterStatusEffect(
+                target=instruction.target,
+                status=stt.KeqingTalentStatus(can_infuse=True),
+            ),
+            CastSkillEffect(
+                target=instruction.target,
+                skill=chr.CharacterSkill.ELEMENTAL_SKILL1,
+            ),
+        )
+        return tuple(effects)

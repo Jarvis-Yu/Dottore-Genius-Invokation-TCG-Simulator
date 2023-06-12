@@ -67,7 +67,7 @@ class CardAction(GameAction):
 class SkillAction(GameAction):
     from dgisim.src.character.character import CharacterSkill
     skill: CharacterSkill
-    instruction: Instruction
+    instruction: DiceOnlyInstruction
 
     def __str__(self) -> str:
         return f"<{self.skill}, {self.instruction}>"
@@ -84,36 +84,23 @@ class DeathSwapAction(GameAction):
     selected_character_id: int
 
 
+@dataclass(frozen=True, kw_only=True)
 class Instruction:
-
-    def dices(self) -> ActualDices:
-        return ActualDices({})
+    dices: ActualDices
 
 
-class _DicedInstruction(Instruction):
-
-    def __init__(self, dices: ActualDices):
-        self._dices = dices
-
-    @override
-    def dices(self) -> ActualDices:
-        return self._dices
-
-
-class DiceOnlyInstruction(_DicedInstruction):
-
-    def __init__(self, dices: ActualDices):
-        super().__init__(dices)
-
+@dataclass(frozen=True, kw_only=True)
+class DiceOnlyInstruction(Instruction):
     def __str__(self) -> str:
-        return str(self._dices.num_dices())
+        return str(self.dices.num_dices())
 
 
-class CharacterTargetInstruction(_DicedInstruction):
+@dataclass(frozen=True, kw_only=True)
+class CharacterTargetInstruction(Instruction):
+    target: StaticTarget
 
-    def __init__(self, dices: ActualDices, target: StaticTarget):
-        super().__init__(dices)
-        self._target = target
 
-    def target(self) -> StaticTarget:
-        return self._target
+@dataclass(frozen=True, kw_only=True)
+class SourceTargetInstruction(Instruction):
+    source: StaticTarget
+    target: StaticTarget
