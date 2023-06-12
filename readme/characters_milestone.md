@@ -1,0 +1,52 @@
+## Characters Milestones
+
+List of character cards obtained by players
+
+- [ ] Abyss Lector: Fathomless Flames
+- [ ] Amber
+- [ ] Arataki Itto
+- [ ] Barbara
+- [ ] Beidou
+- [ ] Bennet
+- [ ] Chongyun
+- [ ] Collei
+- [ ] Cyno
+- [ ] Diluc
+- [ ] Diona
+- [ ] Electro Hypostasis
+- [ ] Eula
+- [ ] Fatui Cryo Cicin Mage
+- [ ] Fatui Pyro Agent
+- [ ] Fischl
+- [ ] Ganyu
+- [ ] Hu Tao
+- [ ] Jadeplume Terrorshroom
+- [ ] Jean
+- [ ] Kaeya
+- [ ] Kamisato Ayaka
+- [ ] Kamisato Ayato
+- [ ] Keqing
+- [ ] Klee
+- [ ] Kujou Sara
+- [ ] Maguu Kenki
+- [ ] Mirror Maiden
+- [ ] Mona
+- [ ] Nahida
+- [ ] Ningguang
+- [ ] Noelle
+- [ ] Raiden Shogun
+- [ ] Razor
+- [ ] Rhodeia of Loch
+- [ ] Sangonomiya Kokomi
+- [ ] Shenhe
+- [ ] Stonehide Lawachurl
+- [ ] Sucrose
+- [ ] Tartaglia
+- [ ] Tighnari
+- [ ] Venti
+- [ ] Xiangling
+- [ ] Xiao
+- [ ] Xingqiu
+- [ ] Yae Miko
+- [ ] Yoimiya
+- [ ] Zhongli
