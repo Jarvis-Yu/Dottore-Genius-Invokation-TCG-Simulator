@@ -556,4 +556,5 @@ class Icicle(CombatStatus, _UsageStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class ColdBloodedStrikeStatus(EquipmentStatus):
+    # TODO: detect kaeya elemental skill, react to it and recover hp
     pass

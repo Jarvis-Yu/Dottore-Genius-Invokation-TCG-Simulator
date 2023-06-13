@@ -196,4 +196,17 @@ class ThunderingPenance(EquipmentCard):
 #### Kaeya ####
 
 class ColdBloodedStrike(EquipmentCard):
-    pass
+    @override
+    @classmethod
+    def effects(cls, instruction: ac.Instruction) -> tuple[Effect, ...]:
+        assert isinstance(instruction, ac.CharacterTargetInstruction)
+        return (
+            AddCharacterStatusEffect(
+                target=instruction.target,
+                status=stt.ColdBloodedStrikeStatus,
+            ),
+            CastSkillEffect(
+                target=instruction.target,
+                skill=chr.CharacterSkill.ELEMENTAL_SKILL1,
+            ),
+        )
