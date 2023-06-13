@@ -13,7 +13,7 @@ import dgisim.src.state.game_state as gs
 import dgisim.src.state.player_state as ps
 import dgisim.src.card.card as cd
 import dgisim.src.dices as ds
-from dgisim.src.helper.quality_of_life import just
+from dgisim.src.helper.quality_of_life import just, case_val
 
 
 class Zone(Enum):
@@ -28,10 +28,11 @@ class TriggeringSignal(Enum):
     FAST_ACTION = 0
     COMBAT_ACTION = 1
     DEATH_EVENT = 2
-    SWAP_EVENT = 3
-    ROUND_START = 4
-    END_ROUND_CHECK_OUT = 5  # summons etc.
-    ROUND_END = 6  # remove frozen etc.
+    SWAP_EVENT_1 = 3
+    SWAP_EVENT_2 = 4
+    ROUND_START = 5
+    END_ROUND_CHECK_OUT = 6  # summons etc.
+    ROUND_END = 7  # remove frozen etc.
 
 
 class DynamicCharacterTarget(Enum):
@@ -326,6 +327,7 @@ class AllStatusTriggererEffect(TriggerrbleEffect):
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         effects = _triggerAllStatusesEffects(game_state, self.pid, self.signal)
+        effects += _triggerAllStatusesEffects(game_state, self.pid.other(), self.signal)
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
@@ -333,7 +335,40 @@ class AllStatusTriggererEffect(TriggerrbleEffect):
 
 @dataclass(frozen=True)
 class SwapCharacterCheckerEffect(CheckerEffect):
-    pass
+    my_active: StaticTarget
+    oppo_active: StaticTarget
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        my_ac_id = game_state.get_player(self.my_active.pid).just_get_active_character().get_id()
+        oppo_ac_id = game_state.get_player(
+            self.oppo_active.pid).just_get_active_character().get_id()
+        my_pid = self.my_active.pid
+        effects: list[Effect] = []
+        if my_pid.is_player1():
+            my_signal = TriggeringSignal.SWAP_EVENT_1
+            oppo_signal = TriggeringSignal.SWAP_EVENT_2
+        else:
+            my_signal = TriggeringSignal.SWAP_EVENT_2
+            oppo_signal = TriggeringSignal.SWAP_EVENT_1
+        if my_ac_id != self.my_active.id:
+            effects += [
+                AllStatusTriggererEffect(
+                    pid=my_pid,
+                    signal=my_signal,
+                ),
+            ]
+        if oppo_ac_id != self.oppo_active.id:
+            effects += [
+                AllStatusTriggererEffect(
+                    pid=my_pid,
+                    signal=oppo_signal,
+                ),
+            ]
+        if not effects:
+            return game_state
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_many_fl(effects)
+        ).build()
 
 
 @dataclass(frozen=True)
@@ -427,11 +462,6 @@ class EndPhaseCheckoutEffect(PhaseEffect):
                 TriggeringSignal.END_ROUND_CHECK_OUT
             ),
             # TODO: add active_player's team status, summons status... here
-            AllStatusTriggererEffect(
-                active_id.other(),
-                TriggeringSignal.END_ROUND_CHECK_OUT
-            ),
-            # TODO: add active_player's team status, summons status... here
         ]
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
@@ -450,11 +480,6 @@ class EndRoundEffect(PhaseEffect):
         effects = [
             AllStatusTriggererEffect(
                 active_id,
-                TriggeringSignal.ROUND_END
-            ),
-            # TODO: add active_player's team status, summons status... here
-            AllStatusTriggererEffect(
-                active_id.other(),
                 TriggeringSignal.ROUND_END
             ),
             # TODO: add active_player's team status, summons status... here
@@ -523,11 +548,27 @@ class SwapCharacterEffect(DirectEffect):
         assert self.target.zone == Zone.CHARACTER
         pid = self.target.pid
         player = game_state.get_player(pid)
-        characters = player.get_characters()
-        characters = characters.factory().active_character_id(self.target.id).build()
-        player = player.factory().characters(characters).build()
-        # TODO: Trigger swap event
-        return game_state.factory().player(pid, player).build()
+        if player.just_get_active_character().get_id() == self.target.id:
+            return game_state
+
+        effects: list[Effect] = [
+            AllStatusTriggererEffect(
+                pid,
+                case_val(
+                    pid.is_player1(),
+                    TriggeringSignal.SWAP_EVENT_1,
+                    TriggeringSignal.SWAP_EVENT_2,
+                ),
+            ),
+        ]
+        return game_state.factory().f_player(
+            pid,
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().active_character_id(self.target.id).build()
+            ).build()
+        ).f_effect_stack(
+            lambda es: es.push_many_fl(effects)
+        ).build()
 
 
 @dataclass(frozen=True)

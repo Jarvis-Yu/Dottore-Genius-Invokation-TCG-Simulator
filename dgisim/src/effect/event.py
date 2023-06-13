@@ -11,7 +11,6 @@ def normal_attack_template(
         source: eft.StaticTarget,
         element: eft.Element,
         damage: int,
-        recharge: int = 1,
 ) -> tuple[eft.Effect, ...]:
     effects: list[eft.Effect] = []
     effects.append(eft.ReferredDamageEffect(
@@ -20,11 +19,6 @@ def normal_attack_template(
         element=element,
         damage=damage,
     ))
-    if recharge > 0:
-        effects.append(eft.EnergyRechargeEffect(
-            target=source,
-            recharge=recharge,
-        ))
     return tuple(effects)
 
 

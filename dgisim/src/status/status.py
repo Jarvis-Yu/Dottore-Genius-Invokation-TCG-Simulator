@@ -50,7 +50,7 @@ class Status:
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
     ) -> list[eft.Effect]:
         es, new_status = self._react_to_signal(source, signal)
-        es, new_status = self._pre_react_to_signal(es, new_status)
+        es, new_status = self._post_react_to_signal(es, new_status)
 
         import dgisim.src.summon.summon as sm
         # do the removal or update of the status
@@ -100,7 +100,7 @@ class Status:
 
         return es
 
-    def _pre_react_to_signal(
+    def _post_react_to_signal(
             self: _T, effects: list[eft.Effect], new_status: Optional[_T]
     ) -> tuple[list[eft.Effect], Optional[_T]]:
         if new_status != self:
@@ -120,9 +120,9 @@ class Status:
 
     def update(self: _T, other: _T) -> Optional[_T]:
         new_self = self._update(other)
-        return self._pre_update(new_self)
+        return self._post_update(new_self)
 
-    def _pre_update(self: _T, new_self: Optional[_T]) -> Optional[_T]:
+    def _post_update(self: _T, new_self: Optional[_T]) -> Optional[_T]:
         return new_self
 
     def _update(self: _T, other: _T) -> Optional[_T]:
@@ -172,11 +172,11 @@ class _DurationStatus(Status):
     max_duration: ClassVar[int] = BIG_INT
 
     @override
-    def _pre_update(self, new_self: Optional[_DurationStatus]) -> Optional[_DurationStatus]:
+    def _post_update(self, new_self: Optional[_DurationStatus]) -> Optional[_DurationStatus]:
         """ remove the status if duration <= 0 """
         if new_self is not None and new_self.duration <= 0:
             new_self = None
-        return super()._pre_update(new_self)
+        return super()._post_update(new_self)
 
     @override
     def _update(self, other: _DurationStatus) -> Optional[_DurationStatus]:
@@ -185,6 +185,27 @@ class _DurationStatus(Status):
 
     def __str__(self) -> str:
         return super().__str__() + f"({self.duration})"  # pragma: no cover
+
+
+@dataclass(frozen=True)
+class _UsageStatus(Status):
+    usages: int
+    max_usages: ClassVar[int] = BIG_INT
+
+    @override
+    def _post_update(self, new_self: Optional[_UsageStatus]) -> Optional[_UsageStatus]:
+        """ remove the status if usages <= 0 """
+        if new_self is not None and new_self.usages <= 0:
+            new_self = None
+        return super()._post_update(new_self)
+
+    @override
+    def _update(self, other: _UsageStatus) -> Optional[_UsageStatus]:
+        new_usages = min(self.usages + other.usages, self.max_usages)
+        return type(self)(usages=new_usages)
+
+    def __str__(self) -> str:
+        return super().__str__() + f"({self.usages})"  # pragma: no cover
 
 
 @dataclass(frozen=True)
@@ -273,7 +294,7 @@ class DendroCoreStatus(CombatStatus):
     - normally the maxinum num of usage(s) is 1
     """
     damage_boost: ClassVar[int] = 2
-    count: int = 1
+    usages: int = 1
 
     @override
     def preprocess(
@@ -285,7 +306,7 @@ class DendroCoreStatus(CombatStatus):
     ) -> tuple[eft.Preprocessable, Optional[DendroCoreStatus]]:
         if signal is Status.PPType.DmgAmount:
             assert isinstance(item, eft.SpecificDamageEffect)
-            assert self.count >= 1
+            assert self.usages >= 1
             elem_can_boost = item.element is Element.ELECTRO or item.element is Element.PYRO
             legal_to_boost = status_source.pid is item.source.pid
             target_is_active = item.target.id == game_state.get_player(
@@ -293,10 +314,10 @@ class DendroCoreStatus(CombatStatus):
             ).just_get_active_character().get_id()
             if elem_can_boost and legal_to_boost and target_is_active:
                 new_damage = replace(item, damage=item.damage + DendroCoreStatus.damage_boost)
-                if self.count == 1:
+                if self.usages == 1:
                     return new_damage, None
                 else:
-                    return new_damage, DendroCoreStatus(self.count - 1)
+                    return new_damage, DendroCoreStatus(self.usages - 1)
         return super().preprocess(game_state, status_source, item, signal)
 
     # @override
@@ -305,13 +326,13 @@ class DendroCoreStatus(CombatStatus):
     #     return DendroCoreStatus(total_count)
 
     def __str__(self) -> str:
-        return super().__str__() + f"({self.count})"  # pragma: no cover
+        return super().__str__() + f"({self.usages})"  # pragma: no cover
 
 
 @dataclass(frozen=True)
 class CatalyzingFieldStatus(CombatStatus):
     damage_boost: ClassVar[int] = 1
-    count: int = 2
+    usages: int = 2
 
     @override
     def preprocess(
@@ -323,7 +344,7 @@ class CatalyzingFieldStatus(CombatStatus):
     ) -> tuple[eft.Preprocessable, Optional[CatalyzingFieldStatus]]:
         if signal is Status.PPType.DmgAmount:
             assert isinstance(item, eft.SpecificDamageEffect)
-            assert self.count >= 1
+            assert self.usages >= 1
             elem_can_boost = item.element is Element.ELECTRO or item.element is Element.DENDRO
             legal_to_boost = status_source.pid is item.source.pid
             target_is_active = item.target.id == game_state.get_player(
@@ -331,14 +352,14 @@ class CatalyzingFieldStatus(CombatStatus):
             ).just_get_active_character().get_id()
             if elem_can_boost and legal_to_boost and target_is_active:
                 new_damage = replace(item, damage=item.damage + CatalyzingFieldStatus.damage_boost)
-                if self.count == 1:
+                if self.usages == 1:
                     return new_damage, None
                 else:
-                    return new_damage, CatalyzingFieldStatus(self.count - 1)
+                    return new_damage, CatalyzingFieldStatus(self.usages - 1)
         return super().preprocess(game_state, status_source, item, signal)
 
     def __str__(self) -> str:
-        return super().__str__() + f"({self.count})"  # pragma: no cover
+        return super().__str__() + f"({self.usages})"  # pragma: no cover
 
 
 @dataclass(frozen=True)
@@ -481,7 +502,9 @@ class ElectroInfusionStatus(_InfusionStatus):
     element: ClassVar[Optional[Element]] = Element.ELECTRO
 
 
-############################## Character intrinsic talent ##############################
+############################## Character specific ##############################
+
+#### Keqing ####
 
 @dataclass(frozen=True, kw_only=True)
 class KeqingTalentStatus(CharacterTalentStatus):
@@ -500,5 +523,37 @@ class KeqingTalentStatus(CharacterTalentStatus):
         return super().__str__() + f"({case_val(self.can_infuse, 1, 0)})"  # pragma: no cover
 
 
+@dataclass(frozen=True, kw_only=True)
 class ThunderingPenanceStatus(EquipmentStatus):
+    pass
+
+
+#### Kaeya ####
+
+@dataclass(frozen=True, kw_only=True)
+class Icicle(CombatStatus, _UsageStatus):
+    usages: int = 3
+
+    def _react_to_signal(
+            self,
+            source: eft.StaticTarget,
+            signal: eft.TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Icicle]]:
+        if source.pid.is_player1() and signal is eft.TriggeringSignal.SWAP_EVENT_1 \
+                or source.pid.is_player2() and signal is eft.TriggeringSignal.SWAP_EVENT_2:
+            effects: list[eft.Effect] = [
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=Element.CRYO,
+                    damage=2,
+                ),
+                eft.DeathCheckCheckerEffect(),
+            ]
+            return effects, replace(self, usages=-1)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class ColdBloodedStrikeStatus(EquipmentStatus):
     pass

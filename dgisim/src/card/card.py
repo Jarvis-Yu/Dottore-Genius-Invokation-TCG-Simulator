@@ -155,6 +155,7 @@ class CalxsArts(EventCard):
 
 # TODO: change to the correct parent class
 
+#### Keqing ####
 
 class LightningStiletto(EventCard):
     @override
@@ -191,3 +192,8 @@ class ThunderingPenance(EquipmentCard):
                 skill=chr.CharacterSkill.ELEMENTAL_SKILL1,
             ),
         )
+
+#### Kaeya ####
+
+class ColdBloodedStrike(EquipmentCard):
+    pass

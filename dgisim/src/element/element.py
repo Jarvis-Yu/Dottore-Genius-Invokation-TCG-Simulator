@@ -169,9 +169,12 @@ class ElementalAura:
             for e, aura in self._aura.items()
         ))
 
-    def contains(self, elem: Element) -> ElementalAura:
+    def contains(self, elem: Element) -> bool:
         assert elem in AURA_ELEMENTS
         return self._aura[elem]
+
+    def has_aura(self) -> bool:
+        return any(self._aura.values())
 
     def elem_auras(self) -> tuple[Element, ...]:
         return tuple(iter(self))

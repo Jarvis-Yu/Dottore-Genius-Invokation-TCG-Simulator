@@ -521,7 +521,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 8)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
         self.assertEqual(
-            game_state.get_player1().get_combat_statuses().just_find(CatalyzingFieldStatus).count,
+            game_state.get_player1().get_combat_statuses().just_find(CatalyzingFieldStatus).usages,
             2
         )
 
@@ -538,7 +538,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 8)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
         self.assertEqual(
-            game_state.get_player1().get_combat_statuses().just_find(CatalyzingFieldStatus).count,
+            game_state.get_player1().get_combat_statuses().just_find(CatalyzingFieldStatus).usages,
             2
         )
 
@@ -569,7 +569,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(
             electro_game_state.get_player1().get_combat_statuses().just_find(
                 CatalyzingFieldStatus
-            ).count,
+            ).usages,
             1
         )
 
@@ -581,7 +581,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(
             dendro_game_state.get_player1().get_combat_statuses().just_find(
                 CatalyzingFieldStatus
-            ).count,
+            ).usages,
             1
         )
 
@@ -602,7 +602,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 5)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
         self.assertEqual(
-            game_state.get_player1().get_combat_statuses().just_find(CatalyzingFieldStatus).count,
+            game_state.get_player1().get_combat_statuses().just_find(CatalyzingFieldStatus).usages,
             2
         )
 
@@ -640,7 +640,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 8)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
         self.assertEqual(
-            game_state.get_player1().get_combat_statuses().just_find(DendroCoreStatus).count,
+            game_state.get_player1().get_combat_statuses().just_find(DendroCoreStatus).usages,
             1
         )
 
@@ -657,7 +657,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 8)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
         self.assertEqual(
-            game_state.get_player1().get_combat_statuses().just_find(DendroCoreStatus).count,
+            game_state.get_player1().get_combat_statuses().just_find(DendroCoreStatus).usages,
             1
         )
 
@@ -706,7 +706,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 8)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
         self.assertEqual(
-            game_state.get_player1().get_combat_statuses().just_find(DendroCoreStatus).count,
+            game_state.get_player1().get_combat_statuses().just_find(DendroCoreStatus).usages,
             1
         )
 

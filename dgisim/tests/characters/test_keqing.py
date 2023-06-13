@@ -171,12 +171,12 @@ class TestKeqing(unittest.TestCase):
         self.assertFalse(p1ac.get_character_statuses().contains(ElectroInfusionStatus))
 
     def testElementalBurst(self):
-        p1, p2 = PuppetAgent(), PuppetAgent()
+        a1, a2 = PuppetAgent(), PuppetAgent()
         base_game_state = self.BASE_GAME.factory().f_player1(
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().f_active_character(
                     lambda ac: ac.factory().energy(
-                        3
+                        ac.get_max_energy()
                     ).build()
                 ).build()
             ).build()
@@ -185,8 +185,8 @@ class TestKeqing(unittest.TestCase):
         hydro_game_state = oppo_aura_elem(base_game_state, Element.HYDRO)
 
         # no reaction
-        gsm = GameStateMachine(base_game_state, p1, p2)
-        p1.inject_action(
+        gsm = GameStateMachine(base_game_state, a1, a2)
+        a1.inject_action(
             SkillAction(
                 CharacterSkill.ELEMENTAL_BURST,
                 DiceOnlyInstruction(dices=ActualDices({})),
@@ -208,8 +208,8 @@ class TestKeqing(unittest.TestCase):
         )
 
         # overloaded
-        gsm = GameStateMachine(pyro_game_state, p1, p2)
-        p1.inject_action(
+        gsm = GameStateMachine(pyro_game_state, a1, a2)
+        a1.inject_action(
             SkillAction(
                 CharacterSkill.ELEMENTAL_BURST,
                 DiceOnlyInstruction(dices=ActualDices({})),
@@ -235,8 +235,8 @@ class TestKeqing(unittest.TestCase):
         )
 
         # electro-charged
-        gsm = GameStateMachine(hydro_game_state, p1, p2)
-        p1.inject_action(
+        gsm = GameStateMachine(hydro_game_state, a1, a2)
+        a1.inject_action(
             SkillAction(
                 CharacterSkill.ELEMENTAL_BURST,
                 DiceOnlyInstruction(dices=ActualDices({})),
@@ -258,11 +258,11 @@ class TestKeqing(unittest.TestCase):
         )
 
     def testTalentCard(self):
-        p1, p2 = PuppetAgent(), PuppetAgent()
+        a1, a2 = PuppetAgent(), PuppetAgent()
         source = StaticTarget(GameState.Pid.P1, Zone.CHARACTER, 3)
         # test early equip
-        gsm = GameStateMachine(self.BASE_GAME, p1, p2)
-        p1.inject_actions([
+        gsm = GameStateMachine(self.BASE_GAME, a1, a2)
+        a1.inject_actions([
             CardAction(
                 ThunderingPenance,
                 CharacterTargetInstruction(
@@ -294,8 +294,8 @@ class TestKeqing(unittest.TestCase):
         self.assertTrue(p2ac.get_elemental_aura().contains(Element.ELECTRO))
 
         # test late equip
-        gsm = GameStateMachine(self.BASE_GAME, p1, p2)
-        p1.inject_actions([
+        gsm = GameStateMachine(self.BASE_GAME, a1, a2)
+        a1.inject_actions([
             SkillAction(
                 CharacterSkill.ELEMENTAL_SKILL1,
                 DiceOnlyInstruction(dices=ActualDices({})),
