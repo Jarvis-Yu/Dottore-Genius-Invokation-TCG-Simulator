@@ -14,6 +14,8 @@ class TestKeqing(unittest.TestCase):
     BASE_GAME = ACTION_TEMPLATE.factory().f_player1(
         lambda p: p.factory().f_characters(
             lambda cs: cs.factory().active_character_id(3).build()  # make active character Keqing
+        ).f_hand_cards(
+            lambda hcs: hcs.add(ThunderingPenance)
         ).build()
     ).f_player2(
         lambda p: p.factory().phase(PlayerState.Act.END_PHASE).build()
@@ -254,3 +256,72 @@ class TestKeqing(unittest.TestCase):
             gsm.get_game_state().get_player1().just_get_active_character().get_energy(),
             0,
         )
+
+    def testTalentCard(self):
+        p1, p2 = PuppetAgent(), PuppetAgent()
+        source = StaticTarget(GameState.Pid.P1, Zone.CHARACTER, 3)
+        # test early equip
+        gsm = GameStateMachine(self.BASE_GAME, p1, p2)
+        p1.inject_actions([
+            CardAction(
+                ThunderingPenance,
+                CharacterTargetInstruction(
+                    dices=ActualDices({}),
+                    target=source,
+                ),
+            ),
+            SkillAction(
+                CharacterSkill.ELEMENTAL_SKILL1,
+                DiceOnlyInstruction(dices=ActualDices({})),
+            ),
+            SkillAction(
+                CharacterSkill.NORMAL_ATTACK,
+                DiceOnlyInstruction(dices=ActualDices({})),
+            )
+        ])
+        gsm.player_step()
+        gsm.auto_step()
+        gsm.player_step()
+        gsm.auto_step()
+        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 4)
+        self.assertTrue(p2ac.get_elemental_aura().contains(Element.ELECTRO))
+
+        gsm.player_step()
+        gsm.auto_step()
+        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 1)
+        self.assertTrue(p2ac.get_elemental_aura().contains(Element.ELECTRO))
+
+        # test late equip
+        gsm = GameStateMachine(self.BASE_GAME, p1, p2)
+        p1.inject_actions([
+            SkillAction(
+                CharacterSkill.ELEMENTAL_SKILL1,
+                DiceOnlyInstruction(dices=ActualDices({})),
+            ),
+            CardAction(
+                ThunderingPenance,
+                CharacterTargetInstruction(
+                    dices=ActualDices({}),
+                    target=source,
+                ),
+            ),
+            SkillAction(
+                CharacterSkill.NORMAL_ATTACK,
+                DiceOnlyInstruction(dices=ActualDices({})),
+            )
+        ])
+        gsm.player_step()
+        gsm.auto_step()
+        gsm.player_step()
+        gsm.auto_step()
+        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 4)
+        self.assertTrue(p2ac.get_elemental_aura().contains(Element.ELECTRO))
+
+        gsm.player_step()
+        gsm.auto_step()
+        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 1)
+        self.assertTrue(p2ac.get_elemental_aura().contains(Element.ELECTRO))

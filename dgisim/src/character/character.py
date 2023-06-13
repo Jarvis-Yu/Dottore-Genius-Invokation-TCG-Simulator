@@ -26,6 +26,7 @@ class CharacterSkill(Enum):
 
 
 class Character:
+    TALENT_STATUS: Optional[type[stt.EquipmentStatus]] = None
 
     def __init__(
         self,
@@ -181,6 +182,10 @@ class Character:
     def _post_elemental_burst(self, effects: tuple[eft.Effect, ...]) -> tuple[eft.Effect, ...]:
         return effects
 
+    def talent_equiped(self) -> bool:
+        assert self.TALENT_STATUS is not None
+        return self.get_equipment_statuses().contains(self.TALENT_STATUS)
+
     def alive(self) -> bool:
         return not self.defeated()
 
@@ -308,6 +313,7 @@ class CharacterFactory:
 
 class Keqing(Character):
     BASE_ELECTRO_INFUSION_DURATION: int = 2
+    TALENT_STATUS = stt.ThunderingPenanceStatus
 
     def _normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
@@ -350,13 +356,21 @@ class Keqing(Character):
             )
             can_infuse = True
 
-        talent_card_equiped = False  # TODO: detect talent card when implemented
+        talent_card_equiped = self.talent_equiped()
         if can_infuse:
             if talent_card_equiped:
-                raise NotImplementedError
+                effects.append(
+                    eft.OverrideCharacterStatusEffect(
+                        target=source,
+                        status=stt.ElectroInfusionStatus(
+                            duration=self.BASE_ELECTRO_INFUSION_DURATION,
+                            damage_boost=1,
+                        ),
+                    )
+                )
             else:
                 effects.append(
-                    eft.UpdateCharacterStatusEffect(
+                    eft.OverrideCharacterStatusEffect(
                         target=source,
                         status=stt.ElectroInfusionStatus(
                             duration=self.BASE_ELECTRO_INFUSION_DURATION
@@ -391,14 +405,14 @@ class Keqing(Character):
             eft.ReferredDamageEffect(
                 source=source,
                 target=eft.DynamicCharacterTarget.OPPO_OFF_FIELD,
-                damage=3,
                 element=Element.PIERCING,
+                damage=3,
             ),
             eft.ReferredDamageEffect(
                 source=source,
                 target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
-                damage=4,
                 element=Element.ELECTRO,
+                damage=4,
             ),
         )
 
@@ -446,6 +460,25 @@ class Kaeya(Character):
                 target=source,
                 recharge=1,
             ),
+        )
+
+    def _elemental_burst(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
+        source = self.address(game_state)
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.get_max_energy(),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.CRYO,
+                damage=1,
+            ),
+            eft.OverrideCombatStatusEffect(
+                target_pid=source.pid,
+                status=stt.CombatStatus(),  # TODO: replace with actual burst status
+            )
         )
 
     @classmethod

@@ -50,7 +50,7 @@ class Status:
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
     ) -> list[eft.Effect]:
         es, new_status = self._react_to_signal(source, signal)
-        es, new_status = self._preprocess_react_to_signal(es, new_status)
+        es, new_status = self._pre_react_to_signal(es, new_status)
 
         import dgisim.src.summon.summon as sm
         # do the removal or update of the status
@@ -100,7 +100,7 @@ class Status:
 
         return es
 
-    def _preprocess_react_to_signal(
+    def _pre_react_to_signal(
             self: _T, effects: list[eft.Effect], new_status: Optional[_T]
     ) -> tuple[list[eft.Effect], Optional[_T]]:
         if new_status != self:
@@ -113,16 +113,16 @@ class Status:
         """
         Returns a tuple, containg the effects and updated self (or None if should be removed)
         """
-        raise NotImplementedError  # pragma: no cover
+        return [], self
 
     def same_type_as(self, status: Status) -> bool:
         return type(self) == type(status)
 
     def update(self: _T, other: _T) -> Optional[_T]:
         new_self = self._update(other)
-        return self._preprocess_update(new_self)
+        return self._pre_update(new_self)
 
-    def _preprocess_update(self: _T, new_self: Optional[_T]) -> Optional[_T]:
+    def _pre_update(self: _T, new_self: Optional[_T]) -> Optional[_T]:
         return new_self
 
     def _update(self: _T, other: _T) -> Optional[_T]:
@@ -172,11 +172,11 @@ class _DurationStatus(Status):
     max_duration: ClassVar[int] = BIG_INT
 
     @override
-    def _preprocess_update(self, new_self: Optional[_DurationStatus]) -> Optional[_DurationStatus]:
+    def _pre_update(self, new_self: Optional[_DurationStatus]) -> Optional[_DurationStatus]:
         """ remove the status if duration <= 0 """
         if new_self is not None and new_self.duration <= 0:
             new_self = None
-        return super()._preprocess_update(new_self)
+        return super()._pre_update(new_self)
 
     @override
     def _update(self, other: _DurationStatus) -> Optional[_DurationStatus]:
@@ -435,9 +435,12 @@ class JueyunGuobaStatus(CharacterStatus):
 
 ############################## Infusions ##############################
 
+
 @dataclass(frozen=True, kw_only=True)
-class ElectroInfusionStatus(CharacterStatus, _DurationStatus):
-    max_duration: ClassVar[int] = 2
+class _InfusionStatus(CharacterStatus, _DurationStatus):
+    max_duration: ClassVar[int] = 0
+    element: ClassVar[Optional[Element]] = None
+    damage_boost: int = 0
 
     @override
     def preprocess(
@@ -446,12 +449,17 @@ class ElectroInfusionStatus(CharacterStatus, _DurationStatus):
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
             signal: Status.PPType,
-    ) -> tuple[eft.Preprocessable, Optional[ElectroInfusionStatus]]:
+    ) -> tuple[eft.Preprocessable, Optional[_InfusionStatus]]:
+        assert self.element is not None
         new_item: Optional[eft.SpecificDamageEffect] = None
         if signal is Status.PPType.DmgElement:
             assert isinstance(item, eft.SpecificDamageEffect)
             if item.element is Element.PHYSICAL:
-                new_item = replace(item, element=Element.ELECTRO)
+                new_item = replace(item, element=self.element)
+        if signal is Status.PPType.DmgAmount:
+            assert isinstance(item, eft.SpecificDamageEffect)
+            if self.damage_boost != 0 and item.element is self.element:
+                new_item = replace(item, damage=item.damage + self.damage_boost)
         if new_item is not None:
             return new_item, self
         else:
@@ -460,11 +468,17 @@ class ElectroInfusionStatus(CharacterStatus, _DurationStatus):
     @override
     def _react_to_signal(
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[ElectroInfusionStatus]]:
+    ) -> tuple[list[eft.Effect], Optional[_InfusionStatus]]:
         d_duration = 0
         if signal is eft.TriggeringSignal.ROUND_END:
             d_duration = -1
         return [], replace(self, duration=d_duration)
+
+
+@dataclass(frozen=True, kw_only=True)
+class ElectroInfusionStatus(_InfusionStatus):
+    max_duration: ClassVar[int] = 2
+    element: ClassVar[Optional[Element]] = Element.ELECTRO
 
 
 ############################## Character intrinsic talent ##############################
@@ -484,3 +498,7 @@ class KeqingTalentStatus(CharacterTalentStatus):
 
     def __str__(self) -> str:
         return super().__str__() + f"({case_val(self.can_infuse, 1, 0)})"  # pragma: no cover
+
+
+class ThunderingPenanceStatus(EquipmentStatus):
+    pass

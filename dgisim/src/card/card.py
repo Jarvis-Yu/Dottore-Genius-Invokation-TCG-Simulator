@@ -39,6 +39,10 @@ class EventCard(Card):
     pass
 
 
+class EquipmentCard(Card):
+    pass
+
+
 class FoodCard(EventCard):
     @override
     @classmethod
@@ -152,12 +156,12 @@ class CalxsArts(EventCard):
 # TODO: change to the correct parent class
 
 
-class LightningStiletto(Card):
+class LightningStiletto(EventCard):
     @override
     @classmethod
     def effects(cls, instruction: ac.Instruction) -> tuple[Effect, ...]:
         assert isinstance(instruction, ac.CharacterTargetInstruction)
-        effects: tuple[Effect, ...] = (
+        return (
             SwapCharacterEffect(
                 target=instruction.target,
             ),
@@ -170,4 +174,20 @@ class LightningStiletto(Card):
                 skill=chr.CharacterSkill.ELEMENTAL_SKILL1,
             ),
         )
-        return tuple(effects)
+
+
+class ThunderingPenance(EquipmentCard):
+    @override
+    @classmethod
+    def effects(cls, instruction: ac.Instruction) -> tuple[Effect, ...]:
+        assert isinstance(instruction, ac.CharacterTargetInstruction)
+        return (
+            AddCharacterStatusEffect(
+                target=instruction.target,
+                status=stt.ThunderingPenanceStatus,
+            ),
+            CastSkillEffect(
+                target=instruction.target,
+                skill=chr.CharacterSkill.ELEMENTAL_SKILL1,
+            ),
+        )

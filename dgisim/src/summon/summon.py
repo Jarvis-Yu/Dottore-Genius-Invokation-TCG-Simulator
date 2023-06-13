@@ -19,14 +19,14 @@ class Summon(stt.Status):
 @dataclass(frozen=True, kw_only=True)
 class _DestroyOnNumSummon(Summon):
     @override
-    def _preprocess_update(
+    def _pre_update(
             self,
             new_self: Optional[_DestroyOnNumSummon]
     ) -> Optional[_DestroyOnNumSummon]:
         """ remove the status if usages <= 0 """
         if new_self is not None and new_self.usages <= 0:
             new_self = None
-        return super()._preprocess_update(new_self)
+        return super()._pre_update(new_self)
 
     def __str__(self) -> str:  # pragma: no cover
         return super().__str__() + f"({self.usages})"
