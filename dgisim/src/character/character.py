@@ -97,17 +97,86 @@ class Character:
     import dgisim.src.action as act
 
     def skill(self, game_state: gs.GameState, skill_type: CharacterSkill) -> tuple[eft.Effect, ...]:
+        return self._post_skill(
+            self._skill(game_state, skill_type)
+        )
+
+    def _skill(self, game_state: gs.GameState, skill_type: CharacterSkill) -> tuple[eft.Effect, ...]:
         if skill_type is CharacterSkill.NORMAL_ATTACK:
             return self.normal_attack(game_state)
         elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
             return self.elemental_skill1(game_state)
         raise Exception("Not Overriden")
 
+
+    def _post_skill(self, effects: tuple[eft.Effect, ...]) -> tuple[eft.Effect, ...]:
+        return effects + (
+            eft.DeathCheckCheckerEffect(),
+        )
+
     def normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
+        return self._post_normal_attack(
+            self._normal_attack(
+                self._pre_normal_attack(game_state)
+            )
+        )
+
+    def _pre_normal_attack(self, game_state: gs.GameState) -> gs.GameState:
+        return game_state
+
+    def _normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
         raise Exception("Not Overriden")
 
+    def _post_normal_attack(self, effects: tuple[eft.Effect, ...]) -> tuple[eft.Effect, ...]:
+        return effects
+
     def elemental_skill1(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
+        return self._post_elemental_skill1(
+            self._elemental_skill1(
+                self._pre_elemental_skill1(game_state)
+            )
+        )
+
+    def _pre_elemental_skill1(self, game_state: gs.GameState) -> gs.GameState:
+        return game_state
+
+    def _elemental_skill1(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
         raise Exception("Not Overriden")
+
+    def _post_elemental_skill1(self, effects: tuple[eft.Effect, ...]) -> tuple[eft.Effect, ...]:
+        return effects
+
+    def elemental_skill2(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
+        return self._post_elemental_skill2(
+            self._elemental_skill2(
+                self._pre_elemental_skill2(game_state)
+            )
+        )
+
+    def _pre_elemental_skill2(self, game_state: gs.GameState) -> gs.GameState:
+        return game_state
+
+    def _elemental_skill2(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
+        raise Exception("Not Overriden")
+
+    def _post_elemental_skill2(self, effects: tuple[eft.Effect, ...]) -> tuple[eft.Effect, ...]:
+        return effects
+
+    def elemental_burst(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
+        return self._post_elemental_burst(
+            self._elemental_burst(
+                self._pre_elemental_burst(game_state)
+            )
+        )
+
+    def _pre_elemental_burst(self, game_state: gs.GameState) -> gs.GameState:
+        return game_state
+
+    def _elemental_burst(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
+        raise Exception("Not Overriden")
+
+    def _post_elemental_burst(self, effects: tuple[eft.Effect, ...]) -> tuple[eft.Effect, ...]:
+        return effects
 
     def alive(self) -> bool:
         return not self.defeated()
@@ -237,14 +306,14 @@ class CharacterFactory:
 class Keqing(Character):
     BASE_ELECTRO_INFUSION_DURATION: int = 2
 
-    def normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
+    def _normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             source=self.address(game_state),
             element=eft.Element.PHYSICAL,
             damage=2,
         )
 
-    def elemental_skill1(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
+    def _elemental_skill1(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
         source = self.address(game_state)
         effects: list[eft.Effect] = [
             eft.ReferredDamageEffect(
@@ -306,8 +375,6 @@ class Keqing(Character):
             )
         )
 
-        effects.append(eft.DeathCheckCheckerEffect())
-
         return tuple(effects)
 
     @classmethod
@@ -332,14 +399,14 @@ class Keqing(Character):
 
 class Kaeya(Character):
 
-    def normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
+    def _normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             source=self.address(game_state),
             element=eft.Element.PHYSICAL,
             damage=2,
         )
 
-    def elemental_skill1(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
+    def _elemental_skill1(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
         from dgisim.src.card.card import LightningStiletto
 
         source = self.address(game_state)
@@ -354,7 +421,6 @@ class Kaeya(Character):
                 target=source,
                 recharge=1,
             ),
-            eft.DeathCheckCheckerEffect(),
         )
 
     @classmethod
@@ -379,14 +445,14 @@ class Kaeya(Character):
 
 class Oceanid(Character):
 
-    def normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
+    def _normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             source=self.address(game_state),
             element=eft.Element.HYDRO,
             damage=1,
         )
 
-    def elemental_skill1(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
+    def _elemental_skill1(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
         # TODO: add summons
         return ()
 
