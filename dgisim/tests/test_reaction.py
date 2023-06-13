@@ -3,6 +3,7 @@ import unittest
 from dgisim.tests.helpers.game_state_templates import *
 from dgisim.tests.helpers.quality_of_life import auto_step
 from dgisim.tests.helpers.dummy_objects import *
+from dgisim.src.helper.quality_of_life import case_val
 from dgisim.src.state.game_state import GameState
 from dgisim.src.game_state_machine import GameStateMachine
 from dgisim.src.agents import *
@@ -14,22 +15,39 @@ from dgisim.src.summon.summon import *
 from dgisim.src.action import *
 
 
-def _oppo_aura_elem(game_state: GameState, elem: Element) -> GameState:
+def _oppo_aura_elem(game_state: GameState, elem: Element, char_id: Optional[int] = None) -> GameState:
     """
     Gives Player2's active character `elem` aura
     """
-    return game_state.factory().f_player2(
-        lambda p: p.factory().f_characters(
-            lambda cs: cs.factory().f_active_character(
-                lambda ac: ac.factory().elemental_aura(
-                    ElementalAura.from_default().add(elem)
+    if char_id is None:
+        return game_state.factory().f_player2(
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().f_active_character(
+                    lambda ac: ac.factory().elemental_aura(
+                        ElementalAura.from_default().add(elem)
+                    ).build()
                 ).build()
             ).build()
         ).build()
-    ).build()
+    else:
+        return game_state.factory().f_player2(
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().f_character(
+                    char_id,
+                    lambda ac: ac.factory().elemental_aura(
+                        ElementalAura.from_default().add(elem)
+                    ).build()
+                ).build()
+            ).build()
+        ).build()
 
 
-def _add_damage_effect(game_state: GameState, damage: int, elem: Element) -> GameState:
+def _add_damage_effect(
+        game_state: GameState,
+        damage: int,
+        elem: Element,
+        char_id: Optional[int] = None,
+) -> GameState:
     """
     Adds ReferredDamageEffect to Player2's active character with `damage` and `elem` from Player1's
     active character (id=1)
@@ -40,12 +58,13 @@ def _add_damage_effect(game_state: GameState, damage: int, elem: Element) -> Gam
                 source=StaticTarget(
                     GameState.Pid.P1,
                     Zone.CHARACTER,
-                    1,
+                    case_val(char_id is None, 1, char_id),  # type: ignore
                 ),
                 target=DynamicCharacterTarget.OPPO_ACTIVE,
                 element=elem,
                 damage=damage,
             ),
+            DeathCheckCheckerEffect(),
         ))
     ).build()
 

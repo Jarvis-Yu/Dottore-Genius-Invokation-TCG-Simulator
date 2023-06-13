@@ -51,5 +51,5 @@ class Summons:
     def __iter__(self) -> Iterator[Summon]:
         return iter(self._summons)
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         return f"[{'.'.join(map(str, self._summons))}]"

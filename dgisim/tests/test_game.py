@@ -9,7 +9,3 @@ class TestGameState(unittest.TestCase):
         game_state = GameState.from_default()
         other_state = game_state.factory().build()
         self.assertEqual(game_state, other_state)
-
-
-if __name__ == "__main__":
-    unittest.main()

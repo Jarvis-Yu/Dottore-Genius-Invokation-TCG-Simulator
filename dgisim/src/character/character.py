@@ -306,6 +306,8 @@ class Keqing(Character):
             )
         )
 
+        effects.append(eft.DeathCheckCheckerEffect())
+
         return tuple(effects)
 
     @classmethod
@@ -351,7 +353,8 @@ class Kaeya(Character):
             eft.EnergyRechargeEffect(
                 target=source,
                 recharge=1,
-            )
+            ),
+            eft.DeathCheckCheckerEffect(),
         )
 
     @classmethod

@@ -28,7 +28,7 @@ class Status:
         DmgAmount = "DmgNumber"      # To determine final amount of damage
 
     def __init__(self) -> None:
-        if type(self) is Status:
+        if type(self) is Status:  # pragma: no cover
             raise Exception("class Status is not instantiable")
 
     def preprocess(
@@ -95,7 +95,7 @@ class Status:
                     new_status,  # type: ignore
                 ))
 
-        else:
+        else:  # pragma: no cover
             raise NotImplementedError
 
         return es
@@ -113,7 +113,7 @@ class Status:
         """
         Returns a tuple, containg the effects and updated self (or None if should be removed)
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def same_type_as(self, status: Status) -> bool:
         return type(self) == type(status)
@@ -129,7 +129,7 @@ class Status:
         return self
 
     def __str__(self) -> str:
-        return self.__class__.__name__.removesuffix("Status")
+        return self.__class__.__name__.removesuffix("Status")  # pragma: no cover
 
 
 @dataclass(frozen=True)
@@ -184,7 +184,7 @@ class _DurationStatus(Status):
         return type(self)(duration=new_duration)
 
     def __str__(self) -> str:
-        return super().__str__() + f"({self.duration})"
+        return super().__str__() + f"({self.duration})"  # pragma: no cover
 
 
 @dataclass(frozen=True)
@@ -220,7 +220,7 @@ class StackedShieldStatus(ShieldStatus):
             return item.target == attached_active_character
 
         else:
-            raise NotImplementedError
+            raise NotImplementedError  # pragma: no cover
 
     @override
     def preprocess(
@@ -249,7 +249,7 @@ class StackedShieldStatus(ShieldStatus):
         return super().preprocess(game_state, status_source, item, signal)
 
     def __str__(self) -> str:
-        return super().__str__() + f"({self.stacks})"
+        return super().__str__() + f"({self.stacks})"  # pragma: no cover
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -305,7 +305,7 @@ class DendroCoreStatus(CombatStatus):
     #     return DendroCoreStatus(total_count)
 
     def __str__(self) -> str:
-        return super().__str__() + f"({self.count})"
+        return super().__str__() + f"({self.count})"  # pragma: no cover
 
 
 @dataclass(frozen=True)
@@ -338,7 +338,7 @@ class CatalyzingFieldStatus(CombatStatus):
         return super().preprocess(game_state, status_source, item, signal)
 
     def __str__(self) -> str:
-        return super().__str__() + f"({self.count})"
+        return super().__str__() + f"({self.count})"  # pragma: no cover
 
 
 @dataclass(frozen=True)
@@ -483,4 +483,4 @@ class KeqingTalentStatus(CharacterTalentStatus):
         return [], self
 
     def __str__(self) -> str:
-        return super().__str__() + f"({case_val(self.can_infuse, 1, 0)})"
+        return super().__str__() + f"({case_val(self.can_infuse, 1, 0)})"  # pragma: no cover

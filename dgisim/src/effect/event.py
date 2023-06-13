@@ -25,6 +25,7 @@ def normal_attack_template(
             target=source,
             recharge=recharge,
         ))
+    effects.append(eft.DeathCheckCheckerEffect())
     return tuple(effects)
 
 

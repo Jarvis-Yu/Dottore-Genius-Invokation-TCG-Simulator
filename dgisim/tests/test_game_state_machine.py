@@ -43,8 +43,10 @@ class TestGameStateMachine(unittest.TestCase):
         state_machine.one_step()  # one player swap cards
         state_machine.one_step()  # other player swap cards
         state = state_machine.get_game_state()
-        self.assertEqual(p1_deck, state.get_player1().get_deck_cards() + state.get_player1().get_hand_cards())
-        self.assertEqual(p2_deck, state.get_player2().get_deck_cards() + state.get_player2().get_hand_cards())
+        self.assertEqual(p1_deck, state.get_player1().get_deck_cards() +
+                         state.get_player1().get_hand_cards())
+        self.assertEqual(p2_deck, state.get_player2().get_deck_cards() +
+                         state.get_player2().get_hand_cards())
 
     def test_entering_starting_hand_select_phase(self):
         state_machine = GameStateMachine(
@@ -116,8 +118,10 @@ class TestGameStateMachine(unittest.TestCase):
         p2 = state.get_player2()
         self.assertEqual(p1.get_hand_cards().num_cards(), 7)
         self.assertEqual(p2.get_hand_cards().num_cards(), 7)
-        self.assertEqual(p1.get_hand_cards().num_cards() + p1.get_deck_cards().num_cards(), p1_deck.num_cards())
-        self.assertEqual(p2.get_hand_cards().num_cards() + p2.get_deck_cards().num_cards(), p2_deck.num_cards())
+        self.assertEqual(p1.get_hand_cards().num_cards() +
+                         p1.get_deck_cards().num_cards(), p1_deck.num_cards())
+        self.assertEqual(p2.get_hand_cards().num_cards() +
+                         p2.get_deck_cards().num_cards(), p2_deck.num_cards())
         self.assertIs(state.get_player1().get_phase(), PlayerState.Act.PASSIVE_WAIT_PHASE)
         self.assertIs(state.get_player2().get_phase(), PlayerState.Act.PASSIVE_WAIT_PHASE)
         state_machine.step_until_phase(EndPhase)
@@ -127,8 +131,10 @@ class TestGameStateMachine(unittest.TestCase):
         p2 = state.get_player2()
         self.assertEqual(p1.get_hand_cards().num_cards(), 9)
         self.assertEqual(p2.get_hand_cards().num_cards(), 9)
-        self.assertEqual(p1.get_hand_cards().num_cards() + p1.get_deck_cards().num_cards(), p1_deck.num_cards())
-        self.assertEqual(p2.get_hand_cards().num_cards() + p2.get_deck_cards().num_cards(), p2_deck.num_cards())
+        self.assertEqual(p1.get_hand_cards().num_cards() +
+                         p1.get_deck_cards().num_cards(), p1_deck.num_cards())
+        self.assertEqual(p2.get_hand_cards().num_cards() +
+                         p2.get_deck_cards().num_cards(), p2_deck.num_cards())
         self.assertIs(state.get_player1().get_phase(), PlayerState.Act.PASSIVE_WAIT_PHASE)
         self.assertIs(state.get_player2().get_phase(), PlayerState.Act.PASSIVE_WAIT_PHASE)
 
@@ -155,6 +161,3 @@ class TestGameStateMachine(unittest.TestCase):
         )
         game_end_phase = state_machine.get_game_state().get_mode().game_end_phase()
         state_machine.step_until_phase(game_end_phase)
-
-if __name__ == "__main__":
-    unittest.main()

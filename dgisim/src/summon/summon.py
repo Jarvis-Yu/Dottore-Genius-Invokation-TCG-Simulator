@@ -12,7 +12,7 @@ from dgisim.src.element.element import Element
 class Summon(stt.Status):
     usages: int = -1
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         return self.__class__.__name__.removesuffix("Summon")
 
 
@@ -28,7 +28,7 @@ class _DestroyOnNumSummon(Summon):
             new_self = None
         return super()._preprocess_update(new_self)
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         return super().__str__() + f"({self.usages})"
 
 
@@ -55,6 +55,7 @@ class BurningFlameSummon(_DestroyOnNumSummon):
                     damage=self.DMG,
                 )
             )
+            es.append(eft.DeathCheckCheckerEffect())
         return es, replace(self, usages=d_usages)
 
     def _update(self, other: BurningFlameSummon) -> Optional[BurningFlameSummon]:

@@ -754,11 +754,6 @@ class SpecificDamageEffect(Effect):
             # this exception shouldn't be reached by now, but leave it here just to be safe
             raise Exception(f"Reaction {reaction.reaction_type} not handled")
 
-        # This is to prevent DeathCheckCheckerEffect being added before a chain
-        # of reactions caused by swirl has finished executing
-        if not game_state.get_effect_stack().contains(DeathCheckCheckerEffect):
-            effects.append(DeathCheckCheckerEffect())
-
         if hp != target.get_hp():
             target = target.factory().hp(hp).build()
 
