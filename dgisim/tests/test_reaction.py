@@ -1,7 +1,7 @@
 import unittest
 
 from dgisim.tests.helpers.game_state_templates import *
-from dgisim.tests.helpers.quality_of_life import auto_step
+from dgisim.tests.helpers.quality_of_life import *
 from dgisim.tests.helpers.dummy_objects import *
 from dgisim.src.helper.quality_of_life import case_val
 from dgisim.src.state.game_state import GameState
@@ -15,74 +15,6 @@ from dgisim.src.summon.summon import *
 from dgisim.src.action import *
 
 
-def _oppo_aura_elem(game_state: GameState, elem: Element, char_id: Optional[int] = None) -> GameState:
-    """
-    Gives Player2's active character `elem` aura
-    """
-    if char_id is None:
-        return game_state.factory().f_player2(
-            lambda p: p.factory().f_characters(
-                lambda cs: cs.factory().f_active_character(
-                    lambda ac: ac.factory().elemental_aura(
-                        ElementalAura.from_default().add(elem)
-                    ).build()
-                ).build()
-            ).build()
-        ).build()
-    else:
-        return game_state.factory().f_player2(
-            lambda p: p.factory().f_characters(
-                lambda cs: cs.factory().f_character(
-                    char_id,
-                    lambda ac: ac.factory().elemental_aura(
-                        ElementalAura.from_default().add(elem)
-                    ).build()
-                ).build()
-            ).build()
-        ).build()
-
-
-def _add_damage_effect(
-        game_state: GameState,
-        damage: int,
-        elem: Element,
-        char_id: Optional[int] = None,
-) -> GameState:
-    """
-    Adds ReferredDamageEffect to Player2's active character with `damage` and `elem` from Player1's
-    active character (id=1)
-    """
-    return game_state.factory().f_effect_stack(
-        lambda es: es.push_many_fl((
-            ReferredDamageEffect(
-                source=StaticTarget(
-                    GameState.Pid.P1,
-                    Zone.CHARACTER,
-                    case_val(char_id is None, 1, char_id),  # type: ignore
-                ),
-                target=DynamicCharacterTarget.OPPO_ACTIVE,
-                element=elem,
-                damage=damage,
-            ),
-            DeathCheckCheckerEffect(),
-        ))
-    ).build()
-
-
-def _kill_character(game_state: GameState, character_id: int, hp: int = 0) -> GameState:
-    """
-    Sets Player2's active character's hp to `hp` (default=0)
-    """
-    return game_state.factory().f_player2(
-        lambda p: p.factory().f_characters(
-            lambda cs: cs.factory().f_character(
-                character_id,
-                lambda c: c.factory().hp(hp).build()
-            ).build()
-        ).build()
-    ).build()
-
-
 class TestStatus(unittest.TestCase):
 
     ############################## Vaporize ##############################
@@ -91,8 +23,8 @@ class TestStatus(unittest.TestCase):
         Tests that dealing 1 Pyro damage to char with Hydro aura deals 3 damage, vice versa
         """
         # PYRO to HYDRO
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.HYDRO)
-        game_state = _add_damage_effect(game_state, 1, Element.PYRO)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.HYDRO)
+        game_state = add_damage_effect(game_state, 1, Element.PYRO)
         self.assertEqual(
             game_state.get_player2().just_get_active_character().get_hp(),
             10,
@@ -103,8 +35,8 @@ class TestStatus(unittest.TestCase):
         self.assertFalse(ac.get_elemental_aura().elem_auras())
 
         # HYDRO to PYRO
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
-        game_state = _add_damage_effect(game_state, 1, Element.HYDRO)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
+        game_state = add_damage_effect(game_state, 1, Element.HYDRO)
         self.assertEqual(
             game_state.get_player2().just_get_active_character().get_hp(),
             10,
@@ -119,8 +51,8 @@ class TestStatus(unittest.TestCase):
         Tests that dealing 1 Pyro damage to char with Cryo aura deals 3 damage, vice versa
         """
         # PYRO to CRYO
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.CRYO)
-        game_state = _add_damage_effect(game_state, 1, Element.PYRO)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.CRYO)
+        game_state = add_damage_effect(game_state, 1, Element.PYRO)
         self.assertEqual(
             game_state.get_player2().just_get_active_character().get_hp(),
             10,
@@ -132,8 +64,8 @@ class TestStatus(unittest.TestCase):
         self.assertFalse(ac.get_elemental_aura().elem_auras())
 
         # CRYO to PYRO
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
-        game_state = _add_damage_effect(game_state, 1, Element.CRYO)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
+        game_state = add_damage_effect(game_state, 1, Element.CRYO)
         self.assertEqual(
             game_state.get_player2().just_get_active_character().get_hp(),
             10,
@@ -151,8 +83,8 @@ class TestStatus(unittest.TestCase):
         to next character, vice versa
         """
         # ELECTRO to PYRO
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
-        game_state = _add_damage_effect(game_state, 1, Element.ELECTRO)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
+        game_state = add_damage_effect(game_state, 1, Element.ELECTRO)
         ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 10)
         self.assertEqual(ac.get_id(), 1)
@@ -170,8 +102,8 @@ class TestStatus(unittest.TestCase):
         self.assertFalse(chars.just_get_character(1).get_elemental_aura().elem_auras())
 
         # PYRO to ELECTRO
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO)
-        game_state = _add_damage_effect(game_state, 1, Element.PYRO)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO)
+        game_state = add_damage_effect(game_state, 1, Element.PYRO)
         ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 10)
         self.assertEqual(ac.get_id(), 1)
@@ -194,9 +126,9 @@ class TestStatus(unittest.TestCase):
         first character when 'next' the last character
         """
         # start from character 1, kill character 2
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
-        game_state = _add_damage_effect(game_state, 1, Element.ELECTRO)
-        game_state = _kill_character(game_state, 2)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
+        game_state = add_damage_effect(game_state, 1, Element.ELECTRO)
+        game_state = kill_character(game_state, 2)
         ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 10)
         self.assertEqual(ac.get_id(), 1)
@@ -214,10 +146,10 @@ class TestStatus(unittest.TestCase):
         self.assertFalse(chars.just_get_character(1).get_elemental_aura().elem_auras())
 
         # start from character 1, kill character 2, 3
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
-        game_state = _add_damage_effect(game_state, 1, Element.ELECTRO)
-        game_state = _kill_character(game_state, 2)
-        game_state = _kill_character(game_state, 3)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
+        game_state = add_damage_effect(game_state, 1, Element.ELECTRO)
+        game_state = kill_character(game_state, 2)
+        game_state = kill_character(game_state, 3)
         ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 10)
         self.assertEqual(ac.get_id(), 1)
@@ -240,8 +172,8 @@ class TestStatus(unittest.TestCase):
                 lambda cs: cs.factory().active_character_id(3).build()
             ).build()
         ).build()
-        game_state = _oppo_aura_elem(game_state, Element.PYRO)
-        game_state = _add_damage_effect(game_state, 1, Element.ELECTRO)
+        game_state = oppo_aura_elem(game_state, Element.PYRO)
+        game_state = add_damage_effect(game_state, 1, Element.ELECTRO)
         ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 10)
         self.assertEqual(ac.get_id(), 3)
@@ -263,9 +195,9 @@ class TestStatus(unittest.TestCase):
         Tests that Overloaded kill doesn't trigger opponent's Deathswap phase
         """
         # kill character 1 with overloaded doesn't trigger death swap
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
-        game_state = _add_damage_effect(game_state, 1, Element.ELECTRO)
-        game_state = _kill_character(game_state, 1, hp=2)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
+        game_state = add_damage_effect(game_state, 1, Element.ELECTRO)
+        game_state = kill_character(game_state, 1, hp=2)
         ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 2)
         self.assertEqual(ac.get_id(), 1)
@@ -281,9 +213,9 @@ class TestStatus(unittest.TestCase):
         self.assertTrue(game_state.get_effect_stack().is_empty())
 
         # kill character 1 with no reaction causes death swap effect
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
-        game_state = _add_damage_effect(game_state, 10, Element.PYRO)
-        game_state = _kill_character(game_state, 1, hp=2)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
+        game_state = add_damage_effect(game_state, 10, Element.PYRO)
+        game_state = kill_character(game_state, 1, hp=2)
         ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 2)
         self.assertEqual(ac.get_id(), 1)
@@ -346,8 +278,8 @@ class TestStatus(unittest.TestCase):
         damage to off-field characters, vice versa
         """
         # HYDRO to ELECTRO
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO)
-        game_state = _add_damage_effect(game_state, 1, Element.HYDRO)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO)
+        game_state = add_damage_effect(game_state, 1, Element.HYDRO)
         self.assertEqual(
             game_state.get_player2().just_get_active_character().get_hp(),
             10,
@@ -361,8 +293,8 @@ class TestStatus(unittest.TestCase):
         self.assertFalse(chars.just_get_active_character().get_elemental_aura().elem_auras())
 
         # ELECTRO to HYDRO
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.HYDRO)
-        game_state = _add_damage_effect(game_state, 1, Element.ELECTRO)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.HYDRO)
+        game_state = add_damage_effect(game_state, 1, Element.ELECTRO)
         self.assertEqual(
             game_state.get_player2().just_get_active_character().get_hp(),
             10,
@@ -382,8 +314,8 @@ class TestStatus(unittest.TestCase):
         damage to off-field characters, vice versa
         """
         # CRYO to ELECTRO
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO)
-        game_state = _add_damage_effect(game_state, 1, Element.CRYO)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO)
+        game_state = add_damage_effect(game_state, 1, Element.CRYO)
         self.assertEqual(
             game_state.get_player2().just_get_active_character().get_hp(),
             10,
@@ -397,8 +329,8 @@ class TestStatus(unittest.TestCase):
         self.assertFalse(chars.just_get_active_character().get_elemental_aura().elem_auras())
 
         # ELECTRO to CRYO
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.CRYO)
-        game_state = _add_damage_effect(game_state, 1, Element.ELECTRO)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.CRYO)
+        game_state = add_damage_effect(game_state, 1, Element.ELECTRO)
         self.assertEqual(
             game_state.get_player2().just_get_active_character().get_hp(),
             10,
@@ -423,8 +355,8 @@ class TestStatus(unittest.TestCase):
             Element.CRYO,
         ]
         for aura_elem in elems:
-            game_state = _oppo_aura_elem(ACTION_TEMPLATE, aura_elem)
-            game_state = _add_damage_effect(game_state, 1, Element.ANEMO)
+            game_state = oppo_aura_elem(ACTION_TEMPLATE, aura_elem)
+            game_state = add_damage_effect(game_state, 1, Element.ANEMO)
 
             game_state = auto_step(game_state)
             chars = game_state.get_player2().get_characters()
@@ -436,8 +368,8 @@ class TestStatus(unittest.TestCase):
             self.assertEqual(chars.just_get_character(3).get_hp(), 9)
 
         aura_elem = Element.DENDRO
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, aura_elem)
-        game_state = _add_damage_effect(game_state, 1, Element.ANEMO)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, aura_elem)
+        game_state = add_damage_effect(game_state, 1, Element.ANEMO)
 
         game_state = auto_step(game_state)
         chars = game_state.get_player2().get_characters()
@@ -450,8 +382,8 @@ class TestStatus(unittest.TestCase):
 
     @staticmethod
     def swirlElem1ToElem2(elem1: Element, elem2: Element) -> GameState:
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, elem1)
-        game_state = _add_damage_effect(game_state, 1, Element.ANEMO)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, elem1)
+        game_state = add_damage_effect(game_state, 1, Element.ANEMO)
         game_state = game_state.factory().f_player2(
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().f_character(
@@ -519,8 +451,8 @@ class TestStatus(unittest.TestCase):
         Tests FrozenStatus boosts Physical and Pyro damage correctly (by 2).
         """
         # HYDRO to CRYO
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.CRYO)
-        game_state = _add_damage_effect(game_state, 1, Element.HYDRO)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.CRYO)
+        game_state = add_damage_effect(game_state, 1, Element.HYDRO)
         self.assertEqual(
             game_state.get_player2().just_get_active_character().get_hp(),
             10,
@@ -533,8 +465,8 @@ class TestStatus(unittest.TestCase):
         self.assertTrue(ac.get_character_statuses().contains(FrozenStatus))
 
         # CRYO to HYDRO
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.HYDRO)
-        game_state = _add_damage_effect(game_state, 1, Element.CRYO)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.HYDRO)
+        game_state = add_damage_effect(game_state, 1, Element.CRYO)
         self.assertEqual(
             game_state.get_player2().just_get_active_character().get_hp(),
             10,
@@ -557,14 +489,14 @@ class TestStatus(unittest.TestCase):
         self.assertFalse(ac.get_character_statuses().contains(FrozenStatus))
 
         # boost physical damage
-        game_state = _add_damage_effect(frozen_game_state, 1, Element.PHYSICAL)
+        game_state = add_damage_effect(frozen_game_state, 1, Element.PHYSICAL)
         game_state = auto_step(game_state)
         ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 5)
         self.assertFalse(ac.get_character_statuses().contains(FrozenStatus))
 
         # boost physical damage
-        game_state = _add_damage_effect(frozen_game_state, 1, Element.PYRO)
+        game_state = add_damage_effect(frozen_game_state, 1, Element.PYRO)
         game_state = auto_step(game_state)
         ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 5)
@@ -577,8 +509,8 @@ class TestStatus(unittest.TestCase):
         CatalyzingFieldStatus, vice versa.
         """
         # ELECTRO to DENDRO
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.DENDRO)
-        game_state = _add_damage_effect(game_state, 1, Element.ELECTRO)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.DENDRO)
+        game_state = add_damage_effect(game_state, 1, Element.ELECTRO)
         self.assertEqual(
             game_state.get_player2().just_get_active_character().get_hp(),
             10,
@@ -594,8 +526,8 @@ class TestStatus(unittest.TestCase):
         )
 
         # DENDRO to ELECTRO
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO)
-        game_state = _add_damage_effect(game_state, 1, Element.DENDRO)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO)
+        game_state = add_damage_effect(game_state, 1, Element.DENDRO)
         self.assertEqual(
             game_state.get_player2().just_get_active_character().get_hp(),
             10,
@@ -622,8 +554,8 @@ class TestStatus(unittest.TestCase):
                 lambda ss: ss.update_status(CatalyzingFieldStatus())
             ).build()
         ).build()
-        electro_game_state = _add_damage_effect(base_game_state, 1, Element.ELECTRO)
-        dendro_game_state = _add_damage_effect(base_game_state, 1, Element.DENDRO)
+        electro_game_state = add_damage_effect(base_game_state, 1, Element.ELECTRO)
+        dendro_game_state = add_damage_effect(base_game_state, 1, Element.DENDRO)
         self.assertEqual(
             electro_game_state.get_player2().just_get_active_character().get_hp(),
             10,
@@ -654,7 +586,7 @@ class TestStatus(unittest.TestCase):
         )
 
         # deals 1 electro damage with CatalyzingFieldStatus(1)
-        game_state = _add_damage_effect(electro_game_state, 1, Element.ELECTRO)
+        game_state = add_damage_effect(electro_game_state, 1, Element.ELECTRO)
         game_state = auto_step(game_state)
         ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 6)
@@ -664,7 +596,7 @@ class TestStatus(unittest.TestCase):
         )
 
         # deals 1 dendro damage with CatalyzingFieldStatus(1) and electro aura
-        game_state = _add_damage_effect(electro_game_state, 1, Element.DENDRO)
+        game_state = add_damage_effect(electro_game_state, 1, Element.DENDRO)
         game_state = auto_step(game_state)
         ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 5)
@@ -696,8 +628,8 @@ class TestStatus(unittest.TestCase):
         CatalyzingFieldStatus, vice versa.
         """
         # HYDRO to DENDRO
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.DENDRO)
-        game_state = _add_damage_effect(game_state, 1, Element.HYDRO)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.DENDRO)
+        game_state = add_damage_effect(game_state, 1, Element.HYDRO)
         self.assertEqual(
             game_state.get_player2().just_get_active_character().get_hp(),
             10,
@@ -713,8 +645,8 @@ class TestStatus(unittest.TestCase):
         )
 
         # DENDRO to HYDRO
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.HYDRO)
-        game_state = _add_damage_effect(game_state, 1, Element.DENDRO)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.HYDRO)
+        game_state = add_damage_effect(game_state, 1, Element.DENDRO)
         self.assertEqual(
             game_state.get_player2().just_get_active_character().get_hp(),
             10,
@@ -741,8 +673,8 @@ class TestStatus(unittest.TestCase):
                 lambda ss: ss.update_status(DendroCoreStatus())
             ).build()
         ).build()
-        electro_game_state = _add_damage_effect(base_game_state, 1, Element.ELECTRO)
-        pyro_game_state = _add_damage_effect(base_game_state, 1, Element.PYRO)
+        electro_game_state = add_damage_effect(base_game_state, 1, Element.ELECTRO)
+        pyro_game_state = add_damage_effect(base_game_state, 1, Element.PYRO)
         self.assertEqual(
             electro_game_state.get_player2().just_get_active_character().get_hp(),
             10,
@@ -767,8 +699,8 @@ class TestStatus(unittest.TestCase):
         )
 
         # bloom with DendroCoreStatus(1)
-        game_state = _oppo_aura_elem(base_game_state, elem=Element.DENDRO)
-        game_state = _add_damage_effect(game_state, 1, Element.HYDRO)
+        game_state = oppo_aura_elem(base_game_state, elem=Element.DENDRO)
+        game_state = add_damage_effect(game_state, 1, Element.HYDRO)
         game_state = auto_step(game_state)
         ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(ac.get_hp(), 8)
@@ -800,8 +732,8 @@ class TestStatus(unittest.TestCase):
         CrystallizeStatus
         """
         # GEO to PYRO
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
-        game_state = _add_damage_effect(game_state, 1, Element.GEO)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
+        game_state = add_damage_effect(game_state, 1, Element.GEO)
         self.assertEqual(
             game_state.get_player2().just_get_active_character().get_hp(),
             10,
@@ -817,8 +749,8 @@ class TestStatus(unittest.TestCase):
         )
 
         # GEO to HYDRO (with CrystallizeStatus{1})
-        game_state = _oppo_aura_elem(game_state, Element.HYDRO)
-        game_state = _add_damage_effect(game_state, 1, Element.GEO)
+        game_state = oppo_aura_elem(game_state, Element.HYDRO)
+        game_state = add_damage_effect(game_state, 1, Element.GEO)
 
         game_state = auto_step(game_state)
         ac = game_state.get_player2().just_get_active_character()
@@ -830,8 +762,8 @@ class TestStatus(unittest.TestCase):
         )
 
         # GEO to HYDRO (with CrystallizeStatus{2})
-        game_state = _oppo_aura_elem(game_state, Element.HYDRO)
-        game_state = _add_damage_effect(game_state, 1, Element.GEO)
+        game_state = oppo_aura_elem(game_state, Element.HYDRO)
+        game_state = add_damage_effect(game_state, 1, Element.GEO)
 
         game_state = auto_step(game_state)
         ac = game_state.get_player2().just_get_active_character()
@@ -858,7 +790,7 @@ class TestStatus(unittest.TestCase):
         ).build()
 
         # 0 dmg test
-        game_state = _add_damage_effect(base_game_state_1, 0, Element.CRYO)
+        game_state = add_damage_effect(base_game_state_1, 0, Element.CRYO)
 
         game_state = auto_step(game_state)
         ac = game_state.get_player2().just_get_active_character()
@@ -870,7 +802,7 @@ class TestStatus(unittest.TestCase):
         )
 
         # 1 dmg test
-        game_state = _add_damage_effect(base_game_state_1, 1, Element.CRYO)
+        game_state = add_damage_effect(base_game_state_1, 1, Element.CRYO)
 
         game_state = auto_step(game_state)
         ac = game_state.get_player2().just_get_active_character()
@@ -878,7 +810,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 10)
         self.assertFalse(game_state.get_player2().get_combat_statuses().contains(CrystallizeStatus))
 
-        game_state = _add_damage_effect(base_game_state_2, 1, Element.CRYO)
+        game_state = add_damage_effect(base_game_state_2, 1, Element.CRYO)
 
         game_state = auto_step(game_state)
         ac = game_state.get_player2().just_get_active_character()
@@ -890,7 +822,7 @@ class TestStatus(unittest.TestCase):
         )
 
         # 2 dmg test
-        game_state = _add_damage_effect(base_game_state_1, 2, Element.CRYO)
+        game_state = add_damage_effect(base_game_state_1, 2, Element.CRYO)
 
         game_state = auto_step(game_state)
         ac = game_state.get_player2().just_get_active_character()
@@ -898,7 +830,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 9)
         self.assertFalse(game_state.get_player2().get_combat_statuses().contains(CrystallizeStatus))
 
-        game_state = _add_damage_effect(base_game_state_2, 2, Element.CRYO)
+        game_state = add_damage_effect(base_game_state_2, 2, Element.CRYO)
 
         game_state = auto_step(game_state)
         ac = game_state.get_player2().just_get_active_character()
@@ -907,7 +839,7 @@ class TestStatus(unittest.TestCase):
         self.assertFalse(game_state.get_player2().get_combat_statuses().contains(CrystallizeStatus))
 
         # 3 dmg test
-        game_state = _add_damage_effect(base_game_state_1, 3, Element.CRYO)
+        game_state = add_damage_effect(base_game_state_1, 3, Element.CRYO)
 
         game_state = auto_step(game_state)
         ac = game_state.get_player2().just_get_active_character()
@@ -915,7 +847,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 8)
         self.assertFalse(game_state.get_player2().get_combat_statuses().contains(CrystallizeStatus))
 
-        game_state = _add_damage_effect(base_game_state_2, 3, Element.CRYO)
+        game_state = add_damage_effect(base_game_state_2, 3, Element.CRYO)
 
         game_state = auto_step(game_state)
         ac = game_state.get_player2().just_get_active_character()
@@ -930,8 +862,8 @@ class TestStatus(unittest.TestCase):
         Summons, vice versa
         """
         # PYRO to DENDRO
-        game_state = _oppo_aura_elem(ACTION_TEMPLATE, Element.DENDRO)
-        game_state = _add_damage_effect(game_state, 1, Element.PYRO)
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.DENDRO)
+        game_state = add_damage_effect(game_state, 1, Element.PYRO)
         self.assertEqual(
             game_state.get_player2().just_get_active_character().get_hp(),
             10,
@@ -947,8 +879,8 @@ class TestStatus(unittest.TestCase):
         )
 
         # DENDRO to PYRO with BurningFieldSummon(1) already
-        game_state_2 = _oppo_aura_elem(game_state_1, Element.PYRO)
-        game_state_2 = _add_damage_effect(game_state_2, 1, Element.DENDRO)
+        game_state_2 = oppo_aura_elem(game_state_1, Element.PYRO)
+        game_state_2 = add_damage_effect(game_state_2, 1, Element.DENDRO)
 
         game_state_2 = auto_step(game_state_2)
         ac = game_state_2.get_player2().just_get_active_character()
@@ -960,8 +892,8 @@ class TestStatus(unittest.TestCase):
         )
 
         # DENDRO to PYRO with BurningFieldSummon(2) already, usages should stay at 2
-        game_state_3 = _oppo_aura_elem(game_state_2, Element.PYRO)
-        game_state_3 = _add_damage_effect(game_state_3, 1, Element.DENDRO)
+        game_state_3 = oppo_aura_elem(game_state_2, Element.PYRO)
+        game_state_3 = add_damage_effect(game_state_3, 1, Element.DENDRO)
 
         game_state_3 = auto_step(game_state_3)
         ac = game_state_3.get_player2().just_get_active_character()

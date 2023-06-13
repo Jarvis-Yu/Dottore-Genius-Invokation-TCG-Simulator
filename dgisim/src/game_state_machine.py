@@ -116,6 +116,10 @@ class GameStateMachine:
             self.one_step(observe=observe)
 
     def one_step(self, observe=False) -> None:
+        """
+        transition the game to its next state, if the transition requires a player action,
+        ask for it and then make the step
+        """
         if self.game_end():
             return
         pid = self._game_state.waiting_for()
@@ -138,12 +142,19 @@ class GameStateMachine:
             self.one_step(observe=observe)
 
     def auto_step(self, observe=False) -> None:
+        """
+        fast-forward to the game state where a player action is required
+        """
         pid = self._game_state.waiting_for()
         while not self.game_end() and pid is None:
             self._step(observe=observe)
             pid = self._game_state.waiting_for()
 
     def player_step(self, observe=False) -> None:
+        """
+        fast-forward to the game state where a player action is required,
+        and then make one step taking the player's action
+        """
         self.auto_step(observe=observe)
         self.one_step(observe=observe)
 

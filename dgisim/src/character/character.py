@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Optional, Tuple, Callable, Union
 from enum import Enum
 from dataclasses import dataclass
+from dgisim.src.effect.event import eft, gs
 
 import dgisim.src.state.game_state as gs
 import dgisim.src.card.card as cd
@@ -13,12 +14,13 @@ from dgisim.src.dices import AbstractDices
 from dgisim.src.effect.event import *
 import dgisim.src.effect.effect as eft
 import dgisim.src.status.status as stt
+from dgisim.src.element.element import *
 from dgisim.src.helper.level_print import level_print_single, INDENT, level_print
 
 
 class CharacterSkill(Enum):
     NORMAL_ATTACK = 0
-    BURST = 1
+    ELEMENTAL_BURST = 1
     ELEMENTAL_SKILL1 = 2
     ELEMENTAL_SKILL2 = 3
 
@@ -106,8 +108,9 @@ class Character:
             return self.normal_attack(game_state)
         elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
             return self.elemental_skill1(game_state)
+        elif skill_type is CharacterSkill.ELEMENTAL_BURST:
+            return self.elemental_burst(game_state)
         raise Exception("Not Overriden")
-
 
     def _post_skill(self, effects: tuple[eft.Effect, ...]) -> tuple[eft.Effect, ...]:
         return effects + (
@@ -309,7 +312,7 @@ class Keqing(Character):
     def _normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             source=self.address(game_state),
-            element=eft.Element.PHYSICAL,
+            element=Element.PHYSICAL,
             damage=2,
         )
 
@@ -319,11 +322,12 @@ class Keqing(Character):
             eft.ReferredDamageEffect(
                 source=source,
                 target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
-                element=eft.Element.ELECTRO,
+                element=Element.ELECTRO,
                 damage=3,
             )
         ]
 
+        # check if can gain ElectroInfusionStatus
         can_infuse = False
 
         intrinsic_talent = self.get_talent_statuses().just_find(stt.KeqingTalentStatus)
@@ -338,7 +342,6 @@ class Keqing(Character):
 
         cards = game_state.get_player(source.pid).get_hand_cards()
         if not can_infuse and cards.contains(cd.LightningStiletto):
-            # TODO: pass game_state in and directly modify it and return
             effects.append(
                 eft.RemoveAllCardEffect(
                     source.pid,
@@ -377,6 +380,28 @@ class Keqing(Character):
 
         return tuple(effects)
 
+    def _elemental_burst(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
+        assert self.get_energy() == self.get_max_energy()
+        source = self.address(game_state)
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.get_max_energy(),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=eft.DynamicCharacterTarget.OPPO_OFF_FIELD,
+                damage=3,
+                element=Element.PIERCING,
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
+                damage=4,
+                element=Element.ELECTRO,
+            ),
+        )
+
     @classmethod
     def from_default(cls, id: int = -1) -> Keqing:
         return cls(
@@ -402,7 +427,7 @@ class Kaeya(Character):
     def _normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             source=self.address(game_state),
-            element=eft.Element.PHYSICAL,
+            element=Element.PHYSICAL,
             damage=2,
         )
 
@@ -414,7 +439,7 @@ class Kaeya(Character):
             eft.ReferredDamageEffect(
                 source=source,
                 target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
-                element=eft.Element.CRYO,
+                element=Element.CRYO,
                 damage=3,
             ),
             eft.EnergyRechargeEffect(
@@ -448,7 +473,7 @@ class Oceanid(Character):
     def _normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             source=self.address(game_state),
-            element=eft.Element.HYDRO,
+            element=Element.HYDRO,
             damage=1,
         )
 

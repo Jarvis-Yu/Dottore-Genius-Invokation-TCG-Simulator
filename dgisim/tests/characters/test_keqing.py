@@ -1,6 +1,7 @@
 import unittest
 
 from dgisim.tests.helpers.game_state_templates import *
+from dgisim.tests.helpers.quality_of_life import *
 from dgisim.src.game_state_machine import GameStateMachine
 from dgisim.src.agents import PuppetAgent
 from dgisim.src.action import *
@@ -12,7 +13,7 @@ from dgisim.src.status.status import *
 class TestKeqing(unittest.TestCase):
     BASE_GAME = ACTION_TEMPLATE.factory().f_player1(
         lambda p: p.factory().f_characters(
-            lambda cs: cs.factory().active_character_id(3).build()
+            lambda cs: cs.factory().active_character_id(3).build()  # make active character Keqing
         ).build()
     ).f_player2(
         lambda p: p.factory().phase(PlayerState.Act.END_PHASE).build()
@@ -166,3 +167,90 @@ class TestKeqing(unittest.TestCase):
         gsm.step_until_phase(game_state.get_mode().action_phase())
         p1ac = gsm.get_game_state().get_player1().just_get_active_character()
         self.assertFalse(p1ac.get_character_statuses().contains(ElectroInfusionStatus))
+
+    def testElementalBurst(self):
+        p1, p2 = PuppetAgent(), PuppetAgent()
+        base_game_state = self.BASE_GAME.factory().f_player1(
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().f_active_character(
+                    lambda ac: ac.factory().energy(
+                        3
+                    ).build()
+                ).build()
+            ).build()
+        ).build()
+        pyro_game_state = oppo_aura_elem(base_game_state, Element.PYRO)
+        hydro_game_state = oppo_aura_elem(base_game_state, Element.HYDRO)
+
+        # no reaction
+        gsm = GameStateMachine(base_game_state, p1, p2)
+        p1.inject_action(
+            SkillAction(
+                CharacterSkill.ELEMENTAL_BURST,
+                DiceOnlyInstruction(dices=ActualDices({})),
+            )
+        )
+        gsm.player_step()
+        gsm.auto_step()
+        p2cs = gsm.get_game_state().get_player2().get_characters()
+        p2c1, p2c2, p2c3 = (p2cs.just_get_character(i) for i in range(1, 4))
+        self.assertEqual(p2c1.get_hp(), 6)
+        self.assertEqual(p2c2.get_hp(), 7)
+        self.assertEqual(p2c3.get_hp(), 7)
+        self.assertTrue(p2c1.get_elemental_aura().contains(Element.ELECTRO))
+        self.assertFalse(p2c2.get_elemental_aura().elem_auras())
+        self.assertFalse(p2c3.get_elemental_aura().elem_auras())
+        self.assertEqual(
+            gsm.get_game_state().get_player1().just_get_active_character().get_energy(),
+            0
+        )
+
+        # overloaded
+        gsm = GameStateMachine(pyro_game_state, p1, p2)
+        p1.inject_action(
+            SkillAction(
+                CharacterSkill.ELEMENTAL_BURST,
+                DiceOnlyInstruction(dices=ActualDices({})),
+            )
+        )
+        gsm.player_step()
+        gsm.auto_step()
+        p2cs = gsm.get_game_state().get_player2().get_characters()
+        p2c1, p2c2, p2c3 = (p2cs.just_get_character(i) for i in range(1, 4))
+        self.assertEqual(p2c1.get_hp(), 4)
+        self.assertEqual(p2c2.get_hp(), 7)
+        self.assertEqual(p2c3.get_hp(), 7)
+        self.assertFalse(p2c1.get_elemental_aura().elem_auras())
+        self.assertFalse(p2c2.get_elemental_aura().elem_auras())
+        self.assertFalse(p2c3.get_elemental_aura().elem_auras())
+        self.assertEqual(
+            p2cs.get_active_character_id(),
+            2,
+        )
+        self.assertEqual(
+            gsm.get_game_state().get_player1().just_get_active_character().get_energy(),
+            0,
+        )
+
+        # electro-charged
+        gsm = GameStateMachine(hydro_game_state, p1, p2)
+        p1.inject_action(
+            SkillAction(
+                CharacterSkill.ELEMENTAL_BURST,
+                DiceOnlyInstruction(dices=ActualDices({})),
+            )
+        )
+        gsm.player_step()
+        gsm.auto_step()
+        p2cs = gsm.get_game_state().get_player2().get_characters()
+        p2c1, p2c2, p2c3 = (p2cs.just_get_character(i) for i in range(1, 4))
+        self.assertEqual(p2c1.get_hp(), 5)
+        self.assertEqual(p2c2.get_hp(), 6)
+        self.assertEqual(p2c3.get_hp(), 6)
+        self.assertFalse(p2c1.get_elemental_aura().elem_auras())
+        self.assertFalse(p2c2.get_elemental_aura().elem_auras())
+        self.assertFalse(p2c3.get_elemental_aura().elem_auras())
+        self.assertEqual(
+            gsm.get_game_state().get_player1().just_get_active_character().get_energy(),
+            0,
+        )
