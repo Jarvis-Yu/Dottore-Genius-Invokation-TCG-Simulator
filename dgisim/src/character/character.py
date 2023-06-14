@@ -391,13 +391,12 @@ class Keqing(Character):
             )
             can_infuse = True
 
-        talent_card_equiped = self.talent_equiped()
         if can_infuse:
-            if talent_card_equiped:
+            if self.talent_equiped():
                 effects.append(
                     eft.OverrideCharacterStatusEffect(
                         target=source,
-                        status=stt.ElectroInfusionStatus(
+                        status=stt.KeqingElectroInfusionStatus(
                             duration=self.BASE_ELECTRO_INFUSION_DURATION,
                             damage_boost=1,
                         ),
@@ -407,7 +406,7 @@ class Keqing(Character):
                 effects.append(
                     eft.OverrideCharacterStatusEffect(
                         target=source,
-                        status=stt.ElectroInfusionStatus(
+                        status=stt.KeqingElectroInfusionStatus(
                             duration=self.BASE_ELECTRO_INFUSION_DURATION
                         ),
                     )

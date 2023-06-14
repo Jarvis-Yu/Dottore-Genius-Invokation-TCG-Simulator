@@ -5,6 +5,7 @@ from dgisim.src.helper.level_print import GamePrinter
 from dgisim.src.helper.quality_of_life import *
 from dgisim.src.agents import *
 
+
 def auto_step(game_state: GameState, observe: bool = False) -> GameState:
     gsm = GameStateMachine(game_state, PuppetAgent(), PuppetAgent())
     if not observe:
@@ -15,6 +16,7 @@ def auto_step(game_state: GameState, observe: bool = False) -> GameState:
             print(GamePrinter.dict_game_printer(gsm.get_game_state().dict_str()))
             input(">>> ")
     return gsm.get_game_state()
+
 
 def oppo_aura_elem(game_state: GameState, elem: Element, char_id: Optional[int] = None) -> GameState:
     """
@@ -81,5 +83,14 @@ def kill_character(game_state: GameState, character_id: int, hp: int = 0) -> Gam
                 character_id,
                 lambda c: c.factory().hp(hp).build()
             ).build()
+        ).build()
+    ).build()
+
+
+def set_active_player_id(game_state: GameState, pid: GameState.Pid, character_id: int) -> GameState:
+    return game_state.factory().f_player(
+        pid,
+        lambda p: p.factory().f_characters(
+            lambda cs: cs.factory().active_character_id(character_id).build()
         ).build()
     ).build()

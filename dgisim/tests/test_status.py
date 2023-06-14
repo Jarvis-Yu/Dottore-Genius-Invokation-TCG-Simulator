@@ -13,6 +13,7 @@ from dgisim.src.status.statuses import *
 from dgisim.src.status.status import *
 from dgisim.src.helper.level_print import GamePrinter
 from dgisim.src.helper.quality_of_life import just
+from dgisim.tests.helpers.quality_of_life import *
 
 
 class TestStatus(unittest.TestCase):
@@ -200,6 +201,41 @@ class TestStatus(unittest.TestCase):
             .get_player1()
             .get_characters()
             .just_get_character(guobaed_char_id)
+            .get_character_statuses()
+            .contains(JueyunGuobaStatus)
+        )
+
+        # with JueyunGuoba but cast elemental skill
+        game_state = set_active_player_id(base_game_state, GameState.Pid.P1, 2)
+        gsm = GameStateMachine(game_state, p1, p2)
+        p1.inject_action(CardAction(
+            JueyunGuoba,
+            CharacterTargetInstruction(
+                dices=ActualDices({}),
+                target=StaticTarget(
+                    GameState.Pid.P1,
+                    Zone.CHARACTER,
+                    2,
+                )
+            )
+        ))
+        p1.inject_action(SkillAction(
+            CharacterSkill.ELEMENTAL_SKILL1,
+            DiceOnlyInstruction(dices=ActualDices({})),
+        ))
+        gsm.player_step()  # p1 has JueyunGuoba
+        gsm.auto_step()
+        gsm.player_step()  # p1 normal attacks
+        gsm.auto_step()  # process normal attack
+        self.assertEqual(
+            gsm.get_game_state().get_player2().just_get_active_character().get_hp(),
+            7,
+        )
+        self.assertTrue(
+            gsm
+            .get_game_state()
+            .get_player1()
+            .just_get_active_character()
             .get_character_statuses()
             .contains(JueyunGuobaStatus)
         )
