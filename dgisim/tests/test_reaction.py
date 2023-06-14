@@ -255,6 +255,7 @@ class TestStatus(unittest.TestCase):
                     target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                     element=Element.ELECTRO,
                     damage=1,
+                    damage_type=DamageType(),
                 )
             )
         ).build()
@@ -613,6 +614,7 @@ class TestStatus(unittest.TestCase):
                 target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                 element=Element.ELECTRO,
                 damage=1,
+                damage_type=DamageType(),
             ))
         ).build()
         oc = game_state.get_player2().get_characters().just_get_character(3)
@@ -717,6 +719,7 @@ class TestStatus(unittest.TestCase):
                 target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                 element=Element.ELECTRO,
                 damage=1,
+                damage_type=DamageType(),
             ))
         ).build()
         oc = game_state.get_player2().get_characters().just_get_character(3)

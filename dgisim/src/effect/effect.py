@@ -54,7 +54,9 @@ class DamageType:
     plunge_attack: bool = False
     elemental_skill: bool = False
     elemental_burst: bool = False
+    status: bool = False  # any talent, equipmenet, character status, combat status.
     summon: bool = False
+    no_boost: bool = False  # reaction secondary damage, Klee's burst status...
 
 
 @dataclass(frozen=True)
@@ -606,12 +608,13 @@ _DAMAGE_ELEMENTS: FrozenSet[Element] = frozenset({
 })
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class SpecificDamageEffect(Effect):
     source: StaticTarget
     target: StaticTarget
     element: Element
     damage: int
+    damage_type: DamageType
     reaction: Optional[ReactionDetail] = None
 
     @staticmethod
@@ -737,6 +740,7 @@ class SpecificDamageEffect(Effect):
                     target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                     element=Element.PIERCING,
                     damage=1,
+                    damage_type=DamageType(no_boost=True),
                 )
             )
 
@@ -748,6 +752,7 @@ class SpecificDamageEffect(Effect):
                     target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                     element=reaction.first_elem,
                     damage=1,
+                    damage_type=DamageType(no_boost=True),
                 )
             )
 
@@ -814,6 +819,7 @@ class ReferredDamageEffect(Effect):
     target: DynamicCharacterTarget
     element: Element
     damage: int
+    damage_type: DamageType
     # this field is used as a reference if the target is OFF_FIELD
     # e.g. super-conduct caused by swirl
     target_ref: Optional[StaticTarget] = field(kw_only=True, default=None)
@@ -861,6 +867,7 @@ class ReferredDamageEffect(Effect):
                     ),
                     element=self.element,
                     damage=self.damage,
+                    damage_type=self.damage_type,
                     reaction=None,
                 )
             )

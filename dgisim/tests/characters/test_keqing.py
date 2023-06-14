@@ -135,8 +135,26 @@ class TestKeqing(unittest.TestCase):
         p2ac = game_state_infused.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 8)
         self.assertTrue(p2ac.get_elemental_aura().contains(Element.ELECTRO))
-        self.assertFalse(game_state_infused.get_player1(
-        ).get_hand_cards().contains(LightningStiletto))
+        self.assertFalse(
+            game_state_infused.get_player1().get_hand_cards().contains(LightningStiletto)
+        )
+
+        # tests infusion doesn't apply to other characters
+        game_state = set_active_player_id(game_state_1_2, GameState.Pid.P1, 2)
+        gsm = GameStateMachine(game_state, a1, a2)
+        a1.inject_action(SkillAction(
+            CharacterSkill.NORMAL_ATTACK,
+            DiceOnlyInstruction(dices=ActualDices({})),
+        ))
+        gsm.player_step()
+        gsm.auto_step()
+        game_state = gsm.get_game_state()
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 8)
+        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+        self.assertFalse(
+            game_state.get_player1().get_hand_cards().contains(LightningStiletto)
+        )
 
         # test ElectroInfusion disappear when two round ends
         gsm = GameStateMachine(game_state_infused, a1, a2)
@@ -153,7 +171,7 @@ class TestKeqing(unittest.TestCase):
         # initially
         p1ac = gsm.get_game_state().get_player1().just_get_active_character()
         self.assertEqual(
-            p1ac.get_character_statuses().just_find(ElectroInfusionStatus).duration,
+            p1ac.get_character_statuses().just_find(KeqingElectroInfusionStatus).duration,
             2
         )
         # next round
@@ -161,14 +179,14 @@ class TestKeqing(unittest.TestCase):
         gsm.step_until_phase(game_state.get_mode().action_phase())
         p1ac = gsm.get_game_state().get_player1().just_get_active_character()
         self.assertEqual(
-            p1ac.get_character_statuses().just_find(ElectroInfusionStatus).duration,
+            p1ac.get_character_statuses().just_find(KeqingElectroInfusionStatus).duration,
             1
         )
         # next round
         gsm.step_until_phase(game_state.get_mode().end_phase())
         gsm.step_until_phase(game_state.get_mode().action_phase())
         p1ac = gsm.get_game_state().get_player1().just_get_active_character()
-        self.assertFalse(p1ac.get_character_statuses().contains(ElectroInfusionStatus))
+        self.assertFalse(p1ac.get_character_statuses().contains(KeqingElectroInfusionStatus))
 
     def testElementalBurst(self):
         a1, a2 = PuppetAgent(), PuppetAgent()

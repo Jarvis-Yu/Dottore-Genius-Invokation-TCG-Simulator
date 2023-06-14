@@ -15,7 +15,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
-    - name: Unittest
+    - name: Unittest and Coverage
       run: |
         coverage run -m unittest && coverage report
     - name: MypyCheck

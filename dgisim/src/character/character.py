@@ -348,10 +348,12 @@ class Keqing(Character):
     TALENT_STATUS = stt.ThunderingPenanceStatus
 
     def _normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
+        source = self.location(game_state)
         return normal_attack_template(
-            source=self.location(game_state),
+            source=source,
             element=Element.PHYSICAL,
             damage=2,
+            dices_num=game_state.get_player(source.pid).get_dices().num_dices()
         )
 
     def _elemental_skill1(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
@@ -362,6 +364,7 @@ class Keqing(Character):
                 target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
                 element=Element.ELECTRO,
                 damage=3,
+                damage_type=eft.DamageType(elemental_skill=True)
             )
         ]
 
@@ -388,13 +391,12 @@ class Keqing(Character):
             )
             can_infuse = True
 
-        talent_card_equiped = self.talent_equiped()
         if can_infuse:
-            if talent_card_equiped:
+            if self.talent_equiped():
                 effects.append(
                     eft.OverrideCharacterStatusEffect(
                         target=source,
-                        status=stt.ElectroInfusionStatus(
+                        status=stt.KeqingElectroInfusionStatus(
                             duration=self.BASE_ELECTRO_INFUSION_DURATION,
                             damage_boost=1,
                         ),
@@ -404,7 +406,7 @@ class Keqing(Character):
                 effects.append(
                     eft.OverrideCharacterStatusEffect(
                         target=source,
-                        status=stt.ElectroInfusionStatus(
+                        status=stt.KeqingElectroInfusionStatus(
                             duration=self.BASE_ELECTRO_INFUSION_DURATION
                         ),
                     )
@@ -432,12 +434,14 @@ class Keqing(Character):
                 target=eft.DynamicCharacterTarget.OPPO_OFF_FIELD,
                 element=Element.PIERCING,
                 damage=3,
+                damage_type=eft.DamageType(elemental_burst=True),
             ),
             eft.ReferredDamageEffect(
                 source=source,
                 target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
                 element=Element.ELECTRO,
                 damage=4,
+                damage_type=eft.DamageType(elemental_burst=True),
             ),
         )
 
@@ -464,10 +468,12 @@ class Keqing(Character):
 class Kaeya(Character):
 
     def _normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
+        source = self.location(game_state)
         return normal_attack_template(
-            source=self.location(game_state),
+            source=source,
             element=Element.PHYSICAL,
             damage=2,
+            dices_num=game_state.get_player(source.pid).get_dices().num_dices()
         )
 
     def _elemental_skill1(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
@@ -480,6 +486,7 @@ class Kaeya(Character):
                 target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
                 element=Element.CRYO,
                 damage=3,
+                damage_type=eft.DamageType(elemental_skill=True),
             ),
         )
 
@@ -495,6 +502,7 @@ class Kaeya(Character):
                 target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
                 element=Element.CRYO,
                 damage=1,
+                damage_type=eft.DamageType(),
             ),
             eft.OverrideCombatStatusEffect(
                 target_pid=source.pid,
@@ -525,10 +533,12 @@ class Kaeya(Character):
 class Oceanid(Character):
 
     def _normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
+        source = self.location(game_state)
         return normal_attack_template(
-            source=self.location(game_state),
+            source=source,
             element=Element.HYDRO,
             damage=1,
+            dices_num=game_state.get_player(source.pid).get_dices().num_dices()
         )
 
     def _elemental_skill1(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:

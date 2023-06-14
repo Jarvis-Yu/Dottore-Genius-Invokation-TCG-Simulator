@@ -439,8 +439,7 @@ class JueyunGuobaStatus(CharacterStatus):
     ) -> tuple[eft.Preprocessable, Optional[_T]]:
         if signal is Status.PPType.DmgAmount:
             assert isinstance(item, eft.SpecificDamageEffect)
-            # TODO: check damage type
-            if item.source == status_source:
+            if item.source == status_source and item.damage_type.normal_attack:
                 item = replace(item, damage=item.damage + JueyunGuobaStatus.damage_boost)
                 return item, None
         return super().preprocess(game_state, status_source, item, signal)
@@ -459,7 +458,7 @@ class JueyunGuobaStatus(CharacterStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class _InfusionStatus(CharacterStatus, _DurationStatus):
-    max_duration: ClassVar[int] = 0
+    max_duration: ClassVar[int] = BIG_INT
     element: ClassVar[Optional[Element]] = None
     damage_boost: int = 0
 
@@ -473,18 +472,36 @@ class _InfusionStatus(CharacterStatus, _DurationStatus):
     ) -> tuple[eft.Preprocessable, Optional[_InfusionStatus]]:
         assert self.element is not None
         new_item: Optional[eft.SpecificDamageEffect] = None
-        if signal is Status.PPType.DmgElement:
-            assert isinstance(item, eft.SpecificDamageEffect)
-            if item.element is Element.PHYSICAL:
-                new_item = replace(item, element=self.element)
-        if signal is Status.PPType.DmgAmount:
-            assert isinstance(item, eft.SpecificDamageEffect)
-            if self.damage_boost != 0 and item.element is self.element:
-                new_item = replace(item, damage=item.damage + self.damage_boost)
+        if isinstance(item, eft.SpecificDamageEffect):
+            if signal is Status.PPType.DmgElement:
+                if self._dmg_element_condition(game_state, status_source, item):
+                    new_item = replace(item, element=self.element)
+            if signal is Status.PPType.DmgAmount:
+                if self.damage_boost != 0  \
+                        and self._dmg_boost_condition(game_state, status_source, item):
+                    new_item = replace(item, damage=item.damage + self.damage_boost)
         if new_item is not None:
             return new_item, self
         else:
             return item, self
+
+    def _dmg_element_condition(
+            self,
+            game_state: gs.GameState,
+            status_source: eft.StaticTarget,
+            item: eft.SpecificDamageEffect,
+    ) -> bool:
+        return item.element is Element.PHYSICAL \
+            and item.damage_type.normal_attack \
+            and status_source == item.source \
+
+    def _dmg_boost_condition(
+            self,
+            game_state: gs.GameState,
+            status_source: eft.StaticTarget,
+            item: eft.SpecificDamageEffect,
+    ) -> bool:
+        return item.element is self.element and status_source == item.source
 
     @override
     def _react_to_signal(
@@ -498,11 +515,11 @@ class _InfusionStatus(CharacterStatus, _DurationStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class ElectroInfusionStatus(_InfusionStatus):
-    max_duration: ClassVar[int] = 2
     element: ClassVar[Optional[Element]] = Element.ELECTRO
 
 
 ############################## Character specific ##############################
+
 
 #### Keqing ####
 
@@ -528,7 +545,13 @@ class ThunderingPenanceStatus(EquipmentStatus):
     pass
 
 
+@dataclass(frozen=True, kw_only=True)
+class KeqingElectroInfusionStatus(ElectroInfusionStatus):
+    duration: int = 2
+
+
 #### Kaeya ####
+
 
 @dataclass(frozen=True, kw_only=True)
 class Icicle(CombatStatus, _UsageStatus):
@@ -547,6 +570,7 @@ class Icicle(CombatStatus, _UsageStatus):
                     target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
                     element=Element.CRYO,
                     damage=2,
+                    damage_type=eft.DamageType(status=True),
                 ),
                 eft.DeathCheckCheckerEffect(),
             ]

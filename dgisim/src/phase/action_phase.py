@@ -106,6 +106,8 @@ class ActionPhase(ph.Phase):
         if active_character is None:
             return None
         assert active_character.can_cast_skill()
+        # note: it's important to cast skill before new_dices are putted into the game_state
+        #       so that normal_attacks can correctly be marked as charged attack
         new_effects += active_character.skill(game_state, action.skill)
         new_effects += (TurnEndEffect(), )
         # Afterwards
