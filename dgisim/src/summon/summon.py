@@ -53,6 +53,7 @@ class BurningFlameSummon(_DestroyOnNumSummon):
                     target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
                     element=Element.PYRO,
                     damage=self.DMG,
+                    damage_type=eft.DamageType(summon=True),
                 )
             )
             es.append(eft.DeathCheckCheckerEffect())

@@ -64,6 +64,7 @@ def add_damage_effect(
                 target=DynamicCharacterTarget.OPPO_ACTIVE,
                 element=elem,
                 damage=damage,
+                damage_type=DamageType(),
             ),
             DeathCheckCheckerEffect(),
         ))

@@ -547,6 +547,7 @@ class Icicle(CombatStatus, _UsageStatus):
                     target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
                     element=Element.CRYO,
                     damage=2,
+                    damage_type=eft.DamageType(status=True),
                 ),
                 eft.DeathCheckCheckerEffect(),
             ]
