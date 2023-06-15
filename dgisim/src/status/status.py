@@ -181,7 +181,7 @@ class _DurationStatus(Status):
     @override
     def _update(self, other: _DurationStatus) -> Optional[_DurationStatus]:
         new_duration = min(self.duration + other.duration, self.max_duration)
-        return type(self)(duration=new_duration)
+        return replace(self, duration=new_duration)
 
     def __str__(self) -> str:
         return super().__str__() + f"({self.duration})"  # pragma: no cover
@@ -495,6 +495,7 @@ class _InfusionStatus(CharacterStatus, _DurationStatus):
             and item.damage_type.normal_attack \
             and status_source == item.source \
 
+
     def _dmg_boost_condition(
             self,
             game_state: gs.GameState,
@@ -547,7 +548,10 @@ class ThunderingPenanceStatus(EquipmentStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class KeqingElectroInfusionStatus(ElectroInfusionStatus):
-    duration: int = 2
+    pass
+
+    def __str__(self) -> str:
+        return super().__str__() + f"({self.damage_boost})"
 
 
 #### Kaeya ####

@@ -92,9 +92,8 @@ class ActionPhase(ph.Phase):
     def _handle_skill_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: SkillAction) -> Optional[gs.GameState]:
         player = game_state.get_player(pid)
         # TODO: check validity of the action
-        effect_stack = game_state.get_effect_stack()
         instruction = action.instruction
-        new_effects: tuple[Effect, ...] = ()
+        new_effects: list[Effect] = []
         # TODO: put pre checks
         # TODO: Costs
         dices = player.get_dices()
@@ -109,10 +108,14 @@ class ActionPhase(ph.Phase):
         # note: it's important to cast skill before new_dices are putted into the game_state
         #       so that normal_attacks can correctly be marked as charged attack
         new_effects += active_character.skill(game_state, action.skill)
-        new_effects += (TurnEndEffect(), )
+        new_effects.append(AllStatusTriggererEffect(
+            pid,
+            TriggeringSignal.COMBAT_ACTION,
+        ))
+        new_effects.append(TurnEndEffect())
         # Afterwards
-        return game_state.factory().effect_stack(
-            effect_stack.push_many_fl(new_effects)
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_many_fl(new_effects)
         ).player(
             pid,
             player.factory().dices(new_dices).build()
@@ -120,7 +123,7 @@ class ActionPhase(ph.Phase):
 
     def _handle_swap_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: SwapAction) -> Optional[gs.GameState]:
         player = game_state.get_player(pid)
-        new_effects: tuple[Effect, ...] = ()
+        new_effects: list[Effect] = []
         # Costs
         dices = player.get_dices()
         new_dices = dices - action.instruction.dices
@@ -129,10 +132,16 @@ class ActionPhase(ph.Phase):
         # Add Effects
         active_character = player.get_characters().get_active_character()
         assert active_character is not None
-        new_effects += (SwapCharacterEffect(
+        new_effects.append(SwapCharacterEffect(
             StaticTarget(pid, Zone.CHARACTER, action.selected_character_id)
-        ), )
-        new_effects += (TurnEndEffect(), )
+        ))
+        is_combat_action = True
+        if is_combat_action:
+            # new_effects.append()
+            pass
+        else:
+            raise NotImplementedError
+        new_effects.append(TurnEndEffect(), )
         # TODO: posts
         return game_state.factory().effect_stack(
             game_state.get_effect_stack().push_many_fl(new_effects)
@@ -152,7 +161,12 @@ class ActionPhase(ph.Phase):
         # Card
         card = action.card
         new_effects.append(RemoveCardEffect(pid, card))
-        new_effects += list(card.effects(action.instruction))
+        new_effects += card.effects(action.instruction)
+        if card.is_combat_action():
+            new_effects.append(AllStatusTriggererEffect(
+                pid,
+                TriggeringSignal.COMBAT_ACTION,
+            ))
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(new_effects)
         ).player(

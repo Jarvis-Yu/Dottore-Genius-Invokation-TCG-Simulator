@@ -397,7 +397,7 @@ class Keqing(Character):
                     eft.OverrideCharacterStatusEffect(
                         target=source,
                         status=stt.KeqingElectroInfusionStatus(
-                            duration=self.BASE_ELECTRO_INFUSION_DURATION,
+                            duration=self.BASE_ELECTRO_INFUSION_DURATION + 1,
                             damage_boost=1,
                         ),
                     )

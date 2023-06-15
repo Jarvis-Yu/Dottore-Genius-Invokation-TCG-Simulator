@@ -20,24 +20,24 @@ class Summons:
     def just_find(self, summon_type: type[Summon]) -> Summon:
         return just(self.find(summon_type))
 
-    def update_summon(self, summon: Summon, force: bool=False) -> Summons:
+    def update_summon(self, incoming_summon: Summon, force: bool=False) -> Summons:
         summons = list(self._summons)
-        for i, s in enumerate(summons):
-            if type(s) != type(summon):
+        for i, summon in enumerate(summons):
+            if type(summon) != type(incoming_summon):
                 continue
             new_summon: Optional[Summon]
             if force:
-                new_summon = summon
+                new_summon = incoming_summon
             else:
-                new_summon = summons[i].update(summon)
-            if s == new_summon:
+                new_summon = summon.update(incoming_summon)
+            if summon == new_summon:
                 return self
             if new_summon is None:
-                return self.remove_summon(type(s))
+                return self.remove_summon(type(summon))
             summons[i] = new_summon
             return Summons(tuple(summons), self._max_num)
         if len(summons) < self._max_num:
-            summons.append(summon)
+            summons.append(incoming_summon)
         return Summons(tuple(summons), self._max_num)
 
     def remove_summon(self, summon_type: type[Summon]) -> Summons:

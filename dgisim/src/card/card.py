@@ -25,6 +25,10 @@ class Card:
     def __str__(self) -> str:
         return self.__class__.__name__
 
+    @staticmethod
+    def is_combat_action() -> bool:
+        return False
+
     @classmethod
     def name(cls) -> str:
         return cls.__name__
@@ -33,6 +37,13 @@ class Card:
 # for test only
 class OmniCard(Card):
     pass
+
+
+class _CombatActionCard(Card):
+    @override
+    @staticmethod
+    def is_combat_action() -> bool:
+        return True
 
 
 class EventCard(Card):
@@ -157,7 +168,7 @@ class CalxsArts(EventCard):
 
 #### Keqing ####
 
-class LightningStiletto(EventCard):
+class LightningStiletto(EventCard, _CombatActionCard):
     @override
     @classmethod
     def effects(cls, instruction: ac.Instruction) -> tuple[Effect, ...]:
@@ -177,7 +188,7 @@ class LightningStiletto(EventCard):
         )
 
 
-class ThunderingPenance(EquipmentCard):
+class ThunderingPenance(EquipmentCard, _CombatActionCard):
     @override
     @classmethod
     def effects(cls, instruction: ac.Instruction) -> tuple[Effect, ...]:
@@ -195,7 +206,7 @@ class ThunderingPenance(EquipmentCard):
 
 #### Kaeya ####
 
-class ColdBloodedStrike(EquipmentCard):
+class ColdBloodedStrike(EquipmentCard, _CombatActionCard):
     @override
     @classmethod
     def effects(cls, instruction: ac.Instruction) -> tuple[Effect, ...]:

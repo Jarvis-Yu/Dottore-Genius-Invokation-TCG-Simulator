@@ -27,7 +27,7 @@ class Statuses:
             if force:
                 new_status = incoming_status
             else:
-                new_status = incoming_status.update(status)
+                new_status = status.update(incoming_status)
             if status == new_status:
                 return self
             if new_status is None:
