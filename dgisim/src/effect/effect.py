@@ -126,7 +126,7 @@ class TriggerStatusEffect(Effect):
         status = statuses.find(self.status)
         if status is None:
             return game_state
-        effects = status.react_to_signal(self.target, self.signal)
+        effects = status.react_to_signal(game_state, self.target, self.signal)
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
@@ -145,6 +145,7 @@ class TriggerCombatStatusEffect(Effect):
         if status is None:
             return game_state
         effects = status.react_to_signal(
+            game_state,
             StaticTarget(
                 pid=self.target_pid,
                 zone=Zone.COMBAT_STATUSES,
@@ -170,6 +171,7 @@ class TriggerSummonEffect(Effect):
         if summon is None:
             return game_state
         effects = summon.react_to_signal(
+            game_state,
             StaticTarget(
                 pid=self.target_pid,
                 zone=Zone.SUMMONS,

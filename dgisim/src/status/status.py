@@ -47,7 +47,7 @@ class Status:
     #     raise Exception("TODO")
 
     def react_to_signal(
-            self, source: eft.StaticTarget, signal: eft.TriggeringSignal
+            self, game_state: gs.GameState, source: eft.StaticTarget, signal: eft.TriggeringSignal
     ) -> list[eft.Effect]:
         es, new_status = self._react_to_signal(source, signal)
         es, new_status = self._post_react_to_signal(es, new_status)
@@ -97,6 +97,31 @@ class Status:
 
         else:  # pragma: no cover
             raise NotImplementedError
+
+        has_damage = False
+        has_swap = False
+        for effect in es:
+            has_damage = has_damage or isinstance(effect, eft.ReferredDamageEffect) \
+                or isinstance(effect, eft.SpecificDamageEffect)
+            has_swap = has_swap or isinstance(effect, eft.SwapCharacterEffect)  \
+                or isinstance(effect, eft.ForwardSwapCharacterEffect)
+        if has_swap or has_damage:
+            es.append(
+                eft.SwapCharacterCheckerEffect(
+                    my_active=eft.StaticTarget(
+                        pid=source.pid,
+                        zone=eft.Zone.CHARACTER,
+                        id=game_state.get_player(source.pid).just_get_active_character().get_id(),
+                    ),
+                    oppo_active=eft.StaticTarget(
+                        pid=source.pid.other(),
+                        zone=eft.Zone.CHARACTER,
+                        id=game_state.get_player(source.pid.other()).just_get_active_character().get_id(),
+                    ),
+                )
+            )
+        if has_damage:
+            es.append(eft.DeathCheckCheckerEffect())
 
         return es
 
@@ -576,7 +601,6 @@ class Icicle(CombatStatus, _UsageStatus):
                     damage=2,
                     damage_type=eft.DamageType(status=True),
                 ),
-                eft.DeathCheckCheckerEffect(),
             ]
             return effects, replace(self, usages=-1)
         return [], self

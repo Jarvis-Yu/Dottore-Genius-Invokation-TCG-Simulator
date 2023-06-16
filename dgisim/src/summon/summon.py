@@ -56,7 +56,6 @@ class BurningFlameSummon(_DestroyOnNumSummon):
                     damage_type=eft.DamageType(summon=True),
                 )
             )
-            es.append(eft.DeathCheckCheckerEffect())
         return es, replace(self, usages=d_usages)
 
     def _update(self, other: BurningFlameSummon) -> Optional[BurningFlameSummon]:
