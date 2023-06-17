@@ -2,8 +2,8 @@ from __future__ import annotations
 from typing import ClassVar, Optional
 from typing_extensions import override, Self
 from dataclasses import dataclass, replace
-import dgisim.src.state.game_state as gs
 
+from dgisim.src.helper.quality_of_life import BIG_INT
 import dgisim.src.status.status as stt
 import dgisim.src.effect.effect as eft
 from dgisim.src.element.element import Element
@@ -50,11 +50,12 @@ class _DestoryOnEndNumSummon(Summon):
         return effects, new_status
 
 
-@dataclass(frozen=True)
-class BurningFlameSummon(_DestroyOnNumSummon):
-    usages: int = 1
-    MAX_USAGES: ClassVar[int] = 2
-    DMG: ClassVar[int] = 1
+@dataclass(frozen=True, kw_only=True)
+class _DmgPerRoundSummon(_DestroyOnNumSummon):
+    usages: int = -1
+    MAX_USAGES: ClassVar[int] = BIG_INT
+    DMG: ClassVar[int] = 0
+    ELEMENT: ClassVar[Element] = Element.ANY  # should be overriden
 
     def _react_to_signal(
             self,
@@ -69,7 +70,7 @@ class BurningFlameSummon(_DestroyOnNumSummon):
                 eft.ReferredDamageEffect(
                     source=source,
                     target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
-                    element=Element.PYRO,
+                    element=self.ELEMENT,
                     damage=self.DMG,
                     damage_type=eft.DamageType(summon=True),
                 )
@@ -81,7 +82,15 @@ class BurningFlameSummon(_DestroyOnNumSummon):
         return type(self)(usages=new_usages)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
+class BurningFlameSummon(_DmgPerRoundSummon):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.PYRO
+
+
+@dataclass(frozen=True, kw_only=True)
 class OceanicMimicFrogSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2
@@ -100,17 +109,33 @@ class OceanicMimicFrogSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
             signal: eft.TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         es: list[eft.Effect] = []
-        if signal is eft.TriggeringSignal.END_ROUND_CHECK_OUT:
-            if self.usages == 0:
-                es.append(
-                    eft.ReferredDamageEffect(
-                        source=source,
-                        target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
-                        element=Element.HYDRO,
-                        damage=self.DMG,
-                        damage_type=eft.DamageType(summon=True),
-                    )
+        if signal is eft.TriggeringSignal.END_ROUND_CHECK_OUT \
+                and self.usages == 0:
+            es.append(
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=Element.HYDRO,
+                    damage=self.DMG,
+                    damage_type=eft.DamageType(summon=True),
                 )
-                return es, None
+            )
+            return es, None
 
         return es, self
+
+
+@dataclass(frozen=True, kw_only=True)
+class OceanicMimicRaptor(_DmgPerRoundSummon):
+    usages: int = 3
+    MAX_USAGES: ClassVar[int] = 3
+    DMG: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.HYDRO
+
+
+@dataclass(frozen=True, kw_only=True)
+class OceanicMimicSquirrel(_DmgPerRoundSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 2
+    ELEMENT: ClassVar[Element] = Element.HYDRO
