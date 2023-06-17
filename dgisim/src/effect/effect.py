@@ -634,7 +634,7 @@ class SpecificDamageEffect(Effect):
             cls, game_state: gs.GameState, damage: SpecificDamageEffect
     ) -> tuple[gs.GameState, SpecificDamageEffect]:
         """ This is the pass to check final damage element """
-        return cls._damage_preprocess(game_state, damage, stt.Status.PPType.DmgElement)
+        return cls._damage_preprocess(game_state, damage, stt.Status.PPType.DMG_ELEMENT)
 
     @classmethod
     def _reaction_confirmation(
@@ -676,7 +676,7 @@ class SpecificDamageEffect(Effect):
             ).build()
 
         game_state, damage = cls._damage_preprocess(
-            game_state, damage, stt.Status.PPType.DmgReaction
+            game_state, damage, stt.Status.PPType.DMG_REACTION
         )
         return game_state, damage, reactionDetail
 
@@ -685,7 +685,7 @@ class SpecificDamageEffect(Effect):
             cls, game_state: gs.GameState, damage: SpecificDamageEffect
     ) -> tuple[gs.GameState, SpecificDamageEffect]:
         """ This is the pass to check final damage amount """
-        return cls._damage_preprocess(game_state, damage, stt.Status.PPType.DmgAmount)
+        return cls._damage_preprocess(game_state, damage, stt.Status.PPType.DMG_AMOUNT)
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         # Preprocessing
@@ -1261,4 +1261,4 @@ class CastSkillEffect(Effect):
 
 
 # This has to be by the end of the file or there's cyclic import error
-Preprocessable = Union[SpecificDamageEffect, int]
+Preprocessable = Union[SpecificDamageEffect, int]  # int is just a placeholder

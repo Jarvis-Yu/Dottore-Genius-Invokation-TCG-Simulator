@@ -5,6 +5,7 @@ from dgisim.src.action import PlayerAction
 from dgisim.src.player_agent import PlayerAgent
 from dgisim.src.state.game_state import GameState
 from dgisim.src.action import *
+from dgisim.src.effect.effect import *
 from dgisim.src.phase.card_select_phase import CardSelectPhase
 from dgisim.src.phase.starting_hand_select_phase import StartingHandSelectPhase
 from dgisim.src.phase.roll_phase import RollPhase

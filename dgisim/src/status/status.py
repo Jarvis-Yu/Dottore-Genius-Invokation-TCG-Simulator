@@ -5,8 +5,10 @@ from enum import Enum
 from dataclasses import dataclass, replace
 from math import ceil
 
-import dgisim.src.effect.effect as eft
 import dgisim.src.state.game_state as gs
+import dgisim.src.character.character as chr
+import dgisim.src.card.card as cd
+import dgisim.src.effect.effect as eft
 from dgisim.src.element.element import Element
 from dgisim.src.helper.quality_of_life import just, BIG_INT, case_val
 
@@ -23,9 +25,9 @@ class Status:
     class PPType(Enum):
         """ PreProcessType """
         # Damages
-        DmgElement = "DmgElement"    # To determine the element
-        DmgReaction = "DmgReaction"  # To determine the reaction
-        DmgAmount = "DmgNumber"      # To determine final amount of damage
+        DMG_ELEMENT = "DmgElement"    # To determine the element
+        DMG_REACTION = "DmgReaction"  # To determine the reaction
+        DMG_AMOUNT = "DmgNumber"      # To determine final amount of damage
 
     def __init__(self) -> None:
         if type(self) is Status:  # pragma: no cover
@@ -42,6 +44,48 @@ class Status:
         Returns the processed Preprocessable and possibly updated or deleted self
         """
         return (item, self)
+
+    def inform(
+            self,
+            game_state: gs.GameState,
+            status_source: eft.StaticTarget,
+            information: eft.SpecificDamageEffect | chr.CharacterSkill | cd.Card,
+    ) -> gs.GameState:
+        new_self = self._inform(game_state, status_source, information)
+        if new_self == self:
+            return game_state
+
+        import dgisim.src.summon.summon as sm
+        if isinstance(new_self, CharacterTalentStatus) \
+                or isinstance(new_self, EquipmentStatus) \
+                or isinstance(new_self, CharacterStatus):
+            return eft.OverrideCharacterStatusEffect(
+                target=status_source,
+                status=new_self,
+            ).execute(game_state)
+
+        elif isinstance(new_self, CombatStatus):
+            return eft.OverrideCombatStatusEffect(
+                target_pid=status_source.pid,
+                status=new_self,
+            ).execute(game_state)
+
+        elif isinstance(new_self, sm.Summon):
+            return eft.OverrideSummonEffect(
+                target_pid=status_source.pid,
+                summon=new_self,
+            ).execute(game_state)
+
+        else:
+            raise NotImplementedError
+
+    def _inform(
+            self: _T,
+            game_state: gs.GameState,
+            status_source: eft.StaticTarget,
+            information: eft.SpecificDamageEffect | chr.CharacterSkill | cd.Card,
+    ) -> _T:
+        return self
 
     # def react_to_event(self, game_state: gs.GameState, event: TriggerringEvent) -> gs.GameState:
     #     raise Exception("TODO")
@@ -126,7 +170,7 @@ class Status:
         return new_self
 
     def _update(self: _T, other: _T) -> Optional[_T]:
-        return self
+        return other
 
     def __str__(self) -> str:
         return self.__class__.__name__.removesuffix("Status")  # pragma: no cover
@@ -252,7 +296,7 @@ class StackedShieldStatus(ShieldStatus):
             signal: Status.PPType,
     ) -> tuple[eft.Preprocessable, Optional[StackedShieldStatus]]:
         cls = type(self)
-        if signal is Status.PPType.DmgAmount:
+        if signal is Status.PPType.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             assert cls.STACK_LIMIT is None or self.stacks <= type(self).STACK_LIMIT  # type: ignore
             if item.damage > 0 \
@@ -304,7 +348,7 @@ class DendroCoreStatus(CombatStatus):
             item: eft.Preprocessable,
             signal: Status.PPType,
     ) -> tuple[eft.Preprocessable, Optional[DendroCoreStatus]]:
-        if signal is Status.PPType.DmgAmount:
+        if signal is Status.PPType.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             assert self.usages >= 1
             elem_can_boost = item.element is Element.ELECTRO or item.element is Element.PYRO
@@ -342,7 +386,7 @@ class CatalyzingFieldStatus(CombatStatus):
             item: eft.Preprocessable,
             signal: Status.PPType,
     ) -> tuple[eft.Preprocessable, Optional[CatalyzingFieldStatus]]:
-        if signal is Status.PPType.DmgAmount:
+        if signal is Status.PPType.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             assert self.usages >= 1
             elem_can_boost = item.element is Element.ELECTRO or item.element is Element.DENDRO
@@ -374,7 +418,7 @@ class FrozenStatus(CharacterStatus):
             item: eft.Preprocessable,
             signal: Status.PPType,
     ) -> tuple[eft.Preprocessable, Optional[_T]]:
-        if signal is Status.PPType.DmgAmount:
+        if signal is Status.PPType.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             can_reaction = item.element is Element.PYRO or item.element is Element.PHYSICAL
             is_damage_target = item.target == status_source
@@ -437,7 +481,7 @@ class JueyunGuobaStatus(CharacterStatus):
             item: eft.Preprocessable,
             signal: Status.PPType,
     ) -> tuple[eft.Preprocessable, Optional[_T]]:
-        if signal is Status.PPType.DmgAmount:
+        if signal is Status.PPType.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             if item.source == status_source and item.damage_type.normal_attack:
                 item = replace(item, damage=item.damage + JueyunGuobaStatus.damage_boost)
@@ -473,10 +517,10 @@ class _InfusionStatus(CharacterStatus, _DurationStatus):
         assert self.element is not None
         new_item: Optional[eft.SpecificDamageEffect] = None
         if isinstance(item, eft.SpecificDamageEffect):
-            if signal is Status.PPType.DmgElement:
+            if signal is Status.PPType.DMG_ELEMENT:
                 if self._dmg_element_condition(game_state, status_source, item):
                     new_item = replace(item, element=self.element)
-            if signal is Status.PPType.DmgAmount:
+            if signal is Status.PPType.DMG_AMOUNT:
                 if self.damage_boost != 0  \
                         and self._dmg_boost_condition(game_state, status_source, item):
                     new_item = replace(item, damage=item.damage + self.damage_boost)
@@ -584,5 +628,42 @@ class Icicle(CombatStatus, _UsageStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class ColdBloodedStrikeStatus(EquipmentStatus):
-    # TODO: detect kaeya elemental skill, react to it and recover hp
-    pass
+    """
+    Equipping this status implies the equipped character is Kaeya
+    """
+    usages: int = 1
+    activated: bool = False
+
+    @override
+    def _inform(
+            self,
+            game_state: gs.GameState,
+            status_source: eft.StaticTarget,
+            information: eft.SpecificDamageEffect | chr.CharacterSkill | cd.Card,
+    ) -> ColdBloodedStrikeStatus:
+        if self.activated or self.usages == 0:
+            return self
+
+        if not isinstance(information, eft.SpecificDamageEffect):
+            return self
+
+        damage = information
+        if damage.source != information.source \
+                or damage.damage_type != eft.DamageType.elemental_skill:
+            return self
+
+        return replace(self, activated=True)
+
+    @override
+    def _react_to_signal(
+            self,
+            source: eft.StaticTarget,
+            signal: eft.TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[ColdBloodedStrikeStatus]]:
+        es: list[eft.Effect] = []
+        # new_
+
+        # if signal is eft.TriggeringSignal.COMBAT_ACTION:
+        #     es.append()
+
+        return super()._react_to_signal(source, signal)

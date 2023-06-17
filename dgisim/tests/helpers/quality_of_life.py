@@ -4,6 +4,7 @@ from dgisim.src.element.element import *
 from dgisim.src.helper.level_print import GamePrinter
 from dgisim.src.helper.quality_of_life import *
 from dgisim.src.agents import *
+from dgisim.src.effect.effect import *
 
 
 def auto_step(game_state: GameState, observe: bool = False) -> GameState:

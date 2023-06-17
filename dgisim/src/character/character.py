@@ -1,13 +1,13 @@
 from __future__ import annotations
 from typing import Optional, Tuple, Callable, Union
+from typing_extensions import override
 from enum import Enum
 from dataclasses import dataclass
-from dgisim.src.effect.event import eft, gs
 
 import dgisim.src.state.game_state as gs
 import dgisim.src.card.card as cd
-from dgisim.src.status.status import Status
-from dgisim.src.status.statuses import Statuses, EquipmentStatuses, OrderedStatuses, TalentStatuses
+import dgisim.src.status.status as stt
+import dgisim.src.status.statuses as stts
 from dgisim.src.element.element import ElementalAura
 from dgisim.src.effect.event_pre import EventPre
 from dgisim.src.dices import AbstractDices
@@ -26,7 +26,6 @@ class CharacterSkill(Enum):
 
 
 class Character:
-    TALENT_STATUS: Optional[type[stt.EquipmentStatus]] = None
 
     def __init__(
         self,
@@ -35,9 +34,9 @@ class Character:
         max_hp: int,
         energy: int,
         max_energy: int,
-        talents: TalentStatuses,
-        equipments: EquipmentStatuses,
-        statuses: Statuses,
+        talents: stts.TalentStatuses,
+        equipments: stts.EquipmentStatuses,
+        statuses: stts.Statuses,
         elemental_aura: ElementalAura,
     ):
         self._id = id
@@ -49,6 +48,10 @@ class Character:
         self._equipments = equipments
         self._statuses = statuses
         self._aura = elemental_aura
+
+    @staticmethod
+    def _talent_status() -> Optional[type[stt.EquipmentStatus]]:
+        return None
 
     def get_id(self) -> int:
         return self._id
@@ -65,22 +68,22 @@ class Character:
     def get_max_energy(self) -> int:
         return self._max_energy
 
-    def get_talent_statuses(self) -> TalentStatuses:
+    def get_talent_statuses(self) -> stts.TalentStatuses:
         return self._talents
 
-    def get_equipment_statuses(self) -> EquipmentStatuses:
+    def get_equipment_statuses(self) -> stts.EquipmentStatuses:
         return self._equipments
 
-    def get_character_statuses(self) -> Statuses:
+    def get_character_statuses(self) -> stts.Statuses:
         return self._statuses
 
     def get_elemental_aura(self) -> ElementalAura:
         return self._aura
 
-    def get_all_statuses_ordered(self) -> list[Statuses]:
+    def get_all_statuses_ordered(self) -> list[stts.Statuses]:
         return [self._talents, self._equipments, self._statuses]
 
-    def get_all_statuses_ordered_flattened(self) -> tuple[Status, ...]:
+    def get_all_statuses_ordered_flattened(self) -> tuple[stt.Status, ...]:
         return sum([statuses.get_statuses() for statuses in self.get_all_statuses_ordered()], ())
 
     def factory(self) -> CharacterFactory:
@@ -215,8 +218,9 @@ class Character:
         return effects
 
     def talent_equiped(self) -> bool:
-        assert self.TALENT_STATUS is not None
-        return self.get_equipment_statuses().contains(self.TALENT_STATUS)
+        talent_status = self._talent_status()
+        assert talent_status is not None
+        return self.get_equipment_statuses().contains(talent_status)
 
     def alive(self) -> bool:
         return not self.defeated()
@@ -304,25 +308,25 @@ class CharacterFactory:
         self._energy = energy
         return self
 
-    def talents(self, talents: TalentStatuses) -> CharacterFactory:
+    def talents(self, talents: stts.TalentStatuses) -> CharacterFactory:
         self._talents = talents
         return self
 
-    def f_talents(self, f: Callable[[TalentStatuses], TalentStatuses]) -> CharacterFactory:
+    def f_talents(self, f: Callable[[stts.TalentStatuses], stts.TalentStatuses]) -> CharacterFactory:
         return self.talents(f(self._talents))
 
-    def equipments(self, equipments: EquipmentStatuses) -> CharacterFactory:
+    def equipments(self, equipments: stts.EquipmentStatuses) -> CharacterFactory:
         self._equipments = equipments
         return self
 
-    def f_equipments(self, f: Callable[[EquipmentStatuses], EquipmentStatuses]) -> CharacterFactory:
+    def f_equipments(self, f: Callable[[stts.EquipmentStatuses], stts.EquipmentStatuses]) -> CharacterFactory:
         return self.equipments(f(self._equipments))
 
-    def character_statuses(self, statuses: Statuses) -> CharacterFactory:
+    def character_statuses(self, statuses: stts.Statuses) -> CharacterFactory:
         self._statuses = statuses
         return self
 
-    def f_character_statuses(self, f: Callable[[Statuses], Statuses]) -> CharacterFactory:
+    def f_character_statuses(self, f: Callable[[stts.Statuses], stts.Statuses]) -> CharacterFactory:
         return self.character_statuses(f(self._statuses))
 
     def elemental_aura(self, aura: ElementalAura) -> CharacterFactory:
@@ -345,7 +349,11 @@ class CharacterFactory:
 
 class Keqing(Character):
     BASE_ELECTRO_INFUSION_DURATION: int = 2
-    TALENT_STATUS = stt.ThunderingPenanceStatus
+
+    @override
+    @staticmethod
+    def _talent_status() -> Optional[type[stt.EquipmentStatus]]:
+        return stt.ThunderingPenanceStatus
 
     def _normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
         source = self.location(game_state)
@@ -453,9 +461,9 @@ class Keqing(Character):
             max_hp=10,
             energy=0,
             max_energy=3,
-            statuses=OrderedStatuses(()),
-            talents=TalentStatuses((stt.KeqingTalentStatus(can_infuse=False),)),
-            equipments=EquipmentStatuses(()),
+            statuses=stts.OrderedStatuses(()),
+            talents=stts.TalentStatuses((stt.KeqingTalentStatus(can_infuse=False),)),
+            equipments=stts.EquipmentStatuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
 
@@ -518,9 +526,9 @@ class Kaeya(Character):
             max_hp=10,
             energy=0,
             max_energy=2,
-            talents=TalentStatuses(()),
-            equipments=EquipmentStatuses(()),
-            statuses=OrderedStatuses(()),
+            talents=stts.TalentStatuses(()),
+            equipments=stts.EquipmentStatuses(()),
+            statuses=stts.OrderedStatuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
 
@@ -553,9 +561,9 @@ class Oceanid(Character):
             max_hp=10,
             energy=0,
             max_energy=3,
-            talents=TalentStatuses(()),
-            equipments=EquipmentStatuses(()),
-            statuses=OrderedStatuses(()),
+            talents=stts.TalentStatuses(()),
+            equipments=stts.EquipmentStatuses(()),
+            statuses=stts.OrderedStatuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
 
