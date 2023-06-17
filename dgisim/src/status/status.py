@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import TypeVar, Union, Optional, ClassVar
-from typing_extensions import override
+from typing_extensions import override, Self
 from enum import Enum
 from dataclasses import dataclass, replace
 from math import ceil
@@ -34,16 +34,44 @@ class Status:
             raise Exception("class Status is not instantiable")
 
     def preprocess(
-            self: _T,
+            self,
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
             signal: Status.PPType,
-    ) -> tuple[eft.Preprocessable, Optional[_T]]:
+    ) -> tuple[eft.Preprocessable, Optional[Self]]:
         """
         Returns the processed Preprocessable and possibly updated or deleted self
         """
+        new_item, new_self = self._preprocess(game_state, status_source, item, signal)
+        return self._post_preprocess(
+            game_state,
+            status_source,
+            item,
+            signal,
+            new_item,
+            new_self,
+        )
+
+    def _preprocess(
+            self,
+            game_state: gs.GameState,
+            status_source: eft.StaticTarget,
+            item: eft.Preprocessable,
+            signal: Status.PPType,
+    ) -> tuple[eft.Preprocessable, Optional[Self]]:
         return (item, self)
+
+    def _post_preprocess(
+            self,
+            game_state: gs.GameState,
+            status_source: eft.StaticTarget,
+            item: eft.Preprocessable,
+            signal: Status.PPType,
+            new_item: eft.Preprocessable,
+            new_self: Optional[Self],
+    ) -> tuple[eft.Preprocessable, Optional[Self]]:
+        return (new_item, new_self)
 
     def inform(
             self,
@@ -96,7 +124,7 @@ class Status:
             self, game_state: gs.GameState, source: eft.StaticTarget, signal: eft.TriggeringSignal
     ) -> list[eft.Effect]:
         es, new_status = self._react_to_signal(source, signal)
-        es, new_status = self._post_react_to_signal(es, new_status)
+        es, new_status = self._post_react_to_signal(es, new_status, signal)
 
         import dgisim.src.summon.summon as sm
         # do the removal or update of the status
@@ -108,7 +136,7 @@ class Status:
                     source,
                     type(self),
                 ))
-            elif new_status != self:
+            elif new_status is not self and self.update(new_status) != self:  # type: ignore
                 assert type(self) == type(new_status)
                 es.append(eft.UpdateCharacterStatusEffect(
                     source,
@@ -121,7 +149,7 @@ class Status:
                     source.pid,
                     type(self),
                 ))
-            elif new_status != self:
+            elif new_status is not self and self.update(new_status) != self:  # type: ignore
                 assert type(self) == type(new_status)
                 es.append(eft.UpdateCombatStatusEffect(
                     source.pid,
@@ -134,7 +162,7 @@ class Status:
                     source.pid,
                     type(self),
                 ))
-            elif new_status != self:
+            elif new_status is not self and self.update(new_status) != self:  # type: ignore
                 assert type(self) == type(new_status)
                 es.append(eft.UpdateSummonEffect(
                     source.pid,
@@ -162,7 +190,8 @@ class Status:
                     oppo_active=eft.StaticTarget(
                         pid=source.pid.other(),
                         zone=eft.Zone.CHARACTER,
-                        id=game_state.get_player(source.pid.other()).just_get_active_character().get_id(),
+                        id=game_state.get_player(
+                            source.pid.other()).just_get_active_character().get_id(),
                     ),
                 )
             )
@@ -172,17 +201,24 @@ class Status:
         return es
 
     def _post_react_to_signal(
-            self: _T, effects: list[eft.Effect], new_status: Optional[_T]
-    ) -> tuple[list[eft.Effect], Optional[_T]]:
+            self,
+            effects: list[eft.Effect],
+            new_status: Optional[Self],
+            signal: eft.TriggeringSignal,
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
         if new_status != self:
             return effects, new_status
         return effects, self
 
     def _react_to_signal(
-            self: _T, source: eft.StaticTarget, signal: eft.TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[_T]]:
+            self, source: eft.StaticTarget, signal: eft.TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
         """
-        Returns a tuple, containg the effects and updated self (or None if should be removed)
+        Returns a tuple, containg the effects and how to update self
+        * if the returned new self is the same object as myself, then it is taken as no change
+          requested
+        * if the returned new self is none, then it is taken as a removal request
+        * if the returned new self is different object than myself, then it is taken as an update
         """
         return [], self
 
@@ -281,15 +317,6 @@ class _UsageStatus(Status):
 
 @dataclass(frozen=True)
 class ShieldStatus(Status):
-    pass
-
-
-@dataclass(frozen=True, kw_only=True)
-class StackedShieldStatus(ShieldStatus):
-    stacks: int
-    STACK_LIMIT: ClassVar[Optional[int]] = None
-    SHIELD_AMOUNT: ClassVar[int] = 1  # shield amount per stack
-
     def _is_target(
             self,
             game_state: gs.GameState,
@@ -297,6 +324,7 @@ class StackedShieldStatus(ShieldStatus):
             item: eft.Preprocessable,
             signal: Status.PPType,
     ) -> bool:
+        import dgisim.src.summon.summon as sm
         assert isinstance(item, eft.SpecificDamageEffect)
         if isinstance(self, CharacterTalentStatus) \
                 or isinstance(self, EquipmentStatus) \
@@ -311,48 +339,104 @@ class StackedShieldStatus(ShieldStatus):
             )
             return item.target == attached_active_character
 
+        elif isinstance(self, sm.Summon):
+            attached_active_character = eft.StaticTarget(
+                status_source.pid,
+                zone=eft.Zone.CHARACTER,
+                id=game_state.get_player(status_source.pid).just_get_active_character().get_id(),
+            )
+            return item.target == attached_active_character
+
+
         else:
             raise NotImplementedError  # pragma: no cover
 
+
+@dataclass(frozen=True, kw_only=True)
+class StackedShieldStatus(ShieldStatus):
+    usages: int
+    MAX_USAGES: ClassVar[int] = BIG_INT
+    SHIELD_AMOUNT: ClassVar[int] = 1  # shield amount per stack
+
     @override
-    def preprocess(
+    def _preprocess(
             self,
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
             signal: Status.PPType,
-    ) -> tuple[eft.Preprocessable, Optional[StackedShieldStatus]]:
+    ) -> tuple[eft.Preprocessable, Optional[Self]]:
         cls = type(self)
         if signal is Status.PPType.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
-            assert cls.STACK_LIMIT is None or self.stacks <= type(self).STACK_LIMIT  # type: ignore
-            if item.damage > 0 \
+            assert self.usages <= type(self).MAX_USAGES
+            if item.damage > 0 and self.usages > 0 \
                     and item.element != Element.PIERCING \
                     and self._is_target(game_state, status_source, item, signal):
-                stacks_consumed = min(ceil(item.damage / cls.SHIELD_AMOUNT), self.stacks)
-                new_dmg = max(0, item.damage - stacks_consumed * cls.SHIELD_AMOUNT)
+                usages_consumed = min(ceil(item.damage / cls.SHIELD_AMOUNT), self.usages)
+                new_dmg = max(0, item.damage - usages_consumed * cls.SHIELD_AMOUNT)
                 new_item = replace(item, damage=new_dmg)
-                new_stacks = self.stacks - stacks_consumed
-                if new_stacks == 0:
+                new_usages = self.usages - usages_consumed
+                if new_usages == 0:
                     return new_item, None
                 else:
-                    return new_item, replace(self, stacks=new_stacks)
+                    return new_item, replace(self, usages=new_usages)
 
-        return super().preprocess(game_state, status_source, item, signal)
+        return super()._preprocess(game_state, status_source, item, signal)
 
     def __str__(self) -> str:
-        return super().__str__() + f"({self.stacks})"  # pragma: no cover
+        return super().__str__() + f"({self.usages})"  # pragma: no cover
+
+
+@dataclass(frozen=True, kw_only=True)
+class FixedShieldStatus(ShieldStatus):
+    usages: int
+    MAX_USAGES: ClassVar[int] = BIG_INT
+    SHIELD_AMOUNT: ClassVar[int] = 0  # shield amount per stack
+
+    def _trigerring_condition(self, damage: eft.SpecificDamageEffect) -> bool:
+        return True
+
+    @staticmethod
+    def _auto_destroy() -> bool:
+        return True
+
+    @override
+    def _preprocess(
+            self,
+            game_state: gs.GameState,
+            status_source: eft.StaticTarget,
+            item: eft.Preprocessable,
+            signal: Status.PPType,
+    ) -> tuple[eft.Preprocessable, Optional[Self]]:
+        cls = type(self)
+        if signal is Status.PPType.DMG_AMOUNT:
+            assert isinstance(item, eft.SpecificDamageEffect)
+            assert self.usages <= type(self).MAX_USAGES
+            if item.damage > 0 and self.usages > 0 \
+                    and item.element != Element.PIERCING \
+                    and self._is_target(game_state, status_source, item, signal) \
+                    and self._trigerring_condition(item):
+                new_dmg = max(0, item.damage - cls.SHIELD_AMOUNT)
+                new_item = replace(item, damage=new_dmg)
+                new_usages = self.usages - 1
+                if self._auto_destroy() and new_usages == 0:
+                    return new_item, None
+                else:
+                    return new_item, replace(self, usages=new_usages)
+
+        return super()._preprocess(game_state, status_source, item, signal)
 
 
 @dataclass(frozen=True, kw_only=True)
 class CrystallizeStatus(CombatStatus, StackedShieldStatus):
-    stacks: int = 1
-    STACK_LIMIT: ClassVar[Optional[int]] = 2
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 2
 
     @override
     def update(self, other: CrystallizeStatus) -> Optional[CrystallizeStatus]:
-        new_stacks = min(just(type(self).STACK_LIMIT, BIG_INT), self.stacks + other.stacks)
-        return type(self)(stacks=new_stacks)
+        new_stacks = min(just(type(self).MAX_USAGES, BIG_INT), self.usages + other.usages)
+        return type(self)(usages=new_stacks)
 
 
 @dataclass(frozen=True)
@@ -368,7 +452,7 @@ class DendroCoreStatus(CombatStatus):
     usages: int = 1
 
     @override
-    def preprocess(
+    def _preprocess(
             self,
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
@@ -389,7 +473,7 @@ class DendroCoreStatus(CombatStatus):
                     return new_damage, None
                 else:
                     return new_damage, DendroCoreStatus(self.usages - 1)
-        return super().preprocess(game_state, status_source, item, signal)
+        return super()._preprocess(game_state, status_source, item, signal)
 
     # @override
     # def update(self, other: DendroCoreStatus) -> DendroCoreStatus:
@@ -406,7 +490,7 @@ class CatalyzingFieldStatus(CombatStatus):
     usages: int = 2
 
     @override
-    def preprocess(
+    def _preprocess(
             self,
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
@@ -427,7 +511,7 @@ class CatalyzingFieldStatus(CombatStatus):
                     return new_damage, None
                 else:
                     return new_damage, CatalyzingFieldStatus(self.usages - 1)
-        return super().preprocess(game_state, status_source, item, signal)
+        return super()._preprocess(game_state, status_source, item, signal)
 
     def __str__(self) -> str:
         return super().__str__() + f"({self.usages})"  # pragma: no cover
@@ -438,7 +522,7 @@ class FrozenStatus(CharacterStatus):
     damage_boost: ClassVar[int] = 2
 
     @override
-    def preprocess(
+    def _preprocess(
             self: _T,
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
@@ -451,7 +535,7 @@ class FrozenStatus(CharacterStatus):
             is_damage_target = item.target == status_source
             if is_damage_target and can_reaction:
                 return replace(item, damage=item.damage + FrozenStatus.damage_boost), None
-        return super().preprocess(game_state, status_source, item, signal)
+        return super()._preprocess(game_state, status_source, item, signal)
 
     @override
     def _react_to_signal(
@@ -492,6 +576,7 @@ class MushroomPizzaStatus(CharacterStatus, _DurationStatus):
                     1,
                 )
             )
+
         return es, replace(self, duration=d_duration)
 
 
@@ -501,7 +586,7 @@ class JueyunGuobaStatus(CharacterStatus):
     duration: int = 1
 
     @override
-    def preprocess(
+    def _preprocess(
             self: _T,
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
@@ -513,7 +598,7 @@ class JueyunGuobaStatus(CharacterStatus):
             if item.source == status_source and item.damage_type.normal_attack:
                 item = replace(item, damage=item.damage + JueyunGuobaStatus.damage_boost)
                 return item, None
-        return super().preprocess(game_state, status_source, item, signal)
+        return super()._preprocess(game_state, status_source, item, signal)
 
     @override
     def _react_to_signal(
@@ -534,7 +619,7 @@ class _InfusionStatus(CharacterStatus, _DurationStatus):
     damage_boost: int = 0
 
     @override
-    def preprocess(
+    def _preprocess(
             self,
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
@@ -698,7 +783,7 @@ class ColdBloodedStrikeStatus(EquipmentStatus):
                     recovery=2,
                 )
             )
-            new_self = replace(new_self, usages=self.usages-1, activated=False)
+            new_self = replace(new_self, usages=self.usages - 1, activated=False)
 
         elif signal is eft.TriggeringSignal.ROUND_END:
             new_self = ColdBloodedStrikeStatus(usages=1, activated=False)

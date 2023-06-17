@@ -10,7 +10,7 @@ from dgisim.src.effect.effect import *
 BASE_GAME = GameState.from_default().factory().f_player1(
     lambda p: p.factory().characters(
         Characters((
-            Oceanid.from_default(1),
+            RhodeiaOfLoch.from_default(1),
             Kaeya.from_default(2),
             Keqing.from_default(3),
         ), None)
@@ -18,7 +18,7 @@ BASE_GAME = GameState.from_default().factory().f_player1(
 ).f_player2(
     lambda p: p.factory().characters(
         Characters((
-            Oceanid.from_default(1),
+            RhodeiaOfLoch.from_default(1),
             Kaeya.from_default(2),
             Keqing.from_default(3),
         ), None)

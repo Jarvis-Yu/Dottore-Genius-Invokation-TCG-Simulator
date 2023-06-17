@@ -3,6 +3,7 @@ from typing import Optional, Tuple, Callable, Union
 from typing_extensions import override
 from enum import Enum
 from dataclasses import dataclass
+from dgisim.src.effect.event import eft, gs
 
 import dgisim.src.state.game_state as gs
 import dgisim.src.card.card as cd
@@ -548,7 +549,7 @@ class Kaeya(Character):
         return self._all_unique_data() == other._all_unique_data()
 
 
-class Oceanid(Character):
+class RhodeiaOfLoch(Character):
 
     def _normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
         source = self.location(game_state)
@@ -560,11 +561,14 @@ class Oceanid(Character):
         )
 
     def _elemental_skill1(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
-        # TODO: add summons
+        source = self.location(game_state)
+        return ()
+
+    def _elemental_burst(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
         return ()
 
     @classmethod
-    def from_default(cls, id: int = -1) -> Oceanid:
+    def from_default(cls, id: int = -1) -> RhodeiaOfLoch:
         return cls(
             id=id,
             hp=10,
@@ -578,6 +582,6 @@ class Oceanid(Character):
         )
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Oceanid):
+        if not isinstance(other, RhodeiaOfLoch):
             return False
         return self._all_unique_data() == other._all_unique_data()

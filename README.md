@@ -14,7 +14,7 @@ The simulator is modeled as a finite state machine, where all game states are im
 
 ## Development Milestones
 
-The aim of my first stage is to make the games runs with characters Oceanid, Kaeya and Keqing,
+The aim of my first stage is to make the games runs with characters Rhodeia of Loch, Kaeya and Keqing,
 with limited action cards and all omni dices.
 
 - [x] Set up the framework for maintaining game states

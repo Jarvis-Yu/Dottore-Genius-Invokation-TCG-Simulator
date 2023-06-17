@@ -50,6 +50,7 @@ def add_damage_effect(
         game_state: GameState,
         damage: int,
         elem: Element,
+        pid: GameState.Pid = GameState.Pid.P2,
         char_id: Optional[int] = None,
 ) -> GameState:
     """
@@ -60,7 +61,7 @@ def add_damage_effect(
         lambda es: es.push_many_fl((
             ReferredDamageEffect(
                 source=StaticTarget(
-                    GameState.Pid.P1,
+                    pid.other(),
                     Zone.CHARACTER,
                     case_val(char_id is None, 1, char_id),  # type: ignore
                 ),

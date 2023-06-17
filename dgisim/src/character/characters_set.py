@@ -5,13 +5,13 @@ from dgisim.src.character.character import *
 DEFAULT_CHARACTERS: FrozenSet[Type[Character]] = frozenset({
     Keqing,
     Kaeya,
-    Oceanid,
+    RhodeiaOfLoch,
 })
 
 _DEFAULT_CHARACTERS: list[type[Character]] = [
     Keqing,
     Kaeya,
-    Oceanid,
+    RhodeiaOfLoch,
 ]
 
 _DEFAULT_CHARACTER_FSET = None

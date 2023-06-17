@@ -97,7 +97,7 @@ class TestStatus(unittest.TestCase):
 
     def testJueyunGuobaCardTakesEffect(self):
         """
-        Pre: active character of both players are Oceanid
+        Pre: active character of both players are "Rhodeia of Loch"
         TODO: move to test_card.py
         """
         base_game_state = ACTION_TEMPLATE.factory().f_player1(

@@ -747,7 +747,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 8)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
         self.assertEqual(
-            game_state.get_player1().get_combat_statuses().just_find(CrystallizeStatus).stacks,
+            game_state.get_player1().get_combat_statuses().just_find(CrystallizeStatus).usages,
             1
         )
 
@@ -760,7 +760,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 6)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
         self.assertEqual(
-            game_state.get_player1().get_combat_statuses().just_find(CrystallizeStatus).stacks,
+            game_state.get_player1().get_combat_statuses().just_find(CrystallizeStatus).usages,
             2
         )
 
@@ -773,7 +773,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 4)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
         self.assertEqual(
-            game_state.get_player1().get_combat_statuses().just_find(CrystallizeStatus).stacks,
+            game_state.get_player1().get_combat_statuses().just_find(CrystallizeStatus).usages,
             2
         )
 
@@ -783,12 +783,12 @@ class TestStatus(unittest.TestCase):
         """
         base_game_state_1 = ACTION_TEMPLATE.factory().f_player2(
             lambda p: p.factory().f_combat_statuses(
-                lambda ss: ss.update_status(CrystallizeStatus(stacks=1))
+                lambda ss: ss.update_status(CrystallizeStatus(usages=1))
             ).build()
         ).build()
         base_game_state_2 = ACTION_TEMPLATE.factory().f_player2(
             lambda p: p.factory().f_combat_statuses(
-                lambda ss: ss.update_status(CrystallizeStatus(stacks=2))
+                lambda ss: ss.update_status(CrystallizeStatus(usages=2))
             ).build()
         ).build()
 
@@ -800,7 +800,7 @@ class TestStatus(unittest.TestCase):
         self.assertTrue(ac.get_elemental_aura().contains(Element.CRYO))
         self.assertEqual(ac.get_hp(), 10)
         self.assertEqual(
-            game_state.get_player2().get_combat_statuses().just_find(CrystallizeStatus).stacks,
+            game_state.get_player2().get_combat_statuses().just_find(CrystallizeStatus).usages,
             1
         )
 
@@ -820,7 +820,7 @@ class TestStatus(unittest.TestCase):
         self.assertTrue(ac.get_elemental_aura().contains(Element.CRYO))
         self.assertEqual(ac.get_hp(), 10)
         self.assertEqual(
-            game_state.get_player2().get_combat_statuses().just_find(CrystallizeStatus).stacks,
+            game_state.get_player2().get_combat_statuses().just_find(CrystallizeStatus).usages,
             1
         )
 
