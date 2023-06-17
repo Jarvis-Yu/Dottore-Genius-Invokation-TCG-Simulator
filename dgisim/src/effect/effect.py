@@ -182,7 +182,7 @@ class TriggerSummonEffect(Effect):
         ).build()
 
 
-def _loopAllStatuses(
+def _loop_all_statuses(
         game_state: gs.GameState,
         pid: gs.GameState.Pid,
         f: Callable[[gs.GameState, stt.Status, StaticTarget], gs.GameState]
@@ -233,7 +233,7 @@ def _loopAllStatuses(
     return game_state
 
 
-def _triggerAllStatusesEffects(
+def _trigger_all_statuses_effects(
         game_state: gs.GameState, pid: gs.GameState.Pid, signal: TriggeringSignal
 ) -> list[Effect]:
     """
@@ -257,11 +257,11 @@ def _triggerAllStatusesEffects(
 
         return game_state
 
-    _loopAllStatuses(game_state, pid, f)
+    _loop_all_statuses(game_state, pid, f)
     return effects
 
 
-def _preprocessByAllStatuses(
+def _preprocess_by_all_statuses(
         game_state: gs.GameState,
         pid: gs.GameState.Pid,
         item: Preprocessable,
@@ -315,8 +315,26 @@ def _preprocessByAllStatuses(
 
         return game_state
 
-    game_state = _loopAllStatuses(game_state, pid, f)
+    game_state = _loop_all_statuses(game_state, pid, f)
     return game_state, item
+
+
+def _inform_all_statuses(
+        game_state: gs.GameState,
+        pid: gs.GameState.Pid,
+        info: SpecificDamageEffect | chr.CharacterSkill | cd.Card,
+        source: Optional[StaticTarget] = None,
+) -> gs.GameState:
+    def f(game_state: gs.GameState, status: stt.Status, status_source: StaticTarget) -> gs.GameState:
+        return status.inform(
+            game_state,
+            status_source,
+            info,
+            info_source=source,
+        )
+
+    game_state = _loop_all_statuses(game_state, pid, f)
+    return game_state
 
 
 @dataclass(frozen=True)
@@ -328,8 +346,8 @@ class AllStatusTriggererEffect(TriggerrbleEffect):
     signal: TriggeringSignal
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
-        effects = _triggerAllStatusesEffects(game_state, self.pid, self.signal)
-        effects += _triggerAllStatusesEffects(game_state, self.pid.other(), self.signal)
+        effects = _trigger_all_statuses_effects(game_state, self.pid, self.signal)
+        effects += _trigger_all_statuses_effects(game_state, self.pid.other(), self.signal)
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
@@ -622,9 +640,9 @@ class SpecificDamageEffect(Effect):
             game_state: gs.GameState, damage: SpecificDamageEffect, pp_type: stt.Status.PPType
     ) -> tuple[gs.GameState, SpecificDamageEffect]:
         source_id = damage.source.pid
-        game_state, item = _preprocessByAllStatuses(game_state, source_id, damage, pp_type)
+        game_state, item = _preprocess_by_all_statuses(game_state, source_id, damage, pp_type)
         assert type(item) == SpecificDamageEffect
-        game_state, item = _preprocessByAllStatuses(game_state, source_id.other(), item, pp_type)
+        game_state, item = _preprocess_by_all_statuses(game_state, source_id.other(), item, pp_type)
         assert type(item) == SpecificDamageEffect
         damage = item
         return game_state, damage
@@ -1258,6 +1276,20 @@ class CastSkillEffect(Effect):
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
+
+
+@dataclass(frozen=True)
+class BroadCastSkillInfoEffect(Effect):
+    source: StaticTarget
+    skill: chr.CharacterSkill
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        return _inform_all_statuses(
+            game_state,
+            self.source.pid,
+            self.skill,
+            source=self.source,
+        )
 
 
 # This has to be by the end of the file or there's cyclic import error

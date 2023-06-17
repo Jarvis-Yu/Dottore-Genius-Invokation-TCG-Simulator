@@ -105,6 +105,7 @@ class Character:
     def skill(self, game_state: gs.GameState, skill_type: CharacterSkill) -> tuple[eft.Effect, ...]:
         return self._post_skill(
             game_state,
+            skill_type,
             self._skill(game_state, skill_type),
         )
 
@@ -117,9 +118,18 @@ class Character:
             return self.elemental_burst(game_state)
         raise Exception("Not Overriden")
 
-    def _post_skill(self, game_state: gs.GameState, effects: tuple[eft.Effect, ...]) -> tuple[eft.Effect, ...]:
+    def _post_skill(
+            self,
+            game_state: gs.GameState,
+            skill_type: CharacterSkill,
+            effects: tuple[eft.Effect, ...],
+    ) -> tuple[eft.Effect, ...]:
         source = self.location(game_state)
         return effects + (
+            eft.BroadCastSkillInfoEffect(
+                source=source,
+                skill=skill_type,
+            ),
             eft.DeathCheckCheckerEffect(),
             eft.SwapCharacterCheckerEffect(
                 my_active=source,

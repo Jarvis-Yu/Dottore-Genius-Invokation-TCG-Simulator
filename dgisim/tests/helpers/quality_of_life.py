@@ -74,11 +74,17 @@ def add_damage_effect(
     ).build()
 
 
-def kill_character(game_state: GameState, character_id: int, hp: int = 0) -> GameState:
+def kill_character(
+        game_state: GameState,
+        character_id: int,
+        pid: GameState.Pid = GameState.Pid.P2,
+        hp: int = 0,
+) -> GameState:
     """
     Sets Player2's active character's hp to `hp` (default=0)
     """
-    return game_state.factory().f_player2(
+    return game_state.factory().f_player(
+        pid,
         lambda p: p.factory().f_characters(
             lambda cs: cs.factory().f_character(
                 character_id,

@@ -185,3 +185,61 @@ class TestKaeya(unittest.TestCase):
             p2.get_combat_statuses().just_find(Icicle).usages,
             2
         )
+
+    def testTalentCard(self):
+        a1, a2 = PuppetAgent(), PuppetAgent()
+        source = StaticTarget(GameState.Pid.P1, Zone.CHARACTER, 2)
+        initial_hp = 3
+        base_game_state = kill_character(
+            game_state=self.BASE_GAME,
+            character_id=2,
+            pid=GameState.Pid.P1,
+            hp=initial_hp,
+        )
+
+        gsm = GameStateMachine(base_game_state, a1, a2)
+        a1.inject_actions([
+            CardAction(
+                ColdBloodedStrike,
+                CharacterTargetInstruction(
+                    dices=ActualDices({}),
+                    target=source,
+                ),
+            ),
+            SkillAction(
+                CharacterSkill.ELEMENTAL_SKILL1,
+                DiceOnlyInstruction(dices=ActualDices({})),
+            ),
+            EndRoundAction(),
+            SkillAction(
+                CharacterSkill.ELEMENTAL_SKILL1,
+                DiceOnlyInstruction(dices=ActualDices({})),
+            ),
+        ])
+        a2.inject_action(EndRoundAction())
+
+        # equiping the talent card casts elemental skill and heals
+        gsm.player_step()
+        gsm.auto_step()
+        p1ac = gsm.get_game_state().get_player1().just_get_active_character()
+        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
+        self.assertEqual(p1ac.get_hp(), initial_hp + 2)
+        self.assertEqual(p2ac.get_hp(), 7)
+
+        # second elemtnal skill in same round doesn't heal
+        gsm.player_step()
+        gsm.auto_step()
+        p1ac = gsm.get_game_state().get_player1().just_get_active_character()
+        self.assertEqual(p1ac.get_hp(), initial_hp + 2)
+
+        gsm.player_step()  # p1 end round, go to next roun
+        gsm.auto_step()
+
+        gsm.player_step()  # p2 end round, let p1 play
+        gsm.auto_step()
+
+        # elemtnal skill in next round heals
+        gsm.player_step()
+        gsm.auto_step()
+        p1ac = gsm.get_game_state().get_player1().just_get_active_character()
+        self.assertEqual(p1ac.get_hp(), initial_hp + 4)

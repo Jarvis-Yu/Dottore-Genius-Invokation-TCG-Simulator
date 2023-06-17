@@ -135,12 +135,16 @@ class ActionPhase(ph.Phase):
         new_effects.append(SwapCharacterEffect(
             StaticTarget(pid, Zone.CHARACTER, action.selected_character_id)
         ))
-        is_combat_action = True
+
+        is_combat_action = True  # TODO: handle checking for fast/combat
         if is_combat_action:
-            # new_effects.append()
-            pass
-        else:
-            raise NotImplementedError
+            new_effects.append(
+                AllStatusTriggererEffect(
+                    pid=pid,
+                    signal=TriggeringSignal.COMBAT_ACTION,
+                )
+            )
+
         new_effects.append(TurnEndEffect(), )
         # TODO: posts
         return game_state.factory().effect_stack(
@@ -167,6 +171,7 @@ class ActionPhase(ph.Phase):
                 pid,
                 TriggeringSignal.COMBAT_ACTION,
             ))
+            new_effects.append(TurnEndEffect())
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(new_effects)
         ).player(

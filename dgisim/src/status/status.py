@@ -50,8 +50,9 @@ class Status:
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             information: eft.SpecificDamageEffect | chr.CharacterSkill | cd.Card,
+            info_source: Optional[eft.StaticTarget] = None,
     ) -> gs.GameState:
-        new_self = self._inform(game_state, status_source, information)
+        new_self = self._inform(game_state, status_source, information, info_source)
         if new_self == self:
             return game_state
 
@@ -84,6 +85,7 @@ class Status:
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             information: eft.SpecificDamageEffect | chr.CharacterSkill | cd.Card,
+            info_source: Optional[eft.StaticTarget],
     ) -> _T:
         return self
 
@@ -640,16 +642,17 @@ class ColdBloodedStrikeStatus(EquipmentStatus):
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             information: eft.SpecificDamageEffect | chr.CharacterSkill | cd.Card,
+            info_source: Optional[eft.StaticTarget],
     ) -> ColdBloodedStrikeStatus:
         if self.activated or self.usages == 0:
             return self
 
-        if not isinstance(information, eft.SpecificDamageEffect):
+        if not isinstance(information, chr.CharacterSkill):
             return self
 
-        damage = information
-        if damage.source != information.source \
-                or damage.damage_type != eft.DamageType.elemental_skill:
+        assert info_source != None
+        if status_source != info_source \
+                or information != chr.CharacterSkill.ELEMENTAL_SKILL1:
             return self
 
         return replace(self, activated=True)
@@ -661,9 +664,22 @@ class ColdBloodedStrikeStatus(EquipmentStatus):
             signal: eft.TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[ColdBloodedStrikeStatus]]:
         es: list[eft.Effect] = []
-        # new_
+        new_self = self
 
-        # if signal is eft.TriggeringSignal.COMBAT_ACTION:
-        #     es.append()
+        if signal is eft.TriggeringSignal.COMBAT_ACTION and self.activated:
+            assert self.usages >= 1
+            es.append(
+                eft.RecoverHPEffect(
+                    target=source,
+                    recovery=2,
+                )
+            )
+            new_self = replace(new_self, usages=self.usages-1, activated=False)
 
-        return super()._react_to_signal(source, signal)
+        elif signal is eft.TriggeringSignal.ROUND_END:
+            new_self = ColdBloodedStrikeStatus(usages=1, activated=False)
+
+        return es, new_self
+
+    def __str__(self) -> str:
+        return super().__str__() + case_val(self.activated, "(*)", '')
