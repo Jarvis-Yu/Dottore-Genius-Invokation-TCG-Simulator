@@ -158,27 +158,39 @@ class HardCodedRandomAgent(PlayerAgent):
                         )
                     )
 
-            # elemental skill1
-            if selection < 0.5 and active_character.can_cast_skill():
-                dices = available_dices.basically_satisfy(AbstractDices({
-                    Element.ANY: 2,
-                }))
-                if dices is not None:
-                    return SkillAction(
-                        CharacterSkill.ELEMENTAL_SKILL1,
-                        DiceOnlyInstruction(dices=dices),
-                    )
+            if selection < 0.6 and active_character.can_cast_skill():
+                # elemental burst
+                if active_character.get_energy() == active_character.get_max_energy():
+                    dices = available_dices.basically_satisfy(AbstractDices({
+                        Element.ANY: 3,
+                    }))
+                    if dices is not None:
+                        return SkillAction(
+                            CharacterSkill.ELEMENTAL_BURST,
+                            DiceOnlyInstruction(dices=dices),
+                        )
 
-            # normal attack
-            if selection < 0.5 and active_character.can_cast_skill():
-                dices = available_dices.basically_satisfy(AbstractDices({
-                    Element.ANY: 2,
-                }))
-                if dices is not None:
-                    return SkillAction(
-                        CharacterSkill.NORMAL_ATTACK,
-                        DiceOnlyInstruction(dices=dices),
-                    )
+                # elemental skill1
+                if selection < 0.5:
+                    dices = available_dices.basically_satisfy(AbstractDices({
+                        Element.ANY: 2,
+                    }))
+                    if dices is not None:
+                        return SkillAction(
+                            CharacterSkill.ELEMENTAL_SKILL1,
+                            DiceOnlyInstruction(dices=dices),
+                        )
+
+                # normal attack
+                if selection < 0.5:
+                    dices = available_dices.basically_satisfy(AbstractDices({
+                        Element.ANY: 2,
+                    }))
+                    if dices is not None:
+                        return SkillAction(
+                            CharacterSkill.NORMAL_ATTACK,
+                            DiceOnlyInstruction(dices=dices),
+                        )
             
             # swap character
             if selection < 0.7:
