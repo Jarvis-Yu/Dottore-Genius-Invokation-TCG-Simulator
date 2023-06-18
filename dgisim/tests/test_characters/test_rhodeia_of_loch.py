@@ -161,5 +161,93 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 9)
         self.assertTrue(p2ac.get_elemental_aura().contains(Element.HYDRO))
 
-    def test_elemental_skill(self):
-        pass
+    def test_elemental_skill1(self):
+        a1, a2 = PuppetAgent(), PuppetAgent()
+        base_game = self.BASE_GAME.factory().f_player1(
+            lambda p: p.factory().f_summons(
+                lambda ss: ss.update_summon(
+                    OceanicMimicRaptorSummon()
+                ).update_summon(
+                    OceanicMimicSquirrelSummon()
+                )
+            ).build()
+        ).build()
+        gsm = GameStateMachine(base_game, a1, a2)
+        a1.inject_action(SkillAction(
+            CharacterSkill.ELEMENTAL_SKILL1,
+            DiceOnlyInstruction(dices=ActualDices({})),
+        ))
+        gsm.player_step()
+        gsm.auto_step()
+        game_state = gsm.get_game_state()
+        p1_summons = game_state.get_player1().get_summons()
+        self.assertEqual(p1_summons.just_find(OceanicMimicFrogSummon).usages, 2)
+        self.assertEqual(p1_summons.just_find(OceanicMimicRaptorSummon).usages, 3)
+        self.assertEqual(p1_summons.just_find(OceanicMimicSquirrelSummon).usages, 2)
+
+    def test_elemental_skill2(self):
+        a1, a2 = PuppetAgent(), PuppetAgent()
+        base_game = self.BASE_GAME.factory().f_player1(
+            lambda p: p.factory().f_summons(
+                lambda ss: ss.update_summon(OceanicMimicRaptorSummon())
+            ).build()
+        ).build()
+        gsm = GameStateMachine(base_game, a1, a2)
+        a1.inject_action(SkillAction(
+            CharacterSkill.ELEMENTAL_SKILL2,
+            DiceOnlyInstruction(dices=ActualDices({})),
+        ))
+        gsm.player_step()
+        gsm.auto_step()
+        game_state = gsm.get_game_state()
+        p1_summons = game_state.get_player1().get_summons()
+        self.assertEqual(p1_summons.just_find(OceanicMimicFrogSummon).usages, 2)
+        self.assertEqual(p1_summons.just_find(OceanicMimicRaptorSummon).usages, 3)
+        self.assertEqual(p1_summons.just_find(OceanicMimicSquirrelSummon).usages, 2)
+
+    def test_elemental_burst(self):
+        a1, a2 = PuppetAgent(), PuppetAgent()
+        base_game = self.BASE_GAME.factory().f_player1(
+            lambda p: p.factory().f_summons(
+                lambda ss: ss.update_summon(
+                    OceanicMimicRaptorSummon()
+                )
+            ).f_characters(
+                lambda cs: cs.factory().f_active_character(
+                    lambda ac: ac.factory().energy(ac.get_max_energy()).build()
+                ).build()
+            ).build()
+        ).build()
+
+        # burst with one summon
+        gsm = GameStateMachine(base_game, a1, a2)
+        a1.inject_action(SkillAction(
+            CharacterSkill.ELEMENTAL_BURST,
+            DiceOnlyInstruction(dices=ActualDices({})),
+        ))
+        gsm.player_step()
+        gsm.auto_step()
+        game_state = gsm.get_game_state()
+        p2_ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2_ac.get_hp(), 6)
+        self.assertTrue(p2_ac.get_elemental_aura().contains(Element.HYDRO))
+
+        # burst with two summons
+        game_state = base_game.factory().f_player1(
+            lambda p: p.factory().f_summons(
+                lambda ss: ss.update_summon(
+                    BurningFlameSummon()
+                )
+            ).build()
+        ).build()
+        gsm = GameStateMachine(game_state, a1, a2)
+        a1.inject_action(SkillAction(
+            CharacterSkill.ELEMENTAL_BURST,
+            DiceOnlyInstruction(dices=ActualDices({})),
+        ))
+        gsm.player_step()
+        gsm.auto_step()
+        game_state = gsm.get_game_state()
+        p2_ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2_ac.get_hp(), 4)
+        self.assertTrue(p2_ac.get_elemental_aura().contains(Element.HYDRO))
