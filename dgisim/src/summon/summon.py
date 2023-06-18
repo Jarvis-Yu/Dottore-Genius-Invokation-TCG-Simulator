@@ -7,7 +7,6 @@ from dgisim.src.helper.quality_of_life import BIG_INT
 import dgisim.src.status.status as stt
 import dgisim.src.effect.effect as eft
 from dgisim.src.element.element import Element
-from dgisim.src.status.status import Status
 
 
 @dataclass(frozen=True, kw_only=True)

@@ -3,12 +3,13 @@ from typing import Optional, Tuple, Callable, Union
 from typing_extensions import override
 from enum import Enum
 from dataclasses import dataclass
-from dgisim.src.effect.event import eft, gs
 
 import dgisim.src.state.game_state as gs
 import dgisim.src.card.card as cd
 import dgisim.src.status.status as stt
+import dgisim.src.summon.summon as sm
 import dgisim.src.status.statuses as stts
+from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.element.element import ElementalAura
 from dgisim.src.effect.event_pre import EventPre
 from dgisim.src.dices import AbstractDices
@@ -17,13 +18,6 @@ import dgisim.src.effect.effect as eft
 import dgisim.src.status.status as stt
 from dgisim.src.element.element import *
 from dgisim.src.helper.level_print import level_print_single, INDENT, level_print
-
-
-class CharacterSkill(Enum):
-    NORMAL_ATTACK = 0
-    ELEMENTAL_BURST = 1
-    ELEMENTAL_SKILL1 = 2
-    ELEMENTAL_SKILL2 = 3
 
 
 class Character:
@@ -521,7 +515,7 @@ class Kaeya(Character):
                 target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
                 element=Element.CRYO,
                 damage=1,
-                damage_type=eft.DamageType(),
+                damage_type=eft.DamageType(elemental_burst=True),
             ),
             eft.OverrideCombatStatusEffect(
                 target_pid=source.pid,
@@ -550,6 +544,11 @@ class Kaeya(Character):
 
 
 class RhodeiaOfLoch(Character):
+    SUMMONS = (
+        sm.OceanicMimicSquirrel,
+        sm.OceanicMimicRaptor,
+        sm.OceanicMimicFrogSummon,
+    )
 
     def _normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
         source = self.location(game_state)
@@ -560,12 +559,51 @@ class RhodeiaOfLoch(Character):
             dices_num=game_state.get_player(source.pid).get_dices().num_dices()
         )
 
+    def _not_summoned_types(
+            self,
+            game_state: gs.GameState,
+            pid: gs.GameState.Pid
+    ) -> tuple[type[sm.Summon], ...]:
+        summons = game_state.get_player(pid).get_summons()
+        return tuple(
+            summon
+            for summon in self.SUMMONS
+            if summon not in summons
+        )
+
     def _elemental_skill1(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
+        from random import choice
         source = self.location(game_state)
-        return ()
+
+        summons_to_choose = self._not_summoned_types(game_state, source.pid)
+        summon: type[sm.Summon]
+        if summons_to_choose:
+            summon = choice(summons_to_choose)
+        else:  # if all kinds of summons have been summoned
+            summon = choice(self.SUMMONS)
+        return (
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=summon,
+            ),
+        )
 
     def _elemental_burst(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
-        return ()
+        source = self.location(game_state)
+        summons = game_state.get_player(source.pid).get_summons()
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.get_max_energy(),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.HYDRO,
+                damage=2 + 2 * len(summons),
+                damage_type=eft.DamageType(elemental_burst=True)
+            ),
+        )
 
     @classmethod
     def from_default(cls, id: int = -1) -> RhodeiaOfLoch:

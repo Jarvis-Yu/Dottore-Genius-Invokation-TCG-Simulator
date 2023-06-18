@@ -3,7 +3,7 @@ import unittest
 
 from dgisim.tests.helpers.game_state_templates import *
 from dgisim.src.game_state_machine import GameStateMachine
-from dgisim.src.character.character import CharacterSkill
+from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.card.card import *
 from dgisim.src.card.cards import Cards
 from dgisim.src.dices import ActualDices

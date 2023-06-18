@@ -1,19 +1,19 @@
 from __future__ import annotations
 from typing import TypeVar, Optional, Iterator
+from typing_extensions import Self
 
-from dgisim.src.status.status import Status
+import dgisim.src.status.status as stt
 from dgisim.src.helper.quality_of_life import just
 
 
-_T = TypeVar('_T', bound='Statuses')
 _U = TypeVar('_U')
 
 
 class Statuses:
-    def __init__(self, statuses: tuple[Status, ...]):
+    def __init__(self, statuses: tuple[stt.Status, ...]):
         self._statuses = statuses
 
-    def update_status(self: _T, incoming_status: Status, force: bool=False) -> _T:
+    def update_status(self, incoming_status: stt.Status, force: bool = False) -> Self:
         """
         Replaces existing status of the same type with the new_status,
         or append the new_status to the end of current statuses
@@ -23,7 +23,7 @@ class Statuses:
         for i, status in enumerate(statuses):
             if type(status) is not type(incoming_status):
                 continue
-            new_status: Optional[Status]
+            new_status: Optional[stt.Status]
             if force:
                 new_status = incoming_status
             else:
@@ -37,28 +37,28 @@ class Statuses:
         statuses.append(incoming_status)
         return cls(tuple(statuses))
 
-    def contains(self, status: type[Status]) -> bool:
+    def contains(self, status: type[stt.Status]) -> bool:
         return any(type(b) is status for b in self._statuses)
 
-    def find(self, status: type[Status]) -> Optional[Status]:
+    def find(self, status: type[stt.Status]) -> Optional[stt.Status]:
         return next((bf for bf in self._statuses if type(bf) is status), None)
 
     def just_find(self, status: type[_U]) -> _U:
         """ _U should be a subclass of type[Status] """
-        assert issubclass(status, Status)
+        assert issubclass(status, stt.Status)
         found_status = just(self.find(status))
         assert isinstance(found_status, status)
         return found_status  # type: ignore
 
-    def remove(self: _T, status: type[Status]) -> _T:
+    def remove(self, status: type[stt.Status]) -> Self:
         return type(self)(tuple(
             filter(lambda bf: type(bf) != status, self._statuses)
         ))
 
-    def get_statuses(self) -> tuple[Status, ...]:
+    def get_statuses(self) -> tuple[stt.Status, ...]:
         return self._statuses
 
-    def __iter__(self) -> Iterator[Status]:
+    def __iter__(self) -> Iterator[stt.Status]:
         return iter(self._statuses)
 
     def __eq__(self, other: object) -> bool:

@@ -65,7 +65,7 @@ class CardAction(GameAction):
 
 @dataclass(frozen=True)
 class SkillAction(GameAction):
-    from dgisim.src.character.character import CharacterSkill
+    from dgisim.src.character.character_skill_enum import CharacterSkill
     skill: CharacterSkill
     instruction: DiceOnlyInstruction
 

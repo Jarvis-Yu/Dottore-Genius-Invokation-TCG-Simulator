@@ -6,9 +6,9 @@ from dataclasses import dataclass, replace
 from math import ceil
 
 import dgisim.src.state.game_state as gs
-import dgisim.src.character.character as chr
 import dgisim.src.card.card as cd
 import dgisim.src.effect.effect as eft
+from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.element.element import Element
 from dgisim.src.helper.quality_of_life import just, BIG_INT, case_val
 
@@ -77,7 +77,7 @@ class Status:
             self,
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
-            information: eft.SpecificDamageEffect | chr.CharacterSkill | cd.Card,
+            information: eft.SpecificDamageEffect | CharacterSkill | cd.Card,
             info_source: Optional[eft.StaticTarget] = None,
     ) -> gs.GameState:
         new_self = self._inform(game_state, status_source, information, info_source)
@@ -112,7 +112,7 @@ class Status:
             self: _T,
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
-            information: eft.SpecificDamageEffect | chr.CharacterSkill | cd.Card,
+            information: eft.SpecificDamageEffect | CharacterSkill | cd.Card,
             info_source: Optional[eft.StaticTarget],
     ) -> _T:
         return self
@@ -750,18 +750,18 @@ class ColdBloodedStrikeStatus(EquipmentStatus):
             self,
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
-            information: eft.SpecificDamageEffect | chr.CharacterSkill | cd.Card,
+            information: eft.SpecificDamageEffect | CharacterSkill | cd.Card,
             info_source: Optional[eft.StaticTarget],
     ) -> ColdBloodedStrikeStatus:
         if self.activated or self.usages == 0:
             return self
 
-        if not isinstance(information, chr.CharacterSkill):
+        if not isinstance(information, CharacterSkill):
             return self
 
         assert info_source != None
         if status_source != info_source \
-                or information != chr.CharacterSkill.ELEMENTAL_SKILL1:
+                or information != CharacterSkill.ELEMENTAL_SKILL1:
             return self
 
         return replace(self, activated=True)

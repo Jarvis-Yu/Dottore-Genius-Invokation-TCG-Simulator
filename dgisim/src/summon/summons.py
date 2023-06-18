@@ -48,8 +48,17 @@ class Summons:
     def contains(self, summon_type: Union[type[Summon], Summon]) -> bool:
         return any(type(s) is summon_type for s in self._summons)
 
+    def __contains__(self, summon_type: Union[type[Summon], Summon]) -> bool:
+        return any(type(s) is summon_type for s in self._summons)
+
     def __iter__(self) -> Iterator[Summon]:
         return iter(self._summons)
 
     def __str__(self) -> str:  # pragma: no cover
-        return f"[{'.'.join(map(str, self._summons))}]"
+        return f"[{', '.join(map(str, self._summons))}]"
+
+    def len(self) -> int:
+        return len(self)
+
+    def __len__(self) -> int:
+        return len(self._summons)

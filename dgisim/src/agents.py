@@ -11,7 +11,7 @@ from dgisim.src.phase.starting_hand_select_phase import StartingHandSelectPhase
 from dgisim.src.phase.roll_phase import RollPhase
 from dgisim.src.phase.action_phase import ActionPhase
 from dgisim.src.card.cards import Cards
-from dgisim.src.character.character import CharacterSkill
+from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.dices import AbstractDices, ActualDices
 from dgisim.src.element.element import Element
 from dgisim.src.card.card import *

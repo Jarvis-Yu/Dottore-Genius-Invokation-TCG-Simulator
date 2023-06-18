@@ -143,6 +143,16 @@ class GamePrinter:
         return board
 
     @staticmethod
+    def _insert_summons(name: str, summons: str) -> StrDrawer:
+        board = StrDrawer()
+        board.insert_at(0, 0, f"<{name}>")
+        summon_strs = summons[1: -1].split(", ")
+        summon_strs = filter(lambda s: s != "", summon_strs)
+        for summon in summon_strs:
+            board.insert_at_nextline(2, f"<{summon}>")
+        return board
+
+    @staticmethod
     def _insert_player(name: str, player: dict) -> StrDrawer:
         board = StrDrawer()
         board.insert_at(0, 0, f"<Player: {name}>")
@@ -153,7 +163,10 @@ class GamePrinter:
             GamePrinter._insert_characters(player["Characters"]),
         )
         board.insert_at_nextline(0, GamePrinter._pair(player, "Combat Statuses"))
-        board.insert_at_nextline(0, GamePrinter._pair(player, "Summons"))
+        board.insert_board_at_nextline(
+            0,
+            GamePrinter._insert_summons("Summons", player["Summons"])
+        )
         board.insert_board_at_nextline(
             0,
             GamePrinter._insert_dices("Dices", player["Dices"]),

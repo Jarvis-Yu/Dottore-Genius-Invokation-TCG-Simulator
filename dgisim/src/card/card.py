@@ -8,7 +8,7 @@ import dgisim.src.state.game_state as gs
 import dgisim.src.effect.effect as eft
 import dgisim.src.action as ac
 import dgisim.src.status.status as stt
-import dgisim.src.character.character as chr
+from dgisim.src.character.character_skill_enum import CharacterSkill
 
 
 class Card:
@@ -185,7 +185,7 @@ class LightningStiletto(EventCard, _CombatActionCard):
             ),
             eft.CastSkillEffect(
                 target=instruction.target,
-                skill=chr.CharacterSkill.ELEMENTAL_SKILL1,
+                skill=CharacterSkill.ELEMENTAL_SKILL1,
             ),
         )
 
@@ -202,7 +202,7 @@ class ThunderingPenance(EquipmentCard, _CombatActionCard):
             ),
             eft.CastSkillEffect(
                 target=instruction.target,
-                skill=chr.CharacterSkill.ELEMENTAL_SKILL1,
+                skill=CharacterSkill.ELEMENTAL_SKILL1,
             ),
         )
 
@@ -221,6 +221,6 @@ class ColdBloodedStrike(EquipmentCard, _CombatActionCard):
             ),
             eft.CastSkillEffect(
                 target=instruction.target,
-                skill=chr.CharacterSkill.ELEMENTAL_SKILL1,
+                skill=CharacterSkill.ELEMENTAL_SKILL1,
             ),
         )

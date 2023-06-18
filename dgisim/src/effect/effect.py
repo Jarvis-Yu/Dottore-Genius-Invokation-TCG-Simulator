@@ -9,6 +9,7 @@ import dgisim.src.status.status as stt
 import dgisim.src.summon.summon as sm
 from dgisim.src.element.element import Element, Reaction, ReactionDetail
 import dgisim.src.character.character as chr
+from dgisim.src.character.character_skill_enum import CharacterSkill
 import dgisim.src.state.game_state as gs
 import dgisim.src.state.player_state as ps
 import dgisim.src.card.card as cd
@@ -324,7 +325,7 @@ def _preprocess_by_all_statuses(
 def _inform_all_statuses(
         game_state: gs.GameState,
         pid: gs.GameState.Pid,
-        info: SpecificDamageEffect | chr.CharacterSkill | cd.Card,
+        info: SpecificDamageEffect | CharacterSkill | cd.Card,
         source: Optional[StaticTarget] = None,
 ) -> gs.GameState:
     def f(game_state: gs.GameState, status: stt.Status, status_source: StaticTarget) -> gs.GameState:
@@ -1265,7 +1266,7 @@ class AddCardEffect(Effect):
 @dataclass(frozen=True)
 class CastSkillEffect(Effect):
     target: StaticTarget
-    skill: chr.CharacterSkill
+    skill: CharacterSkill
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         character = game_state.get_target(self.target)
@@ -1283,7 +1284,7 @@ class CastSkillEffect(Effect):
 @dataclass(frozen=True)
 class BroadCastSkillInfoEffect(Effect):
     source: StaticTarget
-    skill: chr.CharacterSkill
+    skill: CharacterSkill
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         return _inform_all_statuses(
