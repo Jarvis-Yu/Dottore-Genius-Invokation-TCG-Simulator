@@ -19,17 +19,20 @@ class CLISession:
         self._state_idx = 0
 
     def _help(self) -> None:
-        print("a - to forward to an autostep")
-        print("n - to forward to next step")
-        print("ba - to previous autostep")
-        print("bn - to previous step")
-        print("h - to get help")
-        print("q - to quit this session")
-        print("- enter nothing to repeat last step")
+        print("Commands:")
+        print("a    - to forward to an autostep")
+        print("n    - to forward to next step")
+        print("ba   - to previous autostep")
+        print("bn   - to previous step")
+        print("h    - to get help")
+        print("q    - to quit this session")
+        print("     - enter nothing to repeat last step")
+        print()
         print("Note: any invalid commands are ignored")
+        print()
         print("Definitions:")
-        print("* autostep jumps to the next game-state where player interaction is required")
-        print("* step jumps to the next game-state")
+        print("- autostep - jumps to the next game-state where player interaction is required")
+        print("- step - jumps to the next game-state")
 
     def _equals_sep_bar(self) -> None:
         print("==================================================")
