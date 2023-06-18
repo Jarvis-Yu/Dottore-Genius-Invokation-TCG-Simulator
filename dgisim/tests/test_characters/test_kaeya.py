@@ -29,6 +29,38 @@ class TestKaeya(unittest.TestCase):
     assert type(BASE_GAME.get_player1().just_get_active_character()) is Kaeya
     assert type(BASE_GAME.get_player2().just_get_active_character()) is Keqing
 
+    def testKaeyaNormalAttack(self):
+        a1, a2 = PuppetAgent(), PuppetAgent()
+        gsm = GameStateMachine(self.BASE_GAME, a1, a2)
+        a1.inject_action(SkillAction(
+            CharacterSkill.NORMAL_ATTACK,
+            DiceOnlyInstruction(dices=ActualDices({})),
+        ))
+        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 10)
+
+        gsm.player_step()
+        gsm.auto_step()
+        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 8)
+        self.assertFalse(p2ac.get_elemental_aura().elem_auras())
+
+    def testKaeyaElementalSkill(self):
+        a1, a2 = PuppetAgent(), PuppetAgent()
+        gsm = GameStateMachine(self.BASE_GAME, a1, a2)
+        a1.inject_action(SkillAction(
+            CharacterSkill.ELEMENTAL_SKILL1,
+            DiceOnlyInstruction(dices=ActualDices({})),
+        ))
+        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 10)
+
+        gsm.player_step()
+        gsm.auto_step()
+        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 7)
+        self.assertTrue(p2ac.get_elemental_aura().contains(Element.CRYO))
+
     def testElementalBurst(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
         base_game = self.BASE_GAME.factory().f_player1(

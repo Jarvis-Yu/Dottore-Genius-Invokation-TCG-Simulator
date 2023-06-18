@@ -20,13 +20,13 @@ class Summons:
     def just_find(self, summon_type: type[Summon]) -> Summon:
         return just(self.find(summon_type))
 
-    def update_summon(self, incoming_summon: Summon, force: bool=False) -> Summons:
+    def update_summon(self, incoming_summon: Summon, override: bool=False) -> Summons:
         summons = list(self._summons)
         for i, summon in enumerate(summons):
             if type(summon) != type(incoming_summon):
                 continue
             new_summon: Optional[Summon]
-            if force:
+            if override:
                 new_summon = incoming_summon
             else:
                 new_summon = summon.update(incoming_summon)

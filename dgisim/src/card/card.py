@@ -224,3 +224,22 @@ class ColdBloodedStrike(EquipmentCard, _CombatActionCard):
                 skill=CharacterSkill.ELEMENTAL_SKILL1,
             ),
         )
+
+
+#### Rhodeia of Loch ####
+
+class StreamingSurge(EquipmentCard, _CombatActionCard):
+    @override
+    @classmethod
+    def effects(cls, instruction: ac.Instruction) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, ac.CharacterTargetInstruction)
+        return (
+            eft.AddCharacterStatusEffect(
+                target=instruction.target,
+                status=stt.StreamingSurgeStatus,
+            ),
+            eft.CastSkillEffect(
+                target=instruction.target,
+                skill=CharacterSkill.ELEMENTAL_BURST,
+            ),
+        )

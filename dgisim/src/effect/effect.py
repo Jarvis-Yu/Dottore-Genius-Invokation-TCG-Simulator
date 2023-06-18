@@ -1119,15 +1119,15 @@ class OverrideCharacterStatusEffect(Effect):
         assert isinstance(character, chr.Character)
         if isinstance(self.status, stt.CharacterTalentStatus):
             character = character.factory().f_talents(
-                lambda ts: ts.update_status(self.status, force=True)
+                lambda ts: ts.update_status(self.status, override=True)
             ).build()
         elif isinstance(self.status, stt.EquipmentStatus):
             character = character.factory().f_equipments(
-                lambda es: es.update_status(self.status, force=True)
+                lambda es: es.update_status(self.status, override=True)
             ).build()
         elif isinstance(self.status, stt.CharacterStatus):
             character = character.factory().f_character_statuses(
-                lambda cs: cs.update_status(self.status, force=True)
+                lambda cs: cs.update_status(self.status, override=True)
             ).build()
         return game_state.factory().f_player(
             self.target.pid,
@@ -1188,7 +1188,7 @@ class OverrideCombatStatusEffect(Effect):
         return game_state.factory().f_player(
             self.target_pid,
             lambda p: p.factory().f_combat_statuses(
-                lambda ss: ss.update_status(self.status, force=True)
+                lambda ss: ss.update_status(self.status, override=True)
             ).build()
         ).build()
 
@@ -1244,8 +1244,52 @@ class OverrideSummonEffect(Effect):
         return game_state.factory().f_player(
             self.target_pid,
             lambda p: p.factory().f_summons(
-                lambda ss: ss.update_summon(self.summon, force=True)
+                lambda ss: ss.update_summon(self.summon, override=True)
             ).build()
+        ).build()
+
+
+@dataclass(frozen=True, kw_only=True)
+class AllSummonIncreaseUsage(Effect):
+    target_pid: gs.GameState.Pid
+    d_usages: int = 1
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        effects: list[Effect] = []
+        summons = game_state.get_player(self.target_pid).get_summons()
+        for summon in summons:
+            effects.append(
+                OverrideSummonEffect(
+                    target_pid=self.target_pid,
+                    summon=replace(summon, usages=summon.usages + self.d_usages),
+                )
+            )
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_many_fl(effects)
+        ).build()
+
+
+@dataclass(frozen=True, kw_only=True)
+class OneSummonIncreaseUsage(Effect):
+    target_pid: gs.GameState.Pid
+    summon_type: type[sm.Summon]
+    d_usages: int = 1
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        effects: list[Effect] = []
+        summons = game_state.get_player(self.target_pid).get_summons()
+        summon = summons.find(summon_type=self.summon_type)
+        if summon is None:
+            return game_state
+
+        effects.append(
+            OverrideSummonEffect(
+                target_pid=self.target_pid,
+                summon=replace(summon, usages=summon.usages + 1),
+            )
+        )
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_many_fl(effects)
         ).build()
 
 

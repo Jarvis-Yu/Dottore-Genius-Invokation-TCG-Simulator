@@ -144,3 +144,22 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         self.assertFalse(p1_summons.contains(OceanicMimicSquirrelSummon))
         self.assertEqual(p2_ac.get_hp(), 4)
         self.assertTrue(p2_ac.get_elemental_aura().contains(Element.HYDRO))
+
+    def test_rhodeia_normal_attack(self):
+        a1, a2 = PuppetAgent(), PuppetAgent()
+        gsm = GameStateMachine(self.BASE_GAME, a1, a2)
+        a1.inject_action(SkillAction(
+            CharacterSkill.NORMAL_ATTACK,
+            DiceOnlyInstruction(dices=ActualDices({})),
+        ))
+        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 10)
+
+        gsm.player_step()
+        gsm.auto_step()
+        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 9)
+        self.assertTrue(p2ac.get_elemental_aura().contains(Element.HYDRO))
+
+    def test_elemental_skill(self):
+        pass

@@ -95,7 +95,19 @@ class Character:
     def from_default(cls, id: int = -1) -> Character:
         raise Exception("Not Overriden")
 
-    import dgisim.src.action as act
+    @classmethod
+    def skills(cls) -> tuple[CharacterSkill, ...]:
+        """ Provides the skill types that the character has """
+        my_skills: list[CharacterSkill] = []
+        if cls._normal_attack is not Character._normal_attack:
+            my_skills.append(CharacterSkill.NORMAL_ATTACK)
+        if cls._elemental_skill1 is not Character._elemental_skill1:
+            my_skills.append(CharacterSkill.ELEMENTAL_SKILL1)
+        if cls._elemental_skill2 is not Character._elemental_skill2:
+            my_skills.append(CharacterSkill.ELEMENTAL_SKILL2)
+        if cls._elemental_burst is not Character._elemental_burst:
+            my_skills.append(CharacterSkill.ELEMENTAL_BURST)
+        return tuple(my_skills)
 
     def skill(self, game_state: gs.GameState, skill_type: CharacterSkill) -> tuple[eft.Effect, ...]:
         return self._post_skill(
@@ -109,9 +121,11 @@ class Character:
             return self.normal_attack(game_state)
         elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
             return self.elemental_skill1(game_state)
+        elif skill_type is CharacterSkill.ELEMENTAL_SKILL2:
+            return self.elemental_skill2(game_state)
         elif skill_type is CharacterSkill.ELEMENTAL_BURST:
             return self.elemental_burst(game_state)
-        raise Exception("Not Overriden")
+        raise Exception(f"Not Overriden, skill_type={skill_type}")
 
     def _post_skill(
             self,
@@ -125,7 +139,6 @@ class Character:
                 source=source,
                 skill=skill_type,
             ),
-            eft.DeathCheckCheckerEffect(),
             eft.SwapCharacterCheckerEffect(
                 my_active=source,
                 oppo_active=eft.StaticTarget(
@@ -134,6 +147,7 @@ class Character:
                     id=game_state.get_other_player(source.pid).just_get_active_character().get_id()
                 )
             ),
+            eft.DeathCheckCheckerEffect(),
         )
 
     def normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
@@ -480,6 +494,11 @@ class Keqing(Character):
 
 class Kaeya(Character):
 
+    @override
+    @staticmethod
+    def _talent_status() -> Optional[type[stt.EquipmentStatus]]:
+        return stt.ColdBloodedStrikeStatus
+
     def _normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
         source = self.location(game_state)
         return normal_attack_template(
@@ -550,6 +569,11 @@ class RhodeiaOfLoch(Character):
         sm.OceanicMimicFrogSummon,
     )
 
+    @override
+    @staticmethod
+    def _talent_status() -> Optional[type[stt.EquipmentStatus]]:
+        return stt.StreamingSurgeStatus
+
     def _normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
         source = self.location(game_state)
         return normal_attack_template(
@@ -588,10 +612,52 @@ class RhodeiaOfLoch(Character):
             ),
         )
 
+    def _elemental_skill2(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
+        from random import choice
+        source = self.location(game_state)
+
+        # first choice
+        summons_to_choose = self._not_summoned_types(game_state, source.pid)
+        fst_summon: type[sm.Summon]
+
+        if summons_to_choose:
+            fst_summon = choice(summons_to_choose)
+        else:  # if all kinds of summons have been summoned
+            fst_summon = choice(self.SUMMONS)
+
+        # second choice
+        summons_to_choose = tuple(
+            summon
+            for summon in summons_to_choose
+            if summon is not fst_summon
+        )
+        snd_summon: type[sm.Summon]
+
+        if summons_to_choose:
+            snd_summon = choice(summons_to_choose)
+        else:  # if all kinds of summons have been summoned, choose a random that is not chosen
+            snd_summon = choice([
+                summon
+                for summon in self.SUMMONS
+                if summon is not fst_summon
+            ])
+
+        assert fst_summon is not snd_summon
+        return (
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=fst_summon,
+            ),
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=snd_summon,
+            ),
+        )
+
     def _elemental_burst(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
         source = self.location(game_state)
         summons = game_state.get_player(source.pid).get_summons()
-        return (
+        effects: list[eft.Effect] = [
             eft.EnergyDrainEffect(
                 target=source,
                 drain=self.get_max_energy(),
@@ -603,7 +669,12 @@ class RhodeiaOfLoch(Character):
                 damage=2 + 2 * len(summons),
                 damage_type=eft.DamageType(elemental_burst=True)
             ),
-        )
+        ]
+
+        if self.talent_equiped():
+            effects.append(eft.AllSummonIncreaseUsage(target_pid=source.pid, d_usages=1))
+
+        return tuple(effects)
 
     @classmethod
     def from_default(cls, id: int = -1) -> RhodeiaOfLoch:

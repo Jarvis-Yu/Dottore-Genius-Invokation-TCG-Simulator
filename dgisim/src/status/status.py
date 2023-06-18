@@ -17,9 +17,6 @@ class TriggerringEvent(Enum):
     pass
 
 
-_T = TypeVar('_T', bound="Status")
-
-
 @dataclass(frozen=True)
 class Status:
     class PPType(Enum):
@@ -109,12 +106,12 @@ class Status:
             raise NotImplementedError
 
     def _inform(
-            self: _T,
+            self,
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             information: eft.SpecificDamageEffect | CharacterSkill | cd.Card,
             info_source: Optional[eft.StaticTarget],
-    ) -> _T:
+    ) -> Self:
         return self
 
     # def react_to_event(self, game_state: gs.GameState, event: TriggerringEvent) -> gs.GameState:
@@ -225,14 +222,14 @@ class Status:
     def same_type_as(self, status: Status) -> bool:
         return type(self) == type(status)
 
-    def update(self: _T, other: _T) -> Optional[_T]:
+    def update(self, other: Self) -> Optional[Self]:
         new_self = self._update(other)
         return self._post_update(new_self)
 
-    def _post_update(self: _T, new_self: Optional[_T]) -> Optional[_T]:
+    def _post_update(self, new_self: Optional[Self]) -> Optional[Self]:
         return new_self
 
-    def _update(self: _T, other: _T) -> Optional[_T]:
+    def _update(self, other: Self) -> Optional[Self]:
         return other
 
     def __str__(self) -> str:
@@ -279,14 +276,14 @@ class _DurationStatus(Status):
     max_duration: ClassVar[int] = BIG_INT
 
     @override
-    def _post_update(self, new_self: Optional[_DurationStatus]) -> Optional[_DurationStatus]:
+    def _post_update(self, new_self: Optional[Self]) -> Optional[Self]:
         """ remove the status if duration <= 0 """
         if new_self is not None and new_self.duration <= 0:
             new_self = None
         return super()._post_update(new_self)
 
     @override
-    def _update(self, other: _DurationStatus) -> Optional[_DurationStatus]:
+    def _update(self, other: Self) -> Optional[Self]:
         new_duration = min(self.duration + other.duration, self.max_duration)
         return replace(self, duration=new_duration)
 
@@ -300,14 +297,14 @@ class _UsageStatus(Status):
     max_usages: ClassVar[int] = BIG_INT
 
     @override
-    def _post_update(self, new_self: Optional[_UsageStatus]) -> Optional[_UsageStatus]:
+    def _post_update(self, new_self: Optional[Self]) -> Optional[Self]:
         """ remove the status if usages <= 0 """
         if new_self is not None and new_self.usages <= 0:
             new_self = None
         return super()._post_update(new_self)
 
     @override
-    def _update(self, other: _UsageStatus) -> Optional[_UsageStatus]:
+    def _update(self, other: Self) -> Optional[Self]:
         new_usages = min(self.usages + other.usages, self.max_usages)
         return type(self)(usages=new_usages)
 
@@ -346,7 +343,6 @@ class ShieldStatus(Status):
                 id=game_state.get_player(status_source.pid).just_get_active_character().get_id(),
             )
             return item.target == attached_active_character
-
 
         else:
             raise NotImplementedError  # pragma: no cover
@@ -434,7 +430,7 @@ class CrystallizeStatus(CombatStatus, StackedShieldStatus):
     MAX_USAGES: ClassVar[int] = 2
 
     @override
-    def update(self, other: CrystallizeStatus) -> Optional[CrystallizeStatus]:
+    def _update(self, other: CrystallizeStatus) -> Optional[CrystallizeStatus]:
         new_stacks = min(just(type(self).MAX_USAGES, BIG_INT), self.usages + other.usages)
         return type(self)(usages=new_stacks)
 
@@ -523,12 +519,12 @@ class FrozenStatus(CharacterStatus):
 
     @override
     def _preprocess(
-            self: _T,
+            self,
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
             signal: Status.PPType,
-    ) -> tuple[eft.Preprocessable, Optional[_T]]:
+    ) -> tuple[eft.Preprocessable, Optional[Self]]:
         if signal is Status.PPType.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             can_reaction = item.element is Element.PYRO or item.element is Element.PHYSICAL
@@ -587,12 +583,12 @@ class JueyunGuobaStatus(CharacterStatus):
 
     @override
     def _preprocess(
-            self: _T,
+            self,
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
             signal: Status.PPType,
-    ) -> tuple[eft.Preprocessable, Optional[_T]]:
+    ) -> tuple[eft.Preprocessable, Optional[Self]]:
         if signal is Status.PPType.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             if item.source == status_source and item.damage_type.normal_attack:
@@ -792,3 +788,10 @@ class ColdBloodedStrikeStatus(EquipmentStatus):
 
     def __str__(self) -> str:
         return super().__str__() + case_val(self.activated, "(*)", '')
+
+
+#### Rhodeia of Loch ####
+
+@dataclass(frozen=True, kw_only=True)
+class StreamingSurgeStatus(EquipmentStatus):
+    pass

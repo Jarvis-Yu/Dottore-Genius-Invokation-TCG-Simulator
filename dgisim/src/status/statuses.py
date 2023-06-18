@@ -13,7 +13,7 @@ class Statuses:
     def __init__(self, statuses: tuple[stt.Status, ...]):
         self._statuses = statuses
 
-    def update_status(self, incoming_status: stt.Status, force: bool = False) -> Self:
+    def update_status(self, incoming_status: stt.Status, override: bool = False) -> Self:
         """
         Replaces existing status of the same type with the new_status,
         or append the new_status to the end of current statuses
@@ -24,7 +24,7 @@ class Statuses:
             if type(status) is not type(incoming_status):
                 continue
             new_status: Optional[stt.Status]
-            if force:
+            if override:
                 new_status = incoming_status
             else:
                 new_status = status.update(incoming_status)
