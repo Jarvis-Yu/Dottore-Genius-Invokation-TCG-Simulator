@@ -22,7 +22,7 @@ class TestKeqing(unittest.TestCase):
     ).build()
     assert type(BASE_GAME.get_player1().just_get_active_character()) is Keqing
 
-    def testKeqingNormalAttack(self):
+    def test_normal_attack(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
@@ -38,7 +38,7 @@ class TestKeqing(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 8)
         self.assertFalse(p2ac.get_elemental_aura().elem_auras())
 
-    def testKeqingElementalSkill(self):
+    def test_elemental_skill1(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
@@ -188,7 +188,7 @@ class TestKeqing(unittest.TestCase):
         p1ac = gsm.get_game_state().get_player1().just_get_active_character()
         self.assertFalse(p1ac.get_character_statuses().contains(KeqingElectroInfusionStatus))
 
-    def testElementalBurst(self):
+    def test_elemental_burst(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
         base_game_state = self.BASE_GAME.factory().f_player1(
             lambda p: p.factory().f_characters(
@@ -275,7 +275,7 @@ class TestKeqing(unittest.TestCase):
             0,
         )
 
-    def testTalentCard(self):
+    def test_talent_card(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
         source = StaticTarget(GameState.Pid.P1, Zone.CHARACTER, 3)
         # test early equip

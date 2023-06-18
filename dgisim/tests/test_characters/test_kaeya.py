@@ -29,7 +29,7 @@ class TestKaeya(unittest.TestCase):
     assert type(BASE_GAME.get_player1().just_get_active_character()) is Kaeya
     assert type(BASE_GAME.get_player2().just_get_active_character()) is Keqing
 
-    def testKaeyaNormalAttack(self):
+    def test_normal_attack(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
@@ -45,7 +45,7 @@ class TestKaeya(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 8)
         self.assertFalse(p2ac.get_elemental_aura().elem_auras())
 
-    def testKaeyaElementalSkill(self):
+    def test_elemental_skill1(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
@@ -61,7 +61,7 @@ class TestKaeya(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 7)
         self.assertTrue(p2ac.get_elemental_aura().contains(Element.CRYO))
 
-    def testElementalBurst(self):
+    def test_elemental_burst(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
         base_game = self.BASE_GAME.factory().f_player1(
             lambda p: p.factory().f_characters(
@@ -218,7 +218,7 @@ class TestKaeya(unittest.TestCase):
             2
         )
 
-    def testTalentCard(self):
+    def test_talent_card(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
         source = StaticTarget(GameState.Pid.P1, Zone.CHARACTER, 2)
         initial_hp = 3
