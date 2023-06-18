@@ -19,7 +19,6 @@ with limited action cards and all omni dices.
 
 - [x] Set up the framework for maintaining game states
 - [x] Implement game phase of Card Selection (card selection at the start of the game)
-  - [ ] ~~Allow both players to act simultaneously instead of in turns~~ (trivial for AI training)
 - [x] Implement game phase of Starting Hand Select Phase (select active character)
 - [x] Implement game phase of Roll (Dice) Phase (roll dices between rounds)
 - [x] Implement game phase of Action Phase (players beat each other)
@@ -32,7 +31,13 @@ with limited action cards and all omni dices.
 - [x] Implement lazy player agent for minimal testing purposes
 - [x] Implement random player agent for testing purposes
 - [ ] Implement greedy player agent for testing purposes
-- [ ] Implement player action validity checker  <- ***WIP***
+- [ ] Implement player action validity checker
+  - [ ] Provide dices request information (for card/skill/swap)  <- ***WIP***
+  - [ ] Provide dices request information that is preprocessed by statuses
+  - [ ] Check dices player chosen satisfies request
+  - [ ] Check if card action is used on valid target (and card exists)
+  - [ ] Check if swap action is fast or combat action, and target is valid
+  - [ ] Check if burst is only casted when the player has the energy
 - [ ] Implement player action choices provider
 
 The second stage of development will be focusing on including all action cards.
