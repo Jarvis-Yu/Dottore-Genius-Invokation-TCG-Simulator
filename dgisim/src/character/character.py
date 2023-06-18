@@ -286,9 +286,9 @@ class Character:
             "Max HP": str(self._max_hp),
             "Energy": str(self._energy),
             "Max Energy": str(self._max_energy),
-            "Talents": str(self._talents),
-            "Equipments": str(self._equipments),
-            "Statuses": str(self._statuses),
+            "Talents": self._talents.dict_str(),
+            "Equipments": self._equipments.dict_str(),
+            "Statuses": self._statuses.dict_str(),
         }
 
 

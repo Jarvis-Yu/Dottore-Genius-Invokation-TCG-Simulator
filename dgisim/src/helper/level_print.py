@@ -87,7 +87,7 @@ class GamePrinter:
 
     @staticmethod
     def _pair(d: dict, key: str) -> str:
-        return "<" + key + ": " + d[key] + ">"
+        return "<" + key + ": " + str(d[key]) + ">"
 
     @staticmethod
     def _insert_lines(board: StrDrawer, y: int, d: dict, keys: list[str]) -> None:
@@ -104,11 +104,18 @@ class GamePrinter:
         ])
         board.insert_at_nextline(2, f"<HP: {character['HP']}/{character['Max HP']}>")
         board.insert_at_nextline(2, f"<Energy: {character['Energy']}/{character['Max Energy']}>")
-        GamePrinter._insert_lines(board, 2, character, [
-            "Talents",
-            "Equipments",
-            "Statuses",
-        ])
+        board.insert_board_at_nextline(
+            2,
+            GamePrinter._insert_str_list("Talents", character["Talents"])
+        )
+        board.insert_board_at_nextline(
+            2,
+            GamePrinter._insert_str_list("Equipments", character["Equipments"])
+        )
+        board.insert_board_at_nextline(
+            2,
+            GamePrinter._insert_str_list("Statuses", character["Statuses"])
+        )
         return board
 
     @staticmethod
@@ -127,29 +134,19 @@ class GamePrinter:
         return board
 
     @staticmethod
-    def _insert_dices(name: str, dices: dict) -> StrDrawer:
+    def _insert_str_list(name: str, str_list: list) -> StrDrawer:
         board = StrDrawer()
         board.insert_at(0, 0, f"<{name}>")
-        for key in dices:
-            board.insert_at_nextline(2, GamePrinter._pair(dices, key))
+        for s in str_list:
+            board.insert_at_nextline(2, f"<{s}>")
         return board
 
     @staticmethod
-    def _insert_cards(name: str, cards: dict) -> StrDrawer:
+    def _insert_str_str_dict(name: str, d: dict) -> StrDrawer:
         board = StrDrawer()
         board.insert_at(0, 0, f"<{name}>")
-        for key in cards:
-            board.insert_at_nextline(2, GamePrinter._pair(cards, key))
-        return board
-
-    @staticmethod
-    def _insert_summons(name: str, summons: str) -> StrDrawer:
-        board = StrDrawer()
-        board.insert_at(0, 0, f"<{name}>")
-        summon_strs = summons[1: -1].split(", ")
-        summon_strs = filter(lambda s: s != "", summon_strs)
-        for summon in summon_strs:
-            board.insert_at_nextline(2, f"<{summon}>")
+        for key in d:
+            board.insert_at_nextline(2, GamePrinter._pair(d, key))
         return board
 
     @staticmethod
@@ -165,23 +162,23 @@ class GamePrinter:
         board.insert_at_nextline(0, GamePrinter._pair(player, "Combat Statuses"))
         board.insert_board_at_nextline(
             0,
-            GamePrinter._insert_summons("Summons", player["Summons"])
+            GamePrinter._insert_str_str_dict("Summons", player["Summons"])
         )
         board.insert_board_at_nextline(
             0,
-            GamePrinter._insert_dices("Dices", player["Dices"]),
+            GamePrinter._insert_str_str_dict("Dices", player["Dices"]),
         )
         board.insert_board_at_nextline(
             0,
-            GamePrinter._insert_dices("Hand Cards", player["Hand Cards"]),
+            GamePrinter._insert_str_str_dict("Hand Cards", player["Hand Cards"]),
         )
         board.insert_board_at_nextline(
             0,
-            GamePrinter._insert_dices("Deck Cards", player["Deck Cards"]),
+            GamePrinter._insert_str_str_dict("Deck Cards", player["Deck Cards"]),
         )
         board.insert_board_at_nextline(
             0,
-            GamePrinter._insert_dices("Publicly Used Cards", player["Publicly Used Cards"]),
+            GamePrinter._insert_str_str_dict("Publicly Used Cards", player["Publicly Used Cards"]),
         )
         return board
 

@@ -62,3 +62,10 @@ class Summons:
 
     def __len__(self) -> int:
         return len(self._summons)
+
+    def dict_str(self) -> dict:
+        return dict(
+            (summon.__class__.__name__.removesuffix("Summon"), str(summon.usages))
+            for summon in self
+        )
+

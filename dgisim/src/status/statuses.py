@@ -72,6 +72,12 @@ class Statuses:
     def __str__(self) -> str:
         return '[' + ', '.join(map(str, self._statuses)) + ']'
 
+    def dict_str(self) -> list:
+        return [
+            str(status)
+            for status in self._statuses
+        ]
+
 
 class EquipmentStatuses(Statuses):
     pass

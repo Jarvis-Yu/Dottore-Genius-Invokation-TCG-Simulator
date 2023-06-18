@@ -171,7 +171,7 @@ class PlayerState:
             "Card Redraw Chances": str(self._card_redraw_chances),
             "Characters": self._characters.dict_str(),
             "Combat Statuses": str(self._combat_statuses),
-            "Summons": str(self._summons),
+            "Summons": self._summons.dict_str(),
             "Dices": self._dices.dict_str(),
             "Hand Cards": self._hand_cards.dict_str(),
             "Deck Cards": self._deck_cards.dict_str(),
