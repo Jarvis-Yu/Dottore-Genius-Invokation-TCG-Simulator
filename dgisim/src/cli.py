@@ -115,7 +115,13 @@ class CLISession:
         self._print_game_state(self._game_session.get_game_state())
 
     def _print_game_state_at(self, index: int) -> None:
-        self._print_game_state(self._game_session.get_game_state_at(index))
+        game_state = self._game_session.get_game_state_at(index)
+        self._print_game_state(game_state)
+        action = self._game_session.action_at(index)
+        if action is not None:
+            self._print_action(action, game_state)
+        print(f"#### [{index}/{self._game_session.curr_index()}] in game history")
+            
 
     def _print_game_state(self, game_state: GameState) -> None:
         game_state.waiting_for()
@@ -128,10 +134,15 @@ class CLISession:
         idx = self._game_session.get_last_action_idx()
         assert idx is not None
         game_state = self._game_session.get_game_state_at(idx)
-        p1_active = game_state.get_active_player_id().is_player1()
         action = self._game_session.get_last_action()
-        assert action is not None
-        print(f"**** Player{'1' if p1_active else '2'} Action:", action)
+        if action is None:
+            return
+        self._print_action(action, game_state)
+
+    def _print_action(self, action: PlayerAction, game_state: GameState) -> None:
+        p1_active = game_state.get_active_player_id().is_player1()
+        print(f"#### Player{'1' if p1_active else '2'} Action:", action)
+
 
 if __name__ == "__main__":
     cli_session = CLISession()

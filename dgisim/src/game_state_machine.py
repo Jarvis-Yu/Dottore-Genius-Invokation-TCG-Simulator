@@ -68,6 +68,9 @@ class GameStateMachine:
                 return i
         raise Exception("Not Reached")
 
+    def action_at(self, index: int) -> Optional[PlayerAction]:
+        return self._actions.get(index, None)
+
     def prev_index(self, index: int) -> int:
         return max(0, index - 1)
 
