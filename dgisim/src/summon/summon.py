@@ -125,7 +125,7 @@ class OceanicMimicFrogSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class OceanicMimicRaptor(_DmgPerRoundSummon):
+class OceanicMimicRaptorSummon(_DmgPerRoundSummon):
     usages: int = 3
     MAX_USAGES: ClassVar[int] = 3
     DMG: ClassVar[int] = 1
@@ -133,7 +133,7 @@ class OceanicMimicRaptor(_DmgPerRoundSummon):
 
 
 @dataclass(frozen=True, kw_only=True)
-class OceanicMimicSquirrel(_DmgPerRoundSummon):
+class OceanicMimicSquirrelSummon(_DmgPerRoundSummon):
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2
     DMG: ClassVar[int] = 2

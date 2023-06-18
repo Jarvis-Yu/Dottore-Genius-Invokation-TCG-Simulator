@@ -18,6 +18,8 @@ jobs:
     - name: Unittest and Coverage
       run: |
         coverage run -m unittest && coverage report
+      env:
+        RNG_PLAYS: 100
     - name: MypyCheck
       run: |
         mypy dgisim/ --check-untyped-defs

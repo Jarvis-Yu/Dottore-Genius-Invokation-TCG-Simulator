@@ -1,4 +1,5 @@
 #!/bin/bash
+export RNG_PLAYS=5
 echo -ne "#################### Unittest ####################\n" && \
 ./venv/bin/coverage run -m unittest && \
 echo -ne "\n#################### Mypy ####################\n" && \

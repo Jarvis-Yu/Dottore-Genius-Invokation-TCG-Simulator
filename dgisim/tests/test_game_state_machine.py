@@ -1,5 +1,7 @@
 import unittest
 
+from dgisim.src.helper.quality_of_life import case_val
+from dgisim.src.helper.level_print import GamePrinter
 from dgisim.src.game_state_machine import GameStateMachine
 from dgisim.src.state.game_state import GameState
 from dgisim.src.agents import LazyAgent
@@ -147,17 +149,25 @@ class TestGameStateMachine(unittest.TestCase):
         state_machine.step_until_phase(GameEndPhase)
         self.assertTrue(state_machine.game_end())
         self.assertIsNone(state_machine.get_winner())
-        # print(state_machine.get_game_state())
 
     def test_random_agents_not_break_game(self):
-        """
-        Only turned on manually to inspect cases
-        """
         from dgisim.src.agents import HardCodedRandomAgent
-        state_machine = GameStateMachine(
-            self._initial_state,
-            HardCodedRandomAgent(),
-            HardCodedRandomAgent(),
-        )
-        game_end_phase = state_machine.get_game_state().get_mode().game_end_phase()
-        state_machine.step_until_phase(game_end_phase)
+        import os
+        optional_repeats = os.getenv("RNG_PLAYS")
+        repeats: int
+        try:
+            repeats = int(optional_repeats)  # type: ignore
+        except:
+            repeats = 5
+        for i in range(repeats):
+            state_machine = GameStateMachine(
+                self._initial_state,
+                HardCodedRandomAgent(),
+                HardCodedRandomAgent(),
+            )
+            game_end_phase = state_machine.get_game_state().get_mode().game_end_phase()
+            try:
+                state_machine.step_until_phase(game_end_phase)
+            except Exception:
+                print(GamePrinter.dict_game_printer(state_machine.get_game_state().dict_str()))
+                raise Exception("Test failed")

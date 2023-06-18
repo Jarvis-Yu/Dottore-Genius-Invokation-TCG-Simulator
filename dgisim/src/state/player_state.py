@@ -19,6 +19,18 @@ class PlayerState:
         ACTIVE_WAIT_PHASE = "Aggressive Wait Phase"
         END_PHASE = "End Phase"
 
+        def is_action_phase(self) -> bool:
+            return self is PlayerState.Act.ACTION_PHASE
+
+        def is_passive_wait_phase(self) -> bool:
+            return self is PlayerState.Act.PASSIVE_WAIT_PHASE
+
+        def is_active_wait_phase(self) -> bool:
+            return self is PlayerState.Act.ACTIVE_WAIT_PHASE
+        
+        def is_end_phase(self) -> bool:
+            return self is PlayerState.Act.END_PHASE
+
     def __init__(
         self,
         phase: Act,

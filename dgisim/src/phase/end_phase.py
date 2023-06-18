@@ -1,10 +1,13 @@
 from __future__ import annotations
+from typing import Optional
 
 import dgisim.src.state.game_state as gs
+from dgisim.src.action import *
 import dgisim.src.phase.phase as ph
 from dgisim.src.effect.effect import *
 from dgisim.src.state.player_state import PlayerState
 from dgisim.src.dices import ActualDices
+
 
 class EndPhase(ph.Phase):
     _CARDS_DRAWN = 2
@@ -97,6 +100,10 @@ class EndPhase(ph.Phase):
         elif p1.get_phase() is PlayerState.Act.ACTIVE_WAIT_PHASE or p2.get_phase() is PlayerState.Act.ACTIVE_WAIT_PHASE:
             assert self._is_executing_effects(game_state)
             return self._execute_effect(game_state)
+        elif p1.get_phase().is_action_phase() or p2.get_phase().is_action_phase():
+            # handling death swap
+            assert self._is_executing_effects(game_state)
+            return self._execute_effect(game_state)
         elif p1.get_phase() is PlayerState.Act.END_PHASE and p2.get_phase() is PlayerState.Act.END_PHASE:
             new_round = game_state.get_round() + 1
             if new_round > game_state.get_mode().round_limit():
@@ -104,6 +111,41 @@ class EndPhase(ph.Phase):
             else:
                 return self._to_roll_phase(game_state, new_round)
         raise Exception("Unknown Game State to process")
+
+    def _handle_death_swap_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: DeathSwapAction) -> Optional[gs.GameState]:
+        player = game_state.get_player(pid)
+        effect_stack = game_state.get_effect_stack()
+        # Add Effects
+        active_character = player.get_characters().get_active_character()
+        assert active_character is not None
+        effect_stack = effect_stack.push_one(SwapCharacterEffect(
+            StaticTarget(pid, Zone.CHARACTER, action.selected_character_id)
+        ))
+        # TODO: posts
+        return game_state.factory().effect_stack(
+            effect_stack
+        ).build()
+
+    def step_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: PlayerAction) -> Optional[gs.GameState]:
+        effect_stack = game_state.get_effect_stack()
+        if effect_stack.is_not_empty() and isinstance(effect_stack.peek(), DeathSwapPhaseStartEffect):
+            game_state = game_state.factory().effect_stack(effect_stack.pop()[0]).build()
+        if isinstance(action, DeathSwapAction):
+            return self._handle_death_swap_action(game_state, pid, action)
+
+        raise NotImplementedError
+
+    def waiting_for(self, game_state: gs.GameState) -> Optional[gs.GameState.Pid]:
+        """
+        TODO: override this to handle death swap
+        """
+        effect_stack = game_state.get_effect_stack()
+        # if no effects are to be executed or death swap phase is inserted
+        if effect_stack.is_not_empty() \
+                and isinstance(effect_stack.peek(), DeathSwapPhaseStartEffect):
+            return super().waiting_for(game_state)
+        else:
+            return None
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, EndPhase)

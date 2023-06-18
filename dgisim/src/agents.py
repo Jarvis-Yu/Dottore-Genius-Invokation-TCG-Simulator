@@ -10,6 +10,7 @@ from dgisim.src.phase.card_select_phase import CardSelectPhase
 from dgisim.src.phase.starting_hand_select_phase import StartingHandSelectPhase
 from dgisim.src.phase.roll_phase import RollPhase
 from dgisim.src.phase.action_phase import ActionPhase
+from dgisim.src.phase.end_phase import EndPhase
 from dgisim.src.card.cards import Cards
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.dices import AbstractDices, ActualDices
@@ -210,6 +211,25 @@ class HardCodedRandomAgent(PlayerAgent):
                     )
             
             return EndRoundAction()
+
+        elif isinstance(curr_phase, EndPhase):
+            me = game_state.get_player(pid)
+            active_character = me.just_get_active_character()
+
+            # death swap
+            if active_character.defeated():
+                characters = me.get_characters()
+                alive_ids = characters.alive_ids()
+                active_id = characters.get_active_character_id()
+                assert active_id is not None
+                if active_id in alive_ids:
+                    alive_ids.remove(active_id)
+                if alive_ids:
+                    return DeathSwapAction(choice(alive_ids))
+                else:
+                    raise Exception("Game should end here but not implemented(NOT REACHED)")
+            
+            raise Exception("NOT REACHED")
         
         else:
-            raise Exception("No Action Defined")
+            raise Exception(f"No Action Defined, phase={curr_phase}")

@@ -11,7 +11,8 @@ from dgisim.src.card.card import *
 from dgisim.src.status.status import *
 from dgisim.src.summon.summon import *
 
-class TestKaeya(unittest.TestCase):
+
+class TestRohdeiaOfLoch(unittest.TestCase):
     BASE_GAME = ACTION_TEMPLATE.factory().f_player1(
         lambda p: p.factory().f_characters(
             lambda cs: cs.factory().active_character_id(1).build()  # make active character Rhodeia
@@ -23,7 +24,7 @@ class TestKaeya(unittest.TestCase):
     ).build()
     assert type(BASE_GAME.get_player1().just_get_active_character()) is RhodeiaOfLoch
 
-    def test_frog(self):
+    def testFrog(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
         base_game = self.BASE_GAME.factory().f_player2(
             lambda p: p.factory().f_summons(
@@ -78,3 +79,68 @@ class TestKaeya(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 10)
         self.assertFalse(ac.get_elemental_aura().contains(Element.HYDRO))
         self.assertTrue(frog.usages, 2)
+
+    def testRaptorAndSquirrel(self):
+        a1, a2 = PuppetAgent(), PuppetAgent()
+        base_game = self.BASE_GAME.factory().f_player1(
+            lambda p: p.factory().f_summons(
+                lambda ss: ss.update_summon(
+                    OceanicMimicRaptorSummon()
+                ).update_summon(
+                    OceanicMimicSquirrelSummon()
+                )
+            ).build()
+        ).build()
+        base_game = kill_character(base_game, 1, hp=1)
+
+        a1.inject_action(EndRoundAction())
+        a2.inject_action(DeathSwapAction(2))
+
+        gsm = GameStateMachine(base_game, a1, a2)
+
+        # after first end round
+        gsm.player_step()  # P1 END
+        gsm.player_step()  # p2 death swap
+        gsm.auto_step()
+
+        game_state = gsm.get_game_state()
+        p1_summons = game_state.get_player1().get_summons()
+        p2_ac = game_state.get_player2().just_get_active_character()
+        p2_c1 = game_state.get_player2().get_characters().just_get_character(1)
+        self.assertEqual(p1_summons.just_find(OceanicMimicRaptorSummon).usages, 2)
+        self.assertEqual(p1_summons.just_find(OceanicMimicSquirrelSummon).usages, 1)
+        self.assertEqual(p2_ac.get_hp(), 8)
+        self.assertTrue(p2_ac.get_elemental_aura().contains(Element.HYDRO))
+        self.assertEqual(p2_c1.get_hp(), 0)
+
+        # after second end round
+        a1.inject_action(EndRoundAction())
+        a2.inject_action(EndRoundAction())
+
+        gsm.player_step()
+        gsm.player_step()
+        gsm.auto_step()
+
+        game_state = gsm.get_game_state()
+        p1_summons = game_state.get_player1().get_summons()
+        p2_ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p1_summons.just_find(OceanicMimicRaptorSummon).usages, 1)
+        self.assertFalse(p1_summons.contains(OceanicMimicSquirrelSummon))
+        self.assertEqual(p2_ac.get_hp(), 5)
+        self.assertTrue(p2_ac.get_elemental_aura().contains(Element.HYDRO))
+
+        # after second end round
+        a1.inject_action(EndRoundAction())
+        a2.inject_action(EndRoundAction())
+
+        gsm.player_step()
+        gsm.player_step()
+        gsm.auto_step()
+
+        game_state = gsm.get_game_state()
+        p1_summons = game_state.get_player1().get_summons()
+        p2_ac = game_state.get_player2().just_get_active_character()
+        self.assertFalse(p1_summons.contains(OceanicMimicRaptorSummon))
+        self.assertFalse(p1_summons.contains(OceanicMimicSquirrelSummon))
+        self.assertEqual(p2_ac.get_hp(), 4)
+        self.assertTrue(p2_ac.get_elemental_aura().contains(Element.HYDRO))

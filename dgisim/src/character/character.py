@@ -545,8 +545,8 @@ class Kaeya(Character):
 
 class RhodeiaOfLoch(Character):
     SUMMONS = (
-        sm.OceanicMimicSquirrel,
-        sm.OceanicMimicRaptor,
+        sm.OceanicMimicSquirrelSummon,
+        sm.OceanicMimicRaptorSummon,
         sm.OceanicMimicFrogSummon,
     )
 
