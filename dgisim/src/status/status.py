@@ -268,33 +268,9 @@ class CombatStatus(Status):
 
 
 @dataclass(frozen=True)
-class _DurationStatus(Status):
-    """
-    This class has a duration which acts as a counter
-    """
-    duration: int
-    max_duration: ClassVar[int] = BIG_INT
-
-    @override
-    def _post_update(self, new_self: Optional[Self]) -> Optional[Self]:
-        """ remove the status if duration <= 0 """
-        if new_self is not None and new_self.duration <= 0:
-            new_self = None
-        return super()._post_update(new_self)
-
-    @override
-    def _update(self, other: Self) -> Optional[Self]:
-        new_duration = min(self.duration + other.duration, self.max_duration)
-        return replace(self, duration=new_duration)
-
-    def __str__(self) -> str:
-        return super().__str__() + f"({self.duration})"  # pragma: no cover
-
-
-@dataclass(frozen=True)
 class _UsageStatus(Status):
     usages: int
-    max_usages: ClassVar[int] = BIG_INT
+    MAX_USAGES: ClassVar[int] = BIG_INT
 
     @override
     def _post_update(self, new_self: Optional[Self]) -> Optional[Self]:
@@ -305,8 +281,8 @@ class _UsageStatus(Status):
 
     @override
     def _update(self, other: Self) -> Optional[Self]:
-        new_usages = min(self.usages + other.usages, self.max_usages)
-        return type(self)(usages=new_usages)
+        new_usages = min(self.usages + other.usages, self.MAX_USAGES)
+        return replace(self, usages=new_usages)
 
     def __str__(self) -> str:
         return super().__str__() + f"({self.usages})"  # pragma: no cover
@@ -555,25 +531,26 @@ class SatiatedStatus(CharacterStatus):
 
 
 @dataclass(frozen=True)
-class MushroomPizzaStatus(CharacterStatus, _DurationStatus):
-    duration: int = 2
+class MushroomPizzaStatus(CharacterStatus, _UsageStatus):
+    usages: int = 2
 
     @override
     def _react_to_signal(
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[MushroomPizzaStatus]]:
         es: list[eft.Effect] = []
-        d_duration = 0
+        d_usages = 0
         if signal is eft.TriggeringSignal.END_ROUND_CHECK_OUT:
-            d_duration = -1
             es.append(
                 eft.RecoverHPEffect(
                     source,
                     1,
                 )
             )
+        if signal is eft.TriggeringSignal.ROUND_END:
+            d_usages = -1
 
-        return es, replace(self, duration=d_duration)
+        return es, replace(self, usages=d_usages)
 
 
 @dataclass(frozen=True)
@@ -609,9 +586,9 @@ class JueyunGuobaStatus(CharacterStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class _InfusionStatus(CharacterStatus, _DurationStatus):
-    max_duration: ClassVar[int] = BIG_INT
-    element: ClassVar[Optional[Element]] = None
+class _InfusionStatus(CharacterStatus, _UsageStatus):
+    MAX_USAGES: ClassVar[int] = BIG_INT
+    ELEMENT: ClassVar[Optional[Element]] = None
     damage_boost: int = 0
 
     @override
@@ -622,12 +599,12 @@ class _InfusionStatus(CharacterStatus, _DurationStatus):
             item: eft.Preprocessable,
             signal: Status.PPType,
     ) -> tuple[eft.Preprocessable, Optional[_InfusionStatus]]:
-        assert self.element is not None
+        assert self.ELEMENT is not None
         new_item: Optional[eft.SpecificDamageEffect] = None
         if isinstance(item, eft.SpecificDamageEffect):
             if signal is Status.PPType.DMG_ELEMENT:
                 if self._dmg_element_condition(game_state, status_source, item):
-                    new_item = replace(item, element=self.element)
+                    new_item = replace(item, element=self.ELEMENT)
             if signal is Status.PPType.DMG_AMOUNT:
                 if self.damage_boost != 0  \
                         and self._dmg_boost_condition(game_state, status_source, item):
@@ -654,21 +631,21 @@ class _InfusionStatus(CharacterStatus, _DurationStatus):
             status_source: eft.StaticTarget,
             item: eft.SpecificDamageEffect,
     ) -> bool:
-        return item.element is self.element and status_source == item.source
+        return item.element is self.ELEMENT and status_source == item.source
 
     @override
     def _react_to_signal(
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[_InfusionStatus]]:
-        d_duration = 0
+        d_usages = 0
         if signal is eft.TriggeringSignal.ROUND_END:
-            d_duration = -1
-        return [], replace(self, duration=d_duration)
+            d_usages = -1
+        return [], replace(self, usages=d_usages)
 
 
 @dataclass(frozen=True, kw_only=True)
 class ElectroInfusionStatus(_InfusionStatus):
-    element: ClassVar[Optional[Element]] = Element.ELECTRO
+    ELEMENT: ClassVar[Optional[Element]] = Element.ELECTRO
 
 
 ############################## Character specific ##############################

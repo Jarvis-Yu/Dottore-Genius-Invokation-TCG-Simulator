@@ -171,7 +171,7 @@ class TestKeqing(unittest.TestCase):
         # initially
         p1ac = gsm.get_game_state().get_player1().just_get_active_character()
         self.assertEqual(
-            p1ac.get_character_statuses().just_find(KeqingElectroInfusionStatus).duration,
+            p1ac.get_character_statuses().just_find(KeqingElectroInfusionStatus).usages,
             2
         )
         # next round
@@ -179,7 +179,7 @@ class TestKeqing(unittest.TestCase):
         gsm.step_until_phase(game_state.get_mode().action_phase())
         p1ac = gsm.get_game_state().get_player1().just_get_active_character()
         self.assertEqual(
-            p1ac.get_character_statuses().just_find(KeqingElectroInfusionStatus).duration,
+            p1ac.get_character_statuses().just_find(KeqingElectroInfusionStatus).usages,
             1
         )
         # next round

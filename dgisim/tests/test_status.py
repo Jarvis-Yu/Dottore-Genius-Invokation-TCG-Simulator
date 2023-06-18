@@ -47,7 +47,7 @@ class TestStatus(unittest.TestCase):
                 lambda cs: cs.factory().f_character(
                     2,
                     lambda c: c.factory().character_statuses(
-                        Statuses((MushroomPizzaStatus(duration=1), ))
+                        Statuses((MushroomPizzaStatus(usages=1), ))
                     ).hp(
                         2
                     ).build()
@@ -74,7 +74,7 @@ class TestStatus(unittest.TestCase):
                 lambda cs: cs.factory().f_character(
                     2,
                     lambda c: c.factory().character_statuses(
-                        Statuses((MushroomPizzaStatus(duration=2), ))
+                        Statuses((MushroomPizzaStatus(usages=2), ))
                     ).hp(
                         2
                     ).build()
@@ -93,7 +93,7 @@ class TestStatus(unittest.TestCase):
             .just_find(MushroomPizzaStatus)
         assert isinstance(status, MushroomPizzaStatus)
         self.assertEqual(character.get_hp(), 3)
-        self.assertEqual(status.duration, 1)
+        self.assertEqual(status.usages, 1)
 
     def testJueyunGuobaCardTakesEffect(self):
         """
