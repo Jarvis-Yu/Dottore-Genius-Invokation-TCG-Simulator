@@ -19,37 +19,25 @@ with limited action cards and all omni dices.
 
 - [x] Set up the framework for maintaining game states
 - [x] Implement game phase of Card Selection (card selection at the start of the game)
-  - [x] Basiclly work and can continue to next phase of the game
-  - [x] Can work with real cards
   - [ ] ~~Allow both players to act simultaneously instead of in turns~~ (trivial for AI training)
 - [x] Implement game phase of Starting Hand Select Phase (select active character)
 - [x] Implement game phase of Roll (Dice) Phase (roll dices between rounds)
-  - [x] Can provide all omni dices
-  - [x] Can proceed to next phase
-- [ ] Implement game phase of Action Phase (players beat each other)
-  - [x] Allow players to end action phase right away
-  - [x] Partially implement the pipeline for status handling
-  - [x] Allow players to normal attack
-  - [x] Implement all elemental reactions
-  - [ ] Allow players to cast skills (easy task once all other parts are done)
-  - [ ] Allow players to cast elemental burst (same as above)
-  - [x] Allow players to use some cards
-  - [ ] Allow players to use all cards
-  - [x] Can proceed to next phase
+- [x] Implement game phase of Action Phase (players beat each other)
+  - [ ] Implement all cards (9/184 implemented)
+  - [ ] Implement all characters (3/48 implemented)
+  - [x] Implement all reactions
 - [x] Implement game phase of End Phase (summons and some support card or statuses take action)
-  - [x] Can pull cards by the end
-  - [x] Can proceed to next phase
-- [x] Implement CLI for better debugging experience
 - [x] Implement game phase of Game End Phase (one player wins or draw)
+- [x] Implement CLI for better debugging experience
 - [x] Implement lazy player agent for minimal testing purposes
 - [x] Implement random player agent for testing purposes
 - [ ] Implement greedy player agent for testing purposes
-- [ ] Implement player action validity checker
+- [ ] Implement player action validity checker  <- ***WIP***
 - [ ] Implement player action choices provider
 
-The third stage is to implement real dices system.
-
 The second stage of development will be focusing on including all action cards.
+
+The third stage is to implement real dices system.
 
 The final stage is to include more characters and eventually all.
 
@@ -63,14 +51,14 @@ There's currently a CLI available to try this project.
 
 Here are the steps for you to follow to try the developing project.
 
-For Windows based systems:
+For Windows based systems:  *(deprecated now, needs contribution)*
 
 1. Clone the project
 2. Make sure your Python version >= 3.10.11
 3. Run scripts\venv.ps1
 4. After venv is installed, run ./scripts/cli.ps1
 
-For unix based systems (MacOS, Linux...):
+For unix based systems (MacOS, Linux...):  *(up-to-date)*
 
 1. Clone the project
 2. Make sure your Python version >= 3.10.11
