@@ -121,7 +121,6 @@ class EndPhase(ph.Phase):
         effect_stack = effect_stack.push_one(SwapCharacterEffect(
             StaticTarget(pid, Zone.CHARACTER, action.selected_character_id)
         ))
-        # TODO: posts
         return game_state.factory().effect_stack(
             effect_stack
         ).build()
@@ -136,9 +135,6 @@ class EndPhase(ph.Phase):
         raise NotImplementedError
 
     def waiting_for(self, game_state: gs.GameState) -> Optional[gs.GameState.Pid]:
-        """
-        TODO: override this to handle death swap
-        """
         effect_stack = game_state.get_effect_stack()
         # if no effects are to be executed or death swap phase is inserted
         if effect_stack.is_not_empty() \

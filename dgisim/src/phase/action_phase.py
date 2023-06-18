@@ -95,7 +95,7 @@ class ActionPhase(ph.Phase):
         instruction = action.instruction
         new_effects: list[Effect] = []
         # TODO: put pre checks
-        # TODO: Costs
+        # Costs
         dices = player.get_dices()
         new_dices = dices - action.instruction.dices
         if new_dices is None:
@@ -146,7 +146,6 @@ class ActionPhase(ph.Phase):
             )
 
         new_effects.append(TurnEndEffect(), )
-        # TODO: posts
         return game_state.factory().effect_stack(
             game_state.get_effect_stack().push_many_fl(new_effects)
         ).player(
@@ -188,13 +187,11 @@ class ActionPhase(ph.Phase):
         effect_stack = effect_stack.push_one(SwapCharacterEffect(
             StaticTarget(pid, Zone.CHARACTER, action.selected_character_id)
         ))
-        # TODO: posts
         return game_state.factory().effect_stack(
             effect_stack
         ).build()
 
     def _handle_game_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: GameAction) -> Optional[gs.GameState]:
-        # TODO
         player = game_state.get_player(pid)
         if isinstance(action, SkillAction):
             action = cast(SkillAction, action)
@@ -211,9 +208,6 @@ class ActionPhase(ph.Phase):
         raise Exception("Unhandld action", action)
 
     def step_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: PlayerAction) -> Optional[gs.GameState]:
-        """
-        TODO: Currently only allows player to end their round
-        """
         effect_stack = game_state.get_effect_stack()
         if effect_stack.is_not_empty() and isinstance(effect_stack.peek(), DeathSwapPhaseStartEffect):
             game_state = game_state.factory().effect_stack(effect_stack.pop()[0]).build()
@@ -226,9 +220,6 @@ class ActionPhase(ph.Phase):
         raise Exception("Unknown Game State to process")
 
     def waiting_for(self, game_state: gs.GameState) -> Optional[gs.GameState.Pid]:
-        """
-        TODO: override this to handle death swap
-        """
         effect_stack = game_state.get_effect_stack()
         # if no effects are to be executed or death swap phase is inserted
         if effect_stack.is_empty() \
