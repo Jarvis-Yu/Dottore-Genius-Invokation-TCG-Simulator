@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional, Callable, Union
+from typing import Optional, Callable, Union, Iterator
 
 import dgisim.src.character.character as chr
 from dgisim.src.effect.event_pre import EventPre
@@ -26,6 +26,13 @@ class Characters:
             if character.get_id() == self._active_character_id:
                 return self._characters[i:] + self._characters[:i]
         return tuple()
+
+    def get_none_active_characters(self) -> tuple[chr.Character, ...]:
+        return tuple(
+            char
+            for char in self._characters
+            if char.get_id() != self.get_active_character_id()
+        )
 
     def get_character(self, id: int) -> Optional[chr.Character]:
         for character in self._characters:
@@ -112,6 +119,26 @@ class Characters:
 
     def __str__(self) -> str:
         return self.to_string(0)
+
+    def __iter__(self) -> Iterator[chr.Character]:
+        return iter(self.get_characters())
+
+    def contains(self, char: chr.Character | type[chr.Character]) -> bool:
+        if isinstance(char, chr.Character):
+            return any(
+                c
+                for c in self._characters
+                if c == char
+            )
+        else:  # assert char: type[chr.Character]
+            return any(
+                c
+                for c in self._characters
+                if type(c) is char
+            )
+
+    def __contains__(self, char: chr.Character | type[chr.Character]) -> bool:
+        return self.contains(char)
 
     def to_string(self, indent: int = 0) -> str:
         new_indent = indent + INDENT

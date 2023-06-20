@@ -10,22 +10,40 @@ import dgisim.src.action as ac
 import dgisim.src.status.status as stt
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.dices import AbstractDices
+from dgisim.src.element.element import Element
+from dgisim.src.helper.quality_of_life import BIG_INT
 
 
 class Card:
+    _DICE_COST = AbstractDices({Element.OMNI: BIG_INT})
+
     @classmethod
     def effects(cls, instruction: ac.Instruction) -> tuple[eft.Effect, ...]:
         raise NotImplementedError
 
+    @classmethod
+    def base_dice_cost(cls) -> AbstractDices:
+        return cls._DICE_COST
+
+    @classmethod
+    def preprocessed_dice_cost(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> AbstractDices:
+        # TODO: do the actual preprocessing
+        return cls._DICE_COST
+
     # TODO add a post effect adding inform() to all status
 
     @classmethod
-    def usable(
-            cls,
-            game_state: gs.GameState,
-            pid: gs.GameState.Pid,
-    ) -> None | tuple[AbstractDices, type[ac.Instruction]]:
-        raise NotImplementedError
+    def usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
+        """ checks if card can be used (but neglect if player have enough dices for this) """
+        return True
+
+    @classmethod
+    def strictly_usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
+        """ checks if card can be used """
+        dices_satisfy = game_state.get_player(pid).get_dices().loosely_satisfy(
+            cls.preprocessed_dice_cost(game_state, pid)
+        )
+        return dices_satisfy and cls.usable(game_state, pid)
 
     def __eq__(self, other: object) -> bool:
         return type(self) == type(other)
@@ -62,8 +80,19 @@ class EventCard(Card):
 class EquipmentCard(Card):
     pass
 
+class _ActiveCombatTalentCard(EquipmentCard):
+    pass
+
 
 class FoodCard(EventCard):
+    @override
+    @classmethod
+    def usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
+        ac = game_state.get_player(pid).get_active_character()
+        if ac is None or ac.satiated():
+            return False
+        return super().usable(game_state, pid)
+
     @override
     @classmethod
     def effects(cls, instruction: ac.Instruction) -> tuple[eft.Effect, ...]:
@@ -99,6 +128,8 @@ class _DirectHealCard(FoodCard):
 
 
 class SweetMadame(_DirectHealCard):
+    _DICE_COST = AbstractDices({})
+
     @override
     @classmethod
     def heal_amount(cls) -> int:
@@ -106,6 +137,8 @@ class SweetMadame(_DirectHealCard):
 
 
 class MondstadtHashBrown(_DirectHealCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 1})
+
     @override
     @classmethod
     def heal_amount(cls) -> int:
@@ -113,6 +146,8 @@ class MondstadtHashBrown(_DirectHealCard):
 
 
 class JueyunGuoba(FoodCard):
+    _DICE_COST = AbstractDices({})
+
     @override
     @classmethod
     def food_effects(cls, instruction: ac.Instruction) -> tuple[eft.Effect, ...]:
@@ -126,17 +161,20 @@ class JueyunGuoba(FoodCard):
 
 
 class LotusFlowerCrisp(FoodCard):
-    pass
+    _DICE_COST = AbstractDices({Element.OMNI: 1})
 
 
 class MintyMeatRolls(FoodCard):
-    pass
+    _DICE_COST = AbstractDices({Element.OMNI: 1})
 
 
 class MushroomPizza(FoodCard):
     """
     Heal first then the status
     """
+
+    _DICE_COST = AbstractDices({Element.OMNI: 1})
+
     @override
     @classmethod
     def food_effects(cls, instruction: ac.Instruction) -> tuple[eft.Effect, ...]:
@@ -154,10 +192,20 @@ class MushroomPizza(FoodCard):
 
 
 class NorthernSmokedChicken(FoodCard):
-    pass
+    _DICE_COST = AbstractDices({})
 
 
 class Starsigns(EventCard):
+    _DICE_COST = AbstractDices({Element.ANY: 2})
+
+    @override
+    @classmethod
+    def usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
+        ac = game_state.get_player(pid).get_active_character()
+        if ac is None or ac.get_energy() >= ac.get_max_energy():
+            return False
+        return super().usable(game_state, pid)
+
     @override
     @classmethod
     def effects(cls, instruction: ac.Instruction) -> tuple[eft.Effect, ...]:
@@ -171,7 +219,23 @@ class Starsigns(EventCard):
 
 
 class CalxsArts(EventCard):
-    pass
+    _DICE_COST = AbstractDices({Element.OMNI: 1})
+
+    @override
+    @classmethod
+    def usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
+        ac = game_state.get_player(pid).get_active_character()
+        cs = game_state.get_player(pid).get_characters()
+        if ac is None or ac.get_energy() >= ac.get_max_energy():
+            return False
+        has_teammate_with_energy = any(
+            char
+            for char in cs.get_none_active_characters()
+            if char.get_energy() > 0
+        )
+        if not has_teammate_with_energy:
+            return False
+        return super().usable(game_state, pid)
 
 # TODO: change to the correct parent class
 
@@ -179,6 +243,20 @@ class CalxsArts(EventCard):
 
 
 class LightningStiletto(EventCard, _CombatActionCard):
+    _DICE_COST = AbstractDices({Element.ELECTRO: 3})
+
+    @override
+    @classmethod
+    def usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
+        from dgisim.src.character.character import Keqing
+        cs = game_state.get_player(pid).get_characters()
+        keqing = next((c for c in cs if type(c) == Keqing), None)
+        if keqing is None:
+            return False
+        if not keqing.can_cast_skill():
+            return False
+        return super().usable(game_state, pid)
+
     @override
     @classmethod
     def effects(cls, instruction: ac.Instruction) -> tuple[eft.Effect, ...]:
@@ -199,6 +277,19 @@ class LightningStiletto(EventCard, _CombatActionCard):
 
 
 class ThunderingPenance(EquipmentCard, _CombatActionCard):
+    _DICE_COST = AbstractDices({Element.ELECTRO: 3})
+
+    @override
+    @classmethod
+    def usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
+        from dgisim.src.character.character import Keqing
+        ac = game_state.get_player(pid).get_active_character()
+        if ac is None:
+            return False
+        if type(ac) is not Keqing or not ac.can_cast_skill():
+            return False
+        return super().usable(game_state, pid)
+
     @override
     @classmethod
     def effects(cls, instruction: ac.Instruction) -> tuple[eft.Effect, ...]:
@@ -218,6 +309,19 @@ class ThunderingPenance(EquipmentCard, _CombatActionCard):
 
 
 class ColdBloodedStrike(EquipmentCard, _CombatActionCard):
+    _DICE_COST = AbstractDices({Element.CRYO: 4})
+
+    @override
+    @classmethod
+    def usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
+        from dgisim.src.character.character import Kaeya
+        ac = game_state.get_player(pid).get_active_character()
+        if ac is None:
+            return False
+        if type(ac) is not Kaeya or not ac.can_cast_skill():
+            return False
+        return super().usable(game_state, pid)
+
     @override
     @classmethod
     def effects(cls, instruction: ac.Instruction) -> tuple[eft.Effect, ...]:
@@ -237,6 +341,8 @@ class ColdBloodedStrike(EquipmentCard, _CombatActionCard):
 #### Rhodeia of Loch ####
 
 class StreamingSurge(EquipmentCard, _CombatActionCard):
+    _DICE_COST = AbstractDices({Element.HYDRO: 4})
+
     @override
     @classmethod
     def effects(cls, instruction: ac.Instruction) -> tuple[eft.Effect, ...]:

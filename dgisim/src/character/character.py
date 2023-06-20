@@ -253,7 +253,7 @@ class Character:
 
     def can_cast_skill(self) -> bool:
         from dgisim.src.status.status import FrozenStatus
-        return not self._statuses.contains(FrozenStatus)
+        return not self._statuses.contains(FrozenStatus) and not self.defeated()
 
     def name(self) -> str:
         return self.__class__.__name__

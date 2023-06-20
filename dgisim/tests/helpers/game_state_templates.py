@@ -5,6 +5,8 @@ from dgisim.src.state.player_state import PlayerState
 from dgisim.src.character.characters import Characters
 from dgisim.src.character.character import *
 from dgisim.src.effect.effect import *
+from dgisim.src.dices import *
+from dgisim.src.helper.quality_of_life import BIG_INT
 
 
 BASE_GAME = GameState.from_default().factory().f_player1(
@@ -14,6 +16,8 @@ BASE_GAME = GameState.from_default().factory().f_player1(
             Kaeya.from_default(2),
             Keqing.from_default(3),
         ), None)
+    ).dices(
+        ActualDices({Element.OMNI: BIG_INT})
     ).build()
 ).f_player2(
     lambda p: p.factory().characters(
@@ -22,6 +26,8 @@ BASE_GAME = GameState.from_default().factory().f_player1(
             Kaeya.from_default(2),
             Keqing.from_default(3),
         ), None)
+    ).dices(
+        ActualDices({Element.OMNI: BIG_INT})
     ).build()
 ).build()
 

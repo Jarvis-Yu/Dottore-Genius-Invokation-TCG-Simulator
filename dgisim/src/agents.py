@@ -1,5 +1,5 @@
 from typing import List, Optional
-from random import random, choice
+import random
 from dgisim.src.action import PlayerAction
 
 from dgisim.src.player_agent import PlayerAgent
@@ -90,7 +90,7 @@ class HardCodedRandomAgent(PlayerAgent):
             raise Exception("No Action Defined")
         
         elif isinstance(curr_phase, ActionPhase):
-            selection = random()
+            selection = random.random()
             me = game_state.get_player(pid)
             available_dices = me.get_dices()
             active_character = me.get_active_character()
@@ -106,7 +106,7 @@ class HardCodedRandomAgent(PlayerAgent):
                 if active_id in alive_ids:
                     alive_ids.remove(active_id)
                 if alive_ids:
-                    return DeathSwapAction(choice(alive_ids))
+                    return DeathSwapAction(random.choice(alive_ids))
                 else:
                     raise Exception("Game should end here but not implemented(NOT REACHED)")
                 
@@ -129,24 +129,9 @@ class HardCodedRandomAgent(PlayerAgent):
                 else:
                     card = None
                 
-                if card is not None and not active_character.satiated():
-                    return CardAction(
-                        card,
-                        CharacterTargetInstruction(
-                            dices=tmp_dices,
-                            target=StaticTarget(
-                                pid,
-                                Zone.CHARACTER,
-                                active_character.get_id(),
-                            )
-                        )
-                    )
-                
-            # starsigns
-            if cards.contains(Starsigns):
-                if active_character.get_energy() < active_character.get_max_energy():
-                    card = Starsigns
-                    tmp_dices = ActualDices({Element.ANY: 2})
+                if card is not None \
+                        and not active_character.satiated() \
+                        and (available_dices - tmp_dices).is_legal():
                     return CardAction(
                         card,
                         CharacterTargetInstruction(
@@ -172,7 +157,7 @@ class HardCodedRandomAgent(PlayerAgent):
                     alive_ids.remove(active_id)
                 if dices is not None and alive_ids:
                     return SwapAction(
-                        choice(alive_ids),
+                        random.choice(alive_ids),
                         DiceOnlyInstruction(dices=dices),
                     )
             
@@ -236,7 +221,7 @@ class HardCodedRandomAgent(PlayerAgent):
                     alive_ids.remove(active_id)
                 if dices is not None and alive_ids:
                     return SwapAction(
-                        choice(alive_ids),
+                        random.choice(alive_ids),
                         DiceOnlyInstruction(dices=dices),
                     )
             
@@ -255,7 +240,7 @@ class HardCodedRandomAgent(PlayerAgent):
                 if active_id in alive_ids:
                     alive_ids.remove(active_id)
                 if alive_ids:
-                    return DeathSwapAction(choice(alive_ids))
+                    return DeathSwapAction(random.choice(alive_ids))
                 else:
                     raise Exception("Game should end here but not implemented(NOT REACHED)")
             

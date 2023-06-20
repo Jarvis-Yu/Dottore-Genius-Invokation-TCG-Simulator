@@ -27,7 +27,7 @@ class TestKeqing(unittest.TestCase):
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
             CharacterSkill.NORMAL_ATTACK,
-            DiceOnlyInstruction(dices=ActualDices({})),
+            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -43,7 +43,7 @@ class TestKeqing(unittest.TestCase):
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
             CharacterSkill.ELEMENTAL_SKILL1,
-            DiceOnlyInstruction(dices=ActualDices({})),
+            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -66,7 +66,7 @@ class TestKeqing(unittest.TestCase):
         gsm = GameStateMachine(game_state_1, a1, a2)
         a1.inject_action(SkillAction(
             CharacterSkill.ELEMENTAL_SKILL1,
-            DiceOnlyInstruction(dices=ActualDices({})),
+            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -82,7 +82,7 @@ class TestKeqing(unittest.TestCase):
         a1.inject_action(CardAction(
             LightningStiletto,
             CharacterTargetInstruction(
-                dices=ActualDices({}),
+                dices=ActualDices({Element.OMNI: 3}),
                 target=source,
             )
         ))
@@ -104,7 +104,7 @@ class TestKeqing(unittest.TestCase):
         a1.inject_action(CardAction(
             LightningStiletto,
             CharacterTargetInstruction(
-                dices=ActualDices({}),
+                dices=ActualDices({Element.OMNI: 3}),
                 target=source,
             )
         ))
@@ -127,7 +127,7 @@ class TestKeqing(unittest.TestCase):
         gsm = GameStateMachine(game_state_1_2, a1, a2)
         a1.inject_action(SkillAction(
             CharacterSkill.NORMAL_ATTACK,
-            DiceOnlyInstruction(dices=ActualDices({})),
+            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -144,7 +144,7 @@ class TestKeqing(unittest.TestCase):
         gsm = GameStateMachine(game_state, a1, a2)
         a1.inject_action(SkillAction(
             CharacterSkill.NORMAL_ATTACK,
-            DiceOnlyInstruction(dices=ActualDices({})),
+            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -207,7 +207,7 @@ class TestKeqing(unittest.TestCase):
         a1.inject_action(
             SkillAction(
                 CharacterSkill.ELEMENTAL_BURST,
-                DiceOnlyInstruction(dices=ActualDices({})),
+                DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 4})),
             )
         )
         gsm.player_step()
@@ -230,7 +230,7 @@ class TestKeqing(unittest.TestCase):
         a1.inject_action(
             SkillAction(
                 CharacterSkill.ELEMENTAL_BURST,
-                DiceOnlyInstruction(dices=ActualDices({})),
+                DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 4})),
             )
         )
         gsm.player_step()
@@ -257,7 +257,7 @@ class TestKeqing(unittest.TestCase):
         a1.inject_action(
             SkillAction(
                 CharacterSkill.ELEMENTAL_BURST,
-                DiceOnlyInstruction(dices=ActualDices({})),
+                DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 4})),
             )
         )
         gsm.player_step()
@@ -284,17 +284,17 @@ class TestKeqing(unittest.TestCase):
             CardAction(
                 ThunderingPenance,
                 CharacterTargetInstruction(
-                    dices=ActualDices({}),
+                    dices=ActualDices({Element.OMNI: 3}),
                     target=source,
                 ),
             ),
             SkillAction(
                 CharacterSkill.ELEMENTAL_SKILL1,
-                DiceOnlyInstruction(dices=ActualDices({})),
+                DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
             SkillAction(
                 CharacterSkill.NORMAL_ATTACK,
-                DiceOnlyInstruction(dices=ActualDices({})),
+                DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             )
         ])
         gsm.player_step()
@@ -316,18 +316,18 @@ class TestKeqing(unittest.TestCase):
         a1.inject_actions([
             SkillAction(
                 CharacterSkill.ELEMENTAL_SKILL1,
-                DiceOnlyInstruction(dices=ActualDices({})),
+                DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
             CardAction(
                 ThunderingPenance,
                 CharacterTargetInstruction(
-                    dices=ActualDices({}),
+                    dices=ActualDices({Element.OMNI: 3}),
                     target=source,
                 ),
             ),
             SkillAction(
                 CharacterSkill.NORMAL_ATTACK,
-                DiceOnlyInstruction(dices=ActualDices({})),
+                DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             )
         ])
         gsm.player_step()

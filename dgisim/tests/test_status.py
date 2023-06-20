@@ -1,4 +1,3 @@
-
 import unittest
 
 from dgisim.tests.helpers.game_state_templates import *

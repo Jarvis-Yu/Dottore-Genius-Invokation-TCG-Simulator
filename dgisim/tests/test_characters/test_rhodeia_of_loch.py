@@ -150,7 +150,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
             CharacterSkill.NORMAL_ATTACK,
-            DiceOnlyInstruction(dices=ActualDices({})),
+            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -175,7 +175,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm = GameStateMachine(base_game, a1, a2)
         a1.inject_action(SkillAction(
             CharacterSkill.ELEMENTAL_SKILL1,
-            DiceOnlyInstruction(dices=ActualDices({})),
+            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -195,7 +195,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm = GameStateMachine(base_game, a1, a2)
         a1.inject_action(SkillAction(
             CharacterSkill.ELEMENTAL_SKILL2,
-            DiceOnlyInstruction(dices=ActualDices({})),
+            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 5})),
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -223,7 +223,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm = GameStateMachine(base_game, a1, a2)
         a1.inject_action(SkillAction(
             CharacterSkill.ELEMENTAL_BURST,
-            DiceOnlyInstruction(dices=ActualDices({})),
+            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -243,7 +243,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm = GameStateMachine(game_state, a1, a2)
         a1.inject_action(SkillAction(
             CharacterSkill.ELEMENTAL_BURST,
-            DiceOnlyInstruction(dices=ActualDices({})),
+            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -278,7 +278,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
             CardAction(
                 StreamingSurge,
                 CharacterTargetInstruction(
-                    dices=ActualDices({}),
+                    dices=ActualDices({Element.OMNI: 4}),
                     target=source
                 ),
             )

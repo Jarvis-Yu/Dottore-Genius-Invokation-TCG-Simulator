@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import Dict, Optional, Iterator, Iterable, TypeVar, Union
+from typing import Optional, Iterator, Iterable, TypeVar, Union
+from typing_extensions import Self
 from enum import Enum
 import random
 
@@ -9,18 +10,15 @@ from dgisim.src.helper.quality_of_life import BIG_INT, case_val
 from dgisim.src.element.element import Element
 
 
-T = TypeVar('T', bound='Dices')
-
-
 class Dices:
 
-    def __init__(self, dices: Dict[Element, int]) -> None:
+    def __init__(self, dices: dict[Element, int]) -> None:
         self._dices = HashableDict(dices)
 
-    def __add__(self: T, other: Dices) -> T:
+    def __add__(self, other: Dices) -> Self:
         return type(self)(self._dices + other._dices)
 
-    def __sub__(self: T, other: Dices) -> T:
+    def __sub__(self, other: Dices) -> Self:
         return type(self)(self._dices - other._dices)
 
     def num_dices(self) -> int:
@@ -96,14 +94,9 @@ class ActualDices(Dices):
 
     import dgisim.src.state.game_state as gs
 
-    def just_satisfy(self, requirement: AbstractDices) -> bool:
-        """
-        Asserts self and requirement are legal, and then check if self can match
-        requirement.
-        """
+    def _satisfy(self, requirement: AbstractDices) -> bool:
         assert self.is_legal() and requirement.is_legal()
-        if self.num_dices() != requirement.num_dices():
-            return False
+
         # satisfy all pure elements first
         pure_deducted = HashableDict((
             (elem, self[elem] - requirement[elem])
@@ -127,6 +120,27 @@ class ActualDices(Dices):
 
         # We have enough dices to satisfy Element.ANY, so success
         return True
+
+
+    def loosely_satisfy(self, requirement: AbstractDices) -> bool:
+        """
+        Asserts self and requirement are legal, and then check if self can match
+        requirement.
+        """
+        if self.num_dices() >= requirement.num_dices():
+            return False
+        return self._satisfy(requirement)
+
+    def just_satisfy(self, requirement: AbstractDices) -> bool:
+        """
+        Asserts self and requirement are legal, and then check if self can match
+        requirement.
+
+        self must have the same number of dices as requirement asked for.
+        """
+        if self.num_dices() != requirement.num_dices():
+            return False
+        return self._satisfy(requirement)
 
     def basically_satisfy(
             self,

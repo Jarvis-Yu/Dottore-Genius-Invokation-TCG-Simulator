@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dgisim.src.state.game_state import GameState
 from dgisim.src.game_state_machine import GameStateMachine
 from dgisim.src.element.element import *
@@ -101,4 +103,11 @@ def set_active_player_id(game_state: GameState, pid: GameState.Pid, character_id
         lambda p: p.factory().f_characters(
             lambda cs: cs.factory().active_character_id(character_id).build()
         ).build()
+    ).build()
+
+def fill_dices_with_omni(game_state: GameState) -> GameState:
+    return game_state.factory().f_player1(
+        lambda p: p.factory().dices(ActualDices({Element.OMNI: BIG_INT})).build()
+    ).f_player2(
+        lambda p: p.factory().dices(ActualDices({Element.OMNI: BIG_INT})).build()
     ).build()

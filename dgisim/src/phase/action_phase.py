@@ -154,15 +154,27 @@ class ActionPhase(ph.Phase):
         ).build()
 
     def _handle_card_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: CardAction) -> Optional[gs.GameState]:
+        # verify dices satisfies
+        paid_dices = action.instruction.dices
+        card = action.card
+        required_dices = card.preprocessed_dice_cost(game_state, pid)
+        assert paid_dices.just_satisfy(required_dices)
+
+        # verify action validity
+        assert card.usable(game_state, pid)
+
+        #  setup
         player = game_state.get_player(pid)
         new_effects: list[Effect] = []
+
         # Costs
         dices = player.get_dices()
-        new_dices = dices - action.instruction.dices
-        if new_dices is None:
-            return None
+        new_dices = dices - paid_dices
+        if not new_dices.is_legal():
+            print(f"Fail with new dices: <{new_dices}> for card: {card.name()}")
+            assert False
+
         # Card
-        card = action.card
         new_effects.append(RemoveCardEffect(pid, card))
         new_effects += card.effects(action.instruction)
         if card.is_combat_action():
