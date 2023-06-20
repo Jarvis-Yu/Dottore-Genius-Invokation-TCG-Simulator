@@ -9,18 +9,26 @@ import dgisim.src.effect.effect as eft
 import dgisim.src.action as ac
 import dgisim.src.status.status as stt
 from dgisim.src.character.character_skill_enum import CharacterSkill
+from dgisim.src.dices import AbstractDices
 
 
 class Card:
-    # def __eq__(self, other: object) -> bool:
-    #     return isinstance(other, Card)
-
-    # def __hash__(self) -> int:
-    #     return hash(self.__class__.__name__)
-
     @classmethod
     def effects(cls, instruction: ac.Instruction) -> tuple[eft.Effect, ...]:
         raise NotImplementedError
+
+    # TODO add a post effect adding inform() to all status
+
+    @classmethod
+    def usable(
+            cls,
+            game_state: gs.GameState,
+            pid: gs.GameState.Pid,
+    ) -> None | tuple[AbstractDices, type[ac.Instruction]]:
+        raise NotImplementedError
+
+    def __eq__(self, other: object) -> bool:
+        return type(self) == type(other)
 
     def __str__(self) -> str:
         return self.__class__.__name__

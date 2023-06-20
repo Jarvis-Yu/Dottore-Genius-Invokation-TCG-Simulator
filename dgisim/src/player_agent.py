@@ -12,3 +12,7 @@ class PlayerAgent:
 
 class PlayerProxyAgent(PlayerAgent):
     pass
+
+class ProxyAgent(PlayerProxyAgent):
+    def choose_action(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
+        return super().choose_action(history, pid)
