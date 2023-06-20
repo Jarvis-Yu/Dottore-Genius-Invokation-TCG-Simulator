@@ -5,7 +5,7 @@ import random
 
 from dgisim.src.helper.hashable_dict import HashableDict
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
-from dgisim.src.helper.quality_of_life import BIG_INT
+from dgisim.src.helper.quality_of_life import BIG_INT, case_val
 from dgisim.src.element.element import Element
 
 
@@ -36,7 +36,9 @@ class Dices:
         return self._dices.__iter__()
 
     def __getitem__(self, index: Element) -> int:
-        return self._dices[index]
+        if index in self._dices:
+            return self._dices[index]
+        return 0
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Dices):
@@ -93,6 +95,38 @@ class ActualDices(Dices):
     })
 
     import dgisim.src.state.game_state as gs
+
+    def just_satisfy(self, requirement: AbstractDices) -> bool:
+        """
+        Asserts self and requirement are legal, and then check if self can match
+        requirement.
+        """
+        assert self.is_legal() and requirement.is_legal()
+        if self.num_dices() != requirement.num_dices():
+            return False
+        # satisfy all pure elements first
+        pure_deducted = HashableDict((
+            (elem, self[elem] - requirement[elem])
+            for elem in _PURE_ELEMS
+        ), frozen=False)
+        omni_needed = sum(
+            -num
+            for num in pure_deducted.values()
+            if num < 0
+        )
+
+        # if OMNI given cannot cover pure misses, fail
+        if self[Element.OMNI] < omni_needed:
+            return False
+
+        # test OMNI requirement
+        omni_remained = self[Element.OMNI] - omni_needed
+        most_pure = max(pure_deducted.values())
+        if omni_remained + most_pure < requirement[Element.OMNI]:
+            return False
+
+        # We have enough dices to satisfy Element.ANY, so success
+        return True
 
     def basically_satisfy(
             self,
