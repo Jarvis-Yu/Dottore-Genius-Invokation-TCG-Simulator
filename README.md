@@ -32,12 +32,17 @@ with limited action cards and all omni dices.
 - [x] Implement random player agent for testing purposes
 - [ ] Implement greedy player agent for testing purposes
 - [ ] Implement player action validity checker
-  - [ ] Provide dices request information (for card/skill/swap)  <- ***WIP***
-  - [ ] Provide dices request information that is preprocessed by statuses
-  - [ ] Check dices player chosen satisfies request
-  - [ ] Check if card action is used on valid target (and card exists)
-  - [ ] Check if swap action is fast or combat action, and target is valid
-  - [ ] Check if burst is only casted when the player has the energy
+  - [ ] Card
+    - [x] Provide dices requirement information
+    - [x] Provide usablility check information
+    - [x] Checks player provides with sufficient dices
+    - [ ] Provide dices requirement infomation preprocessed by all statuses  <-- ***WIP***
+    - [ ] Provide validity check for player instruction
+  - [ ] Swap
+    - ...
+  - [ ] Character Skills
+    - [ ] Check if swap action is fast or combat action, and target is valid
+    - ...
 - [ ] Implement player action choices provider
 
 The second stage of development will be focusing on including all action cards.

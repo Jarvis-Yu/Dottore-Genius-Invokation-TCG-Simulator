@@ -34,9 +34,14 @@ class Card:
     # TODO add a post effect adding inform() to all status
 
     @classmethod
+    def loosely_usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
+        """ doesn't check if player has the card in hand """
+        return True
+
+    @classmethod
     def usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
         """ checks if card can be used (but neglect if player have enough dices for this) """
-        return True
+        return game_state.get_player(pid).get_hand_cards().contains(cls)
 
     @classmethod
     def strictly_usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:

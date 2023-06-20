@@ -158,10 +158,13 @@ class ActionPhase(ph.Phase):
         paid_dices = action.instruction.dices
         card = action.card
         required_dices = card.preprocessed_dice_cost(game_state, pid)
-        assert paid_dices.just_satisfy(required_dices)
+        if not paid_dices.just_satisfy(required_dices):
+            raise Exception(f"{paid_dices} cannot pay {required_dices}")
 
         # verify action validity
-        assert card.usable(game_state, pid)
+        if not card.usable(game_state, pid):
+            raise Exception(f"{card.name()} is not usable for {pid}"
+                            + f"in game state: \n{game_state}")
 
         #  setup
         player = game_state.get_player(pid)

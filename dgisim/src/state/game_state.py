@@ -184,7 +184,8 @@ class GameState:
         return hash(self._all_unique_data())
 
     def __str__(self) -> str:
-        return self.to_string(0)
+        from dgisim.src.helper.level_print import GamePrinter
+        return GamePrinter.dict_game_printer(self.dict_str())
 
     def to_string(self, indent: int = 0) -> str:
         new_indent = indent + INDENT
