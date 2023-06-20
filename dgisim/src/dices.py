@@ -105,7 +105,7 @@ class ActualDices(Dices):
         from collections import defaultdict
         remaining: dict[Element, int] = self._dices.copy()
         answer: dict[Element, int] = defaultdict(int)
-        pures: dict[Element, int] = HashableDict()
+        pures: dict[Element, int] = HashableDict(frozen=False)
         omni = 0
         any = 0
         for elem in requirement:
@@ -166,15 +166,19 @@ class ActualDices(Dices):
     @classmethod
     def from_random(cls, size: int) -> ActualDices:
         dices = ActualDices.from_empty()
+        dices._dices._unfreeze()
         for i in range(size):
             elem = random.choice(tuple(ActualDices._LEGAL_ELEMS))
             dices._dices[elem] += 1
+        dices._dices.freeze()
         return dices
 
     @classmethod
     def from_all(cls, size: int, elem: Element) -> ActualDices:
         dices = ActualDices.from_empty()
+        dices._dices._unfreeze()
         dices._dices[Element.OMNI] = size
+        dices._dices.freeze()
         return dices
 
     @classmethod
