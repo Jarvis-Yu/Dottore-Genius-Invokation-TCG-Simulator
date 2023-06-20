@@ -8,6 +8,7 @@ import dgisim.src.state.game_state as gs
 import dgisim.src.effect.effect as eft
 import dgisim.src.action as ac
 import dgisim.src.status.status as stt
+import dgisim.src.character.character as chr
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.dices import AbstractDices
 from dgisim.src.element.element import Element
@@ -80,8 +81,30 @@ class EventCard(Card):
 class EquipmentCard(Card):
     pass
 
-class _ActiveCombatTalentCard(EquipmentCard):
-    pass
+
+def _active_combat_talent_skill_card_usable(
+        game_state: gs.GameState,
+        pid: gs.GameState.Pid,
+        char: type[chr.Character]
+):
+    ac = game_state.get_player(pid).get_active_character()
+    if ac is None:
+        return False
+    if type(ac) is not char or not ac.can_cast_skill():
+        return False
+    return True
+
+
+def _active_combat_talent_burst_card_usable(
+        game_state: gs.GameState,
+        pid: gs.GameState.Pid,
+        char: type[chr.Character]
+):
+    ac = game_state.get_player(pid).get_active_character()
+    if ac is None:
+        return False
+    return _active_combat_talent_skill_card_usable(game_state, pid, char) \
+        and ac.get_energy() == ac.get_max_energy()
 
 
 class FoodCard(EventCard):
@@ -282,13 +305,8 @@ class ThunderingPenance(EquipmentCard, _CombatActionCard):
     @override
     @classmethod
     def usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
-        from dgisim.src.character.character import Keqing
-        ac = game_state.get_player(pid).get_active_character()
-        if ac is None:
-            return False
-        if type(ac) is not Keqing or not ac.can_cast_skill():
-            return False
-        return super().usable(game_state, pid)
+        return _active_combat_talent_skill_card_usable(game_state, pid, chr.Keqing) \
+            and super().usable(game_state, pid)
 
     @override
     @classmethod
@@ -314,13 +332,8 @@ class ColdBloodedStrike(EquipmentCard, _CombatActionCard):
     @override
     @classmethod
     def usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
-        from dgisim.src.character.character import Kaeya
-        ac = game_state.get_player(pid).get_active_character()
-        if ac is None:
-            return False
-        if type(ac) is not Kaeya or not ac.can_cast_skill():
-            return False
-        return super().usable(game_state, pid)
+        return _active_combat_talent_skill_card_usable(game_state, pid, chr.Kaeya) \
+            and super().usable(game_state, pid)
 
     @override
     @classmethod
@@ -342,6 +355,12 @@ class ColdBloodedStrike(EquipmentCard, _CombatActionCard):
 
 class StreamingSurge(EquipmentCard, _CombatActionCard):
     _DICE_COST = AbstractDices({Element.HYDRO: 4})
+
+    @override
+    @classmethod
+    def usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
+        return _active_combat_talent_burst_card_usable(game_state, pid, chr.RhodeiaOfLoch) \
+            and super().usable(game_state, pid)
 
     @override
     @classmethod
