@@ -337,3 +337,36 @@ class TestKeqing(unittest.TestCase):
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 1)
         self.assertTrue(p2ac.get_elemental_aura().contains(Element.ELECTRO))
+
+    def test_lightning_stiletto_usability(self):
+        game_state = self.BASE_GAME.factory().f_player1(
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().f_active_character(
+                    lambda ac: ac.factory().f_character_statuses(
+                        lambda sts: sts.update_status(FrozenStatus())
+                    ).build()
+                ).build()
+            ).f_hand_cards(
+                lambda hcs: hcs.add(LightningStiletto)
+            ).build()
+        ).build()
+
+        self.assertFalse(LightningStiletto.loosely_usable(game_state, GameState.Pid.P1))
+        self.assertFalse(LightningStiletto.valid_instruction(
+            game_state,
+            GameState.Pid.P1,
+            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+        ))
+        # False because frozen
+        self.assertFalse(LightningStiletto.valid_instruction(
+            game_state,
+            GameState.Pid.P1,
+            CharacterTargetInstruction(
+                dices=ActualDices({Element.OMNI: 3}),
+                target=StaticTarget(
+                    pid=GameState.Pid.P1,
+                    zone=Zone.CHARACTER,
+                    id=3,
+                )
+            ),
+        ))
