@@ -51,10 +51,10 @@ dictionary, and discover game states on different 'game branches' being actually
     - [x] Provide dices requirement information
     - [x] Provide usablility check information
     - [x] Checks player provides with sufficient dices
-    - [ ] Provide dices requirement infomation preprocessed by all statuses &larr; **_WIP_**
-    - [ ] Provide validity check for player instruction
+    - [x] Provide validity check for player instruction
   - [ ] Swap Action
-    - [ ] Check if swap action is fast or combat action, and target is valid
+    - [ ] Check if swap action is fast or combat action, and target is valid &larr; **_WIP_**
+    - [ ] Provide dices requirement infomation preprocessed by all statuses
     - [ ] ...
   - [ ] Character Skill Action
     - [ ] ...

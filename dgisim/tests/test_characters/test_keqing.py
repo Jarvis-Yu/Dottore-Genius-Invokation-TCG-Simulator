@@ -283,10 +283,7 @@ class TestKeqing(unittest.TestCase):
         a1.inject_actions([
             CardAction(
                 ThunderingPenance,
-                CharacterTargetInstruction(
-                    dices=ActualDices({Element.OMNI: 3}),
-                    target=source,
-                ),
+                DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
             SkillAction(
                 CharacterSkill.ELEMENTAL_SKILL1,
@@ -320,10 +317,7 @@ class TestKeqing(unittest.TestCase):
             ),
             CardAction(
                 ThunderingPenance,
-                CharacterTargetInstruction(
-                    dices=ActualDices({Element.OMNI: 3}),
-                    target=source,
-                ),
+                DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
             SkillAction(
                 CharacterSkill.NORMAL_ATTACK,

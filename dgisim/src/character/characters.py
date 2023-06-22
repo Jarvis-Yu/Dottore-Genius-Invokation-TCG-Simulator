@@ -46,6 +46,12 @@ class Characters:
             raise Exception("Character not found")
         return character
 
+    def find_first_character(self, char_type: type[chr.Character]) -> None | chr.Character:
+        return next(
+            (char for char in self if type(char) is char_type),
+            None
+        )
+
     def get_active_character(self) -> Optional[chr.Character]:
         if self._active_character_id is None:
             return None
@@ -126,15 +132,13 @@ class Characters:
     def contains(self, char: chr.Character | type[chr.Character]) -> bool:
         if isinstance(char, chr.Character):
             return any(
-                c
+                c == char
                 for c in self._characters
-                if c == char
             )
         else:  # assert char: type[chr.Character]
             return any(
-                c
+                type(c) is char
                 for c in self._characters
-                if type(c) is char
             )
 
     def __contains__(self, char: chr.Character | type[chr.Character]) -> bool:

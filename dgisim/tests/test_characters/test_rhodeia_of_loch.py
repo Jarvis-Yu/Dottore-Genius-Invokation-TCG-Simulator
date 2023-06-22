@@ -277,10 +277,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         a1.inject_action(
             CardAction(
                 StreamingSurge,
-                CharacterTargetInstruction(
-                    dices=ActualDices({Element.OMNI: 4}),
-                    target=source
-                ),
+                DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 4})),
             )
         )
         gsm.player_step()

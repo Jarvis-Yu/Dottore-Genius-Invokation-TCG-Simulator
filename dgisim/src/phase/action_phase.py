@@ -154,17 +154,18 @@ class ActionPhase(ph.Phase):
         ).build()
 
     def _handle_card_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: CardAction) -> Optional[gs.GameState]:
-        # verify dices satisfies
         paid_dices = action.instruction.dices
         card = action.card
-        required_dices = card.preprocessed_dice_cost(game_state, pid)
-        if not paid_dices.just_satisfy(required_dices):
-            raise Exception(f"{paid_dices} cannot pay {required_dices}")
 
-        # verify action validity
+        # verify card usage validity
         if not card.usable(game_state, pid):
             raise Exception(f"{card.name()} is not usable for {pid}"
-                            + f"in game state: \n{game_state}")
+                            + f"in game state:\n{game_state}")
+
+        # verify action validity
+        if not card.valid_instruction(game_state, pid, action.instruction):
+            raise Exception(f"{action.instruction} is not valid of the {card.name()}"
+                            + f"in the game state:\n{game_state}")
 
         #  setup
         player = game_state.get_player(pid)
@@ -179,7 +180,7 @@ class ActionPhase(ph.Phase):
 
         # Card
         new_effects.append(RemoveCardEffect(pid, card))
-        new_effects += card.effects(action.instruction)
+        new_effects += card.effects(game_state, pid, action.instruction)
         if card.is_combat_action():
             new_effects.append(AllStatusTriggererEffect(
                 pid,

@@ -233,10 +233,7 @@ class TestKaeya(unittest.TestCase):
         a1.inject_actions([
             CardAction(
                 ColdBloodedStrike,
-                CharacterTargetInstruction(
-                    dices=ActualDices({Element.OMNI: 4}),
-                    target=source,
-                ),
+                DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 4})),
             ),
             SkillAction(
                 CharacterSkill.ELEMENTAL_SKILL1,

@@ -1,8 +1,6 @@
 from __future__ import annotations
 from typing import Optional, Tuple, Callable, Union
 from typing_extensions import override
-from enum import Enum
-from dataclasses import dataclass
 
 import dgisim.src.state.game_state as gs
 import dgisim.src.card.card as cd
@@ -11,13 +9,11 @@ import dgisim.src.summon.summon as sm
 import dgisim.src.status.statuses as stts
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.element.element import ElementalAura
-from dgisim.src.effect.event_pre import EventPre
-from dgisim.src.dices import AbstractDices
 from dgisim.src.effect.event import *
 import dgisim.src.effect.effect as eft
 import dgisim.src.status.status as stt
 from dgisim.src.element.element import *
-from dgisim.src.helper.level_print import level_print_single, INDENT, level_print
+from dgisim.src.helper.level_print import INDENT, level_print
 
 
 class Character:
@@ -268,7 +264,7 @@ class Character:
         )
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Character):
+        if not isinstance(other, type(self)):
             return False
         return self._all_unique_data() == other._all_unique_data()
 
@@ -486,11 +482,6 @@ class Keqing(Character):
             elemental_aura=ElementalAura.from_default(),
         )
 
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Keqing):
-            return False
-        return self._all_unique_data() == other._all_unique_data()
-
 
 class Kaeya(Character):
 
@@ -555,11 +546,6 @@ class Kaeya(Character):
             statuses=stts.OrderedStatuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
-
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Kaeya):
-            return False
-        return self._all_unique_data() == other._all_unique_data()
 
 
 class RhodeiaOfLoch(Character):
@@ -689,8 +675,3 @@ class RhodeiaOfLoch(Character):
             statuses=stts.OrderedStatuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
-
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RhodeiaOfLoch):
-            return False
-        return self._all_unique_data() == other._all_unique_data()
