@@ -38,7 +38,7 @@ class Card:
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
         """ doesn't check if player has the card in hand """
-        return True
+        return game_state.get_active_player_id() is pid
 
     @classmethod
     def loosely_usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
@@ -80,7 +80,18 @@ class Card:
     ) -> bool:
         # the default implementation checks dices satisfy needs and card exists
         return instruction.dices.just_satisfy(cls.preprocessed_dice_cost(game_state, pid)) \
-            and game_state.get_player(pid).get_hand_cards().contains(cls)
+            and game_state.get_player(pid).get_hand_cards().contains(cls) \
+            and game_state.get_active_player_id() is pid \
+            and cls._valid_instruction(game_state, pid, instruction)
+
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: gs.GameState.Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        return True
 
     def __eq__(self, other: object) -> bool:
         return type(self) == type(other)
@@ -172,7 +183,7 @@ class FoodCard(EventCard):
 
     @override
     @classmethod
-    def valid_instruction(
+    def _valid_instruction(
             cls,
             game_state: gs.GameState,
             pid: gs.GameState.Pid,
@@ -183,11 +194,7 @@ class FoodCard(EventCard):
             return False
 
         target = game_state.get_target(instruction.target)
-        if not isinstance(target, chr.Character) \
-                or target.satiated():
-            return False
-
-        return super().valid_instruction(game_state, pid, instruction)
+        return isinstance(target, chr.Character) and not target.satiated()
 
     @override
     @classmethod
@@ -310,7 +317,7 @@ class Starsigns(EventCard):
 
     @override
     @classmethod
-    def valid_instruction(
+    def _valid_instruction(
             cls,
             game_state: gs.GameState,
             pid: gs.GameState.Pid,
@@ -320,8 +327,7 @@ class Starsigns(EventCard):
         if not isinstance(instruction, act.DiceOnlyInstruction):
             return False
 
-        return cls.loosely_usable(game_state, pid) \
-            and super().valid_instruction(game_state, pid, instruction)
+        return cls.loosely_usable(game_state, pid)
 
     @override
     @classmethod
@@ -331,7 +337,6 @@ class Starsigns(EventCard):
             pid: gs.GameState.Pid,
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
-        assert isinstance(instruction, act.DiceOnlyInstruction)
         return (
             eft.EnergyRechargeEffect(
                 eft.StaticTarget(
@@ -365,17 +370,73 @@ class CalxsArts(EventCard):
 
     @override
     @classmethod
-    def valid_instruction(
+    def _valid_instruction(
             cls,
             game_state: gs.GameState,
             pid: gs.GameState.Pid,
             instruction: act.Instruction
     ) -> bool:
-        if not isinstance(instruction, act.DiceOnlyInstruction):
-            return False
+        return isinstance(instruction, act.DiceOnlyInstruction) \
+            and cls.loosely_usable(game_state, pid)
 
-        return cls.loosely_usable(game_state, pid) \
-            and super().valid_instruction(game_state, pid, instruction)
+
+class ChangingShifts(EventCard):
+    _DICE_COST = AbstractDices({})
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: gs.GameState.Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        return isinstance(instruction, act.DiceOnlyInstruction)
+
+    
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: gs.GameState.Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddCombatStatusEffect(
+                target_pid=pid,
+                status=stt.ChangingShiftsStatus,
+            ),
+        )
+
+
+class LeaveItToMe(EventCard):
+    _DICE_COST = AbstractDices({})
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: gs.GameState.Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        return isinstance(instruction, act.DiceOnlyInstruction)
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: gs.GameState.Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddCombatStatusEffect(
+                target_pid=pid,
+                status=stt.LeaveItToMeStatus,
+            ),
+        )
 
 # TODO: change to the correct parent class
 
@@ -398,7 +459,7 @@ class LightningStiletto(EventCard, _CombatActionCard):
 
     @override
     @classmethod
-    def valid_instruction(
+    def _valid_instruction(
             cls,
             game_state: gs.GameState,
             pid: gs.GameState.Pid,
@@ -407,9 +468,7 @@ class LightningStiletto(EventCard, _CombatActionCard):
         if not isinstance(instruction, act.CharacterTargetInstruction):
             return False
         target = game_state.get_target(instruction.target)
-        if not isinstance(target, chr.Keqing) or not target.can_cast_skill():
-            return False
-        return super().valid_instruction(game_state, pid, instruction)
+        return isinstance(target, chr.Keqing) and target.can_cast_skill()
 
     @override
     @classmethod
@@ -446,16 +505,14 @@ class ThunderingPenance(EquipmentCard, _CombatActionCard):
 
     @override
     @classmethod
-    def valid_instruction(
+    def _valid_instruction(
             cls,
             game_state: gs.GameState,
             pid: gs.GameState.Pid,
             instruction: act.Instruction
     ) -> bool:
-        if not isinstance(instruction, act.DiceOnlyInstruction):
-            return False
-        return cls._loosely_usable(game_state, pid) \
-             and super().valid_instruction(game_state, pid, instruction)
+        return isinstance(instruction, act.DiceOnlyInstruction) \
+            and cls._loosely_usable(game_state, pid)
 
     @override
     @classmethod
@@ -496,16 +553,14 @@ class ColdBloodedStrike(EquipmentCard, _CombatActionCard):
 
     @override
     @classmethod
-    def valid_instruction(
+    def _valid_instruction(
             cls,
             game_state: gs.GameState,
             pid: gs.GameState.Pid,
             instruction: act.Instruction
     ) -> bool:
-        if not isinstance(instruction, act.DiceOnlyInstruction):
-            return False
-        return cls._loosely_usable(game_state, pid) \
-             and super().valid_instruction(game_state, pid, instruction)
+        return isinstance(instruction, act.DiceOnlyInstruction) \
+            and cls._loosely_usable(game_state, pid)
 
     @override
     @classmethod
@@ -546,16 +601,14 @@ class StreamingSurge(EquipmentCard, _CombatActionCard):
 
     @override
     @classmethod
-    def valid_instruction(
+    def _valid_instruction(
             cls,
             game_state: gs.GameState,
             pid: gs.GameState.Pid,
             instruction: act.Instruction
     ) -> bool:
-        if not isinstance(instruction, act.DiceOnlyInstruction):
-            return False
-        return cls._loosely_usable(game_state, pid) \
-             and super().valid_instruction(game_state, pid, instruction)
+        return isinstance(instruction, act.DiceOnlyInstruction) \
+            and cls._loosely_usable(game_state, pid)
 
     @override
     @classmethod

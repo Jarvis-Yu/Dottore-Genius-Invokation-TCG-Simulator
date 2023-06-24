@@ -9,7 +9,7 @@ import dgisim.src.summon.summon as sm
 import dgisim.src.status.statuses as stts
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.element.element import ElementalAura
-from dgisim.src.effect.event import *
+from dgisim.src.effect.effects_template import *
 import dgisim.src.effect.effect as eft
 import dgisim.src.status.status as stt
 from dgisim.src.element.element import *

@@ -15,11 +15,21 @@ class Dices:
     def __init__(self, dices: dict[Element, int]) -> None:
         self._dices = HashableDict(dices)
 
-    def __add__(self, other: Dices) -> Self:
-        return type(self)(self._dices + other._dices)
+    def __add__(self, other: Dices | dict[Element, int]) -> Self:
+        dices: dict[Element, int]
+        if isinstance(other, Dices):
+            dices = other._dices
+        else:
+            dices = other
+        return type(self)(self._dices + dices)
 
-    def __sub__(self, other: Dices) -> Self:
-        return type(self)(self._dices - other._dices)
+    def __sub__(self, other: Dices | dict[Element, int]) -> Self:
+        dices: dict[Element, int]
+        if isinstance(other, Dices):
+            dices = other._dices
+        else:
+            dices = other
+        return type(self)(self._dices - dices)
 
     def num_dices(self) -> int:
         return sum(self._dices.values())

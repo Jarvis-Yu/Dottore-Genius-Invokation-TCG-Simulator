@@ -8,6 +8,7 @@ from math import ceil
 import dgisim.src.state.game_state as gs
 import dgisim.src.card.card as cd
 import dgisim.src.effect.effect as eft
+import dgisim.src.event.event as evt
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.element.element import Element
 from dgisim.src.helper.quality_of_life import just, BIG_INT, case_val
@@ -21,6 +22,9 @@ class TriggerringEvent(Enum):
 class Status:
     class PPType(Enum):
         """ PreProcessType """
+        # Swap
+        SWAP = "Swap"                 # To determine if swap needs to cost more or less,
+        #                               if swap is fast action or combat action
         # Damages
         DMG_ELEMENT = "DmgElement"    # To determine the element
         DMG_REACTION = "DmgReaction"  # To determine the reaction
@@ -326,9 +330,10 @@ class ShieldStatus(Status):
 
 @dataclass(frozen=True, kw_only=True)
 class StackedShieldStatus(ShieldStatus):
+    """ The shield status where all usages can be consumed by a DMG effect """
     usages: int
     MAX_USAGES: ClassVar[int] = BIG_INT
-    SHIELD_AMOUNT: ClassVar[int] = 1  # shield amount per stack
+    SHIELD_AMOUNT: ClassVar[int] = 1  # shield amount per usage
 
     @override
     def _preprocess(
@@ -362,6 +367,7 @@ class StackedShieldStatus(ShieldStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class FixedShieldStatus(ShieldStatus):
+    """ The shield status where only one usage can be consumed by a DMG effect """
     usages: int
     MAX_USAGES: ClassVar[int] = BIG_INT
     SHIELD_AMOUNT: ClassVar[int] = 0  # shield amount per stack
@@ -580,6 +586,46 @@ class JueyunGuobaStatus(CharacterStatus):
         if signal is eft.TriggeringSignal.ROUND_END:
             return [], None
         return [], self
+
+
+@dataclass(frozen=True)
+class ChangingShiftsStatus(CombatStatus):
+    COST_DEDUCTION: ClassVar[int] = 1
+
+    @override
+    def _preprocess(
+            self,
+            game_state: gs.GameState,
+            status_source: eft.StaticTarget,
+            item: eft.Preprocessable,
+            signal: Status.PPType,
+    ) -> tuple[eft.Preprocessable, Optional[Self]]:
+        if signal is Status.PPType.SWAP:
+            assert isinstance(item, evt.GameEvent) and item.event_type is evt.EventType.SWAP
+            if item.target.pid is status_source.pid \
+                    and item.dices_cost.num_dices() >= self.COST_DEDUCTION:
+                assert item.dices_cost.num_dices() == item.dices_cost[Element.ANY]
+                new_cost = item.dices_cost - {Element.ANY: self.COST_DEDUCTION}
+                return replace(item, dices_cost=new_cost), None
+        return super()._preprocess(game_state, status_source, item, signal)
+
+
+@dataclass(frozen=True)
+class LeaveItToMeStatus(CombatStatus):
+    @override
+    def _preprocess(
+            self,
+            game_state: gs.GameState,
+            status_source: eft.StaticTarget,
+            item: eft.Preprocessable,
+            signal: Status.PPType,
+    ) -> tuple[eft.Preprocessable, Optional[Self]]:
+        if signal is Status.PPType.SWAP:
+            assert isinstance(item, evt.GameEvent) and item.event_type is evt.EventType.SWAP
+            if item.target.pid is status_source.pid \
+                    and item.event_speed is evt.EventSpeed.COMBAT_ACTION:
+                return replace(item, event_speed=evt.EventSpeed.FAST_ACTION), None
+        return super()._preprocess(game_state, status_source, item, signal)
 
 
 ############################## Infusions ##############################

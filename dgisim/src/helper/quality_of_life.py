@@ -16,6 +16,7 @@ def just(optional_val: Optional[_T], backup: Optional[_T]=None) -> _T:
     return optional_val
 
 def case_val(condition: bool, first: _T, second: _T) -> _T:
+    """ if condition is True; then return first; else return second """
     return first if condition else second
 
 BIG_INT = 0x7fffffff

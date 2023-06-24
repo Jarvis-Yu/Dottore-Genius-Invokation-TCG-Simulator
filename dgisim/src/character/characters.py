@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Optional, Callable, Union, Iterator
 
 import dgisim.src.character.character as chr
-from dgisim.src.effect.event_pre import EventPre
+from dgisim.src.event.event_pre import EventPre
 from dgisim.src.helper.level_print import level_print, INDENT, level_print_single
 
 

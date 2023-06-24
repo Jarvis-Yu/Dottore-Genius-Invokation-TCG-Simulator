@@ -5,6 +5,7 @@ import dgisim.src.state.game_state as gs
 import dgisim.src.phase.phase as ph
 from dgisim.src.state.player_state import PlayerState
 from dgisim.src.action import *
+from dgisim.src.event.event import *
 from dgisim.src.effect.effect import *
 
 
@@ -122,13 +123,19 @@ class ActionPhase(ph.Phase):
         ).build()
 
     def _handle_swap_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: SwapAction) -> Optional[gs.GameState]:
+        # Check action validity
+        result = game_state.swap_checker().valid_action(pid, action)
+        if result is None:
+            raise Exception(f"{action} from {pid} is invalid for gamestate:\n{game_state}")
+        game_state, action_speed = result
+
         player = game_state.get_player(pid)
         new_effects: list[Effect] = []
+
         # Costs
-        dices = player.get_dices()
-        new_dices = dices - action.instruction.dices
-        if new_dices is None:
-            return None
+        new_dices = player.get_dices() - action.instruction.dices
+        assert new_dices.is_legal()
+
         # Add Effects
         active_character = player.get_characters().get_active_character()
         assert active_character is not None
@@ -136,16 +143,22 @@ class ActionPhase(ph.Phase):
             StaticTarget(pid, Zone.CHARACTER, action.selected_character_id)
         ))
 
-        is_combat_action = True  # TODO: handle checking for fast/combat
-        if is_combat_action:
+        if action_speed is EventSpeed.COMBAT_ACTION:
             new_effects.append(
                 AllStatusTriggererEffect(
                     pid=pid,
                     signal=TriggeringSignal.COMBAT_ACTION,
                 )
             )
+            new_effects.append(TurnEndEffect())
+        elif action_speed is EventSpeed.FAST_ACTION:
+            new_effects.append(
+                AllStatusTriggererEffect(
+                    pid=pid,
+                    signal=TriggeringSignal.FAST_ACTION,
+                )
+            )
 
-        new_effects.append(TurnEndEffect(), )
         return game_state.factory().effect_stack(
             game_state.get_effect_stack().push_many_fl(new_effects)
         ).player(
@@ -195,6 +208,13 @@ class ActionPhase(ph.Phase):
         ).build()
 
     def _handle_death_swap_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: DeathSwapAction) -> Optional[gs.GameState]:
+        # Check action validity
+        result = game_state.swap_checker().valid_action(pid, action)
+        if result is None:
+            raise Exception(f"{action} from {pid} is invalid for gamestate:\n{game_state}")
+        game_state, _ = result
+        
+        game_state = game_state.factory().f_effect_stack(lambda es: es.pop()[0]).build()
         player = game_state.get_player(pid)
         effect_stack = game_state.get_effect_stack()
         # Add Effects
@@ -224,15 +244,23 @@ class ActionPhase(ph.Phase):
         raise Exception("Unhandld action", action)
 
     def step_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: PlayerAction) -> Optional[gs.GameState]:
+        # check action arrived at the right state
+        if pid is not self.waiting_for(game_state):
+            raise Exception(f"Unexpected action from {pid} at game state:\n{game_state}")
+
+        # check death swap phase
         effect_stack = game_state.get_effect_stack()
         if effect_stack.is_not_empty() and isinstance(effect_stack.peek(), DeathSwapPhaseStartEffect):
-            game_state = game_state.factory().effect_stack(effect_stack.pop()[0]).build()
-        if isinstance(action, EndRoundAction):
-            action = cast(EndRoundAction, action)
-            return self._handle_end_round(game_state, pid, action)
+            if not isinstance(action, DeathSwapAction):
+                raise Exception(f"Trying to execute {action} when a death swap is expected")
+            # game_state = game_state.factory().effect_stack(effect_stack.pop()[0]).build()
+
         if isinstance(action, GameAction):
             action = cast(GameAction, action)
             return self._handle_game_action(game_state, pid, action)
+        elif isinstance(action, EndRoundAction):
+            action = cast(EndRoundAction, action)
+            return self._handle_end_round(game_state, pid, action)
         raise Exception("Unknown Game State to process")
 
     def waiting_for(self, game_state: gs.GameState) -> Optional[gs.GameState.Pid]:

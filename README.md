@@ -39,7 +39,8 @@ dictionary, and discover game states on different 'game branches' being actually
 - [x] Implement game phase of Roll (Dice) Phase (roll dices between rounds)
 - [x] Implement game phase of Action Phase (players beat each other)
   - [ ] Implement all cards (9/184 implemented)
-  - [ ] Implement all characters (3/48 implemented)
+  - [ ] Implement all characters with their talent cards (3/48 implemented)
+    - [x] Kaeya, Keqing, Rhodeia of Loch
   - [x] Implement all reactions
 - [x] Implement game phase of End Phase (summons and some support card or statuses take action)
 - [x] Implement game phase of Game End Phase (one player wins or draw)
@@ -47,17 +48,18 @@ dictionary, and discover game states on different 'game branches' being actually
 - [x] Implement lazy player agent for minimal testing purposes
 - [x] Implement random player agent for testing purposes
 - [ ] Implement player action validity checker &larr; **_WIP_**
-  - [ ] Card Action &larr; **_WIP_**
+  - [x] Card Action
     - [x] Provide dices requirement information
     - [x] Provide usablility check information
-    - [x] Checks player provides with sufficient dices
+    - [x] Check player provides with sufficient dices
     - [x] Provide validity check for player instruction
-  - [ ] Swap Action
-    - [ ] Check if swap action is fast or combat action, and target is valid &larr; **_WIP_**
-    - [ ] Provide dices requirement infomation preprocessed by all statuses
-    - [ ] ...
-  - [ ] Character Skill Action
-    - [ ] ...
+  - [x] Swap Action
+    - [x] Check if swap action is fast or combat action, and target is valid
+    - [x] Check if player provides sufficient dices for the swap
+    - [x] Check dices with preprocessed dices requirement
+    - [x] Provide validity check for player instruction
+  - [ ] Character Skill Action &larr; **_WIP_**
+    - [ ] ... &larr; **_WIP_**
 - [ ] Implement player action choices provider
 - [ ] Implement greedy player agent for testing purposes
 
@@ -102,7 +104,7 @@ You are just the observer overseeing their gameplay.
 The fully developed project will be published to PyPI (beta versions will be available once all that
 are left is adding more characters and cards)
 
-I have the plan to implemetn a simple cross-platform GUI interface for the simulator. But that will
+I have the plan to implement a simple cross-platform GUI interface for the simulator. But that will
 be in a separate repo.
 
 Once this project is done, I'll be reading relative papers and develop an AI for this game. The AI

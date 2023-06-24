@@ -4,6 +4,9 @@ from typing import Union
 import dgisim.src.phase.phase as ph
 import dgisim.src.card.card as card
 import dgisim.src.character.character as chr
+from dgisim.src.dices import AbstractDices
+from dgisim.src.element.element import *
+from dgisim.src.event.event import *
 from dgisim.src.helper.level_print import level_print_single
 
 
@@ -12,6 +15,8 @@ class Mode:
     _HAND_CARD_LIMIT = 10
     _ROUND_LIMIT = 15
     _SUMMONS_LIMIT = 4
+    _SWAP_COST = AbstractDices({Element.ANY: 1})
+    _SWAP_SPEED = EventSpeed.COMBAT_ACTION
 
     def round_limit(self) -> int:
         return self._ROUND_LIMIT
@@ -21,6 +26,12 @@ class Mode:
 
     def summons_limit(self) -> int:
         return self._SUMMONS_LIMIT
+
+    def swap_cost(self) -> AbstractDices:
+        return self._SWAP_COST
+
+    def swap_speed(self) -> EventSpeed:
+        return self._SWAP_SPEED
 
     def all_cards(self) -> frozenset[type[card.Card]]:
         raise Exception("Not Overridden")

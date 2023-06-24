@@ -14,6 +14,8 @@ import dgisim.src.state.game_state as gs
 import dgisim.src.state.player_state as ps
 import dgisim.src.card.card as cd
 import dgisim.src.dices as ds
+import dgisim.src.event.event as evt
+from dgisim.src.status.status_processing import StatusProcessing
 from dgisim.src.helper.quality_of_life import just, case_val
 
 
@@ -29,8 +31,8 @@ class TriggeringSignal(Enum):
     FAST_ACTION = 0
     COMBAT_ACTION = 1
     DEATH_EVENT = 2
-    SWAP_EVENT_1 = 3
-    SWAP_EVENT_2 = 4
+    SWAP_EVENT_1 = 3  # P1's swap
+    SWAP_EVENT_2 = 4  # P2's swap
     ROUND_START = 5
     END_ROUND_CHECK_OUT = 6  # summons etc.
     ROUND_END = 7  # remove frozen etc.
@@ -185,161 +187,6 @@ class TriggerSummonEffect(Effect):
         ).build()
 
 
-def _loop_all_statuses(
-        game_state: gs.GameState,
-        pid: gs.GameState.Pid,
-        f: Callable[[gs.GameState, stt.Status, StaticTarget], gs.GameState]
-) -> gs.GameState:
-    """
-    Perform f on all statuses of player pid in order
-    f(game_state, status, status_source) -> game_state
-    """
-    player = game_state.get_player(pid)
-
-    # characters first
-    characters = player.get_characters()
-    ordered_characters = characters.get_character_in_activity_order()
-    for character in ordered_characters:
-        # get character's private statuses and add triggerStatusEffect to global effect_stack
-        statuses = character.get_all_statuses_ordered_flattened()
-        character_id = character.get_id()
-        target = StaticTarget(
-            pid,
-            Zone.CHARACTER,
-            character_id
-        )
-        for status in statuses:
-            game_state = f(game_state, status, target)
-
-    # combat status
-    combat_statuses = player.get_combat_statuses()
-    target = StaticTarget(
-        pid,
-        Zone.COMBAT_STATUSES,
-        -1,  # not used
-    )
-    for status in combat_statuses:
-        game_state = f(game_state, status, target)
-
-    # summons
-    summons = player.get_summons()
-    target = StaticTarget(
-        pid,
-        Zone.SUMMONS,
-        -1
-    )
-    for summon in summons:
-        game_state = f(game_state, summon, target)
-
-    # supports TODO
-
-    return game_state
-
-
-def _trigger_all_statuses_effects(
-        game_state: gs.GameState, pid: gs.GameState.Pid, signal: TriggeringSignal
-) -> list[Effect]:
-    """
-    Takes the current game_state, trigger all statuses in order of player pid
-    Returns the triggering effects in order (first to last)
-    """
-    effects: list[Effect] = []
-
-    def f(game_state: gs.GameState, status: stt.Status, target: StaticTarget) -> gs.GameState:
-        nonlocal effects
-        if isinstance(status, stt.CharacterTalentStatus) \
-                or isinstance(status, stt.EquipmentStatus) \
-                or isinstance(status, stt.CharacterStatus):
-            effects.append(TriggerStatusEffect(target, type(status), signal))
-
-        elif isinstance(status, stt.CombatStatus):
-            effects.append(TriggerCombatStatusEffect(target.pid, type(status), signal))
-
-        elif isinstance(status, sm.Summon):
-            effects.append(TriggerSummonEffect(target.pid, type(status), signal))
-
-        return game_state
-
-    _loop_all_statuses(game_state, pid, f)
-    return effects
-
-
-def _preprocess_by_all_statuses(
-        game_state: gs.GameState,
-        pid: gs.GameState.Pid,
-        item: Preprocessable,
-        pp_type: stt.Status.PPType,
-) -> tuple[gs.GameState, Preprocessable]:
-    def f(game_state: gs.GameState, status: stt.Status, status_source: StaticTarget) -> gs.GameState:
-        nonlocal item
-        item, new_status = status.preprocess(game_state, status_source, item, pp_type)
-
-        if isinstance(status, stt.CharacterTalentStatus) \
-                or isinstance(status, stt.EquipmentStatus) \
-                or isinstance(status, stt.CharacterStatus):
-            if new_status is None:
-                game_state = RemoveCharacterStatusEffect(
-                    status_source, type(status)).execute(game_state)
-            elif new_status != status:
-                assert type(status) == type(new_status)
-                game_state = OverrideCharacterStatusEffect(
-                    status_source,
-                    new_status,  # type: ignore
-                ).execute(game_state)
-
-        elif isinstance(status, stt.CombatStatus):
-            if new_status is None:
-                game_state = RemoveCombatStatusEffect(
-                    status_source.pid,
-                    type(status),
-                ).execute(game_state)
-            elif new_status != status:
-                assert type(status) == type(new_status)
-                game_state = OverrideCombatStatusEffect(
-                    status_source.pid,
-                    new_status,  # type: ignore
-                ).execute(game_state)
-
-        elif isinstance(status, sm.Summon):
-            summon = status
-            new_summon = new_status
-            pid = status_source.pid
-            if new_summon is None:
-                game_state = RemoveSummonEffect(
-                    pid,
-                    type(summon),
-                ).execute(game_state)
-            elif new_summon != summon:
-                assert type(summon) == type(new_summon)
-                game_state = OverrideSummonEffect(
-                    pid,
-                    new_summon,  # type: ignore
-                ).execute(game_state)
-
-        return game_state
-
-    game_state = _loop_all_statuses(game_state, pid, f)
-    return game_state, item
-
-
-def _inform_all_statuses(
-        game_state: gs.GameState,
-        pid: gs.GameState.Pid,
-        info: SpecificDamageEffect | CharacterSkill | cd.Card,
-        source: Optional[StaticTarget] = None,
-) -> gs.GameState:
-    def f(game_state: gs.GameState, status: stt.Status, status_source: StaticTarget) -> gs.GameState:
-        return status.inform(
-            game_state,
-            status_source,
-            info,
-            info_source=source,
-        )
-
-    game_state = _loop_all_statuses(game_state, pid, f)
-    return game_state
-
-
 @dataclass(frozen=True)
 class AllStatusTriggererEffect(TriggerrbleEffect):
     """
@@ -349,8 +196,12 @@ class AllStatusTriggererEffect(TriggerrbleEffect):
     signal: TriggeringSignal
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
-        effects = _trigger_all_statuses_effects(game_state, self.pid, self.signal)
-        effects += _trigger_all_statuses_effects(game_state, self.pid.other(), self.signal)
+        effects = StatusProcessing.trigger_all_statuses_effects(game_state, self.pid, self.signal)
+        effects += StatusProcessing.trigger_all_statuses_effects(
+            game_state,
+            self.pid.other(),
+            self.signal
+        )
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
@@ -643,9 +494,19 @@ class SpecificDamageEffect(Effect):
             game_state: gs.GameState, damage: SpecificDamageEffect, pp_type: stt.Status.PPType
     ) -> tuple[gs.GameState, SpecificDamageEffect]:
         source_id = damage.source.pid
-        game_state, item = _preprocess_by_all_statuses(game_state, source_id, damage, pp_type)
+        game_state, item = StatusProcessing.preprocess_by_all_statuses(
+            game_state,
+            source_id,
+            damage,
+            pp_type
+        )
         assert type(item) == SpecificDamageEffect
-        game_state, item = _preprocess_by_all_statuses(game_state, source_id.other(), item, pp_type)
+        game_state, item = StatusProcessing.preprocess_by_all_statuses(
+            game_state,
+            source_id.other(),
+            item,
+            pp_type
+        )
         assert type(item) == SpecificDamageEffect
         damage = item
         return game_state, damage
@@ -1331,7 +1192,7 @@ class BroadCastSkillInfoEffect(Effect):
     skill: CharacterSkill
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
-        return _inform_all_statuses(
+        return StatusProcessing.inform_all_statuses(
             game_state,
             self.source.pid,
             self.skill,
@@ -1340,4 +1201,4 @@ class BroadCastSkillInfoEffect(Effect):
 
 
 # This has to be by the end of the file or there's cyclic import error
-Preprocessable = Union[SpecificDamageEffect, int]  # int is just a placeholder
+Preprocessable = Union[SpecificDamageEffect, evt.GameEvent]  # int is just a placeholder

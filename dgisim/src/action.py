@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing_extensions import override
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 
 from dgisim.src.card.cards import Cards
 from dgisim.src.dices import ActualDices
@@ -8,20 +8,12 @@ from dgisim.src.effect.effect import StaticTarget
 import dgisim.src.state.game_state as gs
 
 
-class Actions:
-    def __init__(self, systems: dict, cards, skills, others) -> None:
-        self._systems = systems
-        self._cards = cards
-        self._skills = skills
-        self._others = others
-
-    def system_actions(self):
-        pass
-
-
 @dataclass(frozen=True)
 class PlayerAction:
-    pass
+    def __str__(self) -> str:
+        fields = asdict(self)
+        paired_fields = (f"{name}={str(val)}" for name, val in fields.items())
+        return f"{self.__class__.__name__}:({', '.join(paired_fields)})"
 
 
 @dataclass(frozen=True)
@@ -88,11 +80,15 @@ class DeathSwapAction(GameAction):
 class Instruction:
     dices: ActualDices
 
+    def __str__(self) -> str:
+        fields = asdict(self)
+        paired_fields = (f"{name}={str(val)}" for name, val in fields.items())
+        return f"{self.__class__.__name__}:({', '.join(paired_fields)})"
+
 
 @dataclass(frozen=True, kw_only=True)
 class DiceOnlyInstruction(Instruction):
-    def __str__(self) -> str:
-        return str(self.dices.num_dices())
+    pass
 
 
 @dataclass(frozen=True, kw_only=True)

@@ -7,7 +7,7 @@ import dgisim.src.card.cards as cds
 from dgisim.src.character.characters import Characters
 import dgisim.src.character.character as chr
 from dgisim.src.dices import ActualDices
-from dgisim.src.effect.event_pre import EventPre
+from dgisim.src.event.event_pre import EventPre
 import dgisim.src.status.statuses as sts
 from dgisim.src.summon.summons import Summons
 

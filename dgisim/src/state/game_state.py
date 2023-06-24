@@ -6,12 +6,16 @@ import dgisim.src.mode as md
 import dgisim.src.phase.phase as ph
 import dgisim.src.phase.game_end_phase as gep
 import dgisim.src.state.player_state as pl
+import dgisim.src.status.status as stt
+import dgisim.src.action as act
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
+from dgisim.src.helper.quality_of_life import case_val
 from dgisim.src.action import PlayerAction
 from dgisim.src.effect.effect_stack import EffectStack
-from dgisim.src.effect.event_pre import EventPre
+from dgisim.src.event.event_pre import EventPre
 from dgisim.src.character.character import Character
 from dgisim.src.effect.effect import StaticTarget, Zone
+from dgisim.src.event.event import *
 
 
 class GameState:
@@ -51,6 +55,9 @@ class GameState:
         self._player1 = player1
         self._player2 = player2
         self._effect_stack = effect_stack
+
+        # checkers
+        self._swap_checker = SwapChecker(self)
 
     @classmethod
     def from_default(cls):
@@ -112,6 +119,9 @@ class GameState:
             return self._player1
         else:
             raise Exception("player_id unknown")
+
+    def swap_checker(self) -> SwapChecker:
+        return self._swap_checker
 
     def belongs_to(self, object: Union[Character, int]) -> Optional[GameState.Pid]:
         """ int in object type is just place holder """
@@ -303,6 +313,114 @@ class GameStateFactory:
             player1=self._player1,
             player2=self._player2,
         )
+
+
+class SwapChecker:
+    def __init__(self, game_state: GameState) -> None:
+        self._game_state = game_state
+
+    def swap_speed(
+            self,
+            pid: GameState.Pid,
+            char_id: int,
+            death_swap: bool = False,
+    ) -> None | EventSpeed:
+        game_state = self._game_state
+        selected_char = game_state.get_player(pid).get_characters().get_character(char_id)
+        active_character_id = game_state.get_player(pid).get_characters().get_active_character_id()
+        if selected_char is None \
+                or selected_char.defeated() \
+                or selected_char.get_id() == active_character_id:
+            return None
+        # Check Death Swap
+        if death_swap:
+            effect_stack = game_state.get_effect_stack()
+            if effect_stack.is_not_empty() \
+                    and isinstance(effect_stack.peek(), eft.DeathSwapPhaseStartEffect):
+                return EventSpeed.FAST_ACTION
+            else:
+                return None
+
+        # Check if player can afford Normal Swap
+        from dgisim.src.status.status_processing import StatusProcessing
+        # ppd is preprocessed
+        _, swap_action = StatusProcessing.preprocess_by_all_statuses(
+            game_state=game_state,
+            pid=pid,
+            item=GameEvent(
+                target=eft.StaticTarget(
+                    pid=pid,
+                    zone=eft.Zone.CHARACTER,
+                    id=char_id,
+                ),
+                event_type=EventType.SWAP,
+                event_speed=game_state.get_mode().swap_speed(),
+                dices_cost=game_state.get_mode().swap_cost(),
+            ),
+            pp_type=stt.Status.PPType.SWAP,
+        )
+        assert isinstance(swap_action, GameEvent)
+        if game_state.get_player(pid).get_dices().loosely_satisfy(swap_action.dices_cost):
+            return swap_action.event_speed
+        else:
+            return None
+
+    def valid_action(
+            self,
+            pid: GameState.Pid,
+            action: act.SwapAction | act.DeathSwapAction,
+    ) -> None | tuple[GameState, EventSpeed]:
+        """
+        Return None if the action is invalid,
+        otherwise return the GameState after preprocessing the swap event.
+        """
+        game_state = self._game_state
+        selected_char = game_state.get_player(
+            pid
+        ).get_characters().get_character(action.selected_character_id)
+        active_character_id = game_state.get_player(pid).get_characters().get_active_character_id()
+        if selected_char is None \
+                or selected_char.defeated() \
+                or selected_char.get_id() == active_character_id:
+            return None
+        if isinstance(action, act.DeathSwapAction):
+            swap_speed = self.swap_speed(
+                pid=pid,
+                char_id=action.selected_character_id,
+                death_swap=True,
+            )
+            return case_val(
+                swap_speed is not None,
+                (game_state, EventSpeed.FAST_ACTION),
+                None,
+            )
+        elif isinstance(action, act.SwapAction):
+            from dgisim.src.status.status_processing import StatusProcessing
+            new_game_state, swap_action = StatusProcessing.preprocess_by_all_statuses(
+                game_state=game_state,
+                pid=pid,
+                item=GameEvent(
+                    target=eft.StaticTarget(
+                        pid=pid,
+                        zone=eft.Zone.CHARACTER,
+                        id=action.selected_character_id,
+                    ),
+                    event_type=EventType.SWAP,
+                    event_speed=game_state.get_mode().swap_speed(),
+                    dices_cost=game_state.get_mode().swap_cost(),
+                ),
+                pp_type=stt.Status.PPType.SWAP,
+            )
+            assert isinstance(swap_action, GameEvent)
+            instruction_dices = action.instruction.dices
+            player_dices = game_state.get_player(pid).get_dices()
+            return case_val(
+                (player_dices - instruction_dices).is_legal()
+                and instruction_dices.just_satisfy(swap_action.dices_cost),
+                (new_game_state, swap_action.event_speed),
+                None
+            )
+        raise Exception("action ({action}) is not expected to be passed in")
 
 
 if __name__ == "__main__":
