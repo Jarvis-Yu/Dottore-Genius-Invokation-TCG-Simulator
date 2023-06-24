@@ -25,6 +25,8 @@ class Status:
         # Swap
         SWAP = "Swap"                 # To determine if swap needs to cost more or less,
         #                               if swap is fast action or combat action
+        # Skill
+        SKILL = "Skill"               # same as SWAP but for skill
         # Damages
         DMG_ELEMENT = "DmgElement"    # To determine the element
         DMG_REACTION = "DmgReaction"  # To determine the reaction

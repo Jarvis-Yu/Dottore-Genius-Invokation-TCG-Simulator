@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Optional, Tuple, Callable, Union
 from typing_extensions import override
+from functools import lru_cache
 
 import dgisim.src.state.game_state as gs
 import dgisim.src.card.card as cd
@@ -10,10 +11,12 @@ import dgisim.src.status.statuses as stts
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.element.element import ElementalAura
 from dgisim.src.effect.effects_template import *
+from dgisim.src.dices import AbstractDices
 import dgisim.src.effect.effect as eft
 import dgisim.src.status.status as stt
 from dgisim.src.element.element import *
 from dgisim.src.helper.level_print import INDENT, level_print
+from dgisim.src.helper.quality_of_life import BIG_INT
 
 
 class Character:
@@ -92,8 +95,9 @@ class Character:
         raise Exception("Not Overriden")
 
     @classmethod
-    def skills(cls) -> tuple[CharacterSkill, ...]:
-        """ Provides the skill types that the character has """
+    @lru_cache(maxsize=1)
+    def skills(cls) -> dict[CharacterSkill, AbstractDices]:
+        """ Provides the skill types with corresponding cost that the character has """
         my_skills: list[CharacterSkill] = []
         if cls._normal_attack is not Character._normal_attack:
             my_skills.append(CharacterSkill.NORMAL_ATTACK)
@@ -103,7 +107,14 @@ class Character:
             my_skills.append(CharacterSkill.ELEMENTAL_SKILL2)
         if cls._elemental_burst is not Character._elemental_burst:
             my_skills.append(CharacterSkill.ELEMENTAL_BURST)
-        return tuple(my_skills)
+        return dict(
+            (skill, cls.skill_cost(skill))
+            for skill in my_skills
+        )
+
+    @classmethod
+    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
+        raise NotImplementedError(f"{skill_type}'s cost is not defined for {cls.__name__}")
 
     def skill(self, game_state: gs.GameState, skill_type: CharacterSkill) -> tuple[eft.Effect, ...]:
         return self._post_skill(
@@ -370,6 +381,24 @@ class Keqing(Character):
     def _talent_status() -> Optional[type[stt.EquipmentStatus]]:
         return stt.ThunderingPenanceStatus
 
+    @override
+    @classmethod
+    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
+        if skill_type is CharacterSkill.NORMAL_ATTACK:
+            return AbstractDices({
+                Element.ELECTRO: 1,
+                Element.ANY: 2,
+            })
+        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
+            return AbstractDices({
+                Element.ELECTRO: 3,
+            })
+        elif skill_type is CharacterSkill.ELEMENTAL_BURST:
+            return AbstractDices({
+                Element.ELECTRO: 4,
+            })
+        return super().skill_cost(skill_type)
+
     def _normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
         source = self.location(game_state)
         return normal_attack_template(
@@ -490,6 +519,24 @@ class Kaeya(Character):
     def _talent_status() -> Optional[type[stt.EquipmentStatus]]:
         return stt.ColdBloodedStrikeStatus
 
+    @override
+    @classmethod
+    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
+        if skill_type is CharacterSkill.NORMAL_ATTACK:
+            return AbstractDices({
+                Element.CRYO: 1,
+                Element.ANY: 2,
+            })
+        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
+            return AbstractDices({
+                Element.CRYO: 3,
+            })
+        elif skill_type is CharacterSkill.ELEMENTAL_BURST:
+            return AbstractDices({
+                Element.CRYO: 4,
+            })
+        return super().skill_cost(skill_type)
+
     def _normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
         source = self.location(game_state)
         return normal_attack_template(
@@ -559,6 +606,28 @@ class RhodeiaOfLoch(Character):
     @staticmethod
     def _talent_status() -> Optional[type[stt.EquipmentStatus]]:
         return stt.StreamingSurgeStatus
+
+    @override
+    @classmethod
+    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
+        if skill_type is CharacterSkill.NORMAL_ATTACK:
+            return AbstractDices({
+                Element.HYDRO: 1,
+                Element.ANY: 2,
+            })
+        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
+            return AbstractDices({
+                Element.HYDRO: 3,
+            })
+        elif skill_type is CharacterSkill.ELEMENTAL_SKILL2:
+            return AbstractDices({
+                Element.HYDRO: 5,
+            })
+        elif skill_type is CharacterSkill.ELEMENTAL_BURST:
+            return AbstractDices({
+                Element.HYDRO: 3,
+            })
+        return super().skill_cost(skill_type)
 
     def _normal_attack(self, game_state: gs.GameState) -> tuple[eft.Effect, ...]:
         source = self.location(game_state)

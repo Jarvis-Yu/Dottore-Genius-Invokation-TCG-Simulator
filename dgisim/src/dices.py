@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Optional, Iterator, Iterable, TypeVar, Union
-from typing_extensions import Self
+from typing_extensions import Self, override
 from enum import Enum
 import random
 
@@ -11,6 +11,7 @@ from dgisim.src.element.element import Element
 
 
 class Dices:
+    _LEGAL_ELEMS = frozenset(elem for elem in Element)
 
     def __init__(self, dices: dict[Element, int]) -> None:
         self._dices = HashableDict(dices)
@@ -35,7 +36,17 @@ class Dices:
         return sum(self._dices.values())
 
     def is_legal(self) -> bool:
-        return all(map(lambda x: x >= 0, self._dices.values()))
+        return all(map(lambda x: x >= 0, self._dices.values())) \
+            and all(elem in self._LEGAL_ELEMS for elem in self._dices)
+
+    def validify(self) -> Self:
+        if self.is_legal():
+            return self
+        return type(self)(dict(
+            (elem, max(0, n))
+            for elem, n in self._dices
+            if elem in self._LEGAL_ELEMS
+        ))
 
     def elems(self) -> Iterable[Element]:
         return self._dices.keys()
@@ -131,7 +142,6 @@ class ActualDices(Dices):
         # We have enough dices to satisfy Element.ANY, so success
         return True
 
-
     def loosely_satisfy(self, requirement: AbstractDices) -> bool:
         """
         Asserts self and requirement are legal, and then check if self can match
@@ -166,6 +176,7 @@ class ActualDices(Dices):
         pures: dict[Element, int] = HashableDict(frozen=False)
         omni = 0
         any = 0
+        omni_required = 0
         for elem in requirement:
             if elem in _PURE_ELEMS:
                 pures[elem] = requirement[elem]
@@ -175,13 +186,14 @@ class ActualDices(Dices):
                 any = requirement[elem]
             else:
                 raise Exception("Unknown element")
-        # TODO: bugs when not sufficient pure
         if len(pures) > 0:
             for elem in pures:
                 if remaining.get(elem, 0) < pures[elem]:
-                    return None
-                answer[elem] += pures[elem]
-                remaining[elem] -= pures[elem]
+                    answer[elem] += remaining.get(elem, 0)
+                    omni_required += pures[elem] - remaining.get(elem, 0)
+                else:
+                    answer[elem] += pures[elem]
+                    remaining[elem] -= pures[elem]
         if omni > 0:
             best_elem: Optional[Element] = None
             count = BIG_INT
@@ -209,10 +221,11 @@ class ActualDices(Dices):
             if any > 0:
                 answer[Element.OMNI] += any
                 remaining[Element.OMNI] -= any
+        if omni_required > 0:
+            if remaining[Element.OMNI] <= omni_required:
+                return None
+            answer[Element.OMNI] += omni_required
         return ActualDices(answer)
-
-    def is_legal(self) -> bool:
-        return super().is_legal() and all(elem in self._LEGAL_ELEMS for elem in self._dices)
 
     @classmethod
     def from_empty(cls) -> ActualDices:
@@ -263,9 +276,6 @@ class AbstractDices(Dices):
         Element.GEO,
         Element.ANY,
     })
-
-    def is_legal(self) -> bool:
-        return super().is_legal() and all([(elem in self._LEGAL_ELEMS) for elem in self._dices])
 
     @classmethod
     def from_pre(cls, omni: int, any: int, element: Optional[Element] = None, num: Optional[int] = None) -> AbstractDices:

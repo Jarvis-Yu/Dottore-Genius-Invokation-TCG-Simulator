@@ -166,9 +166,9 @@ class HardCodedRandomAgent(PlayerAgent):
                 # elemental burst
                 if active_character.get_energy() == active_character.get_max_energy() \
                         and CharacterSkill.ELEMENTAL_BURST in active_character.skills():
-                    dices = available_dices.basically_satisfy(AbstractDices({
-                        Element.ANY: 4,
-                    }))
+                    dices = available_dices.basically_satisfy(
+                        active_character.skill_cost(CharacterSkill.ELEMENTAL_BURST)
+                    )
                     if dices is not None:
                         return SkillAction(
                             CharacterSkill.ELEMENTAL_BURST,
@@ -177,9 +177,9 @@ class HardCodedRandomAgent(PlayerAgent):
 
                 # elemental skill2
                 if selection < 0.7 and CharacterSkill.ELEMENTAL_SKILL2 in active_character.skills():
-                    dices = available_dices.basically_satisfy(AbstractDices({
-                        Element.ANY: 5,
-                    }))
+                    dices = available_dices.basically_satisfy(
+                        active_character.skill_cost(CharacterSkill.ELEMENTAL_SKILL2)
+                    )
                     if dices is not None:
                         return SkillAction(
                             CharacterSkill.ELEMENTAL_SKILL2,
@@ -188,9 +188,9 @@ class HardCodedRandomAgent(PlayerAgent):
 
                 # elemental skill1
                 if selection < 0.7 and CharacterSkill.ELEMENTAL_SKILL1 in active_character.skills():
-                    dices = available_dices.basically_satisfy(AbstractDices({
-                        Element.ANY: 3,
-                    }))
+                    dices = available_dices.basically_satisfy(
+                        active_character.skill_cost(CharacterSkill.ELEMENTAL_SKILL1)
+                    )
                     if dices is not None:
                         return SkillAction(
                             CharacterSkill.ELEMENTAL_SKILL1,
@@ -199,9 +199,9 @@ class HardCodedRandomAgent(PlayerAgent):
 
                 # normal attack
                 if selection < 1 and CharacterSkill.NORMAL_ATTACK in active_character.skills():
-                    dices = available_dices.basically_satisfy(AbstractDices({
-                        Element.ANY: 3,
-                    }))
+                    dices = available_dices.basically_satisfy(
+                        active_character.skill_cost(CharacterSkill.NORMAL_ATTACK)
+                    )
                     if dices is not None:
                         return SkillAction(
                             CharacterSkill.NORMAL_ATTACK,

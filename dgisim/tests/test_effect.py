@@ -119,7 +119,7 @@ class TestEffect(unittest.TestCase):
         game_state = game_state.factory().f_effect_stack(
             lambda es: es.push_one(EnergyRechargeEffect(
                 StaticTarget(GameState.Pid.P1, Zone.CHARACTER, 1),
-                c.get_max_energy() + 1
+                c.get_max_energy() + 1  # type: ignore
             ))
         ).build()
         

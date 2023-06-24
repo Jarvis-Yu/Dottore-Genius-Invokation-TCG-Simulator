@@ -91,6 +91,12 @@ class ActionPhase(ph.Phase):
         ).build()
 
     def _handle_skill_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: SkillAction) -> Optional[gs.GameState]:
+        # Check action validity
+        result = game_state.skill_checker().valid_action(pid, action)
+        if result is None:
+            raise Exception(f"{action} from {pid} is invalid for gamestate:\n{game_state}")
+        game_state = result
+
         player = game_state.get_player(pid)
         # TODO: check validity of the action
         instruction = action.instruction

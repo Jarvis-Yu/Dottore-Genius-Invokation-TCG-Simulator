@@ -16,6 +16,8 @@ from dgisim.src.event.event_pre import EventPre
 from dgisim.src.character.character import Character
 from dgisim.src.effect.effect import StaticTarget, Zone
 from dgisim.src.event.event import *
+from dgisim.src.character.character_skill_enum import CharacterSkill
+from dgisim.src.status.status_processing import StatusProcessing
 
 
 class GameState:
@@ -58,6 +60,7 @@ class GameState:
 
         # checkers
         self._swap_checker = SwapChecker(self)
+        self._skill_checker = SkillChecker(self)
 
     @classmethod
     def from_default(cls):
@@ -122,6 +125,9 @@ class GameState:
 
     def swap_checker(self) -> SwapChecker:
         return self._swap_checker
+
+    def skill_checker(self) -> SkillChecker:
+        return self._skill_checker
 
     def belongs_to(self, object: Union[Character, int]) -> Optional[GameState.Pid]:
         """ int in object type is just place holder """
@@ -342,7 +348,6 @@ class SwapChecker:
                 return None
 
         # Check if player can afford Normal Swap
-        from dgisim.src.status.status_processing import StatusProcessing
         # ppd is preprocessed
         _, swap_action = StatusProcessing.preprocess_by_all_statuses(
             game_state=game_state,
@@ -395,7 +400,6 @@ class SwapChecker:
                 None,
             )
         elif isinstance(action, act.SwapAction):
-            from dgisim.src.status.status_processing import StatusProcessing
             new_game_state, swap_action = StatusProcessing.preprocess_by_all_statuses(
                 game_state=game_state,
                 pid=pid,
@@ -423,9 +427,75 @@ class SwapChecker:
         raise Exception("action ({action}) is not expected to be passed in")
 
 
-if __name__ == "__main__":
-    initial_state = GameState.from_default()
-    pid = initial_state.waiting_for()
-    assert pid is None
-    state = initial_state.step()
-    pass
+class SkillChecker:
+    def __init__(self, game_state: GameState) -> None:
+        self._game_state = game_state
+
+    def usable(
+            self,
+            pid: GameState.Pid,
+            char_id: int,
+            skill_type: CharacterSkill,
+    ) -> bool:
+        game_state = self._game_state
+        character = game_state.get_player(pid).get_characters().get_character(char_id)
+        if character is None \
+                or not character.can_cast_skill() \
+                or skill_type not in character.skills():
+            return False
+        if skill_type is CharacterSkill.ELEMENTAL_BURST \
+                and character.get_energy() < character.get_max_energy():
+            return False
+        _, skill_event = StatusProcessing.preprocess_by_all_statuses(
+            game_state=game_state,
+            pid=pid,
+            item=GameEvent(
+                target=eft.StaticTarget(
+                    pid=pid,
+                    zone=eft.Zone.CHARACTER,
+                    id=char_id,
+                ),
+                event_type=skill_type.to_event_type(),
+                event_speed=EventSpeed.COMBAT_ACTION,
+                dices_cost=character.skill_cost(skill_type),
+            ),
+            pp_type=stt.Status.PPType.SKILL,
+        )
+        assert isinstance(skill_event, GameEvent)
+        return game_state.get_player(pid).get_dices().loosely_satisfy(skill_event.dices_cost)
+        
+    def valid_action(
+            self,
+            pid: GameState.Pid,
+            action: act.SkillAction,
+    ) -> None | GameState:
+        game_state = self._game_state
+        skill_type = action.skill
+        character = game_state.get_player(pid).get_active_character()
+        if character is None \
+                or not character.can_cast_skill() \
+                or skill_type not in character.skills():
+            return None
+        if skill_type is CharacterSkill.ELEMENTAL_BURST \
+                and character.get_energy() < character.get_max_energy():
+            return None
+        game_state, skill_event = StatusProcessing.preprocess_by_all_statuses(
+            game_state=game_state,
+            pid=pid,
+            item=GameEvent(
+                target=eft.StaticTarget(
+                    pid=pid,
+                    zone=eft.Zone.CHARACTER,
+                    id=character.get_id(),
+                ),
+                event_type=skill_type.to_event_type(),
+                event_speed=EventSpeed.COMBAT_ACTION,
+                dices_cost=character.skill_cost(skill_type),
+            ),
+            pp_type=stt.Status.PPType.SKILL,
+        )
+        assert isinstance(skill_event, GameEvent)
+        if action.instruction.dices.just_satisfy(skill_event.dices_cost):
+            return game_state
+        else:
+            return None

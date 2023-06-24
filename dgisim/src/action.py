@@ -1,18 +1,19 @@
 from __future__ import annotations
 from typing_extensions import override
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, fields
 
 from dgisim.src.card.cards import Cards
 from dgisim.src.dices import ActualDices
 from dgisim.src.effect.effect import StaticTarget
+from dgisim.src.character.character_skill_enum import CharacterSkill
 import dgisim.src.state.game_state as gs
 
 
 @dataclass(frozen=True)
 class PlayerAction:
     def __str__(self) -> str:
-        fields = asdict(self)
-        paired_fields = (f"{name}={str(val)}" for name, val in fields.items())
+        cls_fields = fields(self)
+        paired_fields = (f"{field.name}={str(self.__getattribute__(field.name))}" for field in cls_fields)
         return f"{self.__class__.__name__}:({', '.join(paired_fields)})"
 
 
@@ -57,7 +58,6 @@ class CardAction(GameAction):
 
 @dataclass(frozen=True)
 class SkillAction(GameAction):
-    from dgisim.src.character.character_skill_enum import CharacterSkill
     skill: CharacterSkill
     instruction: DiceOnlyInstruction
 
@@ -81,8 +81,8 @@ class Instruction:
     dices: ActualDices
 
     def __str__(self) -> str:
-        fields = asdict(self)
-        paired_fields = (f"{name}={str(val)}" for name, val in fields.items())
+        cls_fields = fields(self)
+        paired_fields = (f"{field.name}={str(self.__getattribute__(field.name))}" for field in cls_fields)
         return f"{self.__class__.__name__}:({', '.join(paired_fields)})"
 
 
