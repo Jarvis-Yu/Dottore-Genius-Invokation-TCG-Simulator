@@ -34,7 +34,7 @@ BASE_GAME = GameState.from_default().factory().f_player1(
 
 OPPO_DEATH_WAIT = BASE_GAME.factory().f_phase(
     lambda mode: mode.action_phase()
-).active_player(
+).active_player_id(
     GameState.Pid.P1
 ).f_player1(
     lambda p: p.factory()
@@ -65,7 +65,7 @@ OPPO_DEATH_END = OPPO_DEATH_WAIT.factory().f_player2(
 
 ACTION_TEMPLATE = BASE_GAME.factory().f_phase(
     lambda mode: mode.action_phase()
-).active_player(
+).active_player_id(
     GameState.Pid.P1
 ).f_player1(
     lambda p: p.factory()
@@ -86,7 +86,7 @@ ACTION_TEMPLATE = BASE_GAME.factory().f_phase(
 
 END_TEMPLATE = BASE_GAME.factory().f_phase(
     lambda mode: mode.end_phase()
-).active_player(
+).active_player_id(
     GameState.Pid.P1
 ).f_player1(
     lambda p: p.factory()

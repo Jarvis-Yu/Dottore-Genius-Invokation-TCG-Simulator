@@ -43,7 +43,7 @@ class StartingHandSelectPhase(ph.Phase):
         if not chars.char_id_valid(char_id):
             return game_state
         new_chars = chars.factory().active_character_id(char_id).build()
-        return game_state.factory().active_player(
+        return game_state.factory().active_player_id(
             pid.other()
         ).player(
             pid,

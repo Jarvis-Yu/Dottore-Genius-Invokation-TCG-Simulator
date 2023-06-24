@@ -373,7 +373,7 @@ class TurnEndEffect(PhaseEffect):
         # TODO: other tidy up
         if other_player.get_phase() is ps.PlayerState.Act.END_PHASE:
             return game_state
-        return game_state.factory().active_player(
+        return game_state.factory().active_player_id(
             active_player_id.other()
         ).player(
             active_player_id,
@@ -391,7 +391,7 @@ class EndPhaseTurnEndEffect(PhaseEffect):
         player = game_state.get_player(active_player_id)
         other_player = game_state.get_other_player(active_player_id)
         assert player.get_phase() is ps.PlayerState.Act.ACTIVE_WAIT_PHASE
-        return game_state.factory().active_player(
+        return game_state.factory().active_player_id(
             active_player_id.other()
         ).player(
             active_player_id,

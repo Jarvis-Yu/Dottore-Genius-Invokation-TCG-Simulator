@@ -76,7 +76,7 @@ class ActionPhase(ph.Phase):
             raise Exception(f"Unknown Game State to process {other_player.get_phase()}")
         if pid is not active_player_id:
             raise Exception("Unknown Game State to process")
-        return game_state.factory().active_player(
+        return game_state.factory().active_player_id(
             active_player_id.other()
         ).player(
             active_player_id,

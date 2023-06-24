@@ -152,7 +152,7 @@ class TestKaeya(unittest.TestCase):
         )
 
         # test self being overloaded
-        game_state_p2_move = game_state_p1_move.factory().active_player(
+        game_state_p2_move = game_state_p1_move.factory().active_player_id(
             GameState.Pid.P2
         ).f_player1(
             lambda p: p.factory().phase(

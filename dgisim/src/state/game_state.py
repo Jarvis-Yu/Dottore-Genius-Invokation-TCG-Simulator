@@ -42,7 +42,7 @@ class GameState:
         mode: md.Mode,
         phase: ph.Phase,
         round: int,
-        active_player: GameState.Pid,
+        active_player_id: GameState.Pid,
         player1: pl.PlayerState,
         player2: pl.PlayerState,
         effect_stack: EffectStack
@@ -51,7 +51,7 @@ class GameState:
         self._mode = mode
         self._phase = phase
         self._round = round
-        self._active_player = active_player
+        self._active_player_id = active_player_id
         self._player1 = player1
         self._player2 = player2
         self._effect_stack = effect_stack
@@ -66,7 +66,7 @@ class GameState:
             mode=mode,
             phase=mode.card_select_phase(),
             round=0,
-            active_player=GameState.Pid.P1,
+            active_player_id=GameState.Pid.P1,
             player1=pl.PlayerState.examplePlayer(mode),
             player2=pl.PlayerState.examplePlayer(mode),
             effect_stack=EffectStack(()),
@@ -85,7 +85,7 @@ class GameState:
         return self._round
 
     def get_active_player_id(self) -> GameState.Pid:
-        return self._active_player
+        return self._active_player_id
 
     def get_effect_stack(self) -> EffectStack:
         return self._effect_stack
@@ -178,7 +178,7 @@ class GameState:
         return (
             self._phase,
             self._round,
-            self._active_player,
+            self._active_player_id,
             self._player1,
             self._player2,
             self._effect_stack,
@@ -203,7 +203,7 @@ class GameState:
             "Mode": self._mode.to_string(new_indent),
             "Phase": self._phase.to_string(new_indent),
             "Round": level_print_single(str(self._round), new_indent),
-            "Active Player": level_print_single(str(self._active_player), new_indent),
+            "Active Player": level_print_single(str(self._active_player_id), new_indent),
             "Player1": self._player1.to_string(new_indent),
             "Player2": self._player2.to_string(new_indent),
             "Effects": self._effect_stack.to_string(new_indent),
@@ -214,7 +214,7 @@ class GameState:
             "Mode": self._mode.dict_str(),
             "Phase": self._phase.dict_str(),
             "Round": str(self._round),
-            "Active Player": str(self._active_player),
+            "Active Player": str(self._active_player_id),
             "Player1": self._player1.dict_str(),
             "Player2": self._player2.dict_str(),
             "Effects": self._effect_stack.dict_str(),
@@ -253,7 +253,7 @@ class GameStateFactory:
     def f_effect_stack(self, f: Callable[[EffectStack], EffectStack]) -> GameStateFactory:
         return self.effect_stack(f(self._effect_stack))
 
-    def active_player(self, pid: GameState.Pid) -> GameStateFactory:
+    def active_player_id(self, pid: GameState.Pid) -> GameStateFactory:
         self._active_player = pid
         return self
 
@@ -308,7 +308,7 @@ class GameStateFactory:
             mode=self._mode,
             phase=self._phase,
             round=self._round,
-            active_player=self._active_player,
+            active_player_id=self._active_player,
             effect_stack=self._effect_stack,
             player1=self._player1,
             player2=self._player2,
