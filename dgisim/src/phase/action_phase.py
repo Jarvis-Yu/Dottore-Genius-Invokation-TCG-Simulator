@@ -178,12 +178,12 @@ class ActionPhase(ph.Phase):
 
         # verify card usage validity
         if not card.usable(game_state, pid):
-            raise Exception(f"{card.name()} is not usable for {pid}"
+            raise Exception(f"{card.name()} is not usable for {pid} "
                             + f"in game state:\n{game_state}")
 
         # verify action validity
         if not card.valid_instruction(game_state, pid, action.instruction):
-            raise Exception(f"{action.instruction} is not valid of the {card.name()}"
+            raise Exception(f"{action.instruction} is not valid of the {card.name()} "
                             + f"in the game state:\n{game_state}")
 
         #  setup

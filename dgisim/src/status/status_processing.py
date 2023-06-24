@@ -8,9 +8,10 @@ import dgisim.src.summon.summon as sm
 import dgisim.src.card.card as cd
 from dgisim.src.character.character_skill_enum import CharacterSkill
 
+
 class StatusProcessing:
     @staticmethod
-    def loop_all_statuses(
+    def loop_one_player_all_statuses(
             game_state: gs.GameState,
             pid: gs.GameState.Pid,
             f: Callable[[gs.GameState, stt.Status, eft.StaticTarget], gs.GameState]
@@ -58,6 +59,20 @@ class StatusProcessing:
 
         # supports TODO
 
+        return game_state
+
+    @staticmethod
+    def loop_all_statuses(
+            game_state: gs.GameState,
+            pid: gs.GameState.Pid,
+            f: Callable[[gs.GameState, stt.Status, eft.StaticTarget], gs.GameState]
+    ) -> gs.GameState:
+        """
+        Perform f on all statuses of player pid and opponent in order
+        f(game_state, status, status_source) -> game_state
+        """
+        game_state = StatusProcessing.loop_one_player_all_statuses(game_state, pid, f)
+        game_state = StatusProcessing.loop_one_player_all_statuses(game_state, pid.other(), f)
         return game_state
 
     @staticmethod

@@ -24,7 +24,7 @@ class Status:
         """ PreProcessType """
         # Swap
         SWAP = "Swap"                 # To determine if swap needs to cost more or less,
-        #                               if swap is fast action or combat action
+        #                             # if swap is fast action or combat action
         # Skill
         SKILL = "Skill"               # same as SWAP but for skill
         # Damages
@@ -277,6 +277,20 @@ class CombatStatus(Status):
 class _UsageStatus(Status):
     usages: int
     MAX_USAGES: ClassVar[int] = BIG_INT
+
+    @override
+    def _post_preprocess(
+            self,
+            game_state: gs.GameState,
+            status_source: eft.StaticTarget,
+            item: eft.Preprocessable,
+            signal: Status.PPType,
+            new_item: eft.Preprocessable,
+            new_self: Optional[Self],
+    ) -> tuple[eft.Preprocessable, Optional[Self]]:
+        if new_self is not None and new_self.usages <= 0:
+            new_self = None
+        return super()._post_preprocess(game_state, status_source, item, signal, new_item, new_self)
 
     @override
     def _post_update(self, new_self: Optional[Self]) -> Optional[Self]:
@@ -532,7 +546,7 @@ class SatiatedStatus(CharacterStatus):
     @override
     def _react_to_signal(
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[SatiatedStatus]]:
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
         if signal is eft.TriggeringSignal.ROUND_END:
             return [], None
         return [], self
@@ -541,11 +555,12 @@ class SatiatedStatus(CharacterStatus):
 @dataclass(frozen=True)
 class MushroomPizzaStatus(CharacterStatus, _UsageStatus):
     usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
 
     @override
     def _react_to_signal(
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[MushroomPizzaStatus]]:
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
         es: list[eft.Effect] = []
         d_usages = 0
         if signal is eft.TriggeringSignal.END_ROUND_CHECK_OUT:
@@ -562,9 +577,10 @@ class MushroomPizzaStatus(CharacterStatus, _UsageStatus):
 
 
 @dataclass(frozen=True)
-class JueyunGuobaStatus(CharacterStatus):
+class JueyunGuobaStatus(CharacterStatus, _UsageStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
     damage_boost: ClassVar[int] = 1
-    duration: int = 1
 
     @override
     def _preprocess(
@@ -578,16 +594,53 @@ class JueyunGuobaStatus(CharacterStatus):
             assert isinstance(item, eft.SpecificDamageEffect)
             if item.source == status_source and item.damage_type.normal_attack:
                 item = replace(item, damage=item.damage + JueyunGuobaStatus.damage_boost)
-                return item, None
+                return item, replace(self, usages=self.usages - 1)
         return super()._preprocess(game_state, status_source, item, signal)
 
     @override
     def _react_to_signal(
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[JueyunGuobaStatus]]:
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        d_usages = 0
         if signal is eft.TriggeringSignal.ROUND_END:
-            return [], None
-        return [], self
+            d_usages = -1
+        return [], replace(self, usages=d_usages)
+
+
+@dataclass(frozen=True)
+class NorthernSmokedChickenStatus(CharacterStatus, _UsageStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    COST_DEDUCTION: ClassVar[int] = 1
+
+    @override
+    def _preprocess(
+            self,
+            game_state: gs.GameState,
+            status_source: eft.StaticTarget,
+            item: eft.Preprocessable,
+            signal: Status.PPType,
+    ) -> tuple[eft.Preprocessable, Optional[Self]]:
+        if signal is Status.PPType.SKILL:
+            assert isinstance(item, evt.GameEvent)
+            if status_source == item.target \
+                    and item.event_type is evt.EventType.NORMAL_ATTACK \
+                    and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION:
+                item = replace(
+                    item,
+                    dices_cost=(item.dices_cost - {Element.ANY: self.COST_DEDUCTION})
+                )
+                return item, replace(self, usages=self.usages - 1)
+        return super()._preprocess(game_state, status_source, item, signal)
+
+    @override
+    def _react_to_signal(
+            self, source: eft.StaticTarget, signal: eft.TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        d_usages = 0
+        if signal is eft.TriggeringSignal.ROUND_END:
+            d_usages = -1
+        return [], replace(self, usages=d_usages)
 
 
 @dataclass(frozen=True)
@@ -646,7 +699,7 @@ class _InfusionStatus(CharacterStatus, _UsageStatus):
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
             signal: Status.PPType,
-    ) -> tuple[eft.Preprocessable, Optional[_InfusionStatus]]:
+    ) -> tuple[eft.Preprocessable, Optional[Self]]:
         assert self.ELEMENT is not None
         new_item: Optional[eft.SpecificDamageEffect] = None
         if isinstance(item, eft.SpecificDamageEffect):
@@ -684,7 +737,7 @@ class _InfusionStatus(CharacterStatus, _UsageStatus):
     @override
     def _react_to_signal(
             self, source: eft.StaticTarget, signal: eft.TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[_InfusionStatus]]:
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
         d_usages = 0
         if signal is eft.TriggeringSignal.ROUND_END:
             d_usages = -1

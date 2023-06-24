@@ -197,11 +197,6 @@ class AllStatusTriggererEffect(TriggerrbleEffect):
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         effects = StatusProcessing.trigger_all_statuses_effects(game_state, self.pid, self.signal)
-        effects += StatusProcessing.trigger_all_statuses_effects(
-            game_state,
-            self.pid.other(),
-            self.signal
-        )
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
@@ -498,13 +493,6 @@ class SpecificDamageEffect(Effect):
             game_state,
             source_id,
             damage,
-            pp_type
-        )
-        assert type(item) == SpecificDamageEffect
-        game_state, item = StatusProcessing.preprocess_by_all_statuses(
-            game_state,
-            source_id.other(),
-            item,
             pp_type
         )
         assert type(item) == SpecificDamageEffect

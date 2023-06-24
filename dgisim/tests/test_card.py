@@ -270,3 +270,86 @@ class TestCard(unittest.TestCase):
         assert game_state is not None
         game_state = auto_step(game_state)
         self.assertEqual(game_state.get_active_player_id(), GameState.Pid.P1)
+
+    def test_northern_smoked_chicken(self):
+        base_game = ACTION_TEMPLATE.factory().f_player1(
+            lambda p: p.factory().hand_cards(
+                Cards({NorthernSmokedChicken: 2})
+            ).build()
+        ).build()
+
+        # test giving wrong num of dices
+        card_action = CardAction(
+            NorthernSmokedChicken,
+            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
+        )
+        self.assertRaises(
+            Exception,
+            lambda: base_game.action_step(GameState.Pid.P1, card_action)
+        )
+
+        # test giving right num of dices
+        card_action = CardAction(
+            NorthernSmokedChicken,
+            CharacterTargetInstruction(
+                dices=ActualDices({}),
+                target=StaticTarget(
+                    pid=GameState.Pid.P1,
+                    zone=Zone.CHARACTER,
+                    id=1,
+                )
+            ),
+        )
+        game_state = base_game.action_step(GameState.Pid.P1, card_action)
+        assert game_state is not None
+        buffed_game_state = auto_step(game_state)
+
+        self.assertEqual(
+            buffed_game_state
+            .get_player1()
+            .just_get_active_character()
+            .get_character_statuses()
+            .just_find(NorthernSmokedChickenStatus)
+            .usages,
+            1
+        )
+        self.assertTrue(
+            buffed_game_state.get_player1().just_get_active_character().get_character_statuses()
+            .contains(SatiatedStatus)
+        )
+
+        # test normal attack with 3 dices fails
+        normal_attack_action = SkillAction(
+            CharacterSkill.NORMAL_ATTACK,
+            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+        )
+        self.assertRaises(
+            Exception,
+            lambda: buffed_game_state.action_step(GameState.Pid.P1, normal_attack_action)
+        )
+
+        # test normal attack with 2 dices pass
+        normal_attack_action = SkillAction(
+            CharacterSkill.NORMAL_ATTACK,
+            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2}))
+        )
+        game_state = buffed_game_state.action_step(GameState.Pid.P1, normal_attack_action)
+        assert game_state is not None
+        game_state = auto_step(game_state)
+
+        self.assertFalse(
+            game_state
+            .get_player1()
+            .just_get_active_character()
+            .get_character_statuses()
+            .contains(NorthernSmokedChickenStatus)
+        )
+
+        # test opponent cannot use this
+        game_state = buffed_game_state.action_step(GameState.Pid.P1, EndRoundAction())
+        assert game_state is not None
+        game_state = auto_step(game_state)
+        self.assertRaises(
+            Exception,
+            lambda: game_state.action_step(GameState.Pid.P2, normal_attack_action)
+        )

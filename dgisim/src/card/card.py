@@ -302,6 +302,17 @@ class MushroomPizza(FoodCard):
 class NorthernSmokedChicken(FoodCard):
     _DICE_COST = AbstractDices({})
 
+    @override
+    @classmethod
+    def food_effects(cls, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.CharacterTargetInstruction)
+        return (
+            eft.AddCharacterStatusEffect(
+                instruction.target,
+                stt.NorthernSmokedChickenStatus,
+            ),
+        )
+
 
 class Starsigns(EventCard):
     _DICE_COST = AbstractDices({Element.ANY: 2})
