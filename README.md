@@ -48,18 +48,21 @@ dictionary, and discover game states on different 'game branches' being actually
 - [x] Implement lazy player agent for minimal testing purposes
 - [x] Implement random player agent for testing purposes
 - [ ] Implement player action validity checker &larr; **_WIP_**
-  - [x] Card Action
+  - [ ] Card Action &larr; **_WIP_**
     - [x] Provide dices requirement information
     - [x] Provide usablility check information
     - [x] Check player provides with sufficient dices
     - [x] Provide validity check for player instruction
+    - [ ] Check dices with preprocessed dices requirement &larr; **_WIP_**
   - [x] Swap Action
     - [x] Check if swap action is fast or combat action, and target is valid
     - [x] Check if player provides sufficient dices for the swap
     - [x] Check dices with preprocessed dices requirement
     - [x] Provide validity check for player instruction
-  - [ ] Character Skill Action &larr; **_WIP_**
-    - [ ] ... &larr; **_WIP_**
+  - [x] Character Skill Action
+    - [x] Check if player provides sufficient dices for the skill
+    - [x] Check dices with preprocessed dices requirement
+    - [x] Provide validity check for player instruction
 - [ ] Implement player action choices provider
 - [ ] Implement greedy player agent for testing purposes
 
