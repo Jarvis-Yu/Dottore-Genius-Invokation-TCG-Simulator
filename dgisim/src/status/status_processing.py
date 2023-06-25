@@ -5,6 +5,7 @@ import dgisim.src.state.game_state as gs
 import dgisim.src.status.status as stt
 import dgisim.src.effect.effect as eft
 import dgisim.src.summon.summon as sm
+import dgisim.src.support.support as sp
 import dgisim.src.card.card as cd
 from dgisim.src.character.character_skill_enum import CharacterSkill
 
@@ -106,6 +107,9 @@ class StatusProcessing:
             elif isinstance(status, sm.Summon):
                 effects.append(eft.TriggerSummonEffect(target.pid, type(status), signal))
 
+            elif isinstance(status, sp.Support):
+                effects.append(eft.TriggerSupportEffect(target.pid, type(status), status.sid, signal))
+
             return game_state
 
         StatusProcessing.loop_all_statuses(game_state, pid, f)
@@ -162,6 +166,23 @@ class StatusProcessing:
                     game_state = eft.OverrideSummonEffect(
                         pid,
                         new_summon,  # type: ignore
+                    ).execute(game_state)
+
+            elif isinstance(status, sp.Support):
+                support = status
+                new_support = new_status
+                pid = status_source.pid
+                if new_support is None:
+                    game_state = eft.RemoveSupportEffect(
+                        pid,
+                        type(support),
+                        support.sid,
+                    ).execute(game_state)
+                elif new_support != support:
+                    assert type(support) == type(new_support)
+                    game_state = eft.OverrideSupportEffect(
+                        pid,
+                        new_support,  # type: ignore
                     ).execute(game_state)
 
             return game_state

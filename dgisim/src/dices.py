@@ -44,7 +44,7 @@ class Dices:
             return self
         return type(self)(dict(
             (elem, max(0, n))
-            for elem, n in self._dices
+            for elem, n in self._dices.items()
             if elem in self._LEGAL_ELEMS
         ))
 

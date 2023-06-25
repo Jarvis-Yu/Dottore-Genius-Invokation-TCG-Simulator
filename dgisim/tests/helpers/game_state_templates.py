@@ -17,7 +17,16 @@ BASE_GAME = GameState.from_default().factory().f_player1(
             Keqing.from_default(3),
         ), None)
     ).dices(
-        ActualDices({Element.OMNI: BIG_INT})
+        ActualDices({
+            Element.OMNI: BIG_INT,
+            Element.PYRO: BIG_INT,
+            Element.HYDRO: BIG_INT,
+            Element.ANEMO: BIG_INT,
+            Element.ELECTRO: BIG_INT,
+            Element.DENDRO: BIG_INT,
+            Element.CRYO: BIG_INT,
+            Element.GEO: BIG_INT,
+        })
     ).build()
 ).f_player2(
     lambda p: p.factory().characters(

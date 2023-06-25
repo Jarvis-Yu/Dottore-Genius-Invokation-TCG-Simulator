@@ -221,7 +221,7 @@ class ActionPhase(ph.Phase):
         if result is None:
             raise Exception(f"{action} from {pid} is invalid for gamestate:\n{game_state}")
         game_state, _ = result
-        
+
         game_state = game_state.factory().f_effect_stack(lambda es: es.pop()[0]).build()
         player = game_state.get_player(pid)
         effect_stack = game_state.get_effect_stack()

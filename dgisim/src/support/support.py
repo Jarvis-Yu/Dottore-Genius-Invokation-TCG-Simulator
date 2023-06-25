@@ -61,3 +61,7 @@ class XudongSupport(Support):
         if signal is eft.TriggeringSignal.ROUND_END:
             return [], type(self)(sid=self.sid)
         return [], self
+
+    @override
+    def content_str(self) -> str:
+        return f"({self.usages})"

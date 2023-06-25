@@ -90,6 +90,7 @@ class Status:
             return game_state
 
         import dgisim.src.summon.summon as sm
+        import dgisim.src.support.support as sp
         if isinstance(new_self, CharacterTalentStatus) \
                 or isinstance(new_self, EquipmentStatus) \
                 or isinstance(new_self, CharacterStatus):
@@ -108,6 +109,12 @@ class Status:
             return eft.OverrideSummonEffect(
                 target_pid=status_source.pid,
                 summon=new_self,
+            ).execute(game_state)
+
+        elif isinstance(new_self, sp.Support):
+            return eft.OverrideSupportEffect(
+                target_pid=status_source.pid,
+                support=new_self,
             ).execute(game_state)
 
         else:
@@ -132,6 +139,7 @@ class Status:
         es, new_status = self._post_react_to_signal(es, new_status, signal)
 
         import dgisim.src.summon.summon as sm
+        import dgisim.src.support.support as sp
         # do the removal or update of the status
         if isinstance(self, CharacterTalentStatus) \
                 or isinstance(self, EquipmentStatus) \
@@ -173,6 +181,21 @@ class Status:
                     source.pid,
                     new_status,  # type: ignore
                 ))
+
+        elif isinstance(self, sp.Support):
+            if new_status is None:
+                es.append(eft.RemoveSupportEffect(
+                    source.pid,
+                    type(self),
+                    sid=self.sid,
+                ))
+            elif new_status is not self and self.update(new_status) != self: # type: ignore
+                assert type(self) == type(new_status)
+                es.append(eft.UpdateSupportEffect(
+                    source.pid,
+                    new_status,  # type: ignore
+                ))
+
 
         else:  # pragma: no cover
             raise NotImplementedError

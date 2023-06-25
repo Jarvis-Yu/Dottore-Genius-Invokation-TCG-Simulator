@@ -188,6 +188,33 @@ class TriggerSummonEffect(Effect):
 
 
 @dataclass(frozen=True)
+class TriggerSupportEffect(Effect):
+    target_pid: gs.GameState.Pid
+    support_type: type[sp.Support]
+    sid: int
+    signal: TriggeringSignal
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        effects: Iterable[Effect] = []
+        supports = game_state.get_player(self.target_pid).get_supports()
+        support = supports.find(self.support_type, self.sid)
+        if support is None:
+            return game_state
+        effects = support.react_to_signal(
+            game_state,
+            StaticTarget(
+                pid=self.target_pid,
+                zone=Zone.SUPPORTS,
+                id=self.sid,
+            ),
+            self.signal,
+        )
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_many_fl(effects)
+        ).build()
+
+
+@dataclass(frozen=True)
 class AllStatusTriggererEffect(TriggerrbleEffect):
     """
     This effect triggers the characters' statuses with the provided signal in order.
