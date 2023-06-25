@@ -27,6 +27,8 @@ class Status:
         #                             # if swap is fast action or combat action
         # Skill
         SKILL = "Skill"               # same as SWAP but for skill
+        # Card
+        CARD = "Card"                 # same as SWAP but for card
         # Damages
         DMG_ELEMENT = "DmgElement"    # To determine the element
         DMG_REACTION = "DmgReaction"  # To determine the reaction

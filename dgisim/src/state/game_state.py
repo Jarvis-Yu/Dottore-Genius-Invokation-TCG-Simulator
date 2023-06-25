@@ -348,7 +348,6 @@ class SwapChecker:
                 return None
 
         # Check if player can afford Normal Swap
-        # ppd is preprocessed
         _, swap_action = StatusProcessing.preprocess_by_all_statuses(
             game_state=game_state,
             pid=pid,

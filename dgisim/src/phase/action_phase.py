@@ -182,9 +182,11 @@ class ActionPhase(ph.Phase):
                             + f"in game state:\n{game_state}")
 
         # verify action validity
-        if not card.valid_instruction(game_state, pid, action.instruction):
+        preprocessed_game_state = card.valid_instruction(game_state, pid, action.instruction)
+        if preprocessed_game_state is None:
             raise Exception(f"{action.instruction} is not valid of the {card.name()} "
                             + f"in the game state:\n{game_state}")
+        game_state = preprocessed_game_state
 
         #  setup
         player = game_state.get_player(pid)

@@ -352,13 +352,13 @@ class TestKeqing(unittest.TestCase):
         ).build()
 
         self.assertFalse(LightningStiletto.loosely_usable(game_state, GameState.Pid.P1))
-        self.assertFalse(LightningStiletto.valid_instruction(
+        self.assertIsNone(LightningStiletto.valid_instruction(
             game_state,
             GameState.Pid.P1,
             DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         # False because frozen
-        self.assertFalse(LightningStiletto.valid_instruction(
+        self.assertIsNone(LightningStiletto.valid_instruction(
             game_state,
             GameState.Pid.P1,
             CharacterTargetInstruction(

@@ -10,6 +10,8 @@ from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.dices import AbstractDices
 from dgisim.src.element.element import Element
 from dgisim.src.helper.quality_of_life import BIG_INT
+from dgisim.src.event.event import CardEvent
+from dgisim.src.status.status_processing import StatusProcessing
 
 
 class Card:
@@ -29,9 +31,35 @@ class Card:
         return cls._DICE_COST
 
     @classmethod
-    def preprocessed_dice_cost(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> AbstractDices:
-        # TODO: do the actual preprocessing
-        return cls._DICE_COST
+    def preprocessed_dice_cost(
+            cls,
+            game_state: gs.GameState,
+            pid: gs.GameState.Pid
+    ) -> tuple[gs.GameState, AbstractDices]:
+        """
+        Return a tuple of GameState and AbstractDices:
+        - returned game-state is the game-state after preprocessing the usage of the card
+        - returned abstract-dices are the actual cost of using the card at the provided game_state
+        """
+        game_state, card_event = StatusProcessing.preprocess_by_all_statuses(
+            game_state=game_state,
+            pid=pid,
+            item=CardEvent(
+                card_type=cls,
+                dices_cost=cls._DICE_COST,
+            ),
+            pp_type=stt.Status.PPType.CARD
+        )
+        assert isinstance(card_event, CardEvent)
+        return game_state, card_event.dices_cost
+
+    @classmethod
+    def just_preprocessed_dice_cost(
+            cls,
+            game_state: gs.GameState,
+            pid: gs.GameState.Pid
+    ) -> AbstractDices:
+        return cls.preprocessed_dice_cost(game_state, pid)[1]
 
     # TODO add a post effect adding inform() to all status
 
@@ -67,7 +95,7 @@ class Card:
         don't override this unless you know what you are doing
         """
         dices_satisfy = game_state.get_player(pid).get_dices().loosely_satisfy(
-            cls.preprocessed_dice_cost(game_state, pid)
+            cls.just_preprocessed_dice_cost(game_state, pid)
         )
         return dices_satisfy and cls.usable(game_state, pid)
 
@@ -77,12 +105,17 @@ class Card:
             game_state: gs.GameState,
             pid: gs.GameState.Pid,
             instruction: act.Instruction
-    ) -> bool:
-        # the default implementation checks dices satisfy needs and card exists
-        return instruction.dices.just_satisfy(cls.preprocessed_dice_cost(game_state, pid)) \
-            and game_state.get_player(pid).get_hand_cards().contains(cls) \
-            and game_state.get_active_player_id() is pid \
-            and cls._valid_instruction(game_state, pid, instruction)
+    ) -> None | gs.GameState:
+        """ Return the preprocessed game-state if instruction is valid, otherwise return None """
+        if not game_state.get_player(pid).get_hand_cards().contains(cls) \
+                or not game_state.get_active_player_id() is pid \
+                or not cls._valid_instruction(game_state, pid, instruction):
+            return None
+        game_state, dices_cost = cls.preprocessed_dice_cost(game_state, pid)
+        if instruction.dices.just_satisfy(dices_cost):
+            return game_state
+        else:
+            return None
 
     @classmethod
     def _valid_instruction(

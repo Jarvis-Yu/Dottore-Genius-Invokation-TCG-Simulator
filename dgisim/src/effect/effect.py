@@ -1189,4 +1189,4 @@ class BroadCastSkillInfoEffect(Effect):
 
 
 # This has to be by the end of the file or there's cyclic import error
-Preprocessable = Union[SpecificDamageEffect, evt.GameEvent]  # int is just a placeholder
+Preprocessable = Union[SpecificDamageEffect, evt.GameEvent, evt.CardEvent]  # int is just a placeholder
