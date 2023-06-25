@@ -119,7 +119,7 @@ class EndPhase(ph.Phase):
         active_character = player.get_characters().get_active_character()
         assert active_character is not None
         effect_stack = effect_stack.push_one(SwapCharacterEffect(
-            StaticTarget(pid, Zone.CHARACTER, action.selected_character_id)
+            StaticTarget(pid, Zone.CHARACTERS, action.selected_character_id)
         ))
         return game_state.factory().effect_stack(
             effect_stack

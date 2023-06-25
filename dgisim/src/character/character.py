@@ -87,7 +87,7 @@ class Character:
         pid = game_state.belongs_to(self)
         if pid is None:
             raise Exception("target character is not in the current game state")
-        me = eft.StaticTarget(pid, eft.Zone.CHARACTER, self.get_id())
+        me = eft.StaticTarget(pid, eft.Zone.CHARACTERS, self.get_id())
         return me
 
     @classmethod
@@ -150,7 +150,7 @@ class Character:
                 my_active=source,
                 oppo_active=eft.StaticTarget(
                     pid=source.pid.other(),
-                    zone=eft.Zone.CHARACTER,
+                    zone=eft.Zone.CHARACTERS,
                     id=game_state.get_other_player(source.pid).just_get_active_character().get_id()
                 )
             ),

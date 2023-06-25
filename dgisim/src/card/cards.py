@@ -16,11 +16,21 @@ class Cards:
     def from_empty(cls) -> Cards:
         return Cards({})
 
-    def __add__(self, other: Cards) -> Cards:
-        return Cards(self._cards + other._cards)
+    def __add__(self, other: Cards | dict[type[Card], int]) -> Cards:
+        other_cards: dict[type[Card], int]
+        if isinstance(other, Cards):
+            other_cards = other._cards
+        else:
+            other_cards = other
+        return Cards(self._cards + other_cards)
 
-    def __sub__(self, other: Cards) -> Cards:
-        return Cards(self._cards - other._cards)
+    def __sub__(self, other: Cards | dict[type[Card], int]) -> Cards:
+        other_cards: dict[type[Card], int]
+        if isinstance(other, Cards):
+            other_cards = other._cards
+        else:
+            other_cards = other
+        return Cards(self._cards - other_cards)
 
     def pick_random_cards(self, num: int) -> tuple[Cards, Cards]:
         """

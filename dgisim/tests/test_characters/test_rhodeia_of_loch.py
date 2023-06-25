@@ -269,7 +269,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         ).build()
         source = StaticTarget(
             pid=GameState.Pid.P1,
-            zone=Zone.CHARACTER,
+            zone=Zone.CHARACTERS,
             id=1,
         )
 

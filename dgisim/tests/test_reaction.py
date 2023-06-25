@@ -249,7 +249,7 @@ class TestStatus(unittest.TestCase):
                 ReferredDamageEffect(
                     source=StaticTarget(
                         pid=GameState.Pid.P1,
-                        zone=Zone.CHARACTER,
+                        zone=Zone.CHARACTERS,
                         id=1,
                     ),
                     target=DynamicCharacterTarget.OPPO_OFF_FIELD,
@@ -610,7 +610,7 @@ class TestStatus(unittest.TestCase):
         # deals 1 electro damage to off-field characters
         game_state = base_game_state.factory().f_effect_stack(
             lambda es: es.push_one(ReferredDamageEffect(
-                source=StaticTarget(GameState.Pid.P1, Zone.CHARACTER, 1),
+                source=StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 1),
                 target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                 element=Element.ELECTRO,
                 damage=1,
@@ -715,7 +715,7 @@ class TestStatus(unittest.TestCase):
         # deals 1 electro damage to off-field characters
         game_state = base_game_state.factory().f_effect_stack(
             lambda es: es.push_one(ReferredDamageEffect(
-                source=StaticTarget(GameState.Pid.P1, Zone.CHARACTER, 1),
+                source=StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 1),
                 target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                 element=Element.ELECTRO,
                 damage=1,

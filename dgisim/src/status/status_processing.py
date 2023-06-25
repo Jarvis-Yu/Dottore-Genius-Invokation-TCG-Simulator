@@ -31,7 +31,7 @@ class StatusProcessing:
             character_id = character.get_id()
             target = eft.StaticTarget(
                 pid,
-                eft.Zone.CHARACTER,
+                eft.Zone.CHARACTERS,
                 character_id
             )
             for status in statuses:
@@ -52,12 +52,20 @@ class StatusProcessing:
         target = eft.StaticTarget(
             pid,
             eft.Zone.SUMMONS,
-            -1
+            -1,
         )
         for summon in summons:
             game_state = f(game_state, summon, target)
 
-        # supports TODO
+        # supports
+        supports = player.get_supports()
+        for support in supports:
+            target = eft.StaticTarget(
+                pid,
+                eft.Zone.SUPPORTS,
+                support.sid,
+            )
+            game_state = f(game_state, support, target)
 
         return game_state
 

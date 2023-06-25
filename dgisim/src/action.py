@@ -95,6 +95,10 @@ class DiceOnlyInstruction(Instruction):
 class CharacterTargetInstruction(Instruction):
     target: StaticTarget
 
+@dataclass(frozen=True, kw_only=True)
+class ReplaceSupportInstruction(Instruction):
+    target: StaticTarget
+
 
 @dataclass(frozen=True, kw_only=True)
 class SourceTargetInstruction(Instruction):

@@ -15,6 +15,7 @@ class Mode:
     _HAND_CARD_LIMIT = 10
     _ROUND_LIMIT = 15
     _SUMMONS_LIMIT = 4
+    _SUPPORTS_LIMIT = 4
     _SWAP_COST = AbstractDices({Element.ANY: 1})
     _SWAP_SPEED = EventSpeed.COMBAT_ACTION
 
@@ -26,6 +27,9 @@ class Mode:
 
     def summons_limit(self) -> int:
         return self._SUMMONS_LIMIT
+
+    def supports_limit(self) -> int:
+        return self._SUPPORTS_LIMIT
 
     def swap_cost(self) -> AbstractDices:
         return self._SWAP_COST

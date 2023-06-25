@@ -5,6 +5,7 @@ import dgisim.src.state.game_state as gs
 import dgisim.src.effect.effect as eft
 import dgisim.src.action as act
 import dgisim.src.status.status as stt
+import dgisim.src.support.support as sp
 import dgisim.src.character.character as chr
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.dices import AbstractDices
@@ -45,6 +46,7 @@ class Card:
             game_state=game_state,
             pid=pid,
             item=CardEvent(
+                pid=pid,
                 card_type=cls,
                 dices_cost=cls._DICE_COST,
             ),
@@ -181,7 +183,7 @@ class _ValidInstructionFuncs:
             instruction: act.CharacterTargetInstruction,
     ) -> bool:
         return instruction.target.pid == pid \
-            and instruction.target.zone is eft.Zone.CHARACTER \
+            and instruction.target.zone is eft.Zone.CHARACTERS \
             and instruction.target.id == game_state.get_player(pid).get_characters().get_active_character_id()
 
 
@@ -205,6 +207,38 @@ class EquipmentCard(Card):
     pass
 
 
+class SupportCard(Card):
+    @override
+    @classmethod
+    def valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: gs.GameState.Pid,
+            instruction: act.Instruction
+    ) -> None | gs.GameState:
+        supports = game_state.get_player(pid).get_supports()
+        if supports.full():
+            if not isinstance(instruction, act.ReplaceSupportInstruction):
+                return None
+            target = game_state.get_target(instruction.target)
+            if target is None or not isinstance(target, sp.Support):
+                return None
+        else:
+            if not isinstance(instruction, act.DiceOnlyInstruction):
+                return None
+        return super().valid_instruction(game_state, pid, instruction)
+
+
+class CompanionCard(SupportCard):
+    pass
+
+
+class LocationCard(SupportCard):
+    pass
+
+
+# <<<<<<<<<<<<<<<<<<<< Event Cards <<<<<<<<<<<<<<<<<<<<
+# <<<<<<<<<<<<<<<<<<<< Event Cards / Food Cards <<<<<<<<<<<<<<<<<<<<
 class FoodCard(EventCard):
     @override
     @classmethod
@@ -346,6 +380,8 @@ class NorthernSmokedChicken(FoodCard):
             ),
         )
 
+# >>>>>>>>>>>>>>>>>>>> Event Cards / Food Cards >>>>>>>>>>>>>>>>>>>>
+
 
 class Starsigns(EventCard):
     _DICE_COST = AbstractDices({Element.ANY: 2})
@@ -385,7 +421,7 @@ class Starsigns(EventCard):
             eft.EnergyRechargeEffect(
                 eft.StaticTarget(
                     pid=pid,
-                    zone=eft.Zone.CHARACTER,
+                    zone=eft.Zone.CHARACTERS,
                     id=game_state.get_player(pid).just_get_active_character().get_id(),
                 ),
                 1
@@ -437,7 +473,6 @@ class ChangingShifts(EventCard):
     ) -> bool:
         return isinstance(instruction, act.DiceOnlyInstruction)
 
-    
     @override
     @classmethod
     def effects(
@@ -482,7 +517,32 @@ class LeaveItToMe(EventCard):
             ),
         )
 
-# TODO: change to the correct parent class
+# >>>>>>>>>>>>>>>>>>>> Event Cards >>>>>>>>>>>>>>>>>>>>
+
+# <<<<<<<<<<<<<<<<<<<< Support Cards <<<<<<<<<<<<<<<<<<<<
+# <<<<<<<<<<<<<<<<<<<< Support Cards / Companion Cards <<<<<<<<<<<<<<<<<<<<
+
+
+class Xudong(CompanionCard):
+    _DICE_COST = AbstractDices({Element.ANY: 2})
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: gs.GameState.Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddSupportEffect(
+                target_pid=pid,
+                support=sp.XudongSupport,
+            ),
+        )
+
+# >>>>>>>>>>>>>>>>>>>> Support Cards / Companion Cards >>>>>>>>>>>>>>>>>>>>
+# >>>>>>>>>>>>>>>>>>>> Support Cards >>>>>>>>>>>>>>>>>>>>
 
 #### Keqing ####
 
@@ -569,7 +629,7 @@ class ThunderingPenance(EquipmentCard, _CombatActionCard):
         assert isinstance(instruction, act.DiceOnlyInstruction)
         target = eft.StaticTarget(
             pid=pid,
-            zone=eft.Zone.CHARACTER,
+            zone=eft.Zone.CHARACTERS,
             id=game_state.get_player(pid).just_get_active_character().get_id(),
         )
         return (
@@ -617,7 +677,7 @@ class ColdBloodedStrike(EquipmentCard, _CombatActionCard):
         assert isinstance(instruction, act.DiceOnlyInstruction)
         target = eft.StaticTarget(
             pid=pid,
-            zone=eft.Zone.CHARACTER,
+            zone=eft.Zone.CHARACTERS,
             id=game_state.get_player(pid).just_get_active_character().get_id(),
         )
         return (
@@ -665,7 +725,7 @@ class StreamingSurge(EquipmentCard, _CombatActionCard):
         assert isinstance(instruction, act.DiceOnlyInstruction)
         target = eft.StaticTarget(
             pid=pid,
-            zone=eft.Zone.CHARACTER,
+            zone=eft.Zone.CHARACTERS,
             id=game_state.get_player(pid).just_get_active_character().get_id(),
         )
         return (

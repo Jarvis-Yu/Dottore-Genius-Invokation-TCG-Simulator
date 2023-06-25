@@ -6,7 +6,7 @@ from dgisim.src.summon.summon import Summon
 
 
 class Summons:
-    def __init__(self, summons: tuple[Summon, ...], max_num: int) -> None:
+    def __init__(self, summons: tuple[Summon, ...], max_num: int):
         assert len(summons) <= max_num
         self._summons = summons
         self._max_num = max_num
@@ -45,11 +45,14 @@ class Summons:
             filter(lambda s: type(s) != summon_type, self._summons)
         ), self._max_num)
 
+    def full(self) -> bool:
+        return len(self) == self._max_num
+
     def contains(self, summon_type: Union[type[Summon], Summon]) -> bool:
         return any(type(s) is summon_type for s in self._summons)
 
     def __contains__(self, summon_type: Union[type[Summon], Summon]) -> bool:
-        return any(type(s) is summon_type for s in self._summons)
+        return self.contains(summon_type)
 
     def __iter__(self) -> Iterator[Summon]:
         return iter(self._summons)

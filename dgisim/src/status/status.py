@@ -65,7 +65,7 @@ class Status:
             item: eft.Preprocessable,
             signal: Status.PPType,
     ) -> tuple[eft.Preprocessable, Optional[Self]]:
-        return (item, self)
+        return item, self
 
     def _post_preprocess(
             self,
@@ -189,12 +189,12 @@ class Status:
                 eft.SwapCharacterCheckerEffect(
                     my_active=eft.StaticTarget(
                         pid=source.pid,
-                        zone=eft.Zone.CHARACTER,
+                        zone=eft.Zone.CHARACTERS,
                         id=game_state.get_player(source.pid).just_get_active_character().get_id(),
                     ),
                     oppo_active=eft.StaticTarget(
                         pid=source.pid.other(),
-                        zone=eft.Zone.CHARACTER,
+                        zone=eft.Zone.CHARACTERS,
                         id=game_state.get_player(
                             source.pid.other()).just_get_active_character().get_id(),
                     ),
@@ -329,7 +329,7 @@ class ShieldStatus(Status):
         elif isinstance(self, CombatStatus):
             attached_active_character = eft.StaticTarget(
                 status_source.pid,
-                zone=eft.Zone.CHARACTER,
+                zone=eft.Zone.CHARACTERS,
                 id=game_state.get_player(status_source.pid).just_get_active_character().get_id(),
             )
             return item.target == attached_active_character
@@ -337,7 +337,7 @@ class ShieldStatus(Status):
         elif isinstance(self, sm.Summon):
             attached_active_character = eft.StaticTarget(
                 status_source.pid,
-                zone=eft.Zone.CHARACTER,
+                zone=eft.Zone.CHARACTERS,
                 id=game_state.get_player(status_source.pid).just_get_active_character().get_id(),
             )
             return item.target == attached_active_character
@@ -630,7 +630,7 @@ class NorthernSmokedChickenStatus(CharacterStatus, _UsageStatus):
                     and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION:
                 item = replace(
                     item,
-                    dices_cost=(item.dices_cost - {Element.ANY: self.COST_DEDUCTION})
+                    dices_cost=(item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
                 )
                 return item, replace(self, usages=self.usages - 1)
         return super()._preprocess(game_state, status_source, item, signal)
@@ -662,7 +662,7 @@ class ChangingShiftsStatus(CombatStatus):
             if item.target.pid is status_source.pid \
                     and item.dices_cost.num_dices() >= self.COST_DEDUCTION:
                 assert item.dices_cost.num_dices() == item.dices_cost[Element.ANY]
-                new_cost = item.dices_cost - {Element.ANY: self.COST_DEDUCTION}
+                new_cost = (item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
                 return replace(item, dices_cost=new_cost), None
         return super()._preprocess(game_state, status_source, item, signal)
 

@@ -7,6 +7,7 @@ from itertools import chain
 import dgisim.src.status.statuses as stts
 import dgisim.src.status.status as stt
 import dgisim.src.summon.summon as sm
+import dgisim.src.support.support as sp
 from dgisim.src.element.element import Element, Reaction, ReactionDetail
 import dgisim.src.character.character as chr
 from dgisim.src.character.character_skill_enum import CharacterSkill
@@ -20,11 +21,10 @@ from dgisim.src.helper.quality_of_life import just, case_val
 
 
 class Zone(Enum):
-    CHARACTER = 0
-    SUMMONS = 1
-    SUPPORT = 2
-    COMBAT_STATUSES = 3
-    # HAND = 4
+    CHARACTERS = "Characters"
+    SUMMONS = "Summons"
+    SUPPORTS = "Supports"
+    COMBAT_STATUSES = "Combat-Statuses"
 
 
 class TriggeringSignal(Enum):
@@ -414,7 +414,7 @@ class SwapCharacterEffect(DirectEffect):
     target: StaticTarget
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
-        assert self.target.zone == Zone.CHARACTER
+        assert self.target.zone == Zone.CHARACTERS
         pid = self.target.pid
         player = game_state.get_player(pid)
         if player.just_get_active_character().get_id() == self.target.id:
@@ -595,7 +595,7 @@ class SpecificDamageEffect(Effect):
                 .get_player(actual_damage.target.pid) \
                 .just_get_active_character() \
                 .get_id()
-            assert actual_damage.target.zone is Zone.CHARACTER
+            assert actual_damage.target.zone is Zone.CHARACTERS
             if actual_damage.target.id is oppo_active_id:
                 effects.append(
                     ForwardSwapCharacterEffect(pid)
@@ -713,7 +713,7 @@ class ReferredDamageEffect(Effect):
                 avoided_id = just(opponenet_characters.get_active_character_id())
             else:
                 assert self.target_ref.pid is self.source.pid.other()
-                assert self.target_ref.zone is Zone.CHARACTER
+                assert self.target_ref.zone is Zone.CHARACTERS
                 avoided_id = self.target_ref.id
             for char in opponenet_characters.get_characters():
                 if char.get_id() != avoided_id:
@@ -732,7 +732,7 @@ class ReferredDamageEffect(Effect):
                     source=self.source,
                     target=StaticTarget(
                         pid=pid,
-                        zone=Zone.CHARACTER,
+                        zone=Zone.CHARACTERS,
                         id=char.get_id(),
                     ),
                     element=self.element,
@@ -832,6 +832,8 @@ class RemoveCardEffect(Effect):
             pid,
             lambda p: p.factory().f_hand_cards(
                 lambda cs: cs.remove(card)
+            ).f_publicly_used_cards(
+                lambda cs: cs.add(card)
             ).build()
         ).build()
 
@@ -1143,6 +1145,63 @@ class OneSummonIncreaseUsage(Effect):
 
 
 @dataclass(frozen=True)
+class AddSupportEffect(Effect):
+    target_pid: gs.GameState.Pid
+    support: type[sp.Support]
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        return game_state.factory().f_player(
+            self.target_pid,
+            lambda p: p.factory().f_supports(
+                lambda ss: ss.update_support(self.support(sid=ss.new_sid(self.support)))
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True)
+class RemoveSupportEffect(Effect):
+    target_pid: gs.GameState.Pid
+    support: type[sp.Support]
+    sid: int
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        return game_state.factory().f_player(
+            self.target_pid,
+            lambda p: p.factory().f_supports(
+                lambda ss: ss.remove_support(self.support, self.sid)
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True)
+class UpdateSupportEffect(Effect):
+    target_pid: gs.GameState.Pid
+    support: sp.Support
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        return game_state.factory().f_player(
+            self.target_pid,
+            lambda p: p.factory().f_supports(
+                lambda ss: ss.update_support(self.support)
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True)
+class OverrideSupportEffect(Effect):
+    target_pid: gs.GameState.Pid
+    support: sp.Support
+
+    def execute(self, game_state: gs.GameState) -> gs.GameState:
+        return game_state.factory().f_player(
+            self.target_pid,
+            lambda p: p.factory().f_supports(
+                lambda ss: ss.update_support(self.support, override=True)
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True)
 class AddCardEffect(Effect):
     pid: gs.GameState.Pid
     card: type[cd.Card]
@@ -1189,4 +1248,4 @@ class BroadCastSkillInfoEffect(Effect):
 
 
 # This has to be by the end of the file or there's cyclic import error
-Preprocessable = Union[SpecificDamageEffect, evt.GameEvent, evt.CardEvent]  # int is just a placeholder
+Preprocessable = Union[SpecificDamageEffect, evt.GameEvent, evt.CardEvent]

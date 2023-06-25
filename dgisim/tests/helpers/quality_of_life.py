@@ -64,7 +64,7 @@ def add_damage_effect(
             ReferredDamageEffect(
                 source=StaticTarget(
                     pid.other(),
-                    Zone.CHARACTER,
+                    Zone.CHARACTERS,
                     case_val(char_id is None, 1, char_id),  # type: ignore
                 ),
                 target=DynamicCharacterTarget.OPPO_ACTIVE,

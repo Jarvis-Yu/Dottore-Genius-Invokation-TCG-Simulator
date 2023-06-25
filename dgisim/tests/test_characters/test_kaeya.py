@@ -124,7 +124,7 @@ class TestKaeya(unittest.TestCase):
             LightningStiletto,
             CharacterTargetInstruction(
                 dices=ActualDices({Element.OMNI: 3}),
-                target=StaticTarget(GameState.Pid.P1, Zone.CHARACTER, 3),
+                target=StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 3),
             )
         ))
         gsm = GameStateMachine(game_state_p1_move, a1, a2)
@@ -220,7 +220,7 @@ class TestKaeya(unittest.TestCase):
 
     def test_talent_card(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
-        source = StaticTarget(GameState.Pid.P1, Zone.CHARACTER, 2)
+        source = StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 2)
         initial_hp = 3
         base_game_state = kill_character(
             game_state=self.BASE_GAME,

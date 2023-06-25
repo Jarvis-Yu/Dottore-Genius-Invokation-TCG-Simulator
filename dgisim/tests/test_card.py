@@ -41,7 +41,7 @@ class TestCard(unittest.TestCase):
                 dices=ActualDices({}),
                 target=StaticTarget(
                     GameState.Pid.P1,
-                    Zone.CHARACTER,
+                    Zone.CHARACTERS,
                     char1.get_id(),
                 )
             )
@@ -84,7 +84,7 @@ class TestCard(unittest.TestCase):
                 dices=ActualDices({}),
                 target=StaticTarget(
                     GameState.Pid.P1,
-                    Zone.CHARACTER,
+                    Zone.CHARACTERS,
                     guobaed_char_id,
                 )
             )
@@ -129,7 +129,7 @@ class TestCard(unittest.TestCase):
                 dices=ActualDices({}),
                 target=StaticTarget(
                     GameState.Pid.P1,
-                    Zone.CHARACTER,
+                    Zone.CHARACTERS,
                     2,
                 )
             )
@@ -295,7 +295,7 @@ class TestCard(unittest.TestCase):
                 dices=ActualDices({}),
                 target=StaticTarget(
                     pid=GameState.Pid.P1,
-                    zone=Zone.CHARACTER,
+                    zone=Zone.CHARACTERS,
                     id=1,
                 )
             ),
@@ -343,6 +343,17 @@ class TestCard(unittest.TestCase):
             .just_get_active_character()
             .get_character_statuses()
             .contains(NorthernSmokedChickenStatus)
+        )
+
+        # test teammate cannot use this
+        game_state = buffed_game_state.factory().f_player1(
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().active_character_id(2).build()
+            ).build()
+        ).build()
+        self.assertRaises(
+            Exception,
+            lambda: game_state.action_step(GameState.Pid.P1, normal_attack_action)  # type: ignore
         )
 
         # test opponent cannot use this

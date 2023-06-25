@@ -62,7 +62,7 @@ class TestEffect(unittest.TestCase):
         # Heals normally
         g1 = game_state.factory().f_effect_stack(
             lambda es: es.push_one(RecoverHPEffect(
-                StaticTarget(GameState.Pid.P1, Zone.CHARACTER, 2),
+                StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 2),
                 1
             ))
         ).build()
@@ -74,7 +74,7 @@ class TestEffect(unittest.TestCase):
         # No overheal
         g2 = game_state.factory().f_effect_stack(
             lambda es: es.push_one(RecoverHPEffect(
-                StaticTarget(GameState.Pid.P1, Zone.CHARACTER, 2),
+                StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 2),
                 3
             ))
         ).build()
@@ -102,7 +102,7 @@ class TestEffect(unittest.TestCase):
         # apply energy recharge effect [1]
         game_state = game_state.factory().f_effect_stack(
             lambda es: es.push_one(EnergyRechargeEffect(
-                StaticTarget(GameState.Pid.P1, Zone.CHARACTER, 1),
+                StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 1),
                 1
             ))
         ).build()
@@ -118,7 +118,7 @@ class TestEffect(unittest.TestCase):
         # apply energy recharge that exceeds max energy
         game_state = game_state.factory().f_effect_stack(
             lambda es: es.push_one(EnergyRechargeEffect(
-                StaticTarget(GameState.Pid.P1, Zone.CHARACTER, 1),
+                StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 1),
                 c.get_max_energy() + 1  # type: ignore
             ))
         ).build()
@@ -146,7 +146,7 @@ class TestEffect(unittest.TestCase):
         # apply energy drain effect [3]
         game_state = game_state.factory().f_effect_stack(
             lambda es: es.push_one(EnergyDrainEffect(
-                StaticTarget(GameState.Pid.P1, Zone.CHARACTER, 1),
+                StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 1),
                 3
             ))
         ).build()
@@ -160,7 +160,7 @@ class TestEffect(unittest.TestCase):
         # Apply another energy drain effect to see if goes below zero
         game_state = game_state.factory().f_effect_stack(
             lambda es: es.push_one(EnergyDrainEffect(
-                StaticTarget(GameState.Pid.P1, Zone.CHARACTER, 1),
+                StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 1),
                 3,
             ))
         ).build()
