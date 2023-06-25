@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import ClassVar
+from typing import Any, ClassVar
 from typing_extensions import override, Self
 from dataclasses import dataclass, fields
 
@@ -8,12 +8,11 @@ from dgisim.src.dices import ActualDices
 from dgisim.src.effect.effect import StaticTarget
 from dgisim.src.character.character_skill_enum import CharacterSkill
 import dgisim.src.state.game_state as gs
+import dgisim.src.effect.effect as eft
 
 
 @dataclass(frozen=True)
 class PlayerAction:
-    # _editing: bool = False
-
     @classmethod
     def _empty(cls) -> Self:
         """
@@ -31,24 +30,30 @@ class PlayerAction:
             object.__setattr__(self, field.name, None)
         return self
 
+    def _set_attr(self, name: str, val: Any) -> None:
+        """
+        This is just for action generator
+        """
+        object.__setattr__(self, name, val)
+
     def _filled(self, exceptions: set[str] = set()) -> bool:
         """
         This is just for action generator
         """
-        field_names = (
-            field.name
-            for field in fields(self)
-            if field.name not in exceptions
-        )
-        return all(
-            self.__getattribute__(field_name) is not None
-            for field_name in field_names
-        )
-
-    def legal(self) -> bool:
         return all(
             self.__getattribute__(field.name) is not None
             for field in fields(self)
+            if field.name not in exceptions
+        )
+
+    def legal(self) -> bool:
+        field_type_val = (
+            (field.type, field.__getattribute__(field.name))
+            for field in fields(self)
+        )
+        return all(
+            val is not None and isinstance(val, field_type)
+            for field_type, val in field_type_val
         )
 
     def __str__(self) -> str:
@@ -163,24 +168,30 @@ class Instruction:
             object.__setattr__(self, field.name, None)
         return self
 
+    def _set_attr(self, name: str, val: Any) -> None:
+        """
+        This is just for action generator
+        """
+        object.__setattr__(self, name, val)
+
     def _filled(self, exceptions: set[str] = set()) -> bool:
         """
         This is just for action generator
         """
-        field_names = (
-            field.name
-            for field in fields(self)
-            if field.name not in exceptions
-        )
-        return all(
-            self.__getattribute__(field_name) is not None
-            for field_name in field_names
-        )
-
-    def legal(self) -> bool:
         return all(
             self.__getattribute__(field.name) is not None
             for field in fields(self)
+            if field.name not in exceptions
+        )
+
+    def legal(self) -> bool:
+        field_type_val = (
+            (field.type, field.__getattribute__(field.name))
+            for field in fields(self)
+        )
+        return all(
+            val is not None and isinstance(val, field_type)
+            for field_type, val in field_type_val
         )
 
     def __str__(self) -> str:
@@ -201,8 +212,32 @@ class DiceOnlyInstruction(Instruction):
 class StaticTargetInstruction(Instruction):
     target: StaticTarget
 
+    @classmethod
+    def _empty(cls) -> Self:
+        return cls(
+            dices=ActualDices({}),
+            target=StaticTarget(
+                pid=gs.GameState.Pid.P1,
+                zone=eft.Zone.CHARACTERS,
+                id=-1,
+            ),
+        )
+
 
 @dataclass(frozen=True, kw_only=True)
 class SourceTargetInstruction(Instruction):
     source: StaticTarget
     target: StaticTarget
+
+    @classmethod
+    def _empty(cls) -> Self:
+        target = StaticTarget(
+            pid=gs.GameState.Pid.P1,
+            zone=eft.Zone.CHARACTERS,
+            id=-1,
+        )
+        return cls(
+            dices=ActualDices({}),
+            source=target,
+            target=target,
+        )

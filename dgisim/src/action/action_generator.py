@@ -19,20 +19,26 @@ class ActionGenerator:
     instruction: None | act.Instruction= None
 
     def _action_filled_but_instruction(self) -> bool:
-        # return self.action.filled(exceptions={"instruction"})
-        return False
+        return self.action._filled(exceptions={"instruction"})
 
     def _action_filled(self) -> bool:
-        # return self.action.filled()
-        return False
+        return self.action._filled()
 
     def _instruction_filled(self) -> bool:
-        # return self.instruction is None \
-        #     or self.instruction.filled()
-        return False
+        return self.instruction is None \
+            or self.instruction._filled()
+
+    def _legal_action(self) -> bool:
+        return self.action.legal()
+
+    def _legal_instruction(self) -> bool:
+        return self.instruction is None or self.instruction.legal()
 
     def filled(self) -> bool:
         return self._action_filled() and self._instruction_filled()
+
+    def valid(self) -> bool:
+        return self._legal_action() and self._legal_instruction()
 
     def generate_action(self) -> act.PlayerAction:
         assert self.filled()
