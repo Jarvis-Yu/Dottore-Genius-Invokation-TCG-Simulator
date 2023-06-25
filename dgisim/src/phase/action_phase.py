@@ -176,11 +176,6 @@ class ActionPhase(ph.Phase):
         paid_dices = action.instruction.dices
         card = action.card
 
-        # verify card usage validity
-        if not card.usable(game_state, pid):
-            raise Exception(f"{card.name()} is not usable for {pid} "
-                            + f"in game state:\n{game_state}")
-
         # verify action validity
         preprocessed_game_state = card.valid_instruction(game_state, pid, action.instruction)
         if preprocessed_game_state is None:
