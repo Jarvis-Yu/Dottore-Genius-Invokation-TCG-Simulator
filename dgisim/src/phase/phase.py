@@ -3,7 +3,7 @@ from typing import Optional, Union
 
 import dgisim.src.state.game_state as gs
 from dgisim.src.helper.level_print import level_print_single
-from dgisim.src.action import PlayerAction
+from dgisim.src.action.action import PlayerAction
 from dgisim.src.event.event_pre import EventPre
 
 

@@ -4,7 +4,7 @@ from typing import Optional, cast
 import dgisim.src.state.game_state as gs
 import dgisim.src.phase.phase as ph
 from dgisim.src.state.player_state import PlayerState
-from dgisim.src.action import *
+from dgisim.src.action.action import *
 from dgisim.src.event.event import *
 from dgisim.src.effect.effect import *
 

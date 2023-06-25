@@ -2,7 +2,7 @@ from typing import List, Type, Tuple, Optional, Callable, Union
 
 from dgisim.src.state.game_state import GameState
 from dgisim.src.player_agent import PlayerAgent
-from dgisim.src.action import PlayerAction
+from dgisim.src.action.action import PlayerAction
 from dgisim.src.phase.phase import Phase
 from dgisim.src.helper.level_print import GamePrinter
 

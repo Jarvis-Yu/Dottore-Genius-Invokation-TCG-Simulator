@@ -3,7 +3,7 @@ from typing_extensions import override
 
 import dgisim.src.state.game_state as gs
 import dgisim.src.effect.effect as eft
-import dgisim.src.action as act
+import dgisim.src.action.action as act
 import dgisim.src.status.status as stt
 import dgisim.src.support.support as sp
 import dgisim.src.character.character as chr

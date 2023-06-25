@@ -7,10 +7,10 @@ import dgisim.src.phase.phase as ph
 import dgisim.src.phase.game_end_phase as gep
 import dgisim.src.state.player_state as pl
 import dgisim.src.status.status as stt
-import dgisim.src.action as act
+import dgisim.src.action.action as act
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
 from dgisim.src.helper.quality_of_life import case_val
-from dgisim.src.action import PlayerAction
+from dgisim.src.action.action import PlayerAction
 from dgisim.src.effect.effect_stack import EffectStack
 from dgisim.src.event.event_pre import EventPre
 from dgisim.src.character.character import Character

@@ -12,7 +12,7 @@ from dgisim.src.effect.effect import *
 from dgisim.src.helper.level_print import GamePrinter
 from dgisim.src.status.status import *
 from dgisim.src.summon.summon import *
-from dgisim.src.action import *
+from dgisim.src.action.action import *
 
 
 class TestStatus(unittest.TestCase):

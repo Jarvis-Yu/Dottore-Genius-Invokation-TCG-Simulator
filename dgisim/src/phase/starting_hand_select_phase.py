@@ -3,7 +3,7 @@ from typing import Optional
 
 import dgisim.src.state.game_state as gs
 import dgisim.src.phase.phase as ph
-from dgisim.src.action import PlayerAction, CharacterSelectAction
+from dgisim.src.action.action import PlayerAction, CharacterSelectAction
 from dgisim.src.state.player_state import PlayerState
 
 

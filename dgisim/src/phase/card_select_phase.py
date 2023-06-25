@@ -4,7 +4,7 @@ from typing import Optional, Tuple
 import dgisim.src.state.game_state as gs
 from dgisim.src.state.player_state import PlayerState
 import dgisim.src.phase.phase as ph
-from dgisim.src.action import CardSelectAction, PlayerAction, EndRoundAction
+from dgisim.src.action.action import CardSelectAction, PlayerAction, EndRoundAction
 from dgisim.src.card.cards import Cards
 from dgisim.src.helper.level_print import level_print
 

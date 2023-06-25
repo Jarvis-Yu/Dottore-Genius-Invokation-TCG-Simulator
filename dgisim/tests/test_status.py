@@ -6,7 +6,7 @@ from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.card.card import *
 from dgisim.src.card.cards import Cards
 from dgisim.src.dices import ActualDices
-from dgisim.src.action import *
+from dgisim.src.action.action import *
 from dgisim.src.agents import PuppetAgent
 from dgisim.src.status.statuses import *
 from dgisim.src.status.status import *
