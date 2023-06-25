@@ -4,6 +4,7 @@ from dgisim.src.action.action import PlayerAction
 
 from dgisim.src.player_agent import PlayerAgent
 from dgisim.src.state.game_state import GameState
+from dgisim.src.action.action_generator import *
 from dgisim.src.action.action import *
 from dgisim.src.effect.effect import *
 from dgisim.src.phase.card_select_phase import CardSelectPhase
@@ -32,17 +33,17 @@ class LazyAgent(PlayerAgent):
         if isinstance(curr_phase, CardSelectPhase):
             _, selected_cards = game_state.get_player(
                 pid).get_hand_cards().pick_random_cards(self._NUM_PICKED_CARDS)
-            return CardSelectAction(selected_cards)
-        
+            return CardSelectAction(selected_cards=selected_cards)
+
         elif isinstance(curr_phase, StartingHandSelectPhase):
-            return CharacterSelectAction(1)
-        
+            return CharacterSelectAction(char_id=1)
+
         elif isinstance(curr_phase, RollPhase):
             raise Exception("No Action Defined")
-        
+
         elif isinstance(curr_phase, ActionPhase):
             return EndRoundAction()
-        
+
         else:
             raise Exception("No Action Defined")
 
@@ -81,14 +82,14 @@ class HardCodedRandomAgent(PlayerAgent):
         if isinstance(curr_phase, CardSelectPhase):
             _, selected_cards = game_state.get_player(
                 pid).get_hand_cards().pick_random_cards(self._NUM_PICKED_CARDS)
-            return CardSelectAction(selected_cards)
-        
+            return CardSelectAction(selected_cards=selected_cards)
+
         elif isinstance(curr_phase, StartingHandSelectPhase):
-            return CharacterSelectAction(1)
-        
+            return CharacterSelectAction(char_id=1)
+
         elif isinstance(curr_phase, RollPhase):
             raise Exception("No Action Defined")
-        
+
         elif isinstance(curr_phase, ActionPhase):
             selection = random.random()
             me = game_state.get_player(pid)
@@ -106,10 +107,10 @@ class HardCodedRandomAgent(PlayerAgent):
                 if active_id in alive_ids:
                     alive_ids.remove(active_id)
                 if alive_ids:
-                    return DeathSwapAction(random.choice(alive_ids))
+                    return DeathSwapAction(char_id=random.choice(alive_ids))
                 else:
                     raise Exception("Game should end here but not implemented(NOT REACHED)")
-                
+
             # food card
             character_injured = active_character.get_hp() < active_character.get_max_hp()
             if selection < 1:
@@ -128,13 +129,13 @@ class HardCodedRandomAgent(PlayerAgent):
                     card = MushroomPizza
                 else:
                     card = None
-                
+
                 if card is not None \
                         and not active_character.satiated() \
                         and (available_dices - tmp_dices).is_legal():
                     return CardAction(
-                        card,
-                        CharacterTargetInstruction(
+                        card=card,
+                        instruction=StaticTargetInstruction(
                             dices=tmp_dices,
                             target=StaticTarget(
                                 pid,
@@ -157,10 +158,9 @@ class HardCodedRandomAgent(PlayerAgent):
                     alive_ids.remove(active_id)
                 if dices is not None and alive_ids:
                     return SwapAction(
-                        random.choice(alive_ids),
-                        DiceOnlyInstruction(dices=dices),
+                        char_id=random.choice(alive_ids),
+                        instruction=DiceOnlyInstruction(dices=dices),
                     )
-            
 
             if selection < 1 and active_character.can_cast_skill():
                 # elemental burst
@@ -171,8 +171,8 @@ class HardCodedRandomAgent(PlayerAgent):
                     )
                     if dices is not None:
                         return SkillAction(
-                            CharacterSkill.ELEMENTAL_BURST,
-                            DiceOnlyInstruction(dices=dices),
+                            skill=CharacterSkill.ELEMENTAL_BURST,
+                            instruction=DiceOnlyInstruction(dices=dices),
                         )
 
                 # elemental skill2
@@ -182,8 +182,8 @@ class HardCodedRandomAgent(PlayerAgent):
                     )
                     if dices is not None:
                         return SkillAction(
-                            CharacterSkill.ELEMENTAL_SKILL2,
-                            DiceOnlyInstruction(dices=dices),
+                            skill=CharacterSkill.ELEMENTAL_SKILL2,
+                            instruction=DiceOnlyInstruction(dices=dices),
                         )
 
                 # elemental skill1
@@ -193,8 +193,8 @@ class HardCodedRandomAgent(PlayerAgent):
                     )
                     if dices is not None:
                         return SkillAction(
-                            CharacterSkill.ELEMENTAL_SKILL1,
-                            DiceOnlyInstruction(dices=dices),
+                            skill=CharacterSkill.ELEMENTAL_SKILL1,
+                            instruction=DiceOnlyInstruction(dices=dices),
                         )
 
                 # normal attack
@@ -204,8 +204,8 @@ class HardCodedRandomAgent(PlayerAgent):
                     )
                     if dices is not None:
                         return SkillAction(
-                            CharacterSkill.NORMAL_ATTACK,
-                            DiceOnlyInstruction(dices=dices),
+                            skill=CharacterSkill.NORMAL_ATTACK,
+                            instruction=DiceOnlyInstruction(dices=dices),
                         )
 
             # swap character
@@ -221,10 +221,10 @@ class HardCodedRandomAgent(PlayerAgent):
                     alive_ids.remove(active_id)
                 if dices is not None and alive_ids:
                     return SwapAction(
-                        random.choice(alive_ids),
-                        DiceOnlyInstruction(dices=dices),
+                        char_id=random.choice(alive_ids),
+                        instruction=DiceOnlyInstruction(dices=dices),
                     )
-            
+
             return EndRoundAction()
 
         elif isinstance(curr_phase, EndPhase):
@@ -240,11 +240,90 @@ class HardCodedRandomAgent(PlayerAgent):
                 if active_id in alive_ids:
                     alive_ids.remove(active_id)
                 if alive_ids:
-                    return DeathSwapAction(random.choice(alive_ids))
+                    return DeathSwapAction(char_id=random.choice(alive_ids))
                 else:
                     raise Exception("Game should end here but not implemented(NOT REACHED)")
-            
+
             raise Exception("NOT REACHED")
-        
+
         else:
             raise Exception(f"No Action Defined, phase={curr_phase}")
+
+
+class RandomAgent(PlayerAgent):
+    _NUM_PICKED_CARDS = 3
+
+    def _card_select_phase(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
+        game_state = history[-1]
+        _, selected_cards = game_state.get_player(
+            pid
+        ).get_hand_cards().pick_random_cards(self._NUM_PICKED_CARDS)
+        return CardSelectAction(selected_cards=selected_cards)
+
+    def _starting_hand_select_phase(
+            self,
+            history: List[GameState],
+            pid: GameState.Pid
+    ) -> PlayerAction:
+        return CharacterSelectAction(char_id=random.randint(1, 3))
+
+    def _roll_phase(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
+        raise Exception("No Action Defined")
+
+    def _random_action_generator_chooser(self, action_generator: ActionGenerator) -> PlayerAction:
+        # TODO: actually choose
+        raise NotImplementedError
+
+    def _action_phase(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
+        game_state = history[-1]
+        decision = random.random()
+        if decision < 0.8:
+            cards = game_state.get_player(pid).get_hand_cards()
+            usable_cards = [
+                card
+                for card in cards
+                if card.usable(game_state, pid)
+            ]
+            card = random.choice(usable_cards)
+            action_generator = card.action_generator(game_state, pid)
+            player_action = self._random_action_generator_chooser(action_generator)
+            return player_action
+
+        return EndRoundAction()
+
+    def _end_phase(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
+        game_state = history[-1]
+        me = game_state.get_player(pid)
+        active_character = me.just_get_active_character()
+
+        # death swap
+        if active_character.defeated():
+            characters = me.get_characters()
+            alive_ids = characters.alive_ids()
+            active_id = characters.get_active_character_id()
+            assert active_id is not None
+            if active_id in alive_ids:
+                alive_ids.remove(active_id)
+            if alive_ids:
+                return DeathSwapAction(char_id=random.choice(alive_ids))
+            else:
+                raise Exception("Game should end here but not implemented(NOT REACHED)")
+
+        raise Exception("NOT REACHED")
+
+    def choose_action(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
+        game_state = history[-1]
+        curr_phase = game_state.get_phase()
+
+        if isinstance(curr_phase, CardSelectPhase):
+            return self._card_select_phase(history, pid)
+        elif isinstance(curr_phase, StartingHandSelectPhase):
+            return self._starting_hand_select_phase(history, pid)
+        elif isinstance(curr_phase, RollPhase):
+            return self._starting_hand_select_phase(history, pid)
+        elif isinstance(curr_phase, ActionPhase):
+            return self._action_phase(history, pid)
+        elif isinstance(curr_phase, EndPhase):
+            return self._end_phase(history, pid)
+
+        raise NotImplementedError

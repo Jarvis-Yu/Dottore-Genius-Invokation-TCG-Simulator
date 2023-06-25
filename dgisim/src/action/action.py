@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing_extensions import override
+from typing import ClassVar
+from typing_extensions import override, Self
 from dataclasses import dataclass, fields
 
 from dgisim.src.card.cards import Cards
@@ -11,18 +12,62 @@ import dgisim.src.state.game_state as gs
 
 @dataclass(frozen=True)
 class PlayerAction:
+    # _editing: bool = False
+
+    @classmethod
+    def _empty(cls) -> Self:
+        """
+        This is just for action generator
+        """
+        return cls()
+
+    @classmethod
+    def _all_none(cls) -> Self:
+        """
+        This is just for action generator
+        """
+        self = cls._empty()
+        for field in fields(self):
+            object.__setattr__(self, field.name, None)
+        return self
+
+    def _filled(self, exceptions: set[str] = set()) -> bool:
+        """
+        This is just for action generator
+        """
+        field_names = (
+            field.name
+            for field in fields(self)
+            if field.name not in exceptions
+        )
+        return all(
+            self.__getattribute__(field_name) is not None
+            for field_name in field_names
+        )
+
+    def legal(self) -> bool:
+        return all(
+            self.__getattribute__(field.name) is not None
+            for field in fields(self)
+        )
+
     def __str__(self) -> str:
         cls_fields = fields(self)
-        paired_fields = (f"{field.name}={str(self.__getattribute__(field.name))}" for field in cls_fields)
+        paired_fields = (
+            f"{field.name}={str(self.__getattribute__(field.name))}" for field in cls_fields)
         return f"{self.__class__.__name__}:({', '.join(paired_fields)})"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class CardSelectAction(PlayerAction):
     selected_cards: Cards
 
     def num_cards(self) -> int:
         return self.selected_cards.num_cards()
+
+    @classmethod
+    def _empty(cls) -> Self:
+        return cls(selected_cards=Cards({}))
 
     def __str__(self) -> str:
         name = self.__class__.__name__
@@ -30,59 +75,120 @@ class CardSelectAction(PlayerAction):
         return f"{name}[{cards}]"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class CharacterSelectAction(PlayerAction):
-    selected_character_id: int
+    char_id: int
+
+    @classmethod
+    def _empty(cls) -> Self:
+        return cls(char_id=-1)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class EndRoundAction(PlayerAction):
     pass
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class GameAction(PlayerAction):
     def is_valid_action(self, game_state: gs.GameState) -> bool:
         raise Exception("Not overriden")
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class CardAction(GameAction):
     from dgisim.src.card.card import Card
     card: type[Card]
     instruction: Instruction
 
+    @classmethod
+    def _empty(cls) -> Self:
+        from dgisim.src.card.card import Card
+        return cls(card=Card, instruction=Instruction._empty())
+
     def __str__(self) -> str:
         return f"<{self.card.__name__}, {self.instruction}>"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class SkillAction(GameAction):
     skill: CharacterSkill
     instruction: DiceOnlyInstruction
+
+    @classmethod
+    def _empty(cls) -> Self:
+        from dgisim.src.card.card import Card
+        return cls(skill=CharacterSkill.NORMAL_ATTACK, instruction=DiceOnlyInstruction._empty())
 
     def __str__(self) -> str:
         return f"<{self.skill}, {self.instruction}>"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class SwapAction(GameAction):
-    selected_character_id: int
+    char_id: int
     instruction: Instruction
 
+    @classmethod
+    def _empty(cls) -> Self:
+        from dgisim.src.card.card import Card
+        return cls(char_id=-1, instruction=Instruction._empty())
 
-@dataclass(frozen=True)
+
+@dataclass(frozen=True, kw_only=True)
 class DeathSwapAction(GameAction):
-    selected_character_id: int
+    char_id: int
+
+    @classmethod
+    def _empty(cls) -> Self:
+        from dgisim.src.card.card import Card
+        return cls(char_id=-1)
 
 
 @dataclass(frozen=True, kw_only=True)
 class Instruction:
     dices: ActualDices
 
+    @classmethod
+    def _empty(cls) -> Self:
+        return cls(dices=ActualDices({}))
+
+    @classmethod
+    def _all_none(cls) -> Self:
+        """
+        This is just for action generator
+        """
+        self = cls._empty()
+        for field in fields(self):
+            object.__setattr__(self, field.name, None)
+        return self
+
+    def _filled(self, exceptions: set[str] = set()) -> bool:
+        """
+        This is just for action generator
+        """
+        field_names = (
+            field.name
+            for field in fields(self)
+            if field.name not in exceptions
+        )
+        return all(
+            self.__getattribute__(field_name) is not None
+            for field_name in field_names
+        )
+
+    def legal(self) -> bool:
+        return all(
+            self.__getattribute__(field.name) is not None
+            for field in fields(self)
+        )
+
     def __str__(self) -> str:
         cls_fields = fields(self)
-        paired_fields = (f"{field.name}={str(self.__getattribute__(field.name))}" for field in cls_fields)
+        paired_fields = (
+            f"{field.name}={str(self.__getattribute__(field.name))}"
+            for field in cls_fields
+        )
         return f"{self.__class__.__name__}:({', '.join(paired_fields)})"
 
 
@@ -92,11 +198,7 @@ class DiceOnlyInstruction(Instruction):
 
 
 @dataclass(frozen=True, kw_only=True)
-class CharacterTargetInstruction(Instruction):
-    target: StaticTarget
-
-@dataclass(frozen=True, kw_only=True)
-class ReplaceSupportInstruction(Instruction):
+class StaticTargetInstruction(Instruction):
     target: StaticTarget
 
 

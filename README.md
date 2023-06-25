@@ -64,6 +64,10 @@ dictionary, and discover game states on different 'game branches' being actually
 - [x] Implement random player agent for testing purposes
 - [x] Implement player action validity checker
 - [ ] Implement player action choices provider &larr; **_WIP_**
+  - [ ] Card choices provider &larr; **_WIP_**
+  - [ ] Swap choices provider
+  - [ ] Skill choices provider
+  - [ ] Other choices provider
 - [ ] Implement greedy player agent for testing purposes
 
 > Just in case you don't know, **_WIP_** means "work in progress".

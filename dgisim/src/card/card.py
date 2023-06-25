@@ -4,6 +4,7 @@ from typing_extensions import override
 import dgisim.src.state.game_state as gs
 import dgisim.src.effect.effect as eft
 import dgisim.src.action.action as act
+import dgisim.src.action.action_generator as acg
 import dgisim.src.status.status as stt
 import dgisim.src.support.support as sp
 import dgisim.src.character.character as chr
@@ -77,7 +78,7 @@ class Card:
 
         don't override this unless you know what you are doing
         """
-        return cls._loosely_usable(game_state, pid)
+        return cls._loosely_usable(game_state, pid) and game_state.get_effect_stack().is_empty()
 
     @classmethod
     def usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
@@ -127,6 +128,14 @@ class Card:
             instruction: act.Instruction
     ) -> bool:
         return True
+
+    @classmethod
+    def action_generator(
+            cls,
+            game_state: gs.GameState,
+            pid: gs.GameState.Pid,
+    ) -> acg.ActionGenerator:
+        raise NotImplementedError
 
     def __eq__(self, other: object) -> bool:
         return type(self) == type(other)
@@ -180,7 +189,7 @@ class _ValidInstructionFuncs:
     def target_is_active_character(
             game_state: gs.GameState,
             pid: gs.GameState.Pid,
-            instruction: act.CharacterTargetInstruction,
+            instruction: act.StaticTargetInstruction,
     ) -> bool:
         return instruction.target.pid == pid \
             and instruction.target.zone is eft.Zone.CHARACTERS \
@@ -218,7 +227,7 @@ class SupportCard(Card):
     ) -> None | gs.GameState:
         supports = game_state.get_player(pid).get_supports()
         if supports.full():
-            if not isinstance(instruction, act.ReplaceSupportInstruction):
+            if not isinstance(instruction, act.StaticTargetInstruction):
                 return None
             target = game_state.get_target(instruction.target)
             if target is None or not isinstance(target, sp.Support):
@@ -257,7 +266,7 @@ class FoodCard(EventCard):
             instruction: act.Instruction
     ) -> bool:
         """ This only applies to food with a single target, override if needed """
-        if not isinstance(instruction, act.CharacterTargetInstruction):
+        if not isinstance(instruction, act.StaticTargetInstruction):
             return False
 
         target = game_state.get_target(instruction.target)
@@ -271,7 +280,7 @@ class FoodCard(EventCard):
             pid: gs.GameState.Pid,
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
-        assert isinstance(instruction, act.CharacterTargetInstruction)
+        assert isinstance(instruction, act.StaticTargetInstruction)
         return cls.food_effects(instruction) + (
             eft.AddCharacterStatusEffect(
                 instruction.target,
@@ -281,7 +290,7 @@ class FoodCard(EventCard):
 
     @classmethod
     def food_effects(cls, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
-        assert isinstance(instruction, act.CharacterTargetInstruction)
+        assert isinstance(instruction, act.StaticTargetInstruction)
         return ()
 
 
@@ -293,7 +302,7 @@ class _DirectHealCard(FoodCard):
     @override
     @classmethod
     def food_effects(cls, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
-        assert isinstance(instruction, act.CharacterTargetInstruction)
+        assert isinstance(instruction, act.StaticTargetInstruction)
         return (
             eft.RecoverHPEffect(
                 instruction.target,
@@ -326,7 +335,7 @@ class JueyunGuoba(FoodCard):
     @override
     @classmethod
     def food_effects(cls, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
-        assert isinstance(instruction, act.CharacterTargetInstruction)
+        assert isinstance(instruction, act.StaticTargetInstruction)
         return (
             eft.AddCharacterStatusEffect(
                 instruction.target,
@@ -353,7 +362,7 @@ class MushroomPizza(FoodCard):
     @override
     @classmethod
     def food_effects(cls, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
-        assert isinstance(instruction, act.CharacterTargetInstruction)
+        assert isinstance(instruction, act.StaticTargetInstruction)
         return (
             eft.RecoverHPEffect(
                 instruction.target,
@@ -372,7 +381,7 @@ class NorthernSmokedChicken(FoodCard):
     @override
     @classmethod
     def food_effects(cls, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
-        assert isinstance(instruction, act.CharacterTargetInstruction)
+        assert isinstance(instruction, act.StaticTargetInstruction)
         return (
             eft.AddCharacterStatusEffect(
                 instruction.target,
@@ -569,7 +578,7 @@ class LightningStiletto(EventCard, _CombatActionCard):
             pid: gs.GameState.Pid,
             instruction: act.Instruction
     ) -> bool:
-        if not isinstance(instruction, act.CharacterTargetInstruction):
+        if not isinstance(instruction, act.StaticTargetInstruction):
             return False
         target = game_state.get_target(instruction.target)
         return isinstance(target, chr.Keqing) and target.can_cast_skill()
@@ -582,7 +591,7 @@ class LightningStiletto(EventCard, _CombatActionCard):
             pid: gs.GameState.Pid,
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
-        assert isinstance(instruction, act.CharacterTargetInstruction)
+        assert isinstance(instruction, act.StaticTargetInstruction)
         return (
             eft.SwapCharacterEffect(
                 target=instruction.target,

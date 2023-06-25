@@ -27,8 +27,8 @@ class TestCard(unittest.TestCase):
         # without JueyunGuoba
         gsm = GameStateMachine(base_game_state, p1, p2)
         p1.inject_action(SkillAction(
-            CharacterSkill.NORMAL_ATTACK,
-            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            skill=CharacterSkill.NORMAL_ATTACK,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         gsm.one_step()  # p1 normal attacks
         gsm.auto_step()  # process normal attack
@@ -37,8 +37,8 @@ class TestCard(unittest.TestCase):
         # with JueyunGuoba
         gsm = GameStateMachine(base_game_state, p1, p2)
         p1.inject_action(CardAction(
-            JueyunGuoba,
-            CharacterTargetInstruction(
+            card=JueyunGuoba,
+            instruction=StaticTargetInstruction(
                 dices=ActualDices({}),
                 target=StaticTarget(
                     GameState.Pid.P1,
@@ -48,8 +48,8 @@ class TestCard(unittest.TestCase):
             )
         ))
         p1.inject_action(SkillAction(
-            CharacterSkill.NORMAL_ATTACK,
-            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            skill=CharacterSkill.NORMAL_ATTACK,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         gsm.one_step()  # p1 has JueyunGuoba
         gsm.auto_step()
@@ -80,8 +80,8 @@ class TestCard(unittest.TestCase):
         gsm = GameStateMachine(base_game_state, p1, p2)
         guobaed_char_id = char1.get_id() % 3 + 1  # next character
         p1.inject_action(CardAction(
-            JueyunGuoba,
-            CharacterTargetInstruction(
+            card=JueyunGuoba,
+            instruction=StaticTargetInstruction(
                 dices=ActualDices({}),
                 target=StaticTarget(
                     GameState.Pid.P1,
@@ -91,8 +91,8 @@ class TestCard(unittest.TestCase):
             )
         ))
         p1.inject_action(SkillAction(
-            CharacterSkill.NORMAL_ATTACK,
-            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            skill=CharacterSkill.NORMAL_ATTACK,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         gsm.one_step()  # p1 has JueyunGuoba
         gsm.auto_step()
@@ -125,8 +125,8 @@ class TestCard(unittest.TestCase):
         game_state = set_active_player_id(base_game_state, GameState.Pid.P1, 2)
         gsm = GameStateMachine(game_state, p1, p2)
         p1.inject_action(CardAction(
-            JueyunGuoba,
-            CharacterTargetInstruction(
+            card=JueyunGuoba,
+            instruction=StaticTargetInstruction(
                 dices=ActualDices({}),
                 target=StaticTarget(
                     GameState.Pid.P1,
@@ -136,8 +136,8 @@ class TestCard(unittest.TestCase):
             )
         ))
         p1.inject_action(SkillAction(
-            CharacterSkill.ELEMENTAL_SKILL1,
-            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            skill=CharacterSkill.ELEMENTAL_SKILL1,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         gsm.player_step()  # p1 has JueyunGuoba
         gsm.auto_step()
@@ -165,8 +165,8 @@ class TestCard(unittest.TestCase):
 
         # test giving wrong num of dices
         card_action = CardAction(
-            ChangingShifts,
-            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
+            card=ChangingShifts,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
         )
         self.assertRaises(
             Exception,
@@ -175,8 +175,8 @@ class TestCard(unittest.TestCase):
 
         # test giving right num of dices
         card_action = CardAction(
-            ChangingShifts,
-            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 0})),
+            card=ChangingShifts,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 0})),
         )
         game_state = base_game.action_step(GameState.Pid.P1, card_action)
         assert game_state is not None
@@ -187,14 +187,20 @@ class TestCard(unittest.TestCase):
         )
 
         # test swap with dices fails
-        swap_action = SwapAction(3, DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})))
+        swap_action = SwapAction(
+            char_id=3,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1}))
+        )
         self.assertRaises(
             Exception,
             lambda: buffed_game_state.action_step(GameState.Pid.P1, swap_action)
         )
 
         # test swap with no dices
-        swap_action = SwapAction(3, DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 0})))
+        swap_action = SwapAction(
+            char_id=3,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 0}))
+        )
         game_state = buffed_game_state.action_step(GameState.Pid.P1, swap_action)
         assert game_state is not None
         game_state = auto_step(game_state)
@@ -221,8 +227,8 @@ class TestCard(unittest.TestCase):
 
         # test giving wrong num of dices
         card_action = CardAction(
-            LeaveItToMe,
-            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
+            card=LeaveItToMe,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
         )
         self.assertRaises(
             Exception,
@@ -231,8 +237,8 @@ class TestCard(unittest.TestCase):
 
         # test giving right num of dices
         card_action = CardAction(
-            LeaveItToMe,
-            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 0})),
+            card=LeaveItToMe,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 0})),
         )
         game_state = base_game.action_step(GameState.Pid.P1, card_action)
         assert game_state is not None
@@ -243,14 +249,20 @@ class TestCard(unittest.TestCase):
         )
 
         # test swap with no dices fails
-        swap_action = SwapAction(3, DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 0})))
+        swap_action = SwapAction(
+            char_id=3,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 0}))
+        )
         self.assertRaises(
             Exception,
             lambda: buffed_game_state.action_step(GameState.Pid.P1, swap_action)
         )
 
         # test swap with no dices
-        swap_action = SwapAction(3, DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})))
+        swap_action = SwapAction(
+            char_id=3,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1}))
+        )
         game_state = buffed_game_state.action_step(GameState.Pid.P1, swap_action)
         assert game_state is not None
         game_state = auto_step(game_state)
@@ -262,8 +274,8 @@ class TestCard(unittest.TestCase):
 
         # test opponent cannot use this
         game_state = buffed_game_state.action_step(GameState.Pid.P1, SkillAction(
-            CharacterSkill.NORMAL_ATTACK,
-            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+            skill=CharacterSkill.NORMAL_ATTACK,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
         ))
         assert game_state is not None
         game_state = auto_step(game_state)
@@ -281,8 +293,8 @@ class TestCard(unittest.TestCase):
 
         # test giving wrong num of dices
         card_action = CardAction(
-            NorthernSmokedChicken,
-            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
+            card=NorthernSmokedChicken,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
         )
         self.assertRaises(
             Exception,
@@ -291,8 +303,8 @@ class TestCard(unittest.TestCase):
 
         # test giving right num of dices
         card_action = CardAction(
-            NorthernSmokedChicken,
-            CharacterTargetInstruction(
+            card=NorthernSmokedChicken,
+            instruction=StaticTargetInstruction(
                 dices=ActualDices({}),
                 target=StaticTarget(
                     pid=GameState.Pid.P1,
@@ -321,8 +333,8 @@ class TestCard(unittest.TestCase):
 
         # test normal attack with 3 dices fails
         normal_attack_action = SkillAction(
-            CharacterSkill.NORMAL_ATTACK,
-            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+            skill=CharacterSkill.NORMAL_ATTACK,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
         )
         self.assertRaises(
             Exception,
@@ -331,8 +343,8 @@ class TestCard(unittest.TestCase):
 
         # test normal attack with 2 dices pass
         normal_attack_action = SkillAction(
-            CharacterSkill.NORMAL_ATTACK,
-            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2}))
+            skill=CharacterSkill.NORMAL_ATTACK,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2}))
         )
         game_state = buffed_game_state.action_step(GameState.Pid.P1, normal_attack_action)
         assert game_state is not None
@@ -379,8 +391,8 @@ class TestCard(unittest.TestCase):
 
         # test giving wrong num of dices
         card_action = CardAction(
-            Xudong,
-            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
+            card=Xudong,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
         )
         self.assertRaises(
             Exception,
@@ -389,8 +401,8 @@ class TestCard(unittest.TestCase):
 
         # test giving right num of dices
         card_action = CardAction(
-            Xudong,
-            DiceOnlyInstruction(dices=ActualDices({Element.PYRO: 1, Element.GEO: 1})),
+            card=Xudong,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.PYRO: 1, Element.GEO: 1})),
         )
         game_state = base_game.action_step(GameState.Pid.P1, card_action)
         assert game_state is not None
@@ -406,8 +418,8 @@ class TestCard(unittest.TestCase):
 
         # test play 0 cost card does not affect Xudong
         card_action = CardAction(
-            SweetMadame,
-            CharacterTargetInstruction(
+            card=SweetMadame,
+            instruction=StaticTargetInstruction(
                 dices=ActualDices({}),
                 target=StaticTarget(
                     pid=GameState.Pid.P1,
@@ -430,8 +442,8 @@ class TestCard(unittest.TestCase):
 
         # test play card does benefits from Xudong
         card_action = CardAction(
-            MondstadtHashBrown,
-            CharacterTargetInstruction(
+            card=MondstadtHashBrown,
+            instruction=StaticTargetInstruction(
                 dices=ActualDices({}),
                 target=StaticTarget(
                     pid=GameState.Pid.P1,

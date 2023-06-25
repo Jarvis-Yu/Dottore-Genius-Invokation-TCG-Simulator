@@ -33,8 +33,8 @@ class TestKaeya(unittest.TestCase):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
-            CharacterSkill.NORMAL_ATTACK,
-            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            skill=CharacterSkill.NORMAL_ATTACK,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -49,8 +49,8 @@ class TestKaeya(unittest.TestCase):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
-            CharacterSkill.ELEMENTAL_SKILL1,
-            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            skill=CharacterSkill.ELEMENTAL_SKILL1,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -75,8 +75,8 @@ class TestKaeya(unittest.TestCase):
 
         # test burst base damage
         a1.inject_action(SkillAction(
-            CharacterSkill.ELEMENTAL_BURST,
-            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 4})),
+            skill=CharacterSkill.ELEMENTAL_BURST,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 4})),
         ))
         gsm = GameStateMachine(base_game, a1, a2)
         gsm.player_step()
@@ -103,8 +103,8 @@ class TestKaeya(unittest.TestCase):
         ).build()
 
         a1.inject_action(SwapAction(
-            1,
-            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
+            char_id=1,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
         ))
         gsm = GameStateMachine(game_state_p1_move, a1, a2)
         gsm.player_step()
@@ -121,8 +121,8 @@ class TestKaeya(unittest.TestCase):
 
         # test Keqing card swap cause usage of Icicle prior of Keqing's skill
         a1.inject_action(CardAction(
-            LightningStiletto,
-            CharacterTargetInstruction(
+            card=LightningStiletto,
+            instruction=StaticTargetInstruction(
                 dices=ActualDices({Element.OMNI: 3}),
                 target=StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 3),
             )
@@ -169,8 +169,8 @@ class TestKaeya(unittest.TestCase):
         ).build()
 
         a2.inject_action(SkillAction(
-            CharacterSkill.ELEMENTAL_SKILL1,
-            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            skill=CharacterSkill.ELEMENTAL_SKILL1,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         gsm = GameStateMachine(game_state_p2_move, a1, a2)
         gsm.player_step()
@@ -189,11 +189,11 @@ class TestKaeya(unittest.TestCase):
         game_state_p2_move_and_low = kill_character(game_state_p2_move, 3, hp=2)
         a2.inject_actions([
             SkillAction(
-                CharacterSkill.ELEMENTAL_SKILL1,
-                DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                skill=CharacterSkill.ELEMENTAL_SKILL1,
+                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
             DeathSwapAction(
-                2,
+                char_id=2,
             ),
         ])
         gsm = GameStateMachine(game_state_p2_move_and_low, a1, a2)
@@ -232,17 +232,17 @@ class TestKaeya(unittest.TestCase):
         gsm = GameStateMachine(base_game_state, a1, a2)
         a1.inject_actions([
             CardAction(
-                ColdBloodedStrike,
-                DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 4})),
+                card=ColdBloodedStrike,
+                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 4})),
             ),
             SkillAction(
-                CharacterSkill.ELEMENTAL_SKILL1,
-                DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                skill=CharacterSkill.ELEMENTAL_SKILL1,
+                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
             EndRoundAction(),
             SkillAction(
-                CharacterSkill.ELEMENTAL_SKILL1,
-                DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                skill=CharacterSkill.ELEMENTAL_SKILL1,
+                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
         ])
         a2.inject_action(EndRoundAction())

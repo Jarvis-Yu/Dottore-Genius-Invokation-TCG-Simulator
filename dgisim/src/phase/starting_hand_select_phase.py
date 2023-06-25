@@ -37,7 +37,7 @@ class StartingHandSelectPhase(ph.Phase):
 
     def _handle_picking_starting_hand(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: CharacterSelectAction) -> gs.GameState:
         swap_action: CharacterSelectAction = action
-        char_id = swap_action.selected_character_id
+        char_id = swap_action.char_id
         player: PlayerState = game_state.get_player(pid)
         chars = player.get_characters()
         if not chars.char_id_valid(char_id):

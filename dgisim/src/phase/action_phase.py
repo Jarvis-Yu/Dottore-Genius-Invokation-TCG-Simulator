@@ -146,7 +146,7 @@ class ActionPhase(ph.Phase):
         active_character = player.get_characters().get_active_character()
         assert active_character is not None
         new_effects.append(SwapCharacterEffect(
-            StaticTarget(pid, Zone.CHARACTERS, action.selected_character_id)
+            StaticTarget(pid, Zone.CHARACTERS, action.char_id)
         ))
 
         if action_speed is EventSpeed.COMBAT_ACTION:
@@ -224,7 +224,7 @@ class ActionPhase(ph.Phase):
         active_character = player.get_characters().get_active_character()
         assert active_character is not None
         effect_stack = effect_stack.push_one(SwapCharacterEffect(
-            StaticTarget(pid, Zone.CHARACTERS, action.selected_character_id)
+            StaticTarget(pid, Zone.CHARACTERS, action.char_id)
         ))
         return game_state.factory().effect_stack(
             effect_stack

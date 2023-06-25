@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Union
+from typing import Union, Iterator
 from collections import Counter
 import random
 
@@ -80,6 +80,9 @@ class Cards:
 
     def __str__(self) -> str:
         return self.to_string(0)
+
+    def __iter__(self) -> Iterator[type[Card]]:
+        return iter(self._cards.keys())
 
     def to_string(self, indent: int = 0) -> str:
         existing_cards = dict([

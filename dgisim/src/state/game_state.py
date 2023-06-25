@@ -383,7 +383,7 @@ class SwapChecker:
         game_state = self._game_state
         selected_char = game_state.get_player(
             pid
-        ).get_characters().get_character(action.selected_character_id)
+        ).get_characters().get_character(action.char_id)
         active_character_id = game_state.get_player(pid).get_characters().get_active_character_id()
         if selected_char is None \
                 or selected_char.defeated() \
@@ -392,7 +392,7 @@ class SwapChecker:
         if isinstance(action, act.DeathSwapAction):
             swap_speed = self.swap_speed(
                 pid=pid,
-                char_id=action.selected_character_id,
+                char_id=action.char_id,
                 death_swap=True,
             )
             return case_val(
@@ -408,7 +408,7 @@ class SwapChecker:
                     target=eft.StaticTarget(
                         pid=pid,
                         zone=eft.Zone.CHARACTERS,
-                        id=action.selected_character_id,
+                        id=action.char_id,
                     ),
                     event_type=EventType.SWAP,
                     event_speed=game_state.get_mode().swap_speed(),
