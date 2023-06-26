@@ -278,7 +278,11 @@ class RandomAgent(PlayerAgent):
                 choice = random.choice(choices)
                 action_generator = action_generator.choose(choice)
             elif isinstance(choices, AbstractDices):
-                choice = just(action_generator.dices_available().basically_satisfy(choices))
+                optional_choice = action_generator.dices_available().basically_satisfy(choices)
+                if optional_choice is None:
+                    raise Exception(f"There's not enough dices for {choices} at game_state:"
+                                    + f"{action_generator.game_state}")
+                choice = optional_choice
                 action_generator = action_generator.choose(choice)
             else:
                 raise NotImplementedError
@@ -292,7 +296,7 @@ class RandomAgent(PlayerAgent):
             usable_cards = [
                 card
                 for card in cards
-                if card.usable(game_state, pid)
+                if card.strictly_usable(game_state, pid)
             ]
             usable_cards = [
                 card

@@ -434,21 +434,13 @@ class JueyunGuoba(FoodCard):
 
 
 class LotusFlowerCrisp(FoodCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 1})
-
-    @override
-    @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
-        return False
+    # _DICE_COST = AbstractDices({Element.OMNI: 1})
+    pass
 
 
 class MintyMeatRolls(FoodCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 1})
-
-    @override
-    @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
-        return False
+    # _DICE_COST = AbstractDices({Element.OMNI: 1})
+    pass
 
 
 class MushroomPizza(FoodCard):
