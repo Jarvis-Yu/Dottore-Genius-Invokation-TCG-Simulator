@@ -434,8 +434,18 @@ class JueyunGuoba(FoodCard):
 
 
 class LotusFlowerCrisp(FoodCard):
-    # _DICE_COST = AbstractDices({Element.OMNI: 1})
-    pass
+    _DICE_COST = AbstractDices({Element.OMNI: 1})
+
+    @override
+    @classmethod
+    def food_effects(cls, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.StaticTargetInstruction)
+        return (
+            eft.AddCharacterStatusEffect(
+                target=instruction.target,
+                status=stt.LotusFlowerCrispStatus,
+            ),
+        )
 
 
 class MintyMeatRolls(FoodCard):

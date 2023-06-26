@@ -189,13 +189,12 @@ class Status:
                     type(self),
                     sid=self.sid,
                 ))
-            elif new_status is not self and self.update(new_status) != self: # type: ignore
+            elif new_status is not self and self.update(new_status) != self:  # type: ignore
                 assert type(self) == type(new_status)
                 es.append(eft.UpdateSupportEffect(
                     source.pid,
                     new_status,  # type: ignore
                 ))
-
 
         else:  # pragma: no cover
             raise NotImplementedError
@@ -303,6 +302,10 @@ class _UsageStatus(Status):
     usages: int
     MAX_USAGES: ClassVar[int] = BIG_INT
 
+    @staticmethod
+    def _auto_destroy() -> bool:
+        return True
+
     @override
     def _post_preprocess(
             self,
@@ -313,15 +316,21 @@ class _UsageStatus(Status):
             new_item: eft.Preprocessable,
             new_self: Optional[Self],
     ) -> tuple[eft.Preprocessable, Optional[Self]]:
-        if new_self is not None and new_self.usages <= 0:
-            new_self = None
+        if new_self is not None:
+            if self._auto_destroy() and new_self.usages <= 0:
+                new_self = None
+            elif new_self.usages < 0:
+                new_self = replace(new_self, usages=0)
         return super()._post_preprocess(game_state, status_source, item, signal, new_item, new_self)
 
     @override
     def _post_update(self, new_self: Optional[Self]) -> Optional[Self]:
         """ remove the status if usages <= 0 """
-        if new_self is not None and new_self.usages <= 0:
-            new_self = None
+        if new_self is not None:
+            if self._auto_destroy() and new_self.usages <= 0:
+                new_self = None
+            elif new_self.usages < 0:
+                new_self = replace(new_self, usages=0)
         return super()._post_update(new_self)
 
     @override
@@ -370,7 +379,7 @@ class ShieldStatus(Status):
 
 
 @dataclass(frozen=True, kw_only=True)
-class StackedShieldStatus(ShieldStatus):
+class StackedShieldStatus(ShieldStatus, _UsageStatus):
     """ The shield status where all usages can be consumed by a DMG effect """
     usages: int
     MAX_USAGES: ClassVar[int] = BIG_INT
@@ -407,17 +416,13 @@ class StackedShieldStatus(ShieldStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class FixedShieldStatus(ShieldStatus):
+class FixedShieldStatus(ShieldStatus, _UsageStatus):
     """ The shield status where only one usage can be consumed by a DMG effect """
     usages: int
     MAX_USAGES: ClassVar[int] = BIG_INT
     SHIELD_AMOUNT: ClassVar[int] = 0  # shield amount per stack
 
     def _trigerring_condition(self, damage: eft.SpecificDamageEffect) -> bool:
-        return True
-
-    @staticmethod
-    def _auto_destroy() -> bool:
         return True
 
     @override
@@ -565,6 +570,7 @@ class FrozenStatus(CharacterStatus):
         return [], self
 
 
+# <<<<<<<<<<<<<<<<<<<< Food Status <<<<<<<<<<<<<<<<<<<<
 @dataclass(frozen=True)
 class SatiatedStatus(CharacterStatus):
 
@@ -666,6 +672,27 @@ class NorthernSmokedChickenStatus(CharacterStatus, _UsageStatus):
         if signal is eft.TriggeringSignal.ROUND_END:
             d_usages = -1
         return [], replace(self, usages=d_usages)
+
+
+@dataclass(frozen=True)
+class LotusFlowerCrispStatus(CharacterStatus, FixedShieldStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    SHIELD_AMOUNT: ClassVar[int] = 3
+
+    @override
+    def _react_to_signal(
+            self,
+            source: eft.StaticTarget,
+            signal: eft.TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        d_usages = 0
+        if signal is eft.TriggeringSignal.ROUND_END:
+            d_usages = -1
+
+        return [], replace(self, usages=d_usages)
+
+# >>>>>>>>>>>>>>>>>>>> Food Status >>>>>>>>>>>>>>>>>>>>
 
 
 @dataclass(frozen=True)

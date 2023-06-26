@@ -147,7 +147,7 @@ class ActualDices(Dices):
         Asserts self and requirement are legal, and then check if self can match
         requirement.
         """
-        if self.num_dices() >= requirement.num_dices():
+        if self.num_dices() < requirement.num_dices():
             return False
         return self._satisfy(requirement)
 
@@ -197,7 +197,7 @@ class ActualDices(Dices):
         if omni > 0:
             best_elem: Optional[Element] = None
             count = BIG_INT
-            for elem in _PURE_ELEMS:
+            for elem in list(_PURE_ELEMS) + [Element.OMNI]:
                 this_count = remaining.get(elem, 0)
                 if this_count >= omni and this_count < count:
                     best_elem = elem
