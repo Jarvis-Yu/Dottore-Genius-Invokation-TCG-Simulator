@@ -97,7 +97,7 @@ class Characters:
         return tuple()
 
     def char_id_valid(self, char_id: int) -> bool:
-        return char_id >= 0 and char_id < len(self._characters)
+        return char_id >= 1 and char_id <= len(self._characters)
 
     def get_swappable_ids(self) -> tuple[int, ...]:
         return tuple([

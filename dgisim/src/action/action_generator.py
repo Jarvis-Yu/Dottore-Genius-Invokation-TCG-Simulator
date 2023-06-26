@@ -1,6 +1,7 @@
 from __future__ import annotations
+from typing import Callable, Optional
 from typing_extensions import Self
-from dataclasses import dataclass
+from dataclasses import dataclass, replace, fields
 
 import dgisim.src.state.game_state as gs
 import dgisim.src.card.cards as cds
@@ -17,12 +18,11 @@ class ActionGenerator:
     pid: gs.GameState.Pid
     action: act.PlayerAction
     instruction: None | act.Instruction= None
-
-    def _action_filled_but_instruction(self) -> bool:
-        return self.action._filled(exceptions={"instruction"})
+    _choices_helper: Callable[[ActionGenerator], tuple[Choosable, ...] | AbstractDices | cds.Cards]
+    _fill_helper: Callable[[ActionGenerator, Choosable | ActualDices | cds.Cards], ActionGenerator]
 
     def _action_filled(self) -> bool:
-        return self.action._filled()
+        return self.action._filled(exceptions={"instruction"})
 
     def _instruction_filled(self) -> bool:
         return self.instruction is None \
@@ -42,21 +42,22 @@ class ActionGenerator:
 
     def generate_action(self) -> act.PlayerAction:
         assert self.filled()
-        raise NotImplementedError
+        action = self.action
+        if self.instruction is not None:
+            action = replace(action, instruction=self.instruction)
+        return action
 
-    def choices(self) -> tuple[Choosable] | AbstractDices | cds.Cards:
+    def choices(self) -> tuple[Choosable, ...] | AbstractDices | cds.Cards:
         assert not self.filled()
-        if not self._action_filled_but_instruction():
-            pass
-        elif not self._instruction_filled():
-            pass
-        else:
-            assert not self._action_filled()
-            self._action_filled()
-        return (-1, )
+        return self._choices_helper(self)
 
     def dices_available(self) -> ActualDices:
         return self.game_state.get_player(self.pid).get_dices()
 
-    def choose(self, choice: Choosable | ActualDices | cds.Cards) -> Self:
-        return self
+    def choose(self, choice: Choosable | ActualDices | cds.Cards) -> ActionGenerator:
+        return self._fill_helper(self, choice)
+
+    def __str__(self) -> str:
+        field_pairs = [f"<{field.name}, {getattr(self, field.name)}>" for field in fields(self)]
+        content = '\n'.join(field_pairs)
+        return self.__class__.__name__ + '\n' + content

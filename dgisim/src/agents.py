@@ -271,23 +271,43 @@ class RandomAgent(PlayerAgent):
         raise Exception("No Action Defined")
 
     def _random_action_generator_chooser(self, action_generator: ActionGenerator) -> PlayerAction:
-        # TODO: actually choose
-        raise NotImplementedError
+        while not action_generator.filled():
+            choices = action_generator.choices()
+            choice: acg.Choosable | ActualDices | cds.Cards
+            if isinstance(choices, tuple):
+                choice = random.choice(choices)
+                action_generator = action_generator.choose(choice)
+            elif isinstance(choices, AbstractDices):
+                choice = just(action_generator.dices_available().basically_satisfy(choices))
+                action_generator = action_generator.choose(choice)
+            else:
+                raise NotImplementedError
+        return action_generator.generate_action()
 
     def _action_phase(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
         game_state = history[-1]
         decision = random.random()
-        if decision < 0.8:
+        if decision < 1:
             cards = game_state.get_player(pid).get_hand_cards()
             usable_cards = [
                 card
                 for card in cards
                 if card.usable(game_state, pid)
             ]
-            card = random.choice(usable_cards)
-            action_generator = card.action_generator(game_state, pid)
-            player_action = self._random_action_generator_chooser(action_generator)
-            return player_action
+            usable_cards = [
+                card
+                for card in usable_cards
+                if issubclass(card, FoodCard)
+            ]
+            if usable_cards:
+                card = random.choice(usable_cards)
+                # print(f"{pid} tries to play card {card}")
+                action_generator = card.action_generator(game_state, pid)
+                assert action_generator is not None
+                player_action = self._random_action_generator_chooser(action_generator)
+                return player_action
+            # else:
+            #     print(f"No Cards Available?\n{cards}")
 
         return EndRoundAction()
 

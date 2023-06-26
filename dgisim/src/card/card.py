@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing_extensions import override
+from dataclasses import replace
 
 import dgisim.src.state.game_state as gs
 import dgisim.src.effect.effect as eft
@@ -8,8 +9,9 @@ import dgisim.src.action.action_generator as acg
 import dgisim.src.status.status as stt
 import dgisim.src.support.support as sp
 import dgisim.src.character.character as chr
+import dgisim.src.card.cards as cds
 from dgisim.src.character.character_skill_enum import CharacterSkill
-from dgisim.src.dices import AbstractDices
+from dgisim.src.dices import AbstractDices, ActualDices
 from dgisim.src.element.element import Element
 from dgisim.src.helper.quality_of_life import BIG_INT
 from dgisim.src.event.event import CardEvent
@@ -134,8 +136,8 @@ class Card:
             cls,
             game_state: gs.GameState,
             pid: gs.GameState.Pid,
-    ) -> acg.ActionGenerator:
-        raise NotImplementedError
+    ) -> None | acg.ActionGenerator:
+        return None
 
     def __eq__(self, other: object) -> bool:
         return type(self) == type(other)
@@ -253,7 +255,7 @@ class FoodCard(EventCard):
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
         characters = game_state.get_player(pid).get_characters()
-        if all(char.satiated() for char in characters):
+        if all(not cls._valid_char(char) for char in characters):
             return False
         return super()._loosely_usable(game_state, pid)
 
@@ -271,6 +273,87 @@ class FoodCard(EventCard):
 
         target = game_state.get_target(instruction.target)
         return isinstance(target, chr.Character) and not target.satiated()
+
+    @classmethod
+    def _valid_char(cls, char: chr.Character) -> bool:
+        return not char.satiated()
+
+    @classmethod
+    def _choices_helper(
+            cls,
+            action_generator: acg.ActionGenerator,
+    ) -> tuple[acg.Choosable, ...] | AbstractDices | cds.Cards:
+        game_state = action_generator.game_state
+        pid = action_generator.pid
+
+        assert action_generator._action_filled()
+
+        instruction = action_generator.instruction
+        assert isinstance(instruction, act.StaticTargetInstruction)
+        if instruction.target is None:
+            chars = game_state.get_player(pid).get_characters()
+            chars = [char for char in chars if cls._valid_char(char)]
+            return tuple(
+                eft.StaticTarget(
+                    pid=pid,
+                    zone=eft.Zone.CHARACTERS,
+                    id=char.get_id(),
+                )
+                for char in chars
+                if not char.satiated()
+            )
+
+        elif instruction.dices is None:
+            return cls.preprocessed_dice_cost(game_state, pid)[1]
+
+        raise Exception(
+            "Not Reached! Should be called when there is something to fill. action_generator:\n"
+            + f"{action_generator}"
+        )
+
+    @classmethod
+    def _fill_helper(
+        cls,
+        action_generator: acg.ActionGenerator,
+        player_choice: acg.Choosable | ActualDices | cds.Cards,
+    ) -> acg.ActionGenerator:
+        assert action_generator._action_filled()
+
+        instruction = action_generator.instruction
+        assert isinstance(instruction, act.StaticTargetInstruction)
+        if instruction.target is None:
+            assert isinstance(player_choice, eft.StaticTarget)
+            return replace(
+                action_generator,
+                instruction=replace(instruction, target=player_choice),
+            )
+
+        elif instruction.dices is None:
+            assert isinstance(player_choice, ActualDices)
+            return replace(
+                action_generator,
+                instruction=replace(instruction, dices=player_choice),
+            )
+
+        raise Exception("Not Reached!")
+
+    @override
+    @classmethod
+    def action_generator(
+            cls,
+            game_state: gs.GameState,
+            pid: gs.GameState.Pid,
+    ) -> None | acg.ActionGenerator:
+        if not cls.usable(game_state, pid):
+            return None
+        return acg.ActionGenerator(
+            game_state=game_state,
+            pid=pid,
+            action=replace(act.CardAction._all_none(), card=cls),
+            instruction=act.StaticTargetInstruction._all_none(),
+            _choices_helper=cls._choices_helper,
+            _fill_helper=cls._fill_helper,
+        )
 
     @override
     @classmethod
@@ -310,6 +393,12 @@ class _DirectHealCard(FoodCard):
             ),
         )
 
+    @override
+    @classmethod
+    def _valid_char(cls, char: chr.Character) -> bool:
+        return char.get_hp() < char.get_max_hp() \
+            and super()._valid_char(char)
+
 
 class SweetMadame(_DirectHealCard):
     _DICE_COST = AbstractDices({})
@@ -347,9 +436,19 @@ class JueyunGuoba(FoodCard):
 class LotusFlowerCrisp(FoodCard):
     _DICE_COST = AbstractDices({Element.OMNI: 1})
 
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
+        return False
+
 
 class MintyMeatRolls(FoodCard):
     _DICE_COST = AbstractDices({Element.OMNI: 1})
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
+        return False
 
 
 class MushroomPizza(FoodCard):
@@ -374,6 +473,10 @@ class MushroomPizza(FoodCard):
             )
         )
 
+    @override
+    @classmethod
+    def _valid_char(cls, char: chr.Character) -> bool:
+        return _DirectHealCard._valid_char(char)
 
 class NorthernSmokedChicken(FoodCard):
     _DICE_COST = AbstractDices({})

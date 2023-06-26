@@ -151,7 +151,7 @@ class TestGameStateMachine(unittest.TestCase):
         self.assertIsNone(state_machine.get_winner())
 
     def test_random_agents_not_break_game(self):
-        from dgisim.src.agents import HardCodedRandomAgent
+        from dgisim.src.agents import RandomAgent
         import os
         optional_repeats = os.getenv("RNG_PLAYS")
         repeats: int
@@ -162,8 +162,8 @@ class TestGameStateMachine(unittest.TestCase):
         for i in range(repeats):
             state_machine = GameStateMachine(
                 self._initial_state,
-                HardCodedRandomAgent(),
-                HardCodedRandomAgent(),
+                RandomAgent(),
+                RandomAgent(),
             )
             game_end_phase = state_machine.get_game_state().get_mode().game_end_phase()
             try:

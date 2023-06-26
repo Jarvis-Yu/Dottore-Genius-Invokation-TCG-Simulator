@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Any, ClassVar
 from typing_extensions import override, Self
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, fields, replace
 
 from dgisim.src.card.cards import Cards
 from dgisim.src.dices import ActualDices
@@ -30,11 +30,13 @@ class PlayerAction:
             object.__setattr__(self, field.name, None)
         return self
 
-    def _set_attr(self, name: str, val: Any) -> None:
+    def _set_attr(self, name: str, val: Any) -> Self:
         """
         This is just for action generator
         """
-        object.__setattr__(self, name, val)
+        other = replace(self)
+        object.__setattr__(other, name, val)
+        return other
 
     def _filled(self, exceptions: set[str] = set()) -> bool:
         """
@@ -52,7 +54,7 @@ class PlayerAction:
             for field in fields(self)
         )
         return all(
-            val is not None and isinstance(val, field_type)
+            isinstance(val, field_type)
             for field_type, val in field_type_val
         )
 
@@ -168,11 +170,13 @@ class Instruction:
             object.__setattr__(self, field.name, None)
         return self
 
-    def _set_attr(self, name: str, val: Any) -> None:
+    def _set_attr(self, name: str, val: Any) -> Self:
         """
         This is just for action generator
         """
-        object.__setattr__(self, name, val)
+        other = replace(self)
+        object.__setattr__(other, name, val)
+        return other
 
     def _filled(self, exceptions: set[str] = set()) -> bool:
         """
@@ -190,7 +194,7 @@ class Instruction:
             for field in fields(self)
         )
         return all(
-            val is not None and isinstance(val, field_type)
+            isinstance(val, field_type)
             for field_type, val in field_type_val
         )
 
