@@ -422,39 +422,12 @@ class _DiceOnlyChoiceProvider(Card):
             _choices_helper=cls._choices_helper,
             _fill_helper=cls._fill_helper,
         )
-# >>>>>>>>>>>>>>>>>>>> Helpers >>>>>>>>>>>>>>>>>>>>
-
-# <<<<<<<<<<<<<<<<<<<< Event Cards <<<<<<<<<<<<<<<<<<<<
-# <<<<<<<<<<<<<<<<<<<< Event Cards / Food Cards <<<<<<<<<<<<<<<<<<<<
 
 
-class FoodCard(EventCard):
-    @override
-    @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
-        characters = game_state.get_player(pid).get_characters()
-        if all(not cls._valid_char(char) for char in characters):
-            return False
-        return super()._loosely_usable(game_state, pid)
-
-    @override
-    @classmethod
-    def _valid_instruction(
-            cls,
-            game_state: gs.GameState,
-            pid: gs.GameState.Pid,
-            instruction: act.Instruction
-    ) -> bool:
-        """ This only applies to food with a single target, override if needed """
-        if not isinstance(instruction, act.StaticTargetInstruction):
-            return False
-
-        target = game_state.get_target(instruction.target)
-        return isinstance(target, chr.Character) and not target.satiated()
-
+class _CharTargetChoiceProvider(Card):
     @classmethod
     def _valid_char(cls, char: chr.Character) -> bool:
-        return not char.satiated()
+        return True
 
     @classmethod
     def _choices_helper(
@@ -478,7 +451,6 @@ class FoodCard(EventCard):
                     id=char.get_id(),
                 )
                 for char in chars
-                if not char.satiated()
             )
 
         elif instruction.dices is None:
@@ -532,6 +504,39 @@ class FoodCard(EventCard):
             _choices_helper=cls._choices_helper,
             _fill_helper=cls._fill_helper,
         )
+# >>>>>>>>>>>>>>>>>>>> Helpers >>>>>>>>>>>>>>>>>>>>
+
+# <<<<<<<<<<<<<<<<<<<< Event Cards <<<<<<<<<<<<<<<<<<<<
+# <<<<<<<<<<<<<<<<<<<< Event Cards / Food Cards <<<<<<<<<<<<<<<<<<<<
+
+
+class FoodCard(EventCard):
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
+        characters = game_state.get_player(pid).get_characters()
+        if all(not cls._valid_char(char) for char in characters):
+            return False
+        return super()._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: gs.GameState.Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        """ This only applies to food with a single target, override if needed """
+        if not isinstance(instruction, act.StaticTargetInstruction):
+            return False
+
+        target = game_state.get_target(instruction.target)
+        return isinstance(target, chr.Character) and not target.satiated()
+
+    @classmethod
+    def _valid_char(cls, char: chr.Character) -> bool:
+        return not char.satiated()
 
     @override
     @classmethod
@@ -578,7 +583,7 @@ class _DirectHealCard(FoodCard):
             and super()._valid_char(char)
 
 
-class SweetMadame(_DirectHealCard):
+class SweetMadame(_DirectHealCard, _CharTargetChoiceProvider):
     _DICE_COST = AbstractDices({})
 
     @override
@@ -587,7 +592,7 @@ class SweetMadame(_DirectHealCard):
         return 1
 
 
-class MondstadtHashBrown(_DirectHealCard):
+class MondstadtHashBrown(_DirectHealCard, _CharTargetChoiceProvider):
     _DICE_COST = AbstractDices({Element.OMNI: 1})
 
     @override
@@ -596,7 +601,7 @@ class MondstadtHashBrown(_DirectHealCard):
         return 2
 
 
-class JueyunGuoba(FoodCard):
+class JueyunGuoba(FoodCard, _CharTargetChoiceProvider):
     _DICE_COST = AbstractDices({})
 
     @override
@@ -611,7 +616,7 @@ class JueyunGuoba(FoodCard):
         )
 
 
-class LotusFlowerCrisp(FoodCard):
+class LotusFlowerCrisp(FoodCard, _CharTargetChoiceProvider):
     _DICE_COST = AbstractDices({Element.OMNI: 1})
 
     @override
@@ -626,7 +631,7 @@ class LotusFlowerCrisp(FoodCard):
         )
 
 
-class MintyMeatRolls(FoodCard):
+class MintyMeatRolls(FoodCard, _CharTargetChoiceProvider):
     _DICE_COST = AbstractDices({Element.OMNI: 1})
 
     @override
@@ -641,7 +646,7 @@ class MintyMeatRolls(FoodCard):
         )
 
 
-class MushroomPizza(FoodCard):
+class MushroomPizza(FoodCard, _CharTargetChoiceProvider):
     """
     Heal first then the status
     """
@@ -669,7 +674,7 @@ class MushroomPizza(FoodCard):
         return _DirectHealCard._valid_char(char)
 
 
-class NorthernSmokedChicken(FoodCard):
+class NorthernSmokedChicken(FoodCard, _CharTargetChoiceProvider):
     _DICE_COST = AbstractDices({})
 
     @override
@@ -849,8 +854,14 @@ class Xudong(CompanionCard):
 #### Keqing ####
 
 
-class LightningStiletto(EventCard, _CombatActionCard):
+class LightningStiletto(EventCard, _CombatActionCard, _CharTargetChoiceProvider):
     _DICE_COST = AbstractDices({Element.ELECTRO: 3})
+
+    @override
+    @classmethod
+    def _valid_char(cls, char: chr.Character) -> bool:
+        return isinstance(char, chr.Keqing) \
+            and super()._valid_char(char)
 
     @override
     @classmethod
