@@ -295,22 +295,15 @@ class RandomAgent(PlayerAgent):
         active_character = me.just_get_active_character()
 
         # death swap
-        if active_character.defeated():
-            characters = me.get_characters()
-            alive_ids = characters.alive_ids()
-            active_id = characters.get_active_character_id()
-            assert active_id is not None
-            if active_id in alive_ids:
-                alive_ids.remove(active_id)
-            if alive_ids:
-                return DeathSwapAction(char_id=random.choice(alive_ids))
-            else:
-                raise Exception("Game should end here but not implemented(NOT REACHED)")
-
-        decision = random.random()
+        if game_state.swap_checker().should_death_swap():
+            swap_action_generator = game_state.swap_checker().action_generator(pid)
+            assert swap_action_generator is not None
+            player_action = self._random_action_generator_chooser(swap_action_generator)
+            return player_action
 
         # play card
-        if decision < 1:
+        decision = random.random()
+        if decision < 0.5:
             cards = game_state.get_player(pid).get_hand_cards()
             usable_cards = [
                 card
@@ -324,13 +317,17 @@ class RandomAgent(PlayerAgent):
             ]
             if usable_cards:
                 card = random.choice(usable_cards)
-                # print(f"{pid} tries to play card {card}")
                 action_generator = card.action_generator(game_state, pid)
                 assert action_generator is not None
                 player_action = self._random_action_generator_chooser(action_generator)
                 return player_action
-            # else:
-            #     print(f"No Cards Available?\n{cards}")
+
+        decision = random.random()
+        if decision < 0.3:
+            swap_action_generator = game_state.swap_checker().action_generator(pid)
+            if swap_action_generator is not None:
+                player_action = self._random_action_generator_chooser(swap_action_generator)
+                return player_action
 
         return EndRoundAction()
 

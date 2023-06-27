@@ -1,15 +1,19 @@
 from __future__ import annotations
 from typing import Optional, Union, cast, Callable
 from enum import Enum
+from dataclasses import replace
 
 import dgisim.src.mode as md
 import dgisim.src.phase.phase as ph
 import dgisim.src.phase.game_end_phase as gep
 import dgisim.src.state.player_state as pl
+import dgisim.src.card.cards as cds
 import dgisim.src.status.status as stt
 import dgisim.src.action.action as act
+import dgisim.src.action.action_generator as acg
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
 from dgisim.src.helper.quality_of_life import case_val
+from dgisim.src.dices import ActualDices
 from dgisim.src.action.action import PlayerAction
 from dgisim.src.effect.effect_stack import EffectStack
 from dgisim.src.event.event_pre import EventPre
@@ -327,12 +331,115 @@ class SwapChecker:
     def __init__(self, game_state: GameState) -> None:
         self._game_state = game_state
 
-    def swap_speed(
+    def _choices_helper(
+            self,
+            action_generator: acg.ActionGenerator,
+    ) -> tuple[acg.Choosable, ...] | AbstractDices | cds.Cards:
+        game_state = self._game_state
+        pid = action_generator.pid
+
+        action = action_generator.action
+        if not action_generator._action_filled():
+            assert type(action) is act.SwapAction \
+                or type(action) is act.DeathSwapAction
+            swappable_char_ids = [
+                char.get_id()
+                for char in game_state.get_player(pid).get_characters()
+                if self.swap_details(pid, char.get_id()) is not None
+            ]
+            return tuple(
+                char_id
+                for char_id in swappable_char_ids
+            )
+
+        assert type(action) is act.SwapAction
+        instruction = action_generator.instruction
+        assert type(instruction) is act.DiceOnlyInstruction
+        if instruction.dices is None:
+            swap_details = self.swap_details(pid, action.char_id)
+            assert swap_details is not None
+            _, dices_cost = swap_details
+            assert dices_cost is not None
+            return dices_cost
+
+        raise Exception(
+            "Not Reached! Should be called when there is something to fill. action_generator:\n"
+            + f"{action_generator}"
+        )
+
+    def _fill_helper(
+        self,
+        action_generator: acg.ActionGenerator,
+        player_choice: acg.Choosable | ActualDices | cds.Cards,
+    ) -> acg.ActionGenerator:
+        action = action_generator.action
+        assert type(action) is act.SwapAction \
+            or type(action) is act.DeathSwapAction
+        if action.char_id is None:
+            assert type(player_choice) is int
+            return replace(
+                action_generator,
+                action=replace(action, char_id=player_choice),
+            )
+
+        assert action_generator._action_filled()
+        assert type(action) is act.SwapAction
+
+        instruction = action_generator.instruction
+        assert type(instruction) is act.DiceOnlyInstruction
+        if instruction.dices is None:
+            assert isinstance(player_choice, ActualDices)
+            return replace(
+                action_generator,
+                instruction=replace(instruction, dices=player_choice),
+            )
+
+        raise Exception("Not Reached!")
+
+    def action_generator(
+            self,
+            pid: gs.GameState.Pid,
+    ) -> None | acg.ActionGenerator:
+        if not self.swappable(pid):
+            return None
+        if self.should_death_swap():
+            return acg.ActionGenerator(
+                game_state=self._game_state,
+                pid=pid,
+                action=act.DeathSwapAction._all_none(),
+                instruction=None,
+                _choices_helper=self._choices_helper,
+                _fill_helper=self._fill_helper,
+            )
+        else:
+            return acg.ActionGenerator(
+                game_state=self._game_state,
+                pid=pid,
+                action=act.SwapAction._all_none(),
+                instruction=act.DiceOnlyInstruction._all_none(),
+                _choices_helper=self._choices_helper,
+                _fill_helper=self._fill_helper,
+            )
+
+    def should_death_swap(self) -> bool:
+        effect_stack = self._game_state.get_effect_stack()
+        return effect_stack.is_not_empty() \
+            and isinstance(effect_stack.peek(), eft.DeathSwapPhaseEndEffect)
+
+    def swappable(
+            self,
+            pid: GameState.Pid,
+    ) -> bool:
+        return any(
+            self.swap_details(pid, char.get_id()) is not None
+            for char in self._game_state.get_player(pid).get_characters()
+        )
+
+    def swap_details(
             self,
             pid: GameState.Pid,
             char_id: int,
-            death_swap: bool = False,
-    ) -> None | EventSpeed:
+    ) -> None | tuple[EventSpeed, None | AbstractDices]:
         game_state = self._game_state
         selected_char = game_state.get_player(pid).get_characters().get_character(char_id)
         active_character_id = game_state.get_player(pid).get_characters().get_active_character_id()
@@ -340,14 +447,9 @@ class SwapChecker:
                 or selected_char.defeated() \
                 or selected_char.get_id() == active_character_id:
             return None
-        # Check Death Swap
-        if death_swap:
-            effect_stack = game_state.get_effect_stack()
-            if effect_stack.is_not_empty() \
-                    and isinstance(effect_stack.peek(), eft.DeathSwapPhaseStartEffect):
-                return EventSpeed.FAST_ACTION
-            else:
-                return None
+
+        if self.should_death_swap():
+            return EventSpeed.FAST_ACTION, None
 
         # Check if player can afford Normal Swap
         _, swap_action = StatusProcessing.preprocess_by_all_statuses(
@@ -367,7 +469,7 @@ class SwapChecker:
         )
         assert isinstance(swap_action, GameEvent)
         if game_state.get_player(pid).get_dices().loosely_satisfy(swap_action.dices_cost):
-            return swap_action.event_speed
+            return swap_action.event_speed, swap_action.dices_cost
         else:
             return None
 
@@ -390,13 +492,12 @@ class SwapChecker:
                 or selected_char.get_id() == active_character_id:
             return None
         if isinstance(action, act.DeathSwapAction):
-            swap_speed = self.swap_speed(
+            swap_details = self.swap_details(
                 pid=pid,
                 char_id=action.char_id,
-                death_swap=True,
             )
             return case_val(
-                swap_speed is not None,
+                swap_details is not None,
                 (game_state, EventSpeed.FAST_ACTION),
                 None,
             )
@@ -464,7 +565,7 @@ class SkillChecker:
         )
         assert isinstance(skill_event, GameEvent)
         return game_state.get_player(pid).get_dices().loosely_satisfy(skill_event.dices_cost)
-        
+
     def valid_action(
             self,
             pid: GameState.Pid,
