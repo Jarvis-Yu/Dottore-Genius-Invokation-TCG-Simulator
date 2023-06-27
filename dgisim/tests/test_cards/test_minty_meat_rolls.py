@@ -10,29 +10,18 @@ from dgisim.src.support.support import *
 from dgisim.src.agents import *
 
 
-class TestNorthernSmokedChicken(unittest.TestCase):
-    def test_northern_smoked_chicken(self):
+class TestMintyMeatRolls(unittest.TestCase):
+    def testCardNormalUsage(self):
         base_game = ACTION_TEMPLATE.factory().f_player1(
             lambda p: p.factory().hand_cards(
-                Cards({NorthernSmokedChicken: 2})
+                Cards({MintyMeatRolls: 2})
             ).build()
         ).build()
 
-        # test giving wrong num of dices
         card_action = CardAction(
-            card=NorthernSmokedChicken,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
-        )
-        self.assertRaises(
-            Exception,
-            lambda: base_game.action_step(GameState.Pid.P1, card_action)
-        )
-
-        # test giving right num of dices
-        card_action = CardAction(
-            card=NorthernSmokedChicken,
+            card=MintyMeatRolls,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({}),
+                dices=ActualDices({Element.OMNI: 1}),
                 target=StaticTarget(
                     pid=GameState.Pid.P1,
                     zone=Zone.CHARACTERS,
@@ -49,9 +38,9 @@ class TestNorthernSmokedChicken(unittest.TestCase):
             .get_player1()
             .just_get_active_character()
             .get_character_statuses()
-            .just_find(NorthernSmokedChickenStatus)
+            .just_find(MintyMeatRollsStatus)
             .usages,
-            1
+            3
         )
         self.assertTrue(
             buffed_game_state.get_player1().just_get_active_character().get_character_statuses()
@@ -77,30 +66,44 @@ class TestNorthernSmokedChicken(unittest.TestCase):
         assert game_state is not None
         game_state = auto_step(game_state)
 
-        self.assertFalse(
-            game_state
-            .get_player1()
-            .just_get_active_character()
+        p1ac = game_state.get_player1().just_get_active_character()
+        self.assertEqual(
+            p1ac
             .get_character_statuses()
-            .contains(NorthernSmokedChickenStatus)
+            .just_find(MintyMeatRollsStatus)
+            .usages,
+            2
         )
 
-        # test teammate cannot use this
-        game_state = buffed_game_state.factory().f_player1(
-            lambda p: p.factory().f_characters(
-                lambda cs: cs.factory().active_character_id(2).build()
-            ).build()
-        ).build()
-        self.assertRaises(
-            Exception,
-            lambda: game_state.action_step(GameState.Pid.P1, normal_attack_action)  # type: ignore
+        # test 3 normal attacks consumes the status
+        a1, a2 = PuppetAgent(), PuppetAgent()
+        gsm = GameStateMachine(buffed_game_state, a1, a2)
+        a1.inject_actions([
+            SkillAction(
+                skill=CharacterSkill.NORMAL_ATTACK,
+                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2}))
+            )
+        ] * 3)
+        a2.inject_action(EndRoundAction())
+        gsm.player_step()  # P1 normal attack
+        gsm.player_step()  # P2 end round
+        gsm.player_step()  # P1 normal attack
+        gsm.player_step()  # P1 normal attack
+        gsm.auto_step()
+        p1ac = gsm.get_game_state().get_player1().just_get_active_character()
+        self.assertFalse(
+            p1ac
+            .get_character_statuses()
+            .contains(MintyMeatRollsStatus)
         )
 
-        # test opponent cannot use this
-        game_state = buffed_game_state.action_step(GameState.Pid.P1, EndRoundAction())
-        assert game_state is not None
-        game_state = auto_step(game_state)
-        self.assertRaises(
-            Exception,
-            lambda: game_state.action_step(GameState.Pid.P2, normal_attack_action)
-        )
+        # test shield disappears after round ends
+        a1, a2 = PuppetAgent(), PuppetAgent()
+        gsm = GameStateMachine(buffed_game_state, a1, a2)
+        a1.inject_action(EndRoundAction())
+        a2.inject_action(EndRoundAction())
+        gsm.step_until_next_phase()
+        gsm.step_until_phase(buffed_game_state.get_mode().action_phase())
+        game_state = gsm.get_game_state()
+        p1ac = game_state.get_player1().just_get_active_character()
+        self.assertFalse(p1ac.get_character_statuses().contains(MintyMeatRollsStatus))
