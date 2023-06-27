@@ -670,7 +670,7 @@ class NorthernSmokedChickenStatus(CharacterStatus, _UsageStatus):
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         d_usages = 0
         if signal is eft.TriggeringSignal.ROUND_END:
-            d_usages = -1
+            d_usages = -BIG_INT
         return [], replace(self, usages=d_usages)
 
 
@@ -688,8 +688,43 @@ class LotusFlowerCrispStatus(CharacterStatus, FixedShieldStatus):
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         d_usages = 0
         if signal is eft.TriggeringSignal.ROUND_END:
-            d_usages = -1
+            d_usages = -BIG_INT
+        return [], replace(self, usages=d_usages)
 
+
+@dataclass(frozen=True)
+class MintyMeatRollsStatus(CharacterStatus, _UsageStatus):
+    usages: int = 3
+    MAX_USAGES: ClassVar[int] = 3
+    COST_DEDUCTION: ClassVar[int] = 1
+
+    @override
+    def _preprocess(
+            self,
+            game_state: gs.GameState,
+            status_source: eft.StaticTarget,
+            item: eft.Preprocessable,
+            signal: Status.PPType,
+    ) -> tuple[eft.Preprocessable, Optional[Self]]:
+        if signal is Status.PPType.SKILL:
+            assert isinstance(item, evt.GameEvent)
+            if status_source == item.target \
+                    and item.event_type is evt.EventType.NORMAL_ATTACK \
+                    and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION:
+                item = replace(
+                    item,
+                    dices_cost=(item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
+                )
+                return item, replace(self, usages=self.usages - 1)
+        return super()._preprocess(game_state, status_source, item, signal)
+
+    @override
+    def _react_to_signal(
+            self, source: eft.StaticTarget, signal: eft.TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        d_usages = 0
+        if signal is eft.TriggeringSignal.ROUND_END:
+            d_usages = -BIG_INT
         return [], replace(self, usages=d_usages)
 
 # >>>>>>>>>>>>>>>>>>>> Food Status >>>>>>>>>>>>>>>>>>>>
