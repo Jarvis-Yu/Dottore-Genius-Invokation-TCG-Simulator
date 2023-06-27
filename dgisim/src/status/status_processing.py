@@ -175,7 +175,6 @@ class StatusProcessing:
                 if new_support is None:
                     game_state = eft.RemoveSupportEffect(
                         pid,
-                        type(support),
                         support.sid,
                     ).execute(game_state)
                 elif new_support != support:

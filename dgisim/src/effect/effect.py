@@ -1188,14 +1188,13 @@ class AddSupportEffect(Effect):
 @dataclass(frozen=True)
 class RemoveSupportEffect(Effect):
     target_pid: gs.GameState.Pid
-    support: type[sp.Support]
     sid: int
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         return game_state.factory().f_player(
             self.target_pid,
             lambda p: p.factory().f_supports(
-                lambda ss: ss.remove_support(self.support, self.sid)
+                lambda ss: ss.remove_by_sid(self.sid)
             ).build()
         ).build()
 

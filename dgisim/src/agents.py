@@ -301,7 +301,7 @@ class RandomAgent(PlayerAgent):
             usable_cards = [
                 card
                 for card in usable_cards
-                if issubclass(card, FoodCard)
+                if card.action_generator(game_state, pid) is not None
             ]
             if usable_cards:
                 card = random.choice(usable_cards)

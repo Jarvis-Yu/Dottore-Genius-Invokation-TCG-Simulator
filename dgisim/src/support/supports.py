@@ -74,7 +74,14 @@ class Supports:
             if type(s) is support_type and s.sid == sid
         ), self._max_num)
 
-    def full(self) -> bool:
+    def remove_by_sid(self, sid: int) -> Supports:
+        return Supports(tuple(
+            s
+            for s in self._supports
+            if s.sid == sid
+        ), self._max_num)
+
+    def is_full(self) -> bool:
         return len(self) == self._max_num
 
     def contains_exactly(self, support_type: type[Support], sid: int) -> bool:

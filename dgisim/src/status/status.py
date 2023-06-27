@@ -186,7 +186,6 @@ class Status:
             if new_status is None:
                 es.append(eft.RemoveSupportEffect(
                     source.pid,
-                    type(self),
                     sid=self.sid,
                 ))
             elif new_status is not self and self.update(new_status) != self:  # type: ignore
