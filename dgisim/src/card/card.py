@@ -364,8 +364,70 @@ class LocationCard(SupportCard):
     pass
 
 
+# <<<<<<<<<<<<<<<<<<<< Helpers <<<<<<<<<<<<<<<<<<<<
+class _DiceOnlyChoiceProvider(Card):
+    @classmethod
+    def _choices_helper(
+            cls,
+            action_generator: acg.ActionGenerator,
+    ) -> tuple[acg.Choosable, ...] | AbstractDices | cds.Cards:
+        game_state = action_generator.game_state
+        pid = action_generator.pid
+
+        assert action_generator._action_filled()
+
+        instruction = action_generator.instruction
+        assert type(instruction) is act.DiceOnlyInstruction
+        if instruction.dices is None:
+            return cls.preprocessed_dice_cost(game_state, pid)[1]
+
+        raise Exception(
+            "Not Reached! Should be called when there is something to fill. action_generator:\n"
+            + f"{action_generator}"
+        )
+
+    @classmethod
+    def _fill_helper(
+        cls,
+        action_generator: acg.ActionGenerator,
+        player_choice: acg.Choosable | ActualDices | cds.Cards,
+    ) -> acg.ActionGenerator:
+        assert action_generator._action_filled()
+
+        instruction = action_generator.instruction
+        assert type(instruction) is act.DiceOnlyInstruction
+        if instruction.dices is None:
+            assert isinstance(player_choice, ActualDices)
+            return replace(
+                action_generator,
+                instruction=replace(instruction, dices=player_choice),
+            )
+
+        raise Exception("Not Reached!")
+
+    @override
+    @classmethod
+    def action_generator(
+            cls,
+            game_state: gs.GameState,
+            pid: gs.GameState.Pid,
+    ) -> None | acg.ActionGenerator:
+        if not cls.strictly_usable(game_state, pid):
+            return None
+        return acg.ActionGenerator(
+            game_state=game_state,
+            pid=pid,
+            action=replace(act.CardAction._all_none(), card=cls),
+            instruction=act.DiceOnlyInstruction._all_none(),
+            _choices_helper=cls._choices_helper,
+            _fill_helper=cls._fill_helper,
+        )
+# >>>>>>>>>>>>>>>>>>>> Helpers >>>>>>>>>>>>>>>>>>>>
+
 # <<<<<<<<<<<<<<<<<<<< Event Cards <<<<<<<<<<<<<<<<<<<<
 # <<<<<<<<<<<<<<<<<<<< Event Cards / Food Cards <<<<<<<<<<<<<<<<<<<<
+
+
 class FoodCard(EventCard):
     @override
     @classmethod
@@ -624,7 +686,7 @@ class NorthernSmokedChicken(FoodCard):
 # >>>>>>>>>>>>>>>>>>>> Event Cards / Food Cards >>>>>>>>>>>>>>>>>>>>
 
 
-class Starsigns(EventCard):
+class Starsigns(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.ANY: 2})
 
     @override
@@ -670,7 +732,7 @@ class Starsigns(EventCard):
         )
 
 
-class CalxsArts(EventCard):
+class CalxsArts(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.OMNI: 1})
 
     @override
@@ -701,7 +763,7 @@ class CalxsArts(EventCard):
             and cls.loosely_usable(game_state, pid)
 
 
-class ChangingShifts(EventCard):
+class ChangingShifts(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({})
 
     @override
@@ -730,7 +792,7 @@ class ChangingShifts(EventCard):
         )
 
 
-class LeaveItToMe(EventCard):
+class LeaveItToMe(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({})
 
     @override
@@ -838,7 +900,7 @@ class LightningStiletto(EventCard, _CombatActionCard):
         )
 
 
-class ThunderingPenance(EquipmentCard, _CombatActionCard):
+class ThunderingPenance(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.ELECTRO: 3})
 
     @override
@@ -886,7 +948,7 @@ class ThunderingPenance(EquipmentCard, _CombatActionCard):
 #### Kaeya ####
 
 
-class ColdBloodedStrike(EquipmentCard, _CombatActionCard):
+class ColdBloodedStrike(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.CRYO: 4})
 
     @override
@@ -934,7 +996,7 @@ class ColdBloodedStrike(EquipmentCard, _CombatActionCard):
 
 #### Rhodeia of Loch ####
 
-class StreamingSurge(EquipmentCard, _CombatActionCard):
+class StreamingSurge(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.HYDRO: 4})
 
     @override
