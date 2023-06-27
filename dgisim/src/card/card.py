@@ -427,7 +427,7 @@ class _DiceOnlyChoiceProvider(Card):
 class _CharTargetChoiceProvider(Card):
     @classmethod
     def _valid_char(cls, char: chr.Character) -> bool:
-        return True
+        return not char.defeated()
 
     @classmethod
     def _choices_helper(
@@ -536,7 +536,7 @@ class FoodCard(EventCard):
 
     @classmethod
     def _valid_char(cls, char: chr.Character) -> bool:
-        return not char.satiated()
+        return not char.satiated() and not char.defeated()
 
     @override
     @classmethod
