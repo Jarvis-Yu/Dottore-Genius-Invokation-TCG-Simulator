@@ -67,8 +67,8 @@ dictionary, and discover game states on different 'game branches' being actually
 - [x] Implement player action validity checker
 - [ ] Implement player action choices provider &larr; **_WIP_**
   - [x] Card choices provider
-  - [ ] Swap choices provider &larr; **_WIP_**
-  - [ ] Skill choices provider
+  - [x] Swap choices provider
+  - [ ] Skill choices provider &larr; **_WIP_**
   - [ ] Other choices provider
 - [ ] Implement greedy player agent for testing purposes
 
