@@ -23,7 +23,7 @@ Also, the `GameState` class, which represents some game state in the state machi
 `Phase` object to determine how to transform to another state, which means the game flow is
 highly customizable.
 
-Everything in the `GameState` object are immutable, so travering game history and exploring different
+Everything in the `GameState` object are immutable, so traversing game history and exploring different
 branches of possibilities in the future are not error-prone. Do not worry about memory efficiency,
 everything is immutable, so only the modified part between neighbouring game states are added to the
 memory.
