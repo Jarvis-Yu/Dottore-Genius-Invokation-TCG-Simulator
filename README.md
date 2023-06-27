@@ -38,13 +38,14 @@ dictionary, and discover game states on different 'game branches' being actually
 - [x] Implement game phase of Starting Hand Select Phase (select active character)
 - [x] Implement game phase of Roll (Dice) Phase (roll dices between rounds)
 - [x] Implement game phase of Action Phase (players beat each other)
-  - [ ] Implement all cards (14/184 implemented)
+  - [ ] Implement all cards (15/184 implemented)
     - [x] Changing Shifts,
           ColdBlooded Strike,
           Jueyun Guoba,
           Leave It to Me!,
           Lightning Stiletto,
           Lotus Flower Crisp,
+          Minty Meat Rolls,
           Mondstadt Hash Brown,
           Mushroom Pizza,
           Nothern Smoked Chicken,
@@ -65,8 +66,8 @@ dictionary, and discover game states on different 'game branches' being actually
 - [x] Implement random player agent for testing purposes
 - [x] Implement player action validity checker
 - [ ] Implement player action choices provider &larr; **_WIP_**
-  - [ ] Card choices provider &larr; **_WIP_**
-  - [ ] Swap choices provider
+  - [x] Card choices provider
+  - [ ] Swap choices provider &larr; **_WIP_**
   - [ ] Skill choices provider
   - [ ] Other choices provider
 - [ ] Implement greedy player agent for testing purposes
