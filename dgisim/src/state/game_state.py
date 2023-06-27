@@ -424,7 +424,7 @@ class SwapChecker:
     def should_death_swap(self) -> bool:
         effect_stack = self._game_state.get_effect_stack()
         return effect_stack.is_not_empty() \
-            and isinstance(effect_stack.peek(), eft.DeathSwapPhaseEndEffect)
+            and isinstance(effect_stack.peek(), eft.DeathSwapPhaseStartEffect)
 
     def swappable(
             self,
