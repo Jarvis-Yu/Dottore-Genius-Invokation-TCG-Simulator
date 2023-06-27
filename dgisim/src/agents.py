@@ -280,7 +280,8 @@ class RandomAgent(PlayerAgent):
             elif isinstance(choices, AbstractDices):
                 optional_choice = action_generator.dices_available().basically_satisfy(choices)
                 if optional_choice is None:
-                    raise Exception(f"There's not enough dices for {choices} at game_state:"
+                    raise Exception(f"There's not enough dices for {choices} from "
+                                    + f"{action_generator.dices_available()} at game_state:"
                                     + f"{action_generator.game_state}")
                 choice = optional_choice
                 action_generator = action_generator.choose(choice)
@@ -290,7 +291,25 @@ class RandomAgent(PlayerAgent):
 
     def _action_phase(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
         game_state = history[-1]
+        me = game_state.get_player(pid)
+        active_character = me.just_get_active_character()
+
+        # death swap
+        if active_character.defeated():
+            characters = me.get_characters()
+            alive_ids = characters.alive_ids()
+            active_id = characters.get_active_character_id()
+            assert active_id is not None
+            if active_id in alive_ids:
+                alive_ids.remove(active_id)
+            if alive_ids:
+                return DeathSwapAction(char_id=random.choice(alive_ids))
+            else:
+                raise Exception("Game should end here but not implemented(NOT REACHED)")
+
         decision = random.random()
+
+        # play card
         if decision < 1:
             cards = game_state.get_player(pid).get_hand_cards()
             usable_cards = [

@@ -13,15 +13,27 @@ DEFAULT_CARDS: frozenset[type[Card]] = frozenset({
 })
 
 _DEFAULT_CARDS: list[type[Card]] = [
+    # Equipment Card
+    ThunderingPenance,
+    ColdBloodedStrike,
+    StreamingSurge,
+
+    # Event Card
+    ChangingShifts,
+    LeaveItToMe,
     Starsigns,
-    # Food
+
+    # Event Card / Food
     JueyunGuoba,
     LotusFlowerCrisp,
-    NorthernSmokedChicken,
-    SweetMadame,
     MondstadtHashBrown,
     MushroomPizza,
     MintyMeatRolls,
+    NorthernSmokedChicken,
+    SweetMadame,
+
+    # Support Card
+    Xudong,
 ]
 
 _DEFAULT_CARDS_FSET = None

@@ -191,6 +191,7 @@ class ActualDices(Dices):
                 if remaining.get(elem, 0) < pures[elem]:
                     answer[elem] += remaining.get(elem, 0)
                     omni_required += pures[elem] - remaining.get(elem, 0)
+                    remaining[elem] = 0
                 else:
                     answer[elem] += pures[elem]
                     remaining[elem] -= pures[elem]
@@ -222,7 +223,7 @@ class ActualDices(Dices):
                 answer[Element.OMNI] += any
                 remaining[Element.OMNI] -= any
         if omni_required > 0:
-            if remaining[Element.OMNI] <= omni_required:
+            if remaining[Element.OMNI] < omni_required:
                 return None
             answer[Element.OMNI] += omni_required
         return ActualDices(answer)
