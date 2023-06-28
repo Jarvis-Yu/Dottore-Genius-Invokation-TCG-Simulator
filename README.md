@@ -68,8 +68,8 @@ dictionary, and discover game states on different 'game branches' being actually
 - [ ] Implement player action choices provider &larr; **_WIP_**
   - [x] Card choices provider
   - [x] Swap choices provider
-  - [ ] Skill choices provider &larr; **_WIP_**
-  - [ ] Other choices provider
+  - [x] Skill choices provider
+  - [ ] Other choices provider &larr; **_WIP_**
 - [ ] Implement greedy player agent for testing purposes
 
 > Just in case you don't know, **_WIP_** means "work in progress".

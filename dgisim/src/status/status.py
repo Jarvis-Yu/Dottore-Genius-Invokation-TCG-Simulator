@@ -435,7 +435,6 @@ class FixedShieldStatus(ShieldStatus, _UsageStatus):
         cls = type(self)
         if signal is Status.PPType.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
-            assert self.usages <= type(self).MAX_USAGES
             if item.damage > 0 and self.usages > 0 \
                     and item.element != Element.PIERCING \
                     and self._is_target(game_state, status_source, item, signal) \
