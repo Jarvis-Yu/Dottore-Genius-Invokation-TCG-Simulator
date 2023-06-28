@@ -62,8 +62,8 @@ dictionary, and discover game states on different 'game branches' being actually
 - [x] Implement game phase of End Phase (summons and some support card or statuses take action)
 - [x] Implement game phase of Game End Phase (one player wins or draw)
 - [x] Implement CLI for better debugging experience
-- [ ] Implement interactive active CLI that accepts user input as action
-- [x] Implement lazy player agent for minimal testing purposes &larr; **_WIP_**
+- [ ] Implement interactive active CLI that accepts user input as action &larr; **_WIP_**
+- [x] Implement lazy player agent for minimal testing purposes
 - [x] Implement random player agent for testing purposes
 - [x] Implement player action validity checker
 - [ ] Implement player action choices provider
