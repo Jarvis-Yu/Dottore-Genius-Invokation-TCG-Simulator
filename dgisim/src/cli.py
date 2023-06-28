@@ -13,8 +13,6 @@ class CLISession:
     def reset_game(self) -> None:
         self._game_session = GameStateMachine(
             GameState.from_default(),
-            # HardCodedRandomAgent(),
-            # HardCodedRandomAgent(),
             RandomAgent(),
             RandomAgent(),
         )
