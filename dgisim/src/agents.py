@@ -316,11 +316,6 @@ class RandomAgent(PlayerAgent):
             usable_cards = [
                 card
                 for card in cards
-                if card.strictly_usable(game_state, pid)
-            ]
-            usable_cards = [
-                card
-                for card in usable_cards
                 if card.action_generator(game_state, pid) is not None
             ]
             if usable_cards:

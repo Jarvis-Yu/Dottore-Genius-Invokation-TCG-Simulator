@@ -14,6 +14,7 @@ from dgisim.src.phase.end_phase import EndPhase
 from dgisim.src.phase.game_end_phase import GameEndPhase
 from dgisim.src.state.player_state import PlayerState
 from dgisim.src.card.cards import Cards
+from dgisim.src.agents import *
 
 
 class TestGameStateMachine(unittest.TestCase):
@@ -151,7 +152,6 @@ class TestGameStateMachine(unittest.TestCase):
         self.assertIsNone(state_machine.get_winner())
 
     def test_random_agents_not_break_game(self):
-        from dgisim.src.agents import RandomAgent
         import os
         optional_repeats = os.getenv("RNG_PLAYS")
         repeats: int

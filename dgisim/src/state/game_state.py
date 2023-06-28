@@ -198,6 +198,8 @@ class GameState:
         )
 
     def __eq__(self, other: object) -> bool:
+        if self is other:
+            return True
         if not isinstance(other, GameState):
             return False
         return self._all_unique_data() == other._all_unique_data()
