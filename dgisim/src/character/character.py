@@ -96,7 +96,7 @@ class Character:
 
     @classmethod
     @lru_cache(maxsize=1)
-    def skills(cls) -> dict[CharacterSkill, AbstractDices]:
+    def skills(cls) -> tuple[CharacterSkill, ...]:
         """ Provides the skill types with corresponding cost that the character has """
         my_skills: list[CharacterSkill] = []
         if cls._normal_attack is not Character._normal_attack:
@@ -107,10 +107,7 @@ class Character:
             my_skills.append(CharacterSkill.ELEMENTAL_SKILL2)
         if cls._elemental_burst is not Character._elemental_burst:
             my_skills.append(CharacterSkill.ELEMENTAL_BURST)
-        return dict(
-            (skill, cls.skill_cost(skill))
-            for skill in my_skills
-        )
+        return tuple(my_skills)
 
     @classmethod
     def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:

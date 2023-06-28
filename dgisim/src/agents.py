@@ -301,6 +301,14 @@ class RandomAgent(PlayerAgent):
             player_action = self._random_action_generator_chooser(swap_action_generator)
             return player_action
 
+        # cast skill
+        decision = random.random()
+        if decision < 0.5:
+            skill_action_generator = game_state.skill_checker().action_generator(pid)
+            if skill_action_generator is not None:
+                player_action = self._random_action_generator_chooser(skill_action_generator)
+                return player_action
+
         # play card
         decision = random.random()
         if decision < 0.5:
@@ -322,8 +330,9 @@ class RandomAgent(PlayerAgent):
                 player_action = self._random_action_generator_chooser(action_generator)
                 return player_action
 
+        # swap
         decision = random.random()
-        if decision < 0.3:
+        if decision < 0.5:
             swap_action_generator = game_state.swap_checker().action_generator(pid)
             if swap_action_generator is not None:
                 player_action = self._random_action_generator_chooser(swap_action_generator)
@@ -333,21 +342,13 @@ class RandomAgent(PlayerAgent):
 
     def _end_phase(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
         game_state = history[-1]
-        me = game_state.get_player(pid)
-        active_character = me.just_get_active_character()
 
         # death swap
-        if active_character.defeated():
-            characters = me.get_characters()
-            alive_ids = characters.alive_ids()
-            active_id = characters.get_active_character_id()
-            assert active_id is not None
-            if active_id in alive_ids:
-                alive_ids.remove(active_id)
-            if alive_ids:
-                return DeathSwapAction(char_id=random.choice(alive_ids))
-            else:
-                raise Exception("Game should end here but not implemented(NOT REACHED)")
+        if game_state.swap_checker().should_death_swap():
+            swap_action_generator = game_state.swap_checker().action_generator(pid)
+            assert swap_action_generator is not None
+            player_action = self._random_action_generator_chooser(swap_action_generator)
+            return player_action
 
         raise Exception("NOT REACHED")
 

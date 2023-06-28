@@ -533,22 +533,103 @@ class SkillChecker:
     def __init__(self, game_state: GameState) -> None:
         self._game_state = game_state
 
+    def _choices_helper(
+            self,
+            action_generator: acg.ActionGenerator,
+    ) -> tuple[acg.Choosable, ...] | AbstractDices | cds.Cards:
+        game_state = self._game_state
+        pid = action_generator.pid
+        active_character = game_state.get_player(pid).just_get_active_character()
+
+        action = action_generator.action
+        assert type(action) is act.SkillAction
+        if action.skill is None:
+            skills = active_character.skills()
+            return tuple(
+                skill
+                for skill in skills
+                if self.usable(pid, active_character.get_id(), skill) is not None
+            )
+
+        assert action_generator._action_filled()
+        instruction = action_generator.instruction
+        assert type(instruction) is act.DiceOnlyInstruction
+        if instruction.dices is None:
+            retval = self.usable(pid, active_character.get_id(), action.skill)
+            assert retval is not None
+            _, dices = retval
+            return dices
+
+        raise Exception(
+            "Not Reached! Should be called when there is something to fill. action_generator:\n"
+            + f"{action_generator}"
+        )
+
+    def _fill_helper(
+        self,
+        action_generator: acg.ActionGenerator,
+        player_choice: acg.Choosable | ActualDices | cds.Cards,
+    ) -> acg.ActionGenerator:
+        action = action_generator.action
+        assert type(action) is act.SkillAction
+        if action.skill is None:
+            assert type(player_choice) is CharacterSkill
+            return replace(
+                action_generator,
+                action=replace(action, skill=player_choice),
+            )
+        
+        instruction = action_generator.instruction
+        assert type(instruction) is act.DiceOnlyInstruction
+        if instruction.dices is None:
+            assert type(player_choice) is ActualDices
+            return replace(
+                action_generator,
+                instruction=replace(instruction, dices=player_choice),
+            )
+
+        raise Exception("Not Reached!")
+
+    def action_generator(
+            self,
+            pid: gs.GameState.Pid,
+    ) -> None | acg.ActionGenerator:
+        active_character = self._game_state.get_player(pid).just_get_active_character()
+        if not active_character.can_cast_skill():
+            return None
+
+        has_castable_skill = any(
+            self.usable(pid, active_character.get_id(), skill) is not None
+            for skill in active_character.skills()
+        )
+        if not has_castable_skill:
+            return None
+
+        return acg.ActionGenerator(
+            game_state=self._game_state,
+            pid=pid,
+            action=act.SkillAction._all_none(),
+            instruction=act.DiceOnlyInstruction._all_none(),
+            _choices_helper=self._choices_helper,
+            _fill_helper=self._fill_helper,
+        )
+
     def usable(
             self,
             pid: GameState.Pid,
             char_id: int,
             skill_type: CharacterSkill,
-    ) -> bool:
+    ) -> None | tuple[GameState, AbstractDices]:
         game_state = self._game_state
         character = game_state.get_player(pid).get_characters().get_character(char_id)
         if character is None \
                 or not character.can_cast_skill() \
                 or skill_type not in character.skills():
-            return False
+            return None
         if skill_type is CharacterSkill.ELEMENTAL_BURST \
                 and character.get_energy() < character.get_max_energy():
-            return False
-        _, skill_event = StatusProcessing.preprocess_by_all_statuses(
+            return None
+        new_game_state, skill_event = StatusProcessing.preprocess_by_all_statuses(
             game_state=game_state,
             pid=pid,
             item=GameEvent(
@@ -564,7 +645,10 @@ class SkillChecker:
             pp_type=stt.Status.PPType.SKILL,
         )
         assert isinstance(skill_event, GameEvent)
-        return game_state.get_player(pid).get_dices().loosely_satisfy(skill_event.dices_cost)
+        if game_state.get_player(pid).get_dices().loosely_satisfy(skill_event.dices_cost):
+            return new_game_state, skill_event.dices_cost
+        else:
+            return None
 
     def valid_action(
             self,
