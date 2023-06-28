@@ -62,14 +62,14 @@ dictionary, and discover game states on different 'game branches' being actually
 - [x] Implement game phase of End Phase (summons and some support card or statuses take action)
 - [x] Implement game phase of Game End Phase (one player wins or draw)
 - [x] Implement CLI for better debugging experience
-- [x] Implement lazy player agent for minimal testing purposes
+- [ ] Implement interactive active CLI that accepts user input as action
+- [x] Implement lazy player agent for minimal testing purposes &larr; **_WIP_**
 - [x] Implement random player agent for testing purposes
 - [x] Implement player action validity checker
-- [ ] Implement player action choices provider &larr; **_WIP_**
-  - [x] Card choices provider
-  - [x] Swap choices provider
-  - [x] Skill choices provider
-  - [ ] Other choices provider &larr; **_WIP_**
+- [ ] Implement player action choices provider
+  - [x] all action phase choices provider
+  - [x] all end phase choices provider
+  - [ ] Other choices provider (trivial for now)
 - [ ] Implement greedy player agent for testing purposes
 
 > Just in case you don't know, **_WIP_** means "work in progress".
