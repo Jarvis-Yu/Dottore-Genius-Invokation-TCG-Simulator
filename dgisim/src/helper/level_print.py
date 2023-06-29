@@ -242,4 +242,5 @@ class GamePrinter:
             0,
             GamePrinter._insert_effects("Effects", game_state["Effects"]),
         )
+        board.insert_at_nextline(0, "=" * board.lim_y())
         return board.draw()

@@ -1,21 +1,44 @@
 from __future__ import annotations
+from enum import Enum
+from typing import Iterable, Any
 
 from dgisim.src.game_state_machine import GameStateMachine
 from dgisim.src.state.game_state import GameState
 from dgisim.src.agents import *
 from dgisim.src.helper.level_print import GamePrinter
 
+
+class GameMode(Enum):
+    PVP = "PVP"
+    PVE = "PVE"
+    EVE = "EVE"
+
+
 class CLISession:
-    
+
     def __init__(self) -> None:
+        self._mode: GameMode = GameMode.PVE
         self.reset_game()
 
     def reset_game(self) -> None:
-        self._game_session = GameStateMachine(
-            GameState.from_default(),
-            RandomAgent(),
-            RandomAgent(),
-        )
+        if self._mode is GameMode.EVE:
+            self._game_session = GameStateMachine(
+                GameState.from_default(),
+                RandomAgent(),
+                RandomAgent(),
+            )
+        elif self._mode is GameMode.PVE:
+            self._game_session = GameStateMachine(
+                GameState.from_default(),
+                CustomChoiceAgent(self.prompt_handler, self.game_action_chooser, self.chooser),
+                RandomAgent(),
+            )
+        elif self._mode is GameMode.PVP:
+            self._game_session = GameStateMachine(
+                GameState.from_default(),
+                CustomChoiceAgent(self.prompt_handler, self.game_action_chooser, self.chooser),
+                CustomChoiceAgent(self.prompt_handler, self.game_action_chooser, self.chooser),
+            )
         self._state_idx = 0
 
     def _help(self) -> None:
@@ -27,6 +50,7 @@ class CLISession:
         print("h    - to get help")
         print("q    - to quit this session")
         print("     - enter nothing to repeat last step")
+        print("rst  - to reset game session (and choose next game mode)")
         print()
         print("Note: any invalid commands are ignored")
         print()
@@ -41,11 +65,70 @@ class CLISession:
         print("Welcome to the Dottore Genius Invokation TCG Simulator CLI ver.")
         print("This is currently just a basic version for debugging only.")
 
+    def _mode_prompt(self) -> None:
+        print("Please choose the cli mode:")
+        mode = self.chooser(mode for mode in GameMode)
+        assert isinstance(mode, GameMode)
+        self._mode = mode
+        self.reset_game()
+
+    @classmethod
+    def _display_choice(cls, choice: Any) -> str:
+        import inspect
+        if isinstance(choice, Enum):
+            return choice.name
+        if inspect.isclass(choice):
+            return choice.__name__
+        if isinstance(choice, StaticTarget):
+            return f"id={choice.id} in Player{choice.pid.value}'s {choice.zone.name}"
+        return str(choice)
+
+    @classmethod
+    def chooser(cls, choices: Iterable[Any]) -> Any:
+        choices_map = dict(enumerate(choices))
+        choices_display = '  |||  '.join(
+            f"@{i}: {cls._display_choice(choice)}"
+            for i, choice in choices_map.items()
+        )
+        final_choice: int = -1
+        id_range = (0, len(choices_map) - 1)
+        while final_choice < 0 or final_choice >= len(choices_map):
+            try:
+                print("Choices are:")
+                print(choices_display)
+                choice = input(f"\nPlease choose id ({id_range[0]}-{id_range[1]}): @")
+                print()
+                final_choice = int(choice)
+            except KeyboardInterrupt:
+                print("\nBye...")
+                exit(0)
+            except:
+                print(f"Last input is invalid! Choose a number in range {id_range[0]}-{id_range[1]}")
+                final_choice = -1
+                continue
+        return choices_map[final_choice]
+
+    @classmethod
+    def game_action_chooser(cls, choices: Iterable[choosable_type]) -> choosable_type:
+        choice = cls.chooser(choices)
+        return choice
+
+    @classmethod
+    def prompt_handler(cls, info_type: str, prompt: str) -> None:
+        prompt_type = case_val(
+            info_type == "",
+            "",
+            f"[{info_type}] "
+        )
+        print(f"{prompt_type}:> {prompt}")
+
     def run(self) -> None:
         self._equals_sep_bar()
         self._welcome()
         self._equals_sep_bar()
         self._help()
+        self._equals_sep_bar()
+        self._mode_prompt()
         self._equals_sep_bar()
         last_cmd = ""
         self._print_latest_game_state()
@@ -103,6 +186,10 @@ class CLISession:
                 self._help()
             elif new_cmd == "q":
                 pass
+            elif new_cmd == "rst":
+                self._mode_prompt()
+                self._equals_sep_bar()
+                self._print_latest_game_state()
             else:
                 wrong_cmd_counter += 1
                 if wrong_cmd_counter >= 3:
@@ -124,11 +211,10 @@ class CLISession:
         if action is not None:
             self._print_action(action, game_state)
         print(f"#### [{index}/{self._game_session.curr_index()}] in game history")
-            
 
     def _print_game_state(self, game_state: GameState) -> None:
         game_state.waiting_for()
-        game_state_dict = game_state.dict_str() 
+        game_state_dict = game_state.dict_str()
         assert type(game_state_dict) is dict
         output = GamePrinter.dict_game_printer(game_state_dict)
         print(output)
