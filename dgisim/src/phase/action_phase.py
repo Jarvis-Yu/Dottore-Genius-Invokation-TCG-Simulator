@@ -193,6 +193,7 @@ class ActionPhase(ph.Phase):
         if not new_dices.is_legal():
             print(f"Fail with new dices: <{new_dices}> for card: {card.name()}")
             assert False
+            return None
 
         # Card
         new_effects.append(RemoveCardEffect(pid, card))
@@ -208,6 +209,34 @@ class ActionPhase(ph.Phase):
         ).player(
             pid,
             player.factory().dices(new_dices).build()
+        ).build()
+
+    def _handle_elemental_tuning_action(
+            self,
+            game_state: gs.GameState,
+            pid: gs.GameState.Pid,
+            action: ElementalTuningAction
+    ) -> Optional[gs.GameState]:
+        player = game_state.get_player(pid)
+        cards = player.get_hand_cards()
+        dices = player.get_dices()
+        active_character = player.get_active_character()
+        assert active_character is not None
+        active_character_elem = active_character.element()
+        if action.card not in cards \
+                or dices[action.dice_elem] == 0 \
+                or action.dice_elem is active_character_elem \
+                or dices[Element.OMNI] + dices[active_character_elem] == dices.num_dices():
+            print(f"{action} cannot be performed in game state:\n{game_state}")
+            assert False
+            return None
+        return game_state.factory().f_player(
+            pid,
+            lambda p: p.factory().f_dices(
+                lambda ds: ds + {action.dice_elem: -1, active_character_elem: 1}
+            ).f_hand_cards(
+                lambda hcs: hcs.remove(action.card)
+            ).build()
         ).build()
 
     def _handle_death_swap_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: DeathSwapAction) -> Optional[gs.GameState]:
@@ -233,16 +262,14 @@ class ActionPhase(ph.Phase):
     def _handle_game_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: GameAction) -> Optional[gs.GameState]:
         player = game_state.get_player(pid)
         if isinstance(action, SkillAction):
-            action = cast(SkillAction, action)
             return self._handle_skill_action(game_state, pid, action)
         elif isinstance(action, SwapAction):
-            action = cast(SwapAction, action)
             return self._handle_swap_action(game_state, pid, action)
         elif isinstance(action, CardAction):
-            action = cast(CardAction, action)
             return self._handle_card_action(game_state, pid, action)
+        elif isinstance(action, ElementalTuningAction):
+            return self._handle_elemental_tuning_action(game_state, pid, action)
         elif isinstance(action, DeathSwapAction):
-            action = cast(DeathSwapAction, action)
             return self._handle_death_swap_action(game_state, pid, action)
         raise Exception("Unhandld action", action)
 

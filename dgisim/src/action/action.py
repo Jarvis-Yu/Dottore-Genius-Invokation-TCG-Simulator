@@ -4,9 +4,11 @@ from typing_extensions import override, Self
 from dataclasses import dataclass, fields, replace
 
 from dgisim.src.card.cards import Cards
+from dgisim.src.card.card import Card
 from dgisim.src.dices import ActualDices
 from dgisim.src.effect.effect import StaticTarget
 from dgisim.src.character.character_skill_enum import CharacterSkill
+from dgisim.src.element.element import Element
 import dgisim.src.state.game_state as gs
 import dgisim.src.effect.effect as eft
 
@@ -100,6 +102,17 @@ class EndRoundAction(PlayerAction):
 class GameAction(PlayerAction):
     def is_valid_action(self, game_state: gs.GameState) -> bool:
         raise Exception("Not overriden")
+
+
+@dataclass(frozen=True, kw_only=True)
+class ElementalTuningAction(GameAction):
+    card: type[Card]
+    dice_elem: Element
+
+    @classmethod
+    def _empty(cls) -> Self:
+        from dgisim.src.card.card import Card
+        return cls(card=Card, dice_elem=Element.ANY)
 
 
 @dataclass(frozen=True, kw_only=True)

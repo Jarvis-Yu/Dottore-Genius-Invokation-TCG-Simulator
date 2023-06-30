@@ -17,11 +17,13 @@ class RollPhase(ph.Phase):
             game_state.get_player1().factory()
             .phase(PlayerState.Act.PASSIVE_WAIT_PHASE)
             .dices(ActualDices.from_all(RollPhase._NUM_DICES, Element.OMNI))
+            # .dices(ActualDices.from_random(RollPhase._NUM_DICES))
             .build()
         ).player2(
             game_state.get_player2().factory()
             .phase(PlayerState.Act.PASSIVE_WAIT_PHASE)
             .dices(ActualDices.from_all(RollPhase._NUM_DICES, Element.OMNI))
+            # .dices(ActualDices.from_random(RollPhase._NUM_DICES))
             .build()
         ).build()
 

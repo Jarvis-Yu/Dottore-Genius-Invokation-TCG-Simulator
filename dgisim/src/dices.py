@@ -51,8 +51,18 @@ class Dices:
     def elems(self) -> Iterable[Element]:
         return self._dices.keys()
 
+    def __contains__(self, elem: Element) -> bool:
+        return (
+            elem in self._LEGAL_ELEMS
+            and self[elem] > 0
+        )
+
     def __iter__(self) -> Iterator[Element]:
-        return self._dices.__iter__()
+        return (
+            elem
+            for elem in self._dices
+            if self[elem] > 0
+        )
 
     def __getitem__(self, index: Element) -> int:
         if index in self._dices:

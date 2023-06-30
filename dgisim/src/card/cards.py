@@ -47,24 +47,33 @@ class Cards:
     def num_cards(self) -> int:
         return sum(self._cards.values())
 
+    def empty(self) -> bool:
+        return all(value == 0 for value in self._cards.values())
+
+    def not_empty(self) -> bool:
+        return any(value > 0 for value in self._cards.values())
+
     def contains(self, card: type[Card]) -> bool:
         for c in self._cards:
             if c == card and self._cards[c] >= 1:
                 return True
         return False
 
+    def __contains__(self, card: type[Card]) -> bool:
+        return self.contains(card)
+
     def add(self, card: type[Card]) -> Cards:
-        return self + Cards({card: 1})
+        return self + {card: 1}
 
     def remove(self, card: type[Card]) -> Cards:
         assert card in self._cards
         assert self._cards[card] >= 1
-        return self - Cards({card: 1})
+        return self - {card: 1}
 
     def remove_all(self, card: type[Card]) -> Cards:
         assert card in self._cards
         assert self._cards[card] >= 1
-        return self - Cards({card: self._cards[card]})
+        return self - {card: self._cards[card]}
 
     def __getitem__(self, card: type[Card]) -> int:
         assert card in self._cards
@@ -82,7 +91,11 @@ class Cards:
         return self.to_string(0)
 
     def __iter__(self) -> Iterator[type[Card]]:
-        return iter(self._cards.keys())
+        return (  # type: ignore
+            card
+            for card in self._cards.keys()
+            if self[card] > 0
+        )
 
     def to_string(self, indent: int = 0) -> str:
         existing_cards = dict([

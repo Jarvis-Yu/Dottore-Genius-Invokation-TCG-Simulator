@@ -78,9 +78,9 @@ dictionary, and discover game states on different 'game branches' being actually
 
 There's currently a CLI available to try this project.
 
-Here are the steps for you to follow to try the developing project.
-
 See CLI's [README](docs/cli_readme.md) for showcase and explanations of the CLI.
+
+Here are the steps for you to follow to try the developing project.
 
 ### For unix based systems (MacOS, Linux...): _(up-to-date)_
 

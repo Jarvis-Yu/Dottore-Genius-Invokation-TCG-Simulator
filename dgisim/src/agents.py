@@ -272,7 +272,7 @@ class RandomAgent(PlayerAgent):
     def _random_action_generator_chooser(self, action_generator: ActionGenerator) -> PlayerAction:
         while not action_generator.filled():
             choices = action_generator.choices()
-            choice: acg.Choosable | ActualDices | cds.Cards
+            choice: cd.Choosable | ActualDices | cds.Cards
             if isinstance(choices, tuple):
                 choice = random.choice(choices)
                 action_generator = action_generator.choose(choice)
@@ -299,6 +299,14 @@ class RandomAgent(PlayerAgent):
             assert swap_action_generator is not None
             player_action = self._random_action_generator_chooser(swap_action_generator)
             return player_action
+
+        # elemental tuning
+        decision = random.random()
+        if decision < 0.3:
+            elem_tuning_generator = game_state.elem_tuning_checker().action_generator(pid)
+            if elem_tuning_generator is not None:
+                player_action = self._random_action_generator_chooser(elem_tuning_generator)
+                return player_action
 
         # cast skill
         decision = random.random()
@@ -368,7 +376,7 @@ class RandomAgent(PlayerAgent):
         raise NotImplementedError
 
 
-choosable_type = acg.Choosable | ActualDices | cds.Cards
+choosable_type = cd.Choosable | ActualDices | cds.Cards
 
 class CustomChoiceAgent(RandomAgent):
     def __init__(
@@ -384,7 +392,7 @@ class CustomChoiceAgent(RandomAgent):
     def _random_action_generator_chooser(self, action_generator: ActionGenerator) -> PlayerAction:
         while not action_generator.filled():
             choices = action_generator.choices()
-            choice: acg.Choosable | ActualDices | cds.Cards
+            choice: cd.Choosable | ActualDices | cds.Cards
             if isinstance(choices, tuple):
                 choice = self._choose_handler(choices)
                 action_generator = action_generator.choose(choice)

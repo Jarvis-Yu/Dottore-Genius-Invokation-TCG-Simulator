@@ -20,6 +20,7 @@ from dgisim.src.helper.quality_of_life import BIG_INT
 
 
 class Character:
+    _ELEMENT = Element.ANY
 
     def __init__(
         self,
@@ -89,6 +90,10 @@ class Character:
             raise Exception("target character is not in the current game state")
         me = eft.StaticTarget(pid, eft.Zone.CHARACTERS, self.get_id())
         return me
+
+    @classmethod
+    def element(cls) -> Element:
+        return cls._ELEMENT
 
     @classmethod
     def from_default(cls, id: int = -1) -> Character:
@@ -371,6 +376,10 @@ class CharacterFactory:
 
 
 class Keqing(Character):
+    # basic info
+    _ELEMENT = Element.ELECTRO
+
+    # consts
     BASE_ELECTRO_INFUSION_DURATION: int = 2
 
     @override
@@ -510,6 +519,8 @@ class Keqing(Character):
 
 
 class Kaeya(Character):
+    # basic info
+    _ELEMENT = Element.CRYO
 
     @override
     @staticmethod
@@ -593,7 +604,11 @@ class Kaeya(Character):
 
 
 class RhodeiaOfLoch(Character):
-    SUMMONS = (
+    # basic info
+    _ELEMENT = Element.HYDRO
+
+    # consts
+    _SUMMONS = (
         sm.OceanicMimicSquirrelSummon,
         sm.OceanicMimicRaptorSummon,
         sm.OceanicMimicFrogSummon,
@@ -643,7 +658,7 @@ class RhodeiaOfLoch(Character):
         summons = game_state.get_player(pid).get_summons()
         return tuple(
             summon
-            for summon in self.SUMMONS
+            for summon in self._SUMMONS
             if summon not in summons
         )
 
@@ -656,7 +671,7 @@ class RhodeiaOfLoch(Character):
         if summons_to_choose:
             summon = choice(summons_to_choose)
         else:  # if all kinds of summons have been summoned
-            summon = choice(self.SUMMONS)
+            summon = choice(self._SUMMONS)
         return (
             eft.AddSummonEffect(
                 target_pid=source.pid,
@@ -675,7 +690,7 @@ class RhodeiaOfLoch(Character):
         if summons_to_choose:
             fst_summon = choice(summons_to_choose)
         else:  # if all kinds of summons have been summoned
-            fst_summon = choice(self.SUMMONS)
+            fst_summon = choice(self._SUMMONS)
 
         # second choice
         summons_to_choose = tuple(
@@ -690,7 +705,7 @@ class RhodeiaOfLoch(Character):
         else:  # if all kinds of summons have been summoned, choose a random that is not chosen
             snd_summon = choice([
                 summon
-                for summon in self.SUMMONS
+                for summon in self._SUMMONS
                 if summon is not fst_summon
             ])
 

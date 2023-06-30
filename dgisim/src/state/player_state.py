@@ -267,6 +267,9 @@ class PlayerStateFactory:
         self._dices = dices
         return self
 
+    def f_dices(self, f: Callable[[ActualDices], ActualDices]) -> PlayerStateFactory:
+        return self.dices(f(self._dices))
+
     def deck_cards(self, cards: cds.Cards) -> PlayerStateFactory:
         self._deck_cards = cards
         return self

@@ -13,6 +13,7 @@ import dgisim.src.action.action as act
 import dgisim.src.action.action_generator as acg
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
 from dgisim.src.helper.quality_of_life import case_val
+from dgisim.src.element.element import Element
 from dgisim.src.dices import ActualDices
 from dgisim.src.action.action import PlayerAction
 from dgisim.src.effect.effect_stack import EffectStack
@@ -66,6 +67,7 @@ class GameState:
         # checkers
         self._swap_checker = SwapChecker(self)
         self._skill_checker = SkillChecker(self)
+        self._elem_tuning_checker = ElementalTuningChecker(self)
 
     @classmethod
     def from_default(cls):
@@ -133,6 +135,9 @@ class GameState:
 
     def skill_checker(self) -> SkillChecker:
         return self._skill_checker
+
+    def elem_tuning_checker(self) -> ElementalTuningChecker:
+        return self._elem_tuning_checker
 
     def belongs_to(self, object: Character | Support) -> None | GameState.Pid:
         """ int in object type is just place holder """
@@ -336,7 +341,7 @@ class SwapChecker:
     def _choices_helper(
             self,
             action_generator: acg.ActionGenerator,
-    ) -> tuple[acg.Choosable, ...] | AbstractDices | cds.Cards:
+    ) -> tuple[cd.Choosable, ...] | AbstractDices | cds.Cards:
         game_state = self._game_state
         pid = action_generator.pid
 
@@ -372,7 +377,7 @@ class SwapChecker:
     def _fill_helper(
         self,
         action_generator: acg.ActionGenerator,
-        player_choice: acg.Choosable | ActualDices | cds.Cards,
+        player_choice: cd.Choosable | ActualDices | cds.Cards,
     ) -> acg.ActionGenerator:
         action = action_generator.action
         assert type(action) is act.SwapAction \
@@ -538,7 +543,7 @@ class SkillChecker:
     def _choices_helper(
             self,
             action_generator: acg.ActionGenerator,
-    ) -> tuple[acg.Choosable, ...] | AbstractDices | cds.Cards:
+    ) -> tuple[cd.Choosable, ...] | AbstractDices | cds.Cards:
         game_state = self._game_state
         pid = action_generator.pid
         active_character = game_state.get_player(pid).just_get_active_character()
@@ -570,7 +575,7 @@ class SkillChecker:
     def _fill_helper(
         self,
         action_generator: acg.ActionGenerator,
-        player_choice: acg.Choosable | ActualDices | cds.Cards,
+        player_choice: cd.Choosable | ActualDices | cds.Cards,
     ) -> acg.ActionGenerator:
         action = action_generator.action
         assert type(action) is act.SkillAction
@@ -580,7 +585,7 @@ class SkillChecker:
                 action_generator,
                 action=replace(action, skill=player_choice),
             )
-        
+
         instruction = action_generator.instruction
         assert type(instruction) is act.DiceOnlyInstruction
         if instruction.dices is None:
@@ -687,3 +692,90 @@ class SkillChecker:
             return game_state
         else:
             return None
+
+
+class ElementalTuningChecker:
+    def __init__(self, game_state: GameState) -> None:
+        self._game_state = game_state
+
+    def usable(self, pid: GameState.Pid, elem: None | Element = None) -> bool:
+        game_state = self._game_state
+        if not (type(game_state.get_phase()) == type(game_state.get_mode().action_phase())
+                or game_state.get_active_player_id() is pid):
+            return False
+        player = game_state.get_player(pid)
+        active_character = player.get_active_character()
+        assert active_character is not None
+        active_character_elem = active_character.element()
+        dices = player.get_dices()
+        return (
+            player.get_hand_cards().not_empty()
+            and dices[Element.OMNI] + dices[active_character_elem] < dices.num_dices()
+            and (elem is None or dices[elem] > 0)
+        )
+
+    def _choices_helper(
+            self,
+            action_generator: acg.ActionGenerator,
+    ) -> tuple[cd.Choosable, ...] | AbstractDices | cds.Cards:
+        game_state = self._game_state
+        pid = action_generator.pid
+
+        action = action_generator.action
+        assert type(action) is act.ElementalTuningAction
+
+        if action.card is None:
+            return tuple(card for card in game_state.get_player(pid).get_hand_cards())
+
+        active_character = game_state.get_player(pid).just_get_active_character()
+        if action.dice_elem is None:
+            return tuple(
+                elem
+                for elem in game_state.get_player(pid).get_dices()
+                if elem is not Element.OMNI and elem is not active_character.element()
+            )
+
+        raise Exception(
+            "Not Reached! Should be called when there is something to fill. action_generator:\n"
+            + f"{action_generator}"
+        )
+
+    def _fill_helper(
+        self,
+        action_generator: acg.ActionGenerator,
+        player_choice: cd.Choosable | ActualDices | cds.Cards,
+    ) -> acg.ActionGenerator:
+        action = action_generator.action
+        assert type(action) is act.ElementalTuningAction
+
+        if action.card is None:
+            assert issubclass(player_choice, cd.Card)  # type: ignore
+            return replace(
+                action_generator,
+                action=replace(action, card=player_choice)
+            )
+
+        if action.dice_elem is None:
+            assert type(player_choice) is Element
+            return replace(
+                action_generator,
+                action=replace(action, dice_elem=player_choice)
+            )
+
+        raise Exception("Not Reached!")
+
+    def action_generator(
+            self,
+            pid: gs.GameState.Pid,
+    ) -> None | acg.ActionGenerator:
+        if not self.usable(pid):
+            return None
+
+        return acg.ActionGenerator(
+            game_state=self._game_state,
+            pid=pid,
+            action=act.ElementalTuningAction._all_none(),
+            instruction=None,
+            _choices_helper=self._choices_helper,
+            _fill_helper=self._fill_helper,
+        )
