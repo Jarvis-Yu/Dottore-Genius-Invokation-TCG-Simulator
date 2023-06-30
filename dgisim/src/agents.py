@@ -426,7 +426,7 @@ class CustomChoiceAgent(RandomAgent):
             player_action = self._random_action_generator_chooser(swap_action_generator)
             return player_action
 
-        choices: tuple[str, ...] = ("Card", "Skill", "Swap", "EndRound")
+        choices: tuple[str, ...] = ("Card", "Skill", "Swap", "Elemental Tuning", "EndRound")
         choice: Any
         while player_action is None:
             choice = self._any_handler(choices)
@@ -458,7 +458,14 @@ class CustomChoiceAgent(RandomAgent):
             elif choice == "Swap":
                 action_generator = game_state.swap_checker().action_generator(pid)
                 if action_generator is None:
-                    self._prompt_handler("info", "No skill available")
+                    self._prompt_handler("info", "Swapping is unavailable")
+                    continue
+                player_action = self._random_action_generator_chooser(action_generator)
+
+            elif choice == "Elemental Tuning":
+                action_generator = game_state.elem_tuning_checker().action_generator(pid)
+                if action_generator is None:
+                    self._prompt_handler("info", "There's no dice or card for tuning")
                     continue
                 player_action = self._random_action_generator_chooser(action_generator)
 
