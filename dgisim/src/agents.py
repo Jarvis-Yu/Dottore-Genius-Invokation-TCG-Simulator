@@ -312,15 +312,19 @@ class RandomAgent(PlayerAgent):
         decision = random.random()
         if decision < 0.5:
             cards = game_state.get_player(pid).get_hand_cards()
-            usable_cards = [
-                card
-                for card in cards
-                if card.action_generator(game_state, pid) is not None
-            ]
-            if usable_cards:
-                card = random.choice(usable_cards)
-                action_generator = card.action_generator(game_state, pid)
-                assert action_generator is not None
+            cards_list = list(cards)
+            random.shuffle(cards_list)
+            action_generator = next(
+                (
+                    act_generator
+                    for act_generator in (
+                        card.action_generator(game_state, pid) for card in cards
+                    )
+                    if act_generator is not None
+                ),
+                None
+            )
+            if action_generator is not None:
                 player_action = self._random_action_generator_chooser(action_generator)
                 return player_action
 
