@@ -5,6 +5,7 @@ A Genshin Impact Genius Invokation TCG simulator intended to be used for AI trai
 The simulator is modeled as a finite state machine, where all game states are immutable.
 
 - [Dottore Genius Invokation TCG Simulator](#dottore-genius-invokation-tcg-simulator)
+  - [Notification](#notification)
   - [Features of This Simulator](#features-of-this-simulator)
   - [Development Milestones](#development-milestones)
   - [CLI (How to try the simulator)](#cli-how-to-try-the-simulator)
@@ -13,6 +14,10 @@ The simulator is modeled as a finite state machine, where all game states are im
   - [Future Plans](#future-plans)
   - [Interested in the Project](#interested-in-the-project)
   - [QA](#qa)
+
+## Notification
+
+***Project is under major refactoring***
 
 ## Features of This Simulator
 
