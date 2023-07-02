@@ -17,6 +17,7 @@ from dgisim.src.status.enums import PREPROCESSABLES
 if TYPE_CHECKING:
     import dgisim.src.card.card as cd
     import dgisim.src.state.game_state as gs
+    from dgisim.src.status.types import Preprocessable
 
 
 class TriggerringEvent(Enum):
@@ -34,9 +35,9 @@ class Status:
             self,
             game_state: gs.GameState,
             status_source: StaticTarget,
-            item: eft.Preprocessable,
+            item: Preprocessable,
             signal: PREPROCESSABLES,
-    ) -> tuple[eft.Preprocessable, Optional[Self]]:
+    ) -> tuple[Preprocessable, Optional[Self]]:
         """
         Returns the processed Preprocessable and possibly updated or deleted self
         """
@@ -54,20 +55,20 @@ class Status:
             self,
             game_state: gs.GameState,
             status_source: StaticTarget,
-            item: eft.Preprocessable,
+            item: Preprocessable,
             signal: PREPROCESSABLES,
-    ) -> tuple[eft.Preprocessable, Optional[Self]]:
+    ) -> tuple[Preprocessable, Optional[Self]]:
         return item, self
 
     def _post_preprocess(
             self,
             game_state: gs.GameState,
             status_source: StaticTarget,
-            item: eft.Preprocessable,
+            item: Preprocessable,
             signal: PREPROCESSABLES,
-            new_item: eft.Preprocessable,
+            new_item: Preprocessable,
             new_self: Optional[Self],
-    ) -> tuple[eft.Preprocessable, Optional[Self]]:
+    ) -> tuple[Preprocessable, Optional[Self]]:
         return (new_item, new_self)
 
     def inform(
@@ -302,11 +303,11 @@ class _UsageStatus(Status):
             self,
             game_state: gs.GameState,
             status_source: StaticTarget,
-            item: eft.Preprocessable,
+            item: Preprocessable,
             signal: PREPROCESSABLES,
-            new_item: eft.Preprocessable,
+            new_item: Preprocessable,
             new_self: Optional[Self],
-    ) -> tuple[eft.Preprocessable, Optional[Self]]:
+    ) -> tuple[Preprocessable, Optional[Self]]:
         if new_self is not None:
             if self._auto_destroy() and new_self.usages <= 0:
                 new_self = None
@@ -339,7 +340,7 @@ class ShieldStatus(Status):
             self,
             game_state: gs.GameState,
             status_source: StaticTarget,
-            item: eft.Preprocessable,
+            item: Preprocessable,
             signal: PREPROCESSABLES,
     ) -> bool:
         import dgisim.src.summon.summon as sm
@@ -381,9 +382,9 @@ class StackedShieldStatus(ShieldStatus, _UsageStatus):
             self,
             game_state: gs.GameState,
             status_source: StaticTarget,
-            item: eft.Preprocessable,
+            item: Preprocessable,
             signal: PREPROCESSABLES,
-    ) -> tuple[eft.Preprocessable, Optional[Self]]:
+    ) -> tuple[Preprocessable, Optional[Self]]:
         cls = type(self)
         if signal is PREPROCESSABLES.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
@@ -421,9 +422,9 @@ class FixedShieldStatus(ShieldStatus, _UsageStatus):
             self,
             game_state: gs.GameState,
             status_source: StaticTarget,
-            item: eft.Preprocessable,
+            item: Preprocessable,
             signal: PREPROCESSABLES,
-    ) -> tuple[eft.Preprocessable, Optional[Self]]:
+    ) -> tuple[Preprocessable, Optional[Self]]:
         cls = type(self)
         if signal is PREPROCESSABLES.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
@@ -470,9 +471,9 @@ class DendroCoreStatus(CombatStatus):
             self,
             game_state: gs.GameState,
             status_source: StaticTarget,
-            item: eft.Preprocessable,
+            item: Preprocessable,
             signal: PREPROCESSABLES,
-    ) -> tuple[eft.Preprocessable, Optional[DendroCoreStatus]]:
+    ) -> tuple[Preprocessable, Optional[DendroCoreStatus]]:
         if signal is PREPROCESSABLES.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             assert self.usages >= 1
@@ -508,9 +509,9 @@ class CatalyzingFieldStatus(CombatStatus):
             self,
             game_state: gs.GameState,
             status_source: StaticTarget,
-            item: eft.Preprocessable,
+            item: Preprocessable,
             signal: PREPROCESSABLES,
-    ) -> tuple[eft.Preprocessable, Optional[CatalyzingFieldStatus]]:
+    ) -> tuple[Preprocessable, Optional[CatalyzingFieldStatus]]:
         if signal is PREPROCESSABLES.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             assert self.usages >= 1
@@ -540,9 +541,9 @@ class FrozenStatus(CharacterStatus):
             self,
             game_state: gs.GameState,
             status_source: StaticTarget,
-            item: eft.Preprocessable,
+            item: Preprocessable,
             signal: PREPROCESSABLES,
-    ) -> tuple[eft.Preprocessable, Optional[Self]]:
+    ) -> tuple[Preprocessable, Optional[Self]]:
         if signal is PREPROCESSABLES.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             can_reaction = item.element is Element.PYRO or item.element is Element.PHYSICAL
@@ -608,9 +609,9 @@ class JueyunGuobaStatus(CharacterStatus, _UsageStatus):
             self,
             game_state: gs.GameState,
             status_source: StaticTarget,
-            item: eft.Preprocessable,
+            item: Preprocessable,
             signal: PREPROCESSABLES,
-    ) -> tuple[eft.Preprocessable, Optional[Self]]:
+    ) -> tuple[Preprocessable, Optional[Self]]:
         if signal is PREPROCESSABLES.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             if item.source == status_source and item.damage_type.normal_attack:
@@ -639,9 +640,9 @@ class NorthernSmokedChickenStatus(CharacterStatus, _UsageStatus):
             self,
             game_state: gs.GameState,
             status_source: StaticTarget,
-            item: eft.Preprocessable,
+            item: Preprocessable,
             signal: PREPROCESSABLES,
-    ) -> tuple[eft.Preprocessable, Optional[Self]]:
+    ) -> tuple[Preprocessable, Optional[Self]]:
         if signal is PREPROCESSABLES.SKILL:
             assert isinstance(item, evt.GameEvent)
             if status_source == item.target \
@@ -693,9 +694,9 @@ class MintyMeatRollsStatus(CharacterStatus, _UsageStatus):
             self,
             game_state: gs.GameState,
             status_source: StaticTarget,
-            item: eft.Preprocessable,
+            item: Preprocessable,
             signal: PREPROCESSABLES,
-    ) -> tuple[eft.Preprocessable, Optional[Self]]:
+    ) -> tuple[Preprocessable, Optional[Self]]:
         if signal is PREPROCESSABLES.SKILL:
             assert isinstance(item, evt.GameEvent)
             if status_source == item.target \
@@ -729,9 +730,9 @@ class ChangingShiftsStatus(CombatStatus):
             self,
             game_state: gs.GameState,
             status_source: StaticTarget,
-            item: eft.Preprocessable,
+            item: Preprocessable,
             signal: PREPROCESSABLES,
-    ) -> tuple[eft.Preprocessable, Optional[Self]]:
+    ) -> tuple[Preprocessable, Optional[Self]]:
         if signal is PREPROCESSABLES.SWAP:
             assert isinstance(item, evt.GameEvent) and item.event_type is evt.EventType.SWAP
             if item.target.pid is status_source.pid \
@@ -749,9 +750,9 @@ class LeaveItToMeStatus(CombatStatus):
             self,
             game_state: gs.GameState,
             status_source: StaticTarget,
-            item: eft.Preprocessable,
+            item: Preprocessable,
             signal: PREPROCESSABLES,
-    ) -> tuple[eft.Preprocessable, Optional[Self]]:
+    ) -> tuple[Preprocessable, Optional[Self]]:
         if signal is PREPROCESSABLES.SWAP:
             assert isinstance(item, evt.GameEvent) and item.event_type is evt.EventType.SWAP
             if item.target.pid is status_source.pid \
@@ -774,9 +775,9 @@ class _InfusionStatus(CharacterStatus, _UsageStatus):
             self,
             game_state: gs.GameState,
             status_source: StaticTarget,
-            item: eft.Preprocessable,
+            item: Preprocessable,
             signal: PREPROCESSABLES,
-    ) -> tuple[eft.Preprocessable, Optional[Self]]:
+    ) -> tuple[Preprocessable, Optional[Self]]:
         assert self.ELEMENT is not None
         new_item: Optional[eft.SpecificDamageEffect] = None
         if isinstance(item, eft.SpecificDamageEffect):

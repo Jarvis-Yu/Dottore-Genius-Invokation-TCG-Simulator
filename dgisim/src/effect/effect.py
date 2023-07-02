@@ -3,7 +3,6 @@ from dataclasses import asdict, dataclass, field, replace
 from typing import FrozenSet, Iterable, Optional, TYPE_CHECKING, Union
 
 import dgisim.src.character.character as chr
-import dgisim.src.event.event as evt
 import dgisim.src.status.status as stt
 import dgisim.src.summon.summon as sm
 import dgisim.src.support.support as sp
@@ -1221,7 +1220,3 @@ class BroadCastSkillInfoEffect(Effect):
             self.skill,
             source=self.source,
         )
-
-
-# This has to be by the end of the file or there's cyclic import error
-Preprocessable = Union[SpecificDamageEffect, evt.GameEvent, evt.CardEvent]

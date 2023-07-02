@@ -276,7 +276,7 @@ class SupportCard(Card):
     def _choices_helper(
             cls,
             action_generator: acg.ActionGenerator,
-    ) -> tuple[Choosable, ...] | AbstractDices | cds.Cards:
+    ) -> tuple[acg.Choosable, ...] | AbstractDices | cds.Cards:
         game_state = action_generator.game_state
         pid = action_generator.pid
 
@@ -309,7 +309,7 @@ class SupportCard(Card):
     def _fill_helper(
         cls,
         action_generator: acg.ActionGenerator,
-        player_choice: Choosable | ActualDices | cds.Cards,
+        player_choice: acg.Choosable | ActualDices | cds.Cards,
     ) -> acg.ActionGenerator:
         assert action_generator._action_filled()
 
@@ -377,7 +377,7 @@ class _DiceOnlyChoiceProvider(Card):
     def _choices_helper(
             cls,
             action_generator: acg.ActionGenerator,
-    ) -> tuple[Choosable, ...] | AbstractDices | cds.Cards:
+    ) -> tuple[acg.Choosable, ...] | AbstractDices | cds.Cards:
         game_state = action_generator.game_state
         pid = action_generator.pid
 
@@ -397,7 +397,7 @@ class _DiceOnlyChoiceProvider(Card):
     def _fill_helper(
         cls,
         action_generator: acg.ActionGenerator,
-        player_choice: Choosable | ActualDices | cds.Cards,
+        player_choice: acg.Choosable | ActualDices | cds.Cards,
     ) -> acg.ActionGenerator:
         assert action_generator._action_filled()
 
@@ -440,7 +440,7 @@ class _CharTargetChoiceProvider(Card):
     def _choices_helper(
             cls,
             action_generator: acg.ActionGenerator,
-    ) -> tuple[Choosable, ...] | AbstractDices | cds.Cards:
+    ) -> tuple[acg.Choosable, ...] | AbstractDices | cds.Cards:
         game_state = action_generator.game_state
         pid = action_generator.pid
 
@@ -472,7 +472,7 @@ class _CharTargetChoiceProvider(Card):
     def _fill_helper(
         cls,
         action_generator: acg.ActionGenerator,
-        player_choice: Choosable | ActualDices | cds.Cards,
+        player_choice: acg.Choosable | ActualDices | cds.Cards,
     ) -> acg.ActionGenerator:
         assert action_generator._action_filled()
 
@@ -1061,4 +1061,3 @@ class StreamingSurge(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
 
 
 ########### type ##########
-Choosable = StaticTarget | int | ActualDices | CharacterSkill | type[Card] | Element

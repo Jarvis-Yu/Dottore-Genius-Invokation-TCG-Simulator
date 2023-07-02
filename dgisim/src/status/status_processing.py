@@ -14,6 +14,7 @@ from dgisim.src.effect.structs import StaticTarget
 if TYPE_CHECKING:
     import dgisim.src.card.card as cd
     import dgisim.src.state.game_state as gs
+    from dgisim.src.status.types import Preprocessable
 
 
 class StatusProcessing:
@@ -114,7 +115,8 @@ class StatusProcessing:
                 effects.append(eft.TriggerSummonEffect(target.pid, type(status), signal))
 
             elif isinstance(status, sp.Support):
-                effects.append(eft.TriggerSupportEffect(target.pid, type(status), status.sid, signal))
+                effects.append(eft.TriggerSupportEffect(
+                    target.pid, type(status), status.sid, signal))
 
             return game_state
 
@@ -125,9 +127,9 @@ class StatusProcessing:
     def preprocess_by_all_statuses(
             game_state: gs.GameState,
             pid: PID,
-            item: eft.Preprocessable,
+            item: Preprocessable,
             pp_type: PREPROCESSABLES,
-    ) -> tuple[gs.GameState, eft.Preprocessable]:
+    ) -> tuple[gs.GameState, Preprocessable]:
         def f(game_state: gs.GameState, status: stt.Status, status_source: StaticTarget) -> gs.GameState:
             nonlocal item
             item, new_status = status.preprocess(game_state, status_source, item, pp_type)

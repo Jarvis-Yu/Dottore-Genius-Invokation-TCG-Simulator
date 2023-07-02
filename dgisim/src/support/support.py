@@ -15,6 +15,7 @@ from dgisim.src.status.enums import PREPROCESSABLES
 if TYPE_CHECKING:
     import dgisim.src.state.game_state as gs
     from dgisim.src.effect.structs import StaticTarget
+    from dgisim.src.status.types import Preprocessable
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -40,9 +41,9 @@ class XudongSupport(Support):
             self,
             game_state: gs.GameState,
             status_source: StaticTarget,
-            item: eft.Preprocessable,
+            item: Preprocessable,
             signal: PREPROCESSABLES,
-    ) -> tuple[eft.Preprocessable, None | Self]:
+    ) -> tuple[Preprocessable, None | Self]:
         if signal is PREPROCESSABLES.CARD:
             assert isinstance(item, evt.CardEvent)
             if item.pid is status_source.pid \
