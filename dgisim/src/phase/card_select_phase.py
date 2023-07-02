@@ -1,13 +1,15 @@
 from __future__ import annotations
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 import dgisim.src.phase.phase as ph
-import dgisim.src.state.game_state as gs
 from dgisim.src.action.action import CardSelectAction, PlayerAction, EndRoundAction
 from dgisim.src.card.cards import Cards
 from dgisim.src.helper.level_print import level_print
 from dgisim.src.state.enums import PID, ACT
 from dgisim.src.state.player_state import PlayerState
+
+if TYPE_CHECKING:
+    import dgisim.src.state.game_state as gs
 
 
 class CardSelectPhase(ph.Phase):

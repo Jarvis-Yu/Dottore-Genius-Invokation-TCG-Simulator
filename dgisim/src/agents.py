@@ -3,7 +3,7 @@ from typing import Optional, Iterable, TYPE_CHECKING
 
 from dgisim.src.action.action import *
 from dgisim.src.action.action_generator import *
-from dgisim.src.action.types import _SingleChoiceType, DecidedChoiceType
+from dgisim.src.action.types import DecidedChoiceType
 from dgisim.src.card.card import *
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.dices import AbstractDices, ActualDices
@@ -273,7 +273,7 @@ class RandomAgent(PlayerAgent):
     def _random_action_generator_chooser(self, action_generator: ActionGenerator) -> PlayerAction:
         while not action_generator.filled():
             choices = action_generator.choices()
-            choice: DecidedChoiceType
+            choice: DecidedChoiceType  # type: ignore
             if isinstance(choices, tuple):
                 choice = random.choice(choices)
                 action_generator = action_generator.choose(choice)
@@ -391,7 +391,7 @@ class CustomChoiceAgent(RandomAgent):
     def _random_action_generator_chooser(self, action_generator: ActionGenerator) -> PlayerAction:
         while not action_generator.filled():
             choices = action_generator.choices()
-            choice: DecidedChoiceType
+            choice: DecidedChoiceType  # type: ignore
             if isinstance(choices, tuple):
                 choice = self._choose_handler(choices)
                 action_generator = action_generator.choose(choice)

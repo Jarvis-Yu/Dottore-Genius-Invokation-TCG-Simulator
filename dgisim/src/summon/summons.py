@@ -1,8 +1,10 @@
 from __future__ import annotations
-from typing import Optional, Union, Iterator
+from typing import Iterator, Optional, TYPE_CHECKING, Union
 
 from dgisim.src.helper.quality_of_life import just
-from dgisim.src.summon.summon import Summon
+
+if TYPE_CHECKING:
+    from dgisim.src.summon.summon import Summon
 
 
 class Summons:
@@ -20,7 +22,7 @@ class Summons:
     def just_find(self, summon_type: type[Summon]) -> Summon:
         return just(self.find(summon_type))
 
-    def update_summon(self, incoming_summon: Summon, override: bool=False) -> Summons:
+    def update_summon(self, incoming_summon: Summon, override: bool = False) -> Summons:
         summons = list(self._summons)
         for i, summon in enumerate(summons):
             if type(summon) != type(incoming_summon):
@@ -71,4 +73,3 @@ class Summons:
             (summon.__class__.__name__.removesuffix("Summon"), str(summon.usages))
             for summon in self
         )
-

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TypeVar, Optional, Iterator
+from typing import Iterator, Optional, TYPE_CHECKING, TypeVar
 from typing_extensions import Self
 
 import dgisim.src.status.status as stt

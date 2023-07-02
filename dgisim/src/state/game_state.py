@@ -4,7 +4,6 @@ from typing import Callable, Optional, TYPE_CHECKING
 
 import dgisim.src.action.action as act
 import dgisim.src.action.action_generator as acg
-import dgisim.src.card.cards as cds
 import dgisim.src.effect.effect as eft
 import dgisim.src.mode as md
 import dgisim.src.phase.game_end_phase as gep

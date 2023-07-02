@@ -3,9 +3,9 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from dgisim.src.summon.summon import *
-from dgisim.src.effect.enums import TRIGGERING_SIGNAL
 
 if TYPE_CHECKING:
+    from dgisim.src.effect.enums import TRIGGERING_SIGNAL
     from dgisim.src.effect.structs import StaticTarget
 
 

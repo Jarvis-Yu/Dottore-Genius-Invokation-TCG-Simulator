@@ -1,8 +1,10 @@
 from __future__ import annotations
-from typing import Optional, Callable, Union, Iterator
+from typing import Callable, Iterator, Optional, TYPE_CHECKING, Union
 
-import dgisim.src.character.character as chr
 from dgisim.src.helper.level_print import level_print, INDENT
+
+if TYPE_CHECKING:
+    import dgisim.src.character.character as chr
 
 
 class Characters:

@@ -1,12 +1,14 @@
 from __future__ import annotations
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 import dgisim.src.phase.phase as ph
-import dgisim.src.state.game_state as gs
 from dgisim.src.action.action import *
 from dgisim.src.dices import ActualDices
 from dgisim.src.effect.effect import *
 from dgisim.src.state.enums import PID, ACT
+
+if TYPE_CHECKING:
+    import dgisim.src.state.game_state as gs
 
 
 class EndPhase(ph.Phase):

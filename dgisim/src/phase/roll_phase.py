@@ -1,10 +1,13 @@
 from __future__ import annotations
+from typing import TYPE_CHECKING
 
 import dgisim.src.phase.phase as ph
-import dgisim.src.state.game_state as gs
 from dgisim.src.dices import ActualDices
 from dgisim.src.element.element import Element
 from dgisim.src.state.enums import ACT
+
+if TYPE_CHECKING:
+    import dgisim.src.state.game_state as gs
 
 
 class RollPhase(ph.Phase):
