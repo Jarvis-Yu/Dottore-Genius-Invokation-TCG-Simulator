@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Union, Optional, Callable
+from typing import Callable, Optional, Union, TYPE_CHECKING
 
 import dgisim.src.card.cards as cds
 import dgisim.src.character.character as chr
@@ -7,11 +7,13 @@ import dgisim.src.status.statuses as sts
 import dgisim.src.support.support as sp
 from dgisim.src.character.characters import Characters
 from dgisim.src.dices import ActualDices
-from dgisim.src.event.event_pre import EventPre
 from dgisim.src.helper.level_print import level_print, INDENT
 from dgisim.src.state.enums import ACT
 from dgisim.src.summon.summons import Summons
 from dgisim.src.support.supports import Supports
+
+if TYPE_CHECKING:
+    import dgisim.src.mode as md
 
 
 class PlayerState:
@@ -102,20 +104,6 @@ class PlayerState:
 
     def defeated(self) -> bool:
         return self._characters.all_defeated()
-
-    def get_possible_actions(self) -> tuple[EventPre, ...]:
-        character_skills = self._characters.get_skills()
-        swaps = [
-            # TypicalSwapCharacterEvent(id)
-            # for id in self._characters.get_swappable_ids()
-        ]
-        return tuple([
-            action
-            for actions in [character_skills, swaps]
-            for action in actions
-        ])
-
-    import dgisim.src.mode as md
 
     @staticmethod
     def examplePlayer(mode: md.Mode):
@@ -219,7 +207,6 @@ class PlayerStateFactory:
     def combat_statuses(self, combat_statuses: sts.Statuses) -> PlayerStateFactory:
         self._combat_statuses = combat_statuses
         return self
-
 
     def f_combat_statuses(self, f: Callable[[sts.Statuses], sts.Statuses]) -> PlayerStateFactory:
         return self.combat_statuses(f(self._combat_statuses))

@@ -21,7 +21,6 @@ from dgisim.src.effect.enums import ZONE
 from dgisim.src.effect.structs import StaticTarget
 from dgisim.src.element.element import Element
 from dgisim.src.event.event import *
-from dgisim.src.event.event_pre import EventPre
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
 from dgisim.src.helper.quality_of_life import case_val
 from dgisim.src.state.enums import PID
@@ -156,9 +155,6 @@ class GameState:
 
     def waiting_for(self) -> Optional[PID]:
         return self._phase.waiting_for(self)
-
-    def possible_actions(self, pid: PID) -> dict[int, EventPre]:
-        return self._phase.possible_actions(self)
 
     def step(self) -> GameState:
         return self._phase.step(self)

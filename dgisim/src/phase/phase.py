@@ -6,7 +6,6 @@ from dgisim.src.helper.level_print import level_print_single
 if TYPE_CHECKING:
     import dgisim.src.state.game_state as gs
     from dgisim.src.action.action import PlayerAction
-    from dgisim.src.event.event_pre import EventPre
     from dgisim.src.state.enums import PID
 
 
@@ -23,9 +22,6 @@ class Phase:
             if player.get_phase().is_action_phase():
                 return game_state.get_pid(player)
         return None
-
-    def possible_actions(self, game_state: gs.GameState) -> dict[int, EventPre]:
-        return {}
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Phase)

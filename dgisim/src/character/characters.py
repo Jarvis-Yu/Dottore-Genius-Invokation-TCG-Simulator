@@ -2,7 +2,6 @@ from __future__ import annotations
 from typing import Optional, Callable, Union, Iterator
 
 import dgisim.src.character.character as chr
-from dgisim.src.event.event_pre import EventPre
 from dgisim.src.helper.level_print import level_print, INDENT
 
 
@@ -87,14 +86,6 @@ class Characters:
 
     def all_defeated(self) -> bool:
         return all([c.defeated() for c in self._characters])
-
-    def get_skills(self) -> tuple[EventPre, ...]:
-        active_character = self.get_active_character()
-        if active_character is None:
-            return tuple()
-        # TODO
-        # return active_character.skills()
-        return tuple()
 
     def char_id_valid(self, char_id: int) -> bool:
         return char_id >= 1 and char_id <= len(self._characters)
