@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dgisim.src.state.game_state import GameState
-from dgisim.src.state.enums import PID
+from dgisim.src.state.enums import PID, ACT
 from dgisim.src.state.player_state import PlayerState
 from dgisim.src.character.characters import Characters
 from dgisim.src.character.character import *
@@ -51,7 +51,7 @@ OPPO_DEATH_WAIT = BASE_GAME.factory().f_phase(
     .f_characters(
         lambda cs: cs.factory().active_character_id(1).build()
     )
-    .phase(PlayerState.Act.ACTION_PHASE)
+    .phase(ACT.ACTION_PHASE)
     .build()
 ).f_player2(
     lambda p: p.factory()
@@ -61,7 +61,7 @@ OPPO_DEATH_WAIT = BASE_GAME.factory().f_phase(
         .f_character(1, lambda c: c.factory().hp(0).build())
         .build()
     )
-    .phase(PlayerState.Act.PASSIVE_WAIT_PHASE)
+    .phase(ACT.PASSIVE_WAIT_PHASE)
     .build()
 ).f_effect_stack(
     lambda es: es.push_one(DeathCheckCheckerEffect())
@@ -69,7 +69,7 @@ OPPO_DEATH_WAIT = BASE_GAME.factory().f_phase(
 
 
 OPPO_DEATH_END = OPPO_DEATH_WAIT.factory().f_player2(
-    lambda p: p.factory().phase(PlayerState.Act.END_PHASE).build()
+    lambda p: p.factory().phase(ACT.END_PHASE).build()
 ).build()
 
 
@@ -82,14 +82,14 @@ ACTION_TEMPLATE = BASE_GAME.factory().f_phase(
     .f_characters(
         lambda cs: cs.factory().active_character_id(1).build()
     )
-    .phase(PlayerState.Act.ACTION_PHASE)
+    .phase(ACT.ACTION_PHASE)
     .build()
 ).f_player2(
     lambda p: p.factory()
     .f_characters(
         lambda cs: cs.factory().active_character_id(1).build()
     )
-    .phase(PlayerState.Act.PASSIVE_WAIT_PHASE)
+    .phase(ACT.PASSIVE_WAIT_PHASE)
     .build()
 ).build()
 
@@ -103,13 +103,13 @@ END_TEMPLATE = BASE_GAME.factory().f_phase(
     .f_characters(
         lambda cs: cs.factory().active_character_id(1).build()
     )
-    .phase(PlayerState.Act.PASSIVE_WAIT_PHASE)
+    .phase(ACT.PASSIVE_WAIT_PHASE)
     .build()
 ).f_player2(
     lambda p: p.factory()
     .f_characters(
         lambda cs: cs.factory().active_character_id(1).build()
     )
-    .phase(PlayerState.Act.PASSIVE_WAIT_PHASE)
+    .phase(ACT.PASSIVE_WAIT_PHASE)
     .build()
 ).build()

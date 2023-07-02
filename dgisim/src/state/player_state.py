@@ -12,30 +12,13 @@ import dgisim.src.status.statuses as sts
 import dgisim.src.support.support as sp
 from dgisim.src.summon.summons import Summons
 from dgisim.src.support.supports import Supports
+from dgisim.src.state.enums import ACT
 
 
 class PlayerState:
-    class Act(Enum):
-        ACTION_PHASE = "Action Phase"
-        PASSIVE_WAIT_PHASE = "Passive Wait Phase"
-        ACTIVE_WAIT_PHASE = "Aggressive Wait Phase"
-        END_PHASE = "End Phase"
-
-        def is_action_phase(self) -> bool:
-            return self is PlayerState.Act.ACTION_PHASE
-
-        def is_passive_wait_phase(self) -> bool:
-            return self is PlayerState.Act.PASSIVE_WAIT_PHASE
-
-        def is_active_wait_phase(self) -> bool:
-            return self is PlayerState.Act.ACTIVE_WAIT_PHASE
-        
-        def is_end_phase(self) -> bool:
-            return self is PlayerState.Act.END_PHASE
-
     def __init__(
         self,
-        phase: Act,
+        phase: ACT,
         characters: Characters,
         combat_statuses: sts.Statuses,
         summons: Summons,
@@ -61,7 +44,7 @@ class PlayerState:
     def factory(self) -> PlayerStateFactory:
         return PlayerStateFactory(self)
 
-    def get_phase(self) -> Act:
+    def get_phase(self) -> ACT:
         return self._phase
 
     def get_card_redraw_chances(self) -> int:
@@ -98,16 +81,16 @@ class PlayerState:
         return self._characters.just_get_active_character()
 
     def is_action_phase(self):
-        return self._phase is self.Act.ACTION_PHASE
+        return self._phase is ACT.ACTION_PHASE
 
     def is_passive_wait_phase(self):
-        return self._phase is self.Act.PASSIVE_WAIT_PHASE
+        return self._phase is ACT.PASSIVE_WAIT_PHASE
 
     def is_active_wait_phase(self):
-        return self._phase is self.Act.ACTIVE_WAIT_PHASE
+        return self._phase is ACT.ACTIVE_WAIT_PHASE
 
     def is_end_phase(self):
-        return self._phase is self.Act.END_PHASE
+        return self._phase is ACT.END_PHASE
 
     def is_mine(self, object: chr.Character | sp.Support) -> bool:
         if isinstance(object, chr.Character):
@@ -140,7 +123,7 @@ class PlayerState:
         cards = mode.all_cards()
         chars = mode.all_chars()
         return PlayerState(
-            phase=PlayerState.Act.PASSIVE_WAIT_PHASE,
+            phase=ACT.PASSIVE_WAIT_PHASE,
             card_redraw_chances=0,
             characters=Characters.from_default(
                 tuple([char.from_default(i + 1) for i, char in enumerate(chars)][:3])
@@ -218,7 +201,7 @@ class PlayerStateFactory:
         self._deck_cards = player_state.get_deck_cards()
         self._publicly_used_cards = player_state.get_publicly_used_cards()
 
-    def phase(self, phase: PlayerState.Act) -> PlayerStateFactory:
+    def phase(self, phase: ACT) -> PlayerStateFactory:
         self._phase = phase
         return self
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Optional, cast
 
 import dgisim.src.state.game_state as gs
-from dgisim.src.state.enums import PID
+from dgisim.src.state.enums import PID, ACT
 import dgisim.src.phase.phase as ph
 from dgisim.src.state.player_state import PlayerState
 from dgisim.src.action.action import *
@@ -17,7 +17,7 @@ class ActionPhase(ph.Phase):
         return game_state.factory().player(
             active_player_id,
             game_state.get_player(active_player_id).factory().phase(
-                PlayerState.Act.ACTION_PHASE
+                ACT.ACTION_PHASE
             ).build()
         ).build()
 
@@ -28,12 +28,12 @@ class ActionPhase(ph.Phase):
         ).player(
             active_player_id,
             game_state.get_player(active_player_id).factory().phase(
-                PlayerState.Act.PASSIVE_WAIT_PHASE
+                ACT.PASSIVE_WAIT_PHASE
             ).build()
         ).other_player(
             active_player_id,
             game_state.get_other_player(active_player_id).factory().phase(
-                PlayerState.Act.PASSIVE_WAIT_PHASE
+                ACT.PASSIVE_WAIT_PHASE
             ).build()
         ).build()
 
@@ -54,12 +54,12 @@ class ActionPhase(ph.Phase):
         p2 = game_state.get_player2()
         p1p = p1.get_phase()
         p2p = p2.get_phase()
-        if p1p is PlayerState.Act.ACTION_PHASE or p2p is PlayerState.Act.ACTION_PHASE:
+        if p1p is ACT.ACTION_PHASE or p2p is ACT.ACTION_PHASE:
             assert self._is_executing_effects(game_state)
             return self._execute_effect(game_state)
-        elif p1p is PlayerState.Act.PASSIVE_WAIT_PHASE and p2p is PlayerState.Act.PASSIVE_WAIT_PHASE:
+        elif p1p is ACT.PASSIVE_WAIT_PHASE and p2p is ACT.PASSIVE_WAIT_PHASE:
             return self._start_up_phase(game_state)
-        elif p1p is PlayerState.Act.END_PHASE and p2p is PlayerState.Act.END_PHASE:
+        elif p1p is ACT.END_PHASE and p2p is ACT.END_PHASE:
             return self._to_end_phase(game_state)
         raise Exception("Unknown Game State to process")
 
@@ -68,10 +68,10 @@ class ActionPhase(ph.Phase):
         assert active_player_id == pid
         active_player = game_state.get_player(active_player_id)
         other_player = game_state.get_other_player(active_player_id)
-        if other_player.get_phase() is PlayerState.Act.END_PHASE:
-            other_player_new_phase = PlayerState.Act.END_PHASE
-        elif other_player.get_phase() is PlayerState.Act.PASSIVE_WAIT_PHASE:
-            other_player_new_phase = PlayerState.Act.ACTION_PHASE
+        if other_player.get_phase() is ACT.END_PHASE:
+            other_player_new_phase = ACT.END_PHASE
+        elif other_player.get_phase() is ACT.PASSIVE_WAIT_PHASE:
+            other_player_new_phase = ACT.ACTION_PHASE
         else:
             print(f"ERROR pid={pid}\n {game_state}")
             raise Exception(f"Unknown Game State to process {other_player.get_phase()}")
@@ -82,7 +82,7 @@ class ActionPhase(ph.Phase):
         ).player(
             active_player_id,
             active_player.factory().phase(
-                PlayerState.Act.END_PHASE
+                ACT.END_PHASE
             ).build()
         ).other_player(
             active_player_id,

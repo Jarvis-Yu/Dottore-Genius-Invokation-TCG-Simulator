@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import dgisim.src.phase.phase as ph
 import dgisim.src.state.game_state as gs
+from dgisim.src.state.enums import ACT
 from dgisim.src.dices import ActualDices
 from dgisim.src.element.element import Element
 from dgisim.src.state.player_state import PlayerState
@@ -15,13 +16,13 @@ class RollPhase(ph.Phase):
             game_state.get_mode().action_phase()
         ).player1(
             game_state.get_player1().factory()
-            .phase(PlayerState.Act.PASSIVE_WAIT_PHASE)
+            .phase(ACT.PASSIVE_WAIT_PHASE)
             .dices(ActualDices.from_all(RollPhase._NUM_DICES, Element.OMNI))
             # .dices(ActualDices.from_random(RollPhase._NUM_DICES))
             .build()
         ).player2(
             game_state.get_player2().factory()
-            .phase(PlayerState.Act.PASSIVE_WAIT_PHASE)
+            .phase(ACT.PASSIVE_WAIT_PHASE)
             .dices(ActualDices.from_all(RollPhase._NUM_DICES, Element.OMNI))
             # .dices(ActualDices.from_random(RollPhase._NUM_DICES))
             .build()

@@ -8,7 +8,7 @@ from dgisim.src.action.action import *
 from dgisim.src.character.character import *
 from dgisim.src.card.card import *
 from dgisim.src.status.status import *
-from dgisim.src.state.enums import PID
+from dgisim.src.state.enums import PID, ACT
 
 
 class TestKeqing(unittest.TestCase):
@@ -19,7 +19,7 @@ class TestKeqing(unittest.TestCase):
             lambda hcs: hcs.add(ThunderingPenance)
         ).build()
     ).f_player2(
-        lambda p: p.factory().phase(PlayerState.Act.END_PHASE).build()
+        lambda p: p.factory().phase(ACT.END_PHASE).build()
     ).build()
     assert type(BASE_GAME.get_player1().just_get_active_character()) is Keqing
 

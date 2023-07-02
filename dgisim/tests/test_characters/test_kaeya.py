@@ -8,7 +8,7 @@ from dgisim.src.action.action import *
 from dgisim.src.character.character import *
 from dgisim.src.card.card import *
 from dgisim.src.status.status import *
-from dgisim.src.state.enums import PID
+from dgisim.src.state.enums import PID, ACT
 
 
 class TestKaeya(unittest.TestCase):
@@ -20,7 +20,7 @@ class TestKaeya(unittest.TestCase):
         ).build()
     ).f_player2(
         lambda p: p.factory().phase(
-            PlayerState.Act.END_PHASE
+            ACT.END_PHASE
         ).f_characters(
             lambda cs: cs.factory().active_character_id(
                 3  # make opponenet active characater Keqing
@@ -157,7 +157,7 @@ class TestKaeya(unittest.TestCase):
             PID.P2
         ).f_player1(
             lambda p: p.factory().phase(
-                PlayerState.Act.PASSIVE_WAIT_PHASE
+                ACT.PASSIVE_WAIT_PHASE
             ).f_characters(
                 lambda cs: cs.factory().f_active_character(
                     lambda ac: ac.factory().elemental_aura(
@@ -166,7 +166,7 @@ class TestKaeya(unittest.TestCase):
                 ).build()
             ).build()
         ).f_player2(
-            lambda p: p.factory().phase(PlayerState.Act.ACTION_PHASE).build()
+            lambda p: p.factory().phase(ACT.ACTION_PHASE).build()
         ).build()
 
         a2.inject_action(SkillAction(

@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Optional
 
 import dgisim.src.state.game_state as gs
-from dgisim.src.state.enums import PID
+from dgisim.src.state.enums import PID, ACT
 from dgisim.src.action.action import *
 import dgisim.src.phase.phase as ph
 from dgisim.src.effect.effect import *
@@ -19,13 +19,13 @@ class EndPhase(ph.Phase):
         effects += [
             EndPhaseCheckoutEffect(),
             EndRoundEffect(),
-            SetBothPlayerPhaseEffect(PlayerState.Act.END_PHASE),
+            SetBothPlayerPhaseEffect(ACT.END_PHASE),
         ]
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).f_player(
             active_pid,
-            lambda p: p.factory().phase(PlayerState.Act.ACTIVE_WAIT_PHASE).build()
+            lambda p: p.factory().phase(ACT.ACTIVE_WAIT_PHASE).build()
         ).build()
 
     def _to_roll_phase(self, game_state: gs.GameState, new_round: int) -> gs.GameState:
@@ -43,7 +43,7 @@ class EndPhase(ph.Phase):
         ).f_player(
             active_player_id,
             lambda p: p.factory().phase(
-                PlayerState.Act.PASSIVE_WAIT_PHASE
+                ACT.PASSIVE_WAIT_PHASE
             ).dices(
                 ActualDices.from_empty()
             ).hand_cards(
@@ -54,7 +54,7 @@ class EndPhase(ph.Phase):
         ).f_other_player(
             active_player_id,
             lambda p: p.factory().phase(
-                PlayerState.Act.PASSIVE_WAIT_PHASE
+                ACT.PASSIVE_WAIT_PHASE
             ).dices(
                 ActualDices.from_empty()
             ).hand_cards(
@@ -67,11 +67,11 @@ class EndPhase(ph.Phase):
     def _end_both_players(self, game_state: gs.GameState) -> gs.GameState:
         return game_state.factory().f_player1(
             lambda p: p.factory().phase(
-                PlayerState.Act.END_PHASE
+                ACT.END_PHASE
             ).build()
         ).f_player2(
             lambda p: p.factory().phase(
-                PlayerState.Act.END_PHASE
+                ACT.END_PHASE
             ).build()
         ).build()
 
@@ -96,16 +96,16 @@ class EndPhase(ph.Phase):
         p1 = game_state.get_player1()
         p2 = game_state.get_player2()
         active_player_id = game_state.get_active_player_id()
-        if p1.get_phase() is PlayerState.Act.PASSIVE_WAIT_PHASE and p2.get_phase() is PlayerState.Act.PASSIVE_WAIT_PHASE:
+        if p1.get_phase() is ACT.PASSIVE_WAIT_PHASE and p2.get_phase() is ACT.PASSIVE_WAIT_PHASE:
             return self._initialize_end_phase(game_state)
-        elif p1.get_phase() is PlayerState.Act.ACTIVE_WAIT_PHASE or p2.get_phase() is PlayerState.Act.ACTIVE_WAIT_PHASE:
+        elif p1.get_phase() is ACT.ACTIVE_WAIT_PHASE or p2.get_phase() is ACT.ACTIVE_WAIT_PHASE:
             assert self._is_executing_effects(game_state)
             return self._execute_effect(game_state)
         elif p1.get_phase().is_action_phase() or p2.get_phase().is_action_phase():
             # handling death swap
             assert self._is_executing_effects(game_state)
             return self._execute_effect(game_state)
-        elif p1.get_phase() is PlayerState.Act.END_PHASE and p2.get_phase() is PlayerState.Act.END_PHASE:
+        elif p1.get_phase() is ACT.END_PHASE and p2.get_phase() is ACT.END_PHASE:
             new_round = game_state.get_round() + 1
             if new_round > game_state.get_mode().round_limit():
                 return self._end_game(game_state)

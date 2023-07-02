@@ -12,7 +12,7 @@ from dgisim.src.element.element import Element, Reaction, ReactionDetail
 import dgisim.src.character.character as chr
 from dgisim.src.character.character_skill_enum import CharacterSkill
 import dgisim.src.state.game_state as gs
-from dgisim.src.state.enums import PID
+from dgisim.src.state.enums import PID, ACT
 import dgisim.src.state.player_state as ps
 import dgisim.src.card.card as cd
 import dgisim.src.dices as ds
@@ -299,12 +299,12 @@ class DeathCheckCheckerEffect(CheckerEffect):
         ).player(
             pid,
             game_state.get_player(pid).factory().phase(
-                ps.PlayerState.Act.ACTION_PHASE
+                ACT.ACTION_PHASE
             ).build()
         ).other_player(
             pid,
             game_state.get_other_player(pid).factory().phase(
-                ps.PlayerState.Act.PASSIVE_WAIT_PHASE
+                ACT.PASSIVE_WAIT_PHASE
             ).build()
         ).build()
 
@@ -326,8 +326,8 @@ class DeathSwapPhaseStartEffect(PhaseEffect):
 @dataclass(frozen=True)
 class DeathSwapPhaseEndEffect(PhaseEffect):
     my_pid: PID
-    my_last_phase: ps.PlayerState.Act
-    other_last_phase: ps.PlayerState.Act
+    my_last_phase: ACT
+    other_last_phase: ACT
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         player = game_state.get_player(self.my_pid)
@@ -392,18 +392,18 @@ class TurnEndEffect(PhaseEffect):
         active_player_id = game_state.get_active_player_id()
         player = game_state.get_player(active_player_id)
         other_player = game_state.get_other_player(active_player_id)
-        assert player.get_phase() is ps.PlayerState.Act.ACTION_PHASE
+        assert player.get_phase() is ACT.ACTION_PHASE
         # TODO: other tidy up
-        if other_player.get_phase() is ps.PlayerState.Act.END_PHASE:
+        if other_player.get_phase() is ACT.END_PHASE:
             return game_state
         return game_state.factory().active_player_id(
             active_player_id.other()
         ).player(
             active_player_id,
-            player.factory().phase(ps.PlayerState.Act.PASSIVE_WAIT_PHASE).build()
+            player.factory().phase(ACT.PASSIVE_WAIT_PHASE).build()
         ).other_player(
             active_player_id,
-            other_player.factory().phase(ps.PlayerState.Act.ACTION_PHASE).build()
+            other_player.factory().phase(ACT.ACTION_PHASE).build()
         ).build()
 
 
@@ -413,21 +413,21 @@ class EndPhaseTurnEndEffect(PhaseEffect):
         active_player_id = game_state.get_active_player_id()
         player = game_state.get_player(active_player_id)
         other_player = game_state.get_other_player(active_player_id)
-        assert player.get_phase() is ps.PlayerState.Act.ACTIVE_WAIT_PHASE
+        assert player.get_phase().is_active_wait_phase()
         return game_state.factory().active_player_id(
             active_player_id.other()
         ).player(
             active_player_id,
-            player.factory().phase(ps.PlayerState.Act.PASSIVE_WAIT_PHASE).build()
+            player.factory().phase(ACT.PASSIVE_WAIT_PHASE).build()
         ).other_player(
             active_player_id,
-            other_player.factory().phase(ps.PlayerState.Act.ACTIVE_WAIT_PHASE).build()
+            other_player.factory().phase(ACT.ACTIVE_WAIT_PHASE).build()
         ).build()
 
 
 @dataclass(frozen=True)
 class SetBothPlayerPhaseEffect(PhaseEffect):
-    phase: ps.PlayerState.Act
+    phase: ACT
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         return game_state.factory().f_player1(

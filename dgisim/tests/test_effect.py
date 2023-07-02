@@ -2,7 +2,7 @@ import unittest
 
 from dgisim.tests.helpers.game_state_templates import *
 from dgisim.src.state.game_state import GameState
-from dgisim.src.state.enums import PID
+from dgisim.src.state.enums import PID, ACT
 from dgisim.src.state.player_state import PlayerState
 from dgisim.src.effect.effect_stack import EffectStack
 from dgisim.src.effect.effect import *
@@ -15,13 +15,13 @@ class TestEffect(unittest.TestCase):
         game_state = OPPO_DEATH_WAIT
         assert game_state.waiting_for() is None
         game_state = game_state.step()
-        self.assertEqual(game_state.get_player1().get_phase(), PlayerState.Act.PASSIVE_WAIT_PHASE)
-        self.assertEqual(game_state.get_player2().get_phase(), PlayerState.Act.ACTION_PHASE)
+        self.assertEqual(game_state.get_player1().get_phase(), ACT.PASSIVE_WAIT_PHASE)
+        self.assertEqual(game_state.get_player2().get_phase(), ACT.ACTION_PHASE)
         self.assertEqual(
             game_state.get_effect_stack(),
             EffectStack((
                 DeathSwapPhaseEndEffect(
-                    PID.P2, PlayerState.Act.PASSIVE_WAIT_PHASE, PlayerState.Act.ACTION_PHASE),
+                    PID.P2, ACT.PASSIVE_WAIT_PHASE, ACT.ACTION_PHASE),
                 DeathSwapPhaseStartEffect(),
             ))
         )
@@ -37,8 +37,8 @@ class TestEffect(unittest.TestCase):
             lambda es: es.pop()[0]
         ).build()
         game_state = game_state.step()
-        self.assertEqual(game_state.get_player1().get_phase(), PlayerState.Act.ACTION_PHASE)
-        self.assertEqual(game_state.get_player2().get_phase(), PlayerState.Act.PASSIVE_WAIT_PHASE)
+        self.assertEqual(game_state.get_player1().get_phase(), ACT.ACTION_PHASE)
+        self.assertEqual(game_state.get_player2().get_phase(), ACT.PASSIVE_WAIT_PHASE)
 
     def testDeathSwapPhaseEndEffect2(self):
         game_state = OPPO_DEATH_END.step()
@@ -47,8 +47,8 @@ class TestEffect(unittest.TestCase):
             lambda es: es.pop()[0]
         ).build()
         game_state = game_state.step()
-        self.assertEqual(game_state.get_player1().get_phase(), PlayerState.Act.ACTION_PHASE)
-        self.assertEqual(game_state.get_player2().get_phase(), PlayerState.Act.END_PHASE)
+        self.assertEqual(game_state.get_player1().get_phase(), ACT.ACTION_PHASE)
+        self.assertEqual(game_state.get_player2().get_phase(), ACT.END_PHASE)
 
     def testRecoverHPEffect(self):
         game_state = ACTION_TEMPLATE.factory().f_player1(

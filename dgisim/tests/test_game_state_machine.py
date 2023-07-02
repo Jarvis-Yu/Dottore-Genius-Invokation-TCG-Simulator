@@ -4,6 +4,7 @@ from dgisim.src.helper.quality_of_life import case_val
 from dgisim.src.helper.level_print import GamePrinter
 from dgisim.src.game_state_machine import GameStateMachine
 from dgisim.src.state.game_state import GameState
+from dgisim.src.state.enums import ACT
 from dgisim.src.agents import LazyAgent
 from dgisim.src.phase.card_select_phase import CardSelectPhase
 from dgisim.src.phase.phase import Phase
@@ -31,8 +32,8 @@ class TestGameStateMachine(unittest.TestCase):
         state_machine.one_step()  # other player swap cards
         state = state_machine.get_game_state()
         self.assertTrue(isinstance(state.get_phase(), CardSelectPhase))
-        self.assertIs(state.get_player1().get_phase(), PlayerState.Act.END_PHASE)
-        self.assertIs(state.get_player2().get_phase(), PlayerState.Act.END_PHASE)
+        self.assertIs(state.get_player1().get_phase(), ACT.END_PHASE)
+        self.assertIs(state.get_player2().get_phase(), ACT.END_PHASE)
 
     def test_card_select_phase_behavior(self):
         p1_deck: Cards = self._initial_state.get_player1().get_deck_cards()
@@ -103,8 +104,8 @@ class TestGameStateMachine(unittest.TestCase):
         #     cd = input()
         state_machine.step_until_phase(EndPhase)
         state = state_machine.get_game_state()
-        self.assertIs(state.get_player1().get_phase(), PlayerState.Act.PASSIVE_WAIT_PHASE)
-        self.assertIs(state.get_player2().get_phase(), PlayerState.Act.PASSIVE_WAIT_PHASE)
+        self.assertIs(state.get_player1().get_phase(), ACT.PASSIVE_WAIT_PHASE)
+        self.assertIs(state.get_player2().get_phase(), ACT.PASSIVE_WAIT_PHASE)
 
     def test_end_phase_basic_behavior(self):
         p1_deck: Cards = self._initial_state.get_player1().get_deck_cards()
@@ -125,8 +126,8 @@ class TestGameStateMachine(unittest.TestCase):
                          p1.get_deck_cards().num_cards(), p1_deck.num_cards())
         self.assertEqual(p2.get_hand_cards().num_cards() +
                          p2.get_deck_cards().num_cards(), p2_deck.num_cards())
-        self.assertIs(state.get_player1().get_phase(), PlayerState.Act.PASSIVE_WAIT_PHASE)
-        self.assertIs(state.get_player2().get_phase(), PlayerState.Act.PASSIVE_WAIT_PHASE)
+        self.assertIs(state.get_player1().get_phase(), ACT.PASSIVE_WAIT_PHASE)
+        self.assertIs(state.get_player2().get_phase(), ACT.PASSIVE_WAIT_PHASE)
         state_machine.step_until_phase(EndPhase)
         state_machine.step_until_phase(RollPhase)
         state = state_machine.get_game_state()
@@ -138,8 +139,8 @@ class TestGameStateMachine(unittest.TestCase):
                          p1.get_deck_cards().num_cards(), p1_deck.num_cards())
         self.assertEqual(p2.get_hand_cards().num_cards() +
                          p2.get_deck_cards().num_cards(), p2_deck.num_cards())
-        self.assertIs(state.get_player1().get_phase(), PlayerState.Act.PASSIVE_WAIT_PHASE)
-        self.assertIs(state.get_player2().get_phase(), PlayerState.Act.PASSIVE_WAIT_PHASE)
+        self.assertIs(state.get_player1().get_phase(), ACT.PASSIVE_WAIT_PHASE)
+        self.assertIs(state.get_player2().get_phase(), ACT.PASSIVE_WAIT_PHASE)
 
     def test_game_end_phase_basic_behavior(self):
         state_machine = GameStateMachine(
