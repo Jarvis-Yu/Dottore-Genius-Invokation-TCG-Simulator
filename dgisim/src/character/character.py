@@ -13,6 +13,7 @@ from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.dices import AbstractDices
 from dgisim.src.effect.effects_template import *
 from dgisim.src.effect.enums import ZONE, DYNAMIC_CHARACTER_TARGET
+from dgisim.src.effect.structs import StaticTarget
 from dgisim.src.element.element import *
 from dgisim.src.helper.level_print import INDENT, level_print
 from dgisim.src.state.enums import PID
@@ -83,11 +84,11 @@ class Character:
     def factory(self) -> CharacterFactory:
         return CharacterFactory(self, type(self))
 
-    def location(self, game_state: gs.GameState) -> eft.StaticTarget:
+    def location(self, game_state: gs.GameState) -> StaticTarget:
         pid = game_state.belongs_to(self)
         if pid is None:
             raise Exception("target character is not in the current game state")
-        me = eft.StaticTarget(pid, ZONE.CHARACTERS, self.get_id())
+        me = StaticTarget(pid, ZONE.CHARACTERS, self.get_id())
         return me
 
     @classmethod
@@ -149,7 +150,7 @@ class Character:
             ),
             eft.SwapCharacterCheckerEffect(
                 my_active=source,
-                oppo_active=eft.StaticTarget(
+                oppo_active=StaticTarget(
                     pid=source.pid.other(),
                     zone=ZONE.CHARACTERS,
                     id=game_state.get_other_player(source.pid).just_get_active_character().get_id()

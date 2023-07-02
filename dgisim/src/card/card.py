@@ -12,6 +12,7 @@ import dgisim.src.support.support as sp
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.dices import AbstractDices, ActualDices
 from dgisim.src.effect.enums import ZONE
+from dgisim.src.effect.structs import StaticTarget
 from dgisim.src.element.element import Element
 from dgisim.src.event.event import CardEvent
 from dgisim.src.helper.quality_of_life import BIG_INT
@@ -285,7 +286,7 @@ class SupportCard(Card):
                 and instruction.target is None:
             supports = game_state.get_player(pid).get_supports()
             return tuple(
-                eft.StaticTarget(
+                StaticTarget(
                     pid=pid,
                     zone=ZONE.SUPPORTS,
                     id=support.sid,
@@ -316,7 +317,7 @@ class SupportCard(Card):
 
         if type(instruction) is act.StaticTargetInstruction \
                 and instruction.target is None:
-            assert isinstance(player_choice, eft.StaticTarget)
+            assert isinstance(player_choice, StaticTarget)
             return replace(
                 action_generator,
                 instruction=replace(instruction, target=player_choice),
@@ -451,7 +452,7 @@ class _CharTargetChoiceProvider(Card):
             chars = game_state.get_player(pid).get_characters()
             chars = [char for char in chars if cls._valid_char(char)]
             return tuple(
-                eft.StaticTarget(
+                StaticTarget(
                     pid=pid,
                     zone=ZONE.CHARACTERS,
                     id=char.get_id(),
@@ -478,7 +479,7 @@ class _CharTargetChoiceProvider(Card):
         instruction = action_generator.instruction
         assert isinstance(instruction, act.StaticTargetInstruction)
         if instruction.target is None:
-            assert isinstance(player_choice, eft.StaticTarget)
+            assert isinstance(player_choice, StaticTarget)
             return replace(
                 action_generator,
                 instruction=replace(instruction, target=player_choice),
@@ -733,7 +734,7 @@ class Starsigns(EventCard, _DiceOnlyChoiceProvider):
     ) -> tuple[eft.Effect, ...]:
         return (
             eft.EnergyRechargeEffect(
-                eft.StaticTarget(
+                StaticTarget(
                     pid=pid,
                     zone=ZONE.CHARACTERS,
                     id=game_state.get_player(pid).just_get_active_character().get_id(),
@@ -946,7 +947,7 @@ class ThunderingPenance(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvide
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.DiceOnlyInstruction)
-        target = eft.StaticTarget(
+        target = StaticTarget(
             pid=pid,
             zone=ZONE.CHARACTERS,
             id=game_state.get_player(pid).just_get_active_character().get_id(),
@@ -994,7 +995,7 @@ class ColdBloodedStrike(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvide
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.DiceOnlyInstruction)
-        target = eft.StaticTarget(
+        target = StaticTarget(
             pid=pid,
             zone=ZONE.CHARACTERS,
             id=game_state.get_player(pid).just_get_active_character().get_id(),
@@ -1042,7 +1043,7 @@ class StreamingSurge(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.DiceOnlyInstruction)
-        target = eft.StaticTarget(
+        target = StaticTarget(
             pid=pid,
             zone=ZONE.CHARACTERS,
             id=game_state.get_player(pid).just_get_active_character().get_id(),
@@ -1061,4 +1062,4 @@ class StreamingSurge(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
 
 ########### type ##########
 from typing import Any
-Choosable = Any # eft.StaticTarget | int | ActualDices | CharacterSkill | type[Card] | Element
+Choosable = Any # StaticTarget | int | ActualDices | CharacterSkill | type[Card] | Element

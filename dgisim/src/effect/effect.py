@@ -9,6 +9,7 @@ import dgisim.src.summon.summon as sm
 import dgisim.src.support.support as sp
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.effect.enums import DYNAMIC_CHARACTER_TARGET, TRIGGERING_SIGNAL, ZONE
+from dgisim.src.effect.structs import StaticTarget
 from dgisim.src.element.element import Element, Reaction, ReactionDetail
 from dgisim.src.helper.quality_of_life import just, case_val
 from dgisim.src.state.enums import PID, ACT
@@ -34,13 +35,6 @@ class DamageType:
     status: bool = False  # any talent, equipmenet, character status, combat status.
     summon: bool = False
     no_boost: bool = False  # reaction secondary damage, Klee's burst status...
-
-
-@dataclass(frozen=True)
-class StaticTarget:
-    pid: PID
-    zone: ZONE
-    id: int
 
 
 @dataclass(frozen=True)

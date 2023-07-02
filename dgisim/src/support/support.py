@@ -14,7 +14,7 @@ from dgisim.src.helper.quality_of_life import BIG_INT
 from dgisim.src.status.enums import PREPROCESSABLES
 
 if TYPE_CHECKING:
-    pass
+    from dgisim.src.effect.structs import StaticTarget
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -39,7 +39,7 @@ class XudongSupport(Support):
     def _preprocess(
             self,
             game_state: gs.GameState,
-            status_source: eft.StaticTarget,
+            status_source: StaticTarget,
             item: eft.Preprocessable,
             signal: PREPROCESSABLES,
     ) -> tuple[eft.Preprocessable, None | Self]:
@@ -63,7 +63,7 @@ class XudongSupport(Support):
 
     @override
     def _react_to_signal(
-            self, source: eft.StaticTarget, signal: TRIGGERING_SIGNAL
+            self, source: StaticTarget, signal: TRIGGERING_SIGNAL
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TRIGGERING_SIGNAL.ROUND_END:
             return [], type(self)(sid=self.sid)

@@ -10,6 +10,7 @@ from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.state.enums import PID
 from dgisim.src.status.enums import PREPROCESSABLES
 from dgisim.src.effect.enums import ZONE, TRIGGERING_SIGNAL
+from dgisim.src.effect.structs import StaticTarget
 
 if TYPE_CHECKING:
     import dgisim.src.card.card as cd
@@ -20,7 +21,7 @@ class StatusProcessing:
     def loop_one_player_all_statuses(
             game_state: gs.GameState,
             pid: PID,
-            f: Callable[[gs.GameState, stt.Status, eft.StaticTarget], gs.GameState]
+            f: Callable[[gs.GameState, stt.Status, StaticTarget], gs.GameState]
     ) -> gs.GameState:
         """
         Perform f on all statuses of player pid in order
@@ -35,7 +36,7 @@ class StatusProcessing:
             # get character's private statuses and add triggerStatusEffect to global effect_stack
             statuses = character.get_all_statuses_ordered_flattened()
             character_id = character.get_id()
-            target = eft.StaticTarget(
+            target = StaticTarget(
                 pid,
                 ZONE.CHARACTERS,
                 character_id
@@ -45,7 +46,7 @@ class StatusProcessing:
 
         # combat status
         combat_statuses = player.get_combat_statuses()
-        target = eft.StaticTarget(
+        target = StaticTarget(
             pid,
             ZONE.COMBAT_STATUSES,
             -1,  # not used
@@ -55,7 +56,7 @@ class StatusProcessing:
 
         # summons
         summons = player.get_summons()
-        target = eft.StaticTarget(
+        target = StaticTarget(
             pid,
             ZONE.SUMMONS,
             -1,
@@ -66,7 +67,7 @@ class StatusProcessing:
         # supports
         supports = player.get_supports()
         for support in supports:
-            target = eft.StaticTarget(
+            target = StaticTarget(
                 pid,
                 ZONE.SUPPORTS,
                 support.sid,
@@ -79,7 +80,7 @@ class StatusProcessing:
     def loop_all_statuses(
             game_state: gs.GameState,
             pid: PID,
-            f: Callable[[gs.GameState, stt.Status, eft.StaticTarget], gs.GameState]
+            f: Callable[[gs.GameState, stt.Status, StaticTarget], gs.GameState]
     ) -> gs.GameState:
         """
         Perform f on all statuses of player pid and opponent in order
@@ -99,7 +100,7 @@ class StatusProcessing:
         """
         effects: list[eft.Effect] = []
 
-        def f(game_state: gs.GameState, status: stt.Status, target: eft.StaticTarget) -> gs.GameState:
+        def f(game_state: gs.GameState, status: stt.Status, target: StaticTarget) -> gs.GameState:
             nonlocal effects
             if isinstance(status, stt.CharacterTalentStatus) \
                     or isinstance(status, stt.EquipmentStatus) \
@@ -127,7 +128,7 @@ class StatusProcessing:
             item: eft.Preprocessable,
             pp_type: PREPROCESSABLES,
     ) -> tuple[gs.GameState, eft.Preprocessable]:
-        def f(game_state: gs.GameState, status: stt.Status, status_source: eft.StaticTarget) -> gs.GameState:
+        def f(game_state: gs.GameState, status: stt.Status, status_source: StaticTarget) -> gs.GameState:
             nonlocal item
             item, new_status = status.preprocess(game_state, status_source, item, pp_type)
 
@@ -199,9 +200,9 @@ class StatusProcessing:
             game_state: gs.GameState,
             pid: PID,
             info: eft.SpecificDamageEffect | CharacterSkill | cd.Card,
-            source: None | eft.StaticTarget = None,
+            source: None | StaticTarget = None,
     ) -> gs.GameState:
-        def f(game_state: gs.GameState, status: stt.Status, status_source: eft.StaticTarget) -> gs.GameState:
+        def f(game_state: gs.GameState, status: stt.Status, status_source: StaticTarget) -> gs.GameState:
             return status.inform(
                 game_state,
                 status_source,

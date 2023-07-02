@@ -1,11 +1,13 @@
 from __future__ import annotations
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
-import dgisim.src.state.game_state as gs
-from dgisim.src.action.action import PlayerAction
-from dgisim.src.event.event_pre import EventPre
 from dgisim.src.helper.level_print import level_print_single
-from dgisim.src.state.enums import PID, ACT
+
+if TYPE_CHECKING:
+    import dgisim.src.state.game_state as gs
+    from dgisim.src.action.action import PlayerAction
+    from dgisim.src.event.event_pre import EventPre
+    from dgisim.src.state.enums import PID
 
 
 class Phase:
@@ -18,8 +20,7 @@ class Phase:
     def waiting_for(self, game_state: gs.GameState) -> Optional[PID]:
         players = [game_state.get_player1(), game_state.get_player2()]
         for player in players:
-            from dgisim.src.state.player_state import PlayerState
-            if player.get_phase() is ACT.ACTION_PHASE:
+            if player.get_phase().is_action_phase():
                 return game_state.get_pid(player)
         return None
 

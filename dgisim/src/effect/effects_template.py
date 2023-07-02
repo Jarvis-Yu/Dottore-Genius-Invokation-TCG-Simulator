@@ -1,11 +1,15 @@
 from __future__ import annotations
+from typing import TYPE_CHECKING
 
 import dgisim.src.effect.effect as eft
 from dgisim.src.effect.enums import DYNAMIC_CHARACTER_TARGET
 
+if TYPE_CHECKING:
+    from dgisim.src.effect.structs import StaticTarget
+
 
 def normal_attack_template(
-        source: eft.StaticTarget,
+        source: StaticTarget,
         element: eft.Element,
         damage: int,
         dices_num: int,

@@ -9,7 +9,7 @@ import dgisim.src.effect.effect as eft
 import dgisim.src.mode as md
 import dgisim.src.phase.game_end_phase as gep
 import dgisim.src.phase.phase as ph
-import dgisim.src.state.player_state as pl
+import dgisim.src.state.player_state as ps
 from dgisim.src.action.action import PlayerAction
 from dgisim.src.character.character import Character
 from dgisim.src.character.character_skill_enum import CharacterSkill
@@ -17,6 +17,7 @@ from dgisim.src.dices import ActualDices
 from dgisim.src.effect.effect import StaticTarget, ZONE
 from dgisim.src.effect.effect_stack import EffectStack
 from dgisim.src.effect.enums import ZONE
+from dgisim.src.effect.structs import StaticTarget
 from dgisim.src.element.element import Element
 from dgisim.src.event.event import *
 from dgisim.src.event.event_pre import EventPre
@@ -36,8 +37,8 @@ class GameState:
         phase: ph.Phase,
         round: int,
         active_player_id: PID,
-        player1: pl.PlayerState,
-        player2: pl.PlayerState,
+        player1: ps.PlayerState,
+        player2: ps.PlayerState,
         effect_stack: EffectStack
     ):
         # REMINDER: don't forget to update factory when adding new fields
@@ -62,8 +63,8 @@ class GameState:
             phase=mode.card_select_phase(),
             round=0,
             active_player_id=PID.P1,
-            player1=pl.PlayerState.examplePlayer(mode),
-            player2=pl.PlayerState.examplePlayer(mode),
+            player1=ps.PlayerState.examplePlayer(mode),
+            player2=ps.PlayerState.examplePlayer(mode),
             effect_stack=EffectStack(()),
         )
 
@@ -85,13 +86,13 @@ class GameState:
     def get_effect_stack(self) -> EffectStack:
         return self._effect_stack
 
-    def get_player1(self) -> pl.PlayerState:
+    def get_player1(self) -> ps.PlayerState:
         return self._player1
 
-    def get_player2(self) -> pl.PlayerState:
+    def get_player2(self) -> ps.PlayerState:
         return self._player2
 
-    def get_pid(self, player: pl.PlayerState) -> PID:
+    def get_pid(self, player: ps.PlayerState) -> PID:
         if player is self._player1:
             return PID.P1
         elif player is self._player2:
@@ -99,7 +100,7 @@ class GameState:
         else:
             raise Exception("player unknown")
 
-    def get_player(self, player_id: PID) -> pl.PlayerState:
+    def get_player(self, player_id: PID) -> ps.PlayerState:
         if player_id.is_player1():
             return self._player1
         elif player_id.is_player2():
@@ -107,7 +108,7 @@ class GameState:
         else:
             raise Exception("player_id unknown")
 
-    def get_other_player(self, player_id: PID) -> pl.PlayerState:
+    def get_other_player(self, player_id: PID) -> ps.PlayerState:
         if player_id.is_player1():
             return self._player2
         elif player_id.is_player2():
@@ -261,21 +262,21 @@ class GameStateFactory:
         self._active_player = pid
         return self
 
-    def player1(self, new_player: pl.PlayerState) -> GameStateFactory:
+    def player1(self, new_player: ps.PlayerState) -> GameStateFactory:
         self._player1 = new_player
         return self
 
-    def f_player1(self, f: Callable[[pl.PlayerState], pl.PlayerState]) -> GameStateFactory:
+    def f_player1(self, f: Callable[[ps.PlayerState], ps.PlayerState]) -> GameStateFactory:
         return self.player1(f(self._player1))
 
-    def player2(self, new_player: pl.PlayerState) -> GameStateFactory:
+    def player2(self, new_player: ps.PlayerState) -> GameStateFactory:
         self._player2 = new_player
         return self
 
-    def f_player2(self, f: Callable[[pl.PlayerState], pl.PlayerState]) -> GameStateFactory:
+    def f_player2(self, f: Callable[[ps.PlayerState], ps.PlayerState]) -> GameStateFactory:
         return self.player2(f(self._player2))
 
-    def player(self, pid: PID, new_player: pl.PlayerState) -> GameStateFactory:
+    def player(self, pid: PID, new_player: ps.PlayerState) -> GameStateFactory:
         if pid is PID.P1:
             return self.player1(new_player)
         elif pid is PID.P2:
@@ -283,7 +284,7 @@ class GameStateFactory:
         else:
             raise Exception("player_id unknown")
 
-    def f_player(self, pid: PID, f: Callable[[pl.PlayerState], pl.PlayerState]) -> GameStateFactory:
+    def f_player(self, pid: PID, f: Callable[[ps.PlayerState], ps.PlayerState]) -> GameStateFactory:
         if pid is PID.P1:
             return self.player1(f(self._player1))
         elif pid is PID.P2:
@@ -291,7 +292,7 @@ class GameStateFactory:
         else:
             raise Exception("player_id unknown")
 
-    def other_player(self, pid: PID, new_player: pl.PlayerState) -> GameStateFactory:
+    def other_player(self, pid: PID, new_player: ps.PlayerState) -> GameStateFactory:
         if pid is PID.P1:
             return self.player2(new_player)
         elif pid is PID.P2:
@@ -299,7 +300,7 @@ class GameStateFactory:
         else:
             raise Exception("player_id unknown")
 
-    def f_other_player(self, pid: PID, f: Callable[[pl.PlayerState], pl.PlayerState]) -> GameStateFactory:
+    def f_other_player(self, pid: PID, f: Callable[[ps.PlayerState], ps.PlayerState]) -> GameStateFactory:
         if pid is PID.P1:
             return self.player2(f(self._player2))
         elif pid is PID.P2:
@@ -448,7 +449,7 @@ class SwapChecker:
             game_state=game_state,
             pid=pid,
             item=GameEvent(
-                target=eft.StaticTarget(
+                target=StaticTarget(
                     pid=pid,
                     zone=ZONE.CHARACTERS,
                     id=char_id,
@@ -498,7 +499,7 @@ class SwapChecker:
                 game_state=game_state,
                 pid=pid,
                 item=GameEvent(
-                    target=eft.StaticTarget(
+                    target=StaticTarget(
                         pid=pid,
                         zone=ZONE.CHARACTERS,
                         id=action.char_id,
@@ -625,7 +626,7 @@ class SkillChecker:
             game_state=game_state,
             pid=pid,
             item=GameEvent(
-                target=eft.StaticTarget(
+                target=StaticTarget(
                     pid=pid,
                     zone=ZONE.CHARACTERS,
                     id=char_id,
@@ -661,7 +662,7 @@ class SkillChecker:
             game_state=game_state,
             pid=pid,
             item=GameEvent(
-                target=eft.StaticTarget(
+                target=StaticTarget(
                     pid=pid,
                     zone=ZONE.CHARACTERS,
                     id=character.get_id(),

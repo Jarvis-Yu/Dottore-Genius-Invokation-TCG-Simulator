@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, replace
-from typing import ClassVar, Optional
+from typing import ClassVar, Optional, TYPE_CHECKING
 from typing_extensions import override, Self
 
 import dgisim.src.effect.effect as eft
@@ -8,6 +8,9 @@ import dgisim.src.status.status as stt
 from dgisim.src.effect.enums import TRIGGERING_SIGNAL, DYNAMIC_CHARACTER_TARGET
 from dgisim.src.element.element import Element
 from dgisim.src.helper.quality_of_life import BIG_INT
+
+if TYPE_CHECKING:
+    from dgisim.src.effect.structs import StaticTarget
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -59,7 +62,7 @@ class _DmgPerRoundSummon(_DestroyOnNumSummon):
 
     def _react_to_signal(
             self,
-            source: eft.StaticTarget,
+            source: StaticTarget,
             signal: TRIGGERING_SIGNAL
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         es: list[eft.Effect] = []
@@ -105,7 +108,7 @@ class OceanicMimicFrogSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
     @override
     def _react_to_signal(
             self,
-            source: eft.StaticTarget,
+            source: StaticTarget,
             signal: TRIGGERING_SIGNAL
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         es: list[eft.Effect] = []

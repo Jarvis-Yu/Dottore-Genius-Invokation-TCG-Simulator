@@ -7,6 +7,7 @@ from enum import Enum
 if TYPE_CHECKING:
     import dgisim.src.card.card as cd
     import dgisim.src.effect.effect as eft
+    from dgisim.src.effect.structs import StaticTarget
     from dgisim.src.dices import AbstractDices
     from dgisim.src.state.enums import PID
 
@@ -26,7 +27,7 @@ class EventType(Enum):
 
 @dataclass(frozen=True, kw_only=True)
 class GameEvent:
-    target: eft.StaticTarget
+    target: StaticTarget
     event_type: EventType
     event_speed: EventSpeed
     dices_cost: AbstractDices
