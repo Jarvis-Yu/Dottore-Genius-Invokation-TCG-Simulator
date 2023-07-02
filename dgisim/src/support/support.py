@@ -6,7 +6,6 @@ from typing_extensions import Self, override
 import dgisim.src.card.card as cd
 import dgisim.src.effect.effect as eft
 import dgisim.src.event.event as evt
-import dgisim.src.state.game_state as gs
 import dgisim.src.status.status as stt
 from dgisim.src.effect.enums import TRIGGERING_SIGNAL
 from dgisim.src.element.element import Element
@@ -14,6 +13,7 @@ from dgisim.src.helper.quality_of_life import BIG_INT
 from dgisim.src.status.enums import PREPROCESSABLES
 
 if TYPE_CHECKING:
+    import dgisim.src.state.game_state as gs
     from dgisim.src.effect.structs import StaticTarget
 
 

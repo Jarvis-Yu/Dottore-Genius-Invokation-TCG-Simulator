@@ -1,11 +1,10 @@
 from __future__ import annotations
-from typing import Optional, Tuple, Callable, Union
+from typing import Callable, Optional, TYPE_CHECKING, Union
 from typing_extensions import override
 from functools import lru_cache
 
 import dgisim.src.card.card as cd
 import dgisim.src.effect.effect as eft
-import dgisim.src.state.game_state as gs
 import dgisim.src.status.status as stt
 import dgisim.src.status.statuses as stts
 import dgisim.src.summon.summon as sm
@@ -18,6 +17,8 @@ from dgisim.src.element.element import *
 from dgisim.src.helper.level_print import INDENT, level_print
 from dgisim.src.state.enums import PID
 
+if TYPE_CHECKING:
+    import dgisim.src.state.game_state as gs
 
 class Character:
     _ELEMENT = Element.ANY
@@ -267,7 +268,7 @@ class Character:
     def name(self) -> str:
         return self.__class__.__name__
 
-    def _all_unique_data(self) -> Tuple:
+    def _all_unique_data(self) -> tuple:
         return (
             self._id,
             self._hp,

@@ -2,12 +2,15 @@ from __future__ import annotations
 import random
 from enum import Enum
 from typing import Optional, Iterator, Iterable, TypeVar, Union
-from typing_extensions import Self, override
+from typing_extensions import Self, override, TYPE_CHECKING
 
 from dgisim.src.helper.hashable_dict import HashableDict
-from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
-from dgisim.src.helper.quality_of_life import BIG_INT, case_val
+from dgisim.src.helper.level_print import level_print
+from dgisim.src.helper.quality_of_life import BIG_INT
 from dgisim.src.element.element import Element
+
+if TYPE_CHECKING:
+    import dgisim.src.state.game_state as gs
 
 
 class Dices:
@@ -123,7 +126,6 @@ class ActualDices(Dices):
         Element.GEO,
     })
 
-    import dgisim.src.state.game_state as gs
 
     def _satisfy(self, requirement: AbstractDices) -> bool:
         assert self.is_legal() and requirement.is_legal()

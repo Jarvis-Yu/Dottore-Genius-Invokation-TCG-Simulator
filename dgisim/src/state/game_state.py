@@ -14,7 +14,8 @@ from dgisim.src.action.action import PlayerAction
 from dgisim.src.character.character import Character
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.dices import ActualDices
-from dgisim.src.effect.effect import StaticTarget, ZONE
+from dgisim.src.effect.enums import ZONE
+from dgisim.src.effect.structs import StaticTarget
 from dgisim.src.effect.effect_stack import EffectStack
 from dgisim.src.effect.enums import ZONE
 from dgisim.src.effect.structs import StaticTarget
@@ -327,7 +328,7 @@ class SwapChecker:
     def _choices_helper(
             self,
             action_generator: acg.ActionGenerator,
-    ) -> tuple[cd.Choosable, ...] | AbstractDices | cds.Cards:
+    ) -> tuple[acg.Choosable, ...] | AbstractDices | cds.Cards:
         game_state = self._game_state
         pid = action_generator.pid
 
@@ -363,7 +364,7 @@ class SwapChecker:
     def _fill_helper(
         self,
         action_generator: acg.ActionGenerator,
-        player_choice: cd.Choosable | ActualDices | cds.Cards,
+        player_choice: acg.Choosable | ActualDices | cds.Cards,
     ) -> acg.ActionGenerator:
         action = action_generator.action
         assert type(action) is act.SwapAction \
@@ -529,7 +530,7 @@ class SkillChecker:
     def _choices_helper(
             self,
             action_generator: acg.ActionGenerator,
-    ) -> tuple[cd.Choosable, ...] | AbstractDices | cds.Cards:
+    ) -> tuple[acg.Choosable, ...] | AbstractDices | cds.Cards:
         game_state = self._game_state
         pid = action_generator.pid
         active_character = game_state.get_player(pid).just_get_active_character()
@@ -561,7 +562,7 @@ class SkillChecker:
     def _fill_helper(
         self,
         action_generator: acg.ActionGenerator,
-        player_choice: cd.Choosable | ActualDices | cds.Cards,
+        player_choice: acg.Choosable | ActualDices | cds.Cards,
     ) -> acg.ActionGenerator:
         action = action_generator.action
         assert type(action) is act.SkillAction
@@ -703,7 +704,7 @@ class ElementalTuningChecker:
     def _choices_helper(
             self,
             action_generator: acg.ActionGenerator,
-    ) -> tuple[cd.Choosable, ...] | AbstractDices | cds.Cards:
+    ) -> tuple[acg.Choosable, ...] | AbstractDices | cds.Cards:
         game_state = self._game_state
         pid = action_generator.pid
 
@@ -729,7 +730,7 @@ class ElementalTuningChecker:
     def _fill_helper(
         self,
         action_generator: acg.ActionGenerator,
-        player_choice: cd.Choosable | ActualDices | cds.Cards,
+        player_choice: acg.Choosable | ActualDices | cds.Cards,
     ) -> acg.ActionGenerator:
         action = action_generator.action
         assert type(action) is act.ElementalTuningAction

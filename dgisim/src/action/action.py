@@ -6,8 +6,8 @@ from typing_extensions import Self
 from dgisim.src.card.cards import Cards
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.dices import ActualDices
-from dgisim.src.effect.effect import StaticTarget
 from dgisim.src.effect.enums import ZONE
+from dgisim.src.effect.structs import StaticTarget
 from dgisim.src.element.element import Element
 from dgisim.src.state.enums import PID
 

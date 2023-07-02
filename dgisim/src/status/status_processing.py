@@ -2,7 +2,6 @@ from __future__ import annotations
 from typing import Callable, TYPE_CHECKING
 
 import dgisim.src.effect.effect as eft
-import dgisim.src.state.game_state as gs
 import dgisim.src.status.status as stt
 import dgisim.src.summon.summon as sm
 import dgisim.src.support.support as sp
@@ -14,6 +13,7 @@ from dgisim.src.effect.structs import StaticTarget
 
 if TYPE_CHECKING:
     import dgisim.src.card.card as cd
+    import dgisim.src.state.game_state as gs
 
 
 class StatusProcessing:
