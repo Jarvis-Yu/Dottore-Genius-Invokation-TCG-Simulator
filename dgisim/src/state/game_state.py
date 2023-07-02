@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import replace
-from typing import Optional, Callable
+from typing import Callable, Optional, TYPE_CHECKING
 
 import dgisim.src.action.action as act
 import dgisim.src.action.action_generator as acg
@@ -28,6 +28,9 @@ from dgisim.src.state.enums import PID
 from dgisim.src.status.status_processing import StatusProcessing
 from dgisim.src.status.enums import PREPROCESSABLES
 from dgisim.src.support.support import Support
+
+if TYPE_CHECKING:
+    from dgisim.src.action.types import DecidedChoiceType, GivenChoiceType
 
 
 class GameState:
@@ -328,7 +331,7 @@ class SwapChecker:
     def _choices_helper(
             self,
             action_generator: acg.ActionGenerator,
-    ) -> tuple[acg.Choosable, ...] | AbstractDices | cds.Cards:
+    ) -> GivenChoiceType:
         game_state = self._game_state
         pid = action_generator.pid
 
@@ -364,7 +367,7 @@ class SwapChecker:
     def _fill_helper(
         self,
         action_generator: acg.ActionGenerator,
-        player_choice: acg.Choosable | ActualDices | cds.Cards,
+        player_choice: DecidedChoiceType,
     ) -> acg.ActionGenerator:
         action = action_generator.action
         assert type(action) is act.SwapAction \
@@ -530,7 +533,7 @@ class SkillChecker:
     def _choices_helper(
             self,
             action_generator: acg.ActionGenerator,
-    ) -> tuple[acg.Choosable, ...] | AbstractDices | cds.Cards:
+    ) -> GivenChoiceType:
         game_state = self._game_state
         pid = action_generator.pid
         active_character = game_state.get_player(pid).just_get_active_character()
@@ -562,7 +565,7 @@ class SkillChecker:
     def _fill_helper(
         self,
         action_generator: acg.ActionGenerator,
-        player_choice: acg.Choosable | ActualDices | cds.Cards,
+        player_choice: DecidedChoiceType,
     ) -> acg.ActionGenerator:
         action = action_generator.action
         assert type(action) is act.SkillAction
@@ -704,7 +707,7 @@ class ElementalTuningChecker:
     def _choices_helper(
             self,
             action_generator: acg.ActionGenerator,
-    ) -> tuple[acg.Choosable, ...] | AbstractDices | cds.Cards:
+    ) -> GivenChoiceType:
         game_state = self._game_state
         pid = action_generator.pid
 
@@ -730,7 +733,7 @@ class ElementalTuningChecker:
     def _fill_helper(
         self,
         action_generator: acg.ActionGenerator,
-        player_choice: acg.Choosable | ActualDices | cds.Cards,
+        player_choice: DecidedChoiceType,
     ) -> acg.ActionGenerator:
         action = action_generator.action
         assert type(action) is act.ElementalTuningAction

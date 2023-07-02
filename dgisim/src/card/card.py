@@ -23,6 +23,7 @@ from dgisim.src.status.status_processing import StatusProcessing
 if TYPE_CHECKING:
     import dgisim.src.card.cards as cds
     import dgisim.src.state.game_state as gs
+    from dgisim.src.action.types import DecidedChoiceType, GivenChoiceType
 
 
 class Card:
@@ -276,7 +277,7 @@ class SupportCard(Card):
     def _choices_helper(
             cls,
             action_generator: acg.ActionGenerator,
-    ) -> tuple[acg.Choosable, ...] | AbstractDices | cds.Cards:
+    ) -> GivenChoiceType:
         game_state = action_generator.game_state
         pid = action_generator.pid
 
@@ -309,7 +310,7 @@ class SupportCard(Card):
     def _fill_helper(
         cls,
         action_generator: acg.ActionGenerator,
-        player_choice: acg.Choosable | ActualDices | cds.Cards,
+        player_choice: DecidedChoiceType,
     ) -> acg.ActionGenerator:
         assert action_generator._action_filled()
 
@@ -377,7 +378,7 @@ class _DiceOnlyChoiceProvider(Card):
     def _choices_helper(
             cls,
             action_generator: acg.ActionGenerator,
-    ) -> tuple[acg.Choosable, ...] | AbstractDices | cds.Cards:
+    ) -> GivenChoiceType:
         game_state = action_generator.game_state
         pid = action_generator.pid
 
@@ -397,7 +398,7 @@ class _DiceOnlyChoiceProvider(Card):
     def _fill_helper(
         cls,
         action_generator: acg.ActionGenerator,
-        player_choice: acg.Choosable | ActualDices | cds.Cards,
+        player_choice: DecidedChoiceType,
     ) -> acg.ActionGenerator:
         assert action_generator._action_filled()
 
@@ -440,7 +441,7 @@ class _CharTargetChoiceProvider(Card):
     def _choices_helper(
             cls,
             action_generator: acg.ActionGenerator,
-    ) -> tuple[acg.Choosable, ...] | AbstractDices | cds.Cards:
+    ) -> GivenChoiceType:
         game_state = action_generator.game_state
         pid = action_generator.pid
 
@@ -472,7 +473,7 @@ class _CharTargetChoiceProvider(Card):
     def _fill_helper(
         cls,
         action_generator: acg.ActionGenerator,
-        player_choice: acg.Choosable | ActualDices | cds.Cards,
+        player_choice: DecidedChoiceType,
     ) -> acg.ActionGenerator:
         assert action_generator._action_filled()
 

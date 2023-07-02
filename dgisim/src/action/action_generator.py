@@ -3,11 +3,7 @@ from dataclasses import dataclass, replace, fields
 from typing import Callable, TYPE_CHECKING
 from typing_extensions import Self
 
-import dgisim.src.card.card as cd
-from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.dices import ActualDices
-from dgisim.src.effect.structs import StaticTarget
-from dgisim.src.element.element import Element
 
 if TYPE_CHECKING:
     import dgisim.src.action.action as act
@@ -15,8 +11,7 @@ if TYPE_CHECKING:
     import dgisim.src.state.game_state as gs
     from dgisim.src.state.enums import PID
     from dgisim.src.dices import ActualDices, AbstractDices
-
-Choosable = StaticTarget | int | ActualDices | CharacterSkill | type["cd.Card"] | Element
+    from dgisim.src.action.types import DecidedChoiceType, GivenChoiceType
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -25,8 +20,8 @@ class ActionGenerator:
     pid: PID
     action: act.PlayerAction
     instruction: None | act.Instruction = None
-    _choices_helper: Callable[[Self], tuple[Choosable, ...] | AbstractDices | cds.Cards]
-    _fill_helper: Callable[[Self, Choosable | ActualDices | cds.Cards], Self]
+    _choices_helper: Callable[[Self], GivenChoiceType]
+    _fill_helper: Callable[[Self, DecidedChoiceType], Self]
 
     def _action_filled(self) -> bool:
         return self.action._filled(exceptions={"instruction"})
@@ -54,14 +49,14 @@ class ActionGenerator:
             action = replace(action, instruction=self.instruction)
         return action
 
-    def choices(self) -> tuple[Choosable, ...] | AbstractDices | cds.Cards:
+    def choices(self) -> GivenChoiceType:
         assert not self.filled()
         return self._choices_helper(self)
 
     def dices_available(self) -> ActualDices:
         return self.game_state.get_player(self.pid).get_dices()
 
-    def choose(self, choice: Choosable | ActualDices | cds.Cards) -> ActionGenerator:
+    def choose(self, choice: DecidedChoiceType) -> ActionGenerator:
         return self._fill_helper(self, choice)
 
     def __str__(self) -> str:

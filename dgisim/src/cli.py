@@ -109,7 +109,7 @@ class CLISession:
         return choices_map[final_choice]
 
     @classmethod
-    def game_action_chooser(cls, choices: Iterable[choosable_type]) -> choosable_type:
+    def game_action_chooser(cls, choices: Iterable[DecidedChoiceType]) -> DecidedChoiceType:
         choice = cls.chooser(choices)
         return choice
 

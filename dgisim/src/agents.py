@@ -1,8 +1,9 @@
 import random
-from typing import Optional, Iterable
+from typing import Optional, Iterable, TYPE_CHECKING
 
 from dgisim.src.action.action import *
 from dgisim.src.action.action_generator import *
+from dgisim.src.action.types import _SingleChoiceType, DecidedChoiceType
 from dgisim.src.card.card import *
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.dices import AbstractDices, ActualDices
@@ -272,7 +273,7 @@ class RandomAgent(PlayerAgent):
     def _random_action_generator_chooser(self, action_generator: ActionGenerator) -> PlayerAction:
         while not action_generator.filled():
             choices = action_generator.choices()
-            choice: Choosable | ActualDices | Cards
+            choice: DecidedChoiceType
             if isinstance(choices, tuple):
                 choice = random.choice(choices)
                 action_generator = action_generator.choose(choice)
@@ -376,13 +377,11 @@ class RandomAgent(PlayerAgent):
         raise NotImplementedError
 
 
-choosable_type = Choosable | ActualDices | Cards
-
 class CustomChoiceAgent(RandomAgent):
     def __init__(
             self,
             prompt_handler: Callable[[str, str], None],
-            choose_handler: Callable[[Iterable[choosable_type]], choosable_type],
+            choose_handler: Callable[[Iterable[DecidedChoiceType]], DecidedChoiceType],
             any_handler: Callable[[Iterable[Any]], Any],
     ) -> None:
         self._prompt_handler = prompt_handler
@@ -392,7 +391,7 @@ class CustomChoiceAgent(RandomAgent):
     def _random_action_generator_chooser(self, action_generator: ActionGenerator) -> PlayerAction:
         while not action_generator.filled():
             choices = action_generator.choices()
-            choice: Choosable | ActualDices | Cards
+            choice: DecidedChoiceType
             if isinstance(choices, tuple):
                 choice = self._choose_handler(choices)
                 action_generator = action_generator.choose(choice)
