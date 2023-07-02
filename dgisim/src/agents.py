@@ -139,7 +139,7 @@ class HardCodedRandomAgent(PlayerAgent):
                             dices=tmp_dices,
                             target=StaticTarget(
                                 pid,
-                                Zone.CHARACTERS,
+                                ZONE.CHARACTERS,
                                 active_character.get_id(),
                             )
                         )

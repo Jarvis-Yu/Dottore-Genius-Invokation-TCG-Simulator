@@ -78,7 +78,7 @@ class TestKeqing(unittest.TestCase):
         self.assertFalse(game_state_1_1.get_player1().get_hand_cards().contains(LightningStiletto))
 
         # second skill by using card, when Keqing on field
-        source = StaticTarget(PID.P1, Zone.CHARACTERS, 3)
+        source = StaticTarget(PID.P1, ZONE.CHARACTERS, 3)
         gsm = GameStateMachine(game_state_1, a1, a2)
         a1.inject_action(CardAction(
             card=LightningStiletto,
@@ -278,7 +278,7 @@ class TestKeqing(unittest.TestCase):
 
     def test_talent_card(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
-        source = StaticTarget(PID.P1, Zone.CHARACTERS, 3)
+        source = StaticTarget(PID.P1, ZONE.CHARACTERS, 3)
         # test early equip
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_actions([
@@ -366,7 +366,7 @@ class TestKeqing(unittest.TestCase):
                 dices=ActualDices({Element.OMNI: 3}),
                 target=StaticTarget(
                     pid=PID.P1,
-                    zone=Zone.CHARACTERS,
+                    zone=ZONE.CHARACTERS,
                     id=3,
                 )
             ),

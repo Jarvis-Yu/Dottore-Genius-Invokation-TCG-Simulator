@@ -19,13 +19,14 @@ from dgisim.src.action.action import PlayerAction
 from dgisim.src.effect.effect_stack import EffectStack
 from dgisim.src.event.event_pre import EventPre
 from dgisim.src.character.character import Character
-from dgisim.src.effect.effect import StaticTarget, Zone
+from dgisim.src.effect.effect import StaticTarget, ZONE
 from dgisim.src.event.event import *
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.status.status_processing import StatusProcessing
 from dgisim.src.status.enums import PREPROCESSABLES
 from dgisim.src.support.support import Support
 from dgisim.src.state.enums import PID
+from dgisim.src.effect.enums import ZONE
 
 
 class GameState:
@@ -135,9 +136,9 @@ class GameState:
 
     def get_target(self, target: StaticTarget) -> None | Character | Support:
         player = self.get_player(target.pid)
-        if target.zone is Zone.CHARACTERS:
+        if target.zone is ZONE.CHARACTERS:
             return player.get_characters().get_character(target.id)
-        elif target.zone is Zone.SUPPORTS:
+        elif target.zone is ZONE.SUPPORTS:
             return player.get_supports().find_by_sid(target.id)
         else:
             raise Exception("Not Implemented Yet")
@@ -450,7 +451,7 @@ class SwapChecker:
             item=GameEvent(
                 target=eft.StaticTarget(
                     pid=pid,
-                    zone=eft.Zone.CHARACTERS,
+                    zone=ZONE.CHARACTERS,
                     id=char_id,
                 ),
                 event_type=EventType.SWAP,
@@ -500,7 +501,7 @@ class SwapChecker:
                 item=GameEvent(
                     target=eft.StaticTarget(
                         pid=pid,
-                        zone=eft.Zone.CHARACTERS,
+                        zone=ZONE.CHARACTERS,
                         id=action.char_id,
                     ),
                     event_type=EventType.SWAP,
@@ -627,7 +628,7 @@ class SkillChecker:
             item=GameEvent(
                 target=eft.StaticTarget(
                     pid=pid,
-                    zone=eft.Zone.CHARACTERS,
+                    zone=ZONE.CHARACTERS,
                     id=char_id,
                 ),
                 event_type=skill_type.to_event_type(),
@@ -663,7 +664,7 @@ class SkillChecker:
             item=GameEvent(
                 target=eft.StaticTarget(
                     pid=pid,
-                    zone=eft.Zone.CHARACTERS,
+                    zone=ZONE.CHARACTERS,
                     id=character.get_id(),
                 ),
                 event_type=skill_type.to_event_type(),

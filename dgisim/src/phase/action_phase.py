@@ -118,7 +118,7 @@ class ActionPhase(ph.Phase):
         new_effects += active_character.skill(game_state, action.skill)
         new_effects.append(AllStatusTriggererEffect(
             pid,
-            TriggeringSignal.COMBAT_ACTION,
+            TRIGGERING_SIGNAL.COMBAT_ACTION,
         ))
         new_effects.append(TurnEndEffect())
         # Afterwards
@@ -147,14 +147,14 @@ class ActionPhase(ph.Phase):
         active_character = player.get_characters().get_active_character()
         assert active_character is not None
         new_effects.append(SwapCharacterEffect(
-            StaticTarget(pid, Zone.CHARACTERS, action.char_id)
+            StaticTarget(pid, ZONE.CHARACTERS, action.char_id)
         ))
 
         if action_speed is EventSpeed.COMBAT_ACTION:
             new_effects.append(
                 AllStatusTriggererEffect(
                     pid=pid,
-                    signal=TriggeringSignal.COMBAT_ACTION,
+                    signal=TRIGGERING_SIGNAL.COMBAT_ACTION,
                 )
             )
             new_effects.append(TurnEndEffect())
@@ -162,7 +162,7 @@ class ActionPhase(ph.Phase):
             new_effects.append(
                 AllStatusTriggererEffect(
                     pid=pid,
-                    signal=TriggeringSignal.FAST_ACTION,
+                    signal=TRIGGERING_SIGNAL.FAST_ACTION,
                 )
             )
 
@@ -202,7 +202,7 @@ class ActionPhase(ph.Phase):
         if card.is_combat_action():
             new_effects.append(AllStatusTriggererEffect(
                 pid,
-                TriggeringSignal.COMBAT_ACTION,
+                TRIGGERING_SIGNAL.COMBAT_ACTION,
             ))
             new_effects.append(TurnEndEffect())
         return game_state.factory().f_effect_stack(
@@ -254,7 +254,7 @@ class ActionPhase(ph.Phase):
         active_character = player.get_characters().get_active_character()
         assert active_character is not None
         effect_stack = effect_stack.push_one(SwapCharacterEffect(
-            StaticTarget(pid, Zone.CHARACTERS, action.char_id)
+            StaticTarget(pid, ZONE.CHARACTERS, action.char_id)
         ))
         return game_state.factory().effect_stack(
             effect_stack

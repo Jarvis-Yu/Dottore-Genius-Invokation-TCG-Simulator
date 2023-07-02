@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dgisim.src.effect.effect as eft
+from dgisim.src.effect.enums import DYNAMIC_CHARACTER_TARGET
 
 
 def normal_attack_template(
@@ -12,7 +13,7 @@ def normal_attack_template(
     effects: list[eft.Effect] = []
     effects.append(eft.ReferredDamageEffect(
         source=source,
-        target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
+        target=DYNAMIC_CHARACTER_TARGET.OPPO_ACTIVE,
         element=element,
         damage=damage,
         damage_type=eft.DamageType(

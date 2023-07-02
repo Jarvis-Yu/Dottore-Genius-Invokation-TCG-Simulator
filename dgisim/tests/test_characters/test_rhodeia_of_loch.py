@@ -270,7 +270,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         ).build()
         source = StaticTarget(
             pid=PID.P1,
-            zone=Zone.CHARACTERS,
+            zone=ZONE.CHARACTERS,
             id=1,
         )
 

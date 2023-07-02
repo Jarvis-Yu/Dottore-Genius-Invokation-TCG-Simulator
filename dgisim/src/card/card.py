@@ -18,6 +18,7 @@ from dgisim.src.helper.quality_of_life import BIG_INT
 from dgisim.src.event.event import CardEvent
 from dgisim.src.status.status_processing import StatusProcessing
 from dgisim.src.status.enums import PREPROCESSABLES
+from dgisim.src.effect.enums import ZONE
 
 
 class Card:
@@ -196,7 +197,7 @@ class _ValidInstructionFuncs:
             instruction: act.StaticTargetInstruction,
     ) -> bool:
         return instruction.target.pid == pid \
-            and instruction.target.zone is eft.Zone.CHARACTERS \
+            and instruction.target.zone is ZONE.CHARACTERS \
             and instruction.target.id == game_state.get_player(pid).get_characters().get_active_character_id()
 
 
@@ -283,7 +284,7 @@ class SupportCard(Card):
             return tuple(
                 eft.StaticTarget(
                     pid=pid,
-                    zone=eft.Zone.SUPPORTS,
+                    zone=ZONE.SUPPORTS,
                     id=support.sid,
                 )
                 for support in supports
@@ -449,7 +450,7 @@ class _CharTargetChoiceProvider(Card):
             return tuple(
                 eft.StaticTarget(
                     pid=pid,
-                    zone=eft.Zone.CHARACTERS,
+                    zone=ZONE.CHARACTERS,
                     id=char.get_id(),
                 )
                 for char in chars
@@ -731,7 +732,7 @@ class Starsigns(EventCard, _DiceOnlyChoiceProvider):
             eft.EnergyRechargeEffect(
                 eft.StaticTarget(
                     pid=pid,
-                    zone=eft.Zone.CHARACTERS,
+                    zone=ZONE.CHARACTERS,
                     id=game_state.get_player(pid).just_get_active_character().get_id(),
                 ),
                 1
@@ -944,7 +945,7 @@ class ThunderingPenance(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvide
         assert isinstance(instruction, act.DiceOnlyInstruction)
         target = eft.StaticTarget(
             pid=pid,
-            zone=eft.Zone.CHARACTERS,
+            zone=ZONE.CHARACTERS,
             id=game_state.get_player(pid).just_get_active_character().get_id(),
         )
         return (
@@ -992,7 +993,7 @@ class ColdBloodedStrike(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvide
         assert isinstance(instruction, act.DiceOnlyInstruction)
         target = eft.StaticTarget(
             pid=pid,
-            zone=eft.Zone.CHARACTERS,
+            zone=ZONE.CHARACTERS,
             id=game_state.get_player(pid).just_get_active_character().get_id(),
         )
         return (
@@ -1040,7 +1041,7 @@ class StreamingSurge(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
         assert isinstance(instruction, act.DiceOnlyInstruction)
         target = eft.StaticTarget(
             pid=pid,
-            zone=eft.Zone.CHARACTERS,
+            zone=ZONE.CHARACTERS,
             id=game_state.get_player(pid).just_get_active_character().get_id(),
         )
         return (

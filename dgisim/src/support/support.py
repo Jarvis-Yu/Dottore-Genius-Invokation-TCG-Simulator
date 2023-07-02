@@ -11,6 +11,7 @@ import dgisim.src.event.event as evt
 from dgisim.src.helper.quality_of_life import BIG_INT
 from dgisim.src.element.element import Element
 from dgisim.src.status.enums import PREPROCESSABLES
+from dgisim.src.effect.enums import TRIGGERING_SIGNAL
 
 @dataclass(frozen=True, kw_only=True)
 class Support(stt.Status):
@@ -57,9 +58,9 @@ class XudongSupport(Support):
 
     @override
     def _react_to_signal(
-            self, source: eft.StaticTarget, signal: eft.TriggeringSignal
+            self, source: eft.StaticTarget, signal: TRIGGERING_SIGNAL
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is eft.TriggeringSignal.ROUND_END:
+        if signal is TRIGGERING_SIGNAL.ROUND_END:
             return [], type(self)(sid=self.sid)
         return [], self
 

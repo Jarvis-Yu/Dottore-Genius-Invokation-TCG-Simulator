@@ -42,7 +42,7 @@ class TestJueyunGuoba(unittest.TestCase):
                 dices=ActualDices({}),
                 target=StaticTarget(
                     PID.P1,
-                    Zone.CHARACTERS,
+                    ZONE.CHARACTERS,
                     char1.get_id(),
                 )
             )
@@ -85,7 +85,7 @@ class TestJueyunGuoba(unittest.TestCase):
                 dices=ActualDices({}),
                 target=StaticTarget(
                     PID.P1,
-                    Zone.CHARACTERS,
+                    ZONE.CHARACTERS,
                     guobaed_char_id,
                 )
             )
@@ -130,7 +130,7 @@ class TestJueyunGuoba(unittest.TestCase):
                 dices=ActualDices({}),
                 target=StaticTarget(
                     PID.P1,
-                    Zone.CHARACTERS,
+                    ZONE.CHARACTERS,
                     2,
                 )
             )

@@ -8,6 +8,7 @@ from dgisim.src.helper.level_print import GamePrinter
 from dgisim.src.helper.quality_of_life import *
 from dgisim.src.agents import *
 from dgisim.src.effect.effect import *
+from dgisim.src.effect.enums import DYNAMIC_CHARACTER_TARGET
 
 
 def auto_step(game_state: GameState, observe: bool = False) -> GameState:
@@ -65,10 +66,10 @@ def add_damage_effect(
             ReferredDamageEffect(
                 source=StaticTarget(
                     pid.other(),
-                    Zone.CHARACTERS,
+                    ZONE.CHARACTERS,
                     case_val(char_id is None, 1, char_id),  # type: ignore
                 ),
-                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                target=DYNAMIC_CHARACTER_TARGET.OPPO_ACTIVE,
                 element=elem,
                 damage=damage,
                 damage_type=DamageType(),

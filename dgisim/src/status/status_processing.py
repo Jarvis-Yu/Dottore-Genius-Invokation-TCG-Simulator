@@ -10,6 +10,7 @@ import dgisim.src.support.support as sp
 import dgisim.src.card.card as cd
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.status.enums import PREPROCESSABLES
+from dgisim.src.effect.enums import ZONE, TRIGGERING_SIGNAL
 
 
 class StatusProcessing:
@@ -34,7 +35,7 @@ class StatusProcessing:
             character_id = character.get_id()
             target = eft.StaticTarget(
                 pid,
-                eft.Zone.CHARACTERS,
+                ZONE.CHARACTERS,
                 character_id
             )
             for status in statuses:
@@ -44,7 +45,7 @@ class StatusProcessing:
         combat_statuses = player.get_combat_statuses()
         target = eft.StaticTarget(
             pid,
-            eft.Zone.COMBAT_STATUSES,
+            ZONE.COMBAT_STATUSES,
             -1,  # not used
         )
         for status in combat_statuses:
@@ -54,7 +55,7 @@ class StatusProcessing:
         summons = player.get_summons()
         target = eft.StaticTarget(
             pid,
-            eft.Zone.SUMMONS,
+            ZONE.SUMMONS,
             -1,
         )
         for summon in summons:
@@ -65,7 +66,7 @@ class StatusProcessing:
         for support in supports:
             target = eft.StaticTarget(
                 pid,
-                eft.Zone.SUPPORTS,
+                ZONE.SUPPORTS,
                 support.sid,
             )
             game_state = f(game_state, support, target)
@@ -88,7 +89,7 @@ class StatusProcessing:
 
     @staticmethod
     def trigger_all_statuses_effects(
-            game_state: gs.GameState, pid: PID, signal: eft.TriggeringSignal
+            game_state: gs.GameState, pid: PID, signal: TRIGGERING_SIGNAL
     ) -> list[eft.Effect]:
         """
         Takes the current game_state, trigger all statuses in order of player pid

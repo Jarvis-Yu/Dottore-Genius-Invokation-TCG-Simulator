@@ -36,7 +36,7 @@ class TestNorthernSmokedChicken(unittest.TestCase):
                 dices=ActualDices({}),
                 target=StaticTarget(
                     pid=PID.P1,
-                    zone=Zone.CHARACTERS,
+                    zone=ZONE.CHARACTERS,
                     id=1,
                 )
             ),

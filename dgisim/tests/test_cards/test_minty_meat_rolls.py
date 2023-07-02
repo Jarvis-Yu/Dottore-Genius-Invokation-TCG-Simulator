@@ -25,7 +25,7 @@ class TestMintyMeatRolls(unittest.TestCase):
                 dices=ActualDices({Element.OMNI: 1}),
                 target=StaticTarget(
                     pid=PID.P1,
-                    zone=Zone.CHARACTERS,
+                    zone=ZONE.CHARACTERS,
                     id=1,
                 )
             ),

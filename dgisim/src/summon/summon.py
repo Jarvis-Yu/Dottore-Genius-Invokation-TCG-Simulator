@@ -6,6 +6,7 @@ from dataclasses import dataclass, replace
 from dgisim.src.helper.quality_of_life import BIG_INT
 import dgisim.src.status.status as stt
 import dgisim.src.effect.effect as eft
+from dgisim.src.effect.enums import TRIGGERING_SIGNAL, DYNAMIC_CHARACTER_TARGET
 from dgisim.src.element.element import Element
 
 
@@ -37,12 +38,12 @@ class _DestoryOnEndNumSummon(Summon):
             self,
             effects: list[eft.Effect],
             new_status: Optional[Self],
-            signal: eft.TriggeringSignal,
+            signal: TRIGGERING_SIGNAL,
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         if new_status is None:
             return effects, new_status
 
-        if signal is eft.TriggeringSignal.END_ROUND_CHECK_OUT \
+        if signal is TRIGGERING_SIGNAL.END_ROUND_CHECK_OUT \
                 and self.usages + new_status.usages <= 0:
             return effects, None
 
@@ -59,16 +60,16 @@ class _DmgPerRoundSummon(_DestroyOnNumSummon):
     def _react_to_signal(
             self,
             source: eft.StaticTarget,
-            signal: eft.TriggeringSignal
+            signal: TRIGGERING_SIGNAL
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         es: list[eft.Effect] = []
         d_usages = 0
-        if signal is eft.TriggeringSignal.END_ROUND_CHECK_OUT:
+        if signal is TRIGGERING_SIGNAL.END_ROUND_CHECK_OUT:
             d_usages = -1
             es.append(
                 eft.ReferredDamageEffect(
                     source=source,
-                    target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
+                    target=DYNAMIC_CHARACTER_TARGET.OPPO_ACTIVE,
                     element=self.ELEMENT,
                     damage=self.DMG,
                     damage_type=eft.DamageType(summon=True),
@@ -105,15 +106,15 @@ class OceanicMimicFrogSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
     def _react_to_signal(
             self,
             source: eft.StaticTarget,
-            signal: eft.TriggeringSignal
+            signal: TRIGGERING_SIGNAL
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         es: list[eft.Effect] = []
-        if signal is eft.TriggeringSignal.END_ROUND_CHECK_OUT \
+        if signal is TRIGGERING_SIGNAL.END_ROUND_CHECK_OUT \
                 and self.usages == 0:
             es.append(
                 eft.ReferredDamageEffect(
                     source=source,
-                    target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
+                    target=DYNAMIC_CHARACTER_TARGET.OPPO_ACTIVE,
                     element=Element.HYDRO,
                     damage=self.DMG,
                     damage_type=eft.DamageType(summon=True),

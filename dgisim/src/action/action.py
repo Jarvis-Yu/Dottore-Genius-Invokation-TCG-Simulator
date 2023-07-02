@@ -12,6 +12,7 @@ from dgisim.src.element.element import Element
 import dgisim.src.state.game_state as gs
 from dgisim.src.state.enums import PID
 import dgisim.src.effect.effect as eft
+from dgisim.src.effect.enums import ZONE
 
 
 @dataclass(frozen=True)
@@ -236,7 +237,7 @@ class StaticTargetInstruction(Instruction):
             dices=ActualDices({}),
             target=StaticTarget(
                 pid=PID.P1,
-                zone=eft.Zone.CHARACTERS,
+                zone=ZONE.CHARACTERS,
                 id=-1,
             ),
         )
@@ -251,7 +252,7 @@ class SourceTargetInstruction(Instruction):
     def _empty(cls) -> Self:
         target = StaticTarget(
             pid=PID.P1,
-            zone=eft.Zone.CHARACTERS,
+            zone=ZONE.CHARACTERS,
             id=-1,
         )
         return cls(

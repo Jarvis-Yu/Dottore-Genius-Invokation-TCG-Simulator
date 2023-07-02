@@ -10,6 +10,7 @@ from dgisim.src.game_state_machine import GameStateMachine
 from dgisim.src.agents import *
 from dgisim.src.element.element import Reaction, ElementalAura
 from dgisim.src.effect.effect import *
+from dgisim.src.effect.enums import DYNAMIC_CHARACTER_TARGET
 from dgisim.src.helper.level_print import GamePrinter
 from dgisim.src.status.status import *
 from dgisim.src.summon.summon import *
@@ -250,10 +251,10 @@ class TestStatus(unittest.TestCase):
                 ReferredDamageEffect(
                     source=StaticTarget(
                         pid=PID.P1,
-                        zone=Zone.CHARACTERS,
+                        zone=ZONE.CHARACTERS,
                         id=1,
                     ),
-                    target=DynamicCharacterTarget.OPPO_OFF_FIELD,
+                    target=DYNAMIC_CHARACTER_TARGET.OPPO_OFF_FIELD,
                     element=Element.ELECTRO,
                     damage=1,
                     damage_type=DamageType(),
@@ -611,8 +612,8 @@ class TestStatus(unittest.TestCase):
         # deals 1 electro damage to off-field characters
         game_state = base_game_state.factory().f_effect_stack(
             lambda es: es.push_one(ReferredDamageEffect(
-                source=StaticTarget(PID.P1, Zone.CHARACTERS, 1),
-                target=DynamicCharacterTarget.OPPO_OFF_FIELD,
+                source=StaticTarget(PID.P1, ZONE.CHARACTERS, 1),
+                target=DYNAMIC_CHARACTER_TARGET.OPPO_OFF_FIELD,
                 element=Element.ELECTRO,
                 damage=1,
                 damage_type=DamageType(),
@@ -716,8 +717,8 @@ class TestStatus(unittest.TestCase):
         # deals 1 electro damage to off-field characters
         game_state = base_game_state.factory().f_effect_stack(
             lambda es: es.push_one(ReferredDamageEffect(
-                source=StaticTarget(PID.P1, Zone.CHARACTERS, 1),
-                target=DynamicCharacterTarget.OPPO_OFF_FIELD,
+                source=StaticTarget(PID.P1, ZONE.CHARACTERS, 1),
+                target=DYNAMIC_CHARACTER_TARGET.OPPO_OFF_FIELD,
                 element=Element.ELECTRO,
                 damage=1,
                 damage_type=DamageType(),

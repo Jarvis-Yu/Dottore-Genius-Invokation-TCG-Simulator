@@ -20,34 +20,7 @@ import dgisim.src.event.event as evt
 from dgisim.src.status.status_processing import StatusProcessing
 from dgisim.src.status.enums import PREPROCESSABLES
 from dgisim.src.helper.quality_of_life import just, case_val
-
-
-class Zone(Enum):
-    CHARACTERS = "Characters"
-    SUMMONS = "Summons"
-    SUPPORTS = "Supports"
-    COMBAT_STATUSES = "Combat-Statuses"
-
-
-class TriggeringSignal(Enum):
-    FAST_ACTION = 0
-    COMBAT_ACTION = 1
-    DEATH_EVENT = 2
-    SWAP_EVENT_1 = 3  # P1's swap
-    SWAP_EVENT_2 = 4  # P2's swap
-    ROUND_START = 5
-    END_ROUND_CHECK_OUT = 6  # summons etc.
-    ROUND_END = 7  # remove frozen etc.
-
-
-class DynamicCharacterTarget(Enum):
-    SELF_SELF = 0
-    SELF_ACTIVE = 1
-    SELF_OFF_FIELD = 2
-    SELF_ALL = 3
-    SELF_ABS = 4
-    OPPO_ACTIVE = 5
-    OPPO_OFF_FIELD = 6
+from dgisim.src.effect.enums import DYNAMIC_CHARACTER_TARGET, TRIGGERING_SIGNAL, ZONE
 
 
 # TODO: postpone this until further tests are done
@@ -67,7 +40,7 @@ class DamageType:
 @dataclass(frozen=True)
 class StaticTarget:
     pid: PID
-    zone: Zone
+    zone: ZONE
     id: int
 
 
@@ -110,7 +83,7 @@ class PhaseEffect(Effect):
 class TriggerStatusEffect(Effect):
     target: StaticTarget
     status: type[Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]]
-    signal: TriggeringSignal
+    signal: TRIGGERING_SIGNAL
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         character = game_state.get_target(self.target)
@@ -141,7 +114,7 @@ class TriggerStatusEffect(Effect):
 class TriggerCombatStatusEffect(Effect):
     target_pid: PID  # the player the status belongs to
     status: type[stt.CombatStatus]
-    signal: TriggeringSignal
+    signal: TRIGGERING_SIGNAL
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         effects: Iterable[Effect] = []
@@ -153,7 +126,7 @@ class TriggerCombatStatusEffect(Effect):
             game_state,
             StaticTarget(
                 pid=self.target_pid,
-                zone=Zone.COMBAT_STATUSES,
+                zone=ZONE.COMBAT_STATUSES,
                 id=-1,
             ),
             self.signal,
@@ -167,7 +140,7 @@ class TriggerCombatStatusEffect(Effect):
 class TriggerSummonEffect(Effect):
     target_pid: PID
     summon: type[sm.Summon]
-    signal: TriggeringSignal
+    signal: TRIGGERING_SIGNAL
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         effects: Iterable[Effect] = []
@@ -179,7 +152,7 @@ class TriggerSummonEffect(Effect):
             game_state,
             StaticTarget(
                 pid=self.target_pid,
-                zone=Zone.SUMMONS,
+                zone=ZONE.SUMMONS,
                 id=-1,
             ),
             self.signal,
@@ -194,7 +167,7 @@ class TriggerSupportEffect(Effect):
     target_pid: PID
     support_type: type[sp.Support]
     sid: int
-    signal: TriggeringSignal
+    signal: TRIGGERING_SIGNAL
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         effects: Iterable[Effect] = []
@@ -206,7 +179,7 @@ class TriggerSupportEffect(Effect):
             game_state,
             StaticTarget(
                 pid=self.target_pid,
-                zone=Zone.SUPPORTS,
+                zone=ZONE.SUPPORTS,
                 id=self.sid,
             ),
             self.signal,
@@ -222,7 +195,7 @@ class AllStatusTriggererEffect(TriggerrbleEffect):
     This effect triggers the characters' statuses with the provided signal in order.
     """
     pid: PID
-    signal: TriggeringSignal
+    signal: TRIGGERING_SIGNAL
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         effects = StatusProcessing.trigger_all_statuses_effects(game_state, self.pid, self.signal)
@@ -243,11 +216,11 @@ class SwapCharacterCheckerEffect(CheckerEffect):
         my_pid = self.my_active.pid
         effects: list[Effect] = []
         if my_pid.is_player1():
-            my_signal = TriggeringSignal.SWAP_EVENT_1
-            oppo_signal = TriggeringSignal.SWAP_EVENT_2
+            my_signal = TRIGGERING_SIGNAL.SWAP_EVENT_1
+            oppo_signal = TRIGGERING_SIGNAL.SWAP_EVENT_2
         else:
-            my_signal = TriggeringSignal.SWAP_EVENT_2
-            oppo_signal = TriggeringSignal.SWAP_EVENT_1
+            my_signal = TRIGGERING_SIGNAL.SWAP_EVENT_2
+            oppo_signal = TRIGGERING_SIGNAL.SWAP_EVENT_1
         if my_ac_id != self.my_active.id:
             effects += [
                 AllStatusTriggererEffect(
@@ -357,7 +330,7 @@ class EndPhaseCheckoutEffect(PhaseEffect):
         effects = [
             AllStatusTriggererEffect(
                 active_id,
-                TriggeringSignal.END_ROUND_CHECK_OUT
+                TRIGGERING_SIGNAL.END_ROUND_CHECK_OUT
             ),
             # TODO: add active_player's team status, summons status... here
         ]
@@ -378,7 +351,7 @@ class EndRoundEffect(PhaseEffect):
         effects = [
             AllStatusTriggererEffect(
                 active_id,
-                TriggeringSignal.ROUND_END
+                TRIGGERING_SIGNAL.ROUND_END
             ),
             # TODO: add active_player's team status, summons status... here
         ]
@@ -443,7 +416,7 @@ class SwapCharacterEffect(DirectEffect):
     target: StaticTarget
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
-        assert self.target.zone == Zone.CHARACTERS
+        assert self.target.zone == ZONE.CHARACTERS
         pid = self.target.pid
         player = game_state.get_player(pid)
         if player.just_get_active_character().get_id() == self.target.id:
@@ -454,8 +427,8 @@ class SwapCharacterEffect(DirectEffect):
                 pid,
                 case_val(
                     pid.is_player1(),
-                    TriggeringSignal.SWAP_EVENT_1,
-                    TriggeringSignal.SWAP_EVENT_2,
+                    TRIGGERING_SIGNAL.SWAP_EVENT_1,
+                    TRIGGERING_SIGNAL.SWAP_EVENT_2,
                 ),
             ),
         ]
@@ -624,7 +597,7 @@ class SpecificDamageEffect(Effect):
                 .get_player(actual_damage.target.pid) \
                 .just_get_active_character() \
                 .get_id()
-            assert actual_damage.target.zone is Zone.CHARACTERS
+            assert actual_damage.target.zone is ZONE.CHARACTERS
             if actual_damage.target.id is oppo_active_id:
                 effects.append(
                     ForwardSwapCharacterEffect(pid)
@@ -636,7 +609,7 @@ class SpecificDamageEffect(Effect):
                 ReferredDamageEffect(
                     source=self.source,
                     target_ref=actual_damage.target,
-                    target=DynamicCharacterTarget.OPPO_OFF_FIELD,
+                    target=DYNAMIC_CHARACTER_TARGET.OPPO_OFF_FIELD,
                     element=Element.PIERCING,
                     damage=1,
                     damage_type=DamageType(no_boost=True),
@@ -648,7 +621,7 @@ class SpecificDamageEffect(Effect):
                 ReferredDamageEffect(
                     source=self.source,
                     target_ref=actual_damage.target,
-                    target=DynamicCharacterTarget.OPPO_OFF_FIELD,
+                    target=DYNAMIC_CHARACTER_TARGET.OPPO_OFF_FIELD,
                     element=reaction.first_elem,
                     damage=1,
                     damage_type=DamageType(no_boost=True),
@@ -715,7 +688,7 @@ class SpecificDamageEffect(Effect):
 @dataclass(frozen=True)
 class ReferredDamageEffect(Effect):
     source: StaticTarget
-    target: DynamicCharacterTarget
+    target: DYNAMIC_CHARACTER_TARGET
     element: Element
     damage: int
     damage_type: DamageType
@@ -731,18 +704,18 @@ class ReferredDamageEffect(Effect):
         effects: list[Effect] = []
         char: Optional[chr.Character]
 
-        if self.target is DynamicCharacterTarget.OPPO_ACTIVE:
+        if self.target is DYNAMIC_CHARACTER_TARGET.OPPO_ACTIVE:
             targets.append(
                 game_state.get_other_player(self.source.pid).get_characters().get_active_character()
             )
-        elif self.target is DynamicCharacterTarget.OPPO_OFF_FIELD:
+        elif self.target is DYNAMIC_CHARACTER_TARGET.OPPO_OFF_FIELD:
             opponenet_characters = game_state.get_other_player(self.source.pid).get_characters()
             avoided_id: int
             if self.target_ref is None:
                 avoided_id = just(opponenet_characters.get_active_character_id())
             else:
                 assert self.target_ref.pid is self.source.pid.other()
-                assert self.target_ref.zone is Zone.CHARACTERS
+                assert self.target_ref.zone is ZONE.CHARACTERS
                 avoided_id = self.target_ref.id
             for char in opponenet_characters.get_characters():
                 if char.get_id() != avoided_id:
@@ -761,7 +734,7 @@ class ReferredDamageEffect(Effect):
                     source=self.source,
                     target=StaticTarget(
                         pid=pid,
-                        zone=Zone.CHARACTERS,
+                        zone=ZONE.CHARACTERS,
                         id=char.get_id(),
                     ),
                     element=self.element,
