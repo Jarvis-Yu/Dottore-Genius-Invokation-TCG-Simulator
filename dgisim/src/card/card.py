@@ -1061,5 +1061,4 @@ class StreamingSurge(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
 
 
 ########### type ##########
-from typing import Any
-Choosable = Any # StaticTarget | int | ActualDices | CharacterSkill | type[Card] | Element
+Choosable = StaticTarget | int | ActualDices | CharacterSkill | type[Card] | Element
