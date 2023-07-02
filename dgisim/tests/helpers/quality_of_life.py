@@ -9,6 +9,7 @@ from dgisim.src.helper.quality_of_life import *
 from dgisim.src.agents import *
 from dgisim.src.effect.effect import *
 from dgisim.src.effect.enums import DYNAMIC_CHARACTER_TARGET
+from dgisim.src.effect.structs import DamageType
 
 
 def auto_step(game_state: GameState, observe: bool = False) -> GameState:

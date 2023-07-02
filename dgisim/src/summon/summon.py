@@ -6,6 +6,7 @@ from typing_extensions import override, Self
 import dgisim.src.effect.effect as eft
 import dgisim.src.status.status as stt
 from dgisim.src.effect.enums import TRIGGERING_SIGNAL, DYNAMIC_CHARACTER_TARGET
+from dgisim.src.effect.structs import DamageType
 from dgisim.src.element.element import Element
 from dgisim.src.helper.quality_of_life import BIG_INT
 
@@ -75,7 +76,7 @@ class _DmgPerRoundSummon(_DestroyOnNumSummon):
                     target=DYNAMIC_CHARACTER_TARGET.OPPO_ACTIVE,
                     element=self.ELEMENT,
                     damage=self.DMG,
-                    damage_type=eft.DamageType(summon=True),
+                    damage_type=DamageType(summon=True),
                 )
             )
         return es, replace(self, usages=d_usages)
@@ -120,7 +121,7 @@ class OceanicMimicFrogSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
                     target=DYNAMIC_CHARACTER_TARGET.OPPO_ACTIVE,
                     element=Element.HYDRO,
                     damage=self.DMG,
-                    damage_type=eft.DamageType(summon=True),
+                    damage_type=DamageType(summon=True),
                 )
             )
             return es, None

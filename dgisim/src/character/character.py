@@ -13,7 +13,7 @@ from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.dices import AbstractDices
 from dgisim.src.effect.effects_template import *
 from dgisim.src.effect.enums import ZONE, DYNAMIC_CHARACTER_TARGET
-from dgisim.src.effect.structs import StaticTarget
+from dgisim.src.effect.structs import StaticTarget, DamageType
 from dgisim.src.element.element import *
 from dgisim.src.helper.level_print import INDENT, level_print
 from dgisim.src.state.enums import PID
@@ -422,7 +422,7 @@ class Keqing(Character):
                 target=DYNAMIC_CHARACTER_TARGET.OPPO_ACTIVE,
                 element=Element.ELECTRO,
                 damage=3,
-                damage_type=eft.DamageType(elemental_skill=True)
+                damage_type=DamageType(elemental_skill=True)
             )
         ]
 
@@ -492,14 +492,14 @@ class Keqing(Character):
                 target=DYNAMIC_CHARACTER_TARGET.OPPO_OFF_FIELD,
                 element=Element.PIERCING,
                 damage=3,
-                damage_type=eft.DamageType(elemental_burst=True),
+                damage_type=DamageType(elemental_burst=True),
             ),
             eft.ReferredDamageEffect(
                 source=source,
                 target=DYNAMIC_CHARACTER_TARGET.OPPO_ACTIVE,
                 element=Element.ELECTRO,
                 damage=4,
-                damage_type=eft.DamageType(elemental_burst=True),
+                damage_type=DamageType(elemental_burst=True),
             ),
         )
 
@@ -564,7 +564,7 @@ class Kaeya(Character):
                 target=DYNAMIC_CHARACTER_TARGET.OPPO_ACTIVE,
                 element=Element.CRYO,
                 damage=3,
-                damage_type=eft.DamageType(elemental_skill=True),
+                damage_type=DamageType(elemental_skill=True),
             ),
         )
 
@@ -580,7 +580,7 @@ class Kaeya(Character):
                 target=DYNAMIC_CHARACTER_TARGET.OPPO_ACTIVE,
                 element=Element.CRYO,
                 damage=1,
-                damage_type=eft.DamageType(elemental_burst=True),
+                damage_type=DamageType(elemental_burst=True),
             ),
             eft.OverrideCombatStatusEffect(
                 target_pid=source.pid,
@@ -734,7 +734,7 @@ class RhodeiaOfLoch(Character):
                 target=DYNAMIC_CHARACTER_TARGET.OPPO_ACTIVE,
                 element=Element.HYDRO,
                 damage=2 + 2 * len(summons),
-                damage_type=eft.DamageType(elemental_burst=True)
+                damage_type=DamageType(elemental_burst=True)
             ),
         ]
 

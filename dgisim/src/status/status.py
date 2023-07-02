@@ -9,7 +9,7 @@ import dgisim.src.effect.effect as eft
 import dgisim.src.event.event as evt
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.effect.enums import ZONE, TRIGGERING_SIGNAL, DYNAMIC_CHARACTER_TARGET
-from dgisim.src.effect.structs import StaticTarget
+from dgisim.src.effect.structs import StaticTarget, DamageType
 from dgisim.src.element.element import Element
 from dgisim.src.helper.quality_of_life import just, BIG_INT, case_val
 from dgisim.src.status.enums import PREPROCESSABLES
@@ -881,7 +881,7 @@ class Icicle(CombatStatus, _UsageStatus):
                     target=DYNAMIC_CHARACTER_TARGET.OPPO_ACTIVE,
                     element=Element.CRYO,
                     damage=2,
-                    damage_type=eft.DamageType(status=True),
+                    damage_type=DamageType(status=True),
                 ),
             ]
             return effects, replace(self, usages=-1)

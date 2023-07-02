@@ -9,7 +9,7 @@ import dgisim.src.summon.summon as sm
 import dgisim.src.support.support as sp
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.effect.enums import DYNAMIC_CHARACTER_TARGET, TRIGGERING_SIGNAL, ZONE
-from dgisim.src.effect.structs import StaticTarget
+from dgisim.src.effect.structs import StaticTarget, DamageType
 from dgisim.src.element.element import Element, Reaction, ReactionDetail
 from dgisim.src.helper.quality_of_life import just, case_val
 from dgisim.src.state.enums import PID, ACT
@@ -21,20 +21,6 @@ if TYPE_CHECKING:
     import dgisim.src.dices as ds
     import dgisim.src.state.game_state as gs
     import dgisim.src.status.statuses as stts
-
-
-# TODO: postpone this until further tests are done
-#       needs to investigate how Klee's burst and Mona's or Sucrose's Talent co-work
-@dataclass(frozen=True, kw_only=True)
-class DamageType:
-    normal_attack: bool = False
-    charged_attack: bool = False
-    plunge_attack: bool = False
-    elemental_skill: bool = False
-    elemental_burst: bool = False
-    status: bool = False  # any talent, equipmenet, character status, combat status.
-    summon: bool = False
-    no_boost: bool = False  # reaction secondary damage, Klee's burst status...
 
 
 @dataclass(frozen=True)
