@@ -1,6 +1,4 @@
 from __future__ import annotations
-from enum import Enum
-from typing import Optional
 
 from dgisim.src.dices import AbstractDices, ActualDices
 # from dgisim.src.event.event import GameEvent

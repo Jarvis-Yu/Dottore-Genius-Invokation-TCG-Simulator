@@ -1,17 +1,15 @@
 from __future__ import annotations
-from typing import Callable, Optional
-from typing_extensions import Self
 from dataclasses import dataclass, replace, fields
+from typing import Callable, TYPE_CHECKING
+from typing_extensions import Self
 
-import dgisim.src.state.game_state as gs
-from dgisim.src.state.enums import PID
-import dgisim.src.card.card as cd
-import dgisim.src.card.cards as cds
-import dgisim.src.action.action as act
-import dgisim.src.effect.effect as eft
-from dgisim.src.dices import ActualDices, AbstractDices
-from dgisim.src.character.character_skill_enum import CharacterSkill
-from dgisim.src.element.element import Element
+if TYPE_CHECKING:
+    import dgisim.src.action.action as act
+    import dgisim.src.card.card as cd
+    import dgisim.src.card.cards as cds
+    import dgisim.src.state.game_state as gs
+    from dgisim.src.state.enums import PID
+    from dgisim.src.dices import ActualDices, AbstractDices
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -20,8 +18,8 @@ class ActionGenerator:
     pid: PID
     action: act.PlayerAction
     instruction: None | act.Instruction = None
-    _choices_helper: Callable[[ActionGenerator], tuple[cd.Choosable, ...] | AbstractDices | cds.Cards]
-    _fill_helper: Callable[[ActionGenerator, cd.Choosable | ActualDices | cds.Cards], ActionGenerator]
+    _choices_helper: Callable[[Self], tuple[cd.Choosable, ...] | AbstractDices | cds.Cards]
+    _fill_helper: Callable[[Self, cd.Choosable | ActualDices | cds.Cards], Self]
 
     def _action_filled(self) -> bool:
         return self.action._filled(exceptions={"instruction"})

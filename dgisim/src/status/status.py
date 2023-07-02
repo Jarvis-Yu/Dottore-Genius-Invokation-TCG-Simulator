@@ -1,19 +1,21 @@
 from __future__ import annotations
-from typing import TypeVar, Union, Optional, ClassVar
-from typing_extensions import override, Self
-from enum import Enum
 from dataclasses import dataclass, replace
+from enum import Enum
 from math import ceil
+from typing import ClassVar, Optional, TYPE_CHECKING
+from typing_extensions import override, Self
 
-import dgisim.src.state.game_state as gs
-import dgisim.src.card.card as cd
 import dgisim.src.effect.effect as eft
 import dgisim.src.event.event as evt
+import dgisim.src.state.game_state as gs
 from dgisim.src.character.character_skill_enum import CharacterSkill
-from dgisim.src.element.element import Element
-from dgisim.src.status.enums import PREPROCESSABLES
 from dgisim.src.effect.enums import ZONE, TRIGGERING_SIGNAL, DYNAMIC_CHARACTER_TARGET
+from dgisim.src.element.element import Element
 from dgisim.src.helper.quality_of_life import just, BIG_INT, case_val
+from dgisim.src.status.enums import PREPROCESSABLES
+
+if TYPE_CHECKING:
+    import dgisim.src.card.card as cd
 
 
 class TriggerringEvent(Enum):

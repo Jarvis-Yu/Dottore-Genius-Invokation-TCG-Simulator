@@ -1,6 +1,6 @@
 from __future__ import annotations
-from typing import Dict, Union
 from dataclasses import dataclass
+from typing import Dict, Union
 
 _INDENTATION = "| "
 INDENT = len(_INDENTATION)

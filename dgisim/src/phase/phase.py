@@ -1,11 +1,11 @@
 from __future__ import annotations
-from typing import Optional, Union
+from typing import Optional
 
 import dgisim.src.state.game_state as gs
-from dgisim.src.state.enums import PID, ACT
-from dgisim.src.helper.level_print import level_print_single
 from dgisim.src.action.action import PlayerAction
 from dgisim.src.event.event_pre import EventPre
+from dgisim.src.helper.level_print import level_print_single
+from dgisim.src.state.enums import PID, ACT
 
 
 class Phase:
@@ -38,5 +38,5 @@ class Phase:
     def to_string(self, indent: int = 0) -> str:
         return level_print_single(self.__class__.__name__, indent)
 
-    def dict_str(self) -> Union[dict, str]:
+    def dict_str(self) -> dict | str:
         return self.__class__.__name__

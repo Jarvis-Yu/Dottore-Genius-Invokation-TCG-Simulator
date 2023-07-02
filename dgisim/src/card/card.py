@@ -1,24 +1,27 @@
 from __future__ import annotations
-from typing_extensions import override
+from typing import TYPE_CHECKING
 from dataclasses import replace
+from typing_extensions import override
 
-import dgisim.src.state.game_state as gs
-from dgisim.src.state.enums import PID
-import dgisim.src.effect.effect as eft
 import dgisim.src.action.action as act
 import dgisim.src.action.action_generator as acg
+import dgisim.src.character.character as chr
+import dgisim.src.effect.effect as eft
 import dgisim.src.status.status as stt
 import dgisim.src.support.support as sp
-import dgisim.src.character.character as chr
-import dgisim.src.card.cards as cds
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.dices import AbstractDices, ActualDices
-from dgisim.src.element.element import Element
-from dgisim.src.helper.quality_of_life import BIG_INT
-from dgisim.src.event.event import CardEvent
-from dgisim.src.status.status_processing import StatusProcessing
-from dgisim.src.status.enums import PREPROCESSABLES
 from dgisim.src.effect.enums import ZONE
+from dgisim.src.element.element import Element
+from dgisim.src.event.event import CardEvent
+from dgisim.src.helper.quality_of_life import BIG_INT
+from dgisim.src.state.enums import PID
+from dgisim.src.status.enums import PREPROCESSABLES
+from dgisim.src.status.status_processing import StatusProcessing
+
+if TYPE_CHECKING:
+    import dgisim.src.card.cards as cds
+    import dgisim.src.state.game_state as gs
 
 
 class Card:
@@ -1057,4 +1060,5 @@ class StreamingSurge(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
 
 
 ########### type ##########
-Choosable = eft.StaticTarget | int | ActualDices | CharacterSkill | type[Card] | Element
+from typing import Any
+Choosable = Any # eft.StaticTarget | int | ActualDices | CharacterSkill | type[Card] | Element

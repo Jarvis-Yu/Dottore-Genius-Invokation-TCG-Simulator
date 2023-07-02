@@ -3,22 +3,19 @@ from typing import Optional, Tuple, Callable, Union
 from typing_extensions import override
 from functools import lru_cache
 
-import dgisim.src.state.game_state as gs
-from dgisim.src.state.enums import PID
 import dgisim.src.card.card as cd
-import dgisim.src.status.status as stt
-import dgisim.src.summon.summon as sm
-import dgisim.src.status.statuses as stts
-from dgisim.src.character.character_skill_enum import CharacterSkill
-from dgisim.src.element.element import ElementalAura
-from dgisim.src.effect.effects_template import *
-from dgisim.src.dices import AbstractDices
 import dgisim.src.effect.effect as eft
+import dgisim.src.state.game_state as gs
 import dgisim.src.status.status as stt
+import dgisim.src.status.statuses as stts
+import dgisim.src.summon.summon as sm
+from dgisim.src.character.character_skill_enum import CharacterSkill
+from dgisim.src.dices import AbstractDices
+from dgisim.src.effect.effects_template import *
+from dgisim.src.effect.enums import ZONE, DYNAMIC_CHARACTER_TARGET
 from dgisim.src.element.element import *
 from dgisim.src.helper.level_print import INDENT, level_print
-from dgisim.src.helper.quality_of_life import BIG_INT
-from dgisim.src.effect.enums import ZONE, DYNAMIC_CHARACTER_TARGET
+from dgisim.src.state.enums import PID
 
 
 class Character:

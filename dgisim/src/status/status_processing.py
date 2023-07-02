@@ -1,16 +1,18 @@
 from __future__ import annotations
-from typing import Callable
+from typing import Callable, TYPE_CHECKING
 
-import dgisim.src.state.game_state as gs
-from dgisim.src.state.enums import PID
-import dgisim.src.status.status as stt
 import dgisim.src.effect.effect as eft
+import dgisim.src.state.game_state as gs
+import dgisim.src.status.status as stt
 import dgisim.src.summon.summon as sm
 import dgisim.src.support.support as sp
-import dgisim.src.card.card as cd
 from dgisim.src.character.character_skill_enum import CharacterSkill
+from dgisim.src.state.enums import PID
 from dgisim.src.status.enums import PREPROCESSABLES
 from dgisim.src.effect.enums import ZONE, TRIGGERING_SIGNAL
+
+if TYPE_CHECKING:
+    import dgisim.src.card.card as cd
 
 
 class StatusProcessing:

@@ -1,7 +1,7 @@
 from __future__ import annotations
-from typing import FrozenSet, Optional, Iterator
-from enum import Enum
 from dataclasses import dataclass
+from enum import Enum
+from typing import FrozenSet, Optional, Iterator
 
 from dgisim.src.helper.hashable_dict import HashableDict
 

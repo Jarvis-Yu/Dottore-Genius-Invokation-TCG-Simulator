@@ -1,18 +1,17 @@
 from __future__ import annotations
-from enum import Enum
-from typing import Union, cast, Optional, Callable
+from typing import Union, Optional, Callable
 
-from dgisim.src.helper.level_print import level_print, INDENT
 import dgisim.src.card.cards as cds
-from dgisim.src.character.characters import Characters
 import dgisim.src.character.character as chr
-from dgisim.src.dices import ActualDices
-from dgisim.src.event.event_pre import EventPre
 import dgisim.src.status.statuses as sts
 import dgisim.src.support.support as sp
+from dgisim.src.character.characters import Characters
+from dgisim.src.dices import ActualDices
+from dgisim.src.event.event_pre import EventPre
+from dgisim.src.helper.level_print import level_print, INDENT
+from dgisim.src.state.enums import ACT
 from dgisim.src.summon.summons import Summons
 from dgisim.src.support.supports import Supports
-from dgisim.src.state.enums import ACT
 
 
 class PlayerState:

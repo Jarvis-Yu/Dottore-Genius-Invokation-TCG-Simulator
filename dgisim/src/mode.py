@@ -1,9 +1,8 @@
 from __future__ import annotations
-from typing import Union
 
-import dgisim.src.phase.phase as ph
 import dgisim.src.card.card as card
 import dgisim.src.character.character as chr
+import dgisim.src.phase.phase as ph
 from dgisim.src.dices import AbstractDices
 from dgisim.src.element.element import *
 from dgisim.src.event.event import *
@@ -70,7 +69,7 @@ class Mode:
     def to_string(self, indent: int = 0) -> str:
         return level_print_single(self.__class__.__name__, indent)
 
-    def dict_str(self) -> Union[dict, str]:
+    def dict_str(self) -> dict | str:
         return self.__class__.__name__
 
 

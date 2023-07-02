@@ -1,8 +1,8 @@
 from __future__ import annotations
+import random
+from enum import Enum
 from typing import Optional, Iterator, Iterable, TypeVar, Union
 from typing_extensions import Self, override
-from enum import Enum
-import random
 
 from dgisim.src.helper.hashable_dict import HashableDict
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT

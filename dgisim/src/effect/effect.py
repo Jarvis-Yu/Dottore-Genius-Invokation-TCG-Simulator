@@ -1,26 +1,25 @@
 from __future__ import annotations
-from typing import FrozenSet, Optional, cast, Union, ClassVar, Iterable, Callable
-from enum import Enum
-from dataclasses import InitVar, dataclass, asdict, replace, field
-from itertools import chain
+from dataclasses import asdict, dataclass, field, replace
+from typing import FrozenSet, Iterable, Optional, TYPE_CHECKING, Union
 
-import dgisim.src.status.statuses as stts
+import dgisim.src.character.character as chr
+import dgisim.src.event.event as evt
 import dgisim.src.status.status as stt
 import dgisim.src.summon.summon as sm
 import dgisim.src.support.support as sp
-from dgisim.src.element.element import Element, Reaction, ReactionDetail
-import dgisim.src.character.character as chr
 from dgisim.src.character.character_skill_enum import CharacterSkill
-import dgisim.src.state.game_state as gs
-from dgisim.src.state.enums import PID, ACT
-import dgisim.src.state.player_state as ps
-import dgisim.src.card.card as cd
-import dgisim.src.dices as ds
-import dgisim.src.event.event as evt
-from dgisim.src.status.status_processing import StatusProcessing
-from dgisim.src.status.enums import PREPROCESSABLES
-from dgisim.src.helper.quality_of_life import just, case_val
 from dgisim.src.effect.enums import DYNAMIC_CHARACTER_TARGET, TRIGGERING_SIGNAL, ZONE
+from dgisim.src.element.element import Element, Reaction, ReactionDetail
+from dgisim.src.helper.quality_of_life import just, case_val
+from dgisim.src.state.enums import PID, ACT
+from dgisim.src.status.enums import PREPROCESSABLES
+from dgisim.src.status.status_processing import StatusProcessing
+
+if TYPE_CHECKING:
+    import dgisim.src.card.card as cd
+    import dgisim.src.dices as ds
+    import dgisim.src.state.game_state as gs
+    import dgisim.src.status.statuses as stts
 
 
 # TODO: postpone this until further tests are done
@@ -89,7 +88,6 @@ class TriggerStatusEffect(Effect):
         character = game_state.get_target(self.target)
         if not isinstance(character, chr.Character):
             return game_state
-        character = cast(chr.Character, character)
         effects: Iterable[Effect] = []
 
         statuses: stts.Statuses
@@ -758,7 +756,6 @@ class EnergyRechargeEffect(Effect):
         character = game_state.get_target(self.target)
         if not isinstance(character, chr.Character):
             return game_state
-        character = cast(chr.Character, character)
         energy = min(character.get_energy() + self.recharge, character.get_max_energy())
         if energy == character.get_energy():
             return game_state
@@ -781,7 +778,6 @@ class EnergyDrainEffect(Effect):
         character = game_state.get_target(self.target)
         if not isinstance(character, chr.Character):
             return game_state
-        character = cast(chr.Character, character)
         energy = max(character.get_energy() - self.drain, 0)
         if energy == character.get_energy():
             return game_state
@@ -804,7 +800,6 @@ class RecoverHPEffect(Effect):
         character = game_state.get_target(self.target)
         if not isinstance(character, chr.Character):
             return game_state
-        character = cast(chr.Character, character)
         hp = min(character.get_hp() + self.recovery, character.get_max_hp())
         if hp == character.get_hp():
             return game_state

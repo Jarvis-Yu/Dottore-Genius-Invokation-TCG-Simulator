@@ -1,13 +1,13 @@
 from __future__ import annotations
+from dataclasses import dataclass, replace
 from typing import ClassVar, Optional
 from typing_extensions import override, Self
-from dataclasses import dataclass, replace
 
-from dgisim.src.helper.quality_of_life import BIG_INT
-import dgisim.src.status.status as stt
 import dgisim.src.effect.effect as eft
+import dgisim.src.status.status as stt
 from dgisim.src.effect.enums import TRIGGERING_SIGNAL, DYNAMIC_CHARACTER_TARGET
 from dgisim.src.element.element import Element
+from dgisim.src.helper.quality_of_life import BIG_INT
 
 
 @dataclass(frozen=True, kw_only=True)

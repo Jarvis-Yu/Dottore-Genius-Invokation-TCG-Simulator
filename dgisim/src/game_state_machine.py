@@ -1,11 +1,11 @@
-from typing import List, Type, Tuple, Optional, Callable, Union
+from typing import Callable, Optional
 
-from dgisim.src.state.game_state import GameState
-from dgisim.src.state.enums import PID
-from dgisim.src.player_agent import PlayerAgent
 from dgisim.src.action.action import PlayerAction
-from dgisim.src.phase.phase import Phase
 from dgisim.src.helper.level_print import GamePrinter
+from dgisim.src.phase.phase import Phase
+from dgisim.src.player_agent import PlayerAgent
+from dgisim.src.state.enums import PID
+from dgisim.src.state.game_state import GameState
 
 
 class GameStateMachine:
@@ -21,10 +21,10 @@ class GameStateMachine:
     def from_default(cls, player1: PlayerAgent, player2: PlayerAgent):
         return cls(GameState.from_default(), player1, player2)
 
-    def get_history(self) -> Tuple[GameState, ...]:
+    def get_history(self) -> tuple[GameState, ...]:
         return tuple(self._history)
 
-    def get_action_history(self) -> Tuple[GameState, ...]:
+    def get_action_history(self) -> tuple[GameState, ...]:
         return tuple([self._history[i] for i in self._action_history])
 
     def get_last_action(self) -> Optional[PlayerAction]:
@@ -102,7 +102,7 @@ class GameStateMachine:
         self._history.append(self._game_state)
         return True
 
-    def step_until_phase(self, phase: Union[type[Phase], Phase], observe=False) -> None:
+    def step_until_phase(self, phase: type[Phase] | Phase, observe=False) -> None:
         if isinstance(phase, Phase):
             phase = type(phase)
         while isinstance(self._game_state.get_phase(), phase):

@@ -2,10 +2,10 @@ from __future__ import annotations
 from enum import Enum
 from typing import Iterable, Any
 
-from dgisim.src.game_state_machine import GameStateMachine
-from dgisim.src.state.game_state import GameState
 from dgisim.src.agents import *
+from dgisim.src.game_state_machine import GameStateMachine
 from dgisim.src.helper.level_print import GamePrinter
+from dgisim.src.state.game_state import GameState
 
 
 class GameMode(Enum):

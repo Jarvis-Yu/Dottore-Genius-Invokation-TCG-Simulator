@@ -1,32 +1,31 @@
 from __future__ import annotations
-from typing import Optional, Union, cast, Callable
-from enum import Enum
 from dataclasses import replace
+from typing import Optional, Callable
 
-import dgisim.src.mode as md
-import dgisim.src.phase.phase as ph
-import dgisim.src.phase.game_end_phase as gep
-import dgisim.src.state.player_state as pl
-import dgisim.src.card.cards as cds
-import dgisim.src.status.status as stt
 import dgisim.src.action.action as act
 import dgisim.src.action.action_generator as acg
+import dgisim.src.card.cards as cds
+import dgisim.src.effect.effect as eft
+import dgisim.src.mode as md
+import dgisim.src.phase.game_end_phase as gep
+import dgisim.src.phase.phase as ph
+import dgisim.src.state.player_state as pl
+from dgisim.src.action.action import PlayerAction
+from dgisim.src.character.character import Character
+from dgisim.src.character.character_skill_enum import CharacterSkill
+from dgisim.src.dices import ActualDices
+from dgisim.src.effect.effect import StaticTarget, ZONE
+from dgisim.src.effect.effect_stack import EffectStack
+from dgisim.src.effect.enums import ZONE
+from dgisim.src.element.element import Element
+from dgisim.src.event.event import *
+from dgisim.src.event.event_pre import EventPre
 from dgisim.src.helper.level_print import level_print, level_print_single, INDENT
 from dgisim.src.helper.quality_of_life import case_val
-from dgisim.src.element.element import Element
-from dgisim.src.dices import ActualDices
-from dgisim.src.action.action import PlayerAction
-from dgisim.src.effect.effect_stack import EffectStack
-from dgisim.src.event.event_pre import EventPre
-from dgisim.src.character.character import Character
-from dgisim.src.effect.effect import StaticTarget, ZONE
-from dgisim.src.event.event import *
-from dgisim.src.character.character_skill_enum import CharacterSkill
+from dgisim.src.state.enums import PID
 from dgisim.src.status.status_processing import StatusProcessing
 from dgisim.src.status.enums import PREPROCESSABLES
 from dgisim.src.support.support import Support
-from dgisim.src.state.enums import PID
-from dgisim.src.effect.enums import ZONE
 
 
 class GameState:
@@ -148,7 +147,7 @@ class GameState:
         character = self.get_target(target)
         if not isinstance(character, Character):
             return None
-        return cast(Character, character)
+        return character
 
     def waiting_for(self) -> Optional[PID]:
         return self._phase.waiting_for(self)

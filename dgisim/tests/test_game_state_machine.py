@@ -1,21 +1,17 @@
 import unittest
 
-from dgisim.src.helper.quality_of_life import case_val
-from dgisim.src.helper.level_print import GamePrinter
+from dgisim.src.agents import *
+from dgisim.src.card.cards import Cards
 from dgisim.src.game_state_machine import GameStateMachine
-from dgisim.src.state.game_state import GameState
-from dgisim.src.state.enums import ACT
-from dgisim.src.agents import LazyAgent
-from dgisim.src.phase.card_select_phase import CardSelectPhase
-from dgisim.src.phase.phase import Phase
-from dgisim.src.phase.starting_hand_select_phase import StartingHandSelectPhase
-from dgisim.src.phase.roll_phase import RollPhase
+from dgisim.src.helper.level_print import GamePrinter
 from dgisim.src.phase.action_phase import ActionPhase
+from dgisim.src.phase.card_select_phase import CardSelectPhase
 from dgisim.src.phase.end_phase import EndPhase
 from dgisim.src.phase.game_end_phase import GameEndPhase
-from dgisim.src.state.player_state import PlayerState
-from dgisim.src.card.cards import Cards
-from dgisim.src.agents import *
+from dgisim.src.phase.roll_phase import RollPhase
+from dgisim.src.phase.starting_hand_select_phase import StartingHandSelectPhase
+from dgisim.src.state.enums import ACT
+from dgisim.src.state.game_state import GameState
 
 
 class TestGameStateMachine(unittest.TestCase):

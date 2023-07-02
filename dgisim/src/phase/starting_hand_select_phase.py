@@ -1,11 +1,10 @@
 from __future__ import annotations
 from typing import Optional
 
-import dgisim.src.state.game_state as gs
-from dgisim.src.state.enums import PID, ACT
 import dgisim.src.phase.phase as ph
+import dgisim.src.state.game_state as gs
 from dgisim.src.action.action import PlayerAction, CharacterSelectAction
-from dgisim.src.state.player_state import PlayerState
+from dgisim.src.state.enums import PID, ACT
 
 
 class StartingHandSelectPhase(ph.Phase):
@@ -27,8 +26,8 @@ class StartingHandSelectPhase(ph.Phase):
         ).build()
 
     def step(self, game_state: gs.GameState) -> gs.GameState:
-        p1: PlayerState = game_state.get_player1()
-        p2: PlayerState = game_state.get_player2()
+        p1 = game_state.get_player1()
+        p2 = game_state.get_player2()
         if p1.get_phase() == ACT.PASSIVE_WAIT_PHASE and p2.get_phase() == ACT.PASSIVE_WAIT_PHASE:
             return self._activate(game_state)
         elif p1.get_phase() is ACT.END_PHASE and p2.get_phase() is ACT.END_PHASE:
@@ -39,7 +38,7 @@ class StartingHandSelectPhase(ph.Phase):
     def _handle_picking_starting_hand(self, game_state: gs.GameState, pid: PID, action: CharacterSelectAction) -> gs.GameState:
         swap_action: CharacterSelectAction = action
         char_id = swap_action.char_id
-        player: PlayerState = game_state.get_player(pid)
+        player = game_state.get_player(pid)
         chars = player.get_characters()
         if not chars.char_id_valid(char_id):
             return game_state

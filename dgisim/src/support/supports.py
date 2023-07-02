@@ -1,8 +1,8 @@
 from __future__ import annotations
 from typing import Iterator
 
-from dgisim.src.support.support import Support
 from dgisim.src.helper.quality_of_life import just
+from dgisim.src.support.support import Support
 
 
 class Supports:

@@ -1,11 +1,13 @@
 from __future__ import annotations
-from typing import Union, Iterator
-from collections import Counter
 import random
+from collections import Counter
+from typing import Union, Iterator, TYPE_CHECKING
 
-from dgisim.src.card.card import Card
 from dgisim.src.helper.hashable_dict import HashableDict
-from dgisim.src.helper.level_print import level_print, INDENT, level_print_single
+from dgisim.src.helper.level_print import level_print
+
+if TYPE_CHECKING:
+    from dgisim.src.card.card import Card
 
 
 class Cards:

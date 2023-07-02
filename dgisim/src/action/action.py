@@ -1,18 +1,19 @@
 from __future__ import annotations
-from typing import Any, ClassVar
-from typing_extensions import override, Self
 from dataclasses import dataclass, fields, replace
+from typing import Any, TYPE_CHECKING
+from typing_extensions import Self
 
 from dgisim.src.card.cards import Cards
-from dgisim.src.card.card import Card
+from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.dices import ActualDices
 from dgisim.src.effect.effect import StaticTarget
-from dgisim.src.character.character_skill_enum import CharacterSkill
-from dgisim.src.element.element import Element
-import dgisim.src.state.game_state as gs
-from dgisim.src.state.enums import PID
-import dgisim.src.effect.effect as eft
 from dgisim.src.effect.enums import ZONE
+from dgisim.src.element.element import Element
+from dgisim.src.state.enums import PID
+
+if TYPE_CHECKING:
+    import dgisim.src.state.game_state as gs
+    from dgisim.src.card.card import Card
 
 
 @dataclass(frozen=True)
@@ -119,7 +120,6 @@ class ElementalTuningAction(GameAction):
 
 @dataclass(frozen=True, kw_only=True)
 class CardAction(GameAction):
-    from dgisim.src.card.card import Card
     card: type[Card]
     instruction: Instruction
 

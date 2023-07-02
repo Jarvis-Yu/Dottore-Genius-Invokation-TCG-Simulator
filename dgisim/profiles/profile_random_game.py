@@ -1,9 +1,10 @@
 import cProfile
 
+from dgisim.src.card.card import *
 from dgisim.src.game_state_machine import GameStateMachine
 from dgisim.src.state.game_state import GameState
-from dgisim.src.agents import RandomAgent
 from dgisim.src.helper.level_print import GamePrinter
+from dgisim.src.agents import RandomAgent
 
 def _random_play(repeats: int) -> None:
     for i in range(repeats):

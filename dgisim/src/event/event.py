@@ -1,11 +1,14 @@
 from __future__ import annotations
-from enum import Enum
+from typing import TYPE_CHECKING
 from dataclasses import dataclass
+from enum import Enum
 
-from dgisim.src.state.enums import PID
-import dgisim.src.effect.effect as eft
-import dgisim.src.card.card as cd
-from dgisim.src.dices import AbstractDices
+
+if TYPE_CHECKING:
+    import dgisim.src.card.card as cd
+    import dgisim.src.effect.effect as eft
+    from dgisim.src.dices import AbstractDices
+    from dgisim.src.state.enums import PID
 
 
 class EventSpeed(Enum):
