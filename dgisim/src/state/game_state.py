@@ -23,6 +23,7 @@ from dgisim.src.effect.effect import StaticTarget, Zone
 from dgisim.src.event.event import *
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.status.status_processing import StatusProcessing
+from dgisim.src.status.enums import PREPROCESSABLES
 from dgisim.src.support.support import Support
 from dgisim.src.state.enums import PID
 
@@ -456,7 +457,7 @@ class SwapChecker:
                 event_speed=game_state.get_mode().swap_speed(),
                 dices_cost=game_state.get_mode().swap_cost(),
             ),
-            pp_type=stt.Status.PPType.SWAP,
+            pp_type=PREPROCESSABLES.SWAP,
         )
         assert isinstance(swap_action, GameEvent)
         if game_state.get_player(pid).get_dices().loosely_satisfy(swap_action.dices_cost):
@@ -506,7 +507,7 @@ class SwapChecker:
                     event_speed=game_state.get_mode().swap_speed(),
                     dices_cost=game_state.get_mode().swap_cost(),
                 ),
-                pp_type=stt.Status.PPType.SWAP,
+                pp_type=PREPROCESSABLES.SWAP,
             )
             assert isinstance(swap_action, GameEvent)
             instruction_dices = action.instruction.dices
@@ -633,7 +634,7 @@ class SkillChecker:
                 event_speed=EventSpeed.COMBAT_ACTION,
                 dices_cost=character.skill_cost(skill_type),
             ),
-            pp_type=stt.Status.PPType.SKILL,
+            pp_type=PREPROCESSABLES.SKILL,
         )
         assert isinstance(skill_event, GameEvent)
         if game_state.get_player(pid).get_dices().loosely_satisfy(skill_event.dices_cost):
@@ -669,7 +670,7 @@ class SkillChecker:
                 event_speed=EventSpeed.COMBAT_ACTION,
                 dices_cost=character.skill_cost(skill_type),
             ),
-            pp_type=stt.Status.PPType.SKILL,
+            pp_type=PREPROCESSABLES.SKILL,
         )
         assert isinstance(skill_event, GameEvent)
         if action.instruction.dices.just_satisfy(skill_event.dices_cost):

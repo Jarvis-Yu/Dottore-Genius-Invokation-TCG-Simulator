@@ -17,6 +17,7 @@ from dgisim.src.element.element import Element
 from dgisim.src.helper.quality_of_life import BIG_INT
 from dgisim.src.event.event import CardEvent
 from dgisim.src.status.status_processing import StatusProcessing
+from dgisim.src.status.enums import PREPROCESSABLES
 
 
 class Card:
@@ -54,7 +55,7 @@ class Card:
                 card_type=cls,
                 dices_cost=cls._DICE_COST,
             ),
-            pp_type=stt.Status.PPType.CARD
+            pp_type=PREPROCESSABLES.CARD
         )
         assert isinstance(card_event, CardEvent)
         return game_state, card_event.dices_cost

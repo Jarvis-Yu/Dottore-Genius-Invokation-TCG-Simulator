@@ -9,6 +9,7 @@ import dgisim.src.summon.summon as sm
 import dgisim.src.support.support as sp
 import dgisim.src.card.card as cd
 from dgisim.src.character.character_skill_enum import CharacterSkill
+from dgisim.src.status.enums import PREPROCESSABLES
 
 
 class StatusProcessing:
@@ -121,7 +122,7 @@ class StatusProcessing:
             game_state: gs.GameState,
             pid: PID,
             item: eft.Preprocessable,
-            pp_type: stt.Status.PPType,
+            pp_type: PREPROCESSABLES,
     ) -> tuple[gs.GameState, eft.Preprocessable]:
         def f(game_state: gs.GameState, status: stt.Status, status_source: eft.StaticTarget) -> gs.GameState:
             nonlocal item

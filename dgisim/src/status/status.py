@@ -11,6 +11,7 @@ import dgisim.src.effect.effect as eft
 import dgisim.src.event.event as evt
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.element.element import Element
+from dgisim.src.status.enums import PREPROCESSABLES
 from dgisim.src.helper.quality_of_life import just, BIG_INT, case_val
 
 
@@ -20,19 +21,6 @@ class TriggerringEvent(Enum):
 
 @dataclass(frozen=True)
 class Status:
-    class PPType(Enum):
-        """ PreProcessType """
-        # Swap
-        SWAP = "Swap"                 # To determine if swap needs to cost more or less,
-        #                             # if swap is fast action or combat action
-        # Skill
-        SKILL = "Skill"               # same as SWAP but for skill
-        # Card
-        CARD = "Card"                 # same as SWAP but for card
-        # Damages
-        DMG_ELEMENT = "DmgElement"    # To determine the element
-        DMG_REACTION = "DmgReaction"  # To determine the reaction
-        DMG_AMOUNT = "DmgNumber"      # To determine final amount of damage
 
     def __init__(self) -> None:
         if type(self) is Status:  # pragma: no cover
@@ -43,7 +31,7 @@ class Status:
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
-            signal: Status.PPType,
+            signal: PREPROCESSABLES,
     ) -> tuple[eft.Preprocessable, Optional[Self]]:
         """
         Returns the processed Preprocessable and possibly updated or deleted self
@@ -63,7 +51,7 @@ class Status:
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
-            signal: Status.PPType,
+            signal: PREPROCESSABLES,
     ) -> tuple[eft.Preprocessable, Optional[Self]]:
         return item, self
 
@@ -72,7 +60,7 @@ class Status:
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
-            signal: Status.PPType,
+            signal: PREPROCESSABLES,
             new_item: eft.Preprocessable,
             new_self: Optional[Self],
     ) -> tuple[eft.Preprocessable, Optional[Self]]:
@@ -311,7 +299,7 @@ class _UsageStatus(Status):
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
-            signal: Status.PPType,
+            signal: PREPROCESSABLES,
             new_item: eft.Preprocessable,
             new_self: Optional[Self],
     ) -> tuple[eft.Preprocessable, Optional[Self]]:
@@ -348,7 +336,7 @@ class ShieldStatus(Status):
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
-            signal: Status.PPType,
+            signal: PREPROCESSABLES,
     ) -> bool:
         import dgisim.src.summon.summon as sm
         assert isinstance(item, eft.SpecificDamageEffect)
@@ -390,10 +378,10 @@ class StackedShieldStatus(ShieldStatus, _UsageStatus):
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
-            signal: Status.PPType,
+            signal: PREPROCESSABLES,
     ) -> tuple[eft.Preprocessable, Optional[Self]]:
         cls = type(self)
-        if signal is Status.PPType.DMG_AMOUNT:
+        if signal is PREPROCESSABLES.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             assert self.usages <= type(self).MAX_USAGES
             if item.damage > 0 and self.usages > 0 \
@@ -430,10 +418,10 @@ class FixedShieldStatus(ShieldStatus, _UsageStatus):
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
-            signal: Status.PPType,
+            signal: PREPROCESSABLES,
     ) -> tuple[eft.Preprocessable, Optional[Self]]:
         cls = type(self)
-        if signal is Status.PPType.DMG_AMOUNT:
+        if signal is PREPROCESSABLES.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             if item.damage > 0 and self.usages > 0 \
                     and item.element != Element.PIERCING \
@@ -479,9 +467,9 @@ class DendroCoreStatus(CombatStatus):
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
-            signal: Status.PPType,
+            signal: PREPROCESSABLES,
     ) -> tuple[eft.Preprocessable, Optional[DendroCoreStatus]]:
-        if signal is Status.PPType.DMG_AMOUNT:
+        if signal is PREPROCESSABLES.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             assert self.usages >= 1
             elem_can_boost = item.element is Element.ELECTRO or item.element is Element.PYRO
@@ -517,9 +505,9 @@ class CatalyzingFieldStatus(CombatStatus):
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
-            signal: Status.PPType,
+            signal: PREPROCESSABLES,
     ) -> tuple[eft.Preprocessable, Optional[CatalyzingFieldStatus]]:
-        if signal is Status.PPType.DMG_AMOUNT:
+        if signal is PREPROCESSABLES.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             assert self.usages >= 1
             elem_can_boost = item.element is Element.ELECTRO or item.element is Element.DENDRO
@@ -549,9 +537,9 @@ class FrozenStatus(CharacterStatus):
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
-            signal: Status.PPType,
+            signal: PREPROCESSABLES,
     ) -> tuple[eft.Preprocessable, Optional[Self]]:
-        if signal is Status.PPType.DMG_AMOUNT:
+        if signal is PREPROCESSABLES.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             can_reaction = item.element is Element.PYRO or item.element is Element.PHYSICAL
             is_damage_target = item.target == status_source
@@ -617,9 +605,9 @@ class JueyunGuobaStatus(CharacterStatus, _UsageStatus):
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
-            signal: Status.PPType,
+            signal: PREPROCESSABLES,
     ) -> tuple[eft.Preprocessable, Optional[Self]]:
-        if signal is Status.PPType.DMG_AMOUNT:
+        if signal is PREPROCESSABLES.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             if item.source == status_source and item.damage_type.normal_attack:
                 item = replace(item, damage=item.damage + JueyunGuobaStatus.damage_boost)
@@ -648,9 +636,9 @@ class NorthernSmokedChickenStatus(CharacterStatus, _UsageStatus):
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
-            signal: Status.PPType,
+            signal: PREPROCESSABLES,
     ) -> tuple[eft.Preprocessable, Optional[Self]]:
-        if signal is Status.PPType.SKILL:
+        if signal is PREPROCESSABLES.SKILL:
             assert isinstance(item, evt.GameEvent)
             if status_source == item.target \
                     and item.event_type is evt.EventType.NORMAL_ATTACK \
@@ -702,9 +690,9 @@ class MintyMeatRollsStatus(CharacterStatus, _UsageStatus):
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
-            signal: Status.PPType,
+            signal: PREPROCESSABLES,
     ) -> tuple[eft.Preprocessable, Optional[Self]]:
-        if signal is Status.PPType.SKILL:
+        if signal is PREPROCESSABLES.SKILL:
             assert isinstance(item, evt.GameEvent)
             if status_source == item.target \
                     and item.event_type is evt.EventType.NORMAL_ATTACK \
@@ -738,9 +726,9 @@ class ChangingShiftsStatus(CombatStatus):
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
-            signal: Status.PPType,
+            signal: PREPROCESSABLES,
     ) -> tuple[eft.Preprocessable, Optional[Self]]:
-        if signal is Status.PPType.SWAP:
+        if signal is PREPROCESSABLES.SWAP:
             assert isinstance(item, evt.GameEvent) and item.event_type is evt.EventType.SWAP
             if item.target.pid is status_source.pid \
                     and item.dices_cost.num_dices() >= self.COST_DEDUCTION:
@@ -758,9 +746,9 @@ class LeaveItToMeStatus(CombatStatus):
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
-            signal: Status.PPType,
+            signal: PREPROCESSABLES,
     ) -> tuple[eft.Preprocessable, Optional[Self]]:
-        if signal is Status.PPType.SWAP:
+        if signal is PREPROCESSABLES.SWAP:
             assert isinstance(item, evt.GameEvent) and item.event_type is evt.EventType.SWAP
             if item.target.pid is status_source.pid \
                     and item.event_speed is evt.EventSpeed.COMBAT_ACTION:
@@ -783,15 +771,15 @@ class _InfusionStatus(CharacterStatus, _UsageStatus):
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
-            signal: Status.PPType,
+            signal: PREPROCESSABLES,
     ) -> tuple[eft.Preprocessable, Optional[Self]]:
         assert self.ELEMENT is not None
         new_item: Optional[eft.SpecificDamageEffect] = None
         if isinstance(item, eft.SpecificDamageEffect):
-            if signal is Status.PPType.DMG_ELEMENT:
+            if signal is PREPROCESSABLES.DMG_ELEMENT:
                 if self._dmg_element_condition(game_state, status_source, item):
                     new_item = replace(item, element=self.ELEMENT)
-            if signal is Status.PPType.DMG_AMOUNT:
+            if signal is PREPROCESSABLES.DMG_AMOUNT:
                 if self.damage_boost != 0  \
                         and self._dmg_boost_condition(game_state, status_source, item):
                     new_item = replace(item, damage=item.damage + self.damage_boost)

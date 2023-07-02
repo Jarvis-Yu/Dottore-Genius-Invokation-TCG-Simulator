@@ -18,6 +18,7 @@ import dgisim.src.card.card as cd
 import dgisim.src.dices as ds
 import dgisim.src.event.event as evt
 from dgisim.src.status.status_processing import StatusProcessing
+from dgisim.src.status.enums import PREPROCESSABLES
 from dgisim.src.helper.quality_of_life import just, case_val
 
 
@@ -514,7 +515,7 @@ class SpecificDamageEffect(Effect):
 
     @staticmethod
     def _damage_preprocess(
-            game_state: gs.GameState, damage: SpecificDamageEffect, pp_type: stt.Status.PPType
+            game_state: gs.GameState, damage: SpecificDamageEffect, pp_type: PREPROCESSABLES
     ) -> tuple[gs.GameState, SpecificDamageEffect]:
         source_id = damage.source.pid
         game_state, item = StatusProcessing.preprocess_by_all_statuses(
@@ -532,7 +533,7 @@ class SpecificDamageEffect(Effect):
             cls, game_state: gs.GameState, damage: SpecificDamageEffect
     ) -> tuple[gs.GameState, SpecificDamageEffect]:
         """ This is the pass to check final damage element """
-        return cls._damage_preprocess(game_state, damage, stt.Status.PPType.DMG_ELEMENT)
+        return cls._damage_preprocess(game_state, damage, PREPROCESSABLES.DMG_ELEMENT)
 
     @classmethod
     def _reaction_confirmation(
@@ -574,7 +575,7 @@ class SpecificDamageEffect(Effect):
             ).build()
 
         game_state, damage = cls._damage_preprocess(
-            game_state, damage, stt.Status.PPType.DMG_REACTION
+            game_state, damage, PREPROCESSABLES.DMG_REACTION
         )
         return game_state, damage, reactionDetail
 
@@ -583,7 +584,7 @@ class SpecificDamageEffect(Effect):
             cls, game_state: gs.GameState, damage: SpecificDamageEffect
     ) -> tuple[gs.GameState, SpecificDamageEffect]:
         """ This is the pass to check final damage amount """
-        return cls._damage_preprocess(game_state, damage, stt.Status.PPType.DMG_AMOUNT)
+        return cls._damage_preprocess(game_state, damage, PREPROCESSABLES.DMG_AMOUNT)
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         # Preprocessing

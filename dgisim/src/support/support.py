@@ -10,6 +10,7 @@ import dgisim.src.effect.effect as eft
 import dgisim.src.event.event as evt
 from dgisim.src.helper.quality_of_life import BIG_INT
 from dgisim.src.element.element import Element
+from dgisim.src.status.enums import PREPROCESSABLES
 
 @dataclass(frozen=True, kw_only=True)
 class Support(stt.Status):
@@ -34,9 +35,9 @@ class XudongSupport(Support):
             game_state: gs.GameState,
             status_source: eft.StaticTarget,
             item: eft.Preprocessable,
-            signal: stt.Status.PPType,
+            signal: PREPROCESSABLES,
     ) -> tuple[eft.Preprocessable, None | Self]:
-        if signal is stt.Status.PPType.CARD:
+        if signal is PREPROCESSABLES.CARD:
             assert isinstance(item, evt.CardEvent)
             if item.pid is status_source.pid \
                     and issubclass(item.card_type, cd.FoodCard) \
