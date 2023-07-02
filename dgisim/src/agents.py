@@ -3,6 +3,7 @@ import random
 
 from dgisim.src.player_agent import PlayerAgent
 from dgisim.src.state.game_state import GameState
+from dgisim.src.state.enums import PID
 from dgisim.src.action.action_generator import *
 from dgisim.src.action.action import *
 from dgisim.src.effect.effect import *
@@ -25,7 +26,7 @@ class NoneAgent(PlayerAgent):
 class LazyAgent(PlayerAgent):
     _NUM_PICKED_CARDS = 3
 
-    def choose_action(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
+    def choose_action(self, history: List[GameState], pid: PID) -> PlayerAction:
         game_state = history[-1]
         curr_phase = game_state.get_phase()
 
@@ -60,7 +61,7 @@ class PuppetAgent(PlayerAgent):
     def inject_actions(self, actions: list[PlayerAction]) -> None:
         self._actions += actions
 
-    def choose_action(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
+    def choose_action(self, history: List[GameState], pid: PID) -> PlayerAction:
         assert self._actions
         return self._actions.pop(0)
 
@@ -74,7 +75,7 @@ class PuppetAgent(PlayerAgent):
 class HardCodedRandomAgent(PlayerAgent):
     _NUM_PICKED_CARDS = 3
 
-    def choose_action(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
+    def choose_action(self, history: List[GameState], pid: PID) -> PlayerAction:
         game_state = history[-1]
         curr_phase = game_state.get_phase()
 
@@ -252,7 +253,7 @@ class HardCodedRandomAgent(PlayerAgent):
 class RandomAgent(PlayerAgent):
     _NUM_PICKED_CARDS = 3
 
-    def _card_select_phase(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
+    def _card_select_phase(self, history: List[GameState], pid: PID) -> PlayerAction:
         game_state = history[-1]
         _, selected_cards = game_state.get_player(
             pid
@@ -262,11 +263,11 @@ class RandomAgent(PlayerAgent):
     def _starting_hand_select_phase(
             self,
             history: List[GameState],
-            pid: GameState.Pid
+            pid: PID
     ) -> PlayerAction:
         return CharacterSelectAction(char_id=random.randint(1, 3))
 
-    def _roll_phase(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
+    def _roll_phase(self, history: List[GameState], pid: PID) -> PlayerAction:
         raise Exception("No Action Defined")
 
     def _random_action_generator_chooser(self, action_generator: ActionGenerator) -> PlayerAction:
@@ -288,7 +289,7 @@ class RandomAgent(PlayerAgent):
                 raise NotImplementedError
         return action_generator.generate_action()
 
-    def _action_phase(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
+    def _action_phase(self, history: List[GameState], pid: PID) -> PlayerAction:
         game_state = history[-1]
         me = game_state.get_player(pid)
         active_character = me.just_get_active_character()
@@ -346,7 +347,7 @@ class RandomAgent(PlayerAgent):
 
         return EndRoundAction()
 
-    def _end_phase(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
+    def _end_phase(self, history: List[GameState], pid: PID) -> PlayerAction:
         game_state = history[-1]
 
         # death swap
@@ -358,7 +359,7 @@ class RandomAgent(PlayerAgent):
 
         raise Exception("NOT REACHED")
 
-    def choose_action(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
+    def choose_action(self, history: List[GameState], pid: PID) -> PlayerAction:
         game_state = history[-1]
         curr_phase = game_state.get_phase()
 
@@ -408,7 +409,7 @@ class CustomChoiceAgent(RandomAgent):
                 raise NotImplementedError
         return action_generator.generate_action()
 
-    def _action_phase(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
+    def _action_phase(self, history: List[GameState], pid: PID) -> PlayerAction:
         game_state = history[-1]
         me = game_state.get_player(pid)
         active_character = me.just_get_active_character()
@@ -477,7 +478,7 @@ class CustomChoiceAgent(RandomAgent):
 
         return player_action
 
-    def _end_phase(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
+    def _end_phase(self, history: List[GameState], pid: PID) -> PlayerAction:
         game_state = history[-1]
 
         self._prompt_handler("info", f"Player{pid.value}'s Action Time!")

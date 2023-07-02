@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Optional, cast
 
 import dgisim.src.state.game_state as gs
+from dgisim.src.state.enums import PID
 import dgisim.src.phase.phase as ph
 from dgisim.src.state.player_state import PlayerState
 from dgisim.src.action.action import *
@@ -62,7 +63,7 @@ class ActionPhase(ph.Phase):
             return self._to_end_phase(game_state)
         raise Exception("Unknown Game State to process")
 
-    def _handle_end_round(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: EndRoundAction) -> gs.GameState:
+    def _handle_end_round(self, game_state: gs.GameState, pid: PID, action: EndRoundAction) -> gs.GameState:
         active_player_id = game_state.get_active_player_id()
         assert active_player_id == pid
         active_player = game_state.get_player(active_player_id)
@@ -90,7 +91,7 @@ class ActionPhase(ph.Phase):
             ).build()
         ).build()
 
-    def _handle_skill_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: SkillAction) -> Optional[gs.GameState]:
+    def _handle_skill_action(self, game_state: gs.GameState, pid: PID, action: SkillAction) -> Optional[gs.GameState]:
         # Check action validity
         result = game_state.skill_checker().valid_action(pid, action)
         if result is None:
@@ -128,7 +129,7 @@ class ActionPhase(ph.Phase):
             player.factory().dices(new_dices).build()
         ).build()
 
-    def _handle_swap_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: SwapAction) -> Optional[gs.GameState]:
+    def _handle_swap_action(self, game_state: gs.GameState, pid: PID, action: SwapAction) -> Optional[gs.GameState]:
         # Check action validity
         result = game_state.swap_checker().valid_action(pid, action)
         if result is None:
@@ -172,7 +173,7 @@ class ActionPhase(ph.Phase):
             player.factory().dices(new_dices).build()
         ).build()
 
-    def _handle_card_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: CardAction) -> Optional[gs.GameState]:
+    def _handle_card_action(self, game_state: gs.GameState, pid: PID, action: CardAction) -> Optional[gs.GameState]:
         paid_dices = action.instruction.dices
         card = action.card
 
@@ -214,7 +215,7 @@ class ActionPhase(ph.Phase):
     def _handle_elemental_tuning_action(
             self,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: PID,
             action: ElementalTuningAction
     ) -> Optional[gs.GameState]:
         player = game_state.get_player(pid)
@@ -239,7 +240,7 @@ class ActionPhase(ph.Phase):
             ).build()
         ).build()
 
-    def _handle_death_swap_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: DeathSwapAction) -> Optional[gs.GameState]:
+    def _handle_death_swap_action(self, game_state: gs.GameState, pid: PID, action: DeathSwapAction) -> Optional[gs.GameState]:
         # Check action validity
         result = game_state.swap_checker().valid_action(pid, action)
         if result is None:
@@ -259,7 +260,7 @@ class ActionPhase(ph.Phase):
             effect_stack
         ).build()
 
-    def _handle_game_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: GameAction) -> Optional[gs.GameState]:
+    def _handle_game_action(self, game_state: gs.GameState, pid: PID, action: GameAction) -> Optional[gs.GameState]:
         player = game_state.get_player(pid)
         if isinstance(action, SkillAction):
             return self._handle_skill_action(game_state, pid, action)
@@ -273,7 +274,7 @@ class ActionPhase(ph.Phase):
             return self._handle_death_swap_action(game_state, pid, action)
         raise Exception("Unhandld action", action)
 
-    def step_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: PlayerAction) -> Optional[gs.GameState]:
+    def step_action(self, game_state: gs.GameState, pid: PID, action: PlayerAction) -> Optional[gs.GameState]:
         # check action arrived at the right state
         if pid is not self.waiting_for(game_state):
             raise Exception(f"Unexpected action from {pid} at game state:\n{game_state}")
@@ -293,7 +294,7 @@ class ActionPhase(ph.Phase):
             return self._handle_end_round(game_state, pid, action)
         raise Exception("Unknown Game State to process")
 
-    def waiting_for(self, game_state: gs.GameState) -> Optional[gs.GameState.Pid]:
+    def waiting_for(self, game_state: gs.GameState) -> Optional[PID]:
         effect_stack = game_state.get_effect_stack()
         # if no effects are to be executed or death swap phase is inserted
         if effect_stack.is_empty() \

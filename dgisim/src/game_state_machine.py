@@ -1,6 +1,7 @@
 from typing import List, Type, Tuple, Optional, Callable, Union
 
 from dgisim.src.state.game_state import GameState
+from dgisim.src.state.enums import PID
 from dgisim.src.player_agent import PlayerAgent
 from dgisim.src.action.action import PlayerAction
 from dgisim.src.phase.phase import Phase
@@ -87,7 +88,7 @@ class GameStateMachine:
             input(">>> ")
         self._history.append(self._game_state)
 
-    def _action_step(self, pid: GameState.Pid, action: PlayerAction, observe=False) -> bool:
+    def _action_step(self, pid: PID, action: PlayerAction, observe=False) -> bool:
         next_state = self._game_state.action_step(pid, action)
         if next_state is None:
             return False
@@ -174,10 +175,10 @@ class GameStateMachine:
             # TODO
             pass
 
-    def player_agent(self, id: GameState.Pid) -> PlayerAgent:
-        if id is GameState.Pid.P1:
+    def player_agent(self, id: PID) -> PlayerAgent:
+        if id is PID.P1:
             return self._playerAgent1
-        elif id is GameState.Pid.P2:
+        elif id is PID.P2:
             return self._playerAgent2
         else:
             raise Exception("GameStateMachine.player(): Invalid player id")
@@ -185,5 +186,5 @@ class GameStateMachine:
     def game_end(self) -> bool:
         return self._game_state.game_end()
 
-    def get_winner(self) -> Optional[GameState.Pid]:
+    def get_winner(self) -> Optional[PID]:
         return self._game_state.get_winner()

@@ -4,6 +4,7 @@ from typing_extensions import Self
 from dataclasses import dataclass, replace, fields
 
 import dgisim.src.state.game_state as gs
+from dgisim.src.state.enums import PID
 import dgisim.src.card.card as cd
 import dgisim.src.card.cards as cds
 import dgisim.src.action.action as act
@@ -16,7 +17,7 @@ from dgisim.src.element.element import Element
 @dataclass(frozen=True, kw_only=True)
 class ActionGenerator:
     game_state: gs.GameState
-    pid: gs.GameState.Pid
+    pid: PID
     action: act.PlayerAction
     instruction: None | act.Instruction = None
     _choices_helper: Callable[[ActionGenerator], tuple[cd.Choosable, ...] | AbstractDices | cds.Cards]

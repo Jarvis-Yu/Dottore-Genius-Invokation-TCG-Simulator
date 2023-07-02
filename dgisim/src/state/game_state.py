@@ -24,33 +24,17 @@ from dgisim.src.event.event import *
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.status.status_processing import StatusProcessing
 from dgisim.src.support.support import Support
+from dgisim.src.state.enums import PID
 
 
 class GameState:
-    class Pid(Enum):
-        P1 = 1
-        P2 = 2
-
-        def is_player1(self) -> bool:
-            return self is GameState.Pid.P1
-
-        def is_player2(self) -> bool:
-            return self is GameState.Pid.P2
-
-        def other(self) -> GameState.Pid:
-            if self is GameState.Pid.P1:
-                return GameState.Pid.P2
-            elif self is GameState.Pid.P2:
-                return GameState.Pid.P1
-            else:
-                raise Exception("Unknown situation of pid")
 
     def __init__(
         self,
         mode: md.Mode,
         phase: ph.Phase,
         round: int,
-        active_player_id: GameState.Pid,
+        active_player_id: PID,
         player1: pl.PlayerState,
         player2: pl.PlayerState,
         effect_stack: EffectStack
@@ -76,7 +60,7 @@ class GameState:
             mode=mode,
             phase=mode.card_select_phase(),
             round=0,
-            active_player_id=GameState.Pid.P1,
+            active_player_id=PID.P1,
             player1=pl.PlayerState.examplePlayer(mode),
             player2=pl.PlayerState.examplePlayer(mode),
             effect_stack=EffectStack(()),
@@ -94,7 +78,7 @@ class GameState:
     def get_round(self) -> int:
         return self._round
 
-    def get_active_player_id(self) -> GameState.Pid:
+    def get_active_player_id(self) -> PID:
         return self._active_player_id
 
     def get_effect_stack(self) -> EffectStack:
@@ -106,15 +90,15 @@ class GameState:
     def get_player2(self) -> pl.PlayerState:
         return self._player2
 
-    def get_pid(self, player: pl.PlayerState) -> GameState.Pid:
+    def get_pid(self, player: pl.PlayerState) -> PID:
         if player is self._player1:
-            return self.Pid.P1
+            return PID.P1
         elif player is self._player2:
-            return self.Pid.P2
+            return PID.P2
         else:
             raise Exception("player unknown")
 
-    def get_player(self, player_id: GameState.Pid) -> pl.PlayerState:
+    def get_player(self, player_id: PID) -> pl.PlayerState:
         if player_id.is_player1():
             return self._player1
         elif player_id.is_player2():
@@ -122,7 +106,7 @@ class GameState:
         else:
             raise Exception("player_id unknown")
 
-    def get_other_player(self, player_id: GameState.Pid) -> pl.PlayerState:
+    def get_other_player(self, player_id: PID) -> pl.PlayerState:
         if player_id.is_player1():
             return self._player2
         elif player_id.is_player2():
@@ -139,12 +123,12 @@ class GameState:
     def elem_tuning_checker(self) -> ElementalTuningChecker:
         return self._elem_tuning_checker
 
-    def belongs_to(self, object: Character | Support) -> None | GameState.Pid:
+    def belongs_to(self, object: Character | Support) -> None | PID:
         """ int in object type is just place holder """
         if self._player1.is_mine(object):
-            return GameState.Pid.P1
+            return PID.P1
         elif self._player2.is_mine(object):
-            return GameState.Pid.P2
+            return PID.P2
         else:
             return None
 
@@ -164,27 +148,27 @@ class GameState:
             return None
         return cast(Character, character)
 
-    def waiting_for(self) -> Optional[GameState.Pid]:
+    def waiting_for(self) -> Optional[PID]:
         return self._phase.waiting_for(self)
 
-    def possible_actions(self, pid: GameState.Pid) -> dict[int, EventPre]:
+    def possible_actions(self, pid: PID) -> dict[int, EventPre]:
         return self._phase.possible_actions(self)
 
     def step(self) -> GameState:
         return self._phase.step(self)
 
-    def action_step(self, pid: GameState.Pid, action: PlayerAction) -> Optional[GameState]:
+    def action_step(self, pid: PID, action: PlayerAction) -> Optional[GameState]:
         """
         Returns None if the action is illegal or undefined
         """
         return self._phase.step_action(self, pid, action)
 
-    def get_winner(self) -> Optional[GameState.Pid]:
+    def get_winner(self) -> Optional[PID]:
         assert self.game_end()
         if self.get_player1().defeated():
-            return GameState.Pid.P2
+            return PID.P2
         elif self.get_player2().defeated():
-            return GameState.Pid.P1
+            return PID.P1
         else:
             return None
 
@@ -272,7 +256,7 @@ class GameStateFactory:
     def f_effect_stack(self, f: Callable[[EffectStack], EffectStack]) -> GameStateFactory:
         return self.effect_stack(f(self._effect_stack))
 
-    def active_player_id(self, pid: GameState.Pid) -> GameStateFactory:
+    def active_player_id(self, pid: PID) -> GameStateFactory:
         self._active_player = pid
         return self
 
@@ -290,34 +274,34 @@ class GameStateFactory:
     def f_player2(self, f: Callable[[pl.PlayerState], pl.PlayerState]) -> GameStateFactory:
         return self.player2(f(self._player2))
 
-    def player(self, pid: GameState.Pid, new_player: pl.PlayerState) -> GameStateFactory:
-        if pid is GameState.Pid.P1:
+    def player(self, pid: PID, new_player: pl.PlayerState) -> GameStateFactory:
+        if pid is PID.P1:
             return self.player1(new_player)
-        elif pid is GameState.Pid.P2:
+        elif pid is PID.P2:
             return self.player2(new_player)
         else:
             raise Exception("player_id unknown")
 
-    def f_player(self, pid: GameState.Pid, f: Callable[[pl.PlayerState], pl.PlayerState]) -> GameStateFactory:
-        if pid is GameState.Pid.P1:
+    def f_player(self, pid: PID, f: Callable[[pl.PlayerState], pl.PlayerState]) -> GameStateFactory:
+        if pid is PID.P1:
             return self.player1(f(self._player1))
-        elif pid is GameState.Pid.P2:
+        elif pid is PID.P2:
             return self.player2(f(self._player2))
         else:
             raise Exception("player_id unknown")
 
-    def other_player(self, pid: GameState.Pid, new_player: pl.PlayerState) -> GameStateFactory:
-        if pid is GameState.Pid.P1:
+    def other_player(self, pid: PID, new_player: pl.PlayerState) -> GameStateFactory:
+        if pid is PID.P1:
             return self.player2(new_player)
-        elif pid is GameState.Pid.P2:
+        elif pid is PID.P2:
             return self.player1(new_player)
         else:
             raise Exception("player_id unknown")
 
-    def f_other_player(self, pid: GameState.Pid, f: Callable[[pl.PlayerState], pl.PlayerState]) -> GameStateFactory:
-        if pid is GameState.Pid.P1:
+    def f_other_player(self, pid: PID, f: Callable[[pl.PlayerState], pl.PlayerState]) -> GameStateFactory:
+        if pid is PID.P1:
             return self.player2(f(self._player2))
-        elif pid is GameState.Pid.P2:
+        elif pid is PID.P2:
             return self.player1(f(self._player1))
         else:
             raise Exception("player_id unknown")
@@ -405,7 +389,7 @@ class SwapChecker:
 
     def action_generator(
             self,
-            pid: gs.GameState.Pid,
+            pid: PID,
     ) -> None | acg.ActionGenerator:
         if not self.swappable(pid):
             return None
@@ -435,7 +419,7 @@ class SwapChecker:
 
     def swappable(
             self,
-            pid: GameState.Pid,
+            pid: PID,
     ) -> bool:
         return any(
             self.swap_details(pid, char.get_id()) is not None
@@ -444,7 +428,7 @@ class SwapChecker:
 
     def swap_details(
             self,
-            pid: GameState.Pid,
+            pid: PID,
             char_id: int,
     ) -> None | tuple[EventSpeed, None | AbstractDices]:
         game_state = self._game_state
@@ -482,7 +466,7 @@ class SwapChecker:
 
     def valid_action(
             self,
-            pid: GameState.Pid,
+            pid: PID,
             action: act.SwapAction | act.DeathSwapAction,
     ) -> None | tuple[GameState, EventSpeed]:
         """
@@ -599,7 +583,7 @@ class SkillChecker:
 
     def action_generator(
             self,
-            pid: gs.GameState.Pid,
+            pid: PID,
     ) -> None | acg.ActionGenerator:
         active_character = self._game_state.get_player(pid).just_get_active_character()
         if not active_character.can_cast_skill():
@@ -623,7 +607,7 @@ class SkillChecker:
 
     def usable(
             self,
-            pid: GameState.Pid,
+            pid: PID,
             char_id: int,
             skill_type: CharacterSkill,
     ) -> None | tuple[GameState, AbstractDices]:
@@ -659,7 +643,7 @@ class SkillChecker:
 
     def valid_action(
             self,
-            pid: GameState.Pid,
+            pid: PID,
             action: act.SkillAction,
     ) -> None | GameState:
         game_state = self._game_state
@@ -698,7 +682,7 @@ class ElementalTuningChecker:
     def __init__(self, game_state: GameState) -> None:
         self._game_state = game_state
 
-    def usable(self, pid: GameState.Pid, elem: None | Element = None) -> bool:
+    def usable(self, pid: PID, elem: None | Element = None) -> bool:
         game_state = self._game_state
         if not (type(game_state.get_phase()) == type(game_state.get_mode().action_phase())
                 or game_state.get_active_player_id() is pid):
@@ -766,7 +750,7 @@ class ElementalTuningChecker:
 
     def action_generator(
             self,
-            pid: gs.GameState.Pid,
+            pid: PID,
     ) -> None | acg.ActionGenerator:
         if not self.usable(pid):
             return None

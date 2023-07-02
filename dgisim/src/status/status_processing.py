@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Callable
 
 import dgisim.src.state.game_state as gs
+from dgisim.src.state.enums import PID
 import dgisim.src.status.status as stt
 import dgisim.src.effect.effect as eft
 import dgisim.src.summon.summon as sm
@@ -14,7 +15,7 @@ class StatusProcessing:
     @staticmethod
     def loop_one_player_all_statuses(
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: PID,
             f: Callable[[gs.GameState, stt.Status, eft.StaticTarget], gs.GameState]
     ) -> gs.GameState:
         """
@@ -73,7 +74,7 @@ class StatusProcessing:
     @staticmethod
     def loop_all_statuses(
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: PID,
             f: Callable[[gs.GameState, stt.Status, eft.StaticTarget], gs.GameState]
     ) -> gs.GameState:
         """
@@ -86,7 +87,7 @@ class StatusProcessing:
 
     @staticmethod
     def trigger_all_statuses_effects(
-            game_state: gs.GameState, pid: gs.GameState.Pid, signal: eft.TriggeringSignal
+            game_state: gs.GameState, pid: PID, signal: eft.TriggeringSignal
     ) -> list[eft.Effect]:
         """
         Takes the current game_state, trigger all statuses in order of player pid
@@ -118,7 +119,7 @@ class StatusProcessing:
     @staticmethod
     def preprocess_by_all_statuses(
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: PID,
             item: eft.Preprocessable,
             pp_type: stt.Status.PPType,
     ) -> tuple[gs.GameState, eft.Preprocessable]:
@@ -192,7 +193,7 @@ class StatusProcessing:
     @staticmethod
     def inform_all_statuses(
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: PID,
             info: eft.SpecificDamageEffect | CharacterSkill | cd.Card,
             source: None | eft.StaticTarget = None,
     ) -> gs.GameState:

@@ -8,6 +8,7 @@ from dgisim.src.card.card import *
 from dgisim.src.status.status import *
 from dgisim.src.support.support import *
 from dgisim.src.agents import *
+from dgisim.src.state.enums import PID
 
 
 class TestMintyMeatRolls(unittest.TestCase):
@@ -23,13 +24,13 @@ class TestMintyMeatRolls(unittest.TestCase):
             instruction=StaticTargetInstruction(
                 dices=ActualDices({Element.OMNI: 1}),
                 target=StaticTarget(
-                    pid=GameState.Pid.P1,
+                    pid=PID.P1,
                     zone=Zone.CHARACTERS,
                     id=1,
                 )
             ),
         )
-        game_state = base_game.action_step(GameState.Pid.P1, card_action)
+        game_state = base_game.action_step(PID.P1, card_action)
         assert game_state is not None
         buffed_game_state = auto_step(game_state)
 
@@ -54,7 +55,7 @@ class TestMintyMeatRolls(unittest.TestCase):
         )
         self.assertRaises(
             Exception,
-            lambda: buffed_game_state.action_step(GameState.Pid.P1, normal_attack_action)
+            lambda: buffed_game_state.action_step(PID.P1, normal_attack_action)
         )
 
         # test normal attack with 2 dices pass
@@ -62,7 +63,7 @@ class TestMintyMeatRolls(unittest.TestCase):
             skill=CharacterSkill.NORMAL_ATTACK,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2}))
         )
-        game_state = buffed_game_state.action_step(GameState.Pid.P1, normal_attack_action)
+        game_state = buffed_game_state.action_step(PID.P1, normal_attack_action)
         assert game_state is not None
         game_state = auto_step(game_state)
 

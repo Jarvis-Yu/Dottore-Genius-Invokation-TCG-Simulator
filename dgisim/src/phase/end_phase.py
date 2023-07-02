@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Optional
 
 import dgisim.src.state.game_state as gs
+from dgisim.src.state.enums import PID
 from dgisim.src.action.action import *
 import dgisim.src.phase.phase as ph
 from dgisim.src.effect.effect import *
@@ -112,7 +113,7 @@ class EndPhase(ph.Phase):
                 return self._to_roll_phase(game_state, new_round)
         raise Exception("Unknown Game State to process")
 
-    def _handle_death_swap_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: DeathSwapAction) -> Optional[gs.GameState]:
+    def _handle_death_swap_action(self, game_state: gs.GameState, pid: PID, action: DeathSwapAction) -> Optional[gs.GameState]:
         player = game_state.get_player(pid)
         effect_stack = game_state.get_effect_stack()
         # Add Effects
@@ -125,7 +126,7 @@ class EndPhase(ph.Phase):
             effect_stack
         ).build()
 
-    def step_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: PlayerAction) -> Optional[gs.GameState]:
+    def step_action(self, game_state: gs.GameState, pid: PID, action: PlayerAction) -> Optional[gs.GameState]:
         effect_stack = game_state.get_effect_stack()
         if effect_stack.is_not_empty() and isinstance(effect_stack.peek(), DeathSwapPhaseStartEffect):
             game_state = game_state.factory().effect_stack(effect_stack.pop()[0]).build()
@@ -134,7 +135,7 @@ class EndPhase(ph.Phase):
 
         raise NotImplementedError
 
-    def waiting_for(self, game_state: gs.GameState) -> Optional[gs.GameState.Pid]:
+    def waiting_for(self, game_state: gs.GameState) -> Optional[PID]:
         effect_stack = game_state.get_effect_stack()
         # if no effects are to be executed or death swap phase is inserted
         if effect_stack.is_not_empty() \

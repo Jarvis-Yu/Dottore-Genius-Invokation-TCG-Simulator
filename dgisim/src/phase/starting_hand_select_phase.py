@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Optional
 
 import dgisim.src.state.game_state as gs
+from dgisim.src.state.enums import PID
 import dgisim.src.phase.phase as ph
 from dgisim.src.action.action import PlayerAction, CharacterSelectAction
 from dgisim.src.state.player_state import PlayerState
@@ -35,7 +36,7 @@ class StartingHandSelectPhase(ph.Phase):
         else:
             raise Exception("Unknown Game State to process")
 
-    def _handle_picking_starting_hand(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: CharacterSelectAction) -> gs.GameState:
+    def _handle_picking_starting_hand(self, game_state: gs.GameState, pid: PID, action: CharacterSelectAction) -> gs.GameState:
         swap_action: CharacterSelectAction = action
         char_id = swap_action.char_id
         player: PlayerState = game_state.get_player(pid)
@@ -53,7 +54,7 @@ class StartingHandSelectPhase(ph.Phase):
             .build()
         ).build()
 
-    def step_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: PlayerAction) -> Optional[gs.GameState]:
+    def step_action(self, game_state: gs.GameState, pid: PID, action: PlayerAction) -> Optional[gs.GameState]:
         if isinstance(action, CharacterSelectAction):
             return self._handle_picking_starting_hand(game_state, pid, action)
         else:

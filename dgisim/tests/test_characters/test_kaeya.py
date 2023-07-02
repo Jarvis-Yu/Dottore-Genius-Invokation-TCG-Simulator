@@ -8,6 +8,7 @@ from dgisim.src.action.action import *
 from dgisim.src.character.character import *
 from dgisim.src.card.card import *
 from dgisim.src.status.status import *
+from dgisim.src.state.enums import PID
 
 
 class TestKaeya(unittest.TestCase):
@@ -124,7 +125,7 @@ class TestKaeya(unittest.TestCase):
             card=LightningStiletto,
             instruction=StaticTargetInstruction(
                 dices=ActualDices({Element.OMNI: 3}),
-                target=StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 3),
+                target=StaticTarget(PID.P1, Zone.CHARACTERS, 3),
             )
         ))
         gsm = GameStateMachine(game_state_p1_move, a1, a2)
@@ -153,7 +154,7 @@ class TestKaeya(unittest.TestCase):
 
         # test self being overloaded
         game_state_p2_move = game_state_p1_move.factory().active_player_id(
-            GameState.Pid.P2
+            PID.P2
         ).f_player1(
             lambda p: p.factory().phase(
                 PlayerState.Act.PASSIVE_WAIT_PHASE
@@ -220,12 +221,12 @@ class TestKaeya(unittest.TestCase):
 
     def test_talent_card(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
-        source = StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 2)
+        source = StaticTarget(PID.P1, Zone.CHARACTERS, 2)
         initial_hp = 3
         base_game_state = kill_character(
             game_state=self.BASE_GAME,
             character_id=2,
-            pid=GameState.Pid.P1,
+            pid=PID.P1,
             hp=initial_hp,
         )
 

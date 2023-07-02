@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dgisim.src.state.game_state import GameState
+from dgisim.src.state.enums import PID
 from dgisim.src.state.player_state import PlayerState
 from dgisim.src.character.characters import Characters
 from dgisim.src.character.character import *
@@ -44,7 +45,7 @@ BASE_GAME = GameState.from_default().factory().f_player1(
 OPPO_DEATH_WAIT = BASE_GAME.factory().f_phase(
     lambda mode: mode.action_phase()
 ).active_player_id(
-    GameState.Pid.P1
+    PID.P1
 ).f_player1(
     lambda p: p.factory()
     .f_characters(
@@ -75,7 +76,7 @@ OPPO_DEATH_END = OPPO_DEATH_WAIT.factory().f_player2(
 ACTION_TEMPLATE = BASE_GAME.factory().f_phase(
     lambda mode: mode.action_phase()
 ).active_player_id(
-    GameState.Pid.P1
+    PID.P1
 ).f_player1(
     lambda p: p.factory()
     .f_characters(
@@ -96,7 +97,7 @@ ACTION_TEMPLATE = BASE_GAME.factory().f_phase(
 END_TEMPLATE = BASE_GAME.factory().f_phase(
     lambda mode: mode.end_phase()
 ).active_player_id(
-    GameState.Pid.P1
+    PID.P1
 ).f_player1(
     lambda p: p.factory()
     .f_characters(

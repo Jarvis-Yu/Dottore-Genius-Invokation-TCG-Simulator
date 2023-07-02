@@ -2,6 +2,7 @@ import unittest
 
 from dgisim.tests.helpers.game_state_templates import *
 from dgisim.src.state.game_state import GameState
+from dgisim.src.state.enums import PID
 from dgisim.src.state.player_state import PlayerState
 from dgisim.src.effect.effect_stack import EffectStack
 from dgisim.src.effect.effect import *
@@ -20,14 +21,14 @@ class TestEffect(unittest.TestCase):
             game_state.get_effect_stack(),
             EffectStack((
                 DeathSwapPhaseEndEffect(
-                    GameState.Pid.P2, PlayerState.Act.PASSIVE_WAIT_PHASE, PlayerState.Act.ACTION_PHASE),
+                    PID.P2, PlayerState.Act.PASSIVE_WAIT_PHASE, PlayerState.Act.ACTION_PHASE),
                 DeathSwapPhaseStartEffect(),
             ))
         )
 
     def testDeathSwapPhaseStartEffect(self):
         game_state = OPPO_DEATH_WAIT.step()
-        self.assertEqual(game_state.waiting_for(), GameState.Pid.P2)
+        self.assertEqual(game_state.waiting_for(), PID.P2)
 
     def testDeathSwapPhaseEndEffect1(self):
         game_state = OPPO_DEATH_WAIT.step()
@@ -62,7 +63,7 @@ class TestEffect(unittest.TestCase):
         # Heals normally
         g1 = game_state.factory().f_effect_stack(
             lambda es: es.push_one(RecoverHPEffect(
-                StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 2),
+                StaticTarget(PID.P1, Zone.CHARACTERS, 2),
                 1
             ))
         ).build()
@@ -74,7 +75,7 @@ class TestEffect(unittest.TestCase):
         # No overheal
         g2 = game_state.factory().f_effect_stack(
             lambda es: es.push_one(RecoverHPEffect(
-                StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 2),
+                StaticTarget(PID.P1, Zone.CHARACTERS, 2),
                 3
             ))
         ).build()
@@ -102,7 +103,7 @@ class TestEffect(unittest.TestCase):
         # apply energy recharge effect [1]
         game_state = game_state.factory().f_effect_stack(
             lambda es: es.push_one(EnergyRechargeEffect(
-                StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 1),
+                StaticTarget(PID.P1, Zone.CHARACTERS, 1),
                 1
             ))
         ).build()
@@ -118,7 +119,7 @@ class TestEffect(unittest.TestCase):
         # apply energy recharge that exceeds max energy
         game_state = game_state.factory().f_effect_stack(
             lambda es: es.push_one(EnergyRechargeEffect(
-                StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 1),
+                StaticTarget(PID.P1, Zone.CHARACTERS, 1),
                 c.get_max_energy() + 1  # type: ignore
             ))
         ).build()
@@ -146,7 +147,7 @@ class TestEffect(unittest.TestCase):
         # apply energy drain effect [3]
         game_state = game_state.factory().f_effect_stack(
             lambda es: es.push_one(EnergyDrainEffect(
-                StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 1),
+                StaticTarget(PID.P1, Zone.CHARACTERS, 1),
                 3
             ))
         ).build()
@@ -160,7 +161,7 @@ class TestEffect(unittest.TestCase):
         # Apply another energy drain effect to see if goes below zero
         game_state = game_state.factory().f_effect_stack(
             lambda es: es.push_one(EnergyDrainEffect(
-                StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 1),
+                StaticTarget(PID.P1, Zone.CHARACTERS, 1),
                 3,
             ))
         ).build()

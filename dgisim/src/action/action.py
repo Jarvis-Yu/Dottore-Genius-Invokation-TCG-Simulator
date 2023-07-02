@@ -10,6 +10,7 @@ from dgisim.src.effect.effect import StaticTarget
 from dgisim.src.character.character_skill_enum import CharacterSkill
 from dgisim.src.element.element import Element
 import dgisim.src.state.game_state as gs
+from dgisim.src.state.enums import PID
 import dgisim.src.effect.effect as eft
 
 
@@ -234,7 +235,7 @@ class StaticTargetInstruction(Instruction):
         return cls(
             dices=ActualDices({}),
             target=StaticTarget(
-                pid=gs.GameState.Pid.P1,
+                pid=PID.P1,
                 zone=eft.Zone.CHARACTERS,
                 id=-1,
             ),
@@ -249,7 +250,7 @@ class SourceTargetInstruction(Instruction):
     @classmethod
     def _empty(cls) -> Self:
         target = StaticTarget(
-            pid=gs.GameState.Pid.P1,
+            pid=PID.P1,
             zone=eft.Zone.CHARACTERS,
             id=-1,
         )

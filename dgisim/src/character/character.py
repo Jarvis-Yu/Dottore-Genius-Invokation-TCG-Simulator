@@ -4,6 +4,7 @@ from typing_extensions import override
 from functools import lru_cache
 
 import dgisim.src.state.game_state as gs
+from dgisim.src.state.enums import PID
 import dgisim.src.card.card as cd
 import dgisim.src.status.status as stt
 import dgisim.src.summon.summon as sm
@@ -653,7 +654,7 @@ class RhodeiaOfLoch(Character):
     def _not_summoned_types(
             self,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid
+            pid: PID
     ) -> tuple[type[sm.Summon], ...]:
         summons = game_state.get_player(pid).get_summons()
         return tuple(

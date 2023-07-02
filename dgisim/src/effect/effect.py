@@ -12,6 +12,7 @@ from dgisim.src.element.element import Element, Reaction, ReactionDetail
 import dgisim.src.character.character as chr
 from dgisim.src.character.character_skill_enum import CharacterSkill
 import dgisim.src.state.game_state as gs
+from dgisim.src.state.enums import PID
 import dgisim.src.state.player_state as ps
 import dgisim.src.card.card as cd
 import dgisim.src.dices as ds
@@ -64,7 +65,7 @@ class DamageType:
 
 @dataclass(frozen=True)
 class StaticTarget:
-    pid: gs.GameState.Pid
+    pid: PID
     zone: Zone
     id: int
 
@@ -137,7 +138,7 @@ class TriggerStatusEffect(Effect):
 
 @dataclass(frozen=True)
 class TriggerCombatStatusEffect(Effect):
-    target_pid: gs.GameState.Pid  # the player the status belongs to
+    target_pid: PID  # the player the status belongs to
     status: type[stt.CombatStatus]
     signal: TriggeringSignal
 
@@ -163,7 +164,7 @@ class TriggerCombatStatusEffect(Effect):
 
 @dataclass(frozen=True)
 class TriggerSummonEffect(Effect):
-    target_pid: gs.GameState.Pid
+    target_pid: PID
     summon: type[sm.Summon]
     signal: TriggeringSignal
 
@@ -189,7 +190,7 @@ class TriggerSummonEffect(Effect):
 
 @dataclass(frozen=True)
 class TriggerSupportEffect(Effect):
-    target_pid: gs.GameState.Pid
+    target_pid: PID
     support_type: type[sp.Support]
     sid: int
     signal: TriggeringSignal
@@ -219,7 +220,7 @@ class AllStatusTriggererEffect(TriggerrbleEffect):
     """
     This effect triggers the characters' statuses with the provided signal in order.
     """
-    pid: gs.GameState.Pid
+    pid: PID
     signal: TriggeringSignal
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
@@ -273,11 +274,11 @@ class DeathCheckCheckerEffect(CheckerEffect):
         p1_character = game_state.get_player1().get_characters().get_active_character()
         p2_character = game_state.get_player2().get_characters().get_active_character()
         assert p1_character is not None and p2_character is not None
-        pid: gs.GameState.Pid
+        pid: PID
         if p1_character.defeated():
-            pid = gs.GameState.Pid.P1
+            pid = PID.P1
         elif p2_character.defeated():
-            pid = gs.GameState.Pid.P2
+            pid = PID.P2
         else:  # if no one defeated, continue
             return game_state
         death_swap_player = game_state.get_player(pid)
@@ -324,7 +325,7 @@ class DeathSwapPhaseStartEffect(PhaseEffect):
 
 @dataclass(frozen=True)
 class DeathSwapPhaseEndEffect(PhaseEffect):
-    my_pid: gs.GameState.Pid
+    my_pid: PID
     my_last_phase: ps.PlayerState.Act
     other_last_phase: ps.PlayerState.Act
 
@@ -469,7 +470,7 @@ class SwapCharacterEffect(DirectEffect):
 
 @dataclass(frozen=True)
 class ForwardSwapCharacterEffect(DirectEffect):
-    target_player: gs.GameState.Pid
+    target_player: PID
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
         characters = game_state.get_player(self.target_player).get_characters()
@@ -846,7 +847,7 @@ class RecoverHPEffect(Effect):
 
 @dataclass(frozen=True)
 class RemoveCardEffect(Effect):
-    pid: gs.GameState.Pid
+    pid: PID
     card: type[cd.Card]
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
@@ -867,7 +868,7 @@ class RemoveCardEffect(Effect):
 
 @dataclass(frozen=True)
 class RemoveAllCardEffect(Effect):
-    pid: gs.GameState.Pid
+    pid: PID
     card: type[cd.Card]
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
@@ -886,7 +887,7 @@ class RemoveAllCardEffect(Effect):
 
 @dataclass(frozen=True)
 class RemoveDiceEffect(Effect):
-    pid: gs.GameState.Pid
+    pid: PID
     dices: ds.ActualDices
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
@@ -1017,7 +1018,7 @@ class OverrideCharacterStatusEffect(Effect):
 
 @dataclass(frozen=True)
 class AddCombatStatusEffect(Effect):
-    target_pid: gs.GameState.Pid
+    target_pid: PID
     status: type[stt.CombatStatus]
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
@@ -1031,7 +1032,7 @@ class AddCombatStatusEffect(Effect):
 
 @dataclass(frozen=True)
 class RemoveCombatStatusEffect(Effect):
-    target_pid: gs.GameState.Pid
+    target_pid: PID
     status: type[stt.CombatStatus]
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
@@ -1045,7 +1046,7 @@ class RemoveCombatStatusEffect(Effect):
 
 @dataclass(frozen=True)
 class UpdateCombatStatusEffect(Effect):
-    target_pid: gs.GameState.Pid
+    target_pid: PID
     status: stt.CombatStatus
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
@@ -1059,7 +1060,7 @@ class UpdateCombatStatusEffect(Effect):
 
 @dataclass(frozen=True)
 class OverrideCombatStatusEffect(Effect):
-    target_pid: gs.GameState.Pid
+    target_pid: PID
     status: stt.CombatStatus
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
@@ -1073,7 +1074,7 @@ class OverrideCombatStatusEffect(Effect):
 
 @dataclass(frozen=True)
 class AddSummonEffect(Effect):
-    target_pid: gs.GameState.Pid
+    target_pid: PID
     summon: type[sm.Summon]
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
@@ -1087,7 +1088,7 @@ class AddSummonEffect(Effect):
 
 @dataclass(frozen=True)
 class RemoveSummonEffect(Effect):
-    target_pid: gs.GameState.Pid
+    target_pid: PID
     summon: type[sm.Summon]
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
@@ -1101,7 +1102,7 @@ class RemoveSummonEffect(Effect):
 
 @dataclass(frozen=True)
 class UpdateSummonEffect(Effect):
-    target_pid: gs.GameState.Pid
+    target_pid: PID
     summon: sm.Summon
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
@@ -1115,7 +1116,7 @@ class UpdateSummonEffect(Effect):
 
 @dataclass(frozen=True)
 class OverrideSummonEffect(Effect):
-    target_pid: gs.GameState.Pid
+    target_pid: PID
     summon: sm.Summon
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
@@ -1129,7 +1130,7 @@ class OverrideSummonEffect(Effect):
 
 @dataclass(frozen=True, kw_only=True)
 class AllSummonIncreaseUsage(Effect):
-    target_pid: gs.GameState.Pid
+    target_pid: PID
     d_usages: int = 1
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
@@ -1149,7 +1150,7 @@ class AllSummonIncreaseUsage(Effect):
 
 @dataclass(frozen=True, kw_only=True)
 class OneSummonIncreaseUsage(Effect):
-    target_pid: gs.GameState.Pid
+    target_pid: PID
     summon_type: type[sm.Summon]
     d_usages: int = 1
 
@@ -1173,7 +1174,7 @@ class OneSummonIncreaseUsage(Effect):
 
 @dataclass(frozen=True)
 class AddSupportEffect(Effect):
-    target_pid: gs.GameState.Pid
+    target_pid: PID
     support: type[sp.Support]
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
@@ -1187,7 +1188,7 @@ class AddSupportEffect(Effect):
 
 @dataclass(frozen=True)
 class RemoveSupportEffect(Effect):
-    target_pid: gs.GameState.Pid
+    target_pid: PID
     sid: int
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
@@ -1201,7 +1202,7 @@ class RemoveSupportEffect(Effect):
 
 @dataclass(frozen=True)
 class UpdateSupportEffect(Effect):
-    target_pid: gs.GameState.Pid
+    target_pid: PID
     support: sp.Support
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
@@ -1215,7 +1216,7 @@ class UpdateSupportEffect(Effect):
 
 @dataclass(frozen=True)
 class OverrideSupportEffect(Effect):
-    target_pid: gs.GameState.Pid
+    target_pid: PID
     support: sp.Support
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:
@@ -1229,7 +1230,7 @@ class OverrideSupportEffect(Effect):
 
 @dataclass(frozen=True)
 class AddCardEffect(Effect):
-    pid: gs.GameState.Pid
+    pid: PID
     card: type[cd.Card]
 
     def execute(self, game_state: gs.GameState) -> gs.GameState:

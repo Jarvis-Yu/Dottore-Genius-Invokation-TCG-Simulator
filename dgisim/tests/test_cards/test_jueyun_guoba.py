@@ -8,6 +8,7 @@ from dgisim.src.card.card import *
 from dgisim.src.status.status import *
 from dgisim.src.support.support import *
 from dgisim.src.agents import *
+from dgisim.src.state.enums import PID
 
 
 class TestJueyunGuoba(unittest.TestCase):
@@ -40,7 +41,7 @@ class TestJueyunGuoba(unittest.TestCase):
             instruction=StaticTargetInstruction(
                 dices=ActualDices({}),
                 target=StaticTarget(
-                    GameState.Pid.P1,
+                    PID.P1,
                     Zone.CHARACTERS,
                     char1.get_id(),
                 )
@@ -83,7 +84,7 @@ class TestJueyunGuoba(unittest.TestCase):
             instruction=StaticTargetInstruction(
                 dices=ActualDices({}),
                 target=StaticTarget(
-                    GameState.Pid.P1,
+                    PID.P1,
                     Zone.CHARACTERS,
                     guobaed_char_id,
                 )
@@ -121,14 +122,14 @@ class TestJueyunGuoba(unittest.TestCase):
         )
 
         # with JueyunGuoba but cast elemental skill
-        game_state = set_active_player_id(base_game_state, GameState.Pid.P1, 2)
+        game_state = set_active_player_id(base_game_state, PID.P1, 2)
         gsm = GameStateMachine(game_state, p1, p2)
         p1.inject_action(CardAction(
             card=JueyunGuoba,
             instruction=StaticTargetInstruction(
                 dices=ActualDices({}),
                 target=StaticTarget(
-                    GameState.Pid.P1,
+                    PID.P1,
                     Zone.CHARACTERS,
                     2,
                 )

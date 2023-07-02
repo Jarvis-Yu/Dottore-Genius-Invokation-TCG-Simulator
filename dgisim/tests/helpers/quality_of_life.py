@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dgisim.src.state.game_state import GameState
+from dgisim.src.state.enums import PID
 from dgisim.src.game_state_machine import GameStateMachine
 from dgisim.src.element.element import *
 from dgisim.src.helper.level_print import GamePrinter
@@ -52,7 +53,7 @@ def add_damage_effect(
         game_state: GameState,
         damage: int,
         elem: Element,
-        pid: GameState.Pid = GameState.Pid.P2,
+        pid: PID = PID.P2,
         char_id: Optional[int] = None,
 ) -> GameState:
     """
@@ -80,7 +81,7 @@ def add_damage_effect(
 def kill_character(
         game_state: GameState,
         character_id: int,
-        pid: GameState.Pid = GameState.Pid.P2,
+        pid: PID = PID.P2,
         hp: int = 0,
 ) -> GameState:
     """
@@ -97,7 +98,7 @@ def kill_character(
     ).build()
 
 
-def set_active_player_id(game_state: GameState, pid: GameState.Pid, character_id: int) -> GameState:
+def set_active_player_id(game_state: GameState, pid: PID, character_id: int) -> GameState:
     return game_state.factory().f_player(
         pid,
         lambda p: p.factory().f_characters(

@@ -8,6 +8,7 @@ from dgisim.src.card.card import *
 from dgisim.src.status.status import *
 from dgisim.src.support.support import *
 from dgisim.src.agents import *
+from dgisim.src.state.enums import PID
 
 
 class TestChangingShifts(unittest.TestCase):
@@ -25,7 +26,7 @@ class TestChangingShifts(unittest.TestCase):
         )
         self.assertRaises(
             Exception,
-            lambda: base_game.action_step(GameState.Pid.P1, card_action)
+            lambda: base_game.action_step(PID.P1, card_action)
         )
 
         # test giving right num of dices
@@ -33,7 +34,7 @@ class TestChangingShifts(unittest.TestCase):
             card=ChangingShifts,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 0})),
         )
-        game_state = base_game.action_step(GameState.Pid.P1, card_action)
+        game_state = base_game.action_step(PID.P1, card_action)
         assert game_state is not None
         buffed_game_state = auto_step(game_state)
 
@@ -48,7 +49,7 @@ class TestChangingShifts(unittest.TestCase):
         )
         self.assertRaises(
             Exception,
-            lambda: buffed_game_state.action_step(GameState.Pid.P1, swap_action)
+            lambda: buffed_game_state.action_step(PID.P1, swap_action)
         )
 
         # test swap with no dices
@@ -56,7 +57,7 @@ class TestChangingShifts(unittest.TestCase):
             char_id=3,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 0}))
         )
-        game_state = buffed_game_state.action_step(GameState.Pid.P1, swap_action)
+        game_state = buffed_game_state.action_step(PID.P1, swap_action)
         assert game_state is not None
         game_state = auto_step(game_state)
 
@@ -65,10 +66,10 @@ class TestChangingShifts(unittest.TestCase):
         )
 
         # test opponent cannot use this
-        game_state = buffed_game_state.action_step(GameState.Pid.P1, EndRoundAction())
+        game_state = buffed_game_state.action_step(PID.P1, EndRoundAction())
         assert game_state is not None
         game_state = auto_step(game_state)
         self.assertRaises(
             Exception,
-            lambda: game_state.action_step(GameState.Pid.P2, swap_action)
+            lambda: game_state.action_step(PID.P2, swap_action)
         )

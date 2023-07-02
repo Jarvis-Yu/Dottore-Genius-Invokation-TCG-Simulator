@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Optional, Tuple
 
 import dgisim.src.state.game_state as gs
+from dgisim.src.state.enums import PID
 from dgisim.src.state.player_state import PlayerState
 import dgisim.src.phase.phase as ph
 from dgisim.src.action.action import CardSelectAction, PlayerAction, EndRoundAction
@@ -57,7 +58,7 @@ class CardSelectPhase(ph.Phase):
         else:
             raise Exception("Unknown Game State to process")
 
-    def _handle_card_drawing(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: CardSelectAction) -> gs.GameState:
+    def _handle_card_drawing(self, game_state: gs.GameState, pid: gs.PID, action: CardSelectAction) -> gs.GameState:
         player: PlayerState = game_state.get_player(pid)
         new_deck, new_cards = player.get_deck_cards().pick_random_cards(action.num_cards())
         new_deck = new_deck + action.selected_cards
@@ -79,7 +80,7 @@ class CardSelectPhase(ph.Phase):
             .build()
         ).build()
 
-    def _handle_end_round(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: EndRoundAction) -> gs.GameState:
+    def _handle_end_round(self, game_state: gs.GameState, pid: gs.PID, action: EndRoundAction) -> gs.GameState:
         player = game_state.get_player(pid)
         return game_state.factory().player(
             pid,
@@ -89,7 +90,7 @@ class CardSelectPhase(ph.Phase):
             .build()
         ).build()
 
-    def step_action(self, game_state: gs.GameState, pid: gs.GameState.Pid, action: PlayerAction) -> Optional[gs.GameState]:
+    def step_action(self, game_state: gs.GameState, pid: gs.PID, action: PlayerAction) -> Optional[gs.GameState]:
         if isinstance(action, CardSelectAction):
             return self._handle_card_drawing(game_state, pid, action)
         elif isinstance(action, EndRoundAction):

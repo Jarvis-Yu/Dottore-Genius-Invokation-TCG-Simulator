@@ -10,6 +10,7 @@ from dgisim.src.character.character import *
 from dgisim.src.card.card import *
 from dgisim.src.status.status import *
 from dgisim.src.summon.summon import *
+from dgisim.src.state.enums import PID
 
 
 class TestRohdeiaOfLoch(unittest.TestCase):
@@ -268,7 +269,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
             ).build()
         ).build()
         source = StaticTarget(
-            pid=GameState.Pid.P1,
+            pid=PID.P1,
             zone=Zone.CHARACTERS,
             id=1,
         )

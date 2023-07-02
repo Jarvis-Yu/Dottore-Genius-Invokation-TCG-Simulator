@@ -2,7 +2,7 @@ from __future__ import annotations
 from enum import Enum
 from dataclasses import dataclass
 
-import dgisim.src.state.game_state as gs
+from dgisim.src.state.enums import PID
 import dgisim.src.effect.effect as eft
 import dgisim.src.card.card as cd
 from dgisim.src.dices import AbstractDices
@@ -30,6 +30,6 @@ class GameEvent:
 
 @dataclass(frozen=True, kw_only=True)
 class CardEvent:
-    pid: gs.GameState.Pid
+    pid: PID
     card_type: type[cd.Card]
     dices_cost: AbstractDices
