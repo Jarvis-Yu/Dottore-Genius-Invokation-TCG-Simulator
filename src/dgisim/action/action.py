@@ -114,7 +114,7 @@ class ElementalTuningAction(GameAction):
 
     @classmethod
     def _empty(cls) -> Self:
-        from src.dgisim.card.card import Card
+        from ..card.card import Card
         return cls(card=Card, dice_elem=Element.ANY)
 
 
@@ -125,7 +125,7 @@ class CardAction(GameAction):
 
     @classmethod
     def _empty(cls) -> Self:
-        from src.dgisim.card.card import Card
+        from ..card.card import Card
         return cls(card=Card, instruction=Instruction._empty())
 
     def __str__(self) -> str:
@@ -139,7 +139,6 @@ class SkillAction(GameAction):
 
     @classmethod
     def _empty(cls) -> Self:
-        from src.dgisim.card.card import Card
         return cls(skill=CharacterSkill.NORMAL_ATTACK, instruction=DiceOnlyInstruction._empty())
 
     def __str__(self) -> str:
@@ -153,7 +152,6 @@ class SwapAction(GameAction):
 
     @classmethod
     def _empty(cls) -> Self:
-        from src.dgisim.card.card import Card
         return cls(char_id=-1, instruction=Instruction._empty())
 
 
@@ -163,7 +161,6 @@ class DeathSwapAction(GameAction):
 
     @classmethod
     def _empty(cls) -> Self:
-        from src.dgisim.card.card import Card
         return cls(char_id=-1)
 
 

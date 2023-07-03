@@ -85,8 +85,8 @@ class Status:
         if new_self == self:
             return game_state
 
-        import src.dgisim.summon.summon as sm
-        import src.dgisim.support.support as sp
+        from ..summon import summon as sm
+        from ..support import support as sp
         if isinstance(new_self, CharacterTalentStatus) \
                 or isinstance(new_self, EquipmentStatus) \
                 or isinstance(new_self, CharacterStatus):
@@ -134,8 +134,8 @@ class Status:
         es, new_status = self._react_to_signal(source, signal)
         es, new_status = self._post_react_to_signal(es, new_status, signal)
 
-        import src.dgisim.summon.summon as sm
-        import src.dgisim.support.support as sp
+        from ..summon import summon as sm
+        from ..support import support as sp
         # do the removal or update of the status
         if isinstance(self, CharacterTalentStatus) \
                 or isinstance(self, EquipmentStatus) \
@@ -346,7 +346,7 @@ class ShieldStatus(Status):
             item: Preprocessable,
             signal: PREPROCESSABLES,
     ) -> bool:
-        import src.dgisim.summon.summon as sm
+        from ..summon import summon as sm
         assert isinstance(item, eft.SpecificDamageEffect)
         if isinstance(self, CharacterTalentStatus) \
                 or isinstance(self, EquipmentStatus) \

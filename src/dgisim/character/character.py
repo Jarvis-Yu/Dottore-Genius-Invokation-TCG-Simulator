@@ -260,11 +260,11 @@ class Character:
         return self._hp == 0
 
     def satiated(self) -> bool:
-        from src.dgisim.status.status import SatiatedStatus
+        from ..status.status import SatiatedStatus
         return self._statuses.contains(SatiatedStatus)
 
     def can_cast_skill(self) -> bool:
-        from src.dgisim.status.status import FrozenStatus
+        from ..status.status import FrozenStatus
         return not self._statuses.contains(FrozenStatus) and not self.defeated()
 
     def name(self) -> str:
@@ -558,8 +558,6 @@ class Kaeya(Character):
         )
 
     def _elemental_skill1(self, game_state: GameState) -> tuple[eft.Effect, ...]:
-        from src.dgisim.card.card import LightningStiletto
-
         source = self.location(game_state)
         return (
             eft.ReferredDamageEffect(

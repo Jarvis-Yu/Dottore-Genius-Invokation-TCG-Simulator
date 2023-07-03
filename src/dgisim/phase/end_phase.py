@@ -9,7 +9,7 @@ from ..effect.effect import *
 from ..state.enums import PID, ACT
 
 if TYPE_CHECKING:
-    from src.dgisim.state.game_state import GameState
+    from ..state.game_state import GameState
 
 
 class EndPhase(ph.Phase):

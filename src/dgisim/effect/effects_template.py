@@ -7,7 +7,7 @@ from .enums import DYNAMIC_CHARACTER_TARGET
 from .structs import DamageType
 
 if TYPE_CHECKING:
-    from src.dgisim.effect.structs import StaticTarget
+    from .structs import StaticTarget
 
 
 def normal_attack_template(

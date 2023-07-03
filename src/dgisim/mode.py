@@ -77,36 +77,36 @@ class Mode:
 class DefaultMode(Mode):
 
     def all_cards(self) -> frozenset[type[card.Card]]:
-        from src.dgisim.card.cards_set import default_cards
+        from .card.cards_set import default_cards
         return default_cards()
 
     def all_chars(self) -> frozenset[type[chr.Character]]:
-        from src.dgisim.character.characters_set import default_characters
+        from .character.characters_set import default_characters
         return default_characters()
 
     # Initial phase of this mode
     def card_select_phase(self) -> ph.Phase:
-        from src.dgisim.phase.card_select_phase import CardSelectPhase
+        from .phase.card_select_phase import CardSelectPhase
         return CardSelectPhase()
 
     def starting_hand_select_phase(self) -> ph.Phase:
-        from src.dgisim.phase.starting_hand_select_phase import StartingHandSelectPhase
+        from .phase.starting_hand_select_phase import StartingHandSelectPhase
         return StartingHandSelectPhase()
 
     def roll_phase(self) -> ph.Phase:
-        from src.dgisim.phase.roll_phase import RollPhase
+        from .phase.roll_phase import RollPhase
         return RollPhase()
 
     def action_phase(self) -> ph.Phase:
-        from src.dgisim.phase.action_phase import ActionPhase
+        from .phase.action_phase import ActionPhase
         return ActionPhase()
 
     def end_phase(self) -> ph.Phase:
-        from src.dgisim.phase.end_phase import EndPhase
+        from .phase.end_phase import EndPhase
         return EndPhase()
 
     def game_end_phase(self) -> ph.Phase:
-        from src.dgisim.phase.game_end_phase import GameEndPhase
+        from .phase.game_end_phase import GameEndPhase
         return GameEndPhase()
 
     def __hash__(self) -> int:

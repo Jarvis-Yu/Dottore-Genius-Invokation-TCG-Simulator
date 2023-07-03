@@ -7,7 +7,7 @@ from ..helper.hashable_dict import HashableDict
 from ..helper.level_print import level_print
 
 if TYPE_CHECKING:
-    from src.dgisim.card.card import Card
+    from .card import Card
 
 
 class Cards:
