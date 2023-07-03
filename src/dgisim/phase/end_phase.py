@@ -115,8 +115,12 @@ class EndPhase(ph.Phase):
                 return self._to_roll_phase(game_state, new_round)
         raise Exception("Unknown Game State to process")
 
-    def _handle_death_swap_action(self, game_state: GameState, pid: PID, action: DeathSwapAction) -> Optional[
-        GameState]:
+    def _handle_death_swap_action(
+            self,
+            game_state: GameState,
+            pid: PID,
+            action: DeathSwapAction
+    ) -> Optional[GameState]:
         player = game_state.get_player(pid)
         effect_stack = game_state.get_effect_stack()
         # Add Effects
@@ -129,8 +133,12 @@ class EndPhase(ph.Phase):
             effect_stack
         ).build()
 
-    def step_action(self, game_state: GameState, pid: PID, action: PlayerAction) -> Optional[
-        GameState]:
+    def step_action(
+            self,
+            game_state: GameState,
+            pid: PID,
+            action: PlayerAction
+    ) -> Optional[GameState]:
         effect_stack = game_state.get_effect_stack()
         if effect_stack.is_not_empty() and isinstance(effect_stack.peek(), DeathSwapPhaseStartEffect):
             game_state = game_state.factory().effect_stack(effect_stack.pop()[0]).build()

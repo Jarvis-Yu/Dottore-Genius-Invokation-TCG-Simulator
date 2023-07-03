@@ -38,7 +38,12 @@ class StartingHandSelectPhase(ph.Phase):
         else:
             raise Exception("Unknown Game State to process")
 
-    def _handle_picking_starting_hand(self, game_state: GameState, pid: PID, action: CharacterSelectAction) -> GameState:
+    def _handle_picking_starting_hand(
+            self,
+            game_state: GameState,
+            pid: PID,
+            action: CharacterSelectAction
+    ) -> GameState:
         swap_action: CharacterSelectAction = action
         char_id = swap_action.char_id
         player = game_state.get_player(pid)
@@ -56,8 +61,12 @@ class StartingHandSelectPhase(ph.Phase):
             .build()
         ).build()
 
-    def step_action(self, game_state: GameState, pid: PID, action: PlayerAction) -> Optional[
-        GameState]:
+    def step_action(
+            self,
+            game_state: GameState,
+            pid: PID,
+            action: PlayerAction
+    ) -> Optional[GameState]:
         if isinstance(action, CharacterSelectAction):
             return self._handle_picking_starting_hand(game_state, pid, action)
         else:
