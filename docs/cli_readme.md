@@ -15,7 +15,8 @@ they are just to explain certain parts,
 but not actually printed when you use the CLI)
 
 ``` terminal
-$ ./scripts/cli.sh
+$ ./scripts/cli.sh    // though it is run via a script here, but it is the same
+                      // if you pip-installed the module and run it
 ==================================================
 Welcome to the Dottore Genius Invokation TCG Simulator CLI ver.
 This is currently just a basic version for debugging only.
@@ -111,7 +112,7 @@ Please choose id (0-2): @1    // last input is '1'
 <Effects>
 ===============================================================
 
->>>    // next input goes here
+:>    // next input goes here
 ```
 
 So the initial game state is printed,
@@ -144,7 +145,7 @@ But `h` can come handy when you forgot which commands you can use.
 Alright, let's give command `a` to the CLI.
 
 ``` terminal
->>> a    // last input is 'a'
+:> a    // last input is 'a'
 <Mode: DefaultMode>  <Phase: CardSelectPhase>  <Round: 0>
 ---------------------------------------------------------------
 <Player: *Player1>            | <Player: Player2>             |
@@ -207,7 +208,7 @@ Alright, let's give command `a` to the CLI.
 ===============================================================
 #### Player1 Action: CardSelectAction[<LotusFlowerCrisp>: 1; <NorthernSmokedChicken>: 1; <SweetMadame>: 1; ]
 
->>> 
+:> 
 ```
 
 You may have noticed this by the end of the last code-block.
@@ -229,7 +230,7 @@ which is the one players care the most right?
 So for now, let's `auto-step` all the way to ***action phase***.
 
 ``` terminal
->>>     // noticed there's no input here?
+:>     // noticed there's no input here?
         // Actually I just entered nothing to repeat last command
 <Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
 ---------------------------------------------------------------
@@ -330,7 +331,7 @@ Please choose id (0-2): @0    // second input
 #### Player1 Action: <Xudong, DiceOnlyInstruction:(dices=<OMNI>: 2
 )>
 
->>> 
+:> 
 ```
 
 (Note that you don't need to (a better way of saying currently you cannot) choose the dices
@@ -347,7 +348,7 @@ But you are the one who need to control if the game-state should *step* forward.
 Remember your last command input? `a` that is. So enter nothing to proceed.
 
 ```
->>> 
+:> 
 <Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
 ---------------------------------------------------------------
 <Player: *Player1>            | <Player: Player2>             |
@@ -437,13 +438,13 @@ Please choose id (0-2): @2
 #### Player1 Action: <CharacterSkill.ELEMENTAL_SKILL2, DiceOnlyInstruction:(dices=<OMNI>: 5
 )>
 
->>> 
+:> 
 ```
 
 And enter nothing to proceed.
 
 ``` terminal
->>>     // last input
+:>     // last input
 <Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
 ---------------------------------------------------------------
 <Player: Player1>             | <Player: *Player2>            |
@@ -511,13 +512,13 @@ And enter nothing to proceed.
 #### Player2 Action: SwapAction:(char_id=1, instruction=DiceOnlyInstruction:(dices=<OMNI>: 1
 ))
 
->>> 
+:> 
 ```
 
 The computer (random player) dicided to make a swap, alright. Enter to proceed to my turn.
 
 ``` terminal
->>> 
+:> 
 <Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
 ---------------------------------------------------------------
 <Player: *Player1>            | <Player: Player2>             |
@@ -600,7 +601,7 @@ Please choose id (0-3): @3
 
 #### Player1 Action: EndRoundAction:()
 
->>> 
+:> 
 ```
 
 and the game continues like this until the end. Feel free to try it out yourself.

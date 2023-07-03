@@ -1,8 +1,41 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=68.0.0"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "dgisim"
-version = "0.0.1"
-dependencies = [
+version = "0.1.dev0"
+license = {file = "LICENSE"}
+
+description = "A highly customizable Genius Invokation TCG Simulator for AI training"
+authors = [{ name="Jarvis Yu" }]
+requires-python = ">=3.10.11"
+readme = "README.md"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
+    "Typing :: Typed",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Operating System :: MacOS",
 ]
+
+dependencies = [
+    "typing-extensions == 4.5.0",
+]
+
+[project.urls]
+source = "https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator"
+tracker = "https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/issues"
+
+[tool.setuptools.package-dir]
+dgisim = "src/dgisim"
