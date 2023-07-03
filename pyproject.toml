@@ -38,4 +38,4 @@ source = "https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator"
 tracker = "https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/issues"
 
 [tool.setuptools.package-dir]
-dgisim = "dgisim/src"
+dgisim = "src/dgisim"
