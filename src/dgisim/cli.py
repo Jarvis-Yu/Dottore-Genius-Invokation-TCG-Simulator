@@ -134,7 +134,7 @@ class CLISession:
         self._print_latest_game_state()
         wrong_cmd_counter = 0
         while last_cmd != "q":
-            new_cmd = input("\n>>> ")
+            new_cmd = input("\n:> ")
             if new_cmd == "":
                 new_cmd = last_cmd
 

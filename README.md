@@ -6,15 +6,32 @@ A Genshin Impact Genius Invokation TCG simulator intended to be used for AI trai
 
 The simulator is modeled as a finite state machine, where all game states are immutable.
 
-- [Dottore Genius Invokation TCG Simulator](#dottore-genius-invokation-tcg-simulator)
-  - [Features of This Simulator](#features-of-this-simulator)
-  - [Development Milestones](#development-milestones)
-  - [CLI (How to try the simulator)](#cli-how-to-try-the-simulator)
-    - [For unix based systems (MacOS, Linux...): _(up-to-date)_](#for-unix-based-systems-macos-linux-up-to-date)
-    - [For Windows based systems: _(out-dated now, needs contribution)_](#for-windows-based-systems-out-dated-now-needs-contribution)
-  - [Future Plans](#future-plans)
-  - [Interested in the Project](#interested-in-the-project)
-  - [QA](#qa)
+## Install
+
+Make sure your Python version `>= 3.10.11`.
+
+```shell
+pip install dgisim
+```
+
+Note that this is a developing project and the final API to users is not set in stone.
+So you may play with it, but using it in production is not recommended at the current stage.
+
+## Simple Guide
+
+Once installed, you may have a try with the CLI to play the simulator in command line.
+
+You might want to run a simple python program like this:
+
+```py
+from dgisim.cli import CLISession
+
+session = CLISession()
+session.run()
+```
+
+See CLI's [README](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/cli_readme.md)
+for showcase and explanations of the CLI.
 
 ## Features of This Simulator
 
@@ -76,42 +93,6 @@ dictionary, and discover game states on different 'game branches' being actually
 
 > Just in case you don't know, **_WIP_** means "work in progress".
 
-## CLI (How to try the simulator)
-
-There's currently a CLI available to try this project.
-
-See CLI's [README](docs/cli_readme.md) for showcase and explanations of the CLI.
-
-Here are the steps for you to follow to try the developing project.
-
-### For unix based systems (MacOS, Linux...): _(up-to-date)_
-
-1. Clone the project
-2. Make sure your Python version >= 3.10.11
-3. Set up the environment with `venv` or otherwise
-4. If you don't know how to setup `venv`, google it or run the following commands under the project directory
-
-```sh
-source ./scripts/venv.sh
-pip install -r requirements.txt
-```
-
-5. With the environment set up run the following command to run the CLI
-
-```sh
-./scripts/cli.sh
-```
-
-### For Windows based systems: _(out-dated now, needs contribution)_
-
-1. Clone the project
-2. Make sure your Python version >= 3.10.11
-3. Run scripts\venv.ps1
-4. After venv is installed, run ./scripts/cli.ps1
-
-Note that currently when playing with the CLI, it is the programmed random agents that are playing the game.
-You are just the observer overseeing their gameplay.
-
 ## Future Plans
 
 The fully developed project will be published to PyPI (beta versions will be available once all that
@@ -124,22 +105,6 @@ Once this project is done, I'll be reading relative papers and develop an AI for
 is supposed to be used for learning strategies and making decks, but not against another player
 directly.
 
-## Interested in the Project
+## Interested in the Project?
 
-I suggest you start reading the code from `dgisim/tests/test_game_state_machine.py`,
-which contains tests for the whole game flow.
-
-A read through other test files are also recommanded to get familiar with the state-machine design.
-
-If you have trouble understanding the repo, please don't hesitate to raise an issue asking for help.
-I may consider adding some design documentations to go over the game model structure of this project.
-
-## QA
-
-Do you want people to join you?
-
-- Well, collaborators are warmly welcomed. If you have the intention to join, please contact me.
-
-How to contact you?
-
-- I assume you can find my email somewhere ~~(hint: `git log`)~~
+Please read this [README](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/dev_readme.md).
