@@ -22,7 +22,7 @@ from ..effect.structs import StaticTarget
 from ..element.element import Element
 from ..event.event import *
 from ..helper.level_print import level_print, level_print_single, INDENT
-from ..helper.quality_of_life import case_val
+from ..helper.quality_of_life import case_val, just
 from .enums import PID
 from ..status.status_processing import StatusProcessing
 from ..status.enums import PREPROCESSABLES
@@ -54,6 +54,7 @@ class GameState:
         self._effect_stack = effect_stack
 
         # checkers
+        self._card_checker = CardChecker(self)
         self._swap_checker = SwapChecker(self)
         self._skill_checker = SkillChecker(self)
         self._elem_tuning_checker = ElementalTuningChecker(self)
@@ -118,6 +119,20 @@ class GameState:
             return self._player1
         else:
             raise Exception("player_id unknown")
+
+    def death_swapping(self, player_id: None | PID = None) -> bool:
+        from ..effect.effect import DeathSwapPhaseStartEffect
+        return (
+            self._effect_stack.is_not_empty()
+            and isinstance(self._effect_stack.peek(), DeathSwapPhaseStartEffect)
+            and (
+                player_id is None
+                or self.get_player(player_id).get_phase().is_action_phase()
+            )
+        )
+
+    def card_checker(self) -> CardChecker:
+        return self._card_checker
 
     def swap_checker(self) -> SwapChecker:
         return self._swap_checker
@@ -323,6 +338,60 @@ class GameStateFactory:
         )
 
 
+class CardChecker:
+    def __init__(self, game_state: GameState) -> None:
+        self._game_state = game_state
+
+    def _choices_helper(
+            self,
+            action_generator: acg.ActionGenerator,
+    ) -> GivenChoiceType:
+        assert not action_generator.filled()
+        game_state = action_generator.game_state
+        pid = action_generator.pid
+        return tuple(
+            card_type
+            for card_type in game_state.get_player(pid).get_hand_cards()
+            if card_type.strictly_usable(game_state, pid)
+        )
+
+    def _fill_helper(
+        self,
+        action_generator: acg.ActionGenerator,
+        player_choice: DecidedChoiceType,
+    ) -> acg.ActionGenerator:
+        assert not action_generator.filled()
+        assert issubclass(player_choice, Card)  # type: ignore
+        assert self.usable(action_generator.pid, player_choice)  # type: ignore
+        return just(player_choice.action_generator(  # type: ignore
+            action_generator.game_state,
+            action_generator.pid
+        ))
+
+    def usable(self, pid: PID, card_type: type[Card]) -> None | acg.ActionGenerator:
+        return card_type.action_generator(self._game_state, pid)
+
+    def playable(self, pid: PID) -> bool:
+        """ Returns true if any card is playable """
+        return any(
+            card_type.strictly_usable(self._game_state, pid)
+            for card_type in self._game_state.get_player(pid).get_hand_cards()
+        )
+
+    def action_generator(
+            self,
+            pid: PID,
+    ) -> None | acg.ActionGenerator:
+        if not self.playable(pid):
+            return None
+        return acg.ActionGenerator(
+            game_state=self._game_state,
+            pid=pid,
+            _choices_helper=self._choices_helper,
+            _fill_helper=self._fill_helper,
+        )
+
+
 class SwapChecker:
     def __init__(self, game_state: GameState) -> None:
         self._game_state = game_state
@@ -426,6 +495,7 @@ class SwapChecker:
             self,
             pid: PID,
     ) -> bool:
+        """ Returns true if a swap to any character is available """
         return any(
             self.swap_details(pid, char.get_id()) is not None
             for char in self._game_state.get_player(pid).get_characters()
@@ -646,6 +716,16 @@ class SkillChecker:
         else:
             return None
 
+    def skillable(
+            self,
+            pid: PID
+    ) -> bool:
+        active_character_id = self._game_state.get_player(pid).just_get_active_character().get_id()
+        return any(
+            self.usable(pid, active_character_id, skill_type)
+            for skill_type in CharacterSkill
+        )
+
     def valid_action(
             self,
             pid: PID,
@@ -702,6 +782,12 @@ class ElementalTuningChecker:
             and dices[Element.OMNI] + dices[active_character_elem] < dices.num_dices()
             and (elem is None or dices[elem] > 0)
         )
+
+    def tunable(self, pid: PID) -> bool:
+        """ Returns true if elemental tuning is available """
+        active_character_elem = self._game_state.get_player(
+            pid).just_get_active_character().element()
+        return self.usable(pid, active_character_elem)
 
     def _choices_helper(
             self,

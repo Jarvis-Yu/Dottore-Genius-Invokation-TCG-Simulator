@@ -11,37 +11,58 @@ if TYPE_CHECKING:
     from .action import PlayerAction, Instruction
     from .types import DecidedChoiceType, GivenChoiceType
 
+def _dummy_choices_helper(_: ActionGenerator) -> GivenChoiceType:
+    raise NotImplementedError
+
+def _dummy_fill_helper(_a: ActionGenerator, _b: DecidedChoiceType) -> ActionGenerator:
+    raise NotImplementedError
 
 @dataclass(frozen=True, kw_only=True)
 class ActionGenerator:
+    """
+    ActionGenerator is a class recording a state of choices made so far.
+
+    If both action and instruction is None, then this action generator is used 
+    to generate other ActionGenerators that may eventually generate some action.
+    """
     game_state: GameState
     pid: PID
-    action: PlayerAction
+    action: None | PlayerAction = None
     instruction: None | Instruction = None
-    _choices_helper: Callable[[Self], GivenChoiceType]
-    _fill_helper: Callable[[Self, DecidedChoiceType], Self]
+    # used to provide all valid choices for users to choose
+    _choices_helper: Callable[[Self], GivenChoiceType] = _dummy_choices_helper  # type: ignore
+    # takes user's choice and check if it is valid, if so return another
+    # action generator representing the next phase of choice, otherwise raise
+    # Exception
+    _fill_helper: Callable[[Self, DecidedChoiceType], Self] = _dummy_fill_helper  # type: ignore
 
     def _action_filled(self) -> bool:
-        return self.action._filled(exceptions={"instruction"})
+        return self.action is None \
+            or self.action._filled(exceptions={"instruction"})
 
     def _instruction_filled(self) -> bool:
         return self.instruction is None \
             or self.instruction._filled()
 
     def _legal_action(self) -> bool:
-        return self.action.legal()
+        return self.action is None or self.action.legal()
 
     def _legal_instruction(self) -> bool:
         return self.instruction is None or self.instruction.legal()
 
     def filled(self) -> bool:
-        return self._action_filled() and self._instruction_filled()
+        """
+        Return if ActionGenerator is ready to produce the final action
+        """
+        return not(self.action is None and self.instruction is None) \
+            and self._action_filled() and self._instruction_filled()
 
     def valid(self) -> bool:
         return self._legal_action() and self._legal_instruction()
 
     def generate_action(self) -> PlayerAction:
         assert self.filled()
+        assert self.action is not None
         action = self.action
         if self.instruction is not None:
             action = replace(action, instruction=self.instruction)
@@ -55,6 +76,7 @@ class ActionGenerator:
         return self.game_state.get_player(self.pid).get_dices()
 
     def choose(self, choice: DecidedChoiceType) -> ActionGenerator:
+        assert not self.filled()
         return self._fill_helper(self, choice)
 
     def __str__(self) -> str:

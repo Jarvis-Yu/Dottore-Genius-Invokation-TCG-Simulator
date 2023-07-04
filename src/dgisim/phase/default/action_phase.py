@@ -5,12 +5,16 @@ from .. import phase as ph
 
 from ...action.action import *
 from ...action.action_generator import ActionGenerator
+from ...character.character_skill_enum import CharacterSkill
 from ...effect.effect import *
 from ...event.event import *
+from ...helper.quality_of_life import just
 from ...state.enums import PID, ACT
 
 if TYPE_CHECKING:
     from ...state.game_state import GameState
+    from ...action.types import DecidedChoiceType, GivenChoiceType
+    from ...action.enums import ActionType
 
 
 class ActionPhase(ph.Phase):
@@ -318,8 +322,7 @@ class ActionPhase(ph.Phase):
             raise Exception(f"Unexpected action from {pid} at game state:\n{game_state}")
 
         # check death swap phase
-        effect_stack = game_state.get_effect_stack()
-        if effect_stack.is_not_empty() and isinstance(effect_stack.peek(), DeathSwapPhaseStartEffect):
+        if game_state.death_swapping(pid):
             if not isinstance(action, DeathSwapAction):
                 raise Exception(f"Trying to execute {action} when a death swap is expected")
             # game_state = game_state.factory().effect_stack(effect_stack.pop()[0]).build()
@@ -333,15 +336,90 @@ class ActionPhase(ph.Phase):
     def waiting_for(self, game_state: GameState) -> Optional[PID]:
         effect_stack = game_state.get_effect_stack()
         # if no effects are to be executed or death swap phase is inserted
-        if effect_stack.is_empty() \
-                or isinstance(effect_stack.peek(), DeathSwapPhaseStartEffect):
+        if effect_stack.is_empty() or game_state.death_swapping():
             return super().waiting_for(game_state)
         else:
             return None
 
+    @classmethod
+    def _choices_helper(cls, action_generator: ActionGenerator) -> GivenChoiceType:
+        game_state = action_generator.game_state
+        pid = action_generator.pid
+
+        # death swap check
+        if game_state.death_swapping(pid):
+            return (ActionType.SWAP_CHARACTER, )
+
+        choices: list[ActionType] = []
+
+        # cards
+        if game_state.card_checker().playable(pid):
+            choices.append(ActionType.PLAY_CARD)
+
+        # skills
+        if game_state.skill_checker().skillable(pid):
+            choices.append(ActionType.CAST_SKILL)
+
+        # swaps
+        if game_state.swap_checker().swappable(pid):
+            choices.append(ActionType.SWAP_CHARACTER)
+
+        # elemental tuning
+        if game_state.elem_tuning_checker().tunable(pid):
+            choices.append(ActionType.ELEMENTAL_TUNING)
+
+        # unconditional end round
+        choices.append(ActionType.END_ROUND)
+        return tuple(choices)
+
+    @classmethod
+    def _fill_helper(
+        cls,
+        action_generator: ActionGenerator,
+        player_choice: DecidedChoiceType,
+    ) -> ActionGenerator:
+        game_state = action_generator.game_state
+        pid = action_generator.pid
+
+        if game_state.death_swapping(pid):
+            assert player_choice is ActionType.SWAP_CHARACTER
+            return just(game_state.swap_checker().action_generator(pid))
+
+        if player_choice is ActionType.PLAY_CARD:
+            assert game_state.card_checker().playable(pid)
+            return just(game_state.card_checker().action_generator(pid))
+        elif player_choice is ActionType.SWAP_CHARACTER:
+            assert game_state.swap_checker().swappable(pid)
+            return just(game_state.swap_checker().action_generator(pid))
+        elif player_choice is ActionType.CAST_SKILL:
+            assert game_state.skill_checker().skillable(pid)
+            return just(game_state.skill_checker().action_generator(pid))
+        elif player_choice is ActionType.ELEMENTAL_TUNING:
+            assert game_state.elem_tuning_checker().tunable(pid)
+            return just(game_state.elem_tuning_checker().action_generator(pid))
+        elif player_choice is ActionType.END_ROUND:
+            return ActionGenerator(
+                game_state=game_state,
+                pid=pid,
+                action=EndRoundAction(),
+            )
+        else:
+            action_type_name = ActionType.__name__
+            if isinstance(player_choice, ActionType):
+                raise Exception(f"Unhandled player {action_type_name} {player_choice}")
+            else:
+                raise TypeError(f"Unexpected player choice {player_choice} where"
+                                + f"where {action_type_name} is expected")
+
     def action_generator(self, game_state: GameState, pid: PID) -> ActionGenerator | None:
-        # TODO
-        raise NotImplementedError
+        return ActionGenerator(
+            game_state=game_state,
+            pid=pid,
+            action=None,
+            instruction=None,
+            _choices_helper=self._choices_helper,
+            _fill_helper=self._fill_helper,
+        )
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, ActionPhase)
