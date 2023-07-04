@@ -1,6 +1,6 @@
 # Dottore Genius Invokation TCG Simulator
 
-![Python 3.10.11](https://img.shields.io/badge/python-3.10.11-blue.svg)
+![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)
 [![Coverage Status](https://coveralls.io/repos/github/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/badge.svg?branch=master)](https://coveralls.io/github/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator?branch=master)
 
 A Genshin Impact Genius Invokation TCG simulator intended to be used for AI training (for now).
@@ -9,7 +9,7 @@ The simulator is modeled as a finite state machine, where all game states are im
 
 ## Install
 
-Make sure your Python version `>= 3.10.11`.
+Make sure your Python version `>= 3.10`.
 
 ```shell
 pip install dgisim

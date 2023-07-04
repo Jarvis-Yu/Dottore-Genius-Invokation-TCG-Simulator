@@ -9,7 +9,7 @@ license = {file = "LICENSE"}
 
 description = "A highly customizable Genius Invokation TCG Simulator for AI training"
 authors = [{ name="Jarvis Yu" }]
-requires-python = ">=3.10.11"
+requires-python = ">=3.10"
 readme = "README.md"
 classifiers = [
     "Development Status :: 3 - Alpha",

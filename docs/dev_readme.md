@@ -12,7 +12,7 @@
 ### For unix based systems (MacOS, Linux...): _(up-to-date)_
 
 1. Clone the project
-2. Make sure your Python version >= 3.10.11
+2. Make sure your Python version >= 3.10
 3. Set up the environment with `venv` or otherwise
 4. If you don't know how to setup `venv`, google it or run the following
    commands under the project directory
