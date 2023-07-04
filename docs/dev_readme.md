@@ -2,14 +2,14 @@
 
 - [Dev README](#dev-readme)
   - [Run the Project Locally](#run-the-project-locally)
-    - [For unix based systems (MacOS, Linux...): _(up-to-date)_](#for-unix-based-systems-macos-linux-up-to-date)
-    - [For Windows based systems: _(out-dated now, needs contribution)_](#for-windows-based-systems-out-dated-now-needs-contribution)
+    - [For unix based systems (MacOS, Linux...)](#for-unix-based-systems-macos-linux)
+    - [For Windows based systems (Powershell)](#for-windows-based-systems-powershell)
   - [Where to Start Reading the Code](#where-to-start-reading-the-code)
   - [QA](#qa)
 
 ## Run the Project Locally
 
-### For unix based systems (MacOS, Linux...): _(up-to-date)_
+### For unix based systems (MacOS, Linux...)
 
 1. Clone the project
 2. Make sure your Python version >= 3.10
@@ -18,22 +18,19 @@
    commands under the project directory
 
 ```sh
-source ./scripts/venv.sh
+source ./scripts/sh/venv.sh
 ```
 
 5. With the environment set up, you may have a try with CLI by running:
 
 ```sh
-./scripts/cli.sh
+./scripts/sh/cli.sh
 ```
 
-### For Windows based systems: _(out-dated now, needs contribution)_
+### For Windows based systems (Powershell)
 
-Sorry the `.ps1` scripts last contributer wrote is not out-dated.
-
-But given you use `wsl` or you are a Powershell user with some knowledge of
-bash scripts, then have a read of the `.sh` scripts in `scripts/` to setup
-the project.
+Powershell scripts of the same name are in `./scripts/ps1/`,
+please refer to the guide above but execute the `.ps1` scripts instead.
 
 ## Where to Start Reading the Code
 

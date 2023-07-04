@@ -6,7 +6,7 @@
 ## Show Case on How to Use the CLI
 
 After setting up the environment following the instructions in the main [README](../README.md),
-you may run `./scripts/cli.sh` under the project directory to start a CLI session.
+you may run `./scripts/sh/cli.sh` under the project directory to start a CLI session.
 
 Below shows what you are likely to see.
 
@@ -15,7 +15,7 @@ they are just to explain certain parts,
 but not actually printed when you use the CLI)
 
 ``` terminal
-$ ./scripts/cli.sh    // though it is run via a script here, but it is the same
+$ ./scripts/sh/cli.sh    // though it is run via a script here, but it is the same
                       // if you pip-installed the module and run it
 ==================================================
 Welcome to the Dottore Genius Invokation TCG Simulator CLI ver.
