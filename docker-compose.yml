@@ -1,8 +1,0 @@
-services:
-  simulator:
-    image: "python:3.9.16"
-    container_name: Dottore_Genius_Invokation_Simulator
-    stdin_open: true
-    working_dir: /src
-    volumes:
-      - ./:/src
