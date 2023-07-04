@@ -4,6 +4,7 @@ from typing import Optional, TYPE_CHECKING
 from ..phase import phase as ph
 
 from ..action.action import *
+from ..action.action_generator import ActionGenerator
 from ..dices import ActualDices
 from ..effect.effect import *
 from ..state.enums import PID, ACT
@@ -155,6 +156,10 @@ class EndPhase(ph.Phase):
             return super().waiting_for(game_state)
         else:
             return None
+
+    def action_generator(self, game_state: GameState, pid: PID) -> ActionGenerator | None:
+        # TODO
+        raise NotImplementedError
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, EndPhase)

@@ -4,6 +4,7 @@ from typing import Optional, TYPE_CHECKING
 from ..phase import phase as ph
 
 from ..action.action import CardSelectAction, PlayerAction, EndRoundAction
+from ..action.action_generator import ActionGenerator
 from ..state.enums import PID, ACT
 
 if TYPE_CHECKING:
@@ -99,6 +100,10 @@ class CardSelectPhase(ph.Phase):
             return self._handle_end_round(game_state, pid, action)
         else:
             raise Exception("Unknown Game State to process")
+
+    def action_generator(self, game_state: GameState, pid: PID) -> ActionGenerator | None:
+        # TODO
+        raise NotImplementedError
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, CardSelectPhase)

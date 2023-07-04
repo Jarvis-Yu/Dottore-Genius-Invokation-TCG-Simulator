@@ -1,13 +1,15 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from ..phase import phase as ph
 
+from ..action.action_generator import ActionGenerator
 from ..dices import ActualDices
 from ..element.element import Element
-from ..state.enums import ACT
+from ..state.enums import ACT, PID
 
 if TYPE_CHECKING:
+    from ..action.action import PlayerAction
     from ..state.game_state import GameState
 
 
@@ -41,6 +43,14 @@ class RollPhase(ph.Phase):
         # else:
         #     raise Exception("Undefined Player id")
         return self._get_all_omni_and_to_action_phase(game_state)
+
+    def step_action(self, game_state: GameState, pid: PID, action: PlayerAction) -> GameState | None:
+        # TODO
+        return super().step_action(game_state, pid, action)
+
+    def action_generator(self, game_state: GameState, pid: PID) -> ActionGenerator | None:
+        # TODO
+        raise NotImplementedError
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, RollPhase)

@@ -165,6 +165,9 @@ class GameState:
         """
         return self._phase.step_action(self, pid, action)
 
+    def action_generator(self, pid: PID) -> None | acg.ActionGenerator:
+        return self._phase.action_generator(self, pid)
+
     def get_winner(self) -> Optional[PID]:
         assert self.game_end()
         if self.get_player1().defeated():
