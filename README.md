@@ -7,6 +7,8 @@ A Genshin Impact Genius Invokation TCG simulator intended to be used for AI trai
 
 The simulator is modeled as a finite state machine, where all game states are immutable.
 
+Basic rules of Genius Invokation TCG can be found [here](https://genshin-impact.fandom.com/wiki/Genius_Invokation_TCG).
+
 ## Install
 
 Make sure your Python version `>= 3.10`.
