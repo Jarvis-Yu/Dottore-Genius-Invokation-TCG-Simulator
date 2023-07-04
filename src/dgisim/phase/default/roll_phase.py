@@ -1,16 +1,16 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 
-from ..phase import phase as ph
+from .. import phase as ph
 
-from ..action.action_generator import ActionGenerator
-from ..dices import ActualDices
-from ..element.element import Element
-from ..state.enums import ACT, PID
+from ...action.action_generator import ActionGenerator
+from ...dices import ActualDices
+from ...element.element import Element
+from ...state.enums import ACT, PID
 
 if TYPE_CHECKING:
-    from ..action.action import PlayerAction
-    from ..state.game_state import GameState
+    from ...action.action import PlayerAction
+    from ...state.game_state import GameState
 
 
 class RollPhase(ph.Phase):

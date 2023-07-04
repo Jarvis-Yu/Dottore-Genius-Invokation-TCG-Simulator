@@ -4,12 +4,12 @@ from src.dgisim.agents import *
 from src.dgisim.card.cards import Cards
 from src.dgisim.game_state_machine import GameStateMachine
 from src.dgisim.helper.level_print import GamePrinter
-from src.dgisim.phase.action_phase import ActionPhase
-from src.dgisim.phase.card_select_phase import CardSelectPhase
-from src.dgisim.phase.end_phase import EndPhase
-from src.dgisim.phase.game_end_phase import GameEndPhase
-from src.dgisim.phase.roll_phase import RollPhase
-from src.dgisim.phase.starting_hand_select_phase import StartingHandSelectPhase
+from src.dgisim.phase.default.action_phase import ActionPhase
+from src.dgisim.phase.default.card_select_phase import CardSelectPhase
+from src.dgisim.phase.default.end_phase import EndPhase
+from src.dgisim.phase.default.game_end_phase import GameEndPhase
+from src.dgisim.phase.default.roll_phase import RollPhase
+from src.dgisim.phase.default.starting_hand_select_phase import StartingHandSelectPhase
 from src.dgisim.state.enums import ACT
 from src.dgisim.state.game_state import GameState
 

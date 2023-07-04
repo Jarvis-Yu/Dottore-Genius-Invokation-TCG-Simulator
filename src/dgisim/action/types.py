@@ -7,7 +7,17 @@ from ..dices import ActualDices, AbstractDices
 from ..effect.structs import StaticTarget
 from ..element.element import Element
 
-_SingleChoiceType = StaticTarget | int | ActualDices | CharacterSkill | type["cd.Card"] | Element
+from .enums import ActionType
+
+_SingleChoiceType = (
+    StaticTarget
+    | int
+    | ActualDices
+    | CharacterSkill
+    | type["cd.Card"]
+    | Element
+    | ActionType
+)
 
 GivenChoiceType = tuple[_SingleChoiceType, ...] | AbstractDices | Cards
 

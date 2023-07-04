@@ -1,13 +1,13 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from ..phase import phase as ph
+from .. import phase as ph
 
 if TYPE_CHECKING:
-    from ..action.action import PlayerAction
-    from ..action.action_generator import ActionGenerator
-    from ..state.game_state import GameState
-    from ..state.enums import PID
+    from ...action.action import PlayerAction
+    from ...action.action_generator import ActionGenerator
+    from ...state.game_state import GameState
+    from ...state.enums import PID
 
 class GameEndPhase(ph.Phase):
     def step(self, game_state: GameState) -> GameState:

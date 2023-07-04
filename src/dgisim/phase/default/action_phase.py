@@ -1,16 +1,16 @@
 from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 
-from ..phase import phase as ph
+from .. import phase as ph
 
-from ..action.action import *
-from ..action.action_generator import ActionGenerator
-from ..effect.effect import *
-from ..event.event import *
-from ..state.enums import PID, ACT
+from ...action.action import *
+from ...action.action_generator import ActionGenerator
+from ...effect.effect import *
+from ...event.event import *
+from ...state.enums import PID, ACT
 
 if TYPE_CHECKING:
-    from ..state.game_state import GameState
+    from ...state.game_state import GameState
 
 
 class ActionPhase(ph.Phase):

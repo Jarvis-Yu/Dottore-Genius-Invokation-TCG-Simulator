@@ -9,11 +9,11 @@ from .character.character_skill_enum import CharacterSkill
 from .dices import AbstractDices, ActualDices
 from .effect.effect import *
 from .element.element import Element
-from .phase.action_phase import ActionPhase
-from .phase.card_select_phase import CardSelectPhase
-from .phase.end_phase import EndPhase
-from .phase.roll_phase import RollPhase
-from .phase.starting_hand_select_phase import StartingHandSelectPhase
+from .phase.default.action_phase import ActionPhase
+from .phase.default.card_select_phase import CardSelectPhase
+from .phase.default.end_phase import EndPhase
+from .phase.default.roll_phase import RollPhase
+from .phase.default.starting_hand_select_phase import StartingHandSelectPhase
 from .player_agent import PlayerAgent
 from .state.enums import PID
 from .state.game_state import GameState

@@ -86,27 +86,27 @@ class DefaultMode(Mode):
 
     # Initial phase of this mode
     def card_select_phase(self) -> ph.Phase:
-        from .phase.card_select_phase import CardSelectPhase
+        from .phase.default.card_select_phase import CardSelectPhase
         return CardSelectPhase()
 
     def starting_hand_select_phase(self) -> ph.Phase:
-        from .phase.starting_hand_select_phase import StartingHandSelectPhase
+        from .phase.default.starting_hand_select_phase import StartingHandSelectPhase
         return StartingHandSelectPhase()
 
     def roll_phase(self) -> ph.Phase:
-        from .phase.roll_phase import RollPhase
+        from .phase.default.roll_phase import RollPhase
         return RollPhase()
 
     def action_phase(self) -> ph.Phase:
-        from .phase.action_phase import ActionPhase
+        from .phase.default.action_phase import ActionPhase
         return ActionPhase()
 
     def end_phase(self) -> ph.Phase:
-        from .phase.end_phase import EndPhase
+        from .phase.default.end_phase import EndPhase
         return EndPhase()
 
     def game_end_phase(self) -> ph.Phase:
-        from .phase.game_end_phase import GameEndPhase
+        from .phase.default.game_end_phase import GameEndPhase
         return GameEndPhase()
 
     def __hash__(self) -> int:

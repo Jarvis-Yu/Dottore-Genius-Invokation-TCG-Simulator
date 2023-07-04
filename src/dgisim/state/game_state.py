@@ -6,7 +6,7 @@ from .. import mode as md
 from ..action import action as act
 from ..action import action_generator as acg
 from ..effect import effect as eft
-from ..phase import game_end_phase as gep
+from ..phase.default import game_end_phase as gep
 from ..phase import phase as ph
 from ..state import player_state as ps
 
