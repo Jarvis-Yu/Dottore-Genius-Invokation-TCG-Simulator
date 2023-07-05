@@ -13,8 +13,8 @@ from ...helper.quality_of_life import just
 from ...state.enums import PID, ACT
 
 if TYPE_CHECKING:
-    from ...state.game_state import GameState
     from ...action.types import DecidedChoiceType, GivenChoiceType
+    from ...state.game_state import GameState
 
 
 class ActionPhase(ph.Phase):
@@ -415,8 +415,6 @@ class ActionPhase(ph.Phase):
         return ActionGenerator(
             game_state=game_state,
             pid=pid,
-            action=None,
-            instruction=None,
             _choices_helper=self._choices_helper,
             _fill_helper=self._fill_helper,
         )

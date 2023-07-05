@@ -5,11 +5,13 @@ from .. import phase as ph
 
 from ...action.action import *
 from ...action.action_generator import ActionGenerator
+from ...action.enums import ActionType
 from ...dices import ActualDices
 from ...effect.effect import *
 from ...state.enums import PID, ACT
 
 if TYPE_CHECKING:
+    from ...action.types import DecidedChoiceType, GivenChoiceType
     from ...state.game_state import GameState
 
 
@@ -35,9 +37,13 @@ class EndPhase(ph.Phase):
         active_player_id = game_state.get_active_player_id()
         active_player = game_state.get_player(active_player_id)
         other_player = game_state.get_other_player(active_player_id)
-        active_player_deck, new_cards = active_player.get_deck_cards().pick_random_cards(self._CARDS_DRAWN)
+        active_player_deck, new_cards = (
+            active_player.get_deck_cards().pick_random_cards(self._CARDS_DRAWN)
+        )
         active_player_hand = active_player.get_hand_cards() + new_cards
-        other_player_deck, new_cards = other_player.get_deck_cards().pick_random_cards(self._CARDS_DRAWN)
+        other_player_deck, new_cards = (
+            other_player.get_deck_cards().pick_random_cards(self._CARDS_DRAWN)
+        )
         other_player_hand = other_player.get_hand_cards() + new_cards
         return game_state.factory().round(
             new_round
@@ -141,7 +147,8 @@ class EndPhase(ph.Phase):
             action: PlayerAction
     ) -> Optional[GameState]:
         effect_stack = game_state.get_effect_stack()
-        if effect_stack.is_not_empty() and isinstance(effect_stack.peek(), DeathSwapPhaseStartEffect):
+        if (effect_stack.is_not_empty() 
+                and isinstance(effect_stack.peek(), DeathSwapPhaseStartEffect)):
             game_state = game_state.factory().effect_stack(effect_stack.pop()[0]).build()
         if isinstance(action, DeathSwapAction):
             return self._handle_death_swap_action(game_state, pid, action)
@@ -156,10 +163,10 @@ class EndPhase(ph.Phase):
             return super().waiting_for(game_state)
         else:
             return None
-
+ 
     def action_generator(self, game_state: GameState, pid: PID) -> ActionGenerator | None:
-        # TODO
-        raise NotImplementedError
+        assert game_state.death_swapping(pid)
+        return game_state.swap_checker().action_generator(pid)
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, EndPhase)

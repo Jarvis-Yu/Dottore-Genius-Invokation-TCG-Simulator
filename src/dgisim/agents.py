@@ -291,79 +291,19 @@ class RandomAgent(PlayerAgent):
 
     def _action_phase(self, history: list[GameState], pid: PID) -> PlayerAction:
         game_state = history[-1]
-        me = game_state.get_player(pid)
-        active_character = me.just_get_active_character()
-
         phase = game_state.get_phase()
         act_gen = phase.action_generator(game_state, pid)
         assert act_gen is not None
         player_action = self._random_action_generator_chooser(act_gen)
         return player_action
 
-        # death swap
-        if game_state.swap_checker().should_death_swap():
-            swap_action_generator = game_state.swap_checker().action_generator(pid)
-            assert swap_action_generator is not None
-            player_action = self._random_action_generator_chooser(swap_action_generator)
-            return player_action
-
-        # elemental tuning
-        decision = random.random()
-        if decision < 0.3:
-            elem_tuning_generator = game_state.elem_tuning_checker().action_generator(pid)
-            if elem_tuning_generator is not None:
-                player_action = self._random_action_generator_chooser(elem_tuning_generator)
-                return player_action
-
-        # cast skill
-        decision = random.random()
-        if decision < 0.5:
-            skill_action_generator = game_state.skill_checker().action_generator(pid)
-            if skill_action_generator is not None:
-                player_action = self._random_action_generator_chooser(skill_action_generator)
-                return player_action
-
-        # play card
-        decision = random.random()
-        if decision < 0.5:
-            cards = game_state.get_player(pid).get_hand_cards()
-            cards_list = list(cards)
-            random.shuffle(cards_list)
-            action_generator = next(
-                (
-                    act_generator
-                    for act_generator in (
-                        card.action_generator(game_state, pid) for card in cards
-                    )
-                    if act_generator is not None
-                ),
-                None
-            )
-            if action_generator is not None:
-                player_action = self._random_action_generator_chooser(action_generator)
-                return player_action
-
-        # swap
-        decision = random.random()
-        if decision < 0.5:
-            swap_action_generator = game_state.swap_checker().action_generator(pid)
-            if swap_action_generator is not None:
-                player_action = self._random_action_generator_chooser(swap_action_generator)
-                return player_action
-
-        return EndRoundAction()
-
     def _end_phase(self, history: list[GameState], pid: PID) -> PlayerAction:
         game_state = history[-1]
-
-        # death swap
-        if game_state.swap_checker().should_death_swap():
-            swap_action_generator = game_state.swap_checker().action_generator(pid)
-            assert swap_action_generator is not None
-            player_action = self._random_action_generator_chooser(swap_action_generator)
-            return player_action
-
-        raise Exception("NOT REACHED")
+        phase = game_state.get_phase()
+        act_gen = phase.action_generator(game_state, pid)
+        assert act_gen is not None
+        player_action = self._random_action_generator_chooser(act_gen)
+        return player_action
 
     def choose_action(self, history: list[GameState], pid: PID) -> PlayerAction:
         game_state = history[-1]
