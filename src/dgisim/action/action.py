@@ -29,6 +29,7 @@ class PlayerAction:
     def _all_none(cls) -> Self:
         """
         This is just for action generator
+        Sets all fields to None ready to be filled later
         """
         self = cls._empty()
         for field in fields(self):

@@ -5,7 +5,6 @@ from .. import phase as ph
 
 from ...action.action import *
 from ...action.action_generator import ActionGenerator
-from ...action.enums import ActionType
 from ...dices import ActualDices
 from ...effect.effect import *
 from ...state.enums import PID, ACT

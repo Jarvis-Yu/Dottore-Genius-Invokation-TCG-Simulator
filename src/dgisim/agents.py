@@ -265,7 +265,12 @@ class RandomAgent(PlayerAgent):
             history: list[GameState],
             pid: PID
     ) -> PlayerAction:
-        return CharacterSelectAction(char_id=random.randint(1, 3))
+        game_state = history[-1]
+        phase = game_state.get_phase()
+        act_gen = phase.action_generator(game_state, pid)
+        assert act_gen is not None
+        player_action = self._random_action_generator_chooser(act_gen)
+        return player_action
 
     def _roll_phase(self, history: list[GameState], pid: PID) -> PlayerAction:
         raise Exception("No Action Defined")

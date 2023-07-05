@@ -1,4 +1,5 @@
 from __future__ import annotations
+from dataclasses import replace
 from typing import Optional, TYPE_CHECKING
 
 from .. import phase as ph
@@ -8,6 +9,7 @@ from ...action.action_generator import ActionGenerator
 from ...state.enums import PID, ACT
 
 if TYPE_CHECKING:
+    from ...action.types import DecidedChoiceType, GivenChoiceType
     from ...state.game_state import GameState
 
 
@@ -73,9 +75,42 @@ class StartingHandSelectPhase(ph.Phase):
         else:
             raise Exception("Unknown Game State to process")
 
+    @classmethod
+    def _choices_helper(cls, action_generator: ActionGenerator) -> GivenChoiceType:
+        assert not action_generator.filled()
+        game_state = action_generator.game_state
+        pid = action_generator.pid
+        action = action_generator.action
+        assert type(action) is CharacterSelectAction and action.char_id is None
+        characters = game_state.get_player(pid).get_characters()
+        return tuple(character.get_id() for character in characters)
+
+    @classmethod
+    def _fill_helper(
+        cls,
+        action_generator: ActionGenerator,
+        player_choice: DecidedChoiceType,
+    ) -> ActionGenerator:
+        assert not action_generator.filled()
+        action = action_generator.action
+        assert type(action) is CharacterSelectAction and action.char_id is None
+        assert isinstance(player_choice, int)
+        return replace(
+            action_generator,
+            action=replace(
+                action,
+                char_id=player_choice,
+            )
+        )
+
     def action_generator(self, game_state: GameState, pid: PID) -> ActionGenerator | None:
-        # TODO
-        raise NotImplementedError
+        return ActionGenerator(
+            game_state=game_state,
+            pid=pid,
+            action=CharacterSelectAction._all_none(),
+            _choices_helper=self._choices_helper,
+            _fill_helper=self._fill_helper,
+        )
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, StartingHandSelectPhase)
