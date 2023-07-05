@@ -294,6 +294,12 @@ class RandomAgent(PlayerAgent):
         me = game_state.get_player(pid)
         active_character = me.just_get_active_character()
 
+        phase = game_state.get_phase()
+        act_gen = phase.action_generator(game_state, pid)
+        assert act_gen is not None
+        player_action = self._random_action_generator_chooser(act_gen)
+        return player_action
+
         # death swap
         if game_state.swap_checker().should_death_swap():
             swap_action_generator = game_state.swap_checker().action_generator(pid)

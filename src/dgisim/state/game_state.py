@@ -11,6 +11,7 @@ from ..phase import phase as ph
 from ..state import player_state as ps
 
 from ..action.action import PlayerAction
+from ..card.card import Card
 from ..character.character import Character
 from ..character.character_skill_enum import CharacterSkill
 from ..dices import ActualDices
@@ -824,7 +825,7 @@ class ElementalTuningChecker:
         assert type(action) is act.ElementalTuningAction
 
         if action.card is None:
-            assert issubclass(player_choice, cd.Card)  # type: ignore
+            assert issubclass(player_choice, Card)  # type: ignore
             return replace(
                 action_generator,
                 action=replace(action, card=player_choice)
