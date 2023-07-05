@@ -398,11 +398,7 @@ class ActionPhase(ph.Phase):
             assert game_state.elem_tuning_checker().tunable(pid)
             return just(game_state.elem_tuning_checker().action_generator(pid))
         elif player_choice is ActionType.END_ROUND:
-            return ActionGenerator(
-                game_state=game_state,
-                pid=pid,
-                action=EndRoundAction(),
-            )
+            return ActionGenerator(game_state=game_state, pid=pid, action=EndRoundAction())
         else:
             action_type_name = ActionType.__name__
             if isinstance(player_choice, ActionType):

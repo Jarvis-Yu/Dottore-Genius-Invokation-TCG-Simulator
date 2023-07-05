@@ -255,10 +255,11 @@ class RandomAgent(PlayerAgent):
 
     def _card_select_phase(self, history: list[GameState], pid: PID) -> PlayerAction:
         game_state = history[-1]
-        _, selected_cards = game_state.get_player(
-            pid
-        ).get_hand_cards().pick_random_cards(self._NUM_PICKED_CARDS)
-        return CardSelectAction(selected_cards=selected_cards)
+        phase = game_state.get_phase()
+        act_gen = phase.action_generator(game_state, pid)
+        assert act_gen is not None
+        player_action = self._random_action_generator_chooser(act_gen)
+        return player_action
 
     def _starting_hand_select_phase(
             self,
@@ -289,6 +290,9 @@ class RandomAgent(PlayerAgent):
                                     + f"{action_generator.dices_available()} at game_state:"
                                     + f"{action_generator.game_state}")
                 choice = optional_choice
+                action_generator = action_generator.choose(choice)
+            elif isinstance(choices, Cards):
+                _, choice = choices.pick_random_cards(random.randint(0, choices.num_cards()))
                 action_generator = action_generator.choose(choice)
             else:
                 raise NotImplementedError

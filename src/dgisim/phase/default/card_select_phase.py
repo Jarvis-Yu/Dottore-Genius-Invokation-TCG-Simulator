@@ -1,13 +1,16 @@
 from __future__ import annotations
+from dataclasses import replace
 from typing import Optional, TYPE_CHECKING
 
 from .. import phase as ph
 
 from ...action.action import CardSelectAction, PlayerAction, EndRoundAction
 from ...action.action_generator import ActionGenerator
+from ...action.enums import ActionType
 from ...state.enums import PID, ACT
 
 if TYPE_CHECKING:
+    from ...action.types import DecidedChoiceType, GivenChoiceType
     from ...state.game_state import GameState
     from ...state.player_state import PlayerState
 
@@ -101,9 +104,69 @@ class CardSelectPhase(ph.Phase):
         else:
             raise Exception("Unknown Game State to process")
 
+    @classmethod
+    def _choices_helper(cls, action_generator: ActionGenerator) -> GivenChoiceType:
+        return (ActionType.SELECT_CARDS, ActionType.END_ROUND)
+
+    @classmethod
+    def _fill_helper(
+        cls,
+        action_generator: ActionGenerator,
+        player_choice: DecidedChoiceType,
+    ) -> ActionGenerator:
+        game_state = action_generator.game_state
+        pid = action_generator.pid
+
+        # TODO: move to more appropriate location
+        def tmp_choices_helper(action_generator: ActionGenerator) -> GivenChoiceType:
+            assert not action_generator.filled()
+            assert type(action_generator.action) is CardSelectAction
+            game_state = action_generator.game_state
+            pid = action_generator.pid
+            return game_state.get_player(pid).get_hand_cards()
+
+        # TODO: move to more appropriate location
+        def tmp_fill_helper(
+                action_generator: ActionGenerator,
+                player_choice: DecidedChoiceType
+        ) -> ActionGenerator:
+            assert not action_generator.filled()
+            assert type(action_generator.action) is CardSelectAction
+            from ...card.cards import Cards
+            assert isinstance(player_choice, Cards)
+            return replace(
+                action_generator,
+                action=replace(
+                    action_generator.action,
+                    selected_cards=player_choice,
+                )
+            )
+
+        if player_choice is ActionType.SELECT_CARDS:
+            return ActionGenerator(
+                game_state=game_state,
+                pid = pid,
+                action=CardSelectAction._all_none(),
+                _choices_helper=tmp_choices_helper,
+                _fill_helper=tmp_fill_helper,
+            )
+        elif player_choice is ActionType.END_ROUND:
+            return ActionGenerator(game_state=game_state, pid=pid, action=EndRoundAction())
+        else:
+            action_type_name = ActionType.__name__
+            if isinstance(player_choice, ActionType):
+                raise Exception(f"Unhandled player {action_type_name} {player_choice}")
+            else:
+                raise TypeError(f"Unexpected player choice {player_choice} where"
+                                + f"where {action_type_name} is expected")
+
     def action_generator(self, game_state: GameState, pid: PID) -> ActionGenerator | None:
-        # TODO
-        raise NotImplementedError
+        return ActionGenerator(
+            game_state=game_state,
+            pid=pid,
+            _choices_helper=self._choices_helper,
+            _fill_helper=self._fill_helper,
+        )
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, CardSelectPhase)
