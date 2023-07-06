@@ -1,5 +1,6 @@
 from __future__ import annotations
 import random
+from collections import Counter
 from enum import Enum
 from typing import Optional, Iterator, Iterable, TypeVar, Union
 from typing_extensions import Self, override, TYPE_CHECKING
@@ -54,6 +55,18 @@ class Dices:
     def elems(self) -> Iterable[Element]:
         return self._dices.keys()
 
+    def pick_random_dices(self, num: int) -> tuple[Self, Self]:
+        """
+        Returns the left dices and selected dices
+        """
+        num = min(self.num_dices(), num)
+        if num == 0:
+            return (self, type(self).from_empty())
+        picked_dices: dict[Element, int] = dict(Counter(
+            random.sample(list(self._dices.keys()), counts=self._dices.values(), k=num)
+        ))
+        return type(self)(self._dices - picked_dices), type(self)(picked_dices)
+
     def __contains__(self, elem: Element) -> bool:
         return (
             elem in self._LEGAL_ELEMS
@@ -98,6 +111,13 @@ class Dices:
             if num != 0
         ])
         return existing_dices
+
+    @classmethod
+    def from_empty(cls) -> Self:
+        return cls(dict([
+            (elem, 0)
+            for elem in cls._LEGAL_ELEMS
+        ]))
 
 
 _PURE_ELEMS = frozenset({
@@ -239,13 +259,6 @@ class ActualDices(Dices):
                 return None
             answer[Element.OMNI] += omni_required
         return ActualDices(answer)
-
-    @classmethod
-    def from_empty(cls) -> ActualDices:
-        return ActualDices(dict([
-            (elem, 0)
-            for elem in ActualDices._LEGAL_ELEMS
-        ]))
 
     @classmethod
     def from_random(cls, size: int) -> ActualDices:

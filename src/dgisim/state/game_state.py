@@ -11,6 +11,7 @@ from ..phase import phase as ph
 from ..state import player_state as ps
 
 from ..action.action import PlayerAction
+from ..card.card import Card
 from ..character.character import Character
 from ..character.character_skill_enum import CharacterSkill
 from ..dices import ActualDices
@@ -22,7 +23,7 @@ from ..effect.structs import StaticTarget
 from ..element.element import Element
 from ..event.event import *
 from ..helper.level_print import level_print, level_print_single, INDENT
-from ..helper.quality_of_life import case_val
+from ..helper.quality_of_life import case_val, just
 from .enums import PID
 from ..status.status_processing import StatusProcessing
 from ..status.enums import PREPROCESSABLES
@@ -54,6 +55,7 @@ class GameState:
         self._effect_stack = effect_stack
 
         # checkers
+        self._card_checker = CardChecker(self)
         self._swap_checker = SwapChecker(self)
         self._skill_checker = SkillChecker(self)
         self._elem_tuning_checker = ElementalTuningChecker(self)
@@ -118,6 +120,20 @@ class GameState:
             return self._player1
         else:
             raise Exception("player_id unknown")
+
+    def death_swapping(self, player_id: None | PID = None) -> bool:
+        from ..effect.effect import DeathSwapPhaseStartEffect
+        return (
+            self._effect_stack.is_not_empty()
+            and isinstance(self._effect_stack.peek(), DeathSwapPhaseStartEffect)
+            and (
+                player_id is None
+                or self.get_player(player_id).get_phase().is_action_phase()
+            )
+        )
+
+    def card_checker(self) -> CardChecker:
+        return self._card_checker
 
     def swap_checker(self) -> SwapChecker:
         return self._swap_checker
@@ -323,99 +339,24 @@ class GameStateFactory:
         )
 
 
-class SwapChecker:
+class CardChecker:
     def __init__(self, game_state: GameState) -> None:
         self._game_state = game_state
 
-    def _choices_helper(
-            self,
-            action_generator: acg.ActionGenerator,
-    ) -> GivenChoiceType:
-        game_state = self._game_state
-        pid = action_generator.pid
+    def usable(self, pid: PID, card_type: type[Card]) -> None | acg.ActionGenerator:
+        return card_type.action_generator(self._game_state, pid)
 
-        action = action_generator.action
-        if not action_generator._action_filled():
-            assert type(action) is act.SwapAction \
-                or type(action) is act.DeathSwapAction
-            swappable_char_ids = [
-                char.get_id()
-                for char in game_state.get_player(pid).get_characters()
-                if self.swap_details(pid, char.get_id()) is not None
-            ]
-            return tuple(
-                char_id
-                for char_id in swappable_char_ids
-            )
-
-        assert type(action) is act.SwapAction
-        instruction = action_generator.instruction
-        assert type(instruction) is act.DiceOnlyInstruction
-        if instruction.dices is None:
-            swap_details = self.swap_details(pid, action.char_id)
-            assert swap_details is not None
-            _, dices_cost = swap_details
-            assert dices_cost is not None
-            return dices_cost
-
-        raise Exception(
-            "Not Reached! Should be called when there is something to fill. action_generator:\n"
-            + f"{action_generator}"
+    def playable(self, pid: PID) -> bool:
+        """ Returns true if any card is playable """
+        return any(
+            card_type.strictly_usable(self._game_state, pid)
+            for card_type in self._game_state.get_player(pid).get_hand_cards()
         )
 
-    def _fill_helper(
-        self,
-        action_generator: acg.ActionGenerator,
-        player_choice: DecidedChoiceType,
-    ) -> acg.ActionGenerator:
-        action = action_generator.action
-        assert type(action) is act.SwapAction \
-            or type(action) is act.DeathSwapAction
-        if action.char_id is None:
-            assert type(player_choice) is int
-            return replace(
-                action_generator,
-                action=replace(action, char_id=player_choice),
-            )
 
-        assert action_generator._action_filled()
-        assert type(action) is act.SwapAction
-
-        instruction = action_generator.instruction
-        assert type(instruction) is act.DiceOnlyInstruction
-        if instruction.dices is None:
-            assert isinstance(player_choice, ActualDices)
-            return replace(
-                action_generator,
-                instruction=replace(instruction, dices=player_choice),
-            )
-
-        raise Exception("Not Reached!")
-
-    def action_generator(
-            self,
-            pid: PID,
-    ) -> None | acg.ActionGenerator:
-        if not self.swappable(pid):
-            return None
-        if self.should_death_swap():
-            return acg.ActionGenerator(
-                game_state=self._game_state,
-                pid=pid,
-                action=act.DeathSwapAction._all_none(),
-                instruction=None,
-                _choices_helper=self._choices_helper,
-                _fill_helper=self._fill_helper,
-            )
-        else:
-            return acg.ActionGenerator(
-                game_state=self._game_state,
-                pid=pid,
-                action=act.SwapAction._all_none(),
-                instruction=act.DiceOnlyInstruction._all_none(),
-                _choices_helper=self._choices_helper,
-                _fill_helper=self._fill_helper,
-            )
+class SwapChecker:
+    def __init__(self, game_state: GameState) -> None:
+        self._game_state = game_state
 
     def should_death_swap(self) -> bool:
         effect_stack = self._game_state.get_effect_stack()
@@ -426,6 +367,7 @@ class SwapChecker:
             self,
             pid: PID,
     ) -> bool:
+        """ Returns true if a swap to any character is available """
         return any(
             self.swap_details(pid, char.get_id()) is not None
             for char in self._game_state.get_player(pid).get_characters()
@@ -529,87 +471,6 @@ class SkillChecker:
     def __init__(self, game_state: GameState) -> None:
         self._game_state = game_state
 
-    def _choices_helper(
-            self,
-            action_generator: acg.ActionGenerator,
-    ) -> GivenChoiceType:
-        game_state = self._game_state
-        pid = action_generator.pid
-        active_character = game_state.get_player(pid).just_get_active_character()
-
-        action = action_generator.action
-        assert type(action) is act.SkillAction
-        if action.skill is None:
-            skills = active_character.skills()
-            return tuple(
-                skill
-                for skill in skills
-                if self.usable(pid, active_character.get_id(), skill) is not None
-            )
-
-        assert action_generator._action_filled()
-        instruction = action_generator.instruction
-        assert type(instruction) is act.DiceOnlyInstruction
-        if instruction.dices is None:
-            retval = self.usable(pid, active_character.get_id(), action.skill)
-            assert retval is not None
-            _, dices = retval
-            return dices
-
-        raise Exception(
-            "Not Reached! Should be called when there is something to fill. action_generator:\n"
-            + f"{action_generator}"
-        )
-
-    def _fill_helper(
-        self,
-        action_generator: acg.ActionGenerator,
-        player_choice: DecidedChoiceType,
-    ) -> acg.ActionGenerator:
-        action = action_generator.action
-        assert type(action) is act.SkillAction
-        if action.skill is None:
-            assert type(player_choice) is CharacterSkill
-            return replace(
-                action_generator,
-                action=replace(action, skill=player_choice),
-            )
-
-        instruction = action_generator.instruction
-        assert type(instruction) is act.DiceOnlyInstruction
-        if instruction.dices is None:
-            assert type(player_choice) is ActualDices
-            return replace(
-                action_generator,
-                instruction=replace(instruction, dices=player_choice),
-            )
-
-        raise Exception("Not Reached!")
-
-    def action_generator(
-            self,
-            pid: PID,
-    ) -> None | acg.ActionGenerator:
-        active_character = self._game_state.get_player(pid).just_get_active_character()
-        if not active_character.can_cast_skill():
-            return None
-
-        has_castable_skill = any(
-            self.usable(pid, active_character.get_id(), skill) is not None
-            for skill in active_character.skills()
-        )
-        if not has_castable_skill:
-            return None
-
-        return acg.ActionGenerator(
-            game_state=self._game_state,
-            pid=pid,
-            action=act.SkillAction._all_none(),
-            instruction=act.DiceOnlyInstruction._all_none(),
-            _choices_helper=self._choices_helper,
-            _fill_helper=self._fill_helper,
-        )
-
     def usable(
             self,
             pid: PID,
@@ -645,6 +506,16 @@ class SkillChecker:
             return new_game_state, skill_event.dices_cost
         else:
             return None
+
+    def skillable(
+            self,
+            pid: PID
+    ) -> bool:
+        active_character_id = self._game_state.get_player(pid).just_get_active_character().get_id()
+        return any(
+            self.usable(pid, active_character_id, skill_type)
+            for skill_type in CharacterSkill
+        )
 
     def valid_action(
             self,
@@ -703,68 +574,8 @@ class ElementalTuningChecker:
             and (elem is None or dices[elem] > 0)
         )
 
-    def _choices_helper(
-            self,
-            action_generator: acg.ActionGenerator,
-    ) -> GivenChoiceType:
-        game_state = self._game_state
-        pid = action_generator.pid
-
-        action = action_generator.action
-        assert type(action) is act.ElementalTuningAction
-
-        if action.card is None:
-            return tuple(card for card in game_state.get_player(pid).get_hand_cards())
-
-        active_character = game_state.get_player(pid).just_get_active_character()
-        if action.dice_elem is None:
-            return tuple(
-                elem
-                for elem in game_state.get_player(pid).get_dices()
-                if elem is not Element.OMNI and elem is not active_character.element()
-            )
-
-        raise Exception(
-            "Not Reached! Should be called when there is something to fill. action_generator:\n"
-            + f"{action_generator}"
-        )
-
-    def _fill_helper(
-        self,
-        action_generator: acg.ActionGenerator,
-        player_choice: DecidedChoiceType,
-    ) -> acg.ActionGenerator:
-        action = action_generator.action
-        assert type(action) is act.ElementalTuningAction
-
-        if action.card is None:
-            assert issubclass(player_choice, cd.Card)  # type: ignore
-            return replace(
-                action_generator,
-                action=replace(action, card=player_choice)
-            )
-
-        if action.dice_elem is None:
-            assert type(player_choice) is Element
-            return replace(
-                action_generator,
-                action=replace(action, dice_elem=player_choice)
-            )
-
-        raise Exception("Not Reached!")
-
-    def action_generator(
-            self,
-            pid: PID,
-    ) -> None | acg.ActionGenerator:
-        if not self.usable(pid):
-            return None
-
-        return acg.ActionGenerator(
-            game_state=self._game_state,
-            pid=pid,
-            action=act.ElementalTuningAction._all_none(),
-            instruction=None,
-            _choices_helper=self._choices_helper,
-            _fill_helper=self._fill_helper,
-        )
+    def tunable(self, pid: PID) -> bool:
+        """ Returns true if elemental tuning is available """
+        active_character_elem = self._game_state.get_player(
+            pid).just_get_active_character().element()
+        return self.usable(pid, active_character_elem)

@@ -91,7 +91,7 @@ dictionary, and discover game states on different 'game branches' being actually
 - [ ] Implement player action choices provider
   - [x] all action phase choices provider
   - [x] all end phase choices provider
-  - [ ] Other choices provider (trivial for now)
+  - [ ] Other choices provider &larr; _WIP_
 - [ ] Implement greedy player agent for testing purposes
 
 > Just in case you don't know, **_WIP_** means "work in progress".

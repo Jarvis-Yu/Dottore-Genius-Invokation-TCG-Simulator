@@ -94,6 +94,9 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm.player_step()  # P1 END
         gsm.player_step()  # p2 death swap
         gsm.auto_step()
+        a1.inject_action(EndRoundAction())  # skip roll phase
+        a2.inject_action(EndRoundAction())
+        gsm.step_until_phase(base_game.get_mode().action_phase())
 
         game_state = gsm.get_game_state()
         p1_summons = game_state.get_player1().get_summons()
@@ -106,12 +109,12 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         self.assertEqual(p2_c1.get_hp(), 0)
 
         # after second end round
-        a1.inject_action(EndRoundAction())
+        a1.inject_action(EndRoundAction())  # skip action phase
         a2.inject_action(EndRoundAction())
-
-        gsm.player_step()
-        gsm.player_step()
-        gsm.auto_step()
+        gsm.step_until_phase(game_state.get_mode().end_phase())
+        a1.inject_action(EndRoundAction())  # skip roll phase
+        a2.inject_action(EndRoundAction())
+        gsm.step_until_phase(game_state.get_mode().action_phase())
 
         game_state = gsm.get_game_state()
         p1_summons = game_state.get_player1().get_summons()

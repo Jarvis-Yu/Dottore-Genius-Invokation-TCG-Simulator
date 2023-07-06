@@ -3,6 +3,7 @@ from typing import Optional, Iterable, TYPE_CHECKING
 
 from .action.action import *
 from .action.action_generator import *
+from .action.action_generator_generator import *
 from .action.types import DecidedChoiceType
 from .card.card import *
 from .character.character_skill_enum import CharacterSkill
@@ -33,13 +34,13 @@ class LazyAgent(PlayerAgent):
         if isinstance(curr_phase, CardSelectPhase):
             _, selected_cards = game_state.get_player(
                 pid).get_hand_cards().pick_random_cards(self._NUM_PICKED_CARDS)
-            return CardSelectAction(selected_cards=selected_cards)
+            return CardsSelectAction(selected_cards=selected_cards)
 
         elif isinstance(curr_phase, StartingHandSelectPhase):
             return CharacterSelectAction(char_id=1)
 
         elif isinstance(curr_phase, RollPhase):
-            raise Exception("No Action Defined")
+            return EndRoundAction()
 
         elif isinstance(curr_phase, ActionPhase):
             return EndRoundAction()
@@ -58,11 +59,14 @@ class PuppetAgent(PlayerAgent):
     def inject_action(self, action: PlayerAction) -> None:
         self._actions.append(action)
 
+    def inject_front_action(self, action: PlayerAction) -> None:
+        self._actions.insert(0, action)
+
     def inject_actions(self, actions: list[PlayerAction]) -> None:
         self._actions += actions
 
     def choose_action(self, history: list[GameState], pid: PID) -> PlayerAction:
-        assert self._actions
+        assert self._actions, f"no action at game state:\b{history[-1]}"
         return self._actions.pop(0)
 
     def clear(self) -> None:
@@ -82,7 +86,7 @@ class HardCodedRandomAgent(PlayerAgent):
         if isinstance(curr_phase, CardSelectPhase):
             _, selected_cards = game_state.get_player(
                 pid).get_hand_cards().pick_random_cards(self._NUM_PICKED_CARDS)
-            return CardSelectAction(selected_cards=selected_cards)
+            return CardsSelectAction(selected_cards=selected_cards)
 
         elif isinstance(curr_phase, StartingHandSelectPhase):
             return CharacterSelectAction(char_id=1)
@@ -255,20 +259,31 @@ class RandomAgent(PlayerAgent):
 
     def _card_select_phase(self, history: list[GameState], pid: PID) -> PlayerAction:
         game_state = history[-1]
-        _, selected_cards = game_state.get_player(
-            pid
-        ).get_hand_cards().pick_random_cards(self._NUM_PICKED_CARDS)
-        return CardSelectAction(selected_cards=selected_cards)
+        phase = game_state.get_phase()
+        act_gen = phase.action_generator(game_state, pid)
+        assert act_gen is not None
+        player_action = self._random_action_generator_chooser(act_gen)
+        return player_action
 
     def _starting_hand_select_phase(
             self,
             history: list[GameState],
             pid: PID
     ) -> PlayerAction:
-        return CharacterSelectAction(char_id=random.randint(1, 3))
+        game_state = history[-1]
+        phase = game_state.get_phase()
+        act_gen = phase.action_generator(game_state, pid)
+        assert act_gen is not None
+        player_action = self._random_action_generator_chooser(act_gen)
+        return player_action
 
     def _roll_phase(self, history: list[GameState], pid: PID) -> PlayerAction:
-        raise Exception("No Action Defined")
+        game_state = history[-1]
+        phase = game_state.get_phase()
+        act_gen = phase.action_generator(game_state, pid)
+        assert act_gen is not None
+        player_action = self._random_action_generator_chooser(act_gen)
+        return player_action
 
     def _random_action_generator_chooser(self, action_generator: ActionGenerator) -> PlayerAction:
         while not action_generator.filled():
@@ -285,79 +300,31 @@ class RandomAgent(PlayerAgent):
                                     + f"{action_generator.game_state}")
                 choice = optional_choice
                 action_generator = action_generator.choose(choice)
+            elif isinstance(choices, Cards):
+                _, choice = choices.pick_random_cards(random.randint(0, choices.num_cards()))
+                action_generator = action_generator.choose(choice)
+            elif isinstance(choices, ActualDices):
+                _, choice = choices.pick_random_dices(random.randint(0, choices.num_dices()))
+                action_generator = action_generator.choose(choice)
             else:
                 raise NotImplementedError
         return action_generator.generate_action()
 
     def _action_phase(self, history: list[GameState], pid: PID) -> PlayerAction:
         game_state = history[-1]
-        me = game_state.get_player(pid)
-        active_character = me.just_get_active_character()
-
-        # death swap
-        if game_state.swap_checker().should_death_swap():
-            swap_action_generator = game_state.swap_checker().action_generator(pid)
-            assert swap_action_generator is not None
-            player_action = self._random_action_generator_chooser(swap_action_generator)
-            return player_action
-
-        # elemental tuning
-        decision = random.random()
-        if decision < 0.3:
-            elem_tuning_generator = game_state.elem_tuning_checker().action_generator(pid)
-            if elem_tuning_generator is not None:
-                player_action = self._random_action_generator_chooser(elem_tuning_generator)
-                return player_action
-
-        # cast skill
-        decision = random.random()
-        if decision < 0.5:
-            skill_action_generator = game_state.skill_checker().action_generator(pid)
-            if skill_action_generator is not None:
-                player_action = self._random_action_generator_chooser(skill_action_generator)
-                return player_action
-
-        # play card
-        decision = random.random()
-        if decision < 0.5:
-            cards = game_state.get_player(pid).get_hand_cards()
-            cards_list = list(cards)
-            random.shuffle(cards_list)
-            action_generator = next(
-                (
-                    act_generator
-                    for act_generator in (
-                        card.action_generator(game_state, pid) for card in cards
-                    )
-                    if act_generator is not None
-                ),
-                None
-            )
-            if action_generator is not None:
-                player_action = self._random_action_generator_chooser(action_generator)
-                return player_action
-
-        # swap
-        decision = random.random()
-        if decision < 0.5:
-            swap_action_generator = game_state.swap_checker().action_generator(pid)
-            if swap_action_generator is not None:
-                player_action = self._random_action_generator_chooser(swap_action_generator)
-                return player_action
-
-        return EndRoundAction()
+        phase = game_state.get_phase()
+        act_gen = phase.action_generator(game_state, pid)
+        assert act_gen is not None
+        player_action = self._random_action_generator_chooser(act_gen)
+        return player_action
 
     def _end_phase(self, history: list[GameState], pid: PID) -> PlayerAction:
         game_state = history[-1]
-
-        # death swap
-        if game_state.swap_checker().should_death_swap():
-            swap_action_generator = game_state.swap_checker().action_generator(pid)
-            assert swap_action_generator is not None
-            player_action = self._random_action_generator_chooser(swap_action_generator)
-            return player_action
-
-        raise Exception("NOT REACHED")
+        phase = game_state.get_phase()
+        act_gen = phase.action_generator(game_state, pid)
+        assert act_gen is not None
+        player_action = self._random_action_generator_chooser(act_gen)
+        return player_action
 
     def choose_action(self, history: list[GameState], pid: PID) -> PlayerAction:
         game_state = history[-1]
@@ -419,7 +386,7 @@ class CustomChoiceAgent(RandomAgent):
 
         # death swap
         if game_state.swap_checker().should_death_swap():
-            swap_action_generator = game_state.swap_checker().action_generator(pid)
+            swap_action_generator = SwapActGenGenerator.action_generator(game_state, pid)
             assert swap_action_generator is not None
             self._prompt_handler("info", "Death Swap Action")
             player_action = self._random_action_generator_chooser(swap_action_generator)
@@ -448,21 +415,21 @@ class CustomChoiceAgent(RandomAgent):
                 player_action = self._random_action_generator_chooser(action_generator)
 
             elif choice == "Skill":
-                action_generator = game_state.skill_checker().action_generator(pid)
+                action_generator = SkillActGenGenerator.action_generator(game_state, pid)
                 if action_generator is None:
                     self._prompt_handler("info", "No skill available")
                     continue
                 player_action = self._random_action_generator_chooser(action_generator)
 
             elif choice == "Swap":
-                action_generator = game_state.swap_checker().action_generator(pid)
+                action_generator = SwapActGenGenerator.action_generator(game_state, pid)
                 if action_generator is None:
                     self._prompt_handler("info", "Swapping is unavailable")
                     continue
                 player_action = self._random_action_generator_chooser(action_generator)
 
             elif choice == "Elemental Tuning":
-                action_generator = game_state.elem_tuning_checker().action_generator(pid)
+                action_generator = ElemTuningActGenGenerator.action_generator(game_state, pid)
                 if action_generator is None:
                     self._prompt_handler("info", "There's no dice or card for tuning")
                     continue
@@ -483,7 +450,7 @@ class CustomChoiceAgent(RandomAgent):
 
         # death swap
         if game_state.swap_checker().should_death_swap():
-            swap_action_generator = game_state.swap_checker().action_generator(pid)
+            swap_action_generator = SwapActGenGenerator.action_generator(game_state, pid)
             assert swap_action_generator is not None
             self._prompt_handler("info", "Death Swap Action")
             player_action = self._random_action_generator_chooser(swap_action_generator)

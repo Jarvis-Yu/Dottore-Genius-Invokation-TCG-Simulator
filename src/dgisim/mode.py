@@ -12,12 +12,20 @@ from .helper.level_print import level_print_single
 
 class Mode:
 
+    _CARD_REDRAW_CHANCES = 1
+    _DICE_REROLL_CHANCES = 1
     _HAND_CARD_LIMIT = 10
     _ROUND_LIMIT = 15
     _SUMMONS_LIMIT = 4
     _SUPPORTS_LIMIT = 4
     _SWAP_COST = AbstractDices({Element.ANY: 1})
     _SWAP_SPEED = EventSpeed.COMBAT_ACTION
+
+    def card_redraw_chances(self) -> int:
+        return self._CARD_REDRAW_CHANCES
+
+    def dice_reroll_chances(self) -> int:
+        return self._DICE_REROLL_CHANCES
 
     def round_limit(self) -> int:
         return self._ROUND_LIMIT

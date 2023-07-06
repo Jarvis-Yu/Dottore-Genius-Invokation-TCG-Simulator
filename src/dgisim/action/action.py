@@ -29,6 +29,7 @@ class PlayerAction:
     def _all_none(cls) -> Self:
         """
         This is just for action generator
+        Sets all fields to None ready to be filled later
         """
         self = cls._empty()
         for field in fields(self):
@@ -71,7 +72,7 @@ class PlayerAction:
 
 
 @dataclass(frozen=True, kw_only=True)
-class CardSelectAction(PlayerAction):
+class CardsSelectAction(PlayerAction):
     selected_cards: Cards
 
     def num_cards(self) -> int:
@@ -86,6 +87,21 @@ class CardSelectAction(PlayerAction):
         cards = '; '.join(str(self.selected_cards).split('\n'))
         return f"{name}[{cards}]"
 
+@dataclass(frozen=True, kw_only=True)
+class DicesSelectAction(PlayerAction):
+    selected_dices: ActualDices
+
+    def num_cards(self) -> int:
+        return self.selected_dices.num_dices()
+
+    @classmethod
+    def _empty(cls) -> Self:
+        return cls(selected_dices=ActualDices({}))
+
+    def __str__(self) -> str:
+        name = self.__class__.__name__
+        dices = '; '.join(str(self.selected_dices).split('\n'))
+        return f"{name}[{dices}]"
 
 @dataclass(frozen=True, kw_only=True)
 class CharacterSelectAction(PlayerAction):

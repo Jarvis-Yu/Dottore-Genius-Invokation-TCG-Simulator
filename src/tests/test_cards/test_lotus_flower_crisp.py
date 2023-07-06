@@ -4,7 +4,7 @@ from src.tests.test_cards.common_imports import *
 
 
 class TestLotusFlowerCrisps(unittest.TestCase):
-    def testCardNormalUsage(self):
+    def test_card_normal_usage(self):
         base_game = ACTION_TEMPLATE.factory().f_player1(
             lambda p: p.factory().hand_cards(
                 Cards({LotusFlowerCrisp: 2})
@@ -83,7 +83,10 @@ class TestLotusFlowerCrisps(unittest.TestCase):
         # test shield disappears after round ends
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(low_health_game_state, a1, a2)
-        a1.inject_action(EndRoundAction())
+        # End Action Phase
+        a1.inject_action(EndRoundAction()) # skip action phase
+        a2.inject_action(EndRoundAction())
+        a1.inject_action(EndRoundAction()) # skip roll phase
         a2.inject_action(EndRoundAction())
         gsm.step_until_next_phase()
         gsm.step_until_phase(low_health_game_state.get_mode().action_phase())

@@ -27,6 +27,7 @@ class PlayerState:
         summons: Summons,
         supports: Supports,
         card_redraw_chances: int,
+        dice_reroll_chances: int,
         dices: ActualDices,
         hand_cards: cds.Cards,
         deck_cards: cds.Cards,
@@ -35,6 +36,7 @@ class PlayerState:
         # REMINDER: don't forget to update factory when adding new fields
         self._phase = phase
         self._card_redraw_chances = card_redraw_chances
+        self._dice_reroll_chances = dice_reroll_chances
         self._characters = characters
         self._combat_statuses = combat_statuses
         self._summons = summons
@@ -52,6 +54,9 @@ class PlayerState:
 
     def get_card_redraw_chances(self) -> int:
         return self._card_redraw_chances
+
+    def get_dice_reroll_chances(self) -> int:
+        return self._dice_reroll_chances
 
     def get_characters(self) -> Characters:
         return self._characters
@@ -114,6 +119,7 @@ class PlayerState:
         return PlayerState(
             phase=ACT.PASSIVE_WAIT_PHASE,
             card_redraw_chances=0,
+            dice_reroll_chances=0,
             characters=Characters.from_default(
                 tuple([char.from_default(i + 1) for i, char in enumerate(chars)][:3])
             ),
@@ -181,6 +187,7 @@ class PlayerStateFactory:
     def __init__(self, player_state: PlayerState) -> None:
         self._phase = player_state.get_phase()
         self._card_redraw_chances = player_state.get_card_redraw_chances()
+        self._dice_reroll_chances = player_state.get_dice_reroll_chances()
         self._characters = player_state.get_characters()
         self._combat_statuses = player_state.get_combat_statuses()
         self._summons = player_state.get_summons()
@@ -197,6 +204,16 @@ class PlayerStateFactory:
     def card_redraw_chances(self, chances: int) -> PlayerStateFactory:
         self._card_redraw_chances = chances
         return self
+
+    def f_card_redraw_chances(self, f: Callable[[int], int]) -> PlayerStateFactory:
+        return self.card_redraw_chances(f(self._card_redraw_chances))
+
+    def dice_reroll_chances(self, chances: int) -> PlayerStateFactory:
+        self._dice_reroll_chances = chances
+        return self
+
+    def f_dice_reroll_chances(self, f: Callable[[int], int]) -> PlayerStateFactory:
+        return self.dice_reroll_chances(f(self._dice_reroll_chances))
 
     def characters(self, characters: Characters) -> PlayerStateFactory:
         self._characters = characters
@@ -256,6 +273,7 @@ class PlayerStateFactory:
         return PlayerState(
             phase=self._phase,
             card_redraw_chances=self._card_redraw_chances,
+            dice_reroll_chances=self._dice_reroll_chances,
             characters=self._characters,
             combat_statuses=self._combat_statuses,
             summons=self._summons,
