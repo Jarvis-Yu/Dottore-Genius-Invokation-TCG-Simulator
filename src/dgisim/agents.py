@@ -429,7 +429,7 @@ class CustomChoiceAgent(RandomAgent):
                 player_action = self._random_action_generator_chooser(action_generator)
 
             elif choice == "Elemental Tuning":
-                action_generator = game_state.elem_tuning_checker().action_generator(pid)
+                action_generator = ElemTuningActGenGenerator.action_generator(game_state, pid)
                 if action_generator is None:
                     self._prompt_handler("info", "There's no dice or card for tuning")
                     continue

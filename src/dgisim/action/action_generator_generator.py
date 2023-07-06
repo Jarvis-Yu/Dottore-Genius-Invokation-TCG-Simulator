@@ -272,3 +272,72 @@ class SkillActGenGenerator:
             _choices_helper=cls._choices_helper,
             _fill_helper=cls._fill_helper,
         )
+
+class ElemTuningActGenGenerator:
+    @classmethod
+    def _choices_helper(cls, action_generator: ActionGenerator) -> GivenChoiceType:
+        game_state = action_generator.game_state
+        pid = action_generator.pid
+
+        action = action_generator.action
+        assert type(action) is ElementalTuningAction
+
+        if action.card is None:
+            return tuple(card for card in game_state.get_player(pid).get_hand_cards())
+
+        active_character = game_state.get_player(pid).just_get_active_character()
+        if action.dice_elem is None:
+            return tuple(
+                elem
+                for elem in game_state.get_player(pid).get_dices()
+                if elem is not Element.OMNI and elem is not active_character.element()
+            )
+
+        raise Exception(
+            "Not Reached! Should be called when there is something to fill. action_generator:\n"
+            + f"{action_generator}"
+        )
+
+    @classmethod
+    def _fill_helper(
+        cls,
+        action_generator: ActionGenerator,
+        player_choice: DecidedChoiceType,
+    ) -> ActionGenerator:
+        action = action_generator.action
+        assert type(action) is ElementalTuningAction
+
+        if action.card is None:
+            from ..card.card import Card
+            assert issubclass(player_choice, Card)  # type: ignore
+            return replace(
+                action_generator,
+                action=replace(action, card=player_choice)
+            )
+
+        if action.dice_elem is None:
+            assert type(player_choice) is Element
+            return replace(
+                action_generator,
+                action=replace(action, dice_elem=player_choice)
+            )
+
+        raise Exception("Not Reached!")
+
+    @classmethod
+    def action_generator(
+            cls,
+            game_state: GameState,
+            pid: PID,
+    ) -> None | ActionGenerator:
+        if not game_state.elem_tuning_checker().usable(pid):
+            return None
+
+        return ActionGenerator(
+            game_state=game_state,
+            pid=pid,
+            action=ElementalTuningAction._all_none(),
+            instruction=None,
+            _choices_helper=cls._choices_helper,
+            _fill_helper=cls._fill_helper,
+        )

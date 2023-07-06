@@ -400,7 +400,8 @@ class ActionPhase(ph.Phase):
             return just(SkillActGenGenerator.action_generator(game_state, pid))
         elif player_choice is ActionType.ELEMENTAL_TUNING:
             assert game_state.elem_tuning_checker().tunable(pid)
-            return just(game_state.elem_tuning_checker().action_generator(pid))
+            from ...action.action_generator_generator import ElemTuningActGenGenerator
+            return just(ElemTuningActGenGenerator.action_generator(game_state, pid))
         elif player_choice is ActionType.END_ROUND:
             return ActionGenerator(game_state=game_state, pid=pid, action=EndRoundAction())
         else:
