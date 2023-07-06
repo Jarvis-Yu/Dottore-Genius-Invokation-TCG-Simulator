@@ -93,11 +93,9 @@ class TestMintyMeatRolls(unittest.TestCase):
         # test shield disappears after round ends
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(buffed_game_state, a1, a2)
-        # Skip Action Phase
-        a1.inject_action(EndRoundAction())
+        a1.inject_action(EndRoundAction()) # skip action phase
         a2.inject_action(EndRoundAction())
-        # Skip Roll Phase
-        a1.inject_action(EndRoundAction())
+        a1.inject_action(EndRoundAction()) # skip roll phase
         a2.inject_action(EndRoundAction())
         gsm.step_until_next_phase()
         gsm.step_until_phase(buffed_game_state.get_mode().action_phase())

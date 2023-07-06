@@ -176,9 +176,8 @@ class TestKeqing(unittest.TestCase):
             1
         )
         # next round
-        gsm.step_until_phase(game_state.get_mode().end_phase())
-        # Skip Roll Phase
-        a1.inject_action(EndRoundAction())
+        gsm.step_until_phase(game_state.get_mode().roll_phase())
+        a1.inject_action(EndRoundAction()) # skip roll phase
         a2.inject_action(EndRoundAction())
         gsm.step_until_phase(game_state.get_mode().action_phase())
         p1ac = gsm.get_game_state().get_player1().just_get_active_character()

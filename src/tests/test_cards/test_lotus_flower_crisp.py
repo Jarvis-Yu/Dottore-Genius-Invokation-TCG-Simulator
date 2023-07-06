@@ -84,10 +84,9 @@ class TestLotusFlowerCrisps(unittest.TestCase):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(low_health_game_state, a1, a2)
         # End Action Phase
-        a1.inject_action(EndRoundAction())
+        a1.inject_action(EndRoundAction()) # skip action phase
         a2.inject_action(EndRoundAction())
-        # Skip Roll Phase
-        a1.inject_action(EndRoundAction())
+        a1.inject_action(EndRoundAction()) # skip roll phase
         a2.inject_action(EndRoundAction())
         gsm.step_until_next_phase()
         gsm.step_until_phase(low_health_game_state.get_mode().action_phase())
