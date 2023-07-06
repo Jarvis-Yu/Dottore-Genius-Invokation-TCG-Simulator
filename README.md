@@ -95,9 +95,6 @@ dictionary, and discover game states on different 'game branches' being actually
 
 ## Future Plans
 
-The fully developed project will be published to PyPI (beta versions will be available once all that
-are left is adding more characters and cards)
-
 I have the plan to implement a simple cross-platform GUI interface for the simulator. But that will
 be in a separate repo.
 
