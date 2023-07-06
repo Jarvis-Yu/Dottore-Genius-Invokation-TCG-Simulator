@@ -165,7 +165,8 @@ class EndPhase(ph.Phase):
  
     def action_generator(self, game_state: GameState, pid: PID) -> ActionGenerator | None:
         assert game_state.death_swapping(pid)
-        return game_state.swap_checker().action_generator(pid)
+        from ...action.action_generator_generator import SwapActGenGenerator
+        return SwapActGenGenerator.action_generator(game_state, pid)
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, EndPhase)

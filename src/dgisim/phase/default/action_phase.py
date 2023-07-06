@@ -383,14 +383,16 @@ class ActionPhase(ph.Phase):
 
         if game_state.death_swapping(pid):
             assert player_choice is ActionType.SWAP_CHARACTER
-            return just(game_state.swap_checker().action_generator(pid))
+            from ...action.action_generator_generator import SwapActGenGenerator
+            return just(SwapActGenGenerator.action_generator(game_state, pid))
 
         if player_choice is ActionType.PLAY_CARD:
             assert game_state.card_checker().playable(pid)
             return just(game_state.card_checker().action_generator(pid))
         elif player_choice is ActionType.SWAP_CHARACTER:
             assert game_state.swap_checker().swappable(pid)
-            return just(game_state.swap_checker().action_generator(pid))
+            from ...action.action_generator_generator import SwapActGenGenerator
+            return just(SwapActGenGenerator.action_generator(game_state, pid))
         elif player_choice is ActionType.CAST_SKILL:
             assert game_state.skill_checker().skillable(pid)
             return just(game_state.skill_checker().action_generator(pid))

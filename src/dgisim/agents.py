@@ -3,6 +3,7 @@ from typing import Optional, Iterable, TYPE_CHECKING
 
 from .action.action import *
 from .action.action_generator import *
+from .action.action_generator_generator import *
 from .action.types import DecidedChoiceType
 from .card.card import *
 from .character.character_skill_enum import CharacterSkill
@@ -385,7 +386,7 @@ class CustomChoiceAgent(RandomAgent):
 
         # death swap
         if game_state.swap_checker().should_death_swap():
-            swap_action_generator = game_state.swap_checker().action_generator(pid)
+            swap_action_generator = SwapActGenGenerator.action_generator(game_state, pid)
             assert swap_action_generator is not None
             self._prompt_handler("info", "Death Swap Action")
             player_action = self._random_action_generator_chooser(swap_action_generator)
@@ -421,7 +422,7 @@ class CustomChoiceAgent(RandomAgent):
                 player_action = self._random_action_generator_chooser(action_generator)
 
             elif choice == "Swap":
-                action_generator = game_state.swap_checker().action_generator(pid)
+                action_generator = SwapActGenGenerator.action_generator(game_state, pid)
                 if action_generator is None:
                     self._prompt_handler("info", "Swapping is unavailable")
                     continue
@@ -449,7 +450,7 @@ class CustomChoiceAgent(RandomAgent):
 
         # death swap
         if game_state.swap_checker().should_death_swap():
-            swap_action_generator = game_state.swap_checker().action_generator(pid)
+            swap_action_generator = SwapActGenGenerator.action_generator(game_state, pid)
             assert swap_action_generator is not None
             self._prompt_handler("info", "Death Swap Action")
             player_action = self._random_action_generator_chooser(swap_action_generator)
