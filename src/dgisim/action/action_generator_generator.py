@@ -4,6 +4,7 @@ particular type based on the GameState and PID passed in.
 """
 
 from __future__ import annotations
+from abc import ABC
 from typing import TYPE_CHECKING
 
 from ..helper.quality_of_life import just
@@ -18,7 +19,7 @@ if TYPE_CHECKING:
     from .types import DecidedChoiceType, GivenChoiceType
 
 
-class CardActGenGenerator:
+class CardActGenGenerator(ABC):
     """
     This generates an ActionGenerator allowing the agent to choose which card to
     play.
@@ -70,7 +71,7 @@ class CardActGenGenerator:
         )
 
 
-class SwapActGenGenerator:
+class SwapActGenGenerator(ABC):
     """
     This generates an ActionGenerator for ordinary SwapAction or DeathSwapAction
     based on the provided game state and pid.
@@ -173,7 +174,7 @@ class SwapActGenGenerator:
             )
 
 
-class SkillActGenGenerator:
+class SkillActGenGenerator(ABC):
     """
     This generates an ActionGenerator allowing the agnet to choose which skill
     to cast.
@@ -273,7 +274,12 @@ class SkillActGenGenerator:
             _fill_helper=cls._fill_helper,
         )
 
-class ElemTuningActGenGenerator:
+class ElemTuningActGenGenerator(ABC):
+    """
+    This generates an ActionGenerator for ElementalTuningAction.
+
+    If elemental tuning cannot be performed for any reason, then None is returned.
+    """
     @classmethod
     def _choices_helper(cls, action_generator: ActionGenerator) -> GivenChoiceType:
         game_state = action_generator.game_state
@@ -342,7 +348,10 @@ class ElemTuningActGenGenerator:
             _fill_helper=cls._fill_helper,
         )
 
-class CardsSelectionActGenGenerator:
+class CardsSelectionActGenGenerator(ABC):
+    """
+    This generates an ActionGenerator for CardsSelectAction.
+    """
     @classmethod
     def _choices_helper(cls, action_generator: ActionGenerator) -> GivenChoiceType:
         assert not action_generator.filled()
@@ -383,10 +392,17 @@ class CardsSelectionActGenGenerator:
             _fill_helper=cls._fill_helper,
         )
 
-class DicesSelectionActGenGenerator:
+class DicesSelectionActGenGenerator(ABC):
+    """
+    This generates an ActionGenerator for DicesSelectAction.
+    """
     @classmethod
     def _choices_helper(cls, action_generator: ActionGenerator) -> GivenChoiceType:
-        raise
+        assert not action_generator.filled()
+        assert type(action_generator.action) is DicesSelectAction
+        game_state = action_generator.game_state
+        pid = action_generator.pid
+        return game_state.get_player(pid).get_dices()
 
     @classmethod
     def _fill_helper(
@@ -394,7 +410,16 @@ class DicesSelectionActGenGenerator:
         action_generator: ActionGenerator,
         player_choice: DecidedChoiceType,
     ) -> ActionGenerator:
-        raise
+        assert not action_generator.filled()
+        assert type(action_generator.action) is DicesSelectAction
+        assert isinstance(player_choice, ActualDices)
+        return replace(
+            action_generator,
+            action=replace(
+                action_generator.action,
+                selected_dices=player_choice,
+            )
+        )
 
     @classmethod
     def action_generator(
@@ -402,4 +427,10 @@ class DicesSelectionActGenGenerator:
             game_state: GameState,
             pid: PID,
     ) -> None | ActionGenerator:
-        raise
+        return ActionGenerator(
+            game_state=game_state,
+            pid=pid,
+            action=DicesSelectAction._all_none(),
+            _choices_helper=cls._choices_helper,
+            _fill_helper=cls._fill_helper,
+        )
