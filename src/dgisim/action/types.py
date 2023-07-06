@@ -19,6 +19,6 @@ _SingleChoiceType = (
     | ActionType
 )
 
-GivenChoiceType = tuple[_SingleChoiceType, ...] | AbstractDices | Cards
+GivenChoiceType = tuple[_SingleChoiceType, ...] | ActualDices | AbstractDices | Cards
 
 DecidedChoiceType = _SingleChoiceType | ActualDices | Cards

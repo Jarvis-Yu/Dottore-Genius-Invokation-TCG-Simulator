@@ -212,7 +212,6 @@ class TestKaeya(unittest.TestCase):
 
     def test_talent_card(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
-        source = StaticTarget(PID.P1, ZONE.CHARACTERS, 2)
         initial_hp = 3
         base_game_state = kill_character(
             game_state=self.BASE_GAME,
@@ -240,7 +239,7 @@ class TestKaeya(unittest.TestCase):
         a2.inject_action(EndRoundAction())
 
         # equiping the talent card casts elemental skill and heals
-        gsm.player_step()
+        gsm.player_step()  # p1 equip talent card
         gsm.auto_step()
         p1ac = gsm.get_game_state().get_player1().just_get_active_character()
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -248,13 +247,16 @@ class TestKaeya(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 7)
 
         # second elemtnal skill in same round doesn't heal
-        gsm.player_step()
+        gsm.player_step()  # p1 elemental skill 1
         gsm.auto_step()
         p1ac = gsm.get_game_state().get_player1().just_get_active_character()
         self.assertEqual(p1ac.get_hp(), initial_hp + 2)
 
-        gsm.player_step()  # p1 end round, go to next roun
+        gsm.player_step()  # p1 end round, go to next round
         gsm.auto_step()
+        a1.inject_front_action(EndRoundAction())
+        a2.inject_front_action(EndRoundAction())
+        gsm.step_until_phase(base_game_state.get_mode().action_phase())
 
         gsm.player_step()  # p2 end round, let p1 play
         gsm.auto_step()

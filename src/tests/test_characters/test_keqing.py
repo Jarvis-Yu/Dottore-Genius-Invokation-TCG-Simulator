@@ -177,6 +177,9 @@ class TestKeqing(unittest.TestCase):
         )
         # next round
         gsm.step_until_phase(game_state.get_mode().end_phase())
+        # Skip Roll Phase
+        a1.inject_action(EndRoundAction())
+        a2.inject_action(EndRoundAction())
         gsm.step_until_phase(game_state.get_mode().action_phase())
         p1ac = gsm.get_game_state().get_player1().just_get_active_character()
         self.assertFalse(p1ac.get_character_statuses().contains(KeqingElectroInfusionStatus))

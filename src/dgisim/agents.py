@@ -33,13 +33,13 @@ class LazyAgent(PlayerAgent):
         if isinstance(curr_phase, CardSelectPhase):
             _, selected_cards = game_state.get_player(
                 pid).get_hand_cards().pick_random_cards(self._NUM_PICKED_CARDS)
-            return CardSelectAction(selected_cards=selected_cards)
+            return CardsSelectAction(selected_cards=selected_cards)
 
         elif isinstance(curr_phase, StartingHandSelectPhase):
             return CharacterSelectAction(char_id=1)
 
         elif isinstance(curr_phase, RollPhase):
-            raise Exception("No Action Defined")
+            return EndRoundAction()
 
         elif isinstance(curr_phase, ActionPhase):
             return EndRoundAction()
@@ -58,11 +58,14 @@ class PuppetAgent(PlayerAgent):
     def inject_action(self, action: PlayerAction) -> None:
         self._actions.append(action)
 
+    def inject_front_action(self, action: PlayerAction) -> None:
+        self._actions.insert(0, action)
+
     def inject_actions(self, actions: list[PlayerAction]) -> None:
         self._actions += actions
 
     def choose_action(self, history: list[GameState], pid: PID) -> PlayerAction:
-        assert self._actions
+        assert self._actions, f"no action at game state:\b{history[-1]}"
         return self._actions.pop(0)
 
     def clear(self) -> None:
@@ -82,7 +85,7 @@ class HardCodedRandomAgent(PlayerAgent):
         if isinstance(curr_phase, CardSelectPhase):
             _, selected_cards = game_state.get_player(
                 pid).get_hand_cards().pick_random_cards(self._NUM_PICKED_CARDS)
-            return CardSelectAction(selected_cards=selected_cards)
+            return CardsSelectAction(selected_cards=selected_cards)
 
         elif isinstance(curr_phase, StartingHandSelectPhase):
             return CharacterSelectAction(char_id=1)
@@ -274,7 +277,12 @@ class RandomAgent(PlayerAgent):
         return player_action
 
     def _roll_phase(self, history: list[GameState], pid: PID) -> PlayerAction:
-        raise Exception("No Action Defined")
+        game_state = history[-1]
+        phase = game_state.get_phase()
+        act_gen = phase.action_generator(game_state, pid)
+        assert act_gen is not None
+        player_action = self._random_action_generator_chooser(act_gen)
+        return player_action
 
     def _random_action_generator_chooser(self, action_generator: ActionGenerator) -> PlayerAction:
         while not action_generator.filled():
@@ -293,6 +301,9 @@ class RandomAgent(PlayerAgent):
                 action_generator = action_generator.choose(choice)
             elif isinstance(choices, Cards):
                 _, choice = choices.pick_random_cards(random.randint(0, choices.num_cards()))
+                action_generator = action_generator.choose(choice)
+            elif isinstance(choices, ActualDices):
+                _, choice = choices.pick_random_dices(random.randint(0, choices.num_dices()))
                 action_generator = action_generator.choose(choice)
             else:
                 raise NotImplementedError
