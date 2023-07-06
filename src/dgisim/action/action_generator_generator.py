@@ -341,3 +341,65 @@ class ElemTuningActGenGenerator:
             _choices_helper=cls._choices_helper,
             _fill_helper=cls._fill_helper,
         )
+
+class CardsSelectionActGenGenerator:
+    @classmethod
+    def _choices_helper(cls, action_generator: ActionGenerator) -> GivenChoiceType:
+        assert not action_generator.filled()
+        assert type(action_generator.action) is CardsSelectAction
+        game_state = action_generator.game_state
+        pid = action_generator.pid
+        return game_state.get_player(pid).get_hand_cards()
+
+    @classmethod
+    def _fill_helper(
+        cls,
+        action_generator: ActionGenerator,
+        player_choice: DecidedChoiceType,
+    ) -> ActionGenerator:
+        assert not action_generator.filled()
+        assert type(action_generator.action) is CardsSelectAction
+        from ..card.cards import Cards
+        assert isinstance(player_choice, Cards)
+        return replace(
+            action_generator,
+            action=replace(
+                action_generator.action,
+                selected_cards=player_choice,
+            )
+        )
+
+    @classmethod
+    def action_generator(
+            cls,
+            game_state: GameState,
+            pid: PID,
+    ) -> None | ActionGenerator:
+        return ActionGenerator(
+            game_state=game_state,
+            pid=pid,
+            action=CardsSelectAction._all_none(),
+            _choices_helper=cls._choices_helper,
+            _fill_helper=cls._fill_helper,
+        )
+
+class DicesSelectionActGenGenerator:
+    @classmethod
+    def _choices_helper(cls, action_generator: ActionGenerator) -> GivenChoiceType:
+        raise
+
+    @classmethod
+    def _fill_helper(
+        cls,
+        action_generator: ActionGenerator,
+        player_choice: DecidedChoiceType,
+    ) -> ActionGenerator:
+        raise
+
+    @classmethod
+    def action_generator(
+            cls,
+            game_state: GameState,
+            pid: PID,
+    ) -> None | ActionGenerator:
+        raise

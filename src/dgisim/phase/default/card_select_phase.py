@@ -7,6 +7,7 @@ from .. import phase as ph
 from ...action.action import CardsSelectAction, PlayerAction, EndRoundAction
 from ...action.action_generator import ActionGenerator
 from ...action.enums import ActionType
+from ...helper.quality_of_life import just
 from ...state.enums import PID, ACT
 
 if TYPE_CHECKING:
@@ -122,39 +123,9 @@ class CardSelectPhase(ph.Phase):
         game_state = action_generator.game_state
         pid = action_generator.pid
 
-        # TODO: move to more appropriate location
-        def tmp_choices_helper(action_generator: ActionGenerator) -> GivenChoiceType:
-            assert not action_generator.filled()
-            assert type(action_generator.action) is CardsSelectAction
-            game_state = action_generator.game_state
-            pid = action_generator.pid
-            return game_state.get_player(pid).get_hand_cards()
-
-        # TODO: move to more appropriate location
-        def tmp_fill_helper(
-                action_generator: ActionGenerator,
-                player_choice: DecidedChoiceType
-        ) -> ActionGenerator:
-            assert not action_generator.filled()
-            assert type(action_generator.action) is CardsSelectAction
-            from ...card.cards import Cards
-            assert isinstance(player_choice, Cards)
-            return replace(
-                action_generator,
-                action=replace(
-                    action_generator.action,
-                    selected_cards=player_choice,
-                )
-            )
-
         if player_choice is ActionType.SELECT_CARDS:
-            return ActionGenerator(
-                game_state=game_state,
-                pid=pid,
-                action=CardsSelectAction._all_none(),
-                _choices_helper=tmp_choices_helper,
-                _fill_helper=tmp_fill_helper,
-            )
+            from ...action.action_generator_generator import CardsSelectionActGenGenerator
+            return just(CardsSelectionActGenGenerator.action_generator(game_state, pid))
         elif player_choice is ActionType.END_ROUND:
             return ActionGenerator(game_state=game_state, pid=pid, action=EndRoundAction())
         else:
