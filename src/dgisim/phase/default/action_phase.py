@@ -396,7 +396,8 @@ class ActionPhase(ph.Phase):
             return just(SwapActGenGenerator.action_generator(game_state, pid))
         elif player_choice is ActionType.CAST_SKILL:
             assert game_state.skill_checker().skillable(pid)
-            return just(game_state.skill_checker().action_generator(pid))
+            from ...action.action_generator_generator import SkillActGenGenerator
+            return just(SkillActGenGenerator.action_generator(game_state, pid))
         elif player_choice is ActionType.ELEMENTAL_TUNING:
             assert game_state.elem_tuning_checker().tunable(pid)
             return just(game_state.elem_tuning_checker().action_generator(pid))

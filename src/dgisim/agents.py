@@ -415,7 +415,7 @@ class CustomChoiceAgent(RandomAgent):
                 player_action = self._random_action_generator_chooser(action_generator)
 
             elif choice == "Skill":
-                action_generator = game_state.skill_checker().action_generator(pid)
+                action_generator = SkillActGenGenerator.action_generator(game_state, pid)
                 if action_generator is None:
                     self._prompt_handler("info", "No skill available")
                     continue

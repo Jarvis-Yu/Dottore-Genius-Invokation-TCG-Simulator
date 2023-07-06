@@ -23,13 +23,10 @@ class CardActGenGenerator:
     This generates an ActionGenerator allowing the agent to choose which card to
     play.
 
-    If there is no card that is playable for any reason, then None is returned:
+    If there is no card that is playable for any reason, then None is returned.
     """
     @classmethod
-    def _choices_helper(
-            cls,
-            action_generator: ActionGenerator,
-    ) -> GivenChoiceType:
+    def _choices_helper(cls, action_generator: ActionGenerator) -> GivenChoiceType:
         assert not action_generator.filled()
         game_state = action_generator.game_state
         pid = action_generator.pid
@@ -85,10 +82,7 @@ class SwapActGenGenerator:
     3. it's not this player's turn (TODO)
     """
     @classmethod
-    def _choices_helper(
-            cls,
-            action_generator: ActionGenerator,
-    ) -> GivenChoiceType:
+    def _choices_helper(cls, action_generator: ActionGenerator) -> GivenChoiceType:
         game_state = action_generator.game_state
         pid = action_generator.pid
 
@@ -177,3 +171,104 @@ class SwapActGenGenerator:
                 _choices_helper=cls._choices_helper,
                 _fill_helper=cls._fill_helper,
             )
+
+
+class SkillActGenGenerator:
+    """
+    This generates an ActionGenerator allowing the agnet to choose which skill
+    to cast.
+
+    If there is no skill castable for any reason, then None is returned.
+    """
+    @classmethod
+    def _choices_helper(cls, action_generator: ActionGenerator) -> GivenChoiceType:
+        game_state = action_generator.game_state
+        pid = action_generator.pid
+        active_character = game_state.get_player(pid).just_get_active_character()
+
+        action = action_generator.action
+        assert type(action) is SkillAction
+        if action.skill is None:
+            skills = active_character.skills()
+            return tuple(
+                skill
+                for skill in skills
+                if game_state.skill_checker().usable(
+                    pid, active_character.get_id(), skill
+                ) is not None
+            )
+
+        assert action_generator._action_filled()
+        instruction = action_generator.instruction
+        assert type(instruction) is DiceOnlyInstruction
+        if instruction.dices is None:
+            retval = game_state.skill_checker().usable(pid, active_character.get_id(), action.skill)
+            assert retval is not None
+            _, dices = retval
+            return dices
+
+        raise Exception(
+            "Not Reached! Should be called when there is something to fill. action_generator:\n"
+            + f"{action_generator}"
+        )
+
+    @classmethod
+    def _fill_helper(
+        cls,
+        action_generator: ActionGenerator,
+        player_choice: DecidedChoiceType,
+    ) -> ActionGenerator:
+        action = action_generator.action
+        assert type(action) is SkillAction
+        if action.skill is None:
+            assert type(player_choice) is CharacterSkill
+            return replace(
+                action_generator,
+                action=replace(action, skill=player_choice),
+            )
+
+        instruction = action_generator.instruction
+        assert type(instruction) is DiceOnlyInstruction
+        if instruction.dices is None:
+            assert isinstance(player_choice, ActualDices)
+            game_state = action_generator.game_state
+            pid = action_generator.pid
+            # assert that dices player provided does satisfy the requirement and is legal
+            assert (game_state.get_player(pid).get_dices() - player_choice).is_legal()
+            assert player_choice.just_satisfy(just(game_state.skill_checker().usable(
+                pid, 
+                game_state.get_player(pid).just_get_active_character().get_id(),
+                action.skill,
+            ))[1])
+            return replace(
+                action_generator,
+                instruction=replace(instruction, dices=player_choice),
+            )
+
+        raise Exception("Not Reached!")
+
+    @classmethod
+    def action_generator(
+            cls,
+            game_state: GameState,
+            pid: PID,
+    ) -> None | ActionGenerator:
+        active_character = game_state.get_player(pid).just_get_active_character()
+        if not active_character.can_cast_skill():
+            return None
+
+        has_castable_skill = any(
+            game_state.skill_checker().usable(pid, active_character.get_id(), skill) is not None
+            for skill in active_character.skills()
+        )
+        if not has_castable_skill:
+            return None
+
+        return ActionGenerator(
+            game_state=game_state,
+            pid=pid,
+            action=SkillAction._all_none(),
+            instruction=DiceOnlyInstruction._all_none(),
+            _choices_helper=cls._choices_helper,
+            _fill_helper=cls._fill_helper,
+        )
