@@ -1,11 +1,14 @@
 from __future__ import annotations
 from enum import Enum
-from typing import Iterable, Any
+from typing import Any, Iterable, TypeVar
 
 from .agents import *
 from .game_state_machine import GameStateMachine
+from .helper.hashable_dict import HashableDict
 from .helper.level_print import GamePrinter
 from .state.game_state import GameState
+
+_T = TypeVar("_T")
 
 
 class GameMode(Enum):
@@ -30,14 +33,29 @@ class CLISession:
         elif self._mode is GameMode.PVE:
             self._game_session = GameStateMachine(
                 GameState.from_default(),
-                CustomChoiceAgent(self.prompt_handler, self.game_action_chooser, self.chooser),
+                CustomChoiceAgent(
+                    prompt_handler=self.prompt_handler,
+                    choose_handler=self.game_action_chooser,
+                    dict_choose_handler=self.dict_action_chooser,
+                    any_handler=self.chooser
+                ),
                 RandomAgent(),
             )
         elif self._mode is GameMode.PVP:
             self._game_session = GameStateMachine(
                 GameState.from_default(),
-                CustomChoiceAgent(self.prompt_handler, self.game_action_chooser, self.chooser),
-                CustomChoiceAgent(self.prompt_handler, self.game_action_chooser, self.chooser),
+                CustomChoiceAgent(
+                    prompt_handler=self.prompt_handler,
+                    choose_handler=self.game_action_chooser,
+                    dict_choose_handler=self.dict_action_chooser,
+                    any_handler=self.chooser
+                ),
+                CustomChoiceAgent(
+                    prompt_handler=self.prompt_handler,
+                    choose_handler=self.game_action_chooser,
+                    dict_choose_handler=self.dict_action_chooser,
+                    any_handler=self.chooser
+                ),
             )
         self._state_idx = 0
 
@@ -86,7 +104,7 @@ class CLISession:
     @classmethod
     def chooser(cls, choices: Iterable[Any]) -> Any:
         choices_map = dict(enumerate(choices))
-        choices_display = '  |||  '.join(
+        choices_display = "  |||  ".join(
             f"@{i}: {cls._display_choice(choice)}"
             for i, choice in choices_map.items()
         )
@@ -96,14 +114,15 @@ class CLISession:
             try:
                 print("Choices are:")
                 print(choices_display)
-                choice = input(f"\nPlease choose id ({id_range[0]}-{id_range[1]}): @")
+                choice = input(f":> Please choose id ({id_range[0]}-{id_range[1]}): @")
                 print()
                 final_choice = int(choice)
             except KeyboardInterrupt:
                 print("\nBye...")
                 exit(0)
             except:
-                print(f"Last input is invalid! Choose a number in range {id_range[0]}-{id_range[1]}")
+                print(
+                    f"Last input is invalid! Choose a number in range {id_range[0]}-{id_range[1]}")
                 final_choice = -1
                 continue
         return choices_map[final_choice]
@@ -112,6 +131,52 @@ class CLISession:
     def game_action_chooser(cls, choices: Iterable[DecidedChoiceType]) -> DecidedChoiceType:
         choice = cls.chooser(choices)
         return choice
+
+    @classmethod
+    def dict_action_chooser(cls, choices: dict[_T, int], optional: bool) -> None | dict[_T, int]:
+        def parse(s: str) -> dict[int, int]:
+            pairs = s.split(';')
+            return dict(
+                (int(tokens[0]), int(tokens[1]))
+                for tokens in (
+                    pair.split(':')
+                    for pair in pairs
+                )
+            )
+
+        tuple_list = list(tuple(item) for item in choices.items())
+        original_dict = HashableDict((i, val) for i, val in enumerate(choices.values()))
+        dict_display = "  |||  ".join(
+            f"@{i}: <{cls._display_choice(pair[0])}, {pair[1]}>"
+            for i, pair in enumerate(tuple_list)
+            if pair[1] > 0  # type: ignore
+        )
+        prompt = 'Example input is "0:2;4:1;3:1" meaning choosing 2 of @0, 1 of @4 and 1 of @3' \
+            + case_val(optional, "\nEnter nothing to skip selection.", '')
+        selected_dict = {0: BIG_INT}
+        while not (original_dict - selected_dict).all_val_non_negative():
+            try:
+                print("Selections are:")
+                print(dict_display)
+                print(prompt)
+                choice = input(":> Please choose: ")
+                print()
+                choice = choice.replace(' ', '')
+                if optional and choice == '':
+                    return None
+                selected_dict = parse(choice)
+            except KeyboardInterrupt:
+                print("\nBye...")
+                exit(0)
+            except:
+                print(
+                    f"Last input is invalid!")
+                selected_dict = {0: BIG_INT}
+                continue
+        return dict(  # type: ignore
+            (tuple_list[i][0], j)  # type: ignore
+            for i, j in selected_dict.items()
+        )
 
     @classmethod
     def prompt_handler(cls, info_type: str, prompt: str) -> None:

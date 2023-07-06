@@ -1,5 +1,5 @@
 import random
-from typing import Optional, Iterable, TYPE_CHECKING
+from typing import Any, Optional, Iterable, TYPE_CHECKING, TypeVar
 
 from .action.action import *
 from .action.action_generator import *
@@ -74,184 +74,6 @@ class PuppetAgent(PlayerAgent):
 
     def __str__(self) -> str:
         return f"PuppetAgent[{', '.join(str(action) for action in self._actions)}]"
-
-
-class HardCodedRandomAgent(PlayerAgent):
-    _NUM_PICKED_CARDS = 3
-
-    def choose_action(self, history: list[GameState], pid: PID) -> PlayerAction:
-        game_state = history[-1]
-        curr_phase = game_state.get_phase()
-
-        if isinstance(curr_phase, CardSelectPhase):
-            _, selected_cards = game_state.get_player(
-                pid).get_hand_cards().pick_random_cards(self._NUM_PICKED_CARDS)
-            return CardsSelectAction(selected_cards=selected_cards)
-
-        elif isinstance(curr_phase, StartingHandSelectPhase):
-            return CharacterSelectAction(char_id=1)
-
-        elif isinstance(curr_phase, RollPhase):
-            raise Exception("No Action Defined")
-
-        elif isinstance(curr_phase, ActionPhase):
-            selection = random.random()
-            me = game_state.get_player(pid)
-            available_dices = me.get_dices()
-            active_character = me.get_active_character()
-
-            assert active_character is not None
-
-            # death swap
-            if active_character.defeated():
-                characters = me.get_characters()
-                alive_ids = characters.alive_ids()
-                active_id = characters.get_active_character_id()
-                assert active_id is not None
-                if active_id in alive_ids:
-                    alive_ids.remove(active_id)
-                if alive_ids:
-                    return DeathSwapAction(char_id=random.choice(alive_ids))
-                else:
-                    raise Exception("Game should end here but not implemented(NOT REACHED)")
-
-            # food card
-            character_injured = active_character.get_hp() < active_character.get_max_hp()
-            if selection < 1:
-                cards = me.get_hand_cards()
-                card: Optional[type[Card]]
-                tmp_dices = ActualDices({})
-
-                if cards.contains(SweetMadame) and character_injured:
-                    card = SweetMadame
-                    tmp_dices = ActualDices({Element.OMNI: 0})
-                elif cards.contains(MondstadtHashBrown) and character_injured:
-                    tmp_dices = ActualDices({Element.OMNI: 1})
-                    card = MondstadtHashBrown
-                elif cards.contains(MushroomPizza) and character_injured:
-                    tmp_dices = ActualDices({Element.OMNI: 1})
-                    card = MushroomPizza
-                else:
-                    card = None
-
-                if card is not None \
-                        and not active_character.satiated() \
-                        and (available_dices - tmp_dices).is_legal():
-                    return CardAction(
-                        card=card,
-                        instruction=StaticTargetInstruction(
-                            dices=tmp_dices,
-                            target=StaticTarget(
-                                pid,
-                                ZONE.CHARACTERS,
-                                active_character.get_id(),
-                            )
-                        )
-                    )
-
-            # swap character
-            if selection < 0.2:
-                dices = available_dices.basically_satisfy(AbstractDices({
-                    Element.ANY: 1,
-                }))
-                characters = me.get_characters()
-                alive_ids = characters.alive_ids()
-                active_id = characters.get_active_character_id()
-                assert active_id is not None
-                if active_id in alive_ids:
-                    alive_ids.remove(active_id)
-                if dices is not None and alive_ids:
-                    return SwapAction(
-                        char_id=random.choice(alive_ids),
-                        instruction=DiceOnlyInstruction(dices=dices),
-                    )
-
-            if selection < 1 and active_character.can_cast_skill():
-                # elemental burst
-                if active_character.get_energy() == active_character.get_max_energy() \
-                        and CharacterSkill.ELEMENTAL_BURST in active_character.skills():
-                    dices = available_dices.basically_satisfy(
-                        active_character.skill_cost(CharacterSkill.ELEMENTAL_BURST)
-                    )
-                    if dices is not None:
-                        return SkillAction(
-                            skill=CharacterSkill.ELEMENTAL_BURST,
-                            instruction=DiceOnlyInstruction(dices=dices),
-                        )
-
-                # elemental skill2
-                if selection < 0.7 and CharacterSkill.ELEMENTAL_SKILL2 in active_character.skills():
-                    dices = available_dices.basically_satisfy(
-                        active_character.skill_cost(CharacterSkill.ELEMENTAL_SKILL2)
-                    )
-                    if dices is not None:
-                        return SkillAction(
-                            skill=CharacterSkill.ELEMENTAL_SKILL2,
-                            instruction=DiceOnlyInstruction(dices=dices),
-                        )
-
-                # elemental skill1
-                if selection < 0.7 and CharacterSkill.ELEMENTAL_SKILL1 in active_character.skills():
-                    dices = available_dices.basically_satisfy(
-                        active_character.skill_cost(CharacterSkill.ELEMENTAL_SKILL1)
-                    )
-                    if dices is not None:
-                        return SkillAction(
-                            skill=CharacterSkill.ELEMENTAL_SKILL1,
-                            instruction=DiceOnlyInstruction(dices=dices),
-                        )
-
-                # normal attack
-                if selection < 1 and CharacterSkill.NORMAL_ATTACK in active_character.skills():
-                    dices = available_dices.basically_satisfy(
-                        active_character.skill_cost(CharacterSkill.NORMAL_ATTACK)
-                    )
-                    if dices is not None:
-                        return SkillAction(
-                            skill=CharacterSkill.NORMAL_ATTACK,
-                            instruction=DiceOnlyInstruction(dices=dices),
-                        )
-
-            # swap character
-            if selection < 0.8:
-                dices = available_dices.basically_satisfy(AbstractDices({
-                    Element.ANY: 1,
-                }))
-                characters = me.get_characters()
-                alive_ids = characters.alive_ids()
-                active_id = characters.get_active_character_id()
-                assert active_id is not None
-                if active_id in alive_ids:
-                    alive_ids.remove(active_id)
-                if dices is not None and alive_ids:
-                    return SwapAction(
-                        char_id=random.choice(alive_ids),
-                        instruction=DiceOnlyInstruction(dices=dices),
-                    )
-
-            return EndRoundAction()
-
-        elif isinstance(curr_phase, EndPhase):
-            me = game_state.get_player(pid)
-            active_character = me.just_get_active_character()
-
-            # death swap
-            if active_character.defeated():
-                characters = me.get_characters()
-                alive_ids = characters.alive_ids()
-                active_id = characters.get_active_character_id()
-                assert active_id is not None
-                if active_id in alive_ids:
-                    alive_ids.remove(active_id)
-                if alive_ids:
-                    return DeathSwapAction(char_id=random.choice(alive_ids))
-                else:
-                    raise Exception("Game should end here but not implemented(NOT REACHED)")
-
-            raise Exception("NOT REACHED")
-
-        else:
-            raise Exception(f"No Action Defined, phase={curr_phase}")
 
 
 class RandomAgent(PlayerAgent):
@@ -343,17 +165,57 @@ class RandomAgent(PlayerAgent):
 
         raise NotImplementedError
 
+_T = TypeVar("_T")
 
 class CustomChoiceAgent(RandomAgent):
     def __init__(
             self,
             prompt_handler: Callable[[str, str], None],
             choose_handler: Callable[[Iterable[DecidedChoiceType]], DecidedChoiceType],
+            dict_choose_handler: Callable[[dict[_T, int], bool], None | dict[_T, int]],
             any_handler: Callable[[Iterable[Any]], Any],
     ) -> None:
         self._prompt_handler = prompt_handler
         self._choose_handler = choose_handler
+        self._dict_choose_handler = dict_choose_handler
         self._any_handler = any_handler
+
+    def _handle_abstract_dices(
+            self,
+            action_generator: ActionGenerator,
+            abstract_dices: AbstractDices,
+    ) -> ActionGenerator:
+        optional_choice = action_generator.dices_available().basically_satisfy(abstract_dices)
+        if optional_choice is None:
+            raise Exception(f"There's not enough dices for {repr(abstract_dices)} from "
+                            + f"{action_generator.dices_available()} at game_state:"
+                            + f"{action_generator.game_state}")
+        while True:
+            choice = optional_choice
+            self._prompt_handler("info", f"auto chosen dices are {repr(choice)}")
+            self._prompt_handler("info", "If you want to choose manually, please input below")
+            manual_choice = self._dict_choose_handler(
+                action_generator.dices_available().as_dict(),  # type: ignore
+                True,
+            )
+            if manual_choice is not None:
+                selected_dices = ActualDices(manual_choice)  # type: ignore
+                if (
+                        selected_dices.is_legal()
+                        and (action_generator.dices_available() - selected_dices).is_legal()
+                ):
+                    try:
+                        action_generator.choose(selected_dices)  # type: ignore
+                    except:
+                        print("error", f"{repr(selected_dices)} cannot fulfill {repr(abstract_dices)}")
+                        continue
+                    choice = selected_dices
+                    break
+                else:
+                    print("error", f"{manual_choice} is illegal")
+            else:
+                break
+        return action_generator.choose(choice)
 
     def _random_action_generator_chooser(self, action_generator: ActionGenerator) -> PlayerAction:
         while not action_generator.filled():
@@ -363,97 +225,13 @@ class CustomChoiceAgent(RandomAgent):
                 choice = self._choose_handler(choices)
                 action_generator = action_generator.choose(choice)
             elif isinstance(choices, AbstractDices):
-                optional_choice = action_generator.dices_available().basically_satisfy(choices)
-                if optional_choice is None:
-                    raise Exception(f"There's not enough dices for {choices} from "
-                                    + f"{action_generator.dices_available()} at game_state:"
-                                    + f"{action_generator.game_state}")
-                choice = optional_choice
+                action_generator = self._handle_abstract_dices(action_generator, choices)
+            elif isinstance(choices, Cards):
+                _, choice = choices.pick_random_cards(random.randint(0, choices.num_cards()))
+                action_generator = action_generator.choose(choice)
+            elif isinstance(choices, ActualDices):
+                _, choice = choices.pick_random_dices(random.randint(0, choices.num_dices()))
                 action_generator = action_generator.choose(choice)
             else:
                 raise NotImplementedError
         return action_generator.generate_action()
-
-    def _action_phase(self, history: list[GameState], pid: PID) -> PlayerAction:
-        game_state = history[-1]
-        me = game_state.get_player(pid)
-        active_character = me.just_get_active_character()
-
-        self._prompt_handler("info", f"Player{pid.value}'s Action Time!")
-
-        player_action: None | PlayerAction = None
-        action_generator: None | ActionGenerator
-
-        # death swap
-        if game_state.swap_checker().should_death_swap():
-            swap_action_generator = SwapActGenGenerator.action_generator(game_state, pid)
-            assert swap_action_generator is not None
-            self._prompt_handler("info", "Death Swap Action")
-            player_action = self._random_action_generator_chooser(swap_action_generator)
-            return player_action
-
-        choices: tuple[str, ...] = ("Card", "Skill", "Swap", "Elemental Tuning", "EndRound")
-        choice: Any
-        while player_action is None:
-            choice = self._any_handler(choices)
-
-            if choice == "Card":
-                cards = game_state.get_player(pid).get_hand_cards()
-                usable_card_gen_pair = dict([
-                    (card, act_gen)
-                    for card, act_gen in (
-                        (card, card.action_generator(game_state, pid))
-                        for card in cards
-                    )
-                    if act_gen is not None
-                ])
-                if not usable_card_gen_pair:
-                    self._prompt_handler("info", "No card available")
-                    continue
-                choice = self._any_handler(usable_card_gen_pair.keys())
-                action_generator = usable_card_gen_pair[choice]
-                player_action = self._random_action_generator_chooser(action_generator)
-
-            elif choice == "Skill":
-                action_generator = SkillActGenGenerator.action_generator(game_state, pid)
-                if action_generator is None:
-                    self._prompt_handler("info", "No skill available")
-                    continue
-                player_action = self._random_action_generator_chooser(action_generator)
-
-            elif choice == "Swap":
-                action_generator = SwapActGenGenerator.action_generator(game_state, pid)
-                if action_generator is None:
-                    self._prompt_handler("info", "Swapping is unavailable")
-                    continue
-                player_action = self._random_action_generator_chooser(action_generator)
-
-            elif choice == "Elemental Tuning":
-                action_generator = ElemTuningActGenGenerator.action_generator(game_state, pid)
-                if action_generator is None:
-                    self._prompt_handler("info", "There's no dice or card for tuning")
-                    continue
-                player_action = self._random_action_generator_chooser(action_generator)
-
-            elif choice == "EndRound":
-                player_action = EndRoundAction()
-
-            else:
-                self._prompt_handler("error", f"Uncaught choice {choice}")
-
-        return player_action
-
-    def _end_phase(self, history: list[GameState], pid: PID) -> PlayerAction:
-        game_state = history[-1]
-
-        self._prompt_handler("info", f"Player{pid.value}'s Action Time!")
-
-        # death swap
-        if game_state.swap_checker().should_death_swap():
-            swap_action_generator = SwapActGenGenerator.action_generator(game_state, pid)
-            assert swap_action_generator is not None
-            self._prompt_handler("info", "Death Swap Action")
-            player_action = self._random_action_generator_chooser(swap_action_generator)
-            return player_action
-
-        raise Exception("NOT REACHED")

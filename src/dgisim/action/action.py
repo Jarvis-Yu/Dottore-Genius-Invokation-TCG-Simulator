@@ -229,7 +229,7 @@ class Instruction:
     def __str__(self) -> str:
         cls_fields = fields(self)
         paired_fields = (
-            f"{field.name}={str(self.__getattribute__(field.name))}"
+            f"{field.name}={repr(self.__getattribute__(field.name))}"
             for field in cls_fields
         )
         return f"{self.__class__.__name__}:({', '.join(paired_fields)})"

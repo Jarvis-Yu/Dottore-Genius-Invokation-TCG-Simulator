@@ -88,6 +88,9 @@ class HashableDict(dict):
             raise Exception("Calling __hash__() to a non-frozen HashableDict!")
         return hash(frozenset(self.items()))
 
+    def all_val_non_negative(self) -> bool:
+        return all(val >= 0 for val in self.values())
+
     @classmethod
     def from_dict(cls, d: dict) -> HashableDict:
         """

@@ -1,8 +1,7 @@
 from __future__ import annotations
 import random
 from collections import Counter
-from enum import Enum
-from typing import Optional, Iterator, Iterable, TypeVar, Union
+from typing import Any, Optional, Iterator, Iterable, TypeVar, Union
 from typing_extensions import Self, override, TYPE_CHECKING
 
 from .helper.hashable_dict import HashableDict
@@ -93,8 +92,19 @@ class Dices:
     def __hash__(self) -> int:
         return hash(self._dices)
 
+    def __repr__(self) -> str:
+        existing_dices = dict([
+            (dice.name, str(num))
+            for dice, num in self._dices.items()
+            if num != 0
+        ])
+        return repr(list(existing_dices.items()))
+
     def __str__(self) -> str:
         return self.to_string(0)
+
+    def as_dict(self) -> dict[Element, int]:
+        return dict(self._dices.items())
 
     def to_string(self, indent: int = 0) -> str:
         existing_dices = dict([
@@ -104,7 +114,7 @@ class Dices:
         ])
         return level_print(existing_dices, indent)
 
-    def dict_str(self) -> Union[dict, str]:
+    def dict_str(self) -> dict[str, Any]:
         existing_dices = dict([
             (dice.name, str(num))
             for dice, num in self._dices.items()
