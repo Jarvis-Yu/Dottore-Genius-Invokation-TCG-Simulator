@@ -388,7 +388,8 @@ class ActionPhase(ph.Phase):
 
         if player_choice is ActionType.PLAY_CARD:
             assert game_state.card_checker().playable(pid)
-            return just(game_state.card_checker().action_generator(pid))
+            from ...action.action_generator_generator import CardActGenGenerator
+            return just(CardActGenGenerator.action_generator(game_state, pid))
         elif player_choice is ActionType.SWAP_CHARACTER:
             assert game_state.swap_checker().swappable(pid)
             from ...action.action_generator_generator import SwapActGenGenerator

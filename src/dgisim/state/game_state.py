@@ -343,32 +343,6 @@ class CardChecker:
     def __init__(self, game_state: GameState) -> None:
         self._game_state = game_state
 
-    def _choices_helper(
-            self,
-            action_generator: acg.ActionGenerator,
-    ) -> GivenChoiceType:
-        assert not action_generator.filled()
-        game_state = action_generator.game_state
-        pid = action_generator.pid
-        return tuple(
-            card_type
-            for card_type in game_state.get_player(pid).get_hand_cards()
-            if card_type.strictly_usable(game_state, pid)
-        )
-
-    def _fill_helper(
-        self,
-        action_generator: acg.ActionGenerator,
-        player_choice: DecidedChoiceType,
-    ) -> acg.ActionGenerator:
-        assert not action_generator.filled()
-        assert issubclass(player_choice, Card)  # type: ignore
-        assert self.usable(action_generator.pid, player_choice)  # type: ignore
-        return just(player_choice.action_generator(  # type: ignore
-            action_generator.game_state,
-            action_generator.pid
-        ))
-
     def usable(self, pid: PID, card_type: type[Card]) -> None | acg.ActionGenerator:
         return card_type.action_generator(self._game_state, pid)
 
@@ -377,19 +351,6 @@ class CardChecker:
         return any(
             card_type.strictly_usable(self._game_state, pid)
             for card_type in self._game_state.get_player(pid).get_hand_cards()
-        )
-
-    def action_generator(
-            self,
-            pid: PID,
-    ) -> None | acg.ActionGenerator:
-        if not self.playable(pid):
-            return None
-        return acg.ActionGenerator(
-            game_state=self._game_state,
-            pid=pid,
-            _choices_helper=self._choices_helper,
-            _fill_helper=self._fill_helper,
         )
 
 
