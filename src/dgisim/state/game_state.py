@@ -573,14 +573,3 @@ class ElementalTuningChecker:
             and dices[Element.OMNI] + dices[active_character_elem] < dices.num_dices()
             and (elem is None or dices[elem] > 0)
         )
-
-    def tunable(self, pid: PID) -> bool:
-        """ Returns true if elemental tuning is available """
-        active_character_elem = self._game_state.get_player(
-            pid
-        ).just_get_active_character().element()
-        return any(
-            self.usable(pid, elem)
-            for elem in ActualDices._LEGAL_ELEMS
-            if elem is not active_character_elem
-        )

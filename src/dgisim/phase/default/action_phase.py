@@ -365,7 +365,7 @@ class ActionPhase(ph.Phase):
             choices.append(ActionType.SWAP_CHARACTER)
 
         # elemental tuning
-        if game_state.elem_tuning_checker().tunable(pid):
+        if game_state.elem_tuning_checker().usable(pid):
             choices.append(ActionType.ELEMENTAL_TUNING)
 
         # unconditional end round
@@ -399,7 +399,7 @@ class ActionPhase(ph.Phase):
             from ...action.action_generator_generator import SkillActGenGenerator
             return just(SkillActGenGenerator.action_generator(game_state, pid))
         elif player_choice is ActionType.ELEMENTAL_TUNING:
-            assert game_state.elem_tuning_checker().tunable(pid)
+            assert game_state.elem_tuning_checker().usable(pid)
             from ...action.action_generator_generator import ElemTuningActGenGenerator
             return just(ElemTuningActGenGenerator.action_generator(game_state, pid))
         elif player_choice is ActionType.END_ROUND:
