@@ -8,15 +8,13 @@
 After setting up the environment following the instructions in the main [README](../README.md),
 you may run `./scripts/sh/cli.sh` under the project directory to start a CLI session.
 
-Below shows what you are likely to see.
+Below shows some random CLI session as an example, comments are occasionally added
+in the format of `// ...`.
 
-(Just note that I may make comments starting with `//` in the code blocks,
-they are just to explain certain parts,
-but not actually printed when you use the CLI)
+Note that prompts are of format `:>` or `::>`.
 
-``` terminal
-$ ./scripts/sh/cli.sh    // though it is run via a script here, but it is the same
-                      // if you pip-installed the module and run it
+```txt
+$ ./scripts/sh/cli.sh 
 ==================================================
 Welcome to the Dottore Genius Invokation TCG Simulator CLI ver.
 This is currently just a basic version for debugging only.
@@ -40,21 +38,11 @@ Definitions:
 Please choose the cli mode:
 Choices are:
 @0: PVP  |||  @1: PVE  |||  @2: EVE
+Please choose id (0-2)
+::> @1    // choose PVE mode, you are player1 by default, opponent is random agent
+          // note that the prompt format is ::> here
 
-Please choose id (0-2): @    // this is where you make your first input
-```
-
-So as shown above, you need to input a number from 0 to 2,
-to save some time and experience all features.
-Let's say we choose 1 for PVE this time.
-
-``` terminal
-Please choose the cli mode:
-Choices are:
-@0: PVP  |||  @1: PVE  |||  @2: EVE
-
-Please choose id (0-2): @1    // last input is '1'
-
+// below prints the current game state
 ==================================================
 <Mode: DefaultMode>  <Phase: CardSelectPhase>  <Round: 0>
 ---------------------------------------------------------------
@@ -62,8 +50,17 @@ Please choose id (0-2): @1    // last input is '1'
 <Phase: Passive Wait Phase>   | <Phase: Passive Wait Phase>   |
 <Card Redraw Chances: 0>      | <Card Redraw Chances: 0>      |
 <Characters>                  | <Characters>                  |
-  <RhodeiaOfLoch>             |   <RhodeiaOfLoch>             |
+  <Keqing>                    |   <Keqing>                    |
     <id: 1>                   |     <id: 1>                   |
+    <Aura: []>                |     <Aura: []>                |
+    <HP: 10/10>               |     <HP: 10/10>               |
+    <Energy: 0/3>             |     <Energy: 0/3>             |
+    <Talents>                 |     <Talents>                 |
+      <KeqingTalent(0)>       |       <KeqingTalent(0)>       |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
+  <RhodeiaOfLoch>             |   <RhodeiaOfLoch>             |
+    <id: 2>                   |     <id: 2>                   |
     <Aura: []>                |     <Aura: []>                |
     <HP: 10/10>               |     <HP: 10/10>               |
     <Energy: 0/3>             |     <Energy: 0/3>             |
@@ -71,20 +68,11 @@ Please choose id (0-2): @1    // last input is '1'
     <Equipments>              |     <Equipments>              |
     <Statuses>                |     <Statuses>                |
   <Kaeya>                     |   <Kaeya>                     |
-    <id: 2>                   |     <id: 2>                   |
+    <id: 3>                   |     <id: 3>                   |
     <Aura: []>                |     <Aura: []>                |
     <HP: 10/10>               |     <HP: 10/10>               |
     <Energy: 0/2>             |     <Energy: 0/2>             |
     <Talents>                 |     <Talents>                 |
-    <Equipments>              |     <Equipments>              |
-    <Statuses>                |     <Statuses>                |
-  <Keqing>                    |   <Keqing>                    |
-    <id: 3>                   |     <id: 3>                   |
-    <Aura: []>                |     <Aura: []>                |
-    <HP: 10/10>               |     <HP: 10/10>               |
-    <Energy: 0/3>             |     <Energy: 0/3>             |
-    <Talents>                 |     <Talents>                 |
-      <KeqingTalent(0)>       |       <KeqingTalent(0)>       |
     <Equipments>              |     <Equipments>              |
     <Statuses>                |     <Statuses>                |
 <Combat Statuses: []>         | <Combat Statuses: []>         |
@@ -93,9 +81,6 @@ Please choose id (0-2): @1    // last input is '1'
 <Dices>                       | <Dices>                       |
 <Hand Cards>                  | <Hand Cards>                  |
 <Deck Cards>                  | <Deck Cards>                  |
-  <SweetMadame: 2>            |   <SweetMadame: 2>            |
-  <NorthernSmokedChicken: 2>  |   <NorthernSmokedChicken: 2>  |
-  <MushroomPizza: 2>          |   <MushroomPizza: 2>          |
   <Xudong: 2>                 |   <Xudong: 2>                 |
   <MintyMeatRolls: 2>         |   <MintyMeatRolls: 2>         |
   <LeaveItToMe: 2>            |   <LeaveItToMe: 2>            |
@@ -107,69 +92,27 @@ Please choose id (0-2): @1    // last input is '1'
   <MondstadtHashBrown: 2>     |   <MondstadtHashBrown: 2>     |
   <Starsigns: 2>              |   <Starsigns: 2>              |
   <ThunderingPenance: 2>      |   <ThunderingPenance: 2>      |
+  <SweetMadame: 2>            |   <SweetMadame: 2>            |
+  <NorthernSmokedChicken: 2>  |   <NorthernSmokedChicken: 2>  |
+  <MushroomPizza: 2>          |   <MushroomPizza: 2>          |
 <Publicly Used Cards>         | <Publicly Used Cards>         |
 ---------------------------------------------------------------
 <Effects>
 ===============================================================
 
-:>    // next input goes here
-```
-
-So the initial game state is printed,
-and hopefully you remember what commands you have,
-lemme give you a quick reminder.
-
-``` terminal
-Commands:
-a    - to forward to an autostep
-n    - to forward to next step
-ba   - to previous autostep
-bn   - to previous step
-h    - to get help
-q    - to quit this session
-     - enter nothing to repeat last step
-rst  - to reset game session (and choose next game mode)
-
-Note: any invalid commands are ignored
-
-Definitions:
-- autostep - jumps to the next game-state where player interaction is required
-- step - jumps to the next game-state
-```
-
-Most of the time `a` is the most useful command to use,
-as it helps skip tedious status handling intermediate game states when player make a move.
-But `h` can come handy when you forgot which commands you can use.
-(giving invalid commands 3 times in a row automatically triggers help prompting)
-
-Alright, let's give command `a` to the CLI.
-
-``` terminal
-:> a    // last input is 'a'
+:> a    // enter command auto-step, skipping intermediate state-transitions that
+        // doesn't require player input
+        // note that the prompt format is :> here
+        // when prompt is :> you are expected to input a command (details in command 'h')
+        // when prompt is ::> you are expected to input according to hints given
 <Mode: DefaultMode>  <Phase: CardSelectPhase>  <Round: 0>
 ---------------------------------------------------------------
 <Player: *Player1>            | <Player: Player2>             |
 <Phase: Action Phase>         | <Phase: Action Phase>         |
 <Card Redraw Chances: 1>      | <Card Redraw Chances: 1>      |
 <Characters>                  | <Characters>                  |
-  <RhodeiaOfLoch>             |   <RhodeiaOfLoch>             |
-    <id: 1>                   |     <id: 1>                   |
-    <Aura: []>                |     <Aura: []>                |
-    <HP: 10/10>               |     <HP: 10/10>               |
-    <Energy: 0/3>             |     <Energy: 0/3>             |
-    <Talents>                 |     <Talents>                 |
-    <Equipments>              |     <Equipments>              |
-    <Statuses>                |     <Statuses>                |
-  <Kaeya>                     |   <Kaeya>                     |
-    <id: 2>                   |     <id: 2>                   |
-    <Aura: []>                |     <Aura: []>                |
-    <HP: 10/10>               |     <HP: 10/10>               |
-    <Energy: 0/2>             |     <Energy: 0/2>             |
-    <Talents>                 |     <Talents>                 |
-    <Equipments>              |     <Equipments>              |
-    <Statuses>                |     <Statuses>                |
   <Keqing>                    |   <Keqing>                    |
-    <id: 3>                   |     <id: 3>                   |
+    <id: 1>                   |     <id: 1>                   |
     <Aura: []>                |     <Aura: []>                |
     <HP: 10/10>               |     <HP: 10/10>               |
     <Energy: 0/3>             |     <Energy: 0/3>             |
@@ -177,69 +120,144 @@ Alright, let's give command `a` to the CLI.
       <KeqingTalent(0)>       |       <KeqingTalent(0)>       |
     <Equipments>              |     <Equipments>              |
     <Statuses>                |     <Statuses>                |
+  <RhodeiaOfLoch>             |   <RhodeiaOfLoch>             |
+    <id: 2>                   |     <id: 2>                   |
+    <Aura: []>                |     <Aura: []>                |
+    <HP: 10/10>               |     <HP: 10/10>               |
+    <Energy: 0/3>             |     <Energy: 0/3>             |
+    <Talents>                 |     <Talents>                 |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
+  <Kaeya>                     |   <Kaeya>                     |
+    <id: 3>                   |     <id: 3>                   |
+    <Aura: []>                |     <Aura: []>                |
+    <HP: 10/10>               |     <HP: 10/10>               |
+    <Energy: 0/2>             |     <Energy: 0/2>             |
+    <Talents>                 |     <Talents>                 |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
 <Combat Statuses: []>         | <Combat Statuses: []>         |
 <Summons>                     | <Summons>                     |
 <Supports>                    | <Supports>                    |
 <Dices>                       | <Dices>                       |
 <Hand Cards>                  | <Hand Cards>                  |
-  <LotusFlowerCrisp: 1>       |   <LotusFlowerCrisp: 1>       |
-  <Xudong: 1>                 |   <MintyMeatRolls: 1>         |
-  <NorthernSmokedChicken: 1>  |   <Starsigns: 1>              |
-  <SweetMadame: 1>            |   <ChangingShifts: 1>         |
-  <ThunderingPenance: 1>      |   <ColdBloodedStrike: 1>      |
+  <ThunderingPenance: 2>      |   <ChangingShifts: 1>         |
+  <SweetMadame: 1>            |   <StreamingSurge: 1>         |
+  <MondstadtHashBrown: 1>     |   <MintyMeatRolls: 1>         |
+  <NorthernSmokedChicken: 1>  |   <Xudong: 1>                 |
+<Deck Cards>                  |   <NorthernSmokedChicken: 1>  |
+  <Xudong: 2>                 | <Deck Cards>                  |
+  <MintyMeatRolls: 2>         |   <Xudong: 1>                 |
+  <LeaveItToMe: 2>            |   <MintyMeatRolls: 1>         |
+  <LotusFlowerCrisp: 2>       |   <LeaveItToMe: 2>            |
+  <ChangingShifts: 2>         |   <LotusFlowerCrisp: 2>       |
+  <StreamingSurge: 2>         |   <ChangingShifts: 1>         |
+  <JueyunGuoba: 2>            |   <StreamingSurge: 1>         |
+  <ColdBloodedStrike: 2>      |   <JueyunGuoba: 2>            |
+  <MondstadtHashBrown: 1>     |   <ColdBloodedStrike: 2>      |
+  <Starsigns: 2>              |   <MondstadtHashBrown: 2>     |
+  <SweetMadame: 1>            |   <Starsigns: 2>              |
+  <NorthernSmokedChicken: 1>  |   <ThunderingPenance: 2>      |
+  <MushroomPizza: 2>          |   <SweetMadame: 2>            |
+<Publicly Used Cards>         |   <NorthernSmokedChicken: 1>  |
+                              |   <MushroomPizza: 2>          |
+                              | <Publicly Used Cards>         |
+---------------------------------------------------------------
+<Effects>
+===============================================================
+Choices are:
+@0: SELECT_CARDS  |||  @1: END_ROUND
+Please choose id (0-1)
+::> @0    // choose to redraw some cards
+
+Selections are:
+@0: <ThunderingPenance, 2>  |||  @1: <SweetMadame, 1>  |||  @2: <MondstadtHashBrown, 1>  |||  @3: <NorthernSmokedChicken, 1>
+e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
+::> 0:1, 3:1
+
+#### Player1 Action: CardsSelectAction[<ThunderingPenance>: 1; <NorthernSmokedChicken>: 1; ]
+
+:>     // no command is input means repeat last valid command, in this case, is auto-step
+<Mode: DefaultMode>  <Phase: CardSelectPhase>  <Round: 0>
+---------------------------------------------------------------
+<Player: *Player1>            | <Player: Player2>             |
+<Phase: End Phase>            | <Phase: Action Phase>         |
+<Card Redraw Chances: 0>      | <Card Redraw Chances: 1>      |
+<Characters>                  | <Characters>                  |
+  <Keqing>                    |   <Keqing>                    |
+    <id: 1>                   |     <id: 1>                   |
+    <Aura: []>                |     <Aura: []>                |
+    <HP: 10/10>               |     <HP: 10/10>               |
+    <Energy: 0/3>             |     <Energy: 0/3>             |
+    <Talents>                 |     <Talents>                 |
+      <KeqingTalent(0)>       |       <KeqingTalent(0)>       |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
+  <RhodeiaOfLoch>             |   <RhodeiaOfLoch>             |
+    <id: 2>                   |     <id: 2>                   |
+    <Aura: []>                |     <Aura: []>                |
+    <HP: 10/10>               |     <HP: 10/10>               |
+    <Energy: 0/3>             |     <Energy: 0/3>             |
+    <Talents>                 |     <Talents>                 |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
+  <Kaeya>                     |   <Kaeya>                     |
+    <id: 3>                   |     <id: 3>                   |
+    <Aura: []>                |     <Aura: []>                |
+    <HP: 10/10>               |     <HP: 10/10>               |
+    <Energy: 0/2>             |     <Energy: 0/2>             |
+    <Talents>                 |     <Talents>                 |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
+<Combat Statuses: []>         | <Combat Statuses: []>         |
+<Summons>                     | <Summons>                     |
+<Supports>                    | <Supports>                    |
+<Dices>                       | <Dices>                       |
+<Hand Cards>                  | <Hand Cards>                  |
+  <ChangingShifts: 1>         |   <ChangingShifts: 1>         |
+  <JueyunGuoba: 1>            |   <StreamingSurge: 1>         |
+  <MondstadtHashBrown: 1>     |   <MintyMeatRolls: 1>         |
+  <ThunderingPenance: 1>      |   <Xudong: 1>                 |
+  <SweetMadame: 1>            |   <NorthernSmokedChicken: 1>  |
 <Deck Cards>                  | <Deck Cards>                  |
-  <SweetMadame: 1>            |   <SweetMadame: 2>            |
-  <NorthernSmokedChicken: 1>  |   <NorthernSmokedChicken: 2>  |
-  <MushroomPizza: 2>          |   <MushroomPizza: 2>          |
-  <Xudong: 1>                 |   <Xudong: 2>                 |
+  <Xudong: 2>                 |   <Xudong: 1>                 |
   <MintyMeatRolls: 2>         |   <MintyMeatRolls: 1>         |
   <LeaveItToMe: 2>            |   <LeaveItToMe: 2>            |
-  <LotusFlowerCrisp: 1>       |   <LotusFlowerCrisp: 1>       |
-  <ChangingShifts: 2>         |   <ChangingShifts: 1>         |
-  <StreamingSurge: 2>         |   <StreamingSurge: 2>         |
-  <JueyunGuoba: 2>            |   <JueyunGuoba: 2>            |
-  <ColdBloodedStrike: 2>      |   <ColdBloodedStrike: 1>      |
-  <MondstadtHashBrown: 2>     |   <MondstadtHashBrown: 2>     |
-  <Starsigns: 2>              |   <Starsigns: 1>              |
+  <LotusFlowerCrisp: 2>       |   <LotusFlowerCrisp: 2>       |
+  <ChangingShifts: 1>         |   <ChangingShifts: 1>         |
+  <StreamingSurge: 2>         |   <StreamingSurge: 1>         |
+  <JueyunGuoba: 1>            |   <JueyunGuoba: 2>            |
+  <ColdBloodedStrike: 2>      |   <ColdBloodedStrike: 2>      |
+  <MondstadtHashBrown: 1>     |   <MondstadtHashBrown: 2>     |
+  <Starsigns: 2>              |   <Starsigns: 2>              |
   <ThunderingPenance: 1>      |   <ThunderingPenance: 2>      |
+  <SweetMadame: 1>            |   <SweetMadame: 2>            |
+  <NorthernSmokedChicken: 2>  |   <NorthernSmokedChicken: 1>  |
+  <MushroomPizza: 2>          |   <MushroomPizza: 2>          |
 <Publicly Used Cards>         | <Publicly Used Cards>         |
 ---------------------------------------------------------------
 <Effects>
 ===============================================================
-#### Player1 Action: CardSelectAction[<LotusFlowerCrisp>: 1; <NorthernSmokedChicken>: 1; <SweetMadame>: 1; ]
+#### Player2 Action: CardsSelectAction[<NorthernSmokedChicken>: 1; ]
 
 :> 
-```
-
-You may have noticed this by the end of the last code-block.
-
-```
-#### Player1 Action: CardSelectAction[<LotusFlowerCrisp>: 1; <NorthernSmokedChicken>: 1; <SweetMadame>: 1; ]
-```
-
-It is the automatic message indicating what the player's action is in this game state.
-
-Some people may have questions here.
-"Didn't I choose **PVE**, why the action is done automatically?"
-
-Well, sorry about that,
-the user-interaction for the initializing phases of the game are not done yet.
-But trust me, you are free to choose what you want to do once you are in the ***action phase***,
-which is the one players care the most right?
-
-So for now, let's `auto-step` all the way to ***action phase***.
-
-``` terminal
-:>     // noticed there's no input here?
-        // Actually I just entered nothing to repeat last command
-<Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
----------------------------------------------------------------
+<Mode: DefaultMode>  <Phase: StartingHandSelectPhase>  <Round: 0>
+-----------------------------------------------------------------
 <Player: *Player1>            | <Player: Player2>             |
-<Phase: Action Phase>         | <Phase: Passive Wait Phase>   |
+<Phase: Action Phase>         | <Phase: Action Phase>         |
 <Card Redraw Chances: 0>      | <Card Redraw Chances: 0>      |
 <Characters>                  | <Characters>                  |
-  <*RhodeiaOfLoch>            |   <RhodeiaOfLoch>             |
+  <Keqing>                    |   <Keqing>                    |
     <id: 1>                   |     <id: 1>                   |
+    <Aura: []>                |     <Aura: []>                |
+    <HP: 10/10>               |     <HP: 10/10>               |
+    <Energy: 0/3>             |     <Energy: 0/3>             |
+    <Talents>                 |     <Talents>                 |
+      <KeqingTalent(0)>       |       <KeqingTalent(0)>       |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
+  <RhodeiaOfLoch>             |   <RhodeiaOfLoch>             |
+    <id: 2>                   |     <id: 2>                   |
     <Aura: []>                |     <Aura: []>                |
     <HP: 10/10>               |     <HP: 10/10>               |
     <Energy: 0/3>             |     <Energy: 0/3>             |
@@ -247,132 +265,58 @@ So for now, let's `auto-step` all the way to ***action phase***.
     <Equipments>              |     <Equipments>              |
     <Statuses>                |     <Statuses>                |
   <Kaeya>                     |   <Kaeya>                     |
-    <id: 2>                   |     <id: 2>                   |
+    <id: 3>                   |     <id: 3>                   |
     <Aura: []>                |     <Aura: []>                |
     <HP: 10/10>               |     <HP: 10/10>               |
     <Energy: 0/2>             |     <Energy: 0/2>             |
     <Talents>                 |     <Talents>                 |
-    <Equipments>              |     <Equipments>              |
-    <Statuses>                |     <Statuses>                |
-  <Keqing>                    |   <*Keqing>                   |
-    <id: 3>                   |     <id: 3>                   |
-    <Aura: []>                |     <Aura: []>                |
-    <HP: 10/10>               |     <HP: 10/10>               |
-    <Energy: 0/3>             |     <Energy: 0/3>             |
-    <Talents>                 |     <Talents>                 |
-      <KeqingTalent(0)>       |       <KeqingTalent(0)>       |
     <Equipments>              |     <Equipments>              |
     <Statuses>                |     <Statuses>                |
 <Combat Statuses: []>         | <Combat Statuses: []>         |
 <Summons>                     | <Summons>                     |
 <Supports>                    | <Supports>                    |
 <Dices>                       | <Dices>                       |
-  <OMNI: 8>                   |   <OMNI: 8>                   |
 <Hand Cards>                  | <Hand Cards>                  |
-  <Xudong: 1>                 |   <LotusFlowerCrisp: 1>       |
-  <MondstadtHashBrown: 1>     |   <ChangingShifts: 1>         |
-  <Starsigns: 1>              |   <JueyunGuoba: 1>            |
-  <LeaveItToMe: 1>            |   <Starsigns: 1>              |
-  <ThunderingPenance: 1>      |   <ThunderingPenance: 1>      |
+  <ChangingShifts: 1>         |   <Xudong: 1>                 |
+  <JueyunGuoba: 1>            |   <MintyMeatRolls: 1>         |
+  <MondstadtHashBrown: 1>     |   <NorthernSmokedChicken: 1>  |
+  <ThunderingPenance: 1>      |   <ChangingShifts: 1>         |
+  <SweetMadame: 1>            |   <StreamingSurge: 1>         |
 <Deck Cards>                  | <Deck Cards>                  |
-  <SweetMadame: 2>            |   <SweetMadame: 2>            |
-  <NorthernSmokedChicken: 2>  |   <NorthernSmokedChicken: 2>  |
-  <MushroomPizza: 2>          |   <MushroomPizza: 2>          |
-  <Xudong: 1>                 |   <Xudong: 2>                 |
-  <MintyMeatRolls: 2>         |   <MintyMeatRolls: 2>         |
-  <LeaveItToMe: 1>            |   <LeaveItToMe: 2>            |
-  <LotusFlowerCrisp: 2>       |   <LotusFlowerCrisp: 1>       |
-  <ChangingShifts: 2>         |   <ChangingShifts: 1>         |
-  <StreamingSurge: 2>         |   <StreamingSurge: 2>         |
-  <JueyunGuoba: 2>            |   <JueyunGuoba: 1>            |
+  <Xudong: 2>                 |   <Xudong: 1>                 |
+  <MintyMeatRolls: 2>         |   <MintyMeatRolls: 1>         |
+  <LeaveItToMe: 2>            |   <LeaveItToMe: 2>            |
+  <LotusFlowerCrisp: 2>       |   <LotusFlowerCrisp: 2>       |
+  <ChangingShifts: 1>         |   <ChangingShifts: 1>         |
+  <StreamingSurge: 2>         |   <StreamingSurge: 1>         |
+  <JueyunGuoba: 1>            |   <JueyunGuoba: 2>            |
   <ColdBloodedStrike: 2>      |   <ColdBloodedStrike: 2>      |
   <MondstadtHashBrown: 1>     |   <MondstadtHashBrown: 2>     |
-  <Starsigns: 1>              |   <Starsigns: 1>              |
-  <ThunderingPenance: 1>      |   <ThunderingPenance: 1>      |
+  <Starsigns: 2>              |   <Starsigns: 2>              |
+  <ThunderingPenance: 1>      |   <ThunderingPenance: 2>      |
+  <SweetMadame: 1>            |   <SweetMadame: 2>            |
+  <NorthernSmokedChicken: 2>  |   <NorthernSmokedChicken: 1>  |
+  <MushroomPizza: 2>          |   <MushroomPizza: 2>          |
 <Publicly Used Cards>         | <Publicly Used Cards>         |
----------------------------------------------------------------
+-----------------------------------------------------------------
 <Effects>
-===============================================================
-[info] :> Player1's Action Time!
+=================================================================
 Choices are:
-@0: Card  |||  @1: Skill  |||  @2: Swap  |||  @3: EndRound
+@0: 1  |||  @1: 2  |||  @2: 3
+Please choose id (0-2)
+::> @0
 
-Please choose id (0-3): @     // next input goes here
-```
-
-As usual, the latest game state is nicely printed,
-and the prompt at the bottom tells you it's player1's turn.
-(when in PVE mode, the user is player1)
-
-Now you may choose the category of action that you want to do.
-
-***Warning***: once you have entered you choice to CLI, you cannot redo what you've done.
-Unless for some reason, you cannot use the entire category of action.
-(e.g. if you choose `Skill` when your character is frozen
-or you just don't have enough dices for any skill,
-then your request is automatically judged as invalid and CLI will prompt you to make another choice)
-
-(The redo thing is just not implemented currently as it has a low priority)
-
-Anyways, as we have `Xudong` in our hands, let's play it.
-
-``` terminal
-[info] :> Player1's Action Time!
-Choices are:
-@0: Card  |||  @1: Skill  |||  @2: Swap  |||  @3: EndRound
-
-Please choose id (0-3): @0    // first input
-
-Choices are:
-@0: Xudong  |||  @1: Starsigns  |||  @2: LeaveItToMe
-
-Please choose id (0-2): @0    // second input
-
-#### Player1 Action: <Xudong, DiceOnlyInstruction:(dices=<OMNI>: 2
-)>
+#### Player1 Action: CharacterSelectAction:(char_id=1)
 
 :> 
-```
-
-(Note that you don't need to (a better way of saying currently you cannot) choose the dices
-to pay for your action. It is automatically chosen for you. And as to the all `OMNI` dices thing,
-other dices are supported, but to make sure you can play as you wish, I made game to only
-give you `OMNI` dices.)
-
-You may have noticed your action is accepted (seeing `#### ...`), hooray!
-
-Wait, why am I not seeing what is happening next?
-The reason is CLI asked for an action because it cannot proceed without one.
-But you are the one who need to control if the game-state should *step* forward.
-
-Remember your last command input? `a` that is. So enter nothing to proceed.
-
-```
-:> 
-<Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
----------------------------------------------------------------
-<Player: *Player1>            | <Player: Player2>             |
-<Phase: Action Phase>         | <Phase: Passive Wait Phase>   |
+<Mode: DefaultMode>  <Phase: StartingHandSelectPhase>  <Round: 0>
+-----------------------------------------------------------------
+<Player: Player1>             | <Player: *Player2>            |
+<Phase: End Phase>            | <Phase: Action Phase>         |
 <Card Redraw Chances: 0>      | <Card Redraw Chances: 0>      |
 <Characters>                  | <Characters>                  |
-  <*RhodeiaOfLoch>            |   <RhodeiaOfLoch>             |
+  <*Keqing>                   |   <Keqing>                    |
     <id: 1>                   |     <id: 1>                   |
-    <Aura: []>                |     <Aura: []>                |
-    <HP: 10/10>               |     <HP: 10/10>               |
-    <Energy: 0/3>             |     <Energy: 0/3>             |
-    <Talents>                 |     <Talents>                 |
-    <Equipments>              |     <Equipments>              |
-    <Statuses>                |     <Statuses>                |
-  <Kaeya>                     |   <Kaeya>                     |
-    <id: 2>                   |     <id: 2>                   |
-    <Aura: []>                |     <Aura: []>                |
-    <HP: 10/10>               |     <HP: 10/10>               |
-    <Energy: 0/2>             |     <Energy: 0/2>             |
-    <Talents>                 |     <Talents>                 |
-    <Equipments>              |     <Equipments>              |
-    <Statuses>                |     <Statuses>                |
-  <Keqing>                    |   <*Keqing>                   |
-    <id: 3>                   |     <id: 3>                   |
     <Aura: []>                |     <Aura: []>                |
     <HP: 10/10>               |     <HP: 10/10>               |
     <Energy: 0/3>             |     <Energy: 0/3>             |
@@ -380,144 +324,441 @@ Remember your last command input? `a` that is. So enter nothing to proceed.
       <KeqingTalent(0)>       |       <KeqingTalent(0)>       |
     <Equipments>              |     <Equipments>              |
     <Statuses>                |     <Statuses>                |
+  <RhodeiaOfLoch>             |   <RhodeiaOfLoch>             |
+    <id: 2>                   |     <id: 2>                   |
+    <Aura: []>                |     <Aura: []>                |
+    <HP: 10/10>               |     <HP: 10/10>               |
+    <Energy: 0/3>             |     <Energy: 0/3>             |
+    <Talents>                 |     <Talents>                 |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
+  <Kaeya>                     |   <Kaeya>                     |
+    <id: 3>                   |     <id: 3>                   |
+    <Aura: []>                |     <Aura: []>                |
+    <HP: 10/10>               |     <HP: 10/10>               |
+    <Energy: 0/2>             |     <Energy: 0/2>             |
+    <Talents>                 |     <Talents>                 |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
 <Combat Statuses: []>         | <Combat Statuses: []>         |
 <Summons>                     | <Summons>                     |
 <Supports>                    | <Supports>                    |
-  <Xudong<1>: (1)>            | <Dices>                       |
-<Dices>                       |   <OMNI: 8>                   |
-  <OMNI: 6>                   | <Hand Cards>                  |
-<Hand Cards>                  |   <LotusFlowerCrisp: 1>       |
-  <LeaveItToMe: 1>            |   <ChangingShifts: 1>         |
-  <MondstadtHashBrown: 1>     |   <JueyunGuoba: 1>            |
-  <Starsigns: 1>              |   <Starsigns: 1>              |
-  <ThunderingPenance: 1>      |   <ThunderingPenance: 1>      |
+<Dices>                       | <Dices>                       |
+<Hand Cards>                  | <Hand Cards>                  |
+  <ChangingShifts: 1>         |   <Xudong: 1>                 |
+  <JueyunGuoba: 1>            |   <MintyMeatRolls: 1>         |
+  <MondstadtHashBrown: 1>     |   <NorthernSmokedChicken: 1>  |
+  <ThunderingPenance: 1>      |   <ChangingShifts: 1>         |
+  <SweetMadame: 1>            |   <StreamingSurge: 1>         |
 <Deck Cards>                  | <Deck Cards>                  |
-  <SweetMadame: 2>            |   <SweetMadame: 2>            |
-  <NorthernSmokedChicken: 2>  |   <NorthernSmokedChicken: 2>  |
-  <MushroomPizza: 2>          |   <MushroomPizza: 2>          |
-  <Xudong: 1>                 |   <Xudong: 2>                 |
-  <MintyMeatRolls: 2>         |   <MintyMeatRolls: 2>         |
-  <LeaveItToMe: 1>            |   <LeaveItToMe: 2>            |
-  <LotusFlowerCrisp: 2>       |   <LotusFlowerCrisp: 1>       |
-  <ChangingShifts: 2>         |   <ChangingShifts: 1>         |
-  <StreamingSurge: 2>         |   <StreamingSurge: 2>         |
-  <JueyunGuoba: 2>            |   <JueyunGuoba: 1>            |
+  <Xudong: 2>                 |   <Xudong: 1>                 |
+  <MintyMeatRolls: 2>         |   <MintyMeatRolls: 1>         |
+  <LeaveItToMe: 2>            |   <LeaveItToMe: 2>            |
+  <LotusFlowerCrisp: 2>       |   <LotusFlowerCrisp: 2>       |
+  <ChangingShifts: 1>         |   <ChangingShifts: 1>         |
+  <StreamingSurge: 2>         |   <StreamingSurge: 1>         |
+  <JueyunGuoba: 1>            |   <JueyunGuoba: 2>            |
   <ColdBloodedStrike: 2>      |   <ColdBloodedStrike: 2>      |
   <MondstadtHashBrown: 1>     |   <MondstadtHashBrown: 2>     |
-  <Starsigns: 1>              |   <Starsigns: 1>              |
-  <ThunderingPenance: 1>      |   <ThunderingPenance: 1>      |
+  <Starsigns: 2>              |   <Starsigns: 2>              |
+  <ThunderingPenance: 1>      |   <ThunderingPenance: 2>      |
+  <SweetMadame: 1>            |   <SweetMadame: 2>            |
+  <NorthernSmokedChicken: 2>  |   <NorthernSmokedChicken: 1>  |
+  <MushroomPizza: 2>          |   <MushroomPizza: 2>          |
 <Publicly Used Cards>         | <Publicly Used Cards>         |
-  <Xudong: 1>                 |                               |
+-----------------------------------------------------------------
+<Effects>
+=================================================================
+#### Player2 Action: CharacterSelectAction:(char_id=2)
+
+:> 
+<Mode: DefaultMode>  <Phase: RollPhase>  <Round: 0>
+---------------------------------------------------------------
+<Player: *Player1>            | <Player: Player2>             |
+<Phase: Action Phase>         | <Phase: Action Phase>         |
+<Card Redraw Chances: 0>      | <Card Redraw Chances: 0>      |
+<Characters>                  | <Characters>                  |
+  <*Keqing>                   |   <Keqing>                    |
+    <id: 1>                   |     <id: 1>                   |
+    <Aura: []>                |     <Aura: []>                |
+    <HP: 10/10>               |     <HP: 10/10>               |
+    <Energy: 0/3>             |     <Energy: 0/3>             |
+    <Talents>                 |     <Talents>                 |
+      <KeqingTalent(0)>       |       <KeqingTalent(0)>       |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
+  <RhodeiaOfLoch>             |   <*RhodeiaOfLoch>            |
+    <id: 2>                   |     <id: 2>                   |
+    <Aura: []>                |     <Aura: []>                |
+    <HP: 10/10>               |     <HP: 10/10>               |
+    <Energy: 0/3>             |     <Energy: 0/3>             |
+    <Talents>                 |     <Talents>                 |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
+  <Kaeya>                     |   <Kaeya>                     |
+    <id: 3>                   |     <id: 3>                   |
+    <Aura: []>                |     <Aura: []>                |
+    <HP: 10/10>               |     <HP: 10/10>               |
+    <Energy: 0/2>             |     <Energy: 0/2>             |
+    <Talents>                 |     <Talents>                 |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
+<Combat Statuses: []>         | <Combat Statuses: []>         |
+<Summons>                     | <Summons>                     |
+<Supports>                    | <Supports>                    |
+<Dices>                       | <Dices>                       |
+  <HYDRO: 1>                  |   <OMNI: 2>                   |
+  <GEO: 1>                    |   <GEO: 1>                    |
+  <CRYO: 1>                   |   <CRYO: 1>                   |
+  <ELECTRO: 5>                |   <ELECTRO: 3>                |
+<Hand Cards>                  |   <PYRO: 1>                   |
+  <ChangingShifts: 1>         | <Hand Cards>                  |
+  <JueyunGuoba: 1>            |   <Xudong: 1>                 |
+  <MondstadtHashBrown: 1>     |   <MintyMeatRolls: 1>         |
+  <ThunderingPenance: 1>      |   <NorthernSmokedChicken: 1>  |
+  <SweetMadame: 1>            |   <ChangingShifts: 1>         |
+<Deck Cards>                  |   <StreamingSurge: 1>         |
+  <Xudong: 2>                 | <Deck Cards>                  |
+  <MintyMeatRolls: 2>         |   <Xudong: 1>                 |
+  <LeaveItToMe: 2>            |   <MintyMeatRolls: 1>         |
+  <LotusFlowerCrisp: 2>       |   <LeaveItToMe: 2>            |
+  <ChangingShifts: 1>         |   <LotusFlowerCrisp: 2>       |
+  <StreamingSurge: 2>         |   <ChangingShifts: 1>         |
+  <JueyunGuoba: 1>            |   <StreamingSurge: 1>         |
+  <ColdBloodedStrike: 2>      |   <JueyunGuoba: 2>            |
+  <MondstadtHashBrown: 1>     |   <ColdBloodedStrike: 2>      |
+  <Starsigns: 2>              |   <MondstadtHashBrown: 2>     |
+  <ThunderingPenance: 1>      |   <Starsigns: 2>              |
+  <SweetMadame: 1>            |   <ThunderingPenance: 2>      |
+  <NorthernSmokedChicken: 2>  |   <SweetMadame: 2>            |
+  <MushroomPizza: 2>          |   <NorthernSmokedChicken: 1>  |
+<Publicly Used Cards>         |   <MushroomPizza: 2>          |
+                              | <Publicly Used Cards>         |
 ---------------------------------------------------------------
 <Effects>
 ===============================================================
-[info] :> Player1's Action Time!
 Choices are:
-@0: Card  |||  @1: Skill  |||  @2: Swap  |||  @3: EndRound
+@0: SELECT_DICES  |||  @1: END_ROUND
+Please choose id (0-1)
+::> @0
 
-Please choose id (0-3): @
-```
+Selections are:
+@1: <HYDRO, 1>  |||  @2: <GEO, 1>  |||  @3: <CRYO, 1>  |||  @4: <ELECTRO, 5>
+e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
+::> 1:100    // deliberate faulty input, player doesn't have 100 HYDO dices
 
-Playing `Xudong` isn't a combat action, so it is still your turn.
+[error] -- Last input is invalid!
+Selections are:
+@1: <HYDRO, 1>  |||  @2: <GEO, 1>  |||  @3: <CRYO, 1>  |||  @4: <ELECTRO, 5>
+e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
+::> 5:1    // deliberate faulty input, player doesn't have die with index @5
 
-According to the `game state` printed above, my active character is Rhodeia (Oceanid).
-Let's summon!
+[error] -- Last input is invalid!
+Selections are:
+@1: <HYDRO, 1>  |||  @2: <GEO, 1>  |||  @3: <CRYO, 1>  |||  @4: <ELECTRO, 5>
+e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
+::> 1:1, 2:1    // finally I gave some correct input
 
-``` terminal
-[info] :> Player1's Action Time!
-Choices are:
-@0: Card  |||  @1: Skill  |||  @2: Swap  |||  @3: EndRound
-
-Please choose id (0-3): @1
-
-Choices are:
-@0: NORMAL_ATTACK  |||  @1: ELEMENTAL_SKILL1  |||  @2: ELEMENTAL_SKILL2
-
-Please choose id (0-2): @2
-
-#### Player1 Action: <CharacterSkill.ELEMENTAL_SKILL2, DiceOnlyInstruction:(dices=<OMNI>: 5
-)>
+#### Player1 Action: DicesSelectAction[<HYDRO>: 1; <GEO>: 1; ]
 
 :> 
-```
+<Mode: DefaultMode>  <Phase: RollPhase>  <Round: 0>
+---------------------------------------------------------------
+<Player: *Player1>            | <Player: Player2>             |
+<Phase: End Phase>            | <Phase: Action Phase>         |
+<Card Redraw Chances: 0>      | <Card Redraw Chances: 0>      |
+<Characters>                  | <Characters>                  |
+  <*Keqing>                   |   <Keqing>                    |
+    <id: 1>                   |     <id: 1>                   |
+    <Aura: []>                |     <Aura: []>                |
+    <HP: 10/10>               |     <HP: 10/10>               |
+    <Energy: 0/3>             |     <Energy: 0/3>             |
+    <Talents>                 |     <Talents>                 |
+      <KeqingTalent(0)>       |       <KeqingTalent(0)>       |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
+  <RhodeiaOfLoch>             |   <*RhodeiaOfLoch>            |
+    <id: 2>                   |     <id: 2>                   |
+    <Aura: []>                |     <Aura: []>                |
+    <HP: 10/10>               |     <HP: 10/10>               |
+    <Energy: 0/3>             |     <Energy: 0/3>             |
+    <Talents>                 |     <Talents>                 |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
+  <Kaeya>                     |   <Kaeya>                     |
+    <id: 3>                   |     <id: 3>                   |
+    <Aura: []>                |     <Aura: []>                |
+    <HP: 10/10>               |     <HP: 10/10>               |
+    <Energy: 0/2>             |     <Energy: 0/2>             |
+    <Talents>                 |     <Talents>                 |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
+<Combat Statuses: []>         | <Combat Statuses: []>         |
+<Summons>                     | <Summons>                     |
+<Supports>                    | <Supports>                    |
+<Dices>                       | <Dices>                       |
+  <OMNI: 1>                   |   <OMNI: 2>                   |
+  <GEO: 1>                    |   <GEO: 1>                    |
+  <CRYO: 1>                   |   <CRYO: 1>                   |
+  <ELECTRO: 5>                |   <ELECTRO: 3>                |
+<Hand Cards>                  |   <PYRO: 1>                   |
+  <ChangingShifts: 1>         | <Hand Cards>                  |
+  <JueyunGuoba: 1>            |   <Xudong: 1>                 |
+  <MondstadtHashBrown: 1>     |   <MintyMeatRolls: 1>         |
+  <ThunderingPenance: 1>      |   <NorthernSmokedChicken: 1>  |
+  <SweetMadame: 1>            |   <ChangingShifts: 1>         |
+<Deck Cards>                  |   <StreamingSurge: 1>         |
+  <Xudong: 2>                 | <Deck Cards>                  |
+  <MintyMeatRolls: 2>         |   <Xudong: 1>                 |
+  <LeaveItToMe: 2>            |   <MintyMeatRolls: 1>         |
+  <LotusFlowerCrisp: 2>       |   <LeaveItToMe: 2>            |
+  <ChangingShifts: 1>         |   <LotusFlowerCrisp: 2>       |
+  <StreamingSurge: 2>         |   <ChangingShifts: 1>         |
+  <JueyunGuoba: 1>            |   <StreamingSurge: 1>         |
+  <ColdBloodedStrike: 2>      |   <JueyunGuoba: 2>            |
+  <MondstadtHashBrown: 1>     |   <ColdBloodedStrike: 2>      |
+  <Starsigns: 2>              |   <MondstadtHashBrown: 2>     |
+  <ThunderingPenance: 1>      |   <Starsigns: 2>              |
+  <SweetMadame: 1>            |   <ThunderingPenance: 2>      |
+  <NorthernSmokedChicken: 2>  |   <SweetMadame: 2>            |
+  <MushroomPizza: 2>          |   <NorthernSmokedChicken: 1>  |
+<Publicly Used Cards>         |   <MushroomPizza: 2>          |
+                              | <Publicly Used Cards>         |
+---------------------------------------------------------------
+<Effects>
+===============================================================
+#### Player2 Action: DicesSelectAction[<OMNI>: 1; ]
 
-And enter nothing to proceed.
+:> 
+<Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
+---------------------------------------------------------------
+<Player: *Player1>            | <Player: Player2>             |
+<Phase: Action Phase>         | <Phase: Passive Wait Phase>   |
+<Card Redraw Chances: 0>      | <Card Redraw Chances: 0>      |
+<Characters>                  | <Characters>                  |
+  <*Keqing>                   |   <Keqing>                    |
+    <id: 1>                   |     <id: 1>                   |
+    <Aura: []>                |     <Aura: []>                |
+    <HP: 10/10>               |     <HP: 10/10>               |
+    <Energy: 0/3>             |     <Energy: 0/3>             |
+    <Talents>                 |     <Talents>                 |
+      <KeqingTalent(0)>       |       <KeqingTalent(0)>       |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
+  <RhodeiaOfLoch>             |   <*RhodeiaOfLoch>            |
+    <id: 2>                   |     <id: 2>                   |
+    <Aura: []>                |     <Aura: []>                |
+    <HP: 10/10>               |     <HP: 10/10>               |
+    <Energy: 0/3>             |     <Energy: 0/3>             |
+    <Talents>                 |     <Talents>                 |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
+  <Kaeya>                     |   <Kaeya>                     |
+    <id: 3>                   |     <id: 3>                   |
+    <Aura: []>                |     <Aura: []>                |
+    <HP: 10/10>               |     <HP: 10/10>               |
+    <Energy: 0/2>             |     <Energy: 0/2>             |
+    <Talents>                 |     <Talents>                 |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
+<Combat Statuses: []>         | <Combat Statuses: []>         |
+<Summons>                     | <Summons>                     |
+<Supports>                    | <Supports>                    |
+<Dices>                       | <Dices>                       |
+  <OMNI: 1>                   |   <OMNI: 2>                   |
+  <GEO: 1>                    |   <GEO: 1>                    |
+  <CRYO: 1>                   |   <CRYO: 1>                   |
+  <ELECTRO: 5>                |   <ELECTRO: 3>                |
+<Hand Cards>                  |   <PYRO: 1>                   |
+  <ChangingShifts: 1>         | <Hand Cards>                  |
+  <JueyunGuoba: 1>            |   <Xudong: 1>                 |
+  <MondstadtHashBrown: 1>     |   <MintyMeatRolls: 1>         |
+  <ThunderingPenance: 1>      |   <NorthernSmokedChicken: 1>  |
+  <SweetMadame: 1>            |   <ChangingShifts: 1>         |
+<Deck Cards>                  |   <StreamingSurge: 1>         |
+  <Xudong: 2>                 | <Deck Cards>                  |
+  <MintyMeatRolls: 2>         |   <Xudong: 1>                 |
+  <LeaveItToMe: 2>            |   <MintyMeatRolls: 1>         |
+  <LotusFlowerCrisp: 2>       |   <LeaveItToMe: 2>            |
+  <ChangingShifts: 1>         |   <LotusFlowerCrisp: 2>       |
+  <StreamingSurge: 2>         |   <ChangingShifts: 1>         |
+  <JueyunGuoba: 1>            |   <StreamingSurge: 1>         |
+  <ColdBloodedStrike: 2>      |   <JueyunGuoba: 2>            |
+  <MondstadtHashBrown: 1>     |   <ColdBloodedStrike: 2>      |
+  <Starsigns: 2>              |   <MondstadtHashBrown: 2>     |
+  <ThunderingPenance: 1>      |   <Starsigns: 2>              |
+  <SweetMadame: 1>            |   <ThunderingPenance: 2>      |
+  <NorthernSmokedChicken: 2>  |   <SweetMadame: 2>            |
+  <MushroomPizza: 2>          |   <NorthernSmokedChicken: 1>  |
+<Publicly Used Cards>         |   <MushroomPizza: 2>          |
+                              | <Publicly Used Cards>         |
+---------------------------------------------------------------
+<Effects>
+===============================================================
+Choices are:
+@0: PLAY_CARD  |||  @1: CAST_SKILL  |||  @2: SWAP_CHARACTER  |||  @3: ELEMENTAL_TUNING  |||  @4: END_ROUND
+Please choose id (0-4)
+::> @1
 
-``` terminal
-:>     // last input
+Choices are:
+@0: NORMAL_ATTACK  |||  @1: ELEMENTAL_SKILL1
+Please choose id (0-1)
+::> @1
+
+[info] -- You need to pay for [('ELECTRO', '3')]
+[info] -- auto-choice is [('ELECTRO', '3')]
+[info] -- Enter nothing if you agree with the auto-choice
+Selections are:
+@0: <OMNI, 1>  |||  @2: <GEO, 1>  |||  @3: <CRYO, 1>  |||  @4: <ELECTRO, 5>
+e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
+::> 0:1, 2:1, 3:1    // give some faulty input as an example
+
+[error] -- [('OMNI', '1'), ('GEO', '1'), ('CRYO', '1')] not valid
+[info] -- auto-choice is [('ELECTRO', '3')]
+[info] -- Enter nothing if you agree with the auto-choice
+Selections are:
+@0: <OMNI, 1>  |||  @2: <GEO, 1>  |||  @3: <CRYO, 1>  |||  @4: <ELECTRO, 5>
+e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
+::>     // entered nothing to use suggested dices
+
+#### Player1 Action: <CharacterSkill.ELEMENTAL_SKILL1, DiceOnlyInstruction:(dices=[('ELECTRO', '3')])>
+
+:> 
 <Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
 ---------------------------------------------------------------
 <Player: Player1>             | <Player: *Player2>            |
 <Phase: Passive Wait Phase>   | <Phase: Action Phase>         |
 <Card Redraw Chances: 0>      | <Card Redraw Chances: 0>      |
 <Characters>                  | <Characters>                  |
-  <*RhodeiaOfLoch>            |   <RhodeiaOfLoch>             |
+  <*Keqing>                   |   <Keqing>                    |
     <id: 1>                   |     <id: 1>                   |
     <Aura: []>                |     <Aura: []>                |
     <HP: 10/10>               |     <HP: 10/10>               |
     <Energy: 1/3>             |     <Energy: 0/3>             |
     <Talents>                 |     <Talents>                 |
+      <KeqingTalent(0)>       |       <KeqingTalent(0)>       |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
+  <RhodeiaOfLoch>             |   <*RhodeiaOfLoch>            |
+    <id: 2>                   |     <id: 2>                   |
+    <Aura: []>                |     <Aura: [ELECTRO]>         |
+    <HP: 10/10>               |     <HP: 7/10>                |
+    <Energy: 0/3>             |     <Energy: 0/3>             |
+    <Talents>                 |     <Talents>                 |
     <Equipments>              |     <Equipments>              |
     <Statuses>                |     <Statuses>                |
   <Kaeya>                     |   <Kaeya>                     |
-    <id: 2>                   |     <id: 2>                   |
+    <id: 3>                   |     <id: 3>                   |
     <Aura: []>                |     <Aura: []>                |
     <HP: 10/10>               |     <HP: 10/10>               |
     <Energy: 0/2>             |     <Energy: 0/2>             |
     <Talents>                 |     <Talents>                 |
     <Equipments>              |     <Equipments>              |
     <Statuses>                |     <Statuses>                |
-  <Keqing>                    |   <*Keqing>                   |
-    <id: 3>                   |     <id: 3>                   |
+<Combat Statuses: []>         | <Combat Statuses: []>         |
+<Summons>                     | <Summons>                     |
+<Supports>                    | <Supports>                    |
+<Dices>                       | <Dices>                       |
+  <OMNI: 1>                   |   <OMNI: 2>                   |
+  <GEO: 1>                    |   <GEO: 1>                    |
+  <CRYO: 1>                   |   <CRYO: 1>                   |
+  <ELECTRO: 2>                |   <ELECTRO: 3>                |
+<Hand Cards>                  |   <PYRO: 1>                   |
+  <MondstadtHashBrown: 1>     | <Hand Cards>                  |
+  <ThunderingPenance: 1>      |   <Xudong: 1>                 |
+  <SweetMadame: 1>            |   <MintyMeatRolls: 1>         |
+  <ChangingShifts: 1>         |   <NorthernSmokedChicken: 1>  |
+  <LightningStiletto: 1>      |   <ChangingShifts: 1>         |
+  <JueyunGuoba: 1>            |   <StreamingSurge: 1>         |
+<Deck Cards>                  | <Deck Cards>                  |
+  <Xudong: 2>                 |   <Xudong: 1>                 |
+  <MintyMeatRolls: 2>         |   <MintyMeatRolls: 1>         |
+  <LeaveItToMe: 2>            |   <LeaveItToMe: 2>            |
+  <LotusFlowerCrisp: 2>       |   <LotusFlowerCrisp: 2>       |
+  <ChangingShifts: 1>         |   <ChangingShifts: 1>         |
+  <StreamingSurge: 2>         |   <StreamingSurge: 1>         |
+  <JueyunGuoba: 1>            |   <JueyunGuoba: 2>            |
+  <ColdBloodedStrike: 2>      |   <ColdBloodedStrike: 2>      |
+  <MondstadtHashBrown: 1>     |   <MondstadtHashBrown: 2>     |
+  <Starsigns: 2>              |   <Starsigns: 2>              |
+  <ThunderingPenance: 1>      |   <ThunderingPenance: 2>      |
+  <SweetMadame: 1>            |   <SweetMadame: 2>            |
+  <NorthernSmokedChicken: 2>  |   <NorthernSmokedChicken: 1>  |
+  <MushroomPizza: 2>          |   <MushroomPizza: 2>          |
+<Publicly Used Cards>         | <Publicly Used Cards>         |
+---------------------------------------------------------------
+<Effects>
+===============================================================
+#### Player2 Action: ElementalTuningAction:(card=<class 'src.dgisim.card.card.ChangingShifts'>, dice_elem=Element.ELECTRO)
+
+:> 
+<Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
+---------------------------------------------------------------
+<Player: Player1>             | <Player: *Player2>            |
+<Phase: Passive Wait Phase>   | <Phase: Action Phase>         |
+<Card Redraw Chances: 0>      | <Card Redraw Chances: 0>      |
+<Characters>                  | <Characters>                  |
+  <*Keqing>                   |   <Keqing>                    |
+    <id: 1>                   |     <id: 1>                   |
     <Aura: []>                |     <Aura: []>                |
     <HP: 10/10>               |     <HP: 10/10>               |
-    <Energy: 0/3>             |     <Energy: 0/3>             |
+    <Energy: 1/3>             |     <Energy: 0/3>             |
     <Talents>                 |     <Talents>                 |
       <KeqingTalent(0)>       |       <KeqingTalent(0)>       |
     <Equipments>              |     <Equipments>              |
     <Statuses>                |     <Statuses>                |
+  <RhodeiaOfLoch>             |   <*RhodeiaOfLoch>            |
+    <id: 2>                   |     <id: 2>                   |
+    <Aura: []>                |     <Aura: [ELECTRO]>         |
+    <HP: 10/10>               |     <HP: 7/10>                |
+    <Energy: 0/3>             |     <Energy: 0/3>             |
+    <Talents>                 |     <Talents>                 |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
+  <Kaeya>                     |   <Kaeya>                     |
+    <id: 3>                   |     <id: 3>                   |
+    <Aura: []>                |     <Aura: []>                |
+    <HP: 10/10>               |     <HP: 10/10>               |
+    <Energy: 0/2>             |     <Energy: 0/2>             |
+    <Talents>                 |     <Talents>                 |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
 <Combat Statuses: []>         | <Combat Statuses: []>         |
 <Summons>                     | <Summons>                     |
-  <OceanicMimicSquirrel: 2>   | <Supports>                    |
-  <OceanicMimicFrog: 2>       | <Dices>                       |
-<Supports>                    |   <OMNI: 8>                   |
-  <Xudong<1>: (1)>            | <Hand Cards>                  |
-<Dices>                       |   <LotusFlowerCrisp: 1>       |
-  <OMNI: 1>                   |   <ChangingShifts: 1>         |
-<Hand Cards>                  |   <JueyunGuoba: 1>            |
-  <LeaveItToMe: 1>            |   <Starsigns: 1>              |
-  <MondstadtHashBrown: 1>     |   <ThunderingPenance: 1>      |
-  <Starsigns: 1>              | <Deck Cards>                  |
-  <ThunderingPenance: 1>      |   <SweetMadame: 2>            |
-<Deck Cards>                  |   <NorthernSmokedChicken: 2>  |
-  <SweetMadame: 2>            |   <MushroomPizza: 2>          |
-  <NorthernSmokedChicken: 2>  |   <Xudong: 2>                 |
-  <MushroomPizza: 2>          |   <MintyMeatRolls: 2>         |
-  <Xudong: 1>                 |   <LeaveItToMe: 2>            |
-  <MintyMeatRolls: 2>         |   <LotusFlowerCrisp: 1>       |
-  <LeaveItToMe: 1>            |   <ChangingShifts: 1>         |
-  <LotusFlowerCrisp: 2>       |   <StreamingSurge: 2>         |
-  <ChangingShifts: 2>         |   <JueyunGuoba: 1>            |
-  <StreamingSurge: 2>         |   <ColdBloodedStrike: 2>      |
-  <JueyunGuoba: 2>            |   <MondstadtHashBrown: 2>     |
-  <ColdBloodedStrike: 2>      |   <Starsigns: 1>              |
-  <MondstadtHashBrown: 1>     |   <ThunderingPenance: 1>      |
-  <Starsigns: 1>              | <Publicly Used Cards>         |
-  <ThunderingPenance: 1>      |                               |
-<Publicly Used Cards>         |                               |
-  <Xudong: 1>                 |                               |
+<Supports>                    | <Supports>                    |
+<Dices>                       | <Dices>                       |
+  <OMNI: 1>                   |   <OMNI: 2>                   |
+  <GEO: 1>                    |   <HYDRO: 1>                  |
+  <CRYO: 1>                   |   <GEO: 1>                    |
+  <ELECTRO: 2>                |   <CRYO: 1>                   |
+<Hand Cards>                  |   <ELECTRO: 2>                |
+  <MondstadtHashBrown: 1>     |   <PYRO: 1>                   |
+  <ThunderingPenance: 1>      | <Hand Cards>                  |
+  <SweetMadame: 1>            |   <Xudong: 1>                 |
+  <ChangingShifts: 1>         |   <MintyMeatRolls: 1>         |
+  <LightningStiletto: 1>      |   <NorthernSmokedChicken: 1>  |
+  <JueyunGuoba: 1>            |   <StreamingSurge: 1>         |
+<Deck Cards>                  | <Deck Cards>                  |
+  <Xudong: 2>                 |   <Xudong: 1>                 |
+  <MintyMeatRolls: 2>         |   <MintyMeatRolls: 1>         |
+  <LeaveItToMe: 2>            |   <LeaveItToMe: 2>            |
+  <LotusFlowerCrisp: 2>       |   <LotusFlowerCrisp: 2>       |
+  <ChangingShifts: 1>         |   <ChangingShifts: 1>         |
+  <StreamingSurge: 2>         |   <StreamingSurge: 1>         |
+  <JueyunGuoba: 1>            |   <JueyunGuoba: 2>            |
+  <ColdBloodedStrike: 2>      |   <ColdBloodedStrike: 2>      |
+  <MondstadtHashBrown: 1>     |   <MondstadtHashBrown: 2>     |
+  <Starsigns: 2>              |   <Starsigns: 2>              |
+  <ThunderingPenance: 1>      |   <ThunderingPenance: 2>      |
+  <SweetMadame: 1>            |   <SweetMadame: 2>            |
+  <NorthernSmokedChicken: 2>  |   <NorthernSmokedChicken: 1>  |
+  <MushroomPizza: 2>          |   <MushroomPizza: 2>          |
+<Publicly Used Cards>         | <Publicly Used Cards>         |
 ---------------------------------------------------------------
 <Effects>
 ===============================================================
-#### Player2 Action: SwapAction:(char_id=1, instruction=DiceOnlyInstruction:(dices=<OMNI>: 1
-))
+#### Player2 Action: <CharacterSkill.NORMAL_ATTACK, DiceOnlyInstruction:(dices=[('HYDRO', '1'), ('GEO', '1'), ('CRYO', '1')])>
 
-:> 
-```
-
-The computer (random player) dicided to make a swap, alright. Enter to proceed to my turn.
-
-``` terminal
 :> 
 <Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
 ---------------------------------------------------------------
@@ -525,86 +766,1066 @@ The computer (random player) dicided to make a swap, alright. Enter to proceed t
 <Phase: Action Phase>         | <Phase: Passive Wait Phase>   |
 <Card Redraw Chances: 0>      | <Card Redraw Chances: 0>      |
 <Characters>                  | <Characters>                  |
-  <*RhodeiaOfLoch>            |   <*RhodeiaOfLoch>            |
+  <*Keqing>                   |   <Keqing>                    |
     <id: 1>                   |     <id: 1>                   |
-    <Aura: []>                |     <Aura: []>                |
-    <HP: 10/10>               |     <HP: 10/10>               |
+    <Aura: [HYDRO]>           |     <Aura: []>                |
+    <HP: 9/10>                |     <HP: 10/10>               |
     <Energy: 1/3>             |     <Energy: 0/3>             |
+    <Talents>                 |     <Talents>                 |
+      <KeqingTalent(0)>       |       <KeqingTalent(0)>       |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
+  <RhodeiaOfLoch>             |   <*RhodeiaOfLoch>            |
+    <id: 2>                   |     <id: 2>                   |
+    <Aura: []>                |     <Aura: [ELECTRO]>         |
+    <HP: 10/10>               |     <HP: 7/10>                |
+    <Energy: 0/3>             |     <Energy: 1/3>             |
     <Talents>                 |     <Talents>                 |
     <Equipments>              |     <Equipments>              |
     <Statuses>                |     <Statuses>                |
   <Kaeya>                     |   <Kaeya>                     |
-    <id: 2>                   |     <id: 2>                   |
+    <id: 3>                   |     <id: 3>                   |
     <Aura: []>                |     <Aura: []>                |
     <HP: 10/10>               |     <HP: 10/10>               |
     <Energy: 0/2>             |     <Energy: 0/2>             |
     <Talents>                 |     <Talents>                 |
     <Equipments>              |     <Equipments>              |
     <Statuses>                |     <Statuses>                |
-  <Keqing>                    |   <Keqing>                    |
-    <id: 3>                   |     <id: 3>                   |
-    <Aura: []>                |     <Aura: []>                |
-    <HP: 10/10>               |     <HP: 10/10>               |
-    <Energy: 0/3>             |     <Energy: 0/3>             |
+<Combat Statuses: []>         | <Combat Statuses: []>         |
+<Summons>                     | <Summons>                     |
+<Supports>                    | <Supports>                    |
+<Dices>                       | <Dices>                       |
+  <OMNI: 1>                   |   <OMNI: 2>                   |
+  <GEO: 1>                    |   <ELECTRO: 2>                |
+  <CRYO: 1>                   |   <PYRO: 1>                   |
+  <ELECTRO: 2>                | <Hand Cards>                  |
+<Hand Cards>                  |   <Xudong: 1>                 |
+  <MondstadtHashBrown: 1>     |   <MintyMeatRolls: 1>         |
+  <ThunderingPenance: 1>      |   <NorthernSmokedChicken: 1>  |
+  <SweetMadame: 1>            |   <StreamingSurge: 1>         |
+  <ChangingShifts: 1>         | <Deck Cards>                  |
+  <LightningStiletto: 1>      |   <Xudong: 1>                 |
+  <JueyunGuoba: 1>            |   <MintyMeatRolls: 1>         |
+<Deck Cards>                  |   <LeaveItToMe: 2>            |
+  <Xudong: 2>                 |   <LotusFlowerCrisp: 2>       |
+  <MintyMeatRolls: 2>         |   <ChangingShifts: 1>         |
+  <LeaveItToMe: 2>            |   <StreamingSurge: 1>         |
+  <LotusFlowerCrisp: 2>       |   <JueyunGuoba: 2>            |
+  <ChangingShifts: 1>         |   <ColdBloodedStrike: 2>      |
+  <StreamingSurge: 2>         |   <MondstadtHashBrown: 2>     |
+  <JueyunGuoba: 1>            |   <Starsigns: 2>              |
+  <ColdBloodedStrike: 2>      |   <ThunderingPenance: 2>      |
+  <MondstadtHashBrown: 1>     |   <SweetMadame: 2>            |
+  <Starsigns: 2>              |   <NorthernSmokedChicken: 1>  |
+  <ThunderingPenance: 1>      |   <MushroomPizza: 2>          |
+  <SweetMadame: 1>            | <Publicly Used Cards>         |
+  <NorthernSmokedChicken: 2>  |                               |
+  <MushroomPizza: 2>          |                               |
+<Publicly Used Cards>         |                               |
+---------------------------------------------------------------
+<Effects>
+===============================================================
+Choices are:
+@0: PLAY_CARD  |||  @1: CAST_SKILL  |||  @2: SWAP_CHARACTER  |||  @3: ELEMENTAL_TUNING  |||  @4: END_ROUND
+Please choose id (0-4)
+::> @3
+
+Choices are:
+@0: MondstadtHashBrown  |||  @1: ThunderingPenance  |||  @2: SweetMadame  |||  @3: ChangingShifts  |||  @4: LightningStiletto  |||  @5: JueyunGuoba
+Please choose id (0-5)
+::> @5
+
+Choices are:
+@0: GEO  |||  @1: CRYO
+Please choose id (0-1)
+::> @0
+
+#### Player1 Action: ElementalTuningAction:(card=<class 'src.dgisim.card.card.JueyunGuoba'>, dice_elem=Element.GEO)
+
+:> 
+<Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
+---------------------------------------------------------------
+<Player: *Player1>            | <Player: Player2>             |
+<Phase: Action Phase>         | <Phase: Passive Wait Phase>   |
+<Card Redraw Chances: 0>      | <Card Redraw Chances: 0>      |
+<Characters>                  | <Characters>                  |
+  <*Keqing>                   |   <Keqing>                    |
+    <id: 1>                   |     <id: 1>                   |
+    <Aura: [HYDRO]>           |     <Aura: []>                |
+    <HP: 9/10>                |     <HP: 10/10>               |
+    <Energy: 1/3>             |     <Energy: 0/3>             |
     <Talents>                 |     <Talents>                 |
       <KeqingTalent(0)>       |       <KeqingTalent(0)>       |
     <Equipments>              |     <Equipments>              |
     <Statuses>                |     <Statuses>                |
+  <RhodeiaOfLoch>             |   <*RhodeiaOfLoch>            |
+    <id: 2>                   |     <id: 2>                   |
+    <Aura: []>                |     <Aura: [ELECTRO]>         |
+    <HP: 10/10>               |     <HP: 7/10>                |
+    <Energy: 0/3>             |     <Energy: 1/3>             |
+    <Talents>                 |     <Talents>                 |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
+  <Kaeya>                     |   <Kaeya>                     |
+    <id: 3>                   |     <id: 3>                   |
+    <Aura: []>                |     <Aura: []>                |
+    <HP: 10/10>               |     <HP: 10/10>               |
+    <Energy: 0/2>             |     <Energy: 0/2>             |
+    <Talents>                 |     <Talents>                 |
+    <Equipments>              |     <Equipments>              |
+    <Statuses>                |     <Statuses>                |
 <Combat Statuses: []>         | <Combat Statuses: []>         |
 <Summons>                     | <Summons>                     |
-  <OceanicMimicSquirrel: 2>   | <Supports>                    |
-  <OceanicMimicFrog: 2>       | <Dices>                       |
-<Supports>                    |   <OMNI: 7>                   |
-  <Xudong<1>: (1)>            | <Hand Cards>                  |
-<Dices>                       |   <LotusFlowerCrisp: 1>       |
-  <OMNI: 1>                   |   <ChangingShifts: 1>         |
-<Hand Cards>                  |   <JueyunGuoba: 1>            |
-  <LeaveItToMe: 1>            |   <Starsigns: 1>              |
-  <MondstadtHashBrown: 1>     |   <ThunderingPenance: 1>      |
-  <Starsigns: 1>              | <Deck Cards>                  |
+<Supports>                    | <Supports>                    |
+<Dices>                       | <Dices>                       |
+  <OMNI: 1>                   |   <OMNI: 2>                   |
+  <CRYO: 1>                   |   <ELECTRO: 2>                |
+  <ELECTRO: 3>                |   <PYRO: 1>                   |
+<Hand Cards>                  | <Hand Cards>                  |
+  <MondstadtHashBrown: 1>     |   <Xudong: 1>                 |
+  <ThunderingPenance: 1>      |   <MintyMeatRolls: 1>         |
+  <SweetMadame: 1>            |   <NorthernSmokedChicken: 1>  |
+  <ChangingShifts: 1>         |   <StreamingSurge: 1>         |
+  <LightningStiletto: 1>      | <Deck Cards>                  |
+<Deck Cards>                  |   <Xudong: 1>                 |
+  <Xudong: 2>                 |   <MintyMeatRolls: 1>         |
+  <MintyMeatRolls: 2>         |   <LeaveItToMe: 2>            |
+  <LeaveItToMe: 2>            |   <LotusFlowerCrisp: 2>       |
+  <LotusFlowerCrisp: 2>       |   <ChangingShifts: 1>         |
+  <ChangingShifts: 1>         |   <StreamingSurge: 1>         |
+  <StreamingSurge: 2>         |   <JueyunGuoba: 2>            |
+  <JueyunGuoba: 1>            |   <ColdBloodedStrike: 2>      |
+  <ColdBloodedStrike: 2>      |   <MondstadtHashBrown: 2>     |
+  <MondstadtHashBrown: 1>     |   <Starsigns: 2>              |
+  <Starsigns: 2>              |   <ThunderingPenance: 2>      |
   <ThunderingPenance: 1>      |   <SweetMadame: 2>            |
-<Deck Cards>                  |   <NorthernSmokedChicken: 2>  |
-  <SweetMadame: 2>            |   <MushroomPizza: 2>          |
-  <NorthernSmokedChicken: 2>  |   <Xudong: 2>                 |
-  <MushroomPizza: 2>          |   <MintyMeatRolls: 2>         |
-  <Xudong: 1>                 |   <LeaveItToMe: 2>            |
-  <MintyMeatRolls: 2>         |   <LotusFlowerCrisp: 1>       |
-  <LeaveItToMe: 1>            |   <ChangingShifts: 1>         |
-  <LotusFlowerCrisp: 2>       |   <StreamingSurge: 2>         |
-  <ChangingShifts: 2>         |   <JueyunGuoba: 1>            |
-  <StreamingSurge: 2>         |   <ColdBloodedStrike: 2>      |
-  <JueyunGuoba: 2>            |   <MondstadtHashBrown: 2>     |
-  <ColdBloodedStrike: 2>      |   <Starsigns: 1>              |
-  <MondstadtHashBrown: 1>     |   <ThunderingPenance: 1>      |
-  <Starsigns: 1>              | <Publicly Used Cards>         |
-  <ThunderingPenance: 1>      |                               |
+  <SweetMadame: 1>            |   <NorthernSmokedChicken: 1>  |
+  <NorthernSmokedChicken: 2>  |   <MushroomPizza: 2>          |
+  <MushroomPizza: 2>          | <Publicly Used Cards>         |
 <Publicly Used Cards>         |                               |
-  <Xudong: 1>                 |                               |
 ---------------------------------------------------------------
 <Effects>
 ===============================================================
-[info] :> Player1's Action Time!
 Choices are:
-@0: Card  |||  @1: Skill  |||  @2: Swap  |||  @3: EndRound
+@0: PLAY_CARD  |||  @1: CAST_SKILL  |||  @2: SWAP_CHARACTER  |||  @3: ELEMENTAL_TUNING  |||  @4: END_ROUND
+Please choose id (0-4)
+::> @0
 
-Please choose id (0-3): @
-```
-
-I don't have many dices to use now, so let's end the round.
-
-``` terminal
-[info] :> Player1's Action Time!
 Choices are:
-@0: Card  |||  @1: Skill  |||  @2: Swap  |||  @3: EndRound
+@0: MondstadtHashBrown  |||  @1: ThunderingPenance  |||  @2: SweetMadame  |||  @3: ChangingShifts  |||  @4: LightningStiletto
+Please choose id (0-4)
+::> @1
 
-Please choose id (0-3): @3
+[info] -- You need to pay for [('ELECTRO', '3')]
+[info] -- auto-choice is [('ELECTRO', '3')]
+[info] -- Enter nothing if you agree with the auto-choice
+Selections are:
+@0: <OMNI, 1>  |||  @3: <CRYO, 1>  |||  @4: <ELECTRO, 3>
+e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
+::> 0:1, 4:2    // this is not optimal choice, just to show that you can make the choice
+
+#### Player1 Action: <ThunderingPenance, DiceOnlyInstruction:(dices=[('OMNI', '1'), ('ELECTRO', '2')])>
+
+:> 
+<Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
+----------------------------------------------------------------------
+<Player: Player1>                    | <Player: *Player2>            |
+<Phase: Passive Wait Phase>          | <Phase: Action Phase>         |
+<Card Redraw Chances: 0>             | <Card Redraw Chances: 0>      |
+<Characters>                         | <Characters>                  |
+  <*Keqing>                          |   <Keqing>                    |
+    <id: 1>                          |     <id: 1>                   |
+    <Aura: [HYDRO]>                  |     <Aura: []>                |
+    <HP: 9/10>                       |     <HP: 10/10>               |
+    <Energy: 2/3>                    |     <Energy: 0/3>             |
+    <Talents>                        |     <Talents>                 |
+      <KeqingTalent(0)>              |       <KeqingTalent(0)>       |
+    <Equipments>                     |     <Equipments>              |
+      <ThunderingPenance>            |     <Statuses>                |
+    <Statuses>                       |   <*RhodeiaOfLoch>            |
+      <KeqingElectroInfusion(3)(1)>  |     <id: 2>                   |
+  <RhodeiaOfLoch>                    |     <Aura: [ELECTRO]>         |
+    <id: 2>                          |     <HP: 4/10>                |
+    <Aura: []>                       |     <Energy: 1/3>             |
+    <HP: 10/10>                      |     <Talents>                 |
+    <Energy: 0/3>                    |     <Equipments>              |
+    <Talents>                        |     <Statuses>                |
+    <Equipments>                     |   <Kaeya>                     |
+    <Statuses>                       |     <id: 3>                   |
+  <Kaeya>                            |     <Aura: []>                |
+    <id: 3>                          |     <HP: 10/10>               |
+    <Aura: []>                       |     <Energy: 0/2>             |
+    <HP: 10/10>                      |     <Talents>                 |
+    <Energy: 0/2>                    |     <Equipments>              |
+    <Talents>                        |     <Statuses>                |
+    <Equipments>                     | <Combat Statuses: []>         |
+    <Statuses>                       | <Summons>                     |
+<Combat Statuses: []>                | <Supports>                    |
+<Summons>                            | <Dices>                       |
+<Supports>                           |   <OMNI: 2>                   |
+<Dices>                              |   <ELECTRO: 2>                |
+  <CRYO: 1>                          |   <PYRO: 1>                   |
+  <ELECTRO: 1>                       | <Hand Cards>                  |
+<Hand Cards>                         |   <Xudong: 1>                 |
+  <MondstadtHashBrown: 1>            |   <MintyMeatRolls: 1>         |
+  <SweetMadame: 1>                   |   <NorthernSmokedChicken: 1>  |
+  <ChangingShifts: 1>                |   <StreamingSurge: 1>         |
+<Deck Cards>                         | <Deck Cards>                  |
+  <Xudong: 2>                        |   <Xudong: 1>                 |
+  <MintyMeatRolls: 2>                |   <MintyMeatRolls: 1>         |
+  <LeaveItToMe: 2>                   |   <LeaveItToMe: 2>            |
+  <LotusFlowerCrisp: 2>              |   <LotusFlowerCrisp: 2>       |
+  <ChangingShifts: 1>                |   <ChangingShifts: 1>         |
+  <StreamingSurge: 2>                |   <StreamingSurge: 1>         |
+  <JueyunGuoba: 1>                   |   <JueyunGuoba: 2>            |
+  <ColdBloodedStrike: 2>             |   <ColdBloodedStrike: 2>      |
+  <MondstadtHashBrown: 1>            |   <MondstadtHashBrown: 2>     |
+  <Starsigns: 2>                     |   <Starsigns: 2>              |
+  <ThunderingPenance: 1>             |   <ThunderingPenance: 2>      |
+  <SweetMadame: 1>                   |   <SweetMadame: 2>            |
+  <NorthernSmokedChicken: 2>         |   <NorthernSmokedChicken: 1>  |
+  <MushroomPizza: 2>                 |   <MushroomPizza: 2>          |
+<Publicly Used Cards>                | <Publicly Used Cards>         |
+  <ThunderingPenance: 1>             |                               |
+----------------------------------------------------------------------
+<Effects>
+======================================================================
+#### Player2 Action: SwapAction:(char_id=1, instruction=DiceOnlyInstruction:(dices=[('PYRO', '1')]))
+
+:> 
+<Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
+----------------------------------------------------------------------
+<Player: *Player1>                   | <Player: Player2>             |
+<Phase: Action Phase>                | <Phase: Passive Wait Phase>   |
+<Card Redraw Chances: 0>             | <Card Redraw Chances: 0>      |
+<Characters>                         | <Characters>                  |
+  <*Keqing>                          |   <*Keqing>                   |
+    <id: 1>                          |     <id: 1>                   |
+    <Aura: [HYDRO]>                  |     <Aura: []>                |
+    <HP: 9/10>                       |     <HP: 10/10>               |
+    <Energy: 2/3>                    |     <Energy: 0/3>             |
+    <Talents>                        |     <Talents>                 |
+      <KeqingTalent(0)>              |       <KeqingTalent(0)>       |
+    <Equipments>                     |     <Equipments>              |
+      <ThunderingPenance>            |     <Statuses>                |
+    <Statuses>                       |   <RhodeiaOfLoch>             |
+      <KeqingElectroInfusion(3)(1)>  |     <id: 2>                   |
+  <RhodeiaOfLoch>                    |     <Aura: [ELECTRO]>         |
+    <id: 2>                          |     <HP: 4/10>                |
+    <Aura: []>                       |     <Energy: 1/3>             |
+    <HP: 10/10>                      |     <Talents>                 |
+    <Energy: 0/3>                    |     <Equipments>              |
+    <Talents>                        |     <Statuses>                |
+    <Equipments>                     |   <Kaeya>                     |
+    <Statuses>                       |     <id: 3>                   |
+  <Kaeya>                            |     <Aura: []>                |
+    <id: 3>                          |     <HP: 10/10>               |
+    <Aura: []>                       |     <Energy: 0/2>             |
+    <HP: 10/10>                      |     <Talents>                 |
+    <Energy: 0/2>                    |     <Equipments>              |
+    <Talents>                        |     <Statuses>                |
+    <Equipments>                     | <Combat Statuses: []>         |
+    <Statuses>                       | <Summons>                     |
+<Combat Statuses: []>                | <Supports>                    |
+<Summons>                            | <Dices>                       |
+<Supports>                           |   <OMNI: 2>                   |
+<Dices>                              |   <ELECTRO: 2>                |
+  <CRYO: 1>                          | <Hand Cards>                  |
+  <ELECTRO: 1>                       |   <Xudong: 1>                 |
+<Hand Cards>                         |   <MintyMeatRolls: 1>         |
+  <MondstadtHashBrown: 1>            |   <NorthernSmokedChicken: 1>  |
+  <SweetMadame: 1>                   |   <StreamingSurge: 1>         |
+  <ChangingShifts: 1>                | <Deck Cards>                  |
+<Deck Cards>                         |   <Xudong: 1>                 |
+  <Xudong: 2>                        |   <MintyMeatRolls: 1>         |
+  <MintyMeatRolls: 2>                |   <LeaveItToMe: 2>            |
+  <LeaveItToMe: 2>                   |   <LotusFlowerCrisp: 2>       |
+  <LotusFlowerCrisp: 2>              |   <ChangingShifts: 1>         |
+  <ChangingShifts: 1>                |   <StreamingSurge: 1>         |
+  <StreamingSurge: 2>                |   <JueyunGuoba: 2>            |
+  <JueyunGuoba: 1>                   |   <ColdBloodedStrike: 2>      |
+  <ColdBloodedStrike: 2>             |   <MondstadtHashBrown: 2>     |
+  <MondstadtHashBrown: 1>            |   <Starsigns: 2>              |
+  <Starsigns: 2>                     |   <ThunderingPenance: 2>      |
+  <ThunderingPenance: 1>             |   <SweetMadame: 2>            |
+  <SweetMadame: 1>                   |   <NorthernSmokedChicken: 1>  |
+  <NorthernSmokedChicken: 2>         |   <MushroomPizza: 2>          |
+  <MushroomPizza: 2>                 | <Publicly Used Cards>         |
+<Publicly Used Cards>                |                               |
+  <ThunderingPenance: 1>             |                               |
+----------------------------------------------------------------------
+<Effects>
+======================================================================
+Choices are:
+@0: PLAY_CARD  |||  @1: SWAP_CHARACTER  |||  @2: ELEMENTAL_TUNING  |||  @3: END_ROUND
+Please choose id (0-3)
+::> @3
 
 #### Player1 Action: EndRoundAction:()
 
 :> 
+<Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
+----------------------------------------------------------------------
+<Player: Player1>                    | <Player: *Player2>            |
+<Phase: End Phase>                   | <Phase: Action Phase>         |
+<Card Redraw Chances: 0>             | <Card Redraw Chances: 0>      |
+<Characters>                         | <Characters>                  |
+  <*Keqing>                          |   <*Keqing>                   |
+    <id: 1>                          |     <id: 1>                   |
+    <Aura: [HYDRO]>                  |     <Aura: []>                |
+    <HP: 9/10>                       |     <HP: 10/10>               |
+    <Energy: 2/3>                    |     <Energy: 0/3>             |
+    <Talents>                        |     <Talents>                 |
+      <KeqingTalent(0)>              |       <KeqingTalent(0)>       |
+    <Equipments>                     |     <Equipments>              |
+      <ThunderingPenance>            |     <Statuses>                |
+    <Statuses>                       |   <RhodeiaOfLoch>             |
+      <KeqingElectroInfusion(3)(1)>  |     <id: 2>                   |
+  <RhodeiaOfLoch>                    |     <Aura: [ELECTRO]>         |
+    <id: 2>                          |     <HP: 4/10>                |
+    <Aura: []>                       |     <Energy: 1/3>             |
+    <HP: 10/10>                      |     <Talents>                 |
+    <Energy: 0/3>                    |     <Equipments>              |
+    <Talents>                        |     <Statuses>                |
+    <Equipments>                     |   <Kaeya>                     |
+    <Statuses>                       |     <id: 3>                   |
+  <Kaeya>                            |     <Aura: []>                |
+    <id: 3>                          |     <HP: 10/10>               |
+    <Aura: []>                       |     <Energy: 0/2>             |
+    <HP: 10/10>                      |     <Talents>                 |
+    <Energy: 0/2>                    |     <Equipments>              |
+    <Talents>                        |     <Statuses>                |
+    <Equipments>                     | <Combat Statuses: []>         |
+    <Statuses>                       | <Summons>                     |
+<Combat Statuses: []>                | <Supports>                    |
+<Summons>                            | <Dices>                       |
+<Supports>                           |   <OMNI: 2>                   |
+<Dices>                              |   <ELECTRO: 2>                |
+  <CRYO: 1>                          | <Hand Cards>                  |
+  <ELECTRO: 1>                       |   <Xudong: 1>                 |
+<Hand Cards>                         |   <MintyMeatRolls: 1>         |
+  <MondstadtHashBrown: 1>            |   <NorthernSmokedChicken: 1>  |
+  <SweetMadame: 1>                   |   <StreamingSurge: 1>         |
+  <ChangingShifts: 1>                | <Deck Cards>                  |
+<Deck Cards>                         |   <Xudong: 1>                 |
+  <Xudong: 2>                        |   <MintyMeatRolls: 1>         |
+  <MintyMeatRolls: 2>                |   <LeaveItToMe: 2>            |
+  <LeaveItToMe: 2>                   |   <LotusFlowerCrisp: 2>       |
+  <LotusFlowerCrisp: 2>              |   <ChangingShifts: 1>         |
+  <ChangingShifts: 1>                |   <StreamingSurge: 1>         |
+  <StreamingSurge: 2>                |   <JueyunGuoba: 2>            |
+  <JueyunGuoba: 1>                   |   <ColdBloodedStrike: 2>      |
+  <ColdBloodedStrike: 2>             |   <MondstadtHashBrown: 2>     |
+  <MondstadtHashBrown: 1>            |   <Starsigns: 2>              |
+  <Starsigns: 2>                     |   <ThunderingPenance: 2>      |
+  <ThunderingPenance: 1>             |   <SweetMadame: 2>            |
+  <SweetMadame: 1>                   |   <NorthernSmokedChicken: 1>  |
+  <NorthernSmokedChicken: 2>         |   <MushroomPizza: 2>          |
+  <MushroomPizza: 2>                 | <Publicly Used Cards>         |
+<Publicly Used Cards>                |                               |
+  <ThunderingPenance: 1>             |                               |
+----------------------------------------------------------------------
+<Effects>
+======================================================================
+#### Player2 Action: <CharacterSkill.NORMAL_ATTACK, DiceOnlyInstruction:(dices=[('ELECTRO', '2'), ('OMNI', '1')])>
+
+:> 
+<Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
+----------------------------------------------------------------------
+<Player: Player1>                    | <Player: *Player2>            |
+<Phase: End Phase>                   | <Phase: Action Phase>         |
+<Card Redraw Chances: 0>             | <Card Redraw Chances: 0>      |
+<Characters>                         | <Characters>                  |
+  <*Keqing>                          |   <*Keqing>                   |
+    <id: 1>                          |     <id: 1>                   |
+    <Aura: [HYDRO]>                  |     <Aura: []>                |
+    <HP: 7/10>                       |     <HP: 10/10>               |
+    <Energy: 2/3>                    |     <Energy: 1/3>             |
+    <Talents>                        |     <Talents>                 |
+      <KeqingTalent(0)>              |       <KeqingTalent(0)>       |
+    <Equipments>                     |     <Equipments>              |
+      <ThunderingPenance>            |     <Statuses>                |
+    <Statuses>                       |   <RhodeiaOfLoch>             |
+      <KeqingElectroInfusion(3)(1)>  |     <id: 2>                   |
+  <RhodeiaOfLoch>                    |     <Aura: [ELECTRO]>         |
+    <id: 2>                          |     <HP: 4/10>                |
+    <Aura: []>                       |     <Energy: 1/3>             |
+    <HP: 10/10>                      |     <Talents>                 |
+    <Energy: 0/3>                    |     <Equipments>              |
+    <Talents>                        |     <Statuses>                |
+    <Equipments>                     |   <Kaeya>                     |
+    <Statuses>                       |     <id: 3>                   |
+  <Kaeya>                            |     <Aura: []>                |
+    <id: 3>                          |     <HP: 10/10>               |
+    <Aura: []>                       |     <Energy: 0/2>             |
+    <HP: 10/10>                      |     <Talents>                 |
+    <Energy: 0/2>                    |     <Equipments>              |
+    <Talents>                        |     <Statuses>                |
+    <Equipments>                     | <Combat Statuses: []>         |
+    <Statuses>                       | <Summons>                     |
+<Combat Statuses: []>                | <Supports>                    |
+<Summons>                            | <Dices>                       |
+<Supports>                           |   <OMNI: 1>                   |
+<Dices>                              | <Hand Cards>                  |
+  <CRYO: 1>                          |   <Xudong: 1>                 |
+  <ELECTRO: 1>                       |   <MintyMeatRolls: 1>         |
+<Hand Cards>                         |   <NorthernSmokedChicken: 1>  |
+  <MondstadtHashBrown: 1>            |   <StreamingSurge: 1>         |
+  <SweetMadame: 1>                   | <Deck Cards>                  |
+  <ChangingShifts: 1>                |   <Xudong: 1>                 |
+<Deck Cards>                         |   <MintyMeatRolls: 1>         |
+  <Xudong: 2>                        |   <LeaveItToMe: 2>            |
+  <MintyMeatRolls: 2>                |   <LotusFlowerCrisp: 2>       |
+  <LeaveItToMe: 2>                   |   <ChangingShifts: 1>         |
+  <LotusFlowerCrisp: 2>              |   <StreamingSurge: 1>         |
+  <ChangingShifts: 1>                |   <JueyunGuoba: 2>            |
+  <StreamingSurge: 2>                |   <ColdBloodedStrike: 2>      |
+  <JueyunGuoba: 1>                   |   <MondstadtHashBrown: 2>     |
+  <ColdBloodedStrike: 2>             |   <Starsigns: 2>              |
+  <MondstadtHashBrown: 1>            |   <ThunderingPenance: 2>      |
+  <Starsigns: 2>                     |   <SweetMadame: 2>            |
+  <ThunderingPenance: 1>             |   <NorthernSmokedChicken: 1>  |
+  <SweetMadame: 1>                   |   <MushroomPizza: 2>          |
+  <NorthernSmokedChicken: 2>         | <Publicly Used Cards>         |
+  <MushroomPizza: 2>                 |                               |
+<Publicly Used Cards>                |                               |
+  <ThunderingPenance: 1>             |                               |
+----------------------------------------------------------------------
+<Effects>
+======================================================================
+#### Player2 Action: <MintyMeatRolls, StaticTargetInstruction:(dices=[('OMNI', '1')], target=StaticTarget(pid=<PID.P2: 2>, zone=<ZONE.CHARACTERS: 'Characters'>, id=1))>
+
+:> 
+<Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
+----------------------------------------------------------------------
+<Player: Player1>                    | <Player: *Player2>            |
+<Phase: End Phase>                   | <Phase: Action Phase>         |
+<Card Redraw Chances: 0>             | <Card Redraw Chances: 0>      |
+<Characters>                         | <Characters>                  |
+  <*Keqing>                          |   <*Keqing>                   |
+    <id: 1>                          |     <id: 1>                   |
+    <Aura: [HYDRO]>                  |     <Aura: []>                |
+    <HP: 7/10>                       |     <HP: 10/10>               |
+    <Energy: 2/3>                    |     <Energy: 1/3>             |
+    <Talents>                        |     <Talents>                 |
+      <KeqingTalent(0)>              |       <KeqingTalent(0)>       |
+    <Equipments>                     |     <Equipments>              |
+      <ThunderingPenance>            |     <Statuses>                |
+    <Statuses>                       |       <MintyMeatRolls(3)>     |
+      <KeqingElectroInfusion(3)(1)>  |       <Satiated>              |
+  <RhodeiaOfLoch>                    |   <RhodeiaOfLoch>             |
+    <id: 2>                          |     <id: 2>                   |
+    <Aura: []>                       |     <Aura: [ELECTRO]>         |
+    <HP: 10/10>                      |     <HP: 4/10>                |
+    <Energy: 0/3>                    |     <Energy: 1/3>             |
+    <Talents>                        |     <Talents>                 |
+    <Equipments>                     |     <Equipments>              |
+    <Statuses>                       |     <Statuses>                |
+  <Kaeya>                            |   <Kaeya>                     |
+    <id: 3>                          |     <id: 3>                   |
+    <Aura: []>                       |     <Aura: []>                |
+    <HP: 10/10>                      |     <HP: 10/10>               |
+    <Energy: 0/2>                    |     <Energy: 0/2>             |
+    <Talents>                        |     <Talents>                 |
+    <Equipments>                     |     <Equipments>              |
+    <Statuses>                       |     <Statuses>                |
+<Combat Statuses: []>                | <Combat Statuses: []>         |
+<Summons>                            | <Summons>                     |
+<Supports>                           | <Supports>                    |
+<Dices>                              | <Dices>                       |
+  <CRYO: 1>                          | <Hand Cards>                  |
+  <ELECTRO: 1>                       |   <Xudong: 1>                 |
+<Hand Cards>                         |   <NorthernSmokedChicken: 1>  |
+  <MondstadtHashBrown: 1>            |   <StreamingSurge: 1>         |
+  <SweetMadame: 1>                   | <Deck Cards>                  |
+  <ChangingShifts: 1>                |   <Xudong: 1>                 |
+<Deck Cards>                         |   <MintyMeatRolls: 1>         |
+  <Xudong: 2>                        |   <LeaveItToMe: 2>            |
+  <MintyMeatRolls: 2>                |   <LotusFlowerCrisp: 2>       |
+  <LeaveItToMe: 2>                   |   <ChangingShifts: 1>         |
+  <LotusFlowerCrisp: 2>              |   <StreamingSurge: 1>         |
+  <ChangingShifts: 1>                |   <JueyunGuoba: 2>            |
+  <StreamingSurge: 2>                |   <ColdBloodedStrike: 2>      |
+  <JueyunGuoba: 1>                   |   <MondstadtHashBrown: 2>     |
+  <ColdBloodedStrike: 2>             |   <Starsigns: 2>              |
+  <MondstadtHashBrown: 1>            |   <ThunderingPenance: 2>      |
+  <Starsigns: 2>                     |   <SweetMadame: 2>            |
+  <ThunderingPenance: 1>             |   <NorthernSmokedChicken: 1>  |
+  <SweetMadame: 1>                   |   <MushroomPizza: 2>          |
+  <NorthernSmokedChicken: 2>         | <Publicly Used Cards>         |
+  <MushroomPizza: 2>                 |   <MintyMeatRolls: 1>         |
+<Publicly Used Cards>                |                               |
+  <ThunderingPenance: 1>             |                               |
+----------------------------------------------------------------------
+<Effects>
+======================================================================
+#### Player2 Action: EndRoundAction:()
+
+:> 
+<Mode: DefaultMode>  <Phase: RollPhase>  <Round: 1>
+----------------------------------------------------------------------
+<Player: *Player1>                   | <Player: Player2>             |
+<Phase: Action Phase>                | <Phase: Action Phase>         |
+<Card Redraw Chances: 0>             | <Card Redraw Chances: 0>      |
+<Characters>                         | <Characters>                  |
+  <*Keqing>                          |   <*Keqing>                   |
+    <id: 1>                          |     <id: 1>                   |
+    <Aura: [HYDRO]>                  |     <Aura: []>                |
+    <HP: 7/10>                       |     <HP: 10/10>               |
+    <Energy: 2/3>                    |     <Energy: 1/3>             |
+    <Talents>                        |     <Talents>                 |
+      <KeqingTalent(0)>              |       <KeqingTalent(0)>       |
+    <Equipments>                     |     <Equipments>              |
+      <ThunderingPenance>            |     <Statuses>                |
+    <Statuses>                       |   <RhodeiaOfLoch>             |
+      <KeqingElectroInfusion(2)(1)>  |     <id: 2>                   |
+  <RhodeiaOfLoch>                    |     <Aura: [ELECTRO]>         |
+    <id: 2>                          |     <HP: 4/10>                |
+    <Aura: []>                       |     <Energy: 1/3>             |
+    <HP: 10/10>                      |     <Talents>                 |
+    <Energy: 0/3>                    |     <Equipments>              |
+    <Talents>                        |     <Statuses>                |
+    <Equipments>                     |   <Kaeya>                     |
+    <Statuses>                       |     <id: 3>                   |
+  <Kaeya>                            |     <Aura: []>                |
+    <id: 3>                          |     <HP: 10/10>               |
+    <Aura: []>                       |     <Energy: 0/2>             |
+    <HP: 10/10>                      |     <Talents>                 |
+    <Energy: 0/2>                    |     <Equipments>              |
+    <Talents>                        |     <Statuses>                |
+    <Equipments>                     | <Combat Statuses: []>         |
+    <Statuses>                       | <Summons>                     |
+<Combat Statuses: []>                | <Supports>                    |
+<Summons>                            | <Dices>                       |
+<Supports>                           |   <OMNI: 1>                   |
+<Dices>                              |   <HYDRO: 4>                  |
+  <HYDRO: 1>                         |   <CRYO: 2>                   |
+  <CRYO: 1>                          |   <PYRO: 1>                   |
+  <DENDRO: 2>                        | <Hand Cards>                  |
+  <PYRO: 2>                          |   <Xudong: 1>                 |
+  <ANEMO: 2>                         |   <MintyMeatRolls: 1>         |
+<Hand Cards>                         |   <NorthernSmokedChicken: 1>  |
+  <MondstadtHashBrown: 1>            |   <StreamingSurge: 1>         |
+  <Starsigns: 1>                     |   <MushroomPizza: 1>          |
+  <SweetMadame: 1>                   | <Deck Cards>                  |
+  <ChangingShifts: 2>                |   <Xudong: 1>                 |
+<Deck Cards>                         |   <LeaveItToMe: 2>            |
+  <Xudong: 2>                        |   <LotusFlowerCrisp: 2>       |
+  <MintyMeatRolls: 2>                |   <ChangingShifts: 1>         |
+  <LeaveItToMe: 2>                   |   <StreamingSurge: 1>         |
+  <LotusFlowerCrisp: 2>              |   <JueyunGuoba: 2>            |
+  <StreamingSurge: 2>                |   <ColdBloodedStrike: 2>      |
+  <JueyunGuoba: 1>                   |   <MondstadtHashBrown: 2>     |
+  <ColdBloodedStrike: 2>             |   <Starsigns: 2>              |
+  <MondstadtHashBrown: 1>            |   <ThunderingPenance: 2>      |
+  <Starsigns: 1>                     |   <SweetMadame: 2>            |
+  <ThunderingPenance: 1>             |   <NorthernSmokedChicken: 1>  |
+  <SweetMadame: 1>                   |   <MushroomPizza: 1>          |
+  <NorthernSmokedChicken: 2>         | <Publicly Used Cards>         |
+  <MushroomPizza: 2>                 |   <MintyMeatRolls: 1>         |
+<Publicly Used Cards>                |                               |
+  <ThunderingPenance: 1>             |                               |
+----------------------------------------------------------------------
+<Effects>
+======================================================================
+Choices are:
+@0: SELECT_DICES  |||  @1: END_ROUND
+Please choose id (0-1)
+::> @1    // not doing reroll here
+
+#### Player1 Action: EndRoundAction:()
+
+:> 
+<Mode: DefaultMode>  <Phase: RollPhase>  <Round: 1>
+----------------------------------------------------------------------
+<Player: *Player1>                   | <Player: Player2>             |
+<Phase: End Phase>                   | <Phase: Action Phase>         |
+<Card Redraw Chances: 0>             | <Card Redraw Chances: 0>      |
+<Characters>                         | <Characters>                  |
+  <*Keqing>                          |   <*Keqing>                   |
+    <id: 1>                          |     <id: 1>                   |
+    <Aura: [HYDRO]>                  |     <Aura: []>                |
+    <HP: 7/10>                       |     <HP: 10/10>               |
+    <Energy: 2/3>                    |     <Energy: 1/3>             |
+    <Talents>                        |     <Talents>                 |
+      <KeqingTalent(0)>              |       <KeqingTalent(0)>       |
+    <Equipments>                     |     <Equipments>              |
+      <ThunderingPenance>            |     <Statuses>                |
+    <Statuses>                       |   <RhodeiaOfLoch>             |
+      <KeqingElectroInfusion(2)(1)>  |     <id: 2>                   |
+  <RhodeiaOfLoch>                    |     <Aura: [ELECTRO]>         |
+    <id: 2>                          |     <HP: 4/10>                |
+    <Aura: []>                       |     <Energy: 1/3>             |
+    <HP: 10/10>                      |     <Talents>                 |
+    <Energy: 0/3>                    |     <Equipments>              |
+    <Talents>                        |     <Statuses>                |
+    <Equipments>                     |   <Kaeya>                     |
+    <Statuses>                       |     <id: 3>                   |
+  <Kaeya>                            |     <Aura: []>                |
+    <id: 3>                          |     <HP: 10/10>               |
+    <Aura: []>                       |     <Energy: 0/2>             |
+    <HP: 10/10>                      |     <Talents>                 |
+    <Energy: 0/2>                    |     <Equipments>              |
+    <Talents>                        |     <Statuses>                |
+    <Equipments>                     | <Combat Statuses: []>         |
+    <Statuses>                       | <Summons>                     |
+<Combat Statuses: []>                | <Supports>                    |
+<Summons>                            | <Dices>                       |
+<Supports>                           |   <OMNI: 1>                   |
+<Dices>                              |   <HYDRO: 4>                  |
+  <HYDRO: 1>                         |   <CRYO: 2>                   |
+  <CRYO: 1>                          |   <PYRO: 1>                   |
+  <DENDRO: 2>                        | <Hand Cards>                  |
+  <PYRO: 2>                          |   <Xudong: 1>                 |
+  <ANEMO: 2>                         |   <MintyMeatRolls: 1>         |
+<Hand Cards>                         |   <NorthernSmokedChicken: 1>  |
+  <MondstadtHashBrown: 1>            |   <StreamingSurge: 1>         |
+  <Starsigns: 1>                     |   <MushroomPizza: 1>          |
+  <SweetMadame: 1>                   | <Deck Cards>                  |
+  <ChangingShifts: 2>                |   <Xudong: 1>                 |
+<Deck Cards>                         |   <LeaveItToMe: 2>            |
+  <Xudong: 2>                        |   <LotusFlowerCrisp: 2>       |
+  <MintyMeatRolls: 2>                |   <ChangingShifts: 1>         |
+  <LeaveItToMe: 2>                   |   <StreamingSurge: 1>         |
+  <LotusFlowerCrisp: 2>              |   <JueyunGuoba: 2>            |
+  <StreamingSurge: 2>                |   <ColdBloodedStrike: 2>      |
+  <JueyunGuoba: 1>                   |   <MondstadtHashBrown: 2>     |
+  <ColdBloodedStrike: 2>             |   <Starsigns: 2>              |
+  <MondstadtHashBrown: 1>            |   <ThunderingPenance: 2>      |
+  <Starsigns: 1>                     |   <SweetMadame: 2>            |
+  <ThunderingPenance: 1>             |   <NorthernSmokedChicken: 1>  |
+  <SweetMadame: 1>                   |   <MushroomPizza: 1>          |
+  <NorthernSmokedChicken: 2>         | <Publicly Used Cards>         |
+  <MushroomPizza: 2>                 |   <MintyMeatRolls: 1>         |
+<Publicly Used Cards>                |                               |
+  <ThunderingPenance: 1>             |                               |
+----------------------------------------------------------------------
+<Effects>
+======================================================================
+#### Player2 Action: EndRoundAction:()
+
+:> 
+<Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 1>
+----------------------------------------------------------------------
+<Player: *Player1>                   | <Player: Player2>             |
+<Phase: Action Phase>                | <Phase: Passive Wait Phase>   |
+<Card Redraw Chances: 0>             | <Card Redraw Chances: 0>      |
+<Characters>                         | <Characters>                  |
+  <*Keqing>                          |   <*Keqing>                   |
+    <id: 1>                          |     <id: 1>                   |
+    <Aura: [HYDRO]>                  |     <Aura: []>                |
+    <HP: 7/10>                       |     <HP: 10/10>               |
+    <Energy: 2/3>                    |     <Energy: 1/3>             |
+    <Talents>                        |     <Talents>                 |
+      <KeqingTalent(0)>              |       <KeqingTalent(0)>       |
+    <Equipments>                     |     <Equipments>              |
+      <ThunderingPenance>            |     <Statuses>                |
+    <Statuses>                       |   <RhodeiaOfLoch>             |
+      <KeqingElectroInfusion(2)(1)>  |     <id: 2>                   |
+  <RhodeiaOfLoch>                    |     <Aura: [ELECTRO]>         |
+    <id: 2>                          |     <HP: 4/10>                |
+    <Aura: []>                       |     <Energy: 1/3>             |
+    <HP: 10/10>                      |     <Talents>                 |
+    <Energy: 0/3>                    |     <Equipments>              |
+    <Talents>                        |     <Statuses>                |
+    <Equipments>                     |   <Kaeya>                     |
+    <Statuses>                       |     <id: 3>                   |
+  <Kaeya>                            |     <Aura: []>                |
+    <id: 3>                          |     <HP: 10/10>               |
+    <Aura: []>                       |     <Energy: 0/2>             |
+    <HP: 10/10>                      |     <Talents>                 |
+    <Energy: 0/2>                    |     <Equipments>              |
+    <Talents>                        |     <Statuses>                |
+    <Equipments>                     | <Combat Statuses: []>         |
+    <Statuses>                       | <Summons>                     |
+<Combat Statuses: []>                | <Supports>                    |
+<Summons>                            | <Dices>                       |
+<Supports>                           |   <OMNI: 1>                   |
+<Dices>                              |   <HYDRO: 4>                  |
+  <HYDRO: 1>                         |   <CRYO: 2>                   |
+  <CRYO: 1>                          |   <PYRO: 1>                   |
+  <DENDRO: 2>                        | <Hand Cards>                  |
+  <PYRO: 2>                          |   <Xudong: 1>                 |
+  <ANEMO: 2>                         |   <MintyMeatRolls: 1>         |
+<Hand Cards>                         |   <NorthernSmokedChicken: 1>  |
+  <MondstadtHashBrown: 1>            |   <StreamingSurge: 1>         |
+  <Starsigns: 1>                     |   <MushroomPizza: 1>          |
+  <SweetMadame: 1>                   | <Deck Cards>                  |
+  <ChangingShifts: 2>                |   <Xudong: 1>                 |
+<Deck Cards>                         |   <LeaveItToMe: 2>            |
+  <Xudong: 2>                        |   <LotusFlowerCrisp: 2>       |
+  <MintyMeatRolls: 2>                |   <ChangingShifts: 1>         |
+  <LeaveItToMe: 2>                   |   <StreamingSurge: 1>         |
+  <LotusFlowerCrisp: 2>              |   <JueyunGuoba: 2>            |
+  <StreamingSurge: 2>                |   <ColdBloodedStrike: 2>      |
+  <JueyunGuoba: 1>                   |   <MondstadtHashBrown: 2>     |
+  <ColdBloodedStrike: 2>             |   <Starsigns: 2>              |
+  <MondstadtHashBrown: 1>            |   <ThunderingPenance: 2>      |
+  <Starsigns: 1>                     |   <SweetMadame: 2>            |
+  <ThunderingPenance: 1>             |   <NorthernSmokedChicken: 1>  |
+  <SweetMadame: 1>                   |   <MushroomPizza: 1>          |
+  <NorthernSmokedChicken: 2>         | <Publicly Used Cards>         |
+  <MushroomPizza: 2>                 |   <MintyMeatRolls: 1>         |
+<Publicly Used Cards>                |                               |
+  <ThunderingPenance: 1>             |                               |
+----------------------------------------------------------------------
+<Effects>
+======================================================================
+Choices are:
+@0: PLAY_CARD  |||  @1: SWAP_CHARACTER  |||  @2: ELEMENTAL_TUNING  |||  @3: END_ROUND
+Please choose id (0-3)
+::> @3 
+
+#### Player1 Action: EndRoundAction:()
+
+:> ba    // browse history, backward auto-step
+<Mode: DefaultMode>  <Phase: RollPhase>  <Round: 1>
+----------------------------------------------------------------------
+<Player: *Player1>                   | <Player: Player2>             |
+<Phase: End Phase>                   | <Phase: Action Phase>         |
+<Card Redraw Chances: 0>             | <Card Redraw Chances: 0>      |
+<Characters>                         | <Characters>                  |
+  <*Keqing>                          |   <*Keqing>                   |
+    <id: 1>                          |     <id: 1>                   |
+    <Aura: [HYDRO]>                  |     <Aura: []>                |
+    <HP: 7/10>                       |     <HP: 10/10>               |
+    <Energy: 2/3>                    |     <Energy: 1/3>             |
+    <Talents>                        |     <Talents>                 |
+      <KeqingTalent(0)>              |       <KeqingTalent(0)>       |
+    <Equipments>                     |     <Equipments>              |
+      <ThunderingPenance>            |     <Statuses>                |
+    <Statuses>                       |   <RhodeiaOfLoch>             |
+      <KeqingElectroInfusion(2)(1)>  |     <id: 2>                   |
+  <RhodeiaOfLoch>                    |     <Aura: [ELECTRO]>         |
+    <id: 2>                          |     <HP: 4/10>                |
+    <Aura: []>                       |     <Energy: 1/3>             |
+    <HP: 10/10>                      |     <Talents>                 |
+    <Energy: 0/3>                    |     <Equipments>              |
+    <Talents>                        |     <Statuses>                |
+    <Equipments>                     |   <Kaeya>                     |
+    <Statuses>                       |     <id: 3>                   |
+  <Kaeya>                            |     <Aura: []>                |
+    <id: 3>                          |     <HP: 10/10>               |
+    <Aura: []>                       |     <Energy: 0/2>             |
+    <HP: 10/10>                      |     <Talents>                 |
+    <Energy: 0/2>                    |     <Equipments>              |
+    <Talents>                        |     <Statuses>                |
+    <Equipments>                     | <Combat Statuses: []>         |
+    <Statuses>                       | <Summons>                     |
+<Combat Statuses: []>                | <Supports>                    |
+<Summons>                            | <Dices>                       |
+<Supports>                           |   <OMNI: 1>                   |
+<Dices>                              |   <HYDRO: 4>                  |
+  <HYDRO: 1>                         |   <CRYO: 2>                   |
+  <CRYO: 1>                          |   <PYRO: 1>                   |
+  <DENDRO: 2>                        | <Hand Cards>                  |
+  <PYRO: 2>                          |   <Xudong: 1>                 |
+  <ANEMO: 2>                         |   <MintyMeatRolls: 1>         |
+<Hand Cards>                         |   <NorthernSmokedChicken: 1>  |
+  <MondstadtHashBrown: 1>            |   <StreamingSurge: 1>         |
+  <Starsigns: 1>                     |   <MushroomPizza: 1>          |
+  <SweetMadame: 1>                   | <Deck Cards>                  |
+  <ChangingShifts: 2>                |   <Xudong: 1>                 |
+<Deck Cards>                         |   <LeaveItToMe: 2>            |
+  <Xudong: 2>                        |   <LotusFlowerCrisp: 2>       |
+  <MintyMeatRolls: 2>                |   <ChangingShifts: 1>         |
+  <LeaveItToMe: 2>                   |   <StreamingSurge: 1>         |
+  <LotusFlowerCrisp: 2>              |   <JueyunGuoba: 2>            |
+  <StreamingSurge: 2>                |   <ColdBloodedStrike: 2>      |
+  <JueyunGuoba: 1>                   |   <MondstadtHashBrown: 2>     |
+  <ColdBloodedStrike: 2>             |   <Starsigns: 2>              |
+  <MondstadtHashBrown: 1>            |   <ThunderingPenance: 2>      |
+  <Starsigns: 1>                     |   <SweetMadame: 2>            |
+  <ThunderingPenance: 1>             |   <NorthernSmokedChicken: 1>  |
+  <SweetMadame: 1>                   |   <MushroomPizza: 1>          |
+  <NorthernSmokedChicken: 2>         | <Publicly Used Cards>         |
+  <MushroomPizza: 2>                 |   <MintyMeatRolls: 1>         |
+<Publicly Used Cards>                |                               |
+  <ThunderingPenance: 1>             |                               |
+----------------------------------------------------------------------
+<Effects>
+======================================================================
+#### Player2 Action: EndRoundAction:()
+#### [117/121] in game history
+
+:> 
+<Mode: DefaultMode>  <Phase: RollPhase>  <Round: 1>
+----------------------------------------------------------------------
+<Player: *Player1>                   | <Player: Player2>             |
+<Phase: Action Phase>                | <Phase: Action Phase>         |
+<Card Redraw Chances: 0>             | <Card Redraw Chances: 0>      |
+<Characters>                         | <Characters>                  |
+  <*Keqing>                          |   <*Keqing>                   |
+    <id: 1>                          |     <id: 1>                   |
+    <Aura: [HYDRO]>                  |     <Aura: []>                |
+    <HP: 7/10>                       |     <HP: 10/10>               |
+    <Energy: 2/3>                    |     <Energy: 1/3>             |
+    <Talents>                        |     <Talents>                 |
+      <KeqingTalent(0)>              |       <KeqingTalent(0)>       |
+    <Equipments>                     |     <Equipments>              |
+      <ThunderingPenance>            |     <Statuses>                |
+    <Statuses>                       |   <RhodeiaOfLoch>             |
+      <KeqingElectroInfusion(2)(1)>  |     <id: 2>                   |
+  <RhodeiaOfLoch>                    |     <Aura: [ELECTRO]>         |
+    <id: 2>                          |     <HP: 4/10>                |
+    <Aura: []>                       |     <Energy: 1/3>             |
+    <HP: 10/10>                      |     <Talents>                 |
+    <Energy: 0/3>                    |     <Equipments>              |
+    <Talents>                        |     <Statuses>                |
+    <Equipments>                     |   <Kaeya>                     |
+    <Statuses>                       |     <id: 3>                   |
+  <Kaeya>                            |     <Aura: []>                |
+    <id: 3>                          |     <HP: 10/10>               |
+    <Aura: []>                       |     <Energy: 0/2>             |
+    <HP: 10/10>                      |     <Talents>                 |
+    <Energy: 0/2>                    |     <Equipments>              |
+    <Talents>                        |     <Statuses>                |
+    <Equipments>                     | <Combat Statuses: []>         |
+    <Statuses>                       | <Summons>                     |
+<Combat Statuses: []>                | <Supports>                    |
+<Summons>                            | <Dices>                       |
+<Supports>                           |   <OMNI: 1>                   |
+<Dices>                              |   <HYDRO: 4>                  |
+  <HYDRO: 1>                         |   <CRYO: 2>                   |
+  <CRYO: 1>                          |   <PYRO: 1>                   |
+  <DENDRO: 2>                        | <Hand Cards>                  |
+  <PYRO: 2>                          |   <Xudong: 1>                 |
+  <ANEMO: 2>                         |   <MintyMeatRolls: 1>         |
+<Hand Cards>                         |   <NorthernSmokedChicken: 1>  |
+  <MondstadtHashBrown: 1>            |   <StreamingSurge: 1>         |
+  <Starsigns: 1>                     |   <MushroomPizza: 1>          |
+  <SweetMadame: 1>                   | <Deck Cards>                  |
+  <ChangingShifts: 2>                |   <Xudong: 1>                 |
+<Deck Cards>                         |   <LeaveItToMe: 2>            |
+  <Xudong: 2>                        |   <LotusFlowerCrisp: 2>       |
+  <MintyMeatRolls: 2>                |   <ChangingShifts: 1>         |
+  <LeaveItToMe: 2>                   |   <StreamingSurge: 1>         |
+  <LotusFlowerCrisp: 2>              |   <JueyunGuoba: 2>            |
+  <StreamingSurge: 2>                |   <ColdBloodedStrike: 2>      |
+  <JueyunGuoba: 1>                   |   <MondstadtHashBrown: 2>     |
+  <ColdBloodedStrike: 2>             |   <Starsigns: 2>              |
+  <MondstadtHashBrown: 1>            |   <ThunderingPenance: 2>      |
+  <Starsigns: 1>                     |   <SweetMadame: 2>            |
+  <ThunderingPenance: 1>             |   <NorthernSmokedChicken: 1>  |
+  <SweetMadame: 1>                   |   <MushroomPizza: 1>          |
+  <NorthernSmokedChicken: 2>         | <Publicly Used Cards>         |
+  <MushroomPizza: 2>                 |   <MintyMeatRolls: 1>         |
+<Publicly Used Cards>                |                               |
+  <ThunderingPenance: 1>             |                               |
+----------------------------------------------------------------------
+<Effects>
+======================================================================
+#### Player1 Action: EndRoundAction:()
+#### [116/121] in game history
+
+:> 
+<Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
+----------------------------------------------------------------------
+<Player: Player1>                    | <Player: *Player2>            |
+<Phase: End Phase>                   | <Phase: Action Phase>         |
+<Card Redraw Chances: 0>             | <Card Redraw Chances: 0>      |
+<Characters>                         | <Characters>                  |
+  <*Keqing>                          |   <*Keqing>                   |
+    <id: 1>                          |     <id: 1>                   |
+    <Aura: [HYDRO]>                  |     <Aura: []>                |
+    <HP: 7/10>                       |     <HP: 10/10>               |
+    <Energy: 2/3>                    |     <Energy: 1/3>             |
+    <Talents>                        |     <Talents>                 |
+      <KeqingTalent(0)>              |       <KeqingTalent(0)>       |
+    <Equipments>                     |     <Equipments>              |
+      <ThunderingPenance>            |     <Statuses>                |
+    <Statuses>                       |       <MintyMeatRolls(3)>     |
+      <KeqingElectroInfusion(3)(1)>  |       <Satiated>              |
+  <RhodeiaOfLoch>                    |   <RhodeiaOfLoch>             |
+    <id: 2>                          |     <id: 2>                   |
+    <Aura: []>                       |     <Aura: [ELECTRO]>         |
+    <HP: 10/10>                      |     <HP: 4/10>                |
+    <Energy: 0/3>                    |     <Energy: 1/3>             |
+    <Talents>                        |     <Talents>                 |
+    <Equipments>                     |     <Equipments>              |
+    <Statuses>                       |     <Statuses>                |
+  <Kaeya>                            |   <Kaeya>                     |
+    <id: 3>                          |     <id: 3>                   |
+    <Aura: []>                       |     <Aura: []>                |
+    <HP: 10/10>                      |     <HP: 10/10>               |
+    <Energy: 0/2>                    |     <Energy: 0/2>             |
+    <Talents>                        |     <Talents>                 |
+    <Equipments>                     |     <Equipments>              |
+    <Statuses>                       |     <Statuses>                |
+<Combat Statuses: []>                | <Combat Statuses: []>         |
+<Summons>                            | <Summons>                     |
+<Supports>                           | <Supports>                    |
+<Dices>                              | <Dices>                       |
+  <CRYO: 1>                          | <Hand Cards>                  |
+  <ELECTRO: 1>                       |   <Xudong: 1>                 |
+<Hand Cards>                         |   <NorthernSmokedChicken: 1>  |
+  <MondstadtHashBrown: 1>            |   <StreamingSurge: 1>         |
+  <SweetMadame: 1>                   | <Deck Cards>                  |
+  <ChangingShifts: 1>                |   <Xudong: 1>                 |
+<Deck Cards>                         |   <MintyMeatRolls: 1>         |
+  <Xudong: 2>                        |   <LeaveItToMe: 2>            |
+  <MintyMeatRolls: 2>                |   <LotusFlowerCrisp: 2>       |
+  <LeaveItToMe: 2>                   |   <ChangingShifts: 1>         |
+  <LotusFlowerCrisp: 2>              |   <StreamingSurge: 1>         |
+  <ChangingShifts: 1>                |   <JueyunGuoba: 2>            |
+  <StreamingSurge: 2>                |   <ColdBloodedStrike: 2>      |
+  <JueyunGuoba: 1>                   |   <MondstadtHashBrown: 2>     |
+  <ColdBloodedStrike: 2>             |   <Starsigns: 2>              |
+  <MondstadtHashBrown: 1>            |   <ThunderingPenance: 2>      |
+  <Starsigns: 2>                     |   <SweetMadame: 2>            |
+  <ThunderingPenance: 1>             |   <NorthernSmokedChicken: 1>  |
+  <SweetMadame: 1>                   |   <MushroomPizza: 2>          |
+  <NorthernSmokedChicken: 2>         | <Publicly Used Cards>         |
+  <MushroomPizza: 2>                 |   <MintyMeatRolls: 1>         |
+<Publicly Used Cards>                |                               |
+  <ThunderingPenance: 1>             |                               |
+----------------------------------------------------------------------
+<Effects>
+======================================================================
+#### Player2 Action: EndRoundAction:()
+#### [91/121] in game history
+
+:> a    // forward auto-step again
+<Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 1>
+----------------------------------------------------------------------
+<Player: *Player1>                   | <Player: Player2>             |
+<Phase: Action Phase>                | <Phase: Passive Wait Phase>   |
+<Card Redraw Chances: 0>             | <Card Redraw Chances: 0>      |
+<Characters>                         | <Characters>                  |
+  <*Keqing>                          |   <*Keqing>                   |
+    <id: 1>                          |     <id: 1>                   |
+    <Aura: [HYDRO]>                  |     <Aura: []>                |
+    <HP: 7/10>                       |     <HP: 10/10>               |
+    <Energy: 2/3>                    |     <Energy: 1/3>             |
+    <Talents>                        |     <Talents>                 |
+      <KeqingTalent(0)>              |       <KeqingTalent(0)>       |
+    <Equipments>                     |     <Equipments>              |
+      <ThunderingPenance>            |     <Statuses>                |
+    <Statuses>                       |   <RhodeiaOfLoch>             |
+      <KeqingElectroInfusion(2)(1)>  |     <id: 2>                   |
+  <RhodeiaOfLoch>                    |     <Aura: [ELECTRO]>         |
+    <id: 2>                          |     <HP: 4/10>                |
+    <Aura: []>                       |     <Energy: 1/3>             |
+    <HP: 10/10>                      |     <Talents>                 |
+    <Energy: 0/3>                    |     <Equipments>              |
+    <Talents>                        |     <Statuses>                |
+    <Equipments>                     |   <Kaeya>                     |
+    <Statuses>                       |     <id: 3>                   |
+  <Kaeya>                            |     <Aura: []>                |
+    <id: 3>                          |     <HP: 10/10>               |
+    <Aura: []>                       |     <Energy: 0/2>             |
+    <HP: 10/10>                      |     <Talents>                 |
+    <Energy: 0/2>                    |     <Equipments>              |
+    <Talents>                        |     <Statuses>                |
+    <Equipments>                     | <Combat Statuses: []>         |
+    <Statuses>                       | <Summons>                     |
+<Combat Statuses: []>                | <Supports>                    |
+<Summons>                            | <Dices>                       |
+<Supports>                           |   <OMNI: 1>                   |
+<Dices>                              |   <HYDRO: 4>                  |
+  <HYDRO: 1>                         |   <CRYO: 2>                   |
+  <CRYO: 1>                          |   <PYRO: 1>                   |
+  <DENDRO: 2>                        | <Hand Cards>                  |
+  <PYRO: 2>                          |   <Xudong: 1>                 |
+  <ANEMO: 2>                         |   <MintyMeatRolls: 1>         |
+<Hand Cards>                         |   <NorthernSmokedChicken: 1>  |
+  <MondstadtHashBrown: 1>            |   <StreamingSurge: 1>         |
+  <Starsigns: 1>                     |   <MushroomPizza: 1>          |
+  <SweetMadame: 1>                   | <Deck Cards>                  |
+  <ChangingShifts: 2>                |   <Xudong: 1>                 |
+<Deck Cards>                         |   <LeaveItToMe: 2>            |
+  <Xudong: 2>                        |   <LotusFlowerCrisp: 2>       |
+  <MintyMeatRolls: 2>                |   <ChangingShifts: 1>         |
+  <LeaveItToMe: 2>                   |   <StreamingSurge: 1>         |
+  <LotusFlowerCrisp: 2>              |   <JueyunGuoba: 2>            |
+  <StreamingSurge: 2>                |   <ColdBloodedStrike: 2>      |
+  <JueyunGuoba: 1>                   |   <MondstadtHashBrown: 2>     |
+  <ColdBloodedStrike: 2>             |   <Starsigns: 2>              |
+  <MondstadtHashBrown: 1>            |   <ThunderingPenance: 2>      |
+  <Starsigns: 1>                     |   <SweetMadame: 2>            |
+  <ThunderingPenance: 1>             |   <NorthernSmokedChicken: 1>  |
+  <SweetMadame: 1>                   |   <MushroomPizza: 1>          |
+  <NorthernSmokedChicken: 2>         | <Publicly Used Cards>         |
+  <MushroomPizza: 2>                 |   <MintyMeatRolls: 1>         |
+<Publicly Used Cards>                |                               |
+  <ThunderingPenance: 1>             |                               |
+----------------------------------------------------------------------
+<Effects>
+======================================================================
+#### Player1 Action: EndRoundAction:()
+#### [120/121] in game history
+
+:> 
+<Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 1>
+----------------------------------------------------------------------
+<Player: Player1>                    | <Player: *Player2>            |
+<Phase: End Phase>                   | <Phase: Action Phase>         |
+<Card Redraw Chances: 0>             | <Card Redraw Chances: 0>      |
+<Characters>                         | <Characters>                  |
+  <*Keqing>                          |   <*Keqing>                   |
+    <id: 1>                          |     <id: 1>                   |
+    <Aura: [HYDRO]>                  |     <Aura: []>                |
+    <HP: 7/10>                       |     <HP: 10/10>               |
+    <Energy: 2/3>                    |     <Energy: 1/3>             |
+    <Talents>                        |     <Talents>                 |
+      <KeqingTalent(0)>              |       <KeqingTalent(0)>       |
+    <Equipments>                     |     <Equipments>              |
+      <ThunderingPenance>            |     <Statuses>                |
+    <Statuses>                       |   <RhodeiaOfLoch>             |
+      <KeqingElectroInfusion(2)(1)>  |     <id: 2>                   |
+  <RhodeiaOfLoch>                    |     <Aura: [ELECTRO]>         |
+    <id: 2>                          |     <HP: 4/10>                |
+    <Aura: []>                       |     <Energy: 1/3>             |
+    <HP: 10/10>                      |     <Talents>                 |
+    <Energy: 0/3>                    |     <Equipments>              |
+    <Talents>                        |     <Statuses>                |
+    <Equipments>                     |   <Kaeya>                     |
+    <Statuses>                       |     <id: 3>                   |
+  <Kaeya>                            |     <Aura: []>                |
+    <id: 3>                          |     <HP: 10/10>               |
+    <Aura: []>                       |     <Energy: 0/2>             |
+    <HP: 10/10>                      |     <Talents>                 |
+    <Energy: 0/2>                    |     <Equipments>              |
+    <Talents>                        |     <Statuses>                |
+    <Equipments>                     | <Combat Statuses: []>         |
+    <Statuses>                       | <Summons>                     |
+<Combat Statuses: []>                | <Supports>                    |
+<Summons>                            | <Dices>                       |
+<Supports>                           |   <OMNI: 1>                   |
+<Dices>                              |   <HYDRO: 4>                  |
+  <HYDRO: 1>                         |   <CRYO: 2>                   |
+  <CRYO: 1>                          |   <PYRO: 1>                   |
+  <DENDRO: 2>                        | <Hand Cards>                  |
+  <PYRO: 2>                          |   <Xudong: 1>                 |
+  <ANEMO: 2>                         |   <MintyMeatRolls: 1>         |
+<Hand Cards>                         |   <NorthernSmokedChicken: 1>  |
+  <MondstadtHashBrown: 1>            |   <StreamingSurge: 1>         |
+  <Starsigns: 1>                     |   <MushroomPizza: 1>          |
+  <SweetMadame: 1>                   | <Deck Cards>                  |
+  <ChangingShifts: 2>                |   <Xudong: 1>                 |
+<Deck Cards>                         |   <LeaveItToMe: 2>            |
+  <Xudong: 2>                        |   <LotusFlowerCrisp: 2>       |
+  <MintyMeatRolls: 2>                |   <ChangingShifts: 1>         |
+  <LeaveItToMe: 2>                   |   <StreamingSurge: 1>         |
+  <LotusFlowerCrisp: 2>              |   <JueyunGuoba: 2>            |
+  <StreamingSurge: 2>                |   <ColdBloodedStrike: 2>      |
+  <JueyunGuoba: 1>                   |   <MondstadtHashBrown: 2>     |
+  <ColdBloodedStrike: 2>             |   <Starsigns: 2>              |
+  <MondstadtHashBrown: 1>            |   <ThunderingPenance: 2>      |
+  <Starsigns: 1>                     |   <SweetMadame: 2>            |
+  <ThunderingPenance: 1>             |   <NorthernSmokedChicken: 1>  |
+  <SweetMadame: 1>                   |   <MushroomPizza: 1>          |
+  <NorthernSmokedChicken: 2>         | <Publicly Used Cards>         |
+  <MushroomPizza: 2>                 |   <MintyMeatRolls: 1>         |
+<Publicly Used Cards>                |                               |
+  <ThunderingPenance: 1>             |                               |
+----------------------------------------------------------------------
+<Effects>
+======================================================================
+#### Player2 Action: <CharacterSkill.NORMAL_ATTACK, DiceOnlyInstruction:(dices=[('PYRO', '1'), ('CRYO', '1'), ('OMNI', '1')])>
+
+:> q    // quit CLI
 ```
 
-and the game continues like this until the end. Feel free to try it out yourself.
-
-Don't forget to make use of `ba` to review the game history.
-Or use `n` and `bn` to examine how the intermediate states transit from one to another.
+If you do want to learn more about how the state-machine (for this game) works,
+I encourage you to use `n` and `bn` often to observe how `Effects` are processed.
