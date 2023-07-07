@@ -18,6 +18,7 @@ class GameMode(Enum):
 
 
 class CLISession:
+    _PS1 = ":> "
 
     def __init__(self) -> None:
         self._mode: GameMode = GameMode.PVE
@@ -95,10 +96,9 @@ class CLISession:
         prompt_type = case_val(
             info_type == "",
             "",
-            f"[{info_type}] "
+            f"[{info_type}]"
         )
-        print(f"{prompt_type}:> {prompt}")
-
+        print(f"{prompt_type} -- {prompt}")
 
     @classmethod
     def _display_choice(cls, choice: Any) -> str:
@@ -124,15 +124,16 @@ class CLISession:
             try:
                 print("Choices are:")
                 print(choices_display)
-                choice = input(f":> Please choose id ({id_range[0]}-{id_range[1]}): @")
+                print(f"Please choose id ({id_range[0]}-{id_range[1]})")
+                choice = input(f":{cls._PS1}@")
                 print()
                 final_choice = int(choice)
             except KeyboardInterrupt:
-                print("\nBye...")
+                print()
+                cls.prompt_handler("exit", "Bye...")
                 exit(0)
             except:
-                print(
-                    f"Last input is invalid! Choose a number in range {id_range[0]}-{id_range[1]}")
+                cls.prompt_handler("error", f"Last input is invalid!")
                 final_choice = -1
                 continue
         return choices_map[final_choice]
@@ -161,22 +162,22 @@ class CLISession:
             for i, pair in enumerate(tuple_list)
             if pair[1] > 0  # type: ignore
         )
-        prompt = 'e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3' \
-            + case_val(optional, "\nEnter nothing to skip selection.", '')
+        prompt = 'e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3'
         selected_dict: dict[int, int]
         while True:
             try:
                 print("Selections are:")
                 print(dict_display)
                 print(prompt)
-                choice = input(":> Please choose: ")
+                choice = input(f":{cls._PS1}")
                 print()
                 choice = choice.replace(' ', '')
                 if optional and choice == '':
                     return None
                 selected_dict = parse(choice)
             except KeyboardInterrupt:
-                print("\nBye...")
+                print()
+                cls.prompt_handler("exit", "Bye...")
                 exit(0)
             except:
                 cls.prompt_handler("error", f"Last input is invalid!")
@@ -202,7 +203,7 @@ class CLISession:
         self._print_latest_game_state()
         wrong_cmd_counter = 0
         while last_cmd != "q":
-            new_cmd = input("\n:> ")
+            new_cmd = input(f"\n{self._PS1}")
             if new_cmd == "":
                 new_cmd = last_cmd
 

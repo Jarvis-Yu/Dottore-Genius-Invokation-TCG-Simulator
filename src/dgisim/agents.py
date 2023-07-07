@@ -184,7 +184,7 @@ class CustomChoiceAgent(RandomAgent):
             self,
             action_generator: ActionGenerator,
             choices: ActualDices | Cards,
-            default_choice: None | ActualDices | Cards,
+            default_choice: None | ActualDices | Cards = None,
     ) -> ActualDices | Cards:
         base_selection: ActualDices | Cards
         if isinstance(choices, ActualDices):
@@ -204,7 +204,7 @@ class CustomChoiceAgent(RandomAgent):
                 if isinstance(choices, ActualDices):
                     selection = ActualDices(manual_choice)  # type: ignore
                 elif isinstance(choices, Cards):
-                    selection = Cards(choices)  # type: ignore
+                    selection = Cards(manual_choice)  # type: ignore
                 else:
                     raise ValueError(f"choices has type {type(choices)} which is not caught!")
                 assert type(selection) == type(base_selection)
@@ -236,6 +236,7 @@ class CustomChoiceAgent(RandomAgent):
                     raise Exception(f"There's not enough dices for {repr(choices)} from "
                                     + f"{action_generator.dices_available()} at game_state:"
                                     + f"{action_generator.game_state}")
+                self._prompt_handler("info", f"You need to pay for {repr(choices)}")
                 choice = self._dict_class_choose_handler(
                     action_generator,
                     action_generator.dices_available(),
@@ -243,10 +244,16 @@ class CustomChoiceAgent(RandomAgent):
                 )
                 action_generator = action_generator.choose(choice)
             elif isinstance(choices, Cards):
-                _, choice = choices.pick_random_cards(random.randint(0, choices.num_cards()))
+                choice = self._dict_class_choose_handler(
+                    action_generator,
+                    action_generator.hand_cards_available(),
+                )
                 action_generator = action_generator.choose(choice)
             elif isinstance(choices, ActualDices):
-                _, choice = choices.pick_random_dices(random.randint(0, choices.num_dices()))
+                choice = self._dict_class_choose_handler(
+                    action_generator,
+                    action_generator.dices_available(),
+                )
                 action_generator = action_generator.choose(choice)
             else:
                 raise NotImplementedError
