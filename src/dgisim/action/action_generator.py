@@ -4,9 +4,10 @@ from typing import Callable, TYPE_CHECKING
 from typing_extensions import Self
 
 if TYPE_CHECKING:
-    from ..state.game_state import GameState
-    from ..state.enums import PID
+    from ..card.cards import Cards
     from ..dices import ActualDices
+    from ..state.enums import PID
+    from ..state.game_state import GameState
 
     from .action import PlayerAction, Instruction
     from .types import DecidedChoiceType, GivenChoiceType
@@ -74,6 +75,9 @@ class ActionGenerator:
 
     def dices_available(self) -> ActualDices:
         return self.game_state.get_player(self.pid).get_dices()
+
+    def hand_cards_available(self) -> Cards:
+        return self.game_state.get_player(self.pid).get_hand_cards()
 
     def choose(self, choice: DecidedChoiceType) -> ActionGenerator:
         assert not self.filled()

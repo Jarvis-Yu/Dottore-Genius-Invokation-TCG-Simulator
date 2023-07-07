@@ -49,6 +49,9 @@ class Cards:
     def num_cards(self) -> int:
         return sum(self._cards.values())
 
+    def is_legal(self) -> bool:
+        return all(val >= 0 for val in self._cards.values())
+
     def empty(self) -> bool:
         return all(value == 0 for value in self._cards.values())
 
@@ -98,6 +101,9 @@ class Cards:
             for card in self._cards.keys()
             if self[card] > 0
         )
+
+    def as_dict(self) -> dict[type[Card], int]:
+        return dict(self._cards.items())
 
     def to_string(self, indent: int = 0) -> str:
         existing_cards = dict([

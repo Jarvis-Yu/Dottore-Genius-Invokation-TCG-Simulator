@@ -180,42 +180,48 @@ class CustomChoiceAgent(RandomAgent):
         self._dict_choose_handler = dict_choose_handler
         self._any_handler = any_handler
 
-    def _handle_abstract_dices(
+    def _dict_class_choose_handler(
             self,
             action_generator: ActionGenerator,
-            abstract_dices: AbstractDices,
-    ) -> ActionGenerator:
-        optional_choice = action_generator.dices_available().basically_satisfy(abstract_dices)
-        if optional_choice is None:
-            raise Exception(f"There's not enough dices for {repr(abstract_dices)} from "
-                            + f"{action_generator.dices_available()} at game_state:"
-                            + f"{action_generator.game_state}")
+            choices: ActualDices | Cards,
+            default_choice: None | ActualDices | Cards,
+    ) -> ActualDices | Cards:
+        base_selection: ActualDices | Cards
+        if isinstance(choices, ActualDices):
+            base_selection = action_generator.dices_available()
+        else:
+            base_selection = action_generator.hand_cards_available()
+        choice = default_choice
         while True:
-            choice = optional_choice
-            self._prompt_handler("info", f"auto chosen dices are {repr(choice)}")
-            self._prompt_handler("info", "If you want to choose manually, please input below")
+            if default_choice is not None:
+                self._prompt_handler("info", f"auto-choice is {repr(default_choice)}")
+                self._prompt_handler("info", "Enter nothing if you agree with the auto-choice")
             manual_choice = self._dict_choose_handler(
-                action_generator.dices_available().as_dict(),  # type: ignore
-                True,
+                choices.as_dict(),  # type: ignore
+                default_choice is not None,
             )
             if manual_choice is not None:
-                selected_dices = ActualDices(manual_choice)  # type: ignore
-                if (
-                        selected_dices.is_legal()
-                        and (action_generator.dices_available() - selected_dices).is_legal()
-                ):
+                if isinstance(choices, ActualDices):
+                    selection = ActualDices(manual_choice)  # type: ignore
+                elif isinstance(choices, Cards):
+                    selection = Cards(choices)  # type: ignore
+                else:
+                    raise ValueError(f"choices has type {type(choices)} which is not caught!")
+                assert type(selection) == type(base_selection)
+                if selection.is_legal() and (base_selection - selection).is_legal():  # type: ignore
                     try:
-                        action_generator.choose(selected_dices)  # type: ignore
+                        action_generator.choose(selection)
                     except:
-                        print("error", f"{repr(selected_dices)} cannot fulfill {repr(abstract_dices)}")
+                        self._prompt_handler("error", f"{repr(selection)} not valid")
                         continue
-                    choice = selected_dices
+                    choice = selection
                     break
                 else:
-                    print("error", f"{manual_choice} is illegal")
+                    self._prompt_handler("error", f"{repr(selection)} not illegal")
             else:
                 break
-        return action_generator.choose(choice)
+        assert choice is not None
+        return choice
 
     def _random_action_generator_chooser(self, action_generator: ActionGenerator) -> PlayerAction:
         while not action_generator.filled():
@@ -225,7 +231,17 @@ class CustomChoiceAgent(RandomAgent):
                 choice = self._choose_handler(choices)
                 action_generator = action_generator.choose(choice)
             elif isinstance(choices, AbstractDices):
-                action_generator = self._handle_abstract_dices(action_generator, choices)
+                optional_choice = action_generator.dices_available().basically_satisfy(choices)
+                if optional_choice is None:
+                    raise Exception(f"There's not enough dices for {repr(choices)} from "
+                                    + f"{action_generator.dices_available()} at game_state:"
+                                    + f"{action_generator.game_state}")
+                choice = self._dict_class_choose_handler(
+                    action_generator,
+                    action_generator.dices_available(),
+                    optional_choice,
+                )
+                action_generator = action_generator.choose(choice)
             elif isinstance(choices, Cards):
                 _, choice = choices.pick_random_cards(random.randint(0, choices.num_cards()))
                 action_generator = action_generator.choose(choice)

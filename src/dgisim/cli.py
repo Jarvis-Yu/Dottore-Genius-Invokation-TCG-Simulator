@@ -91,6 +91,16 @@ class CLISession:
         self.reset_game()
 
     @classmethod
+    def prompt_handler(cls, info_type: str, prompt: str) -> None:
+        prompt_type = case_val(
+            info_type == "",
+            "",
+            f"[{info_type}] "
+        )
+        print(f"{prompt_type}:> {prompt}")
+
+
+    @classmethod
     def _display_choice(cls, choice: Any) -> str:
         import inspect
         if isinstance(choice, Enum):
@@ -135,7 +145,7 @@ class CLISession:
     @classmethod
     def dict_action_chooser(cls, choices: dict[_T, int], optional: bool) -> None | dict[_T, int]:
         def parse(s: str) -> dict[int, int]:
-            pairs = s.split(';')
+            pairs = s.split(',')
             return dict(
                 (int(tokens[0]), int(tokens[1]))
                 for tokens in (
@@ -151,10 +161,10 @@ class CLISession:
             for i, pair in enumerate(tuple_list)
             if pair[1] > 0  # type: ignore
         )
-        prompt = 'Example input is "0:2;4:1;3:1" meaning choosing 2 of @0, 1 of @4 and 1 of @3' \
+        prompt = 'e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3' \
             + case_val(optional, "\nEnter nothing to skip selection.", '')
-        selected_dict = {0: BIG_INT}
-        while not (original_dict - selected_dict).all_val_non_negative():
+        selected_dict: dict[int, int]
+        while True:
             try:
                 print("Selections are:")
                 print(dict_display)
@@ -169,23 +179,16 @@ class CLISession:
                 print("\nBye...")
                 exit(0)
             except:
-                print(
-                    f"Last input is invalid!")
-                selected_dict = {0: BIG_INT}
+                cls.prompt_handler("error", f"Last input is invalid!")
                 continue
+            if (original_dict - selected_dict).all_val_non_negative():
+                break
+            cls.prompt_handler("error", f"Last input is invalid!")
+            continue
         return dict(  # type: ignore
             (tuple_list[i][0], j)  # type: ignore
             for i, j in selected_dict.items()
         )
-
-    @classmethod
-    def prompt_handler(cls, info_type: str, prompt: str) -> None:
-        prompt_type = case_val(
-            info_type == "",
-            "",
-            f"[{info_type}] "
-        )
-        print(f"{prompt_type}:> {prompt}")
 
     def run(self) -> None:
         self._equals_sep_bar()
