@@ -117,7 +117,7 @@ class PlayerState:
     def defeated(self) -> bool:
         return self._characters.all_defeated()
 
-    def hide_all(self) -> PlayerState:
+    def hide_cards(self) -> PlayerState:
         return self.factory().f_hand_cards(
             lambda hcs: hcs.hide_all()
         ).f_deck_cards(

@@ -11,6 +11,10 @@ from .state.game_state import GameState
 class GameStateMachine:
     def __init__(self, game_state: GameState, player1: PlayerAgent, player2: PlayerAgent):
         self._history = [game_state]
+        self._perspective_history: dict[PID, list[GameState]] = {
+            PID.P1: [game_state.prespective_view(PID.P1)],
+            PID.P2: [game_state.prespective_view(PID.P2)],
+        }
         self._action_history: list[int] = []
         self._actions: dict[int, PlayerAction] = {}
         self._game_state = game_state
@@ -81,12 +85,17 @@ class GameStateMachine:
     def get_game_state_at(self, index: int) -> GameState:
         return self._history[index]
 
+    def _append_history(self, game_state: GameState) -> None:
+        self._history.append(self._game_state)
+        self._perspective_history[PID.P1].append(self._game_state.prespective_view(PID.P1))
+        self._perspective_history[PID.P2].append(self._game_state.prespective_view(PID.P2))
+
     def _step(self, observe=False) -> None:
         self._game_state = self._game_state.step()
         if observe:
             print(GamePrinter.dict_game_printer(self._game_state.dict_str()))
-            input(">>> ")
-        self._history.append(self._game_state)
+            input(":> ")
+        self._append_history(self._game_state)
 
     def _action_step(self, pid: PID, action: PlayerAction, observe=False) -> bool:
         next_state = self._game_state.action_step(pid, action)
@@ -99,7 +108,7 @@ class GameStateMachine:
         if observe:
             print(GamePrinter.dict_game_printer(self._game_state.dict_str()))
             input(">>> ")
-        self._history.append(self._game_state)
+        self._append_history(self._game_state)
         return True
 
     def step_until_phase(self, phase: type[Phase] | Phase, observe=False) -> None:
@@ -134,7 +143,7 @@ class GameStateMachine:
             while patience > 0 \
                     and not self._action_step(
                         pid,
-                        self.player_agent(pid).choose_action(self._history, pid),
+                        self.player_agent(pid).choose_action(self._perspective_history[pid], pid),
                         observe=observe,
                     ):
                 patience -= 1

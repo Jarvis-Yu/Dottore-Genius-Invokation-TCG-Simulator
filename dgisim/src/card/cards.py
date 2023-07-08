@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 class Cards:
     def __init__(self, mapping: dict[type[Card], int]) -> None:
-        self._cards = HashableDict(mapping)
+        self._cards = HashableDict.from_dict(mapping)
 
     @classmethod
     def from_empty(cls) -> Cards:

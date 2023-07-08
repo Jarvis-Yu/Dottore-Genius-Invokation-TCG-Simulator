@@ -196,6 +196,12 @@ class GameState:
     def game_end(self) -> bool:
         return isinstance(self._phase, gep.GameEndPhase)
 
+    def prespective_view(self, pid: PID) -> GameState:
+        return self.factory().f_player(
+            pid.other(),
+            lambda p: p.hide_cards()
+        ).build()
+
     def _all_unique_data(self) -> tuple:
         return (
             self._phase,
