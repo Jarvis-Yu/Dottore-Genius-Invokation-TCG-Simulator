@@ -79,35 +79,36 @@ class Card:
 
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: PID) -> bool:
-        """ doesn't check if player has the card in hand """
-        return game_state.get_active_player_id() is pid
+        """Checks if the player with give PID can loosley use a card."""
+        active_PID = game_state.get_active_player_id() # Get the active PID frpm the game state
+        return active_PID == pid # Compares the active PID with the provided one
 
     @classmethod
     def loosely_usable(cls, game_state: gs.GameState, pid: PID) -> bool:
         """
-        doesn't check if player has the card in hand
+        Checks if the player with the give PID can loosely use a card
 
-        don't override this unless you know what you are doing
+        Does't check if the player has the card in hand
         """
-        return cls._loosely_usable(game_state, pid) and game_state.get_effect_stack().is_empty()
-
+        active_PID = game_state.get_active_player_id()
+        effect_stack_empty = game_state.get_effect_stack().is_empty()
+        return active_PID == pid and  effect_stack_empty 
     @classmethod
     def usable(cls, game_state: gs.GameState, pid: PID) -> bool:
         """
         checks if card can be used (but neglect if player have enough dices for this)
-
-        don't override this unless you know what you are doing
         """
-        return game_state.get_player(pid).get_hand_cards().contains(cls) \
-            and cls.loosely_usable(game_state, pid)
+        active_PID = game_state.get_active_player_id()
+        hand_cards = game_state.get_player(pid).get_hand_cards()
+        return active_PID == pid and bool(hand_cards)
 
     @classmethod
     def strictly_usable(cls, game_state: gs.GameState, pid: PID) -> bool:
         """
         checks if card can be used
-
-        don't override this unless you know what you are doing
         """
+        active_PID = game_state.get_active_player_id()
+        hand_cards = game_state.get_player(pid).get_hand_cards()
         dices_satisfy = game_state.get_player(pid).get_dices().loosely_satisfy(
             cls.just_preprocessed_dice_cost(game_state, pid)
         )
@@ -267,12 +268,18 @@ class SupportCard(Card):
         return tuple(es) + cls._effects(game_state, pid)
 
     @classmethod
-    def _effects(
-            cls,
-            game_state: gs.GameState,
-            pid: PID,
-    ) -> tuple[eft.Effect, ...]:
-        raise
+    def _effects(cls, game_state: gs.GameState, pid: PID) -> tuple[eft.Effect, ...]:
+        es: list[eft.Effect] = []
+        if game_state.get_player(pid).is_support_zone_overflow():
+            support_zone = game_state.get_player(pid).get_support_zone()
+            last_card = support_zone[-1] if support_zone else None
+            if last_card:
+                # Effect to handle the last card in the support zone
+                es.append(eft.RemoveCardEffect(last_card))
+            else:
+                # Error message indicating support zone overflow
+                raise ValueError("Support zone is overflowing, but no cards are present!")
+        return tuple(es)
 
     @classmethod
     def _choices_helper(
