@@ -1,9 +1,21 @@
+"""
+This file contains the enums and structs of elements and reactions.
+"""
 from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 from typing import FrozenSet, Optional, Iterator
 
 from .helper.hashable_dict import HashableDict
+
+__all__ = [
+    "AURA_ELEMENTS",
+    "AURA_ELEMENTS_ORDERED",
+    "Element",
+    "ElementalAura",
+    "Reaction",
+    "ReactionDetail",
+]
 
 
 class Element(Enum):

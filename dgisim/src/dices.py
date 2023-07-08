@@ -12,8 +12,17 @@ from .element import Element
 if TYPE_CHECKING:
     from .state.game_state import GameState
 
+__all__ = [
+    "AbstractDices",
+    "ActualDices",
+    "Dices",
+]
+
 
 class Dices:
+    """
+    Base class for dices
+    """
     _LEGAL_ELEMS = frozenset(elem for elem in Element)
 
     def __init__(self, dices: dict[Element, int]) -> None:

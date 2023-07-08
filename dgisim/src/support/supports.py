@@ -2,9 +2,11 @@ from __future__ import annotations
 from typing import Iterator
 
 from ..helper.quality_of_life import just
-
 from .support import Support
 
+__all__ = [
+    "Supports",
+]
 
 class Supports:
     def __init__(self, supports: tuple[Support, ...], max_num: int):

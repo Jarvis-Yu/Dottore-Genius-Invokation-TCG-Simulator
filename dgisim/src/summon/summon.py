@@ -1,3 +1,14 @@
+"""
+This file contains the base class "Summon" for all summons,
+and implementation of all summons.
+
+The classes are divided into 3 sections ordered. Within each section, they are
+ordered alphabetically.
+
+- base class, which is Summon
+- template classes, starting with an '_', are templates for other classes
+- concrete classes, the implementation of summons that are actually in the game
+"""
 from __future__ import annotations
 from dataclasses import dataclass, replace
 from typing import ClassVar, Optional, TYPE_CHECKING
@@ -13,6 +24,17 @@ from ..helper.quality_of_life import BIG_INT
 
 if TYPE_CHECKING:
     from ..effect.structs import StaticTarget
+
+__all__ = [
+    # base
+    "Summon",
+
+    # concrete implementations
+    "BurningFlameSummon",
+    "OceanicMimicFrogSummon",
+    "OceanicMimicRaptorSummon",
+    "OceanicMimicSquirrelSummon",
+]
 
 
 @dataclass(frozen=True, kw_only=True)

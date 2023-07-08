@@ -9,8 +9,21 @@ from .element import *
 from .event.event import *
 from .helper.level_print import level_print_single
 
+__all__ = [
+    "Mode",
+    "DefaultMode",
+]
+
 
 class Mode:
+    """
+    Base Mode for all modes.
+
+    A mode is what that contains all configurations for a 'version' of a game.
+
+    e.g. It contains how many cards a player can have, how many summons can a
+    player have...
+    """
 
     _CARD_REDRAW_CHANCES = 1
     _DICE_REROLL_CHANCES = 1
@@ -87,6 +100,9 @@ class Mode:
 
 
 class DefaultMode(Mode):
+    """
+    The DefaultMode which is what Genius Invokationn TCG in Genshin is like.
+    """
 
     def all_cards(self) -> frozenset[type[card.Card]]:
         from .card.cards_set import default_cards

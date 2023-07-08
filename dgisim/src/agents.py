@@ -1,3 +1,6 @@
+"""
+This file contains different implementations of PlayerAgents.
+"""
 import random
 from typing import Any, Optional, Iterable, TYPE_CHECKING, TypeVar
 
@@ -21,18 +24,25 @@ from .state.game_state import GameState
 
 
 __all__ = [
+    "CustomChoiceAgent",
     "LazyAgent",
+    "NoneAgent",
     "PuppetAgent",
     "RandomAgent",
-    "CustomChoiceAgent",
 ]
 
 
 class NoneAgent(PlayerAgent):
+    """
+    A dummy agent.
+    """
     pass
 
 
 class LazyAgent(PlayerAgent):
+    """
+    A player agent that only end round whenever possible.
+    """
     _NUM_PICKED_CARDS = 3
 
     def choose_action(self, history: list[GameState], pid: PID) -> PlayerAction:
@@ -58,6 +68,12 @@ class LazyAgent(PlayerAgent):
 
 
 class PuppetAgent(PlayerAgent):
+    """
+    A player agent that gives the game PlayerActions passed into the object by
+    the user.
+
+    This agent is meaningly used for controlled testing.
+    """
     def __init__(self, actions: Optional[list[PlayerAction]] = None) -> None:
         if actions is None:
             self._actions = []
@@ -85,6 +101,9 @@ class PuppetAgent(PlayerAgent):
 
 
 class RandomAgent(PlayerAgent):
+    """
+    A player agent that make purely random (but of course valid) acions.
+    """
     _NUM_PICKED_CARDS = 3
 
     def _card_select_phase(self, history: list[GameState], pid: PID) -> PlayerAction:
@@ -173,9 +192,15 @@ class RandomAgent(PlayerAgent):
 
         raise NotImplementedError
 
+
 _T = TypeVar("_T")
 
+
 class CustomChoiceAgent(RandomAgent):
+    """
+    A player agent used by CLI, it requires several Callables passed in, in order
+    to make a decision.
+    """
     def __init__(
             self,
             prompt_handler: Callable[[str, str], None],

@@ -1,3 +1,14 @@
+"""
+This file contains the base class "Support" for all supports,
+and implementation of all supports.
+
+The classes are divided into 3 sections ordered. Within each section, they are
+ordered alphabetically.
+
+- base class, which is Support
+- template classes, starting with an '_', are templates for other classes
+- concrete classes, the implementation of summons that are actually in the game
+"""
 from __future__ import annotations
 from dataclasses import dataclass, replace
 from typing import ClassVar, TYPE_CHECKING
@@ -17,6 +28,14 @@ if TYPE_CHECKING:
     from ..state.game_state import GameState
     from ..effect.structs import StaticTarget
     from ..status.types import Preprocessable
+
+__all__ = [
+    # base
+    "Support",
+
+    # concrete implementations
+    "XudongSupport",
+]
 
 
 @dataclass(frozen=True, kw_only=True)

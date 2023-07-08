@@ -1,3 +1,6 @@
+"""
+This file contains the CLI class.
+"""
 from __future__ import annotations
 from enum import Enum
 from typing import Any, Iterable, TypeVar
@@ -13,10 +16,14 @@ from .helper.quality_of_life import case_val
 from .state.game_state import GameState
 from .state.enums import PID
 
+__all__ = [
+    "CLISession",
+]
+
 _T = TypeVar("_T")
 
 
-class GameMode(Enum):
+class _GameMode(Enum):
     PVP = "PVP"
     PVE = "PVE"
     EVE = "EVE"
@@ -26,17 +33,17 @@ class CLISession:
     _PS1 = ":> "
 
     def __init__(self) -> None:
-        self._mode: GameMode = GameMode.PVE
+        self._mode: _GameMode = _GameMode.PVE
         self.reset_game()
 
     def reset_game(self) -> None:
-        if self._mode is GameMode.EVE:
+        if self._mode is _GameMode.EVE:
             self._game_session = GameStateMachine(
                 GameState.from_default(),
                 RandomAgent(),
                 RandomAgent(),
             )
-        elif self._mode is GameMode.PVE:
+        elif self._mode is _GameMode.PVE:
             self._game_session = GameStateMachine(
                 GameState.from_default(),
                 CustomChoiceAgent(
@@ -47,7 +54,7 @@ class CLISession:
                 ),
                 RandomAgent(),
             )
-        elif self._mode is GameMode.PVP:
+        elif self._mode is _GameMode.PVP:
             self._game_session = GameStateMachine(
                 GameState.from_default(),
                 CustomChoiceAgent(
@@ -91,8 +98,8 @@ class CLISession:
 
     def _mode_prompt(self) -> None:
         print("Please choose the cli mode:")
-        mode = self.chooser(mode for mode in GameMode)
-        assert isinstance(mode, GameMode)
+        mode = self.chooser(mode for mode in _GameMode)
+        assert isinstance(mode, _GameMode)
         self._mode = mode
         self.reset_game()
 

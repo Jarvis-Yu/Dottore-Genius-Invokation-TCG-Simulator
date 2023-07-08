@@ -7,6 +7,10 @@ from .player_agent import PlayerAgent
 from .state.enums import PID
 from .state.game_state import GameState
 
+__all__ = [
+    "GameStateMachine",
+]
+
 
 class GameStateMachine:
     def __init__(self, game_state: GameState, player1: PlayerAgent, player2: PlayerAgent):
