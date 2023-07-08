@@ -3,6 +3,7 @@ from dataclasses import asdict, dataclass, field, replace
 from typing import FrozenSet, Iterable, Optional, TYPE_CHECKING, Union
 
 from ..character import character as chr
+from ..helper.quality_of_life import dataclass_repr
 from ..status import status as stt
 from ..summon import summon as sm
 from ..support import support as sp
@@ -13,7 +14,6 @@ from ..helper.quality_of_life import just, case_val
 from ..state.enums import PID, ACT
 from ..status.enums import PREPROCESSABLES
 from ..status.status_processing import StatusProcessing
-
 from .enums import DYNAMIC_CHARACTER_TARGET, TRIGGERING_SIGNAL, ZONE
 from .structs import StaticTarget, DamageType
 
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from ..status.statuses import Statuses
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class Effect:
     def execute(self, game_state: GameState) -> GameState:
         raise Exception("Not Overriden or Implemented")
@@ -35,31 +35,31 @@ class Effect:
     def dict_str(self) -> Union[dict, str]:
         return asdict(self)
 
-    def __str__(self) -> str:
-        return self.__class__.__name__
+    def __repr__(self) -> str:
+        return dataclass_repr(self)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class TriggerrbleEffect(Effect):
     pass
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class DirectEffect(Effect):
     pass
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class CheckerEffect(Effect):
     pass
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class PhaseEffect(Effect):
     pass
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class TriggerStatusEffect(Effect):
     target: StaticTarget
     status: type[Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]]
@@ -89,7 +89,7 @@ class TriggerStatusEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class TriggerCombatStatusEffect(Effect):
     target_pid: PID  # the player the status belongs to
     status: type[stt.CombatStatus]
@@ -115,7 +115,7 @@ class TriggerCombatStatusEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class TriggerSummonEffect(Effect):
     target_pid: PID
     summon: type[sm.Summon]
@@ -141,7 +141,7 @@ class TriggerSummonEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class TriggerSupportEffect(Effect):
     target_pid: PID
     support_type: type[sp.Support]
@@ -168,7 +168,7 @@ class TriggerSupportEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class AllStatusTriggererEffect(TriggerrbleEffect):
     """
     This effect triggers the characters' statuses with the provided signal in order.
@@ -183,7 +183,7 @@ class AllStatusTriggererEffect(TriggerrbleEffect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class SwapCharacterCheckerEffect(CheckerEffect):
     my_active: StaticTarget
     oppo_active: StaticTarget
@@ -221,7 +221,7 @@ class SwapCharacterCheckerEffect(CheckerEffect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class DeathCheckCheckerEffect(CheckerEffect):
     def execute(self, game_state: GameState) -> GameState:
         p1_character = game_state.get_player1().get_characters().get_active_character()
@@ -262,7 +262,7 @@ class DeathCheckCheckerEffect(CheckerEffect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class DefeatedCheckerEffect(CheckerEffect):
     def execute(self, game_state: GameState) -> GameState:
         if game_state.get_player1().defeated() \
@@ -271,12 +271,12 @@ class DefeatedCheckerEffect(CheckerEffect):
         return game_state
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class DeathSwapPhaseStartEffect(PhaseEffect):
     pass
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class DeathSwapPhaseEndEffect(PhaseEffect):
     my_pid: PID
     my_last_phase: ACT
@@ -296,7 +296,7 @@ class DeathSwapPhaseEndEffect(PhaseEffect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class EndPhaseCheckoutEffect(PhaseEffect):
     """
     This is responsible for triggering character statuses/summons/supports by the
@@ -318,7 +318,7 @@ class EndPhaseCheckoutEffect(PhaseEffect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class EndRoundEffect(PhaseEffect):
     """
     This is responsible for triggering other clean ups (e.g. remove satiated)
@@ -339,7 +339,7 @@ class EndRoundEffect(PhaseEffect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class TurnEndEffect(PhaseEffect):
     def execute(self, game_state: GameState) -> GameState:
         active_player_id = game_state.get_active_player_id()
@@ -360,7 +360,7 @@ class TurnEndEffect(PhaseEffect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class EndPhaseTurnEndEffect(PhaseEffect):
     def execute(self, game_state: GameState) -> GameState:
         active_player_id = game_state.get_active_player_id()
@@ -378,7 +378,7 @@ class EndPhaseTurnEndEffect(PhaseEffect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class SetBothPlayerPhaseEffect(PhaseEffect):
     phase: ACT
 
@@ -390,7 +390,7 @@ class SetBothPlayerPhaseEffect(PhaseEffect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class SwapCharacterEffect(DirectEffect):
     target: StaticTarget
 
@@ -421,7 +421,7 @@ class SwapCharacterEffect(DirectEffect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class ForwardSwapCharacterEffect(DirectEffect):
     target_player: PID
 
@@ -456,7 +456,7 @@ _DAMAGE_ELEMENTS: FrozenSet[Element] = frozenset({
 })
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True, repr=False)
 class SpecificDamageEffect(Effect):
     source: StaticTarget
     target: StaticTarget
@@ -664,7 +664,7 @@ class SpecificDamageEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class ReferredDamageEffect(Effect):
     source: StaticTarget
     target: DYNAMIC_CHARACTER_TARGET
@@ -728,7 +728,7 @@ class ReferredDamageEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class EnergyRechargeEffect(Effect):
     target: StaticTarget
     recharge: int
@@ -750,7 +750,7 @@ class EnergyRechargeEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class EnergyDrainEffect(Effect):
     target: StaticTarget
     drain: int
@@ -772,7 +772,7 @@ class EnergyDrainEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class RecoverHPEffect(Effect):
     target: StaticTarget
     recovery: int
@@ -795,7 +795,7 @@ class RecoverHPEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class RemoveCardEffect(Effect):
     pid: PID
     card: type[Card]
@@ -816,7 +816,7 @@ class RemoveCardEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class RemoveAllCardEffect(Effect):
     pid: PID
     card: type[Card]
@@ -835,7 +835,7 @@ class RemoveAllCardEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class RemoveDiceEffect(Effect):
     pid: PID
     dices: ActualDices
@@ -852,7 +852,7 @@ class RemoveDiceEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class AddCharacterStatusEffect(Effect):
     target: StaticTarget
     status: type[Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]]
@@ -880,7 +880,7 @@ class AddCharacterStatusEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class RemoveCharacterStatusEffect(DirectEffect):
     target: StaticTarget
     status: type[Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]]
@@ -910,7 +910,7 @@ class RemoveCharacterStatusEffect(DirectEffect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class UpdateCharacterStatusEffect(Effect):
     target: StaticTarget
     status: Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]
@@ -938,7 +938,7 @@ class UpdateCharacterStatusEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class OverrideCharacterStatusEffect(Effect):
     target: StaticTarget
     status: Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]
@@ -966,7 +966,7 @@ class OverrideCharacterStatusEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class AddCombatStatusEffect(Effect):
     target_pid: PID
     status: type[stt.CombatStatus]
@@ -980,7 +980,7 @@ class AddCombatStatusEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class RemoveCombatStatusEffect(Effect):
     target_pid: PID
     status: type[stt.CombatStatus]
@@ -994,7 +994,7 @@ class RemoveCombatStatusEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class UpdateCombatStatusEffect(Effect):
     target_pid: PID
     status: stt.CombatStatus
@@ -1008,7 +1008,7 @@ class UpdateCombatStatusEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class OverrideCombatStatusEffect(Effect):
     target_pid: PID
     status: stt.CombatStatus
@@ -1022,7 +1022,7 @@ class OverrideCombatStatusEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class AddSummonEffect(Effect):
     target_pid: PID
     summon: type[sm.Summon]
@@ -1036,7 +1036,7 @@ class AddSummonEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class RemoveSummonEffect(Effect):
     target_pid: PID
     summon: type[sm.Summon]
@@ -1050,7 +1050,7 @@ class RemoveSummonEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class UpdateSummonEffect(Effect):
     target_pid: PID
     summon: sm.Summon
@@ -1064,7 +1064,7 @@ class UpdateSummonEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class OverrideSummonEffect(Effect):
     target_pid: PID
     summon: sm.Summon
@@ -1078,7 +1078,7 @@ class OverrideSummonEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True, repr=False)
 class AllSummonIncreaseUsage(Effect):
     target_pid: PID
     d_usages: int = 1
@@ -1098,7 +1098,7 @@ class AllSummonIncreaseUsage(Effect):
         ).build()
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True, repr=False)
 class OneSummonIncreaseUsage(Effect):
     target_pid: PID
     summon_type: type[sm.Summon]
@@ -1122,7 +1122,7 @@ class OneSummonIncreaseUsage(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class AddSupportEffect(Effect):
     target_pid: PID
     support: type[sp.Support]
@@ -1136,7 +1136,7 @@ class AddSupportEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class RemoveSupportEffect(Effect):
     target_pid: PID
     sid: int
@@ -1150,7 +1150,7 @@ class RemoveSupportEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class UpdateSupportEffect(Effect):
     target_pid: PID
     support: sp.Support
@@ -1164,7 +1164,7 @@ class UpdateSupportEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class OverrideSupportEffect(Effect):
     target_pid: PID
     support: sp.Support
@@ -1178,7 +1178,7 @@ class OverrideSupportEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class AddCardEffect(Effect):
     pid: PID
     card: type[Card]
@@ -1192,7 +1192,7 @@ class AddCardEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class CastSkillEffect(Effect):
     target: StaticTarget
     skill: CharacterSkill
@@ -1210,7 +1210,7 @@ class CastSkillEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class BroadCastSkillInfoEffect(Effect):
     source: StaticTarget
     skill: CharacterSkill

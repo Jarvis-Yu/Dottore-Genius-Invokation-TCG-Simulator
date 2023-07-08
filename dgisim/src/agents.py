@@ -197,7 +197,7 @@ class CustomChoiceAgent(RandomAgent):
                 self._prompt_handler("info", f"auto-choice is {repr(default_choice)}")
                 self._prompt_handler("info", "Enter nothing if you agree with the auto-choice")
             manual_choice = self._dict_choose_handler(
-                choices.as_dict(),  # type: ignore
+                choices.to_dict(),  # type: ignore
                 default_choice is not None,
             )
             if manual_choice is not None:

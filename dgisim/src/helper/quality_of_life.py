@@ -1,9 +1,12 @@
 from __future__ import annotations
-from typing import TypeVar, Optional
+from dataclasses import fields
+from enum import Enum
+from inspect import isclass
+from typing import Any, TypeVar
 
 _T = TypeVar('_T')
 
-def just(optional_val: Optional[_T], backup: Optional[_T]=None) -> _T:
+def just(optional_val: None | _T, backup: None | _T=None) -> _T:
     """
     Removes Optional and get value directly
     Throws exception if it is indeed None
@@ -18,5 +21,21 @@ def just(optional_val: Optional[_T], backup: Optional[_T]=None) -> _T:
 def case_val(condition: bool, first: _T, second: _T) -> _T:
     """ if condition is True; then return first; else return second """
     return first if condition else second
+
+
+def dataclass_repr(self) -> str:
+    def field_val_to_str(field_val: Any) -> str:
+        if isclass(field_val):
+            return field_val.__name__
+        if isinstance(field_val, Enum):
+            return field_val.name
+        return repr(field_val)
+
+    cls_fields = fields(self)
+    paired_fields = (
+        f"{field.name}={field_val_to_str(self.__getattribute__(field.name))}"
+        for field in cls_fields
+    )
+    return f"{self.__class__.__name__}({', '.join(paired_fields)})"
 
 BIG_INT = 0x7fffffff

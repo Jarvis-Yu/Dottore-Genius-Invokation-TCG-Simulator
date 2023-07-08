@@ -98,21 +98,17 @@ class Dices:
             for dice, num in self._dices.items()
             if num != 0
         ])
-        return repr(list(existing_dices.items()))
+        return (
+            '{'
+            + ", ".join(
+                f"{key}: {val}"
+                for key, val in existing_dices.items()
+            )
+            + '}'
+        )
 
-    def __str__(self) -> str:
-        return self.to_string(0)
-
-    def as_dict(self) -> dict[Element, int]:
+    def to_dict(self) -> dict[Element, int]:
         return dict(self._dices.items())
-
-    def to_string(self, indent: int = 0) -> str:
-        existing_dices = dict([
-            (dice.name, str(num))
-            for dice, num in self._dices.items()
-            if num != 0
-        ])
-        return level_print(existing_dices, indent)
 
     def dict_str(self) -> dict[str, Any]:
         existing_dices = dict([
@@ -155,7 +151,6 @@ class ActualDices(Dices):
         Element.CRYO,
         Element.GEO,
     })
-
 
     def _satisfy(self, requirement: AbstractDices) -> bool:
         assert self.is_legal() and requirement.is_legal()

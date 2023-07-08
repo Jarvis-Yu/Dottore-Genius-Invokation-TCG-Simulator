@@ -153,21 +153,6 @@ class PlayerState:
     def __hash__(self) -> int:
         return hash(self._all_unique_data())
 
-    def __str__(self) -> str:
-        return self.to_string(0)
-
-    def to_string(self, indent: int = 0):
-        new_indent = indent + INDENT
-        return level_print({
-            "Phase": self._phase.value,
-            # "Card Redraw Chances": str(self._card_redraw_chances),
-            "Characters": self._characters.to_string(new_indent),
-            "Dices": self._dices.to_string(new_indent),
-            # "Hand Cards": self._hand_cards.to_string(new_indent),
-            # "Deck Cards": self._deck_cards.to_string(new_indent),
-            # "Publicly Used Cards": self._publicly_used_cards.to_string(new_indent),
-        }, indent)
-
     def dict_str(self) -> dict[str, Union[dict, str]]:
         return {
             "Phase": self._phase.value,

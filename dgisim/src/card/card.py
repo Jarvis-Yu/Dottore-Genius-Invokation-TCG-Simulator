@@ -151,7 +151,7 @@ class Card:
     def __eq__(self, other: object) -> bool:
         return type(self) == type(other)
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         return self.__class__.__name__
 
     @staticmethod

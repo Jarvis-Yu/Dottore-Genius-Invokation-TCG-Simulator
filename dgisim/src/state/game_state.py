@@ -221,18 +221,6 @@ class GameState:
         from ..helper.level_print import GamePrinter
         return GamePrinter.dict_game_printer(self.dict_str())
 
-    def to_string(self, indent: int = 0) -> str:
-        new_indent = indent + INDENT
-        return level_print({
-            "Mode": self._mode.to_string(new_indent),
-            "Phase": self._phase.to_string(new_indent),
-            "Round": level_print_single(str(self._round), new_indent),
-            "Active Player": level_print_single(str(self._active_player_id), new_indent),
-            "Player1": self._player1.to_string(new_indent),
-            "Player2": self._player2.to_string(new_indent),
-            "Effects": self._effect_stack.to_string(new_indent),
-        }, indent)
-
     def dict_str(self) -> dict:
         return {
             "Mode": self._mode.dict_str(),

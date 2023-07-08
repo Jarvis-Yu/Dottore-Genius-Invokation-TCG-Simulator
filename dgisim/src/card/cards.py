@@ -92,8 +92,20 @@ class Cards:
     def __hash__(self) -> int:
         return hash(self._cards)
 
-    def __str__(self) -> str:
-        return self.to_string(0)
+    def __repr__(self) -> str:
+        existing_cards = dict([
+            (card.name(), str(num))
+            for card, num in self._cards.items()
+            if num != 0
+        ])
+        return (
+            '{'
+            + ", ".join(
+                f"{key}: {val}"
+                for key, val in existing_cards.items()
+            )
+            + '}'
+        )
 
     def __iter__(self) -> Iterator[type[Card]]:
         return (  # type: ignore
@@ -102,18 +114,10 @@ class Cards:
             if self[card] > 0
         )
 
-    def as_dict(self) -> dict[type[Card], int]:
+    def to_dict(self) -> dict[type[Card], int]:
         return dict(self._cards.items())
 
-    def to_string(self, indent: int = 0) -> str:
-        existing_cards = dict([
-            (card.name(), str(num))
-            for card, num in self._cards.items()
-            if num != 0
-        ])
-        return level_print(existing_cards, indent)
-
-    def dict_str(self) -> Union[dict, str]:
+    def dict_str(self) -> dict:
         existing_cards = dict([
             (card.name(), str(num))
             for card, num in self._cards.items()

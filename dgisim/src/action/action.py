@@ -1,5 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, fields, replace
+from enum import Enum
+from inspect import isclass
 from typing import Any, TYPE_CHECKING
 from typing_extensions import Self
 
@@ -9,6 +11,7 @@ from ..dices import ActualDices
 from ..effect.enums import ZONE
 from ..effect.structs import StaticTarget
 from ..element.element import Element
+from ..helper.quality_of_life import dataclass_repr
 from ..state.enums import PID
 
 if TYPE_CHECKING:
@@ -16,7 +19,7 @@ if TYPE_CHECKING:
     from ..card.card import Card
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class PlayerAction:
     @classmethod
     def _empty(cls) -> Self:
@@ -64,14 +67,11 @@ class PlayerAction:
             for field_type, val in field_type_val
         )
 
-    def __str__(self) -> str:
-        cls_fields = fields(self)
-        paired_fields = (
-            f"{field.name}={str(self.__getattribute__(field.name))}" for field in cls_fields)
-        return f"{self.__class__.__name__}:({', '.join(paired_fields)})"
+    def __repr__(self) -> str:
+        return dataclass_repr(self)
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True, repr=False)
 class CardsSelectAction(PlayerAction):
     selected_cards: Cards
 
@@ -82,12 +82,8 @@ class CardsSelectAction(PlayerAction):
     def _empty(cls) -> Self:
         return cls(selected_cards=Cards({}))
 
-    def __str__(self) -> str:
-        name = self.__class__.__name__
-        cards = '; '.join(str(self.selected_cards).split('\n'))
-        return f"{name}[{cards}]"
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True, repr=False)
 class DicesSelectAction(PlayerAction):
     selected_dices: ActualDices
 
@@ -98,12 +94,8 @@ class DicesSelectAction(PlayerAction):
     def _empty(cls) -> Self:
         return cls(selected_dices=ActualDices({}))
 
-    def __str__(self) -> str:
-        name = self.__class__.__name__
-        dices = '; '.join(str(self.selected_dices).split('\n'))
-        return f"{name}[{dices}]"
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True, repr=False)
 class CharacterSelectAction(PlayerAction):
     char_id: int
 
@@ -112,18 +104,18 @@ class CharacterSelectAction(PlayerAction):
         return cls(char_id=-1)
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True, repr=False)
 class EndRoundAction(PlayerAction):
     pass
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True, repr=False)
 class GameAction(PlayerAction):
     def is_valid_action(self, game_state: GameState) -> bool:
         raise Exception("Not overriden")
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True, repr=False)
 class ElementalTuningAction(GameAction):
     card: type[Card]
     dice_elem: Element
@@ -134,7 +126,7 @@ class ElementalTuningAction(GameAction):
         return cls(card=Card, dice_elem=Element.ANY)
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True, repr=False)
 class CardAction(GameAction):
     card: type[Card]
     instruction: Instruction
@@ -144,11 +136,8 @@ class CardAction(GameAction):
         from ..card.card import Card
         return cls(card=Card, instruction=Instruction._empty())
 
-    def __str__(self) -> str:
-        return f"<{self.card.__name__}, {self.instruction}>"
 
-
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True, repr=False)
 class SkillAction(GameAction):
     skill: CharacterSkill
     instruction: DiceOnlyInstruction
@@ -157,11 +146,8 @@ class SkillAction(GameAction):
     def _empty(cls) -> Self:
         return cls(skill=CharacterSkill.NORMAL_ATTACK, instruction=DiceOnlyInstruction._empty())
 
-    def __str__(self) -> str:
-        return f"<{self.skill}, {self.instruction}>"
 
-
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True, repr=False)
 class SwapAction(GameAction):
     char_id: int
     instruction: Instruction
@@ -171,7 +157,7 @@ class SwapAction(GameAction):
         return cls(char_id=-1, instruction=Instruction._empty())
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True, repr=False)
 class DeathSwapAction(GameAction):
     char_id: int
 
@@ -180,7 +166,7 @@ class DeathSwapAction(GameAction):
         return cls(char_id=-1)
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True, repr=False)
 class Instruction:
     dices: ActualDices
 
@@ -226,21 +212,16 @@ class Instruction:
             for field_type, val in field_type_val
         )
 
-    def __str__(self) -> str:
-        cls_fields = fields(self)
-        paired_fields = (
-            f"{field.name}={repr(self.__getattribute__(field.name))}"
-            for field in cls_fields
-        )
-        return f"{self.__class__.__name__}:({', '.join(paired_fields)})"
+    def __repr__(self) -> str:
+        return dataclass_repr(self)
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True, repr=False)
 class DiceOnlyInstruction(Instruction):
     pass
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True, repr=False)
 class StaticTargetInstruction(Instruction):
     target: StaticTarget
 
@@ -256,7 +237,7 @@ class StaticTargetInstruction(Instruction):
         )
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True, repr=False)
 class SourceTargetInstruction(Instruction):
     source: StaticTarget
     target: StaticTarget
