@@ -2,6 +2,11 @@ from typing import FrozenSet, Type
 
 from .character import *
 
+__all__ = [
+    "DEFAULT_CHARACTERS",
+    "default_characters",
+]
+
 DEFAULT_CHARACTERS: FrozenSet[Type[Character]] = frozenset({
     Keqing,
     Kaeya,

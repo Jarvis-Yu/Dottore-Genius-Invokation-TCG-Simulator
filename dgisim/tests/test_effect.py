@@ -2,6 +2,8 @@ import unittest
 
 from dgisim.src.effect.effect import *
 from dgisim.src.effect.effect_stack import EffectStack
+from dgisim.src.effect.enums import ZONE
+from dgisim.src.effect.structs import StaticTarget
 from dgisim.src.state.enums import PID, ACT
 from dgisim.tests.helpers.game_state_templates import *
 

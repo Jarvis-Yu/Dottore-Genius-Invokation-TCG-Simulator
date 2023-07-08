@@ -2,6 +2,11 @@ from enum import Enum
 
 from ..event import EventType
 
+__all__ = [
+    "CharacterSkill",
+]
+
+
 class CharacterSkill(Enum):
     NORMAL_ATTACK = 0
     ELEMENTAL_BURST = 1

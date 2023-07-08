@@ -1,3 +1,7 @@
+"""
+This file contains the base class Character for all characters,
+and implementation of all characters. (in alphabetic order)
+"""
 from __future__ import annotations
 from typing import Callable, Optional, TYPE_CHECKING, Union
 from typing_extensions import override
@@ -15,12 +19,20 @@ from ..effect.enums import ZONE, DYNAMIC_CHARACTER_TARGET
 from ..effect.structs import StaticTarget, DamageType
 from ..element import *
 from ..state.enums import PID
-
 from .character_skill_enum import CharacterSkill
 
 if TYPE_CHECKING:
     from ..state.game_state import GameState
 
+__all__ = [
+    # base
+    "Character",
+
+    # concretes
+    "Kaeya",
+    "Keqing",
+    "RhodeiaOfLoch",
+]
 
 class Character:
     _ELEMENT = Element.ANY

@@ -4,6 +4,9 @@ from typing import Callable, Iterator, Optional, TYPE_CHECKING, Union
 if TYPE_CHECKING:
     from .character import Character
 
+__all__ = [
+    "Characters",
+]
 
 class Characters:
     def __init__(self, characters: tuple[Character, ...], active_character_id: Optional[int]):
