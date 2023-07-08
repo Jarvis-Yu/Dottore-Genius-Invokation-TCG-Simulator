@@ -4,6 +4,10 @@ from typing import Iterable, TYPE_CHECKING
 if TYPE_CHECKING:
     from .effect import Effect
 
+__all__ = [
+    "EffectStack",
+]
+
 
 class EffectStack:
     def __init__(self, effects: tuple[Effect, ...]) -> None:

@@ -9,6 +9,10 @@ from .structs import DamageType
 if TYPE_CHECKING:
     from .structs import StaticTarget
 
+__all__ = [
+    "normal_attack_template",
+]
+
 
 def normal_attack_template(
         source: StaticTarget,

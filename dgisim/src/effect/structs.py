@@ -5,6 +5,11 @@ from ..helper.quality_of_life import dataclass_repr
 from ..state.enums import PID
 from .enums import ZONE
 
+__all__ = [
+    "DamageType",
+    "StaticTarget",
+]
+
 
 @dataclass(frozen=True, repr=False)
 class StaticTarget:
@@ -17,6 +22,8 @@ class StaticTarget:
 
 # TODO: postpone this until further tests are done
 #       needs to investigate how Klee's burst and Mona's or Sucrose's Talent co-work
+
+
 @dataclass(frozen=True, kw_only=True, repr=False)
 class DamageType:
     normal_attack: bool = False

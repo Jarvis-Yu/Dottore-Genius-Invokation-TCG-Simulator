@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from dgisim.src.agents import *
+from dgisim.src.dices import ActualDices
 from dgisim.src.effect.effect import *
-from dgisim.src.effect.enums import DYNAMIC_CHARACTER_TARGET
-from dgisim.src.effect.structs import DamageType
+from dgisim.src.effect.enums import DYNAMIC_CHARACTER_TARGET, ZONE
+from dgisim.src.effect.structs import DamageType, StaticTarget
 from dgisim.src.element import *
 from dgisim.src.game_state_machine import GameStateMachine
 from dgisim.src.helper.level_print import GamePrinter
@@ -24,7 +25,7 @@ def auto_step(game_state: GameState, observe: bool = False) -> GameState:
     return gsm.get_game_state()
 
 
-def oppo_aura_elem(game_state: GameState, elem: Element, char_id: Optional[int] = None) -> GameState:
+def oppo_aura_elem(game_state: GameState, elem: Element, char_id: None | int = None) -> GameState:
     """
     Gives Player2's active character `elem` aura
     """
@@ -56,7 +57,7 @@ def add_damage_effect(
         damage: int,
         elem: Element,
         pid: PID = PID.P2,
-        char_id: Optional[int] = None,
+        char_id: None | int = None,
 ) -> GameState:
     """
     Adds ReferredDamageEffect to Player2's active character with `damage` and `elem` from Player1's

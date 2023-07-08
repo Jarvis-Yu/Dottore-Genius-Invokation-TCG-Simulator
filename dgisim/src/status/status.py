@@ -2,13 +2,13 @@
 This file contains the base class "Status" for all status,
 and implementation of all statuses.
 
-The classes are divided into 3 sections ordered. Within each section, they are
+The classes are divided into 4 sections ordered. Within each section, they are
 ordered alphabetically.
 
-- base class, which is Summon
+- base class, which is Status
 - type classes, used to identify what type of status a status is
 - template classes, starting with an '_', are templates for other classes
-- concrete classes, the implementation of summons that are actually in the game
+- concrete classes, the implementation of statuses that are actually in the game
 """
 from __future__ import annotations
 from dataclasses import dataclass, replace

@@ -8,6 +8,7 @@ from ...action.action_generator import ActionGenerator
 from ...action.enums import ActionType
 from ...character.character_skill_enum import CharacterSkill
 from ...effect.effect import *
+from ...effect.enums import TRIGGERING_SIGNAL
 from ...event import *
 from ...helper.quality_of_life import just
 from ...state.enums import PID, ACT
@@ -228,7 +229,7 @@ class ActionPhase(ph.Phase):
             return None
 
         # Card
-        new_effects.append(RemoveCardEffect(pid, card))
+        new_effects.append(PublicRemoveCardEffect(pid, card))
         new_effects += card.effects(game_state, pid, action.instruction)
         if card.is_combat_action():
             new_effects.append(AllStatusTriggererEffect(

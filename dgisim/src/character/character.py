@@ -428,7 +428,7 @@ class Keqing(Character):
         cards = game_state.get_player(source.pid).get_hand_cards()
         if not can_infuse and cards.contains(cd.LightningStiletto):
             effects.append(
-                eft.RemoveAllCardEffect(
+                eft.PublicRemoveAllCardEffect(
                     source.pid,
                     cd.LightningStiletto,
                 )
