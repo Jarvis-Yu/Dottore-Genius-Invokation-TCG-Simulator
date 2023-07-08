@@ -258,12 +258,15 @@ class ActionPhase(ph.Phase):
             print(f"{action} cannot be performed in game state:\n{game_state}")
             assert False
             return None
+        from ...card.card import OmniCard
         return game_state.factory().f_player(
             pid,
             lambda p: p.factory().f_dices(
                 lambda ds: ds + {action.dice_elem: -1, active_character_elem: 1}
             ).f_hand_cards(
                 lambda hcs: hcs.remove(action.card)
+            ).f_publicly_used_cards(
+                lambda pucs: pucs.add(OmniCard)
             ).build()
         ).build()
 

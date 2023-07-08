@@ -474,7 +474,7 @@ class Keqing(Character):
                 )
         else:
             effects.append(
-                eft.AddCardEffect(
+                eft.PublicAddCardEffect(
                     pid=source.pid,
                     card=cd.LightningStiletto,
                 )

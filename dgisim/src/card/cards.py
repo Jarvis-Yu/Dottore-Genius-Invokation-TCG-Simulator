@@ -80,6 +80,10 @@ class Cards:
         assert self._cards[card] >= 1
         return self - {card: self._cards[card]}
 
+    def hide_all(self) -> Cards:
+        from .card import OmniCard
+        return Cards({OmniCard: self.num_cards()})
+
     def __getitem__(self, card: type[Card]) -> int:
         assert card in self._cards
         return self._cards[card]

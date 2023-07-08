@@ -1179,7 +1179,7 @@ class OverrideSupportEffect(Effect):
 
 
 @dataclass(frozen=True, repr=False)
-class AddCardEffect(Effect):
+class PublicAddCardEffect(Effect):
     pid: PID
     card: type[Card]
 
@@ -1187,6 +1187,8 @@ class AddCardEffect(Effect):
         return game_state.factory().f_player(
             self.pid,
             lambda p: p.factory().f_hand_cards(
+                lambda cs: cs.add(self.card)
+            ).f_publicly_gained_cards(
                 lambda cs: cs.add(self.card)
             ).build()
         ).build()

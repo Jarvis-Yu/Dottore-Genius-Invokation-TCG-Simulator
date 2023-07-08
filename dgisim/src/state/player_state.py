@@ -32,6 +32,7 @@ class PlayerState:
         hand_cards: cds.Cards,
         deck_cards: cds.Cards,
         publicly_used_cards: cds.Cards,
+        publicly_gained_cards: cds.Cards,
     ):
         # REMINDER: don't forget to update factory when adding new fields
         self._phase = phase
@@ -45,6 +46,7 @@ class PlayerState:
         self._hand_cards = hand_cards
         self._deck_cards = deck_cards
         self._publicly_used_cards = publicly_used_cards
+        self._publicly_gained_cards = publicly_gained_cards
 
     def factory(self) -> PlayerStateFactory:
         return PlayerStateFactory(self)
@@ -82,6 +84,9 @@ class PlayerState:
     def get_publicly_used_cards(self) -> cds.Cards:
         return self._publicly_used_cards
 
+    def get_publicly_gained_cards(self) -> cds.Cards:
+        return self._publicly_gained_cards
+
     def get_active_character(self) -> Optional[chr.Character]:
         return self._characters.get_active_character()
 
@@ -112,6 +117,13 @@ class PlayerState:
     def defeated(self) -> bool:
         return self._characters.all_defeated()
 
+    def hide_all(self) -> PlayerState:
+        return self.factory().f_hand_cards(
+            lambda hcs: hcs.hide_all()
+        ).f_deck_cards(
+            lambda dcs: dcs.hide_all()
+        ).build()
+
     @staticmethod
     def examplePlayer(mode: Mode):
         cards = mode.all_cards()
@@ -126,10 +138,11 @@ class PlayerState:
             combat_statuses=sts.Statuses(()),
             summons=Summons((), mode.summons_limit()),
             supports=Supports((), mode.supports_limit()),
-            hand_cards=cds.Cards(dict([(card, 0) for card in cards])),
             dices=ActualDices({}),
+            hand_cards=cds.Cards({}),
             deck_cards=cds.Cards(dict([(card, 2) for card in cards])),
-            publicly_used_cards=cds.Cards(dict([(card, 0) for card in cards])),
+            publicly_used_cards=cds.Cards({}),
+            publicly_gained_cards=cds.Cards({}),
         )
 
     def _all_unique_data(self) -> tuple:
@@ -165,6 +178,7 @@ class PlayerState:
             "Hand Cards": self._hand_cards.dict_str(),
             "Deck Cards": self._deck_cards.dict_str(),
             "Publicly Used Cards": self._publicly_used_cards.dict_str(),
+            "Publicly Gained Cards": self._publicly_gained_cards.dict_str(),
         }
 
 
@@ -177,10 +191,11 @@ class PlayerStateFactory:
         self._combat_statuses = player_state.get_combat_statuses()
         self._summons = player_state.get_summons()
         self._supports = player_state.get_supports()
-        self._hand_cards = player_state.get_hand_cards()
         self._dices = player_state.get_dices()
+        self._hand_cards = player_state.get_hand_cards()
         self._deck_cards = player_state.get_deck_cards()
         self._publicly_used_cards = player_state.get_publicly_used_cards()
+        self._publicly_gained_cards = player_state.get_publicly_gained_cards()
 
     def phase(self, phase: ACT) -> PlayerStateFactory:
         self._phase = phase
@@ -229,13 +244,6 @@ class PlayerStateFactory:
     def f_supports(self, f: Callable[[Supports], Supports]) -> PlayerStateFactory:
         return self.supports(f(self._supports))
 
-    def hand_cards(self, cards: cds.Cards) -> PlayerStateFactory:
-        self._hand_cards = cards
-        return self
-
-    def f_hand_cards(self, f: Callable[[cds.Cards], cds.Cards]) -> PlayerStateFactory:
-        return self.hand_cards(f(self._hand_cards))
-
     def dices(self, dices: ActualDices) -> PlayerStateFactory:
         self._dices = dices
         return self
@@ -243,9 +251,19 @@ class PlayerStateFactory:
     def f_dices(self, f: Callable[[ActualDices], ActualDices]) -> PlayerStateFactory:
         return self.dices(f(self._dices))
 
+    def hand_cards(self, cards: cds.Cards) -> PlayerStateFactory:
+        self._hand_cards = cards
+        return self
+
+    def f_hand_cards(self, f: Callable[[cds.Cards], cds.Cards]) -> PlayerStateFactory:
+        return self.hand_cards(f(self._hand_cards))
+
     def deck_cards(self, cards: cds.Cards) -> PlayerStateFactory:
         self._deck_cards = cards
         return self
+
+    def f_deck_cards(self, f: Callable[[cds.Cards], cds.Cards]) -> PlayerStateFactory:
+        return self.deck_cards(f(self._deck_cards))
 
     def publicly_used_cards(self, cards: cds.Cards) -> PlayerStateFactory:
         self._publicly_used_cards = cards
@@ -253,6 +271,13 @@ class PlayerStateFactory:
 
     def f_publicly_used_cards(self, f: Callable[[cds.Cards], cds.Cards]) -> PlayerStateFactory:
         return self.publicly_used_cards(f(self._publicly_used_cards))
+
+    def publicly_gained_cards(self, cards: cds.Cards) -> PlayerStateFactory:
+        self._publicly_gained_cards = cards
+        return self
+
+    def f_publicly_gained_cards(self, f: Callable[[cds.Cards], cds.Cards]) -> PlayerStateFactory:
+        return self.publicly_gained_cards(f(self._publicly_gained_cards))
 
     def build(self) -> PlayerState:
         return PlayerState(
@@ -263,8 +288,9 @@ class PlayerStateFactory:
             combat_statuses=self._combat_statuses,
             summons=self._summons,
             supports=self._supports,
-            hand_cards=self._hand_cards,
             dices=self._dices,
+            hand_cards=self._hand_cards,
             deck_cards=self._deck_cards,
             publicly_used_cards=self._publicly_used_cards,
+            publicly_gained_cards=self._publicly_gained_cards,
         )

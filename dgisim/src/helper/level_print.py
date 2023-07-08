@@ -184,6 +184,10 @@ class GamePrinter:
             0,
             GamePrinter._insert_str_str_dict("Publicly Used Cards", player["Publicly Used Cards"]),
         )
+        board.insert_board_at_nextline(
+            0,
+            GamePrinter._insert_str_str_dict("Publicly Gained Cards", player["Publicly Gained Cards"]),
+        )
         return board
 
     @staticmethod
