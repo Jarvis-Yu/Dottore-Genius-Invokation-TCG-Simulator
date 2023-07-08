@@ -20,6 +20,14 @@ from .state.enums import PID
 from .state.game_state import GameState
 
 
+__all__ = [
+    "LazyAgent",
+    "PuppetAgent",
+    "RandomAgent",
+    "CustomChoiceAgent",
+]
+
+
 class NoneAgent(PlayerAgent):
     pass
 

@@ -1,3 +1,4 @@
+from dgisim.src.action.action import *
 from dgisim.src.agents import *
 from dgisim.src.card.card import *
 from dgisim.src.card.cards import *
