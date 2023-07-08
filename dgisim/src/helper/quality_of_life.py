@@ -4,9 +4,17 @@ from enum import Enum
 from inspect import isclass
 from typing import Any, TypeVar
 
+__all__ = [
+    "BIG_INT",
+    "case_val",
+    "dataclass_repr",
+    "just",
+]
+
 _T = TypeVar('_T')
 
-def just(optional_val: None | _T, backup: None | _T=None) -> _T:
+
+def just(optional_val: None | _T, backup: None | _T = None) -> _T:
     """
     Removes Optional and get value directly
     Throws exception if it is indeed None
@@ -17,6 +25,7 @@ def just(optional_val: None | _T, backup: None | _T=None) -> _T:
         else:
             return backup
     return optional_val
+
 
 def case_val(condition: bool, first: _T, second: _T) -> _T:
     """ if condition is True; then return first; else return second """
@@ -37,5 +46,6 @@ def dataclass_repr(self) -> str:
         for field in cls_fields
     )
     return f"{self.__class__.__name__}({', '.join(paired_fields)})"
+
 
 BIG_INT = 0x7fffffff

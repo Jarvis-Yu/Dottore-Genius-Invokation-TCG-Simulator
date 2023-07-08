@@ -1,10 +1,9 @@
 from __future__ import annotations
 import random
 from collections import Counter
-from typing import Union, Iterator, TYPE_CHECKING
+from typing import Iterator, TYPE_CHECKING
 
 from ..helper.hashable_dict import HashableDict
-from ..helper.level_print import level_print
 
 if TYPE_CHECKING:
     from .card import Card

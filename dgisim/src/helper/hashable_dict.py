@@ -1,6 +1,9 @@
 from __future__ import annotations
-from typing import Dict, Any
-from typing_extensions import override
+from typing import Any
+
+__all__ = [
+    "HashableDict"
+]
 
 
 class HashableDict(dict):
@@ -17,6 +20,9 @@ class HashableDict(dict):
 
     You cannot call any setter, deleter or hash method of a frozen HashableDict.
     If you do so, Exception will be raised.
+
+    Note that though __add__ and __sub__ are overriden, but they are designed for
+    int values only!
     """
 
     def __init__(self, *args, frozen=True, **kwargs):
@@ -70,13 +76,13 @@ class HashableDict(dict):
             raise Exception("Calling __delitem__() to a frozen HashableDict!")
         super().__delitem__(*args, **kwargs)
 
-    def __add__(self, other: Dict[Any, int]):
+    def __add__(self, other: dict[Any, int]):
         keys = set(self.keys()).union(other.keys())
         return HashableDict(
             [(key, self.get(key, 0) + other.get(key, 0)) for key in keys]
         )
 
-    def __sub__(self, other: Dict[Any, int]):
+    def __sub__(self, other: dict[Any, int]):
         keys = set(self.keys()).union(other.keys())
         return HashableDict(
             [(key, self.get(key, 0) - other.get(key, 0)) for key in keys]

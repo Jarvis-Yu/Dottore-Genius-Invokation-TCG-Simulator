@@ -1,8 +1,6 @@
 from __future__ import annotations
 from typing import Callable, Iterator, Optional, TYPE_CHECKING, Union
 
-from ..helper.level_print import level_print, INDENT
-
 if TYPE_CHECKING:
     from .character import Character
 
@@ -116,9 +114,6 @@ class Characters:
     def __hash__(self) -> int:
         return hash(self._all_unique_data())
 
-    def __str__(self) -> str:
-        return self.to_string(0)
-
     def __iter__(self) -> Iterator[Character]:
         return iter(self.get_characters())
 
@@ -136,17 +131,6 @@ class Characters:
 
     def __contains__(self, char: Character | type[Character]) -> bool:
         return self.contains(char)
-
-    def to_string(self, indent: int = 0) -> str:
-        new_indent = indent + INDENT
-        new_new_indent = new_indent + INDENT
-        return level_print({
-            "Active Character": self.get_active_character_name(),
-            "Characters": level_print(dict([
-                (char.name(), char.to_string(new_new_indent))
-                for char in self._characters
-            ]), new_indent),
-        }, indent)
 
     def dict_str(self) -> Union[dict, str]:
         return {

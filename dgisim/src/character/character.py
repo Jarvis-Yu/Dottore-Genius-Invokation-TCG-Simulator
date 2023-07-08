@@ -14,13 +14,13 @@ from ..effect.effects_template import *
 from ..effect.enums import ZONE, DYNAMIC_CHARACTER_TARGET
 from ..effect.structs import StaticTarget, DamageType
 from ..element import *
-from ..helper.level_print import INDENT, level_print
 from ..state.enums import PID
 
 from .character_skill_enum import CharacterSkill
 
 if TYPE_CHECKING:
     from ..state.game_state import GameState
+
 
 class Character:
     _ELEMENT = Element.ANY
@@ -286,23 +286,6 @@ class Character:
 
     def __hash__(self) -> int:
         return hash(self._all_unique_data())
-
-    def __str__(self) -> str:
-        return self.to_string(0)
-
-    def to_string(self, indent: int) -> str:
-        new_indent = indent + INDENT
-        return level_print({
-            "id": str(self._id),
-            "Aura": str(self._aura),
-            "HP": str(self._hp),
-            "Max HP": str(self._max_hp),
-            "Energy": str(self._energy),
-            "Max Energy": str(self._max_energy),
-            "Talents": str(self._talents),
-            "Equipments": str(self._equipments),
-            "Statuses": str(self._statuses),
-        }, indent)
 
     def dict_str(self) -> Union[dict, str]:
         return {

@@ -5,7 +5,6 @@ from typing import Any, Optional, Iterator, Iterable, TypeVar, Union
 from typing_extensions import Self, override, TYPE_CHECKING
 
 from .helper.hashable_dict import HashableDict
-from .helper.level_print import level_print
 from .helper.quality_of_life import BIG_INT
 from .element import Element
 
