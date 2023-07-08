@@ -1,5 +1,5 @@
 """
-This file contains the base class "Status" for all status,
+This file contains the base class "Status" for all statuses,
 and implementation of all statuses.
 
 The classes are divided into 4 sections ordered. Within each section, they are

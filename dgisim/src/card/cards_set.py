@@ -1,16 +1,8 @@
 from .card import *
 
-DEFAULT_CARDS: frozenset[type[Card]] = frozenset({
-    Starsigns,
-    # Food
-    JueyunGuoba,
-    LotusFlowerCrisp,
-    NorthernSmokedChicken,
-    SweetMadame,
-    MondstadtHashBrown,
-    MushroomPizza,
-    MintyMeatRolls,
-})
+__all__ = [
+    "default_cards",
+]
 
 _DEFAULT_CARDS: list[type[Card]] = [
     # Equipment Card

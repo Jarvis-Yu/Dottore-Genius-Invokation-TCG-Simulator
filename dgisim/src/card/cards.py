@@ -8,8 +8,15 @@ from ..helper.hashable_dict import HashableDict
 if TYPE_CHECKING:
     from .card import Card
 
+__all__ = [
+    "Cards",
+]
+
 
 class Cards:
+    """
+    A container for easy management of cards.
+    """
     def __init__(self, mapping: dict[type[Card], int]) -> None:
         self._cards = HashableDict.from_dict(mapping)
 
