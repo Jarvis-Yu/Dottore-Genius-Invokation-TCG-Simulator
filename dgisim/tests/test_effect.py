@@ -1,9 +1,9 @@
 import unittest
 
-from src.dgisim.effect.effect import *
-from src.dgisim.effect.effect_stack import EffectStack
-from src.dgisim.state.enums import PID, ACT
-from src.tests.helpers.game_state_templates import *
+from dgisim.src.effect.effect import *
+from dgisim.src.effect.effect_stack import EffectStack
+from dgisim.src.state.enums import PID, ACT
+from dgisim.tests.helpers.game_state_templates import *
 
 
 class TestEffect(unittest.TestCase):

@@ -1,6 +1,6 @@
 import unittest
 
-from src.tests.test_characters.common_imports import *
+from dgisim.tests.test_characters.common_imports import *
 
 
 class TestKeqing(unittest.TestCase):

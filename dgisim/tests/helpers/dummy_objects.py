@@ -2,11 +2,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from src.dgisim.summon.summon import *
+from dgisim.src.summon.summon import *
 
 if TYPE_CHECKING:
-    from src.dgisim.effect.enums import TRIGGERING_SIGNAL
-    from src.dgisim.effect.structs import StaticTarget
+    from dgisim.src.effect.enums import TRIGGERING_SIGNAL
+    from dgisim.src.effect.structs import StaticTarget
 
 
 @dataclass(frozen=True, kw_only=True)

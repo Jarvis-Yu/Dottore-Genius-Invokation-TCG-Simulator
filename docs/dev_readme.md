@@ -34,7 +34,7 @@ please refer to the guide above but execute the `.ps1` scripts instead.
 
 ## Where to Start Reading the Code
 
-I suggest you start reading the code from `src/tests/test_game_state_machine.py`,
+I suggest you start reading the code from `dgisim/tests/test_game_state_machine.py`,
 which contains tests for the whole game flow.
 
 A read through other test files are also recommanded to get familiar with the state-machine design.

@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from src.dgisim.character.character import *
-from src.dgisim.character.characters import Characters
-from src.dgisim.dices import *
-from src.dgisim.effect.effect import *
-from src.dgisim.helper.quality_of_life import BIG_INT
-from src.dgisim.state.enums import PID, ACT
-from src.dgisim.state.game_state import GameState
+from dgisim.src.character.character import *
+from dgisim.src.character.characters import Characters
+from dgisim.src.dices import *
+from dgisim.src.effect.effect import *
+from dgisim.src.helper.quality_of_life import BIG_INT
+from dgisim.src.state.enums import PID, ACT
+from dgisim.src.state.game_state import GameState
 
 
 BASE_GAME = GameState.from_default().factory().f_player1(

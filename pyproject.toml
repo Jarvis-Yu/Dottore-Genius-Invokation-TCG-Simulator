@@ -39,4 +39,4 @@ tracker = "https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/
 changelog = "https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/CHANGELOG.md"
 
 [tool.setuptools.package-dir]
-dgisim = "src/dgisim"
+dgisim = "dgisim/src"

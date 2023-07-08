@@ -30,4 +30,4 @@ jobs:
 
     - name: MypyCheck
       run: |
-        mypy src/ --check-untyped-defs
+        mypy dgisim/ --check-untyped-defs

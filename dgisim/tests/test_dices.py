@@ -1,7 +1,7 @@
 import unittest
 
-from src.dgisim.dices import *
-from src.dgisim.element.element import *
+from dgisim.src.dices import *
+from dgisim.src.element.element import *
 
 
 class TestDices(unittest.TestCase):

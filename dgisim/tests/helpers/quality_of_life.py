@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from src.dgisim.agents import *
-from src.dgisim.effect.effect import *
-from src.dgisim.effect.enums import DYNAMIC_CHARACTER_TARGET
-from src.dgisim.effect.structs import DamageType
-from src.dgisim.element.element import *
-from src.dgisim.game_state_machine import GameStateMachine
-from src.dgisim.helper.level_print import GamePrinter
-from src.dgisim.helper.quality_of_life import *
-from src.dgisim.state.enums import PID
-from src.dgisim.state.game_state import GameState
+from dgisim.src.agents import *
+from dgisim.src.effect.effect import *
+from dgisim.src.effect.enums import DYNAMIC_CHARACTER_TARGET
+from dgisim.src.effect.structs import DamageType
+from dgisim.src.element.element import *
+from dgisim.src.game_state_machine import GameStateMachine
+from dgisim.src.helper.level_print import GamePrinter
+from dgisim.src.helper.quality_of_life import *
+from dgisim.src.state.enums import PID
+from dgisim.src.state.game_state import GameState
 
 
 def auto_step(game_state: GameState, observe: bool = False) -> GameState:

@@ -1,6 +1,6 @@
 import unittest
 
-from src.tests.test_cards.common_imports import *
+from dgisim.tests.test_cards.common_imports import *
 
 
 class TestXudong(unittest.TestCase):

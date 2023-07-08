@@ -1,19 +1,18 @@
 import unittest
 
-from src.tests.test_cards.common_imports import *
+from dgisim.tests.test_cards.common_imports import *
 
-
-class TestLeaveItToMe(unittest.TestCase):
-    def test_leave_it_to_me(self):
+class TestChangingShifts(unittest.TestCase):
+    def test_changing_shifts(self):
         base_game = ACTION_TEMPLATE.factory().f_player1(
             lambda p: p.factory().hand_cards(
-                Cards({LeaveItToMe: 1})
+                Cards({ChangingShifts: 1})
             ).build()
         ).build()
 
         # test giving wrong num of dices
         card_action = CardAction(
-            card=LeaveItToMe,
+            card=ChangingShifts,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
         )
         self.assertRaises(
@@ -23,7 +22,7 @@ class TestLeaveItToMe(unittest.TestCase):
 
         # test giving right num of dices
         card_action = CardAction(
-            card=LeaveItToMe,
+            card=ChangingShifts,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 0})),
         )
         game_state = base_game.action_step(PID.P1, card_action)
@@ -31,13 +30,13 @@ class TestLeaveItToMe(unittest.TestCase):
         buffed_game_state = auto_step(game_state)
 
         self.assertTrue(
-            buffed_game_state.get_player1().get_combat_statuses().contains(LeaveItToMeStatus)
+            buffed_game_state.get_player1().get_combat_statuses().contains(ChangingShiftsStatus)
         )
 
-        # test swap with no dices fails
+        # test swap with dices fails
         swap_action = SwapAction(
             char_id=3,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 0}))
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1}))
         )
         self.assertRaises(
             Exception,
@@ -47,25 +46,21 @@ class TestLeaveItToMe(unittest.TestCase):
         # test swap with no dices
         swap_action = SwapAction(
             char_id=3,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1}))
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 0}))
         )
         game_state = buffed_game_state.action_step(PID.P1, swap_action)
         assert game_state is not None
         game_state = auto_step(game_state)
 
         self.assertFalse(
-            game_state.get_player1().get_combat_statuses().contains(LeaveItToMeStatus)
+            game_state.get_player1().get_combat_statuses().contains(ChangingShiftsStatus)
         )
-        self.assertEqual(game_state.get_active_player_id(), PID.P1)
 
         # test opponent cannot use this
-        game_state = buffed_game_state.action_step(PID.P1, SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
-        ))
+        game_state = buffed_game_state.action_step(PID.P1, EndRoundAction())
         assert game_state is not None
         game_state = auto_step(game_state)
-        game_state = game_state.action_step(PID.P2, swap_action)
-        assert game_state is not None
-        game_state = auto_step(game_state)
-        self.assertEqual(game_state.get_active_player_id(), PID.P1)
+        self.assertRaises(
+            Exception,
+            lambda: game_state.action_step(PID.P2, swap_action)
+        )

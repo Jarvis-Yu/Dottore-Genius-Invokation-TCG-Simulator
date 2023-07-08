@@ -1,19 +1,19 @@
 import unittest
 
-from src.dgisim.action.action import *
-from src.dgisim.agents import *
-from src.dgisim.effect.effect import *
-from src.dgisim.effect.enums import DYNAMIC_CHARACTER_TARGET
-from src.dgisim.effect.structs import DamageType
-from src.dgisim.element.element import ElementalAura
-from src.dgisim.game_state_machine import GameStateMachine
-from src.dgisim.state.enums import PID
-from src.dgisim.state.game_state import GameState
-from src.dgisim.status.status import *
-from src.dgisim.summon.summon import *
-from src.tests.helpers.game_state_templates import *
-from src.tests.helpers.quality_of_life import *
-from src.tests.helpers.dummy_objects import *
+from dgisim.src.action.action import *
+from dgisim.src.agents import *
+from dgisim.src.effect.effect import *
+from dgisim.src.effect.enums import DYNAMIC_CHARACTER_TARGET
+from dgisim.src.effect.structs import DamageType
+from dgisim.src.element.element import ElementalAura
+from dgisim.src.game_state_machine import GameStateMachine
+from dgisim.src.state.enums import PID
+from dgisim.src.state.game_state import GameState
+from dgisim.src.status.status import *
+from dgisim.src.summon.summon import *
+from dgisim.tests.helpers.game_state_templates import *
+from dgisim.tests.helpers.quality_of_life import *
+from dgisim.tests.helpers.dummy_objects import *
 
 
 class TestStatus(unittest.TestCase):

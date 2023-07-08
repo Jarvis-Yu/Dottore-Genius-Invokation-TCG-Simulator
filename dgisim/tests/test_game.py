@@ -1,6 +1,6 @@
 import unittest
 
-from src.dgisim.state.game_state import GameState
+from dgisim.src.state.game_state import GameState
 
 
 class TestGameState(unittest.TestCase):

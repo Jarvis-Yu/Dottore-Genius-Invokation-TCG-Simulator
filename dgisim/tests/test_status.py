@@ -1,13 +1,13 @@
 import unittest
 
-from src.dgisim.action.action import *
-from src.dgisim.agents import PuppetAgent
-from src.dgisim.card.card import *
-from src.dgisim.game_state_machine import GameStateMachine
-from src.dgisim.status.status import *
-from src.dgisim.status.statuses import *
-from src.tests.helpers.game_state_templates import *
-from src.tests.helpers.quality_of_life import *
+from dgisim.src.action.action import *
+from dgisim.src.agents import PuppetAgent
+from dgisim.src.card.card import *
+from dgisim.src.game_state_machine import GameStateMachine
+from dgisim.src.status.status import *
+from dgisim.src.status.statuses import *
+from dgisim.tests.helpers.game_state_templates import *
+from dgisim.tests.helpers.quality_of_life import *
 
 
 class TestStatus(unittest.TestCase):
