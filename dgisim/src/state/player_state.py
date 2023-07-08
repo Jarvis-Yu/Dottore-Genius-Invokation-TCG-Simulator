@@ -140,7 +140,7 @@ class PlayerState:
             supports=Supports((), mode.supports_limit()),
             dices=ActualDices({}),
             hand_cards=cds.Cards({}),
-            deck_cards=cds.Cards(dict([(card, 2) for card in cards])),
+            deck_cards=cds.Cards(dict([(card, mode.max_cards_per_kind()) for card in cards])),
             publicly_used_cards=cds.Cards({}),
             publicly_gained_cards=cds.Cards({}),
         )

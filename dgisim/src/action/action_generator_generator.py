@@ -358,7 +358,18 @@ class CardsSelectionActGenGenerator(ABC):
         assert type(action_generator.action) is CardsSelectAction
         game_state = action_generator.game_state
         pid = action_generator.pid
-        return game_state.get_player(pid).get_hand_cards()
+        hand_cards = game_state.get_player(pid).get_hand_cards()
+        from ..card.card import OmniCard
+        if hand_cards.contains(OmniCard):
+            # TODO: further filter available cards
+            publicly_used_cards = game_state.get_player(pid).get_publicly_used_cards()
+            mode = game_state.get_mode()
+            return tuple(
+                card
+                for card in mode.all_cards()
+                if publicly_used_cards[card] < mode.max_cards_per_kind()
+            )
+        return hand_cards
 
     @classmethod
     def _fill_helper(

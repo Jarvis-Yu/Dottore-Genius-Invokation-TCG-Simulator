@@ -15,6 +15,7 @@ class Mode:
     _CARD_REDRAW_CHANCES = 1
     _DICE_REROLL_CHANCES = 1
     _HAND_CARD_LIMIT = 10
+    _MAX_CARDS_PER_KIND = 2
     _ROUND_LIMIT = 15
     _SUMMONS_LIMIT = 4
     _SUPPORTS_LIMIT = 4
@@ -32,6 +33,9 @@ class Mode:
 
     def hand_card_limit(self) -> int:
         return self._HAND_CARD_LIMIT
+
+    def max_cards_per_kind(self) -> int:
+        return self._MAX_CARDS_PER_KIND
 
     def summons_limit(self) -> int:
         return self._SUMMONS_LIMIT

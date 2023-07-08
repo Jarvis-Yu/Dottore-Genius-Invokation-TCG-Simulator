@@ -59,10 +59,8 @@ class Cards:
         return any(value > 0 for value in self._cards.values())
 
     def contains(self, card: type[Card]) -> bool:
-        for c in self._cards:
-            if c == card and self._cards[c] >= 1:
-                return True
-        return False
+        from .card import OmniCard
+        return self[card] > 0 or self[OmniCard] > 0
 
     def __contains__(self, card: type[Card]) -> bool:
         return self.contains(card)
@@ -71,8 +69,10 @@ class Cards:
         return self + {card: 1}
 
     def remove(self, card: type[Card]) -> Cards:
-        assert card in self._cards
-        assert self._cards[card] >= 1
+        from .card import OmniCard
+        if self[card] <= 0:
+            assert self[OmniCard] > 0
+            return self - {OmniCard: 1}  # type: ignore
         return self - {card: 1}
 
     def remove_all(self, card: type[Card]) -> Cards:
@@ -85,8 +85,7 @@ class Cards:
         return Cards({OmniCard: self.num_cards()})
 
     def __getitem__(self, card: type[Card]) -> int:
-        assert card in self._cards
-        return self._cards[card]
+        return self._cards.get(card, 0)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Cards):

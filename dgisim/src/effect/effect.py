@@ -804,7 +804,7 @@ class RemoveCardEffect(Effect):
         pid = self.pid
         card = self.card
         hand_cards = game_state.get_player(pid).get_hand_cards()
-        if not hand_cards.contains(card) or hand_cards[card] <= 0:
+        if not hand_cards.contains(card):
             return game_state
         return game_state.factory().f_player(
             pid,

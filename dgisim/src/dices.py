@@ -80,9 +80,7 @@ class Dices:
         )
 
     def __getitem__(self, index: Element) -> int:
-        if index in self._dices:
-            return self._dices[index]
-        return 0
+        return self._dices.get(index, 0)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Dices):
