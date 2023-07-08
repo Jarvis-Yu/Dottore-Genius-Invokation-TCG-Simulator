@@ -2,6 +2,8 @@
 This file contains the base class "Support" for all supports,
 and implementation of all supports.
 
+Note that a summon is basically a Status.
+
 The classes are divided into 3 sections ordered. Within each section, they are
 ordered alphabetically.
 

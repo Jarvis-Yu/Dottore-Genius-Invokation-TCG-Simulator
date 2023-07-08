@@ -10,7 +10,6 @@ from ..character.character_skill_enum import CharacterSkill
 from ..state.enums import PID
 from ..effect.enums import ZONE, TRIGGERING_SIGNAL
 from ..effect.structs import StaticTarget
-
 from .enums import PREPROCESSABLES
 
 if TYPE_CHECKING:
@@ -19,8 +18,18 @@ if TYPE_CHECKING:
 
     from .types import Preprocessable
 
+__all__ = [
+    "StatusProcessing",
+]
 
 class StatusProcessing:
+    """
+    This class holds static methods that facilitate the preprocessing of items by
+    all statuses.
+
+    e.g. 3 Pyro damage from Bennett with a sword equipped should actually be 4 after
+    preprocessing. (an equipment is also treated as a status)
+    """
     @staticmethod
     def loop_one_player_all_statuses(
             game_state: GameState,

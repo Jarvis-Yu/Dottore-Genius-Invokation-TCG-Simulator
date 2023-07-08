@@ -585,7 +585,7 @@ class Kaeya(Character):
             ),
             eft.OverrideCombatStatusEffect(
                 target_pid=source.pid,
-                status=stt.Icicle(),
+                status=stt.IcicleStatus(),
             )
         )
 

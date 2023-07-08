@@ -12,6 +12,9 @@ __all__ = [
 
 
 class Summons:
+    """
+    A container for easy summons managing.
+    """
     def __init__(self, summons: tuple[Summon, ...], max_num: int):
         assert len(summons) <= max_num
         self._summons = summons

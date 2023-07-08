@@ -2,6 +2,8 @@
 This file contains the base class "Summon" for all summons,
 and implementation of all summons.
 
+Note that a summon is basically a Status.
+
 The classes are divided into 3 sections ordered. Within each section, they are
 ordered alphabetically.
 

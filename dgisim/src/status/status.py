@@ -1,3 +1,15 @@
+"""
+This file contains the base class "Status" for all status,
+and implementation of all statuses.
+
+The classes are divided into 3 sections ordered. Within each section, they are
+ordered alphabetically.
+
+- base class, which is Summon
+- type classes, used to identify what type of status a status is
+- template classes, starting with an '_', are templates for other classes
+- concrete classes, the implementation of summons that are actually in the game
+"""
 from __future__ import annotations
 from dataclasses import dataclass, replace
 from enum import Enum
@@ -13,20 +25,57 @@ from ..effect.enums import ZONE, TRIGGERING_SIGNAL, DYNAMIC_CHARACTER_TARGET
 from ..effect.structs import StaticTarget, DamageType
 from ..element import Element
 from ..helper.quality_of_life import just, BIG_INT, case_val
-
 from .enums import PREPROCESSABLES
 
 if TYPE_CHECKING:
     from ..card.card import Card
     from ..state.game_state import GameState
-
     from .types import Preprocessable
 
+__all__ = [
+    # base
+    "Status",
 
-class TriggerringEvent(Enum):
-    pass
+    # type
+    "CharacterTalentStatus",  # it should be statuses used to record character-talent related data
+    "EquipmentStatus",  # talent / weapon / artifact
+    "CharacterStatus",  # statues that belongs to one character only
+    "CombatStatus",  # statues that buffs the active character
+
+    # templates
+    "StackedShieldStatus",
+    "FixedShieldStatus",
+
+    # combat status
+    "CatalyzingFieldStatus",
+    "ChangingShiftsStatus",
+    "CrystallizeStatus",
+    "DendroCoreStatus",
+    "FrozenStatus",
+    "LeaveItToMeStatus",
+
+    # character status
+    "JueyunGuobaStatus",
+    "LotusFlowerCrispStatus",
+    "MintyMeatRollsStatus",
+    "MushroomPizzaStatus",
+    "NorthernSmokedChickenStatus",
+    "SatiatedStatus",
+
+    # character specific status
+    ## Kaeya ##
+    "ColdBloodedStrikeStatus",
+    "IcicleStatus",
+    ## Keqing ##
+    "KeqingElectroInfusionStatus",
+    "KeqingTalentStatus",
+    "ThunderingPenanceStatus",
+    ## Rhodeia of Loch ##
+    "StreamingSurgeStatus",
+]
 
 
+############################## base ##############################
 @dataclass(frozen=True)
 class Status:
 
@@ -261,6 +310,7 @@ class Status:
         return self.__class__.__name__.removesuffix("Status")  # pragma: no cover
 
 
+############################## type ##############################
 @dataclass(frozen=True)
 class CharacterTalentStatus(Status):
     """
@@ -292,6 +342,7 @@ class CombatStatus(Status):
     pass
 
 
+############################## template ##############################
 @dataclass(frozen=True)
 class _UsageStatus(Status):
     usages: int
@@ -338,7 +389,7 @@ class _UsageStatus(Status):
 
 
 @dataclass(frozen=True)
-class ShieldStatus(Status):
+class _ShieldStatus(Status):
     def _is_target(
             self,
             game_state: GameState,
@@ -374,44 +425,7 @@ class ShieldStatus(Status):
 
 
 @dataclass(frozen=True, kw_only=True)
-class StackedShieldStatus(ShieldStatus, _UsageStatus):
-    """ The shield status where all usages can be consumed by a DMG effect """
-    usages: int
-    MAX_USAGES: ClassVar[int] = BIG_INT
-    SHIELD_AMOUNT: ClassVar[int] = 1  # shield amount per usage
-
-    @override
-    def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: Preprocessable,
-            signal: PREPROCESSABLES,
-    ) -> tuple[Preprocessable, Optional[Self]]:
-        cls = type(self)
-        if signal is PREPROCESSABLES.DMG_AMOUNT:
-            assert isinstance(item, eft.SpecificDamageEffect)
-            assert self.usages <= type(self).MAX_USAGES
-            if item.damage > 0 and self.usages > 0 \
-                    and item.element != Element.PIERCING \
-                    and self._is_target(game_state, status_source, item, signal):
-                usages_consumed = min(ceil(item.damage / cls.SHIELD_AMOUNT), self.usages)
-                new_dmg = max(0, item.damage - usages_consumed * cls.SHIELD_AMOUNT)
-                new_item = replace(item, damage=new_dmg)
-                new_usages = self.usages - usages_consumed
-                if new_usages == 0:
-                    return new_item, None
-                else:
-                    return new_item, replace(self, usages=new_usages)
-
-        return super()._preprocess(game_state, status_source, item, signal)
-
-    def __str__(self) -> str:
-        return super().__str__() + f"({self.usages})"  # pragma: no cover
-
-
-@dataclass(frozen=True, kw_only=True)
-class FixedShieldStatus(ShieldStatus, _UsageStatus):
+class FixedShieldStatus(_ShieldStatus, _UsageStatus):
     """ The shield status where only one usage can be consumed by a DMG effect """
     usages: int
     MAX_USAGES: ClassVar[int] = BIG_INT
@@ -447,27 +461,11 @@ class FixedShieldStatus(ShieldStatus, _UsageStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class CrystallizeStatus(CombatStatus, StackedShieldStatus):
-    usages: int = 1
-    MAX_USAGES: ClassVar[int] = 2
-
-    @override
-    def _update(self, other: CrystallizeStatus) -> Optional[CrystallizeStatus]:
-        new_stacks = min(just(type(self).MAX_USAGES, BIG_INT), self.usages + other.usages)
-        return type(self)(usages=new_stacks)
-
-
-@dataclass(frozen=True)
-class DendroCoreStatus(CombatStatus):
-    """
-    When you deal Pyro DMG or Electro DMG to an opposing active character, DMG dealt +2.
-    Usage(s): 1
-    =====
-    Experiment results:
-    - normally the maxinum num of usage(s) is 1
-    """
-    damage_boost: ClassVar[int] = 2
-    usages: int = 1
+class StackedShieldStatus(_ShieldStatus, _UsageStatus):
+    """ The shield status where all usages can be consumed by a DMG effect """
+    usages: int
+    MAX_USAGES: ClassVar[int] = BIG_INT
+    SHIELD_AMOUNT: ClassVar[int] = 1  # shield amount per usage
 
     @override
     def _preprocess(
@@ -476,295 +474,27 @@ class DendroCoreStatus(CombatStatus):
             status_source: StaticTarget,
             item: Preprocessable,
             signal: PREPROCESSABLES,
-    ) -> tuple[Preprocessable, Optional[DendroCoreStatus]]:
+    ) -> tuple[Preprocessable, Optional[Self]]:
+        cls = type(self)
         if signal is PREPROCESSABLES.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
-            assert self.usages >= 1
-            elem_can_boost = item.element is Element.ELECTRO or item.element is Element.PYRO
-            legal_to_boost = status_source.pid is item.source.pid
-            target_is_active = item.target.id == game_state.get_player(
-                item.target.pid
-            ).just_get_active_character().get_id()
-            if elem_can_boost and legal_to_boost and target_is_active:
-                new_damage = replace(item, damage=item.damage + DendroCoreStatus.damage_boost)
-                if self.usages == 1:
-                    return new_damage, None
+            assert self.usages <= type(self).MAX_USAGES
+            if item.damage > 0 and self.usages > 0 \
+                    and item.element != Element.PIERCING \
+                    and self._is_target(game_state, status_source, item, signal):
+                usages_consumed = min(ceil(item.damage / cls.SHIELD_AMOUNT), self.usages)
+                new_dmg = max(0, item.damage - usages_consumed * cls.SHIELD_AMOUNT)
+                new_item = replace(item, damage=new_dmg)
+                new_usages = self.usages - usages_consumed
+                if new_usages == 0:
+                    return new_item, None
                 else:
-                    return new_damage, DendroCoreStatus(self.usages - 1)
-        return super()._preprocess(game_state, status_source, item, signal)
+                    return new_item, replace(self, usages=new_usages)
 
-    # @override
-    # def update(self, other: DendroCoreStatus) -> DendroCoreStatus:
-    #     total_count = min(self.count + other.count, 2)
-    #     return DendroCoreStatus(total_count)
-
-    def __str__(self) -> str:
-        return super().__str__() + f"({self.usages})"  # pragma: no cover
-
-
-@dataclass(frozen=True)
-class CatalyzingFieldStatus(CombatStatus):
-    damage_boost: ClassVar[int] = 1
-    usages: int = 2
-
-    @override
-    def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: Preprocessable,
-            signal: PREPROCESSABLES,
-    ) -> tuple[Preprocessable, Optional[CatalyzingFieldStatus]]:
-        if signal is PREPROCESSABLES.DMG_AMOUNT:
-            assert isinstance(item, eft.SpecificDamageEffect)
-            assert self.usages >= 1
-            elem_can_boost = item.element is Element.ELECTRO or item.element is Element.DENDRO
-            legal_to_boost = status_source.pid is item.source.pid
-            target_is_active = item.target.id == game_state.get_player(
-                item.target.pid
-            ).just_get_active_character().get_id()
-            if elem_can_boost and legal_to_boost and target_is_active:
-                new_damage = replace(item, damage=item.damage + CatalyzingFieldStatus.damage_boost)
-                if self.usages == 1:
-                    return new_damage, None
-                else:
-                    return new_damage, CatalyzingFieldStatus(self.usages - 1)
         return super()._preprocess(game_state, status_source, item, signal)
 
     def __str__(self) -> str:
         return super().__str__() + f"({self.usages})"  # pragma: no cover
-
-
-@dataclass(frozen=True)
-class FrozenStatus(CharacterStatus):
-    damage_boost: ClassVar[int] = 2
-
-    @override
-    def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: Preprocessable,
-            signal: PREPROCESSABLES,
-    ) -> tuple[Preprocessable, Optional[Self]]:
-        if signal is PREPROCESSABLES.DMG_AMOUNT:
-            assert isinstance(item, eft.SpecificDamageEffect)
-            can_reaction = item.element is Element.PYRO or item.element is Element.PHYSICAL
-            is_damage_target = item.target == status_source
-            if is_damage_target and can_reaction:
-                return replace(item, damage=item.damage + FrozenStatus.damage_boost), None
-        return super()._preprocess(game_state, status_source, item, signal)
-
-    @override
-    def _react_to_signal(
-            self, source: StaticTarget, signal: TRIGGERING_SIGNAL
-    ) -> tuple[list[eft.Effect], Optional[FrozenStatus]]:
-        if signal is TRIGGERING_SIGNAL.ROUND_END:
-            return [], None
-        return [], self
-
-
-# <<<<<<<<<<<<<<<<<<<< Food Status <<<<<<<<<<<<<<<<<<<<
-@dataclass(frozen=True)
-class SatiatedStatus(CharacterStatus):
-
-    @override
-    def _react_to_signal(
-            self, source: StaticTarget, signal: TRIGGERING_SIGNAL
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
-        if signal is TRIGGERING_SIGNAL.ROUND_END:
-            return [], None
-        return [], self
-
-
-@dataclass(frozen=True)
-class MushroomPizzaStatus(CharacterStatus, _UsageStatus):
-    usages: int = 2
-    MAX_USAGES: ClassVar[int] = 2
-
-    @override
-    def _react_to_signal(
-            self, source: StaticTarget, signal: TRIGGERING_SIGNAL
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
-        es: list[eft.Effect] = []
-        d_usages = 0
-        if signal is TRIGGERING_SIGNAL.END_ROUND_CHECK_OUT:
-            es.append(
-                eft.RecoverHPEffect(
-                    source,
-                    1,
-                )
-            )
-        if signal is TRIGGERING_SIGNAL.ROUND_END:
-            d_usages = -1
-
-        return es, replace(self, usages=d_usages)
-
-
-@dataclass(frozen=True)
-class JueyunGuobaStatus(CharacterStatus, _UsageStatus):
-    usages: int = 1
-    MAX_USAGES: ClassVar[int] = 1
-    damage_boost: ClassVar[int] = 1
-
-    @override
-    def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: Preprocessable,
-            signal: PREPROCESSABLES,
-    ) -> tuple[Preprocessable, Optional[Self]]:
-        if signal is PREPROCESSABLES.DMG_AMOUNT:
-            assert isinstance(item, eft.SpecificDamageEffect)
-            if item.source == status_source and item.damage_type.normal_attack:
-                item = replace(item, damage=item.damage + JueyunGuobaStatus.damage_boost)
-                return item, replace(self, usages=self.usages - 1)
-        return super()._preprocess(game_state, status_source, item, signal)
-
-    @override
-    def _react_to_signal(
-            self, source: StaticTarget, signal: TRIGGERING_SIGNAL
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
-        d_usages = 0
-        if signal is TRIGGERING_SIGNAL.ROUND_END:
-            d_usages = -1
-        return [], replace(self, usages=d_usages)
-
-
-@dataclass(frozen=True)
-class NorthernSmokedChickenStatus(CharacterStatus, _UsageStatus):
-    usages: int = 1
-    MAX_USAGES: ClassVar[int] = 1
-    COST_DEDUCTION: ClassVar[int] = 1
-
-    @override
-    def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: Preprocessable,
-            signal: PREPROCESSABLES,
-    ) -> tuple[Preprocessable, Optional[Self]]:
-        if signal is PREPROCESSABLES.SKILL:
-            assert isinstance(item, evt.GameEvent)
-            if status_source == item.target \
-                    and item.event_type is evt.EventType.NORMAL_ATTACK \
-                    and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION:
-                item = replace(
-                    item,
-                    dices_cost=(item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
-                )
-                return item, replace(self, usages=self.usages - 1)
-        return super()._preprocess(game_state, status_source, item, signal)
-
-    @override
-    def _react_to_signal(
-            self, source: StaticTarget, signal: TRIGGERING_SIGNAL
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
-        d_usages = 0
-        if signal is TRIGGERING_SIGNAL.ROUND_END:
-            d_usages = -BIG_INT
-        return [], replace(self, usages=d_usages)
-
-
-@dataclass(frozen=True)
-class LotusFlowerCrispStatus(CharacterStatus, FixedShieldStatus):
-    usages: int = 1
-    MAX_USAGES: ClassVar[int] = 1
-    SHIELD_AMOUNT: ClassVar[int] = 3
-
-    @override
-    def _react_to_signal(
-            self,
-            source: StaticTarget,
-            signal: TRIGGERING_SIGNAL
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
-        d_usages = 0
-        if signal is TRIGGERING_SIGNAL.ROUND_END:
-            d_usages = -BIG_INT
-        return [], replace(self, usages=d_usages)
-
-
-@dataclass(frozen=True)
-class MintyMeatRollsStatus(CharacterStatus, _UsageStatus):
-    usages: int = 3
-    MAX_USAGES: ClassVar[int] = 3
-    COST_DEDUCTION: ClassVar[int] = 1
-
-    @override
-    def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: Preprocessable,
-            signal: PREPROCESSABLES,
-    ) -> tuple[Preprocessable, Optional[Self]]:
-        if signal is PREPROCESSABLES.SKILL:
-            assert isinstance(item, evt.GameEvent)
-            if status_source == item.target \
-                    and item.event_type is evt.EventType.NORMAL_ATTACK \
-                    and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION:
-                item = replace(
-                    item,
-                    dices_cost=(item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
-                )
-                return item, replace(self, usages=self.usages - 1)
-        return super()._preprocess(game_state, status_source, item, signal)
-
-    @override
-    def _react_to_signal(
-            self, source: StaticTarget, signal: TRIGGERING_SIGNAL
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
-        d_usages = 0
-        if signal is TRIGGERING_SIGNAL.ROUND_END:
-            d_usages = -BIG_INT
-        return [], replace(self, usages=d_usages)
-
-# >>>>>>>>>>>>>>>>>>>> Food Status >>>>>>>>>>>>>>>>>>>>
-
-
-@dataclass(frozen=True)
-class ChangingShiftsStatus(CombatStatus):
-    COST_DEDUCTION: ClassVar[int] = 1
-
-    @override
-    def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: Preprocessable,
-            signal: PREPROCESSABLES,
-    ) -> tuple[Preprocessable, Optional[Self]]:
-        if signal is PREPROCESSABLES.SWAP:
-            assert isinstance(item, evt.GameEvent) and item.event_type is evt.EventType.SWAP
-            if item.target.pid is status_source.pid \
-                    and item.dices_cost.num_dices() >= self.COST_DEDUCTION:
-                assert item.dices_cost.num_dices() == item.dices_cost[Element.ANY]
-                new_cost = (item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
-                return replace(item, dices_cost=new_cost), None
-        return super()._preprocess(game_state, status_source, item, signal)
-
-
-@dataclass(frozen=True)
-class LeaveItToMeStatus(CombatStatus):
-    @override
-    def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: Preprocessable,
-            signal: PREPROCESSABLES,
-    ) -> tuple[Preprocessable, Optional[Self]]:
-        if signal is PREPROCESSABLES.SWAP:
-            assert isinstance(item, evt.GameEvent) and item.event_type is evt.EventType.SWAP
-            if item.target.pid is status_source.pid \
-                    and item.event_speed is evt.EventSpeed.COMBAT_ACTION:
-                return replace(item, event_speed=evt.EventSpeed.FAST_ACTION), None
-        return super()._preprocess(game_state, status_source, item, signal)
-
-
-############################## Infusions ##############################
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -829,54 +559,345 @@ class _InfusionStatus(CharacterStatus, _UsageStatus):
 class ElectroInfusionStatus(_InfusionStatus):
     ELEMENT: ClassVar[Optional[Element]] = Element.ELECTRO
 
+############################## Combat Status ##############################
 
-############################## Character specific ##############################
+
+@dataclass(frozen=True)
+class CatalyzingFieldStatus(CombatStatus):
+    damage_boost: ClassVar[int] = 1
+    usages: int = 2
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: Preprocessable,
+            signal: PREPROCESSABLES,
+    ) -> tuple[Preprocessable, Optional[CatalyzingFieldStatus]]:
+        if signal is PREPROCESSABLES.DMG_AMOUNT:
+            assert isinstance(item, eft.SpecificDamageEffect)
+            assert self.usages >= 1
+            elem_can_boost = item.element is Element.ELECTRO or item.element is Element.DENDRO
+            legal_to_boost = status_source.pid is item.source.pid
+            target_is_active = item.target.id == game_state.get_player(
+                item.target.pid
+            ).just_get_active_character().get_id()
+            if elem_can_boost and legal_to_boost and target_is_active:
+                new_damage = replace(item, damage=item.damage + CatalyzingFieldStatus.damage_boost)
+                if self.usages == 1:
+                    return new_damage, None
+                else:
+                    return new_damage, CatalyzingFieldStatus(self.usages - 1)
+        return super()._preprocess(game_state, status_source, item, signal)
+
+    def __str__(self) -> str:
+        return super().__str__() + f"({self.usages})"  # pragma: no cover
 
 
-#### Keqing ####
+@dataclass(frozen=True)
+class ChangingShiftsStatus(CombatStatus):
+    COST_DEDUCTION: ClassVar[int] = 1
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: Preprocessable,
+            signal: PREPROCESSABLES,
+    ) -> tuple[Preprocessable, Optional[Self]]:
+        if signal is PREPROCESSABLES.SWAP:
+            assert isinstance(item, evt.GameEvent) and item.event_type is evt.EventType.SWAP
+            if item.target.pid is status_source.pid \
+                    and item.dices_cost.num_dices() >= self.COST_DEDUCTION:
+                assert item.dices_cost.num_dices() == item.dices_cost[Element.ANY]
+                new_cost = (item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
+                return replace(item, dices_cost=new_cost), None
+        return super()._preprocess(game_state, status_source, item, signal)
+
 
 @dataclass(frozen=True, kw_only=True)
-class KeqingTalentStatus(CharacterTalentStatus):
-    can_infuse: bool
+class CrystallizeStatus(CombatStatus, StackedShieldStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 2
 
+    @override
+    def _update(self, other: CrystallizeStatus) -> Optional[CrystallizeStatus]:
+        new_stacks = min(just(type(self).MAX_USAGES, BIG_INT), self.usages + other.usages)
+        return type(self)(usages=new_stacks)
+
+
+@dataclass(frozen=True)
+class DendroCoreStatus(CombatStatus):
+    """
+    When you deal Pyro DMG or Electro DMG to an opposing active character, DMG dealt +2.
+    Usage(s): 1
+    =====
+    Experiment results:
+    - normally the maxinum num of usage(s) is 1
+    """
+    damage_boost: ClassVar[int] = 2
+    usages: int = 1
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: Preprocessable,
+            signal: PREPROCESSABLES,
+    ) -> tuple[Preprocessable, Optional[DendroCoreStatus]]:
+        if signal is PREPROCESSABLES.DMG_AMOUNT:
+            assert isinstance(item, eft.SpecificDamageEffect)
+            assert self.usages >= 1
+            elem_can_boost = item.element is Element.ELECTRO or item.element is Element.PYRO
+            legal_to_boost = status_source.pid is item.source.pid
+            target_is_active = item.target.id == game_state.get_player(
+                item.target.pid
+            ).just_get_active_character().get_id()
+            if elem_can_boost and legal_to_boost and target_is_active:
+                new_damage = replace(item, damage=item.damage + DendroCoreStatus.damage_boost)
+                if self.usages == 1:
+                    return new_damage, None
+                else:
+                    return new_damage, DendroCoreStatus(self.usages - 1)
+        return super()._preprocess(game_state, status_source, item, signal)
+
+    # @override
+    # def update(self, other: DendroCoreStatus) -> DendroCoreStatus:
+    #     total_count = min(self.count + other.count, 2)
+    #     return DendroCoreStatus(total_count)
+
+    def __str__(self) -> str:
+        return super().__str__() + f"({self.usages})"  # pragma: no cover
+
+
+@dataclass(frozen=True)
+class FrozenStatus(CharacterStatus):
+    damage_boost: ClassVar[int] = 2
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: Preprocessable,
+            signal: PREPROCESSABLES,
+    ) -> tuple[Preprocessable, Optional[Self]]:
+        if signal is PREPROCESSABLES.DMG_AMOUNT:
+            assert isinstance(item, eft.SpecificDamageEffect)
+            can_reaction = item.element is Element.PYRO or item.element is Element.PHYSICAL
+            is_damage_target = item.target == status_source
+            if is_damage_target and can_reaction:
+                return replace(item, damage=item.damage + FrozenStatus.damage_boost), None
+        return super()._preprocess(game_state, status_source, item, signal)
+
+    @override
+    def _react_to_signal(
+            self, source: StaticTarget, signal: TRIGGERING_SIGNAL
+    ) -> tuple[list[eft.Effect], Optional[FrozenStatus]]:
+        if signal is TRIGGERING_SIGNAL.ROUND_END:
+            return [], None
+        return [], self
+
+
+@dataclass(frozen=True)
+class LeaveItToMeStatus(CombatStatus):
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: Preprocessable,
+            signal: PREPROCESSABLES,
+    ) -> tuple[Preprocessable, Optional[Self]]:
+        if signal is PREPROCESSABLES.SWAP:
+            assert isinstance(item, evt.GameEvent) and item.event_type is evt.EventType.SWAP
+            if item.target.pid is status_source.pid \
+                    and item.event_speed is evt.EventSpeed.COMBAT_ACTION:
+                return replace(item, event_speed=evt.EventSpeed.FAST_ACTION), None
+        return super()._preprocess(game_state, status_source, item, signal)
+
+
+############################## Character Status ##############################
+
+
+@dataclass(frozen=True)
+class JueyunGuobaStatus(CharacterStatus, _UsageStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    damage_boost: ClassVar[int] = 1
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: Preprocessable,
+            signal: PREPROCESSABLES,
+    ) -> tuple[Preprocessable, Optional[Self]]:
+        if signal is PREPROCESSABLES.DMG_AMOUNT:
+            assert isinstance(item, eft.SpecificDamageEffect)
+            if item.source == status_source and item.damage_type.normal_attack:
+                item = replace(item, damage=item.damage + JueyunGuobaStatus.damage_boost)
+                return item, replace(self, usages=self.usages - 1)
+        return super()._preprocess(game_state, status_source, item, signal)
+
+    @override
+    def _react_to_signal(
+            self, source: StaticTarget, signal: TRIGGERING_SIGNAL
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        d_usages = 0
+        if signal is TRIGGERING_SIGNAL.ROUND_END:
+            d_usages = -1
+        return [], replace(self, usages=d_usages)
+
+
+@dataclass(frozen=True)
+class LotusFlowerCrispStatus(CharacterStatus, FixedShieldStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    SHIELD_AMOUNT: ClassVar[int] = 3
+
+    @override
     def _react_to_signal(
             self,
             source: StaticTarget,
             signal: TRIGGERING_SIGNAL
-    ) -> tuple[list[eft.Effect], Optional[KeqingTalentStatus]]:
-        if signal is TRIGGERING_SIGNAL.COMBAT_ACTION:
-            return [], type(self)(can_infuse=False)
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        d_usages = 0
+        if signal is TRIGGERING_SIGNAL.ROUND_END:
+            d_usages = -BIG_INT
+        return [], replace(self, usages=d_usages)
+
+
+@dataclass(frozen=True)
+class MintyMeatRollsStatus(CharacterStatus, _UsageStatus):
+    usages: int = 3
+    MAX_USAGES: ClassVar[int] = 3
+    COST_DEDUCTION: ClassVar[int] = 1
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: Preprocessable,
+            signal: PREPROCESSABLES,
+    ) -> tuple[Preprocessable, Optional[Self]]:
+        if signal is PREPROCESSABLES.SKILL:
+            assert isinstance(item, evt.GameEvent)
+            if status_source == item.target \
+                    and item.event_type is evt.EventType.NORMAL_ATTACK \
+                    and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION:
+                item = replace(
+                    item,
+                    dices_cost=(item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
+                )
+                return item, replace(self, usages=self.usages - 1)
+        return super()._preprocess(game_state, status_source, item, signal)
+
+    @override
+    def _react_to_signal(
+            self, source: StaticTarget, signal: TRIGGERING_SIGNAL
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        d_usages = 0
+        if signal is TRIGGERING_SIGNAL.ROUND_END:
+            d_usages = -BIG_INT
+        return [], replace(self, usages=d_usages)
+
+
+@dataclass(frozen=True)
+class MushroomPizzaStatus(CharacterStatus, _UsageStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+
+    @override
+    def _react_to_signal(
+            self, source: StaticTarget, signal: TRIGGERING_SIGNAL
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        es: list[eft.Effect] = []
+        d_usages = 0
+        if signal is TRIGGERING_SIGNAL.END_ROUND_CHECK_OUT:
+            es.append(
+                eft.RecoverHPEffect(
+                    source,
+                    1,
+                )
+            )
+        if signal is TRIGGERING_SIGNAL.ROUND_END:
+            d_usages = -1
+
+        return es, replace(self, usages=d_usages)
+
+
+@dataclass(frozen=True)
+class NorthernSmokedChickenStatus(CharacterStatus, _UsageStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    COST_DEDUCTION: ClassVar[int] = 1
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: Preprocessable,
+            signal: PREPROCESSABLES,
+    ) -> tuple[Preprocessable, Optional[Self]]:
+        if signal is PREPROCESSABLES.SKILL:
+            assert isinstance(item, evt.GameEvent)
+            if status_source == item.target \
+                    and item.event_type is evt.EventType.NORMAL_ATTACK \
+                    and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION:
+                item = replace(
+                    item,
+                    dices_cost=(item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
+                )
+                return item, replace(self, usages=self.usages - 1)
+        return super()._preprocess(game_state, status_source, item, signal)
+
+    @override
+    def _react_to_signal(
+            self, source: StaticTarget, signal: TRIGGERING_SIGNAL
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        d_usages = 0
+        if signal is TRIGGERING_SIGNAL.ROUND_END:
+            d_usages = -BIG_INT
+        return [], replace(self, usages=d_usages)
+
+
+@dataclass(frozen=True)
+class SatiatedStatus(CharacterStatus):
+
+    @override
+    def _react_to_signal(
+            self, source: StaticTarget, signal: TRIGGERING_SIGNAL
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        if signal is TRIGGERING_SIGNAL.ROUND_END:
+            return [], None
         return [], self
 
-    def __str__(self) -> str:
-        return super().__str__() + f"({case_val(self.can_infuse, 1, 0)})"  # pragma: no cover
 
-
-@dataclass(frozen=True, kw_only=True)
-class ThunderingPenanceStatus(EquipmentStatus):
-    pass
-
-
-@dataclass(frozen=True, kw_only=True)
-class KeqingElectroInfusionStatus(ElectroInfusionStatus):
-    pass
-
-    def __str__(self) -> str:
-        return super().__str__() + f"({self.damage_boost})"
+############################## Character Specific Status ##############################
+"""
+Group statues by characters, characters ordered alphabetically
+"""
 
 
 #### Kaeya ####
 
 
 @dataclass(frozen=True, kw_only=True)
-class Icicle(CombatStatus, _UsageStatus):
+class IcicleStatus(CombatStatus, _UsageStatus):
     usages: int = 3
 
     def _react_to_signal(
             self,
             source: StaticTarget,
             signal: TRIGGERING_SIGNAL
-    ) -> tuple[list[eft.Effect], Optional[Icicle]]:
+    ) -> tuple[list[eft.Effect], Optional[IcicleStatus]]:
         if source.pid.is_player1() and signal is TRIGGERING_SIGNAL.SWAP_EVENT_1 \
                 or source.pid.is_player2() and signal is TRIGGERING_SIGNAL.SWAP_EVENT_2:
             effects: list[eft.Effect] = [
@@ -947,6 +968,38 @@ class ColdBloodedStrikeStatus(EquipmentStatus):
 
     def __str__(self) -> str:
         return super().__str__() + case_val(self.activated, "(*)", '')
+
+#### Keqing ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class KeqingTalentStatus(CharacterTalentStatus):
+    can_infuse: bool
+
+    def _react_to_signal(
+            self,
+            source: StaticTarget,
+            signal: TRIGGERING_SIGNAL
+    ) -> tuple[list[eft.Effect], Optional[KeqingTalentStatus]]:
+        if signal is TRIGGERING_SIGNAL.COMBAT_ACTION:
+            return [], type(self)(can_infuse=False)
+        return [], self
+
+    def __str__(self) -> str:
+        return super().__str__() + f"({case_val(self.can_infuse, 1, 0)})"  # pragma: no cover
+
+
+@dataclass(frozen=True, kw_only=True)
+class ThunderingPenanceStatus(EquipmentStatus):
+    pass
+
+
+@dataclass(frozen=True, kw_only=True)
+class KeqingElectroInfusionStatus(ElectroInfusionStatus):
+    pass
+
+    def __str__(self) -> str:
+        return super().__str__() + f"({self.damage_boost})"
 
 
 #### Rhodeia of Loch ####

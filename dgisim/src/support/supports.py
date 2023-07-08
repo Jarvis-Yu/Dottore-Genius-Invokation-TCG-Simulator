@@ -9,6 +9,9 @@ __all__ = [
 ]
 
 class Supports:
+    """
+    A container for easy supports managing.
+    """
     def __init__(self, supports: tuple[Support, ...], max_num: int):
         assert len(supports) <= max_num
         self._supports = supports

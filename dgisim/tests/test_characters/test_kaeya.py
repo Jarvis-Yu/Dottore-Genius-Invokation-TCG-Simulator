@@ -79,7 +79,7 @@ class TestKaeya(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 9)
         self.assertTrue(p2ac.get_elemental_aura().contains(Element.CRYO))
         self.assertEqual(
-            p1.get_combat_statuses().just_find(Icicle).usages,
+            p1.get_combat_statuses().just_find(IcicleStatus).usages,
             3
         )
 
@@ -90,7 +90,7 @@ class TestKaeya(unittest.TestCase):
             ).build()
         ).player2(
             self.BASE_GAME.get_player2().factory().f_combat_statuses(
-                lambda cs: cs.update_status(Icicle())
+                lambda cs: cs.update_status(IcicleStatus())
             ).build()
         ).build()
 
@@ -107,7 +107,7 @@ class TestKaeya(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 8)
         self.assertTrue(p2ac.get_elemental_aura().contains(Element.CRYO))
         self.assertEqual(
-            p1.get_combat_statuses().just_find(Icicle).usages,
+            p1.get_combat_statuses().just_find(IcicleStatus).usages,
             2
         )
 
@@ -122,7 +122,7 @@ class TestKaeya(unittest.TestCase):
         gsm = GameStateMachine(game_state_p1_move, a1, a2)
         gsm.player_step()
         gsm.step_until_holds(
-            lambda gs: gs.get_player1().get_combat_statuses().just_find(Icicle).usages == 2
+            lambda gs: gs.get_player1().get_combat_statuses().just_find(IcicleStatus).usages == 2
         )
         game_state = gsm.get_game_state()
         p2ac = game_state.get_player2().just_get_active_character()
@@ -139,7 +139,7 @@ class TestKaeya(unittest.TestCase):
         self.assertEqual(p2cs.just_get_character(3).get_hp(), 4)
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
         self.assertEqual(
-            p1.get_combat_statuses().just_find(Icicle).usages,
+            p1.get_combat_statuses().just_find(IcicleStatus).usages,
             2
         )
 
@@ -173,7 +173,7 @@ class TestKaeya(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 8)
         self.assertTrue(p2ac.get_elemental_aura().contains(Element.CRYO))
         self.assertEqual(
-            p1.get_combat_statuses().just_find(Icicle).usages,
+            p1.get_combat_statuses().just_find(IcicleStatus).usages,
             2
         )
 
@@ -202,11 +202,11 @@ class TestKaeya(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 10)
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
         self.assertEqual(
-            p1.get_combat_statuses().just_find(Icicle).usages,
+            p1.get_combat_statuses().just_find(IcicleStatus).usages,
             2
         )
         self.assertEqual(
-            p2.get_combat_statuses().just_find(Icicle).usages,
+            p2.get_combat_statuses().just_find(IcicleStatus).usages,
             2
         )
 

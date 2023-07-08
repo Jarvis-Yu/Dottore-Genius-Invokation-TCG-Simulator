@@ -6,11 +6,17 @@ from ..status import status as stt
 
 from ..helper.quality_of_life import just
 
+__all__ = [
+    "Statuses",
+]
 
 _U = TypeVar('_U')
 
 
 class Statuses:
+    """
+    A container for easy statuses managing.
+    """
     def __init__(self, statuses: tuple[stt.Status, ...]):
         self._statuses = statuses
 
