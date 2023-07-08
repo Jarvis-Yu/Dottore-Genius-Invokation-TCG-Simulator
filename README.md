@@ -9,7 +9,7 @@ The simulator is modeled as a finite state machine, where all game states are im
 
 Basic rules of Genius Invokation TCG can be found [here](https://genshin-impact.fandom.com/wiki/Genius_Invokation_TCG).
 
-## Install
+## Installation
 
 Make sure your Python version `>= 3.10`.
 

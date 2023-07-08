@@ -13,7 +13,7 @@ in the format of `// ...`.
 
 Note that prompts are of format `:>` or `::>`.
 
-```txt
+```
 $ ./scripts/sh/cli.sh 
 ==================================================
 Welcome to the Dottore Genius Invokation TCG Simulator CLI ver.
