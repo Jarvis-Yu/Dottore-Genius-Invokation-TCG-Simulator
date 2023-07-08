@@ -8,7 +8,7 @@ from ...action.action_generator import ActionGenerator
 from ...action.enums import ActionType
 from ...character.character_skill_enum import CharacterSkill
 from ...effect.effect import *
-from ...event.event import *
+from ...event import *
 from ...helper.quality_of_life import just
 from ...state.enums import PID, ACT
 

@@ -15,7 +15,7 @@ from ..dices import AbstractDices, ActualDices
 from ..effect.enums import ZONE
 from ..effect.structs import StaticTarget
 from ..element import Element
-from ..event.event import CardEvent
+from ..event import CardEvent
 from ..helper.quality_of_life import BIG_INT
 from ..state.enums import PID
 from ..status.enums import PREPROCESSABLES

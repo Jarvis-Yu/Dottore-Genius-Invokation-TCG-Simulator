@@ -3,12 +3,19 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING
 
-
 if TYPE_CHECKING:
-    from ..card.card import Card
-    from ..effect.structs import StaticTarget
-    from ..dices import AbstractDices
-    from ..state.enums import PID
+    from .card.card import Card
+    from .effect.structs import StaticTarget
+    from .dices import AbstractDices
+    from .state.enums import PID
+
+__all__ = [
+    "CardEvent",
+    "EventSpeed",
+    "EventType",
+    "GameEvent",
+]
+
 
 class EventSpeed(Enum):
     FAST_ACTION = "Fast-Action"
@@ -29,6 +36,7 @@ class GameEvent:
     event_type: EventType
     event_speed: EventSpeed
     dices_cost: AbstractDices
+
 
 @dataclass(frozen=True, kw_only=True)
 class CardEvent:

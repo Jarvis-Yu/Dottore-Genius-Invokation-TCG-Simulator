@@ -1,6 +1,6 @@
 from enum import Enum
 
-from ..event.event import EventType
+from ..event import EventType
 
 class CharacterSkill(Enum):
     NORMAL_ATTACK = 0

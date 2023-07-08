@@ -18,7 +18,7 @@ from typing_extensions import Self, override
 
 from ..card import card as cd
 from ..effect import effect as eft
-from ..event import event as evt
+from ..event import CardEvent
 from ..status import status as stt
 
 from ..effect.enums import TRIGGERING_SIGNAL
@@ -67,7 +67,7 @@ class XudongSupport(Support):
             signal: PREPROCESSABLES,
     ) -> tuple[Preprocessable, None | Self]:
         if signal is PREPROCESSABLES.CARD:
-            assert isinstance(item, evt.CardEvent)
+            assert isinstance(item, CardEvent)
             if item.pid is status_source.pid \
                     and issubclass(item.card_type, cd.FoodCard) \
                     and item.dices_cost.num_dices() > 0 \

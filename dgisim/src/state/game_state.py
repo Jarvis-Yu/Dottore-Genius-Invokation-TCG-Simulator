@@ -13,13 +13,14 @@ from ..action.action import PlayerAction
 from ..card.card import Card
 from ..character.character import Character
 from ..character.character_skill_enum import CharacterSkill
+from ..dices import AbstractDices
 from ..effect.enums import ZONE
 from ..effect.structs import StaticTarget
 from ..effect.effect_stack import EffectStack
 from ..effect.enums import ZONE
 from ..effect.structs import StaticTarget
 from ..element import Element
-from ..event.event import *
+from ..event import *
 from ..helper.quality_of_life import case_val
 from ..status.status_processing import StatusProcessing
 from ..status.enums import PREPROCESSABLES

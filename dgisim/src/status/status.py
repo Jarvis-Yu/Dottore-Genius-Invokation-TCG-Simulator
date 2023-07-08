@@ -18,12 +18,12 @@ from typing import ClassVar, Optional, TYPE_CHECKING
 from typing_extensions import override, Self
 
 from ..effect import effect as eft
-from ..event import event as evt
 
 from ..character.character_skill_enum import CharacterSkill
 from ..effect.enums import ZONE, TRIGGERING_SIGNAL, DYNAMIC_CHARACTER_TARGET
 from ..effect.structs import StaticTarget, DamageType
 from ..element import Element
+from ..event import EventSpeed, EventType, GameEvent
 from ..helper.quality_of_life import just, BIG_INT, case_val
 from .enums import PREPROCESSABLES
 
@@ -608,7 +608,7 @@ class ChangingShiftsStatus(CombatStatus):
             signal: PREPROCESSABLES,
     ) -> tuple[Preprocessable, Optional[Self]]:
         if signal is PREPROCESSABLES.SWAP:
-            assert isinstance(item, evt.GameEvent) and item.event_type is evt.EventType.SWAP
+            assert isinstance(item, GameEvent) and item.event_type is EventType.SWAP
             if item.target.pid is status_source.pid \
                     and item.dices_cost.num_dices() >= self.COST_DEDUCTION:
                 assert item.dices_cost.num_dices() == item.dices_cost[Element.ANY]
@@ -713,10 +713,10 @@ class LeaveItToMeStatus(CombatStatus):
             signal: PREPROCESSABLES,
     ) -> tuple[Preprocessable, Optional[Self]]:
         if signal is PREPROCESSABLES.SWAP:
-            assert isinstance(item, evt.GameEvent) and item.event_type is evt.EventType.SWAP
+            assert isinstance(item, GameEvent) and item.event_type is EventType.SWAP
             if item.target.pid is status_source.pid \
-                    and item.event_speed is evt.EventSpeed.COMBAT_ACTION:
-                return replace(item, event_speed=evt.EventSpeed.FAST_ACTION), None
+                    and item.event_speed is EventSpeed.COMBAT_ACTION:
+                return replace(item, event_speed=EventSpeed.FAST_ACTION), None
         return super()._preprocess(game_state, status_source, item, signal)
 
 
@@ -787,9 +787,9 @@ class MintyMeatRollsStatus(CharacterStatus, _UsageStatus):
             signal: PREPROCESSABLES,
     ) -> tuple[Preprocessable, Optional[Self]]:
         if signal is PREPROCESSABLES.SKILL:
-            assert isinstance(item, evt.GameEvent)
+            assert isinstance(item, GameEvent)
             if status_source == item.target \
-                    and item.event_type is evt.EventType.NORMAL_ATTACK \
+                    and item.event_type is EventType.NORMAL_ATTACK \
                     and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION:
                 item = replace(
                     item,
@@ -847,9 +847,9 @@ class NorthernSmokedChickenStatus(CharacterStatus, _UsageStatus):
             signal: PREPROCESSABLES,
     ) -> tuple[Preprocessable, Optional[Self]]:
         if signal is PREPROCESSABLES.SKILL:
-            assert isinstance(item, evt.GameEvent)
+            assert isinstance(item, GameEvent)
             if status_source == item.target \
-                    and item.event_type is evt.EventType.NORMAL_ATTACK \
+                    and item.event_type is EventType.NORMAL_ATTACK \
                     and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION:
                 item = replace(
                     item,

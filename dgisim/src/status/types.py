@@ -1,8 +1,8 @@
 from ..effect import effect as eft
-from ..event import event as evt
+from ..event import GameEvent, CardEvent
 
 __all__ = [
     "Preprocessable",
 ]
 
-Preprocessable = eft.SpecificDamageEffect | evt.GameEvent | evt.CardEvent
+Preprocessable = eft.SpecificDamageEffect | GameEvent | CardEvent

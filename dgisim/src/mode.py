@@ -6,7 +6,7 @@ from .phase import phase as ph
 
 from .dices import AbstractDices
 from .element import *
-from .event.event import *
+from .event import *
 from .helper.level_print import level_print_single
 
 __all__ = [
