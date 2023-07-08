@@ -8,7 +8,7 @@ from ...action.action import DicesSelectAction, EndRoundAction, PlayerAction
 from ...action.action_generator import ActionGenerator
 from ...action.enums import ActionType
 from ...dices import ActualDices
-from ...element.element import Element
+from ...element import Element
 from ...helper.quality_of_life import just
 from ...state.enums import ACT, PID
 

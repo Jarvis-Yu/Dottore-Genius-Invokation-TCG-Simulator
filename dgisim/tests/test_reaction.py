@@ -5,7 +5,7 @@ from dgisim.src.agents import *
 from dgisim.src.effect.effect import *
 from dgisim.src.effect.enums import DYNAMIC_CHARACTER_TARGET
 from dgisim.src.effect.structs import DamageType
-from dgisim.src.element.element import ElementalAura
+from dgisim.src.element import ElementalAura
 from dgisim.src.game_state_machine import GameStateMachine
 from dgisim.src.state.enums import PID
 from dgisim.src.state.game_state import GameState

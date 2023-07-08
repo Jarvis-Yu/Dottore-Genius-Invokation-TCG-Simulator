@@ -8,7 +8,7 @@ from ..status import status as stt
 
 from ..effect.enums import TRIGGERING_SIGNAL, DYNAMIC_CHARACTER_TARGET
 from ..effect.structs import DamageType
-from ..element.element import Element
+from ..element import Element
 from ..helper.quality_of_life import BIG_INT
 
 if TYPE_CHECKING:

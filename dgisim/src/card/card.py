@@ -14,7 +14,7 @@ from ..character.character_skill_enum import CharacterSkill
 from ..dices import AbstractDices, ActualDices
 from ..effect.enums import ZONE
 from ..effect.structs import StaticTarget
-from ..element.element import Element
+from ..element import Element
 from ..event.event import CardEvent
 from ..helper.quality_of_life import BIG_INT
 from ..state.enums import PID

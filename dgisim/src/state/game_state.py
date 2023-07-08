@@ -20,7 +20,7 @@ from ..effect.structs import StaticTarget
 from ..effect.effect_stack import EffectStack
 from ..effect.enums import ZONE
 from ..effect.structs import StaticTarget
-from ..element.element import Element
+from ..element import Element
 from ..event.event import *
 from ..helper.level_print import level_print, level_print_single, INDENT
 from ..helper.quality_of_life import case_val, just

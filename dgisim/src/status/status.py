@@ -11,7 +11,7 @@ from ..event import event as evt
 from ..character.character_skill_enum import CharacterSkill
 from ..effect.enums import ZONE, TRIGGERING_SIGNAL, DYNAMIC_CHARACTER_TARGET
 from ..effect.structs import StaticTarget, DamageType
-from ..element.element import Element
+from ..element import Element
 from ..helper.quality_of_life import just, BIG_INT, case_val
 
 from .enums import PREPROCESSABLES

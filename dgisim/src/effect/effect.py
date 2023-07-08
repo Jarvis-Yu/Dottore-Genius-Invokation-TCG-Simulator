@@ -9,7 +9,7 @@ from ..summon import summon as sm
 from ..support import support as sp
 
 from ..character.character_skill_enum import CharacterSkill
-from ..element.element import Element, Reaction, ReactionDetail
+from ..element import Element, Reaction, ReactionDetail
 from ..helper.quality_of_life import just, case_val
 from ..state.enums import PID, ACT
 from ..status.enums import PREPROCESSABLES

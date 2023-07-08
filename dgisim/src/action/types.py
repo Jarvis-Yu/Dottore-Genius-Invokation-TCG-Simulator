@@ -5,7 +5,7 @@ from ..card.cards import Cards
 from ..character.character_skill_enum import CharacterSkill
 from ..dices import ActualDices, AbstractDices
 from ..effect.structs import StaticTarget
-from ..element.element import Element
+from ..element import Element
 
 from .enums import ActionType
 

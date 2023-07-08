@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import FrozenSet, Optional, Iterator
 
-from ..helper.hashable_dict import HashableDict
+from .helper.hashable_dict import HashableDict
 
 
 class Element(Enum):

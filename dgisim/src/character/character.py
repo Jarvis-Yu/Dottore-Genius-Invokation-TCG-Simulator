@@ -13,7 +13,7 @@ from ..dices import AbstractDices
 from ..effect.effects_template import *
 from ..effect.enums import ZONE, DYNAMIC_CHARACTER_TARGET
 from ..effect.structs import StaticTarget, DamageType
-from ..element.element import *
+from ..element import *
 from ..helper.level_print import INDENT, level_print
 from ..state.enums import PID
 

@@ -16,9 +16,6 @@ class GameEndPhase(ph.Phase):
     def step_action(self, game_state: GameState, pid: PID, action: PlayerAction) -> None | GameState:
         raise Exception("Not Reached")
 
-    def waiting_for(self, game_state: GameState) -> None | PID:
-        raise Exception("Not Reached")
-
     def action_generator(self, game_state: GameState, pid: PID) -> None | ActionGenerator:
         raise Exception("Not Reached")
 

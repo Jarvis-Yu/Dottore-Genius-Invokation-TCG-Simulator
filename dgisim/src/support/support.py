@@ -9,7 +9,7 @@ from ..event import event as evt
 from ..status import status as stt
 
 from ..effect.enums import TRIGGERING_SIGNAL
-from ..element.element import Element
+from ..element import Element
 from ..helper.quality_of_life import BIG_INT
 from ..status.enums import PREPROCESSABLES
 

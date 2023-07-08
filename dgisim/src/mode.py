@@ -5,7 +5,7 @@ from .character import character as chr
 from .phase import phase as ph
 
 from .dices import AbstractDices
-from .element.element import *
+from .element import *
 from .event.event import *
 from .helper.level_print import level_print_single
 

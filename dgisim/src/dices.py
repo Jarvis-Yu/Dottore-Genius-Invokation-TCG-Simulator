@@ -7,7 +7,7 @@ from typing_extensions import Self, override, TYPE_CHECKING
 from .helper.hashable_dict import HashableDict
 from .helper.level_print import level_print
 from .helper.quality_of_life import BIG_INT
-from .element.element import Element
+from .element import Element
 
 if TYPE_CHECKING:
     from .state.game_state import GameState

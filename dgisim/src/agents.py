@@ -9,7 +9,7 @@ from .card.card import *
 from .character.character_skill_enum import CharacterSkill
 from .dices import AbstractDices, ActualDices
 from .effect.effect import *
-from .element.element import Element
+from .element import Element
 from .phase.default.action_phase import ActionPhase
 from .phase.default.card_select_phase import CardSelectPhase
 from .phase.default.end_phase import EndPhase
