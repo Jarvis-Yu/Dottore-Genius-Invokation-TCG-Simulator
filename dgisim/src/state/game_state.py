@@ -12,7 +12,7 @@ from ..state import player_state as ps
 from ..action.action import PlayerAction
 from ..card.card import Card
 from ..character.character import Character
-from ..character.character_skill_enum import CharacterSkill
+from ..character.enums import CharacterSkill
 from ..dices import AbstractDices
 from ..effect.enums import ZONE
 from ..effect.structs import StaticTarget

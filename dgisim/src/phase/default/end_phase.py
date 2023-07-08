@@ -7,6 +7,8 @@ from ...action.action import *
 from ...action.action_generator import ActionGenerator
 from ...dices import ActualDices
 from ...effect.effect import *
+from ...effect.enums import ZONE
+from ...effect.structs import StaticTarget
 from ...state.enums import PID, ACT
 
 if TYPE_CHECKING:

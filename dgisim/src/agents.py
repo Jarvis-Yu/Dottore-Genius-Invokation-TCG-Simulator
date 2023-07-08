@@ -2,13 +2,14 @@
 This file contains different implementations of PlayerAgents.
 """
 import random
-from typing import Any, Optional, Iterable, TYPE_CHECKING, TypeVar
+from typing import Any, Callable, Iterable, Optional, TYPE_CHECKING, TypeVar
 
 from .action.action import *
 from .action.action_generator import *
 from .action.action_generator_generator import *
 from .action.types import DecidedChoiceType
 from .card.card import *
+from .card.cards import Cards
 from .dices import AbstractDices, ActualDices
 from .effect.effect import *
 from .phase.default.action_phase import ActionPhase
@@ -72,6 +73,7 @@ class PuppetAgent(PlayerAgent):
 
     This agent is meaningly used for controlled testing.
     """
+
     def __init__(self, actions: Optional[list[PlayerAction]] = None) -> None:
         if actions is None:
             self._actions = []
@@ -199,6 +201,7 @@ class CustomChoiceAgent(RandomAgent):
     A player agent used by CLI, it requires several Callables passed in, in order
     to make a decision.
     """
+
     def __init__(
             self,
             prompt_handler: Callable[[str, str], None],

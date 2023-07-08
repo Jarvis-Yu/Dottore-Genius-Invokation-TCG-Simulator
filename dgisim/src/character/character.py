@@ -19,7 +19,7 @@ from ..effect.enums import ZONE, DYNAMIC_CHARACTER_TARGET
 from ..effect.structs import StaticTarget, DamageType
 from ..element import *
 from ..state.enums import PID
-from .character_skill_enum import CharacterSkill
+from .enums import CharacterSkill
 
 if TYPE_CHECKING:
     from ..state.game_state import GameState

@@ -6,7 +6,7 @@ from ..status import status as stt
 from ..summon import summon as sm
 from ..support import support as sp
 
-from ..character.character_skill_enum import CharacterSkill
+from ..character.enums import CharacterSkill
 from ..state.enums import PID
 from ..effect.enums import ZONE, TRIGGERING_SIGNAL
 from ..effect.structs import StaticTarget

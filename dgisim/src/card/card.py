@@ -22,7 +22,7 @@ from ..effect import effect as eft
 from ..status import status as stt
 from ..support import support as sp
 
-from ..character.character_skill_enum import CharacterSkill
+from ..character.enums import CharacterSkill
 from ..dices import AbstractDices, ActualDices
 from ..effect.enums import ZONE
 from ..effect.structs import StaticTarget

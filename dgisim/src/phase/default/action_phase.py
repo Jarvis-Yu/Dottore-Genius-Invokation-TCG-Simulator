@@ -6,9 +6,11 @@ from .. import phase as ph
 from ...action.action import *
 from ...action.action_generator import ActionGenerator
 from ...action.enums import ActionType
-from ...character.character_skill_enum import CharacterSkill
+from ...character.enums import CharacterSkill
 from ...effect.effect import *
-from ...effect.enums import TRIGGERING_SIGNAL
+from ...effect.enums import TRIGGERING_SIGNAL, ZONE
+from ...effect.structs import StaticTarget
+from ...element import Element
 from ...event import *
 from ...helper.quality_of_life import just
 from ...state.enums import PID, ACT

@@ -19,7 +19,7 @@ from typing_extensions import override, Self
 
 from ..effect import effect as eft
 
-from ..character.character_skill_enum import CharacterSkill
+from ..character.enums import CharacterSkill
 from ..effect.enums import ZONE, TRIGGERING_SIGNAL, DYNAMIC_CHARACTER_TARGET
 from ..effect.structs import StaticTarget, DamageType
 from ..element import Element

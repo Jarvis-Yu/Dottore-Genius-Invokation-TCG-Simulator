@@ -12,11 +12,18 @@ if TYPE_CHECKING:
     from .action import PlayerAction, Instruction
     from .types import DecidedChoiceType, GivenChoiceType
 
+__all__ = [
+    "ActionGenerator",
+]
+
+
 def _dummy_choices_helper(_: ActionGenerator) -> GivenChoiceType:
-    raise NotImplementedError
+    raise NotImplementedError("You are supposed to override this if needed")
+
 
 def _dummy_fill_helper(_a: ActionGenerator, _b: DecidedChoiceType) -> ActionGenerator:
-    raise NotImplementedError
+    raise NotImplementedError("You are supposed to override this if needed")
+
 
 @dataclass(frozen=True, kw_only=True)
 class ActionGenerator:
@@ -55,7 +62,7 @@ class ActionGenerator:
         """
         Return if ActionGenerator is ready to produce the final action
         """
-        return not(self.action is None and self.instruction is None) \
+        return not (self.action is None and self.instruction is None) \
             and self._action_filled() and self._instruction_filled()
 
     def valid(self) -> bool:

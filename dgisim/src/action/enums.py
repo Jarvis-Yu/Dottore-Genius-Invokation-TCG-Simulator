@@ -1,5 +1,9 @@
 from enum import Enum
 
+__all__ = [
+    "ActionType",
+]
+
 class ActionType(Enum):
     SELECT_CARDS = 0
     SELECT_ACTIVE_CHARACTER = 1
