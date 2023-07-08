@@ -14,6 +14,11 @@ if TYPE_CHECKING:
     from ...state.game_state import GameState
 
 
+__all__ = [
+    "EndPhase",
+]
+
+
 class EndPhase(ph.Phase):
     _CARDS_DRAWN = 2
 
@@ -146,7 +151,7 @@ class EndPhase(ph.Phase):
             action: PlayerAction
     ) -> Optional[GameState]:
         effect_stack = game_state.get_effect_stack()
-        if (effect_stack.is_not_empty() 
+        if (effect_stack.is_not_empty()
                 and isinstance(effect_stack.peek(), DeathSwapPhaseStartEffect)):
             game_state = game_state.factory().effect_stack(effect_stack.pop()[0]).build()
         if isinstance(action, DeathSwapAction):
@@ -162,7 +167,7 @@ class EndPhase(ph.Phase):
             return super().waiting_for(game_state)
         else:
             return None
- 
+
     def action_generator(self, game_state: GameState, pid: PID) -> ActionGenerator | None:
         assert game_state.death_swapping(pid)
         from ...action.action_generator_generator import SwapActGenGenerator

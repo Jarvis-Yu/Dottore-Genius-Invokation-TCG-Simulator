@@ -10,6 +10,10 @@ if TYPE_CHECKING:
     from ..action.action_generator import ActionGenerator
     from ..state.enums import PID
 
+__all__ = [
+    "Phase",
+]
+
 
 class Phase:
     @abstractmethod
@@ -18,7 +22,7 @@ class Phase:
 
     @abstractmethod
     def step_action(self, game_state: GameState, pid: PID, action: PlayerAction) -> Optional[
-        GameState]:
+            GameState]:
         raise NotImplementedError
 
     def waiting_for(self, game_state: GameState) -> Optional[PID]:

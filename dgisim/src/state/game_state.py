@@ -1,6 +1,5 @@
 from __future__ import annotations
-from dataclasses import replace
-from typing import Callable, Optional, TYPE_CHECKING
+from typing import Callable, Optional
 
 from .. import mode as md
 from ..action import action as act
@@ -14,7 +13,6 @@ from ..action.action import PlayerAction
 from ..card.card import Card
 from ..character.character import Character
 from ..character.character_skill_enum import CharacterSkill
-from ..dices import ActualDices
 from ..effect.enums import ZONE
 from ..effect.structs import StaticTarget
 from ..effect.effect_stack import EffectStack
@@ -22,18 +20,27 @@ from ..effect.enums import ZONE
 from ..effect.structs import StaticTarget
 from ..element import Element
 from ..event.event import *
-from ..helper.level_print import level_print, level_print_single, INDENT
-from ..helper.quality_of_life import case_val, just
-from .enums import PID
+from ..helper.quality_of_life import case_val
 from ..status.status_processing import StatusProcessing
 from ..status.enums import PREPROCESSABLES
 from ..support.support import Support
+from .enums import PID
 
-if TYPE_CHECKING:
-    from ..action.types import DecidedChoiceType, GivenChoiceType
+__all__ = [
+    "GameState",
+]
 
 
 class GameState:
+    """
+    The class which represents a moment or a state of the game, containing all
+    information required to proceed to the next game state.
+
+    To proceed when the game doesn't require a player action at the moment,
+    run step(), otherwise run action_step(player_action).
+    
+    To tell if a player action is required, run waiting_for().
+    """
 
     def __init__(
         self,

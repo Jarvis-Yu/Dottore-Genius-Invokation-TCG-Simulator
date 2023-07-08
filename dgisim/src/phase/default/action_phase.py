@@ -16,6 +16,10 @@ if TYPE_CHECKING:
     from ...action.types import DecidedChoiceType, GivenChoiceType
     from ...state.game_state import GameState
 
+__all__ = [
+    "ActionPhase",
+]
+
 
 class ActionPhase(ph.Phase):
     def _start_up_phase(self, game_state: GameState) -> GameState:

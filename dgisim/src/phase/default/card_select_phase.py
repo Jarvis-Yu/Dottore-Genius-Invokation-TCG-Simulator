@@ -15,6 +15,10 @@ if TYPE_CHECKING:
     from ...state.game_state import GameState
     from ...state.player_state import PlayerState
 
+__all__ = [
+    "CardSelectPhase",
+]
+
 
 class CardSelectPhase(ph.Phase):
     _NUM_CARDS: int = 5

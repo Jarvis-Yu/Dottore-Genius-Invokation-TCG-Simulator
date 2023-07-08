@@ -17,6 +17,9 @@ from .enums import ACT
 if TYPE_CHECKING:
     from ..mode import Mode
 
+__all__ = [
+    "PlayerState",
+]
 
 class PlayerState:
     def __init__(

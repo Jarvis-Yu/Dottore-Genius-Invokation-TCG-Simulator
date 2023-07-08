@@ -9,6 +9,11 @@ if TYPE_CHECKING:
     from ...state.game_state import GameState
     from ...state.enums import PID
 
+__all__ = [
+    "GameEndPhase",
+]
+
+
 class GameEndPhase(ph.Phase):
     def step(self, game_state: GameState) -> GameState:
         raise Exception("Not Reached")
