@@ -1,5 +1,13 @@
 # Change Log
 
+## v0.2.dev1
+
+### Added
+
+- methods to quick-create GameState / PlayerState / Characters
+- includes some container classes in root dgisim
+- unifies PS1 format
+
 ## v0.2.dev0
 
 ### Added

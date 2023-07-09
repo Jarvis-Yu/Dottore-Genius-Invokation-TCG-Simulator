@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Callable, Iterator, Optional, TYPE_CHECKING, Union
+from typing import Callable, Iterator, Optional, TYPE_CHECKING, Union, Iterable
 
 if TYPE_CHECKING:
     from .character import Character
@@ -16,6 +16,16 @@ class Characters:
     @classmethod
     def from_default(cls, characters: tuple[Character, ...]) -> Characters:
         return cls(characters, None)
+
+    @classmethod
+    def from_list(cls, characters: Iterable[type[Character]]) -> Characters:
+        return Characters(
+            tuple(
+                char.from_default(i + 1)
+                for i, char in enumerate(characters)
+            ),
+            None,
+        )
 
     def get_characters(self) -> tuple[Character, ...]:
         return self._characters

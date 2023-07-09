@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Callable, Optional
+from typing_extensions import Self
 
 from .. import mode as md
 from ..action import action as act
@@ -39,7 +40,7 @@ class GameState:
 
     To proceed when the game doesn't require a player action at the moment,
     run step(), otherwise run action_step(player_action).
-    
+
     To tell if a player action is required, run waiting_for().
     """
 
@@ -69,15 +70,27 @@ class GameState:
         self._elem_tuning_checker = ElementalTuningChecker(self)
 
     @classmethod
-    def from_default(cls):
+    def from_default(cls) -> Self:
         mode = md.DefaultMode()
         return cls(
             mode=mode,
             phase=mode.card_select_phase(),
             round=0,
             active_player_id=PID.P1,
-            player1=ps.PlayerState.examplePlayer(mode),
-            player2=ps.PlayerState.examplePlayer(mode),
+            player1=ps.PlayerState.example_player(mode),
+            player2=ps.PlayerState.example_player(mode),
+            effect_stack=EffectStack(()),
+        )
+
+    @classmethod
+    def from_players(cls, mode: md.Mode, player1: ps.PlayerState, player2: ps.PlayerState) -> Self:
+        return cls(
+            mode=mode,
+            phase=mode.card_select_phase(),
+            round=0,
+            active_player_id=PID.P1,
+            player1=player1,
+            player2=player2,
             effect_stack=EffectStack(()),
         )
 

@@ -111,7 +111,7 @@ class GameStateMachine:
         self._game_state = next_state
         if observe:
             print(GamePrinter.dict_game_printer(self._game_state.dict_str()))
-            input(">>> ")
+            input(":> ")
         self._append_history(self._game_state)
         return True
 

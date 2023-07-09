@@ -1,11 +1,12 @@
 from __future__ import annotations
 from typing import Callable, Optional, Union, TYPE_CHECKING
+from typing_extensions import Self
 
-from ..card import cards as cds
 from ..character import character as chr
 from ..status import statuses as sts
 from ..support import support as sp
 
+from ..card.cards import Cards
 from ..character.characters import Characters
 from ..dices import ActualDices
 from ..summon.summons import Summons
@@ -20,6 +21,7 @@ __all__ = [
     "PlayerState",
 ]
 
+
 class PlayerState:
     def __init__(
         self,
@@ -31,10 +33,10 @@ class PlayerState:
         card_redraw_chances: int,
         dice_reroll_chances: int,
         dices: ActualDices,
-        hand_cards: cds.Cards,
-        deck_cards: cds.Cards,
-        publicly_used_cards: cds.Cards,
-        publicly_gained_cards: cds.Cards,
+        hand_cards: Cards,
+        deck_cards: Cards,
+        publicly_used_cards: Cards,
+        publicly_gained_cards: Cards,
     ):
         # REMINDER: don't forget to update factory when adding new fields
         self._phase = phase
@@ -77,16 +79,16 @@ class PlayerState:
     def get_dices(self) -> ActualDices:
         return self._dices
 
-    def get_hand_cards(self) -> cds.Cards:
+    def get_hand_cards(self) -> Cards:
         return self._hand_cards
 
-    def get_deck_cards(self) -> cds.Cards:
+    def get_deck_cards(self) -> Cards:
         return self._deck_cards
 
-    def get_publicly_used_cards(self) -> cds.Cards:
+    def get_publicly_used_cards(self) -> Cards:
         return self._publicly_used_cards
 
-    def get_publicly_gained_cards(self) -> cds.Cards:
+    def get_publicly_gained_cards(self) -> Cards:
         return self._publicly_gained_cards
 
     def get_active_character(self) -> Optional[chr.Character]:
@@ -126,11 +128,11 @@ class PlayerState:
             lambda dcs: dcs.hide_all()
         ).build()
 
-    @staticmethod
-    def examplePlayer(mode: Mode):
+    @classmethod
+    def example_player(cls, mode: Mode) -> Self:
         cards = mode.all_cards()
         chars = mode.all_chars()
-        return PlayerState(
+        return cls(
             phase=ACT.PASSIVE_WAIT_PHASE,
             card_redraw_chances=0,
             dice_reroll_chances=0,
@@ -141,10 +143,27 @@ class PlayerState:
             summons=Summons((), mode.summons_limit()),
             supports=Supports((), mode.supports_limit()),
             dices=ActualDices({}),
-            hand_cards=cds.Cards({}),
-            deck_cards=cds.Cards(dict([(card, mode.max_cards_per_kind()) for card in cards])),
-            publicly_used_cards=cds.Cards({}),
-            publicly_gained_cards=cds.Cards({}),
+            hand_cards=Cards({}),
+            deck_cards=Cards(dict([(card, mode.max_cards_per_kind()) for card in cards])),
+            publicly_used_cards=Cards({}),
+            publicly_gained_cards=Cards({}),
+        )
+
+    @classmethod
+    def from_deck(cls, mode: Mode, characters: Characters, cards: Cards) -> Self:
+        return cls(
+            phase=ACT.PASSIVE_WAIT_PHASE,
+            card_redraw_chances=0,
+            dice_reroll_chances=0,
+            characters=characters,
+            combat_statuses=sts.Statuses(()),
+            summons=Summons((), mode.summons_limit()),
+            supports=Supports((), mode.supports_limit()),
+            dices=ActualDices({}),
+            hand_cards=Cards({}),
+            deck_cards=cards,
+            publicly_used_cards=Cards({}),
+            publicly_gained_cards=Cards({}),
         )
 
     def _all_unique_data(self) -> tuple:
@@ -253,32 +272,32 @@ class PlayerStateFactory:
     def f_dices(self, f: Callable[[ActualDices], ActualDices]) -> PlayerStateFactory:
         return self.dices(f(self._dices))
 
-    def hand_cards(self, cards: cds.Cards) -> PlayerStateFactory:
+    def hand_cards(self, cards: Cards) -> PlayerStateFactory:
         self._hand_cards = cards
         return self
 
-    def f_hand_cards(self, f: Callable[[cds.Cards], cds.Cards]) -> PlayerStateFactory:
+    def f_hand_cards(self, f: Callable[[Cards], Cards]) -> PlayerStateFactory:
         return self.hand_cards(f(self._hand_cards))
 
-    def deck_cards(self, cards: cds.Cards) -> PlayerStateFactory:
+    def deck_cards(self, cards: Cards) -> PlayerStateFactory:
         self._deck_cards = cards
         return self
 
-    def f_deck_cards(self, f: Callable[[cds.Cards], cds.Cards]) -> PlayerStateFactory:
+    def f_deck_cards(self, f: Callable[[Cards], Cards]) -> PlayerStateFactory:
         return self.deck_cards(f(self._deck_cards))
 
-    def publicly_used_cards(self, cards: cds.Cards) -> PlayerStateFactory:
+    def publicly_used_cards(self, cards: Cards) -> PlayerStateFactory:
         self._publicly_used_cards = cards
         return self
 
-    def f_publicly_used_cards(self, f: Callable[[cds.Cards], cds.Cards]) -> PlayerStateFactory:
+    def f_publicly_used_cards(self, f: Callable[[Cards], Cards]) -> PlayerStateFactory:
         return self.publicly_used_cards(f(self._publicly_used_cards))
 
-    def publicly_gained_cards(self, cards: cds.Cards) -> PlayerStateFactory:
+    def publicly_gained_cards(self, cards: Cards) -> PlayerStateFactory:
         self._publicly_gained_cards = cards
         return self
 
-    def f_publicly_gained_cards(self, f: Callable[[cds.Cards], cds.Cards]) -> PlayerStateFactory:
+    def f_publicly_gained_cards(self, f: Callable[[Cards], Cards]) -> PlayerStateFactory:
         return self.publicly_gained_cards(f(self._publicly_gained_cards))
 
     def build(self) -> PlayerState:

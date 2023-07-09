@@ -21,7 +21,7 @@ def auto_step(game_state: GameState, observe: bool = False) -> GameState:
         while gsm.get_game_state().waiting_for() is None:
             gsm.one_step()
             print(GamePrinter.dict_game_printer(gsm.get_game_state().dict_str()))
-            input(">>> ")
+            input(":> ")
     return gsm.get_game_state()
 
 

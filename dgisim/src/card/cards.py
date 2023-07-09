@@ -17,8 +17,8 @@ class Cards:
     """
     A container for easy management of cards.
     """
-    def __init__(self, mapping: dict[type[Card], int]) -> None:
-        self._cards = HashableDict.from_dict(mapping)
+    def __init__(self, cards: dict[type[Card], int]) -> None:
+        self._cards = HashableDict.from_dict(cards)
 
     @classmethod
     def from_empty(cls) -> Cards:
