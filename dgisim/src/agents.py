@@ -62,7 +62,7 @@ class LazyAgent(PlayerAgent):
         elif isinstance(curr_phase, ActionPhase):
             return EndRoundAction()
 
-        else:
+        else:  # pragma: no cover
             raise Exception("No Action Defined")
 
 
@@ -184,7 +184,7 @@ class RandomAgent(PlayerAgent):
         elif isinstance(curr_phase, StartingHandSelectPhase):
             return self._starting_hand_select_phase(history, pid)
         elif isinstance(curr_phase, RollPhase):
-            return self._starting_hand_select_phase(history, pid)
+            return self._roll_phase(history, pid)
         elif isinstance(curr_phase, ActionPhase):
             return self._action_phase(history, pid)
         elif isinstance(curr_phase, EndPhase):
@@ -196,7 +196,7 @@ class RandomAgent(PlayerAgent):
 _T = TypeVar("_T")
 
 
-class CustomChoiceAgent(RandomAgent):
+class CustomChoiceAgent(RandomAgent):  # pragma: no cover
     """
     A player agent used by CLI, it requires several Callables passed in, in order
     to make a decision.

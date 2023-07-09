@@ -208,7 +208,7 @@ class ElemTuningActGenGenerator(ABC):
                 if elem is not Element.OMNI and elem is not active_character.element()
             )
 
-        raise Exception(
+        raise Exception(  # pragma: no cover
             "Not Reached! Should be called when there is something to fill. action_generator:\n"
             + f"{action_generator}"
         )
@@ -237,7 +237,7 @@ class ElemTuningActGenGenerator(ABC):
                 action=replace(action, dice_elem=player_choice)
             )
 
-        raise Exception("Not Reached!")
+        raise Exception("Not Reached")
 
     @classmethod
     def action_generator(
@@ -292,7 +292,7 @@ class SkillActGenGenerator(ABC):
             _, dices = retval
             return dices
 
-        raise Exception(
+        raise Exception(  # pragma: no cover
             "Not Reached! Should be called when there is something to fill. action_generator:\n"
             + f"{action_generator}"
         )
@@ -330,7 +330,7 @@ class SkillActGenGenerator(ABC):
                 instruction=replace(instruction, dices=player_choice),
             )
 
-        raise Exception("Not Reached!")
+        raise Exception("Not Reached")
 
     @classmethod
     def action_generator(
@@ -399,7 +399,7 @@ class SwapActGenGenerator(ABC):
             assert dices_cost is not None
             return dices_cost
 
-        raise Exception(
+        raise Exception(  # pragma: no cover
             "Not Reached! Should be called when there is something to fill. action_generator:\n"
             + f"{action_generator}"
         )
@@ -432,7 +432,7 @@ class SwapActGenGenerator(ABC):
                 instruction=replace(instruction, dices=player_choice),
             )
 
-        raise Exception("Not Reached!")
+        raise Exception("Not Reached")
 
     @classmethod
     def action_generator(

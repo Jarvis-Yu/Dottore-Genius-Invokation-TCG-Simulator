@@ -227,7 +227,7 @@ class ActualDices(Dices):
                 omni = requirement[elem]
             elif elem is Element.ANY:
                 any = requirement[elem]
-            else:
+            else:  # pragma: no cover
                 raise Exception("Unknown element")
         if len(pures) > 0:
             for elem in pures:

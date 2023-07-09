@@ -1,0 +1,15 @@
+[run]
+omit =
+    dgisim/profiles/*
+    dgisim/src/cli.py
+
+[report]
+exclude_also =
+    def __repr__
+    def __str__
+    def dict_str
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    raise NotImplementedError
+    raise Exception\(.Not Reached
+    @abstractmethod
