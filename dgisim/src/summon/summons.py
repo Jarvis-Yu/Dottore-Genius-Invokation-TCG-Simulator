@@ -23,7 +23,7 @@ class Summons:
     def get_summons(self) -> tuple[Summon, ...]:
         return self._summons
 
-    def find(self, summon_type: type[Summon]) -> Optional[Summon]:
+    def find(self, summon_type: type[Summon]) -> None | Summon:
         return next((s for s in self._summons if type(s) is summon_type), None)
 
     def just_find(self, summon_type: type[Summon]) -> Summon:
@@ -57,10 +57,10 @@ class Summons:
     def full(self) -> bool:
         return len(self) == self._max_num
 
-    def contains(self, summon_type: Union[type[Summon], Summon]) -> bool:
+    def contains(self, summon_type: type[Summon] | Summon) -> bool:
         return any(type(s) is summon_type for s in self._summons)
 
-    def __contains__(self, summon_type: Union[type[Summon], Summon]) -> bool:
+    def __contains__(self, summon_type: type[Summon] | Summon) -> bool:
         return self.contains(summon_type)
 
     def __iter__(self) -> Iterator[Summon]:

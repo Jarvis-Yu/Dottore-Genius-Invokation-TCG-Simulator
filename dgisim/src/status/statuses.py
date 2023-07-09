@@ -47,7 +47,7 @@ class Statuses:
     def contains(self, status: type[stt.Status]) -> bool:
         return any(type(b) is status for b in self._statuses)
 
-    def find(self, status: type[stt.Status]) -> Optional[stt.Status]:
+    def find(self, status: type[stt.Status]) -> None | stt.Status:
         return next((bf for bf in self._statuses if type(bf) is status), None)
 
     def just_find(self, status: type[_U]) -> _U:

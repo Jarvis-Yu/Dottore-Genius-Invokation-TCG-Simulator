@@ -296,7 +296,7 @@ class Status:
     def same_type_as(self, status: Status) -> bool:
         return type(self) == type(status)
 
-    def update(self, other: Self) -> Optional[Self]:
+    def update(self, other: Self) -> None | Self:
         new_self = self._update(other)
         return self._post_update(new_self)
 

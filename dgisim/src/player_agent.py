@@ -1,4 +1,5 @@
 from __future__ import annotations
+from abc import abstractmethod
 from typing import TYPE_CHECKING
 
 from .action.action import PlayerAction
@@ -19,5 +20,6 @@ class PlayerAgent:
     A player agent is what that is accepted by GameStateMachine as a player to
     interact with the game.
     """
+    @abstractmethod
     def choose_action(self, history: list[GameState], pid: Pid) -> PlayerAction:
-        return PlayerAction()
+        pass

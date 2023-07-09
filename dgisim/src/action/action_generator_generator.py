@@ -1,6 +1,6 @@
 """
 This file contains method classes that provide an optional ActionGenerator of a
-particular type based on the GameState and PID passed in.
+particular type based on the GameState and Pid passed in.
 """
 from __future__ import annotations
 from abc import ABC

@@ -82,9 +82,12 @@ class Cards:
         return self - {card: 1}
 
     def remove_all(self, card: type[Card]) -> Cards:
-        assert card in self._cards
-        assert self._cards[card] >= 1
-        return self - {card: self._cards[card]}
+        if self._cards[card] >= 1:
+            return self - {card: self._cards[card]}
+        else:
+            # if the card doesn't exist, even though there might be OmniCards
+            # but we don't know how many to remove, so nothing is removed
+            return self
 
     def hide_all(self) -> Cards:
         from .card import OmniCard

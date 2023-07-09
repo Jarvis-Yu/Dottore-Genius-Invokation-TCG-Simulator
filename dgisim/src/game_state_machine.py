@@ -199,5 +199,5 @@ class GameStateMachine:
     def game_end(self) -> bool:
         return self._game_state.game_end()
 
-    def get_winner(self) -> Optional[Pid]:
+    def get_winner(self) -> None | Pid:
         return self._game_state.get_winner()

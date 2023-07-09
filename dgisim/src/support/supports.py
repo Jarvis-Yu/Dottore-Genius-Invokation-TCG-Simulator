@@ -87,7 +87,7 @@ class Supports:
             if s.sid == sid
         ), self._max_num)
 
-    def is_full(self) -> bool:
+    def full(self) -> bool:
         return len(self) == self._max_num
 
     def contains_exactly(self, support_type: type[Support], sid: int) -> bool:

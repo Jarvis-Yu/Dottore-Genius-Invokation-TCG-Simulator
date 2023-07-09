@@ -499,6 +499,7 @@ class ForwardSwapCharacterEffect(DirectEffect):
         ordered_chars = characters.get_character_in_activity_order()
         next_char: Optional[chr.Character] = None
         for char in ordered_chars[1:] + ordered_chars[:1]:
+            assert isinstance(char, chr.Character)
             if char.alive():
                 next_char = char
                 break
@@ -507,7 +508,9 @@ class ForwardSwapCharacterEffect(DirectEffect):
         return game_state.factory().f_player(
             self.target_player,
             lambda p: p.factory().f_characters(
-                lambda cs: cs.factory().active_character_id(next_char.get_id()).build()
+                lambda cs: cs.factory().active_character_id(
+                    next_char.get_id()  # type: ignore
+                ).build()
             ).build()
         ).build()
 
@@ -590,7 +593,7 @@ class SpecificDamageEffect(DirectEffect):
                 just(game_state.belongs_to(target_char)),
                 lambda p: p.factory().f_characters(
                     lambda cs: cs.factory().character(
-                        target_char.factory().elemental_aura(new_aura).build()
+                        target_char.factory().elemental_aura(new_aura).build()  # type: ignore
                     ).build()
                 ).build()
             ).build()
@@ -726,7 +729,7 @@ class SpecificDamageEffect(DirectEffect):
         return game_state.factory().f_player(
             pid,
             lambda p: p.factory().f_characters(
-                lambda cs: cs.factory().character(target).build()
+                lambda cs: cs.factory().character(target).build()  # type: ignore
             ).build()
         ).f_effect_stack(
             lambda es: es.push_many_fl(effects)
@@ -857,7 +860,7 @@ class RecoverHPEffect(DirectEffect):
             self.target.pid,
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().f_character(
-                    character.get_id(),
+                    character.get_id(),  # type: ignore
                     lambda c: c.factory().hp(hp).build()
                 ).build()
             ).build()
@@ -962,7 +965,7 @@ class AddCharacterStatusEffect(DirectEffect):
         return game_state.factory().f_player(
             self.target.pid,
             lambda p: p.factory().f_characters(
-                lambda cs: cs.factory().character(character).build()
+                lambda cs: cs.factory().character(character).build()  # type: ignore
             ).build()
         ).build()
 
@@ -1020,7 +1023,7 @@ class UpdateCharacterStatusEffect(DirectEffect):
         return game_state.factory().f_player(
             self.target.pid,
             lambda p: p.factory().f_characters(
-                lambda cs: cs.factory().character(character).build()
+                lambda cs: cs.factory().character(character).build()  # type: ignore
             ).build()
         ).build()
 
@@ -1048,7 +1051,7 @@ class OverrideCharacterStatusEffect(DirectEffect):
         return game_state.factory().f_player(
             self.target.pid,
             lambda p: p.factory().f_characters(
-                lambda cs: cs.factory().character(character).build()
+                lambda cs: cs.factory().character(character).build()  # type: ignore
             ).build()
         ).build()
 

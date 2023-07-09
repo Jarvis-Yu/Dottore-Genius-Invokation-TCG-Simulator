@@ -1193,7 +1193,7 @@ Please choose id (0-3)
 ----------------------------------------------------------------------
 <Effects>
 ======================================================================
-#### Player2 Action: <MintyMeatRolls, StaticTargetInstruction:(dices=[('OMNI', '1')], target=StaticTarget(pid=<PID.P2: 2>, zone=<ZONE.CHARACTERS: 'Characters'>, id=1))>
+#### Player2 Action: <MintyMeatRolls, StaticTargetInstruction:(dices=[('OMNI', '1')], target=StaticTarget(pid=<Pid.P2: 2>, zone=<ZONE.CHARACTERS: 'Characters'>, id=1))>
 
 :> 
 <Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>

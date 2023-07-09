@@ -9,7 +9,7 @@ __all__ = [
 ]
 
 class Characters:
-    def __init__(self, characters: tuple[Character, ...], active_character_id: Optional[int]):
+    def __init__(self, characters: tuple[Character, ...], active_character_id: None | int):
         self._characters = characters
         self._active_character_id = active_character_id
 
@@ -30,7 +30,7 @@ class Characters:
     def get_characters(self) -> tuple[Character, ...]:
         return self._characters
 
-    def get_active_character_id(self) -> Optional[int]:
+    def get_active_character_id(self) -> None | int:
         return self._active_character_id
 
     def get_character_in_activity_order(self) -> tuple[Character, ...]:
@@ -46,7 +46,7 @@ class Characters:
             if char.get_id() != self.get_active_character_id()
         )
 
-    def get_character(self, id: int) -> Optional[Character]:
+    def get_character(self, id: int) -> None | Character:
         for character in self._characters:
             if id == character.get_id():
                 return character
@@ -64,7 +64,7 @@ class Characters:
             None
         )
 
-    def get_active_character(self) -> Optional[Character]:
+    def get_active_character(self) -> None | Character:
         if self._active_character_id is None:
             return None
         return self.get_character(self._active_character_id)
@@ -122,7 +122,7 @@ class Characters:
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Characters):
             return False
-        return self._all_unique_data() == other._all_unique_data()
+        return self is other or self._all_unique_data() == other._all_unique_data()
 
     def __hash__(self) -> int:
         return hash(self._all_unique_data())

@@ -43,7 +43,7 @@ def oppo_aura_elem(game_state: GameState, elem: Element, char_id: None | int = N
         return game_state.factory().f_player2(
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().f_character(
-                    char_id,
+                    char_id,  # type: ignore
                     lambda ac: ac.factory().elemental_aura(
                         ElementalAura.from_default().add(elem)
                     ).build()

@@ -95,5 +95,5 @@ class TestNorthernSmokedChicken(unittest.TestCase):
         game_state = auto_step(game_state)
         self.assertRaises(
             Exception,
-            lambda: game_state.action_step(Pid.P2, normal_attack_action)
+            lambda: game_state.action_step(Pid.P2, normal_attack_action)  # type: ignore
         )

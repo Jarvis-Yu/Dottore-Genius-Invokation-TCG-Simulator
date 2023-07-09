@@ -97,16 +97,16 @@ class PlayerState:
     def just_get_active_character(self) -> chr.Character:
         return self._characters.just_get_active_character()
 
-    def is_action_phase(self):
+    def is_action_phase(self) -> bool:
         return self._phase is Act.ACTION_PHASE
 
-    def is_passive_wait_phase(self):
+    def is_passive_wait_phase(self) -> bool:
         return self._phase is Act.PASSIVE_WAIT_PHASE
 
-    def is_active_wait_phase(self):
+    def is_active_wait_phase(self) -> bool:
         return self._phase is Act.ACTIVE_WAIT_PHASE
 
-    def is_end_phase(self):
+    def is_end_phase(self) -> bool:
         return self._phase is Act.END_PHASE
 
     def is_mine(self, object: chr.Character | sp.Support) -> bool:

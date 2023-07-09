@@ -443,7 +443,7 @@ class SupportCard(Card):
             instruction: act.Instruction
     ) -> None | gs.GameState:
         supports = game_state.get_player(pid).get_supports()
-        if supports.is_full():
+        if supports.full():
             if not isinstance(instruction, act.StaticTargetInstruction):
                 return None
             target = game_state.get_target(instruction.target)
@@ -549,7 +549,7 @@ class SupportCard(Card):
     ) -> None | acg.ActionGenerator:
         if not cls.strictly_usable(game_state, pid):
             return None
-        if game_state.get_player(pid).get_supports().is_full():
+        if game_state.get_player(pid).get_supports().full():
             return acg.ActionGenerator(
                 game_state=game_state,
                 pid=pid,

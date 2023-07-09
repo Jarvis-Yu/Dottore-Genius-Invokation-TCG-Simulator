@@ -6,7 +6,6 @@ from .. import mode as md
 from ..action import action as act
 from ..action import action_generator as acg
 from ..effect import effect as eft
-from ..phase.default import game_end_phase as gep
 from ..phase import phase as ph
 from ..state import player_state as ps
 
@@ -94,7 +93,7 @@ class GameState:
             effect_stack=EffectStack(()),
         )
 
-    def factory(self):
+    def factory(self) -> GameStateFactory:
         return GameStateFactory(self)
 
     def get_mode(self) -> md.Mode:
@@ -215,7 +214,7 @@ class GameState:
             return None
 
     def game_end(self) -> bool:
-        return isinstance(self._phase, gep.GameEndPhase)
+        return type(self._phase) is type(self._mode.game_end_phase())
 
     def prespective_view(self, pid: Pid) -> GameState:
         return self.factory().f_player(
@@ -235,11 +234,9 @@ class GameState:
         )
 
     def __eq__(self, other: object) -> bool:
-        if self is other:
-            return True
         if not isinstance(other, GameState):
             return False
-        return self._all_unique_data() == other._all_unique_data()
+        return self is other or self._all_unique_data() == other._all_unique_data()
 
     def __hash__(self) -> int:
         return hash(self._all_unique_data())
