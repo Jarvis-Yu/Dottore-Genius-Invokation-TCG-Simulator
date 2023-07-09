@@ -142,6 +142,8 @@ class RollPhase(ph.Phase):
                                 + f"where {action_type_name} is expected")
 
     def action_generator(self, game_state: GameState, pid: Pid) -> ActionGenerator | None:
+        if pid is not self.waiting_for(game_state):
+            return None
         return ActionGenerator(
             game_state=game_state,
             pid=pid,

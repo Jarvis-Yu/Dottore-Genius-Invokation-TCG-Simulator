@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import abstractmethod
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from ..helper.level_print import level_print_single
 
@@ -21,11 +21,15 @@ class Phase:
         raise NotImplementedError
 
     @abstractmethod
-    def step_action(self, game_state: GameState, pid: Pid, action: PlayerAction) -> Optional[
-            GameState]:
+    def step_action(
+        self,
+        game_state: GameState,
+        pid: Pid,
+        action: PlayerAction
+    ) -> None | GameState:
         raise NotImplementedError
 
-    def waiting_for(self, game_state: GameState) -> Optional[Pid]:
+    def waiting_for(self, game_state: GameState) -> None | Pid:
         players = [game_state.get_player1(), game_state.get_player2()]
         for player in players:
             if player.get_phase().is_action_phase():
@@ -37,16 +41,10 @@ class Phase:
         raise NotImplementedError
 
     def __eq__(self, other: object) -> bool:
-        return isinstance(other, Phase)
+        return type(self) is type(other)
 
     def __hash__(self) -> int:
-        return hash(self.__class__.__name__)
-
-    def __str__(self) -> str:
-        return self.to_string(0)
-
-    def to_string(self, indent: int = 0) -> str:
-        return level_print_single(self.__class__.__name__, indent)
+        return hash(type(self))
 
     def dict_str(self) -> dict | str:
         return self.__class__.__name__

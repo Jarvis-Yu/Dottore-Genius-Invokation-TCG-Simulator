@@ -171,6 +171,8 @@ class EndPhase(ph.Phase):
             return None
 
     def action_generator(self, game_state: GameState, pid: Pid) -> ActionGenerator | None:
+        if pid is not self.waiting_for(game_state):
+            return None
         assert game_state.death_swapping(pid)
         from ...action.action_generator_generator import SwapActGenGenerator
         return SwapActGenGenerator.action_generator(game_state, pid)
