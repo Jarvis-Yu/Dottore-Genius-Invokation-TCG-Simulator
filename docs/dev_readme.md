@@ -17,13 +17,13 @@
 4. If you don't know how to setup `venv`, google it or run the following
    commands under the project directory
 
-```sh
+```
 source ./scripts/sh/venv.sh
 ```
 
 5. With the environment set up, you may have a try with CLI by running:
 
-```sh
+```
 ./scripts/sh/cli.sh
 ```
 

@@ -13,9 +13,12 @@ Basic rules of Genius Invokation TCG can be found [here](https://genshin-impact.
 
 Make sure your Python version `>= 3.10`.
 
-```shell
+```
 pip install dgisim
 ```
+
+You may check [wiki](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/wiki)
+for more information on the package.
 
 Note that this is a developing project and the final API to users is not set in stone.
 So you may play with it, but using it in production is not recommended at the current stage.
