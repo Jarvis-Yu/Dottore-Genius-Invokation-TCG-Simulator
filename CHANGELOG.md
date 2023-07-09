@@ -1,5 +1,11 @@
 # Change Log
 
+## v0.2.dev2
+
+### Updated
+
+- minor API change
+
 ## v0.2.dev1
 
 ### Added
