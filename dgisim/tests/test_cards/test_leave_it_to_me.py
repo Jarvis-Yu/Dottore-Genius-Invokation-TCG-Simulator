@@ -18,7 +18,7 @@ class TestLeaveItToMe(unittest.TestCase):
         )
         self.assertRaises(
             Exception,
-            lambda: base_game.action_step(PID.P1, card_action)
+            lambda: base_game.action_step(Pid.P1, card_action)
         )
 
         # test giving right num of dices
@@ -26,7 +26,7 @@ class TestLeaveItToMe(unittest.TestCase):
             card=LeaveItToMe,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 0})),
         )
-        game_state = base_game.action_step(PID.P1, card_action)
+        game_state = base_game.action_step(Pid.P1, card_action)
         assert game_state is not None
         buffed_game_state = auto_step(game_state)
 
@@ -41,7 +41,7 @@ class TestLeaveItToMe(unittest.TestCase):
         )
         self.assertRaises(
             Exception,
-            lambda: buffed_game_state.action_step(PID.P1, swap_action)
+            lambda: buffed_game_state.action_step(Pid.P1, swap_action)
         )
 
         # test swap with no dices
@@ -49,23 +49,23 @@ class TestLeaveItToMe(unittest.TestCase):
             char_id=3,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1}))
         )
-        game_state = buffed_game_state.action_step(PID.P1, swap_action)
+        game_state = buffed_game_state.action_step(Pid.P1, swap_action)
         assert game_state is not None
         game_state = auto_step(game_state)
 
         self.assertFalse(
             game_state.get_player1().get_combat_statuses().contains(LeaveItToMeStatus)
         )
-        self.assertEqual(game_state.get_active_player_id(), PID.P1)
+        self.assertEqual(game_state.get_active_player_id(), Pid.P1)
 
         # test opponent cannot use this
-        game_state = buffed_game_state.action_step(PID.P1, SkillAction(
+        game_state = buffed_game_state.action_step(Pid.P1, SkillAction(
             skill=CharacterSkill.NORMAL_ATTACK,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
         ))
         assert game_state is not None
         game_state = auto_step(game_state)
-        game_state = game_state.action_step(PID.P2, swap_action)
+        game_state = game_state.action_step(Pid.P2, swap_action)
         assert game_state is not None
         game_state = auto_step(game_state)
-        self.assertEqual(game_state.get_active_player_id(), PID.P1)
+        self.assertEqual(game_state.get_active_player_id(), Pid.P1)

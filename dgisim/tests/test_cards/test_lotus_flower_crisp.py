@@ -18,7 +18,7 @@ class TestLotusFlowerCrisps(unittest.TestCase):
         )
         self.assertRaises(
             Exception,
-            lambda: base_game.action_step(PID.P1, card_action)
+            lambda: base_game.action_step(Pid.P1, card_action)
         )
 
         # test giving right num of dices
@@ -27,13 +27,13 @@ class TestLotusFlowerCrisps(unittest.TestCase):
             instruction=StaticTargetInstruction(
                 dices=ActualDices({Element.OMNI: 1}),
                 target=StaticTarget(
-                    pid=PID.P1,
-                    zone=ZONE.CHARACTERS,
+                    pid=Pid.P1,
+                    zone=Zone.CHARACTERS,
                     id=1,
                 )
             ),
         )
-        game_state = base_game.action_step(PID.P1, card_action)
+        game_state = base_game.action_step(Pid.P1, card_action)
         assert game_state is not None
         buffed_game_state = auto_step(game_state)
 
@@ -52,12 +52,12 @@ class TestLotusFlowerCrisps(unittest.TestCase):
         )
 
         # test when shield takes 4 damage
-        low_health_game_state = kill_character(buffed_game_state, 1, pid=PID.P1, hp=5)
+        low_health_game_state = kill_character(buffed_game_state, 1, pid=Pid.P1, hp=5)
         game_state = add_damage_effect(
             low_health_game_state,
             4,
             Element.PYRO,
-            pid=PID.P1,
+            pid=Pid.P1,
             char_id=1,
         )
         game_state = auto_step(game_state)
@@ -71,7 +71,7 @@ class TestLotusFlowerCrisps(unittest.TestCase):
             low_health_game_state,
             2,
             Element.PYRO,
-            pid=PID.P1,
+            pid=Pid.P1,
             char_id=1,
         )
         game_state = auto_step(game_state)

@@ -8,7 +8,7 @@ from ...action.action import CardsSelectAction, PlayerAction, EndRoundAction
 from ...action.action_generator import ActionGenerator
 from ...action.enums import ActionType
 from ...helper.quality_of_life import just
-from ...state.enums import PID, ACT
+from ...state.enums import Pid, Act
 
 if TYPE_CHECKING:
     from ...action.types import DecidedChoiceType, GivenChoiceType
@@ -31,14 +31,14 @@ class CardSelectPhase(ph.Phase):
         mode = game_state.get_mode()
         return game_state.factory().f_player1(
             lambda p1: p1.factory()
-            .phase(ACT.ACTION_PHASE)
+            .phase(Act.ACTION_PHASE)
             .card_redraw_chances(game_state.get_mode().card_redraw_chances())
             .deck_cards(p1_deck)
             .hand_cards(p1_hand)
             .build()
         ).f_player2(
             lambda p2: p2.factory()
-            .phase(ACT.ACTION_PHASE)
+            .phase(Act.ACTION_PHASE)
             .card_redraw_chances(game_state.get_mode().card_redraw_chances())
             .deck_cards(p2_deck)
             .hand_cards(p2_hand)
@@ -49,34 +49,34 @@ class CardSelectPhase(ph.Phase):
         return game_state.factory().f_phase(
             lambda mode: mode.starting_hand_select_phase()
         ).f_player1(
-            lambda p1: p1.factory().phase(ACT.PASSIVE_WAIT_PHASE).build()
+            lambda p1: p1.factory().phase(Act.PASSIVE_WAIT_PHASE).build()
         ).f_player2(
-            lambda p2: p2.factory().phase(ACT.PASSIVE_WAIT_PHASE).build()
+            lambda p2: p2.factory().phase(Act.PASSIVE_WAIT_PHASE).build()
         ).build()
 
     def step(self, game_state: GameState) -> GameState:
         p1: PlayerState = game_state.get_player1()
         p2: PlayerState = game_state.get_player2()
         # If both players just entered waiting, assign them cards and make them take actions
-        if p1.get_phase() is ACT.PASSIVE_WAIT_PHASE and p2.get_phase() is ACT.PASSIVE_WAIT_PHASE:
+        if p1.get_phase() is Act.PASSIVE_WAIT_PHASE and p2.get_phase() is Act.PASSIVE_WAIT_PHASE:
             return self._draw_cards_and_activate(game_state)
-        elif p1.get_phase() is ACT.END_PHASE and p2.get_phase() is ACT.END_PHASE:
+        elif p1.get_phase() is Act.END_PHASE and p2.get_phase() is Act.END_PHASE:
             return self._to_starting_hand_select_phase(game_state)
         else:
             raise Exception("Unknown Game State to process")
 
-    def _handle_card_drawing(self, game_state: GameState, pid: PID, action: CardsSelectAction) -> GameState:
+    def _handle_card_drawing(self, game_state: GameState, pid: Pid, action: CardsSelectAction) -> GameState:
         player: PlayerState = game_state.get_player(pid)
         new_deck, new_cards = player.get_deck_cards().pick_random_cards(action.num_cards())
         new_deck = new_deck + action.selected_cards
         new_hand = player.get_hand_cards() - action.selected_cards
         new_hand = new_hand + new_cards
         new_redraw_chances: int = player.get_card_redraw_chances() - 1
-        new_player_phase: ACT
+        new_player_phase: Act
         if new_redraw_chances > 0:
             new_player_phase = player.get_phase()
         else:
-            new_player_phase = ACT.END_PHASE
+            new_player_phase = Act.END_PHASE
         return game_state.factory().player(
             pid,
             player.factory()
@@ -90,13 +90,13 @@ class CardSelectPhase(ph.Phase):
     def _handle_end_round(
             self,
             game_state: GameState,
-            pid: PID,
+            pid: Pid,
             action: EndRoundAction
     ) -> GameState:
         return game_state.factory().f_player(
             pid,
             lambda p: p.factory()
-            .phase(ACT.END_PHASE)
+            .phase(Act.END_PHASE)
             .card_redraw_chances(0)
             .build()
         ).build()
@@ -104,7 +104,7 @@ class CardSelectPhase(ph.Phase):
     def step_action(
             self,
             game_state: GameState,
-            pid: PID,
+            pid: Pid,
             action: PlayerAction
     ) -> Optional[GameState]:
         if isinstance(action, CardsSelectAction):
@@ -140,7 +140,7 @@ class CardSelectPhase(ph.Phase):
                 raise TypeError(f"Unexpected player choice {player_choice} where"
                                 + f"where {action_type_name} is expected")
 
-    def action_generator(self, game_state: GameState, pid: PID) -> ActionGenerator | None:
+    def action_generator(self, game_state: GameState, pid: Pid) -> ActionGenerator | None:
         return ActionGenerator(
             game_state=game_state,
             pid=pid,

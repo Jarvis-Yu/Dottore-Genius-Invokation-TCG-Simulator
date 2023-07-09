@@ -6,7 +6,7 @@ from dgisim.src.summon.summon import Summon
 
 if TYPE_CHECKING:
     from dgisim.src.effect.effect import Effect
-    from dgisim.src.effect.enums import TRIGGERING_SIGNAL
+    from dgisim.src.effect.enums import TriggeringSignal
     from dgisim.src.effect.structs import StaticTarget
 
 
@@ -17,6 +17,6 @@ class TestSummon(Summon):
     def _react_to_signal(
             self,
             source: StaticTarget,
-            signal: TRIGGERING_SIGNAL
+            signal: TriggeringSignal
     ) -> tuple[list[Effect], None | TestSummon]:
         return [], self

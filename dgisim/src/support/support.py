@@ -21,10 +21,10 @@ from ..effect import effect as eft
 from ..event import CardEvent
 from ..status import status as stt
 
-from ..effect.enums import TRIGGERING_SIGNAL
+from ..effect.enums import TriggeringSignal
 from ..element import Element
 from ..helper.quality_of_life import BIG_INT
-from ..status.enums import PREPROCESSABLES
+from ..status.enums import Preprocessables
 
 if TYPE_CHECKING:
     from ..state.game_state import GameState
@@ -64,9 +64,9 @@ class XudongSupport(Support):
             game_state: GameState,
             status_source: StaticTarget,
             item: Preprocessable,
-            signal: PREPROCESSABLES,
+            signal: Preprocessables,
     ) -> tuple[Preprocessable, None | Self]:
-        if signal is PREPROCESSABLES.CARD:
+        if signal is Preprocessables.CARD:
             assert isinstance(item, CardEvent)
             if item.pid is status_source.pid \
                     and issubclass(item.card_type, cd.FoodCard) \
@@ -86,9 +86,9 @@ class XudongSupport(Support):
 
     @override
     def _react_to_signal(
-            self, source: StaticTarget, signal: TRIGGERING_SIGNAL
+            self, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TRIGGERING_SIGNAL.ROUND_END:
+        if signal is TriggeringSignal.ROUND_END:
             return [], type(self)(sid=self.sid)
         return [], self
 

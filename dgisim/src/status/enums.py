@@ -2,11 +2,11 @@ from __future__ import annotations
 from enum import Enum
 
 __all__ = [
-    "PREPROCESSABLES",
+    "Preprocessables",
 ]
 
 
-class PREPROCESSABLES(Enum):
+class Preprocessables(Enum):
     """ PreProcessType """
     # Swap
     SWAP = "Swap"                 # To determine if swap needs to cost more or less,

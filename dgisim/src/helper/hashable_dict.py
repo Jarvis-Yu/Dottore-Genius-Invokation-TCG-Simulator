@@ -32,6 +32,7 @@ class HashableDict(dict):
         from_dict() is preferred when trying to copy a HashableDict than __init__().
         """
         super().__init__(*args, **kwargs)
+        self._frozen_set: None | frozenset = None
         self._frozen = frozen
 
     def freeze(self) -> None:
@@ -88,11 +89,38 @@ class HashableDict(dict):
             [(key, self.get(key, 0) - other.get(key, 0)) for key in keys]
         )
 
+    def _to_frozen_set(self) -> frozenset:
+        if self._frozen:
+            if self._frozen_set is None:
+                object.__setattr__(
+                    self,
+                    "_frozen_set",
+                    frozenset(
+                        item
+                        for item in self.items()
+                        if item[1] != 0
+                    ),
+                )
+            assert self._frozen_set is not None
+            return self._frozen_set
+        else:
+            self._frozen_set = None
+            return frozenset(
+                item
+                for item in self.items()
+                if item[1] != 0
+            )
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, HashableDict):
+            return False
+        return self is other or self._to_frozen_set() == other._to_frozen_set()
+
     def __hash__(self) -> int:  # type: ignore
         """ Exception is raised if the HashableDict is not frozen. """
         if not self.frozen():
             raise Exception("Calling __hash__() to a non-frozen HashableDict!")
-        return hash(frozenset(self.items()))
+        return hash(self._to_frozen_set())
 
     def all_val_non_negative(self) -> bool:
         return all(val >= 0 for val in self.values())

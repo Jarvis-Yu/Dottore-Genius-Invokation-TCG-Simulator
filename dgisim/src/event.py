@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from .card.card import Card
     from .effect.structs import StaticTarget
     from .dices import AbstractDices
-    from .state.enums import PID
+    from .state.enums import Pid
 
 __all__ = [
     "CardEvent",
@@ -40,6 +40,6 @@ class GameEvent:
 
 @dataclass(frozen=True, kw_only=True)
 class CardEvent:
-    pid: PID
+    pid: Pid
     card_type: type[Card]
     dices_cost: AbstractDices

@@ -12,7 +12,7 @@ from ..dices import ActualDices
 from ..summon.summons import Summons
 from ..support.supports import Supports
 
-from .enums import ACT
+from .enums import Act
 
 if TYPE_CHECKING:
     from ..mode import Mode
@@ -25,7 +25,7 @@ __all__ = [
 class PlayerState:
     def __init__(
         self,
-        phase: ACT,
+        phase: Act,
         characters: Characters,
         combat_statuses: sts.Statuses,
         summons: Summons,
@@ -55,7 +55,7 @@ class PlayerState:
     def factory(self) -> PlayerStateFactory:
         return PlayerStateFactory(self)
 
-    def get_phase(self) -> ACT:
+    def get_phase(self) -> Act:
         return self._phase
 
     def get_card_redraw_chances(self) -> int:
@@ -98,16 +98,16 @@ class PlayerState:
         return self._characters.just_get_active_character()
 
     def is_action_phase(self):
-        return self._phase is ACT.ACTION_PHASE
+        return self._phase is Act.ACTION_PHASE
 
     def is_passive_wait_phase(self):
-        return self._phase is ACT.PASSIVE_WAIT_PHASE
+        return self._phase is Act.PASSIVE_WAIT_PHASE
 
     def is_active_wait_phase(self):
-        return self._phase is ACT.ACTIVE_WAIT_PHASE
+        return self._phase is Act.ACTIVE_WAIT_PHASE
 
     def is_end_phase(self):
-        return self._phase is ACT.END_PHASE
+        return self._phase is Act.END_PHASE
 
     def is_mine(self, object: chr.Character | sp.Support) -> bool:
         if isinstance(object, chr.Character):
@@ -133,7 +133,7 @@ class PlayerState:
         cards = mode.all_cards()
         chars = mode.all_chars()
         return cls(
-            phase=ACT.PASSIVE_WAIT_PHASE,
+            phase=Act.PASSIVE_WAIT_PHASE,
             card_redraw_chances=0,
             dice_reroll_chances=0,
             characters=Characters.from_default(
@@ -152,7 +152,7 @@ class PlayerState:
     @classmethod
     def from_deck(cls, mode: Mode, characters: Characters, cards: Cards) -> Self:
         return cls(
-            phase=ACT.PASSIVE_WAIT_PHASE,
+            phase=Act.PASSIVE_WAIT_PHASE,
             card_redraw_chances=0,
             dice_reroll_chances=0,
             characters=characters,
@@ -218,7 +218,7 @@ class PlayerStateFactory:
         self._publicly_used_cards = player_state.get_publicly_used_cards()
         self._publicly_gained_cards = player_state.get_publicly_gained_cards()
 
-    def phase(self, phase: ACT) -> PlayerStateFactory:
+    def phase(self, phase: Act) -> PlayerStateFactory:
         self._phase = phase
         return self
 

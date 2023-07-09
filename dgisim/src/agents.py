@@ -18,7 +18,7 @@ from .phase.default.end_phase import EndPhase
 from .phase.default.roll_phase import RollPhase
 from .phase.default.starting_hand_select_phase import StartingHandSelectPhase
 from .player_agent import PlayerAgent
-from .state.enums import PID
+from .state.enums import Pid
 from .state.game_state import GameState
 
 
@@ -44,7 +44,7 @@ class LazyAgent(PlayerAgent):
     """
     _NUM_PICKED_CARDS = 3
 
-    def choose_action(self, history: list[GameState], pid: PID) -> PlayerAction:
+    def choose_action(self, history: list[GameState], pid: Pid) -> PlayerAction:
         game_state = history[-1]
         curr_phase = game_state.get_phase()
 
@@ -89,7 +89,7 @@ class PuppetAgent(PlayerAgent):
     def inject_actions(self, actions: list[PlayerAction]) -> None:
         self._actions += actions
 
-    def choose_action(self, history: list[GameState], pid: PID) -> PlayerAction:
+    def choose_action(self, history: list[GameState], pid: Pid) -> PlayerAction:
         assert self._actions, f"no action at game state:\b{history[-1]}"
         return self._actions.pop(0)
 
@@ -106,7 +106,7 @@ class RandomAgent(PlayerAgent):
     """
     _NUM_PICKED_CARDS = 3
 
-    def _card_select_phase(self, history: list[GameState], pid: PID) -> PlayerAction:
+    def _card_select_phase(self, history: list[GameState], pid: Pid) -> PlayerAction:
         game_state = history[-1]
         phase = game_state.get_phase()
         act_gen = phase.action_generator(game_state, pid)
@@ -117,7 +117,7 @@ class RandomAgent(PlayerAgent):
     def _starting_hand_select_phase(
             self,
             history: list[GameState],
-            pid: PID
+            pid: Pid
     ) -> PlayerAction:
         game_state = history[-1]
         phase = game_state.get_phase()
@@ -126,7 +126,7 @@ class RandomAgent(PlayerAgent):
         player_action = self._random_action_generator_chooser(act_gen)
         return player_action
 
-    def _roll_phase(self, history: list[GameState], pid: PID) -> PlayerAction:
+    def _roll_phase(self, history: list[GameState], pid: Pid) -> PlayerAction:
         game_state = history[-1]
         phase = game_state.get_phase()
         act_gen = phase.action_generator(game_state, pid)
@@ -159,7 +159,7 @@ class RandomAgent(PlayerAgent):
                 raise NotImplementedError
         return action_generator.generate_action()
 
-    def _action_phase(self, history: list[GameState], pid: PID) -> PlayerAction:
+    def _action_phase(self, history: list[GameState], pid: Pid) -> PlayerAction:
         game_state = history[-1]
         phase = game_state.get_phase()
         act_gen = phase.action_generator(game_state, pid)
@@ -167,7 +167,7 @@ class RandomAgent(PlayerAgent):
         player_action = self._random_action_generator_chooser(act_gen)
         return player_action
 
-    def _end_phase(self, history: list[GameState], pid: PID) -> PlayerAction:
+    def _end_phase(self, history: list[GameState], pid: Pid) -> PlayerAction:
         game_state = history[-1]
         phase = game_state.get_phase()
         act_gen = phase.action_generator(game_state, pid)
@@ -175,7 +175,7 @@ class RandomAgent(PlayerAgent):
         player_action = self._random_action_generator_chooser(act_gen)
         return player_action
 
-    def choose_action(self, history: list[GameState], pid: PID) -> PlayerAction:
+    def choose_action(self, history: list[GameState], pid: Pid) -> PlayerAction:
         game_state = history[-1]
         curr_phase = game_state.get_phase()
 

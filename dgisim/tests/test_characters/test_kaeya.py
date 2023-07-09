@@ -11,7 +11,7 @@ class TestKaeya(unittest.TestCase):
         ).build()
     ).f_player2(
         lambda p: p.factory().phase(
-            ACT.END_PHASE
+            Act.END_PHASE
         ).f_characters(
             lambda cs: cs.factory().active_character_id(
                 3  # make opponenet active characater Keqing
@@ -116,7 +116,7 @@ class TestKaeya(unittest.TestCase):
             card=LightningStiletto,
             instruction=StaticTargetInstruction(
                 dices=ActualDices({Element.OMNI: 3}),
-                target=StaticTarget(PID.P1, ZONE.CHARACTERS, 3),
+                target=StaticTarget(Pid.P1, Zone.CHARACTERS, 3),
             )
         ))
         gsm = GameStateMachine(game_state_p1_move, a1, a2)
@@ -145,10 +145,10 @@ class TestKaeya(unittest.TestCase):
 
         # test self being overloaded
         game_state_p2_move = game_state_p1_move.factory().active_player_id(
-            PID.P2
+            Pid.P2
         ).f_player1(
             lambda p: p.factory().phase(
-                ACT.PASSIVE_WAIT_PHASE
+                Act.PASSIVE_WAIT_PHASE
             ).f_characters(
                 lambda cs: cs.factory().f_active_character(
                     lambda ac: ac.factory().elemental_aura(
@@ -157,7 +157,7 @@ class TestKaeya(unittest.TestCase):
                 ).build()
             ).build()
         ).f_player2(
-            lambda p: p.factory().phase(ACT.ACTION_PHASE).build()
+            lambda p: p.factory().phase(Act.ACTION_PHASE).build()
         ).build()
 
         a2.inject_action(SkillAction(
@@ -216,7 +216,7 @@ class TestKaeya(unittest.TestCase):
         base_game_state = kill_character(
             game_state=self.BASE_GAME,
             character_id=2,
-            pid=PID.P1,
+            pid=Pid.P1,
             hp=initial_hp,
         )
 

@@ -20,12 +20,12 @@ from typing_extensions import override, Self
 from ..effect import effect as eft
 
 from ..character.enums import CharacterSkill
-from ..effect.enums import ZONE, TRIGGERING_SIGNAL, DYNAMIC_CHARACTER_TARGET
+from ..effect.enums import Zone, TriggeringSignal, DynamicCharacterTarget
 from ..effect.structs import StaticTarget, DamageType
 from ..element import Element
 from ..event import EventSpeed, EventType, GameEvent
 from ..helper.quality_of_life import just, BIG_INT, case_val
-from .enums import PREPROCESSABLES
+from .enums import Preprocessables
 
 if TYPE_CHECKING:
     from ..card.card import Card
@@ -88,7 +88,7 @@ class Status:
             game_state: GameState,
             status_source: StaticTarget,
             item: Preprocessable,
-            signal: PREPROCESSABLES,
+            signal: Preprocessables,
     ) -> tuple[Preprocessable, Optional[Self]]:
         """
         Returns the processed Preprocessable and possibly updated or deleted self
@@ -108,7 +108,7 @@ class Status:
             game_state: GameState,
             status_source: StaticTarget,
             item: Preprocessable,
-            signal: PREPROCESSABLES,
+            signal: Preprocessables,
     ) -> tuple[Preprocessable, Optional[Self]]:
         return item, self
 
@@ -117,7 +117,7 @@ class Status:
             game_state: GameState,
             status_source: StaticTarget,
             item: Preprocessable,
-            signal: PREPROCESSABLES,
+            signal: Preprocessables,
             new_item: Preprocessable,
             new_self: Optional[Self],
     ) -> tuple[Preprocessable, Optional[Self]]:
@@ -178,7 +178,7 @@ class Status:
     #     raise Exception("TODO")
 
     def react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TRIGGERING_SIGNAL
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> list[eft.Effect]:
         es, new_status = self._react_to_signal(source, signal)
         es, new_status = self._post_react_to_signal(es, new_status, signal)
@@ -255,12 +255,12 @@ class Status:
                 eft.SwapCharacterCheckerEffect(
                     my_active=StaticTarget(
                         pid=source.pid,
-                        zone=ZONE.CHARACTERS,
+                        zone=Zone.CHARACTERS,
                         id=game_state.get_player(source.pid).just_get_active_character().get_id(),
                     ),
                     oppo_active=StaticTarget(
                         pid=source.pid.other(),
-                        zone=ZONE.CHARACTERS,
+                        zone=Zone.CHARACTERS,
                         id=game_state.get_player(
                             source.pid.other()).just_get_active_character().get_id(),
                     ),
@@ -275,14 +275,14 @@ class Status:
             self,
             effects: list[eft.Effect],
             new_status: Optional[Self],
-            signal: TRIGGERING_SIGNAL,
+            signal: TriggeringSignal,
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         if new_status != self:
             return effects, new_status
         return effects, self
 
     def _react_to_signal(
-            self, source: StaticTarget, signal: TRIGGERING_SIGNAL
+            self, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         """
         Returns a tuple, containg the effects and how to update self
@@ -358,7 +358,7 @@ class _UsageStatus(Status):
             game_state: GameState,
             status_source: StaticTarget,
             item: Preprocessable,
-            signal: PREPROCESSABLES,
+            signal: Preprocessables,
             new_item: Preprocessable,
             new_self: Optional[Self],
     ) -> tuple[Preprocessable, Optional[Self]]:
@@ -395,7 +395,7 @@ class _ShieldStatus(Status):
             game_state: GameState,
             status_source: StaticTarget,
             item: Preprocessable,
-            signal: PREPROCESSABLES,
+            signal: Preprocessables,
     ) -> bool:
         from ..summon import summon as sm
         assert isinstance(item, eft.SpecificDamageEffect)
@@ -407,7 +407,7 @@ class _ShieldStatus(Status):
         elif isinstance(self, CombatStatus):
             attached_active_character = StaticTarget(
                 status_source.pid,
-                zone=ZONE.CHARACTERS,
+                zone=Zone.CHARACTERS,
                 id=game_state.get_player(status_source.pid).just_get_active_character().get_id(),
             )
             return item.target == attached_active_character
@@ -415,7 +415,7 @@ class _ShieldStatus(Status):
         elif isinstance(self, sm.Summon):
             attached_active_character = StaticTarget(
                 status_source.pid,
-                zone=ZONE.CHARACTERS,
+                zone=Zone.CHARACTERS,
                 id=game_state.get_player(status_source.pid).just_get_active_character().get_id(),
             )
             return item.target == attached_active_character
@@ -440,10 +440,10 @@ class FixedShieldStatus(_ShieldStatus, _UsageStatus):
             game_state: GameState,
             status_source: StaticTarget,
             item: Preprocessable,
-            signal: PREPROCESSABLES,
+            signal: Preprocessables,
     ) -> tuple[Preprocessable, Optional[Self]]:
         cls = type(self)
-        if signal is PREPROCESSABLES.DMG_AMOUNT:
+        if signal is Preprocessables.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             if item.damage > 0 and self.usages > 0 \
                     and item.element != Element.PIERCING \
@@ -473,10 +473,10 @@ class StackedShieldStatus(_ShieldStatus, _UsageStatus):
             game_state: GameState,
             status_source: StaticTarget,
             item: Preprocessable,
-            signal: PREPROCESSABLES,
+            signal: Preprocessables,
     ) -> tuple[Preprocessable, Optional[Self]]:
         cls = type(self)
-        if signal is PREPROCESSABLES.DMG_AMOUNT:
+        if signal is Preprocessables.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             assert self.usages <= type(self).MAX_USAGES
             if item.damage > 0 and self.usages > 0 \
@@ -509,15 +509,15 @@ class _InfusionStatus(CharacterStatus, _UsageStatus):
             game_state: GameState,
             status_source: StaticTarget,
             item: Preprocessable,
-            signal: PREPROCESSABLES,
+            signal: Preprocessables,
     ) -> tuple[Preprocessable, Optional[Self]]:
         assert self.ELEMENT is not None
         new_item: Optional[eft.SpecificDamageEffect] = None
         if isinstance(item, eft.SpecificDamageEffect):
-            if signal is PREPROCESSABLES.DMG_ELEMENT:
+            if signal is Preprocessables.DMG_ELEMENT:
                 if self._dmg_element_condition(game_state, status_source, item):
                     new_item = replace(item, element=self.ELEMENT)
-            if signal is PREPROCESSABLES.DMG_AMOUNT:
+            if signal is Preprocessables.DMG_AMOUNT:
                 if self.damage_boost != 0  \
                         and self._dmg_boost_condition(game_state, status_source, item):
                     new_item = replace(item, damage=item.damage + self.damage_boost)
@@ -547,10 +547,10 @@ class _InfusionStatus(CharacterStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, source: StaticTarget, signal: TRIGGERING_SIGNAL
+            self, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         d_usages = 0
-        if signal is TRIGGERING_SIGNAL.ROUND_END:
+        if signal is TriggeringSignal.ROUND_END:
             d_usages = -1
         return [], replace(self, usages=d_usages)
 
@@ -573,9 +573,9 @@ class CatalyzingFieldStatus(CombatStatus):
             game_state: GameState,
             status_source: StaticTarget,
             item: Preprocessable,
-            signal: PREPROCESSABLES,
+            signal: Preprocessables,
     ) -> tuple[Preprocessable, Optional[CatalyzingFieldStatus]]:
-        if signal is PREPROCESSABLES.DMG_AMOUNT:
+        if signal is Preprocessables.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             assert self.usages >= 1
             elem_can_boost = item.element is Element.ELECTRO or item.element is Element.DENDRO
@@ -605,9 +605,9 @@ class ChangingShiftsStatus(CombatStatus):
             game_state: GameState,
             status_source: StaticTarget,
             item: Preprocessable,
-            signal: PREPROCESSABLES,
+            signal: Preprocessables,
     ) -> tuple[Preprocessable, Optional[Self]]:
-        if signal is PREPROCESSABLES.SWAP:
+        if signal is Preprocessables.SWAP:
             assert isinstance(item, GameEvent) and item.event_type is EventType.SWAP
             if item.target.pid is status_source.pid \
                     and item.dices_cost.num_dices() >= self.COST_DEDUCTION:
@@ -646,9 +646,9 @@ class DendroCoreStatus(CombatStatus):
             game_state: GameState,
             status_source: StaticTarget,
             item: Preprocessable,
-            signal: PREPROCESSABLES,
+            signal: Preprocessables,
     ) -> tuple[Preprocessable, Optional[DendroCoreStatus]]:
-        if signal is PREPROCESSABLES.DMG_AMOUNT:
+        if signal is Preprocessables.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             assert self.usages >= 1
             elem_can_boost = item.element is Element.ELECTRO or item.element is Element.PYRO
@@ -683,9 +683,9 @@ class FrozenStatus(CharacterStatus):
             game_state: GameState,
             status_source: StaticTarget,
             item: Preprocessable,
-            signal: PREPROCESSABLES,
+            signal: Preprocessables,
     ) -> tuple[Preprocessable, Optional[Self]]:
-        if signal is PREPROCESSABLES.DMG_AMOUNT:
+        if signal is Preprocessables.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             can_reaction = item.element is Element.PYRO or item.element is Element.PHYSICAL
             is_damage_target = item.target == status_source
@@ -695,9 +695,9 @@ class FrozenStatus(CharacterStatus):
 
     @override
     def _react_to_signal(
-            self, source: StaticTarget, signal: TRIGGERING_SIGNAL
+            self, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[FrozenStatus]]:
-        if signal is TRIGGERING_SIGNAL.ROUND_END:
+        if signal is TriggeringSignal.ROUND_END:
             return [], None
         return [], self
 
@@ -710,9 +710,9 @@ class LeaveItToMeStatus(CombatStatus):
             game_state: GameState,
             status_source: StaticTarget,
             item: Preprocessable,
-            signal: PREPROCESSABLES,
+            signal: Preprocessables,
     ) -> tuple[Preprocessable, Optional[Self]]:
-        if signal is PREPROCESSABLES.SWAP:
+        if signal is Preprocessables.SWAP:
             assert isinstance(item, GameEvent) and item.event_type is EventType.SWAP
             if item.target.pid is status_source.pid \
                     and item.event_speed is EventSpeed.COMBAT_ACTION:
@@ -735,9 +735,9 @@ class JueyunGuobaStatus(CharacterStatus, _UsageStatus):
             game_state: GameState,
             status_source: StaticTarget,
             item: Preprocessable,
-            signal: PREPROCESSABLES,
+            signal: Preprocessables,
     ) -> tuple[Preprocessable, Optional[Self]]:
-        if signal is PREPROCESSABLES.DMG_AMOUNT:
+        if signal is Preprocessables.DMG_AMOUNT:
             assert isinstance(item, eft.SpecificDamageEffect)
             if item.source == status_source and item.damage_type.normal_attack:
                 item = replace(item, damage=item.damage + JueyunGuobaStatus.damage_boost)
@@ -746,10 +746,10 @@ class JueyunGuobaStatus(CharacterStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, source: StaticTarget, signal: TRIGGERING_SIGNAL
+            self, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         d_usages = 0
-        if signal is TRIGGERING_SIGNAL.ROUND_END:
+        if signal is TriggeringSignal.ROUND_END:
             d_usages = -1
         return [], replace(self, usages=d_usages)
 
@@ -764,10 +764,10 @@ class LotusFlowerCrispStatus(CharacterStatus, FixedShieldStatus):
     def _react_to_signal(
             self,
             source: StaticTarget,
-            signal: TRIGGERING_SIGNAL
+            signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         d_usages = 0
-        if signal is TRIGGERING_SIGNAL.ROUND_END:
+        if signal is TriggeringSignal.ROUND_END:
             d_usages = -BIG_INT
         return [], replace(self, usages=d_usages)
 
@@ -784,9 +784,9 @@ class MintyMeatRollsStatus(CharacterStatus, _UsageStatus):
             game_state: GameState,
             status_source: StaticTarget,
             item: Preprocessable,
-            signal: PREPROCESSABLES,
+            signal: Preprocessables,
     ) -> tuple[Preprocessable, Optional[Self]]:
-        if signal is PREPROCESSABLES.SKILL:
+        if signal is Preprocessables.SKILL:
             assert isinstance(item, GameEvent)
             if status_source == item.target \
                     and item.event_type is EventType.NORMAL_ATTACK \
@@ -800,10 +800,10 @@ class MintyMeatRollsStatus(CharacterStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, source: StaticTarget, signal: TRIGGERING_SIGNAL
+            self, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         d_usages = 0
-        if signal is TRIGGERING_SIGNAL.ROUND_END:
+        if signal is TriggeringSignal.ROUND_END:
             d_usages = -BIG_INT
         return [], replace(self, usages=d_usages)
 
@@ -815,18 +815,18 @@ class MushroomPizzaStatus(CharacterStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, source: StaticTarget, signal: TRIGGERING_SIGNAL
+            self, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         es: list[eft.Effect] = []
         d_usages = 0
-        if signal is TRIGGERING_SIGNAL.END_ROUND_CHECK_OUT:
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             es.append(
                 eft.RecoverHPEffect(
                     source,
                     1,
                 )
             )
-        if signal is TRIGGERING_SIGNAL.ROUND_END:
+        if signal is TriggeringSignal.ROUND_END:
             d_usages = -1
 
         return es, replace(self, usages=d_usages)
@@ -844,9 +844,9 @@ class NorthernSmokedChickenStatus(CharacterStatus, _UsageStatus):
             game_state: GameState,
             status_source: StaticTarget,
             item: Preprocessable,
-            signal: PREPROCESSABLES,
+            signal: Preprocessables,
     ) -> tuple[Preprocessable, Optional[Self]]:
-        if signal is PREPROCESSABLES.SKILL:
+        if signal is Preprocessables.SKILL:
             assert isinstance(item, GameEvent)
             if status_source == item.target \
                     and item.event_type is EventType.NORMAL_ATTACK \
@@ -860,10 +860,10 @@ class NorthernSmokedChickenStatus(CharacterStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, source: StaticTarget, signal: TRIGGERING_SIGNAL
+            self, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         d_usages = 0
-        if signal is TRIGGERING_SIGNAL.ROUND_END:
+        if signal is TriggeringSignal.ROUND_END:
             d_usages = -BIG_INT
         return [], replace(self, usages=d_usages)
 
@@ -873,9 +873,9 @@ class SatiatedStatus(CharacterStatus):
 
     @override
     def _react_to_signal(
-            self, source: StaticTarget, signal: TRIGGERING_SIGNAL
+            self, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
-        if signal is TRIGGERING_SIGNAL.ROUND_END:
+        if signal is TriggeringSignal.ROUND_END:
             return [], None
         return [], self
 
@@ -896,14 +896,14 @@ class IcicleStatus(CombatStatus, _UsageStatus):
     def _react_to_signal(
             self,
             source: StaticTarget,
-            signal: TRIGGERING_SIGNAL
+            signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[IcicleStatus]]:
-        if source.pid.is_player1() and signal is TRIGGERING_SIGNAL.SWAP_EVENT_1 \
-                or source.pid.is_player2() and signal is TRIGGERING_SIGNAL.SWAP_EVENT_2:
+        if source.pid.is_player1() and signal is TriggeringSignal.SWAP_EVENT_1 \
+                or source.pid.is_player2() and signal is TriggeringSignal.SWAP_EVENT_2:
             effects: list[eft.Effect] = [
                 eft.ReferredDamageEffect(
                     source=source,
-                    target=DYNAMIC_CHARACTER_TARGET.OPPO_ACTIVE,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
                     element=Element.CRYO,
                     damage=2,
                     damage_type=DamageType(status=True),
@@ -946,12 +946,12 @@ class ColdBloodedStrikeStatus(EquipmentStatus):
     def _react_to_signal(
             self,
             source: StaticTarget,
-            signal: TRIGGERING_SIGNAL
+            signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[ColdBloodedStrikeStatus]]:
         es: list[eft.Effect] = []
         new_self = self
 
-        if signal is TRIGGERING_SIGNAL.COMBAT_ACTION and self.activated:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
             assert self.usages >= 1
             es.append(
                 eft.RecoverHPEffect(
@@ -961,7 +961,7 @@ class ColdBloodedStrikeStatus(EquipmentStatus):
             )
             new_self = replace(new_self, usages=self.usages - 1, activated=False)
 
-        elif signal is TRIGGERING_SIGNAL.ROUND_END:
+        elif signal is TriggeringSignal.ROUND_END:
             new_self = ColdBloodedStrikeStatus(usages=1, activated=False)
 
         return es, new_self
@@ -979,9 +979,9 @@ class KeqingTalentStatus(CharacterTalentStatus):
     def _react_to_signal(
             self,
             source: StaticTarget,
-            signal: TRIGGERING_SIGNAL
+            signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[KeqingTalentStatus]]:
-        if signal is TRIGGERING_SIGNAL.COMBAT_ACTION:
+        if signal is TriggeringSignal.COMBAT_ACTION:
             return [], type(self)(can_infuse=False)
         return [], self
 

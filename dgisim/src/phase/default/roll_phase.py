@@ -10,7 +10,7 @@ from ...action.enums import ActionType
 from ...dices import ActualDices
 from ...element import Element
 from ...helper.quality_of_life import just
-from ...state.enums import ACT, PID
+from ...state.enums import Act, Pid
 
 if TYPE_CHECKING:
     from ...action.types import DecidedChoiceType, GivenChoiceType
@@ -27,14 +27,14 @@ class RollPhase(ph.Phase):
     def _get_all_omni_and_activate(self, game_state: GameState) -> GameState:
         return game_state.factory().f_player1(
             lambda p1: p1.factory()
-            .phase(ACT.ACTION_PHASE)
+            .phase(Act.ACTION_PHASE)
             .dice_reroll_chances(game_state.get_mode().dice_reroll_chances())
             # .dices(ActualDices.from_all(RollPhase._NUM_DICES, Element.OMNI))
             .dices(ActualDices.from_random(RollPhase._NUM_DICES))
             .build()
         ).f_player2(
             lambda p2: p2.factory()
-            .phase(ACT.ACTION_PHASE)
+            .phase(Act.ACTION_PHASE)
             .dice_reroll_chances(game_state.get_mode().dice_reroll_chances())
             # .dices(ActualDices.from_all(RollPhase._NUM_DICES, Element.OMNI))
             .dices(ActualDices.from_random(RollPhase._NUM_DICES))
@@ -45,9 +45,9 @@ class RollPhase(ph.Phase):
         return game_state.factory().f_phase(
             lambda mode: mode.action_phase()
         ).f_player1(
-            lambda p1: p1.factory().phase(ACT.PASSIVE_WAIT_PHASE).build()
+            lambda p1: p1.factory().phase(Act.PASSIVE_WAIT_PHASE).build()
         ).f_player2(
-            lambda p2: p2.factory().phase(ACT.PASSIVE_WAIT_PHASE).build()
+            lambda p2: p2.factory().phase(Act.PASSIVE_WAIT_PHASE).build()
         ).build()
 
     def step(self, game_state: GameState) -> GameState:
@@ -64,7 +64,7 @@ class RollPhase(ph.Phase):
     def _handle_dices_selection(
             self,
             game_state: GameState,
-            pid: PID,
+            pid: Pid,
             action: DicesSelectAction
     ) -> None | GameState:
         player = game_state.get_player(pid)
@@ -74,11 +74,11 @@ class RollPhase(ph.Phase):
         replacement_dices = ActualDices.from_random(action.selected_dices.num_dices())
         new_dices = kept_dices + replacement_dices
         new_reroll_chances = player.get_dice_reroll_chances() - 1
-        new_player_phase: ACT
+        new_player_phase: Act
         if new_reroll_chances > 0:
             new_player_phase = player.get_phase()
         else:
-            new_player_phase = ACT.END_PHASE
+            new_player_phase = Act.END_PHASE
         return game_state.factory().f_player(
             pid,
             lambda p: p.factory()
@@ -91,13 +91,13 @@ class RollPhase(ph.Phase):
     def _handle_end_round(
             self,
             game_state: GameState,
-            pid: PID,
+            pid: Pid,
             action: EndRoundAction
     ) -> None | GameState:
         return game_state.factory().f_player(
             pid,
             lambda p: p.factory()
-            .phase(ACT.END_PHASE)
+            .phase(Act.END_PHASE)
             .dice_reroll_chances(0)
             .build()
         ).build()
@@ -105,7 +105,7 @@ class RollPhase(ph.Phase):
     def step_action(
             self,
             game_state: GameState,
-            pid: PID,
+            pid: Pid,
             action: PlayerAction
     ) -> None | GameState:
         if isinstance(action, DicesSelectAction):
@@ -141,7 +141,7 @@ class RollPhase(ph.Phase):
                 raise TypeError(f"Unexpected player choice {player_choice} where"
                                 + f"where {action_type_name} is expected")
 
-    def action_generator(self, game_state: GameState, pid: PID) -> ActionGenerator | None:
+    def action_generator(self, game_state: GameState, pid: Pid) -> ActionGenerator | None:
         return ActionGenerator(
             game_state=game_state,
             pid=pid,

@@ -18,7 +18,7 @@ class TestNorthernSmokedChicken(unittest.TestCase):
         )
         self.assertRaises(
             Exception,
-            lambda: base_game.action_step(PID.P1, card_action)
+            lambda: base_game.action_step(Pid.P1, card_action)
         )
 
         # test giving right num of dices
@@ -27,13 +27,13 @@ class TestNorthernSmokedChicken(unittest.TestCase):
             instruction=StaticTargetInstruction(
                 dices=ActualDices({}),
                 target=StaticTarget(
-                    pid=PID.P1,
-                    zone=ZONE.CHARACTERS,
+                    pid=Pid.P1,
+                    zone=Zone.CHARACTERS,
                     id=1,
                 )
             ),
         )
-        game_state = base_game.action_step(PID.P1, card_action)
+        game_state = base_game.action_step(Pid.P1, card_action)
         assert game_state is not None
         buffed_game_state = auto_step(game_state)
 
@@ -58,7 +58,7 @@ class TestNorthernSmokedChicken(unittest.TestCase):
         )
         self.assertRaises(
             Exception,
-            lambda: buffed_game_state.action_step(PID.P1, normal_attack_action)
+            lambda: buffed_game_state.action_step(Pid.P1, normal_attack_action)
         )
 
         # test normal attack with 2 dices pass
@@ -66,7 +66,7 @@ class TestNorthernSmokedChicken(unittest.TestCase):
             skill=CharacterSkill.NORMAL_ATTACK,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2}))
         )
-        game_state = buffed_game_state.action_step(PID.P1, normal_attack_action)
+        game_state = buffed_game_state.action_step(Pid.P1, normal_attack_action)
         assert game_state is not None
         game_state = auto_step(game_state)
 
@@ -86,14 +86,14 @@ class TestNorthernSmokedChicken(unittest.TestCase):
         ).build()
         self.assertRaises(
             Exception,
-            lambda: game_state.action_step(PID.P1, normal_attack_action)  # type: ignore
+            lambda: game_state.action_step(Pid.P1, normal_attack_action)  # type: ignore
         )
 
         # test opponent cannot use this
-        game_state = buffed_game_state.action_step(PID.P1, EndRoundAction())
+        game_state = buffed_game_state.action_step(Pid.P1, EndRoundAction())
         assert game_state is not None
         game_state = auto_step(game_state)
         self.assertRaises(
             Exception,
-            lambda: game_state.action_step(PID.P2, normal_attack_action)
+            lambda: game_state.action_step(Pid.P2, normal_attack_action)
         )

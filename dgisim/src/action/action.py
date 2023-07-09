@@ -6,11 +6,11 @@ from typing_extensions import Self
 from ..card.cards import Cards
 from ..character.enums import CharacterSkill
 from ..dices import ActualDices
-from ..effect.enums import ZONE
+from ..effect.enums import Zone
 from ..effect.structs import StaticTarget
 from ..element import Element
 from ..helper.quality_of_life import dataclass_repr
-from ..state.enums import PID
+from ..state.enums import Pid
 
 if TYPE_CHECKING:
     from ..state.game_state import GameState
@@ -245,8 +245,8 @@ class StaticTargetInstruction(Instruction):
         return cls(
             dices=ActualDices({}),
             target=StaticTarget(
-                pid=PID.P1,
-                zone=ZONE.CHARACTERS,
+                pid=Pid.P1,
+                zone=Zone.CHARACTERS,
                 id=-1,
             ),
         )
@@ -260,8 +260,8 @@ class SourceTargetInstruction(Instruction):
     @classmethod
     def _empty(cls) -> Self:
         target = StaticTarget(
-            pid=PID.P1,
-            zone=ZONE.CHARACTERS,
+            pid=Pid.P1,
+            zone=Zone.CHARACTERS,
             id=-1,
         )
         return cls(

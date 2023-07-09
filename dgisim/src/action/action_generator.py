@@ -6,7 +6,7 @@ from typing_extensions import Self
 if TYPE_CHECKING:
     from ..card.cards import Cards
     from ..dices import ActualDices
-    from ..state.enums import PID
+    from ..state.enums import Pid
     from ..state.game_state import GameState
 
     from .action import PlayerAction, Instruction
@@ -34,7 +34,7 @@ class ActionGenerator:
     to generate other ActionGenerators that may eventually generate some action.
     """
     game_state: GameState
-    pid: PID
+    pid: Pid
     action: None | PlayerAction = None
     instruction: None | Instruction = None
     # used to provide all valid choices for users to choose

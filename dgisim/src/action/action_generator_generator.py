@@ -16,7 +16,7 @@ from .action_generator import ActionGenerator
 from .action import *
 
 if TYPE_CHECKING:
-    from ..state.enums import PID
+    from ..state.enums import Pid
     from ..state.game_state import GameState
 
     from .types import DecidedChoiceType, GivenChoiceType
@@ -71,7 +71,7 @@ class CardActGenGenerator(ABC):
     def action_generator(
             cls,
             game_state: GameState,
-            pid: PID,
+            pid: Pid,
     ) -> None | ActionGenerator:
         if not game_state.card_checker().playable(pid):
             return None
@@ -128,7 +128,7 @@ class CardsSelectionActGenGenerator(ABC):
     def action_generator(
             cls,
             game_state: GameState,
-            pid: PID,
+            pid: Pid,
     ) -> None | ActionGenerator:
         return ActionGenerator(
             game_state=game_state,
@@ -172,7 +172,7 @@ class DicesSelectionActGenGenerator(ABC):
     def action_generator(
             cls,
             game_state: GameState,
-            pid: PID,
+            pid: Pid,
     ) -> None | ActionGenerator:
         return ActionGenerator(
             game_state=game_state,
@@ -243,7 +243,7 @@ class ElemTuningActGenGenerator(ABC):
     def action_generator(
             cls,
             game_state: GameState,
-            pid: PID,
+            pid: Pid,
     ) -> None | ActionGenerator:
         if not game_state.elem_tuning_checker().usable(pid):
             return None
@@ -336,7 +336,7 @@ class SkillActGenGenerator(ABC):
     def action_generator(
             cls,
             game_state: GameState,
-            pid: PID,
+            pid: Pid,
     ) -> None | ActionGenerator:
         active_character = game_state.get_player(pid).just_get_active_character()
         if not active_character.can_cast_skill():
@@ -438,7 +438,7 @@ class SwapActGenGenerator(ABC):
     def action_generator(
             cls,
             game_state: GameState,
-            pid: PID,
+            pid: Pid,
     ) -> None | ActionGenerator:
         if not game_state.swap_checker().swappable(pid):
             return None

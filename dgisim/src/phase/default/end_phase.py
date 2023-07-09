@@ -7,9 +7,9 @@ from ...action.action import *
 from ...action.action_generator import ActionGenerator
 from ...dices import ActualDices
 from ...effect.effect import *
-from ...effect.enums import ZONE
+from ...effect.enums import Zone
 from ...effect.structs import StaticTarget
-from ...state.enums import PID, ACT
+from ...state.enums import Pid, Act
 
 if TYPE_CHECKING:
     from ...action.types import DecidedChoiceType, GivenChoiceType
@@ -30,13 +30,13 @@ class EndPhase(ph.Phase):
         effects += [
             EndPhaseCheckoutEffect(),
             EndRoundEffect(),
-            SetBothPlayerPhaseEffect(ACT.END_PHASE),
+            SetBothPlayerPhaseEffect(Act.END_PHASE),
         ]
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).f_player(
             active_pid,
-            lambda p: p.factory().phase(ACT.ACTIVE_WAIT_PHASE).build()
+            lambda p: p.factory().phase(Act.ACTIVE_WAIT_PHASE).build()
         ).build()
 
     def _to_roll_phase(self, game_state: GameState, new_round: int) -> GameState:
@@ -58,7 +58,7 @@ class EndPhase(ph.Phase):
         ).f_player(
             active_player_id,
             lambda p: p.factory().phase(
-                ACT.PASSIVE_WAIT_PHASE
+                Act.PASSIVE_WAIT_PHASE
             ).dices(
                 ActualDices.from_empty()
             ).hand_cards(
@@ -69,7 +69,7 @@ class EndPhase(ph.Phase):
         ).f_other_player(
             active_player_id,
             lambda p: p.factory().phase(
-                ACT.PASSIVE_WAIT_PHASE
+                Act.PASSIVE_WAIT_PHASE
             ).dices(
                 ActualDices.from_empty()
             ).hand_cards(
@@ -82,11 +82,11 @@ class EndPhase(ph.Phase):
     def _end_both_players(self, game_state: GameState) -> GameState:
         return game_state.factory().f_player1(
             lambda p: p.factory().phase(
-                ACT.END_PHASE
+                Act.END_PHASE
             ).build()
         ).f_player2(
             lambda p: p.factory().phase(
-                ACT.END_PHASE
+                Act.END_PHASE
             ).build()
         ).build()
 
@@ -111,16 +111,16 @@ class EndPhase(ph.Phase):
         p1 = game_state.get_player1()
         p2 = game_state.get_player2()
         active_player_id = game_state.get_active_player_id()
-        if p1.get_phase() is ACT.PASSIVE_WAIT_PHASE and p2.get_phase() is ACT.PASSIVE_WAIT_PHASE:
+        if p1.get_phase() is Act.PASSIVE_WAIT_PHASE and p2.get_phase() is Act.PASSIVE_WAIT_PHASE:
             return self._initialize_end_phase(game_state)
-        elif p1.get_phase() is ACT.ACTIVE_WAIT_PHASE or p2.get_phase() is ACT.ACTIVE_WAIT_PHASE:
+        elif p1.get_phase() is Act.ACTIVE_WAIT_PHASE or p2.get_phase() is Act.ACTIVE_WAIT_PHASE:
             assert self._is_executing_effects(game_state)
             return self._execute_effect(game_state)
         elif p1.get_phase().is_action_phase() or p2.get_phase().is_action_phase():
             # handling death swap
             assert self._is_executing_effects(game_state)
             return self._execute_effect(game_state)
-        elif p1.get_phase() is ACT.END_PHASE and p2.get_phase() is ACT.END_PHASE:
+        elif p1.get_phase() is Act.END_PHASE and p2.get_phase() is Act.END_PHASE:
             new_round = game_state.get_round() + 1
             if new_round > game_state.get_mode().round_limit():
                 return self._end_game(game_state)
@@ -131,7 +131,7 @@ class EndPhase(ph.Phase):
     def _handle_death_swap_action(
             self,
             game_state: GameState,
-            pid: PID,
+            pid: Pid,
             action: DeathSwapAction
     ) -> Optional[GameState]:
         player = game_state.get_player(pid)
@@ -140,7 +140,7 @@ class EndPhase(ph.Phase):
         active_character = player.get_characters().get_active_character()
         assert active_character is not None
         effect_stack = effect_stack.push_one(SwapCharacterEffect(
-            StaticTarget(pid, ZONE.CHARACTERS, action.char_id)
+            StaticTarget(pid, Zone.CHARACTERS, action.char_id)
         ))
         return game_state.factory().effect_stack(
             effect_stack
@@ -149,7 +149,7 @@ class EndPhase(ph.Phase):
     def step_action(
             self,
             game_state: GameState,
-            pid: PID,
+            pid: Pid,
             action: PlayerAction
     ) -> Optional[GameState]:
         effect_stack = game_state.get_effect_stack()
@@ -161,7 +161,7 @@ class EndPhase(ph.Phase):
 
         raise NotImplementedError
 
-    def waiting_for(self, game_state: GameState) -> Optional[PID]:
+    def waiting_for(self, game_state: GameState) -> Optional[Pid]:
         effect_stack = game_state.get_effect_stack()
         # if no effects are to be executed or death swap phase is inserted
         if effect_stack.is_not_empty() \
@@ -170,7 +170,7 @@ class EndPhase(ph.Phase):
         else:
             return None
 
-    def action_generator(self, game_state: GameState, pid: PID) -> ActionGenerator | None:
+    def action_generator(self, game_state: GameState, pid: Pid) -> ActionGenerator | None:
         assert game_state.death_swapping(pid)
         from ...action.action_generator_generator import SwapActGenGenerator
         return SwapActGenGenerator.action_generator(game_state, pid)

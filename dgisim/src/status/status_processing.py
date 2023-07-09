@@ -7,10 +7,10 @@ from ..summon import summon as sm
 from ..support import support as sp
 
 from ..character.enums import CharacterSkill
-from ..state.enums import PID
-from ..effect.enums import ZONE, TRIGGERING_SIGNAL
+from ..state.enums import Pid
+from ..effect.enums import Zone, TriggeringSignal
 from ..effect.structs import StaticTarget
-from .enums import PREPROCESSABLES
+from .enums import Preprocessables
 
 if TYPE_CHECKING:
     from ..card.card import Card
@@ -33,7 +33,7 @@ class StatusProcessing:
     @staticmethod
     def loop_one_player_all_statuses(
             game_state: GameState,
-            pid: PID,
+            pid: Pid,
             f: Callable[[GameState, stt.Status, StaticTarget], GameState]
     ) -> GameState:
         """
@@ -51,7 +51,7 @@ class StatusProcessing:
             character_id = character.get_id()
             target = StaticTarget(
                 pid,
-                ZONE.CHARACTERS,
+                Zone.CHARACTERS,
                 character_id
             )
             for status in statuses:
@@ -61,7 +61,7 @@ class StatusProcessing:
         combat_statuses = player.get_combat_statuses()
         target = StaticTarget(
             pid,
-            ZONE.COMBAT_STATUSES,
+            Zone.COMBAT_STATUSES,
             -1,  # not used
         )
         for status in combat_statuses:
@@ -71,7 +71,7 @@ class StatusProcessing:
         summons = player.get_summons()
         target = StaticTarget(
             pid,
-            ZONE.SUMMONS,
+            Zone.SUMMONS,
             -1,
         )
         for summon in summons:
@@ -82,7 +82,7 @@ class StatusProcessing:
         for support in supports:
             target = StaticTarget(
                 pid,
-                ZONE.SUPPORTS,
+                Zone.SUPPORTS,
                 support.sid,
             )
             game_state = f(game_state, support, target)
@@ -92,7 +92,7 @@ class StatusProcessing:
     @staticmethod
     def loop_all_statuses(
             game_state: GameState,
-            pid: PID,
+            pid: Pid,
             f: Callable[[GameState, stt.Status, StaticTarget], GameState]
     ) -> GameState:
         """
@@ -105,7 +105,7 @@ class StatusProcessing:
 
     @staticmethod
     def trigger_all_statuses_effects(
-            game_state: GameState, pid: PID, signal: TRIGGERING_SIGNAL
+            game_state: GameState, pid: Pid, signal: TriggeringSignal
     ) -> list[eft.Effect]:
         """
         Takes the current game_state, trigger all statuses in order of player pid
@@ -138,9 +138,9 @@ class StatusProcessing:
     @staticmethod
     def preprocess_by_all_statuses(
             game_state: GameState,
-            pid: PID,
+            pid: Pid,
             item: Preprocessable,
-            pp_type: PREPROCESSABLES,
+            pp_type: Preprocessables,
     ) -> tuple[GameState, Preprocessable]:
         def f(game_state: GameState, status: stt.Status, status_source: StaticTarget) -> GameState:
             nonlocal item
@@ -212,7 +212,7 @@ class StatusProcessing:
     @staticmethod
     def inform_all_statuses(
             game_state: GameState,
-            pid: PID,
+            pid: Pid,
             info: eft.SpecificDamageEffect | CharacterSkill | Card,
             source: None | StaticTarget = None,
     ) -> GameState:

@@ -6,7 +6,7 @@ from dgisim.src.dices import *
 from dgisim.src.effect.effect import *
 from dgisim.src.element import Element
 from dgisim.src.helper.quality_of_life import BIG_INT
-from dgisim.src.state.enums import PID, ACT
+from dgisim.src.state.enums import Pid, Act
 from dgisim.src.state.game_state import GameState
 
 
@@ -45,13 +45,13 @@ BASE_GAME = GameState.from_default().factory().f_player1(
 OPPO_DEATH_WAIT = BASE_GAME.factory().f_phase(
     lambda mode: mode.action_phase()
 ).active_player_id(
-    PID.P1
+    Pid.P1
 ).f_player1(
     lambda p: p.factory()
     .f_characters(
         lambda cs: cs.factory().active_character_id(1).build()
     )
-    .phase(ACT.ACTION_PHASE)
+    .phase(Act.ACTION_PHASE)
     .build()
 ).f_player2(
     lambda p: p.factory()
@@ -61,7 +61,7 @@ OPPO_DEATH_WAIT = BASE_GAME.factory().f_phase(
         .f_character(1, lambda c: c.factory().hp(0).build())
         .build()
     )
-    .phase(ACT.PASSIVE_WAIT_PHASE)
+    .phase(Act.PASSIVE_WAIT_PHASE)
     .build()
 ).f_effect_stack(
     lambda es: es.push_one(DeathCheckCheckerEffect())
@@ -69,27 +69,27 @@ OPPO_DEATH_WAIT = BASE_GAME.factory().f_phase(
 
 
 OPPO_DEATH_END = OPPO_DEATH_WAIT.factory().f_player2(
-    lambda p: p.factory().phase(ACT.END_PHASE).build()
+    lambda p: p.factory().phase(Act.END_PHASE).build()
 ).build()
 
 
 ACTION_TEMPLATE = BASE_GAME.factory().f_phase(
     lambda mode: mode.action_phase()
 ).active_player_id(
-    PID.P1
+    Pid.P1
 ).f_player1(
     lambda p: p.factory()
     .f_characters(
         lambda cs: cs.factory().active_character_id(1).build()
     )
-    .phase(ACT.ACTION_PHASE)
+    .phase(Act.ACTION_PHASE)
     .build()
 ).f_player2(
     lambda p: p.factory()
     .f_characters(
         lambda cs: cs.factory().active_character_id(1).build()
     )
-    .phase(ACT.PASSIVE_WAIT_PHASE)
+    .phase(Act.PASSIVE_WAIT_PHASE)
     .build()
 ).build()
 
@@ -97,19 +97,19 @@ ACTION_TEMPLATE = BASE_GAME.factory().f_phase(
 END_TEMPLATE = BASE_GAME.factory().f_phase(
     lambda mode: mode.end_phase()
 ).active_player_id(
-    PID.P1
+    Pid.P1
 ).f_player1(
     lambda p: p.factory()
     .f_characters(
         lambda cs: cs.factory().active_character_id(1).build()
     )
-    .phase(ACT.PASSIVE_WAIT_PHASE)
+    .phase(Act.PASSIVE_WAIT_PHASE)
     .build()
 ).f_player2(
     lambda p: p.factory()
     .f_characters(
         lambda cs: cs.factory().active_character_id(1).build()
     )
-    .phase(ACT.PASSIVE_WAIT_PHASE)
+    .phase(Act.PASSIVE_WAIT_PHASE)
     .build()
 ).build()

@@ -4,7 +4,7 @@ This file contains the enums and structs of elements and reactions.
 from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
-from typing import FrozenSet, Optional, Iterator
+from typing import Any, FrozenSet, Optional, Iterator
 
 from .helper.hashable_dict import HashableDict
 
@@ -45,71 +45,73 @@ AURA_ELEMENTS: FrozenSet[Element] = frozenset(AURA_ELEMENTS_ORDERED)
 
 @dataclass(frozen=True)
 class _ReactionData:
-    reaction_elems: tuple[set[Element], set[Element]]
+    reaction_elems: tuple[frozenset[Element], frozenset[Element]]
     damage_boost: int
 
 
 class Reaction(Enum):
     BLOOM = _ReactionData(
-        reaction_elems=({Element.DENDRO}, {Element.HYDRO}),
+        reaction_elems=(frozenset({Element.DENDRO}), frozenset({Element.HYDRO})),
         damage_boost=1,
     )
     BURNING = _ReactionData(
-        reaction_elems=({Element.DENDRO}, {Element.PYRO}),
+        reaction_elems=(frozenset({Element.DENDRO}), frozenset({Element.PYRO})),
         damage_boost=1,
     )
     CRYSTALLIZE = _ReactionData(
         reaction_elems=(
-            {
+            frozenset({
                 Element.PYRO,
                 Element.HYDRO,
                 Element.CRYO,
                 Element.ELECTRO,
-            }, {
+            }),
+            frozenset({
                 Element.GEO
-            }
+            }),
         ),
         damage_boost=1,
     )
     ELECTRO_CHARGED = _ReactionData(
-        reaction_elems=({Element.HYDRO}, {Element.ELECTRO}),
+        reaction_elems=(frozenset({Element.HYDRO}), frozenset({Element.ELECTRO})),
         damage_boost=1,
     )
     FROZEN = _ReactionData(
-        reaction_elems=({Element.HYDRO}, {Element.CRYO}),
+        reaction_elems=(frozenset({Element.HYDRO}), frozenset({Element.CRYO})),
         damage_boost=1,
     )
     MELT = _ReactionData(
-        reaction_elems=({Element.PYRO}, {Element.CRYO}),
+        reaction_elems=(frozenset({Element.PYRO}), frozenset({Element.CRYO})),
         damage_boost=2,
     )
     OVERLOADED = _ReactionData(
-        reaction_elems=({Element.PYRO}, {Element.ELECTRO}),
+        reaction_elems=(frozenset({Element.PYRO}), frozenset({Element.ELECTRO})),
         damage_boost=2,
     )
     QUICKEN = _ReactionData(
-        reaction_elems=({Element.DENDRO}, {Element.ELECTRO}),
+        reaction_elems=(frozenset({Element.DENDRO}), frozenset({Element.ELECTRO})),
         damage_boost=1,
     )
     SUPERCONDUCT = _ReactionData(
-        reaction_elems=({Element.CRYO}, {Element.ELECTRO}),
+        reaction_elems=(frozenset({Element.CRYO}), frozenset({Element.ELECTRO})),
         damage_boost=1,
     )
     SWIRL = _ReactionData(
         reaction_elems=(
-            {
+            frozenset({
                 Element.PYRO,
                 Element.HYDRO,
                 Element.CRYO,
                 Element.ELECTRO,
-            }, {
+            }),
+            frozenset({
                 Element.ANEMO
-            }
+            }),
         ),
         damage_boost=0,
     )
     VAPORIZE = _ReactionData(
-        reaction_elems=({Element.HYDRO}, {Element.PYRO}),
+        reaction_elems=(frozenset({Element.HYDRO}), frozenset({Element.PYRO})),
         damage_boost=2,
     )
 

@@ -22,7 +22,7 @@ class TestXudong(unittest.TestCase):
         )
         self.assertRaises(
             Exception,
-            lambda: base_game.action_step(PID.P1, card_action)
+            lambda: base_game.action_step(Pid.P1, card_action)
         )
 
         # test giving right num of dices
@@ -30,7 +30,7 @@ class TestXudong(unittest.TestCase):
             card=Xudong,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.PYRO: 1, Element.GEO: 1})),
         )
-        game_state = base_game.action_step(PID.P1, card_action)
+        game_state = base_game.action_step(Pid.P1, card_action)
         assert game_state is not None
         buffed_game_state = auto_step(game_state)
 
@@ -38,9 +38,9 @@ class TestXudong(unittest.TestCase):
         assert isinstance(xudong_support, XudongSupport)
         self.assertEqual(xudong_support.usages, 1)
 
-        buffed_game_state = kill_character(buffed_game_state, 1, PID.P1, 2)
-        buffed_game_state = kill_character(buffed_game_state, 2, PID.P1, 2)
-        buffed_game_state = kill_character(buffed_game_state, 3, PID.P1, 2)
+        buffed_game_state = kill_character(buffed_game_state, 1, Pid.P1, 2)
+        buffed_game_state = kill_character(buffed_game_state, 2, Pid.P1, 2)
+        buffed_game_state = kill_character(buffed_game_state, 3, Pid.P1, 2)
 
         # test play 0 cost card does not affect Xudong
         card_action = CardAction(
@@ -48,13 +48,13 @@ class TestXudong(unittest.TestCase):
             instruction=StaticTargetInstruction(
                 dices=ActualDices({}),
                 target=StaticTarget(
-                    pid=PID.P1,
-                    zone=ZONE.CHARACTERS,
+                    pid=Pid.P1,
+                    zone=Zone.CHARACTERS,
                     id=1,
                 )
             ),
         )
-        game_state = buffed_game_state.action_step(PID.P1, card_action)
+        game_state = buffed_game_state.action_step(Pid.P1, card_action)
         assert game_state is not None
         game_state = auto_step(game_state)
 
@@ -72,13 +72,13 @@ class TestXudong(unittest.TestCase):
             instruction=StaticTargetInstruction(
                 dices=ActualDices({}),
                 target=StaticTarget(
-                    pid=PID.P1,
-                    zone=ZONE.CHARACTERS,
+                    pid=Pid.P1,
+                    zone=Zone.CHARACTERS,
                     id=1,
                 )
             ),
         )
-        game_state = buffed_game_state.action_step(PID.P1, card_action)
+        game_state = buffed_game_state.action_step(Pid.P1, card_action)
         assert game_state is not None
         game_state = auto_step(game_state)
 

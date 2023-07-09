@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from ..effect import effect as eft
 
-from .enums import DYNAMIC_CHARACTER_TARGET
+from .enums import DynamicCharacterTarget
 from .structs import DamageType
 
 if TYPE_CHECKING:
@@ -23,7 +23,7 @@ def normal_attack_template(
     effects: list[eft.Effect] = []
     effects.append(eft.ReferredDamageEffect(
         source=source,
-        target=DYNAMIC_CHARACTER_TARGET.OPPO_ACTIVE,
+        target=DynamicCharacterTarget.OPPO_ACTIVE,
         element=element,
         damage=damage,
         damage_type=DamageType(

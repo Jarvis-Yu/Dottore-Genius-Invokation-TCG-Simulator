@@ -4,7 +4,7 @@ from .action.action import PlayerAction
 from .helper.level_print import GamePrinter
 from .phase.phase import Phase
 from .player_agent import PlayerAgent
-from .state.enums import PID
+from .state.enums import Pid
 from .state.game_state import GameState
 
 __all__ = [
@@ -13,21 +13,21 @@ __all__ = [
 
 
 class GameStateMachine:
-    def __init__(self, game_state: GameState, player1: PlayerAgent, player2: PlayerAgent):
+    def __init__(self, game_state: GameState, agent1: PlayerAgent, agent2: PlayerAgent):
         self._history = [game_state]
-        self._perspective_history: dict[PID, list[GameState]] = {
-            PID.P1: [game_state.prespective_view(PID.P1)],
-            PID.P2: [game_state.prespective_view(PID.P2)],
+        self._perspective_history: dict[Pid, list[GameState]] = {
+            Pid.P1: [game_state.prespective_view(Pid.P1)],
+            Pid.P2: [game_state.prespective_view(Pid.P2)],
         }
         self._action_history: list[int] = []
         self._actions: dict[int, PlayerAction] = {}
         self._game_state = game_state
-        self._playerAgent1 = player1
-        self._playerAgent2 = player2
+        self._player_agent1 = agent1
+        self._player_agent2 = agent2
 
     @classmethod
-    def from_default(cls, player1: PlayerAgent, player2: PlayerAgent):
-        return cls(GameState.from_default(), player1, player2)
+    def from_default(cls, agent1: PlayerAgent, agent2: PlayerAgent):
+        return cls(GameState.from_default(), agent1, agent2)
 
     def get_history(self) -> tuple[GameState, ...]:
         return tuple(self._history)
@@ -91,8 +91,8 @@ class GameStateMachine:
 
     def _append_history(self, game_state: GameState) -> None:
         self._history.append(self._game_state)
-        self._perspective_history[PID.P1].append(self._game_state.prespective_view(PID.P1))
-        self._perspective_history[PID.P2].append(self._game_state.prespective_view(PID.P2))
+        self._perspective_history[Pid.P1].append(self._game_state.prespective_view(Pid.P1))
+        self._perspective_history[Pid.P2].append(self._game_state.prespective_view(Pid.P2))
 
     def _step(self, observe=False) -> None:
         self._game_state = self._game_state.step()
@@ -101,7 +101,7 @@ class GameStateMachine:
             input(":> ")
         self._append_history(self._game_state)
 
-    def _action_step(self, pid: PID, action: PlayerAction, observe=False) -> bool:
+    def _action_step(self, pid: Pid, action: PlayerAction, observe=False) -> bool:
         next_state = self._game_state.action_step(pid, action)
         if next_state is None:
             return False
@@ -188,16 +188,16 @@ class GameStateMachine:
             # TODO
             pass
 
-    def player_agent(self, id: PID) -> PlayerAgent:
-        if id is PID.P1:
-            return self._playerAgent1
-        elif id is PID.P2:
-            return self._playerAgent2
+    def player_agent(self, id: Pid) -> PlayerAgent:
+        if id is Pid.P1:
+            return self._player_agent1
+        elif id is Pid.P2:
+            return self._player_agent2
         else:
             raise Exception("GameStateMachine.player(): Invalid player id")
 
     def game_end(self) -> bool:
         return self._game_state.game_end()
 
-    def get_winner(self) -> Optional[PID]:
+    def get_winner(self) -> Optional[Pid]:
         return self._game_state.get_winner()

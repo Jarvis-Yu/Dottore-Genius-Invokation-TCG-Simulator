@@ -15,10 +15,10 @@ from ..summon import summon as sm
 
 from ..dices import AbstractDices
 from ..effect.effects_template import *
-from ..effect.enums import ZONE, DYNAMIC_CHARACTER_TARGET
+from ..effect.enums import Zone, DynamicCharacterTarget
 from ..effect.structs import StaticTarget, DamageType
 from ..element import *
-from ..state.enums import PID
+from ..state.enums import Pid
 from .enums import CharacterSkill
 
 if TYPE_CHECKING:
@@ -103,7 +103,7 @@ class Character:
         pid = game_state.belongs_to(self)
         if pid is None:
             raise Exception("target character is not in the current game state")
-        me = StaticTarget(pid, ZONE.CHARACTERS, self.get_id())
+        me = StaticTarget(pid, Zone.CHARACTERS, self.get_id())
         return me
 
     @classmethod
@@ -167,7 +167,7 @@ class Character:
                 my_active=source,
                 oppo_active=StaticTarget(
                     pid=source.pid.other(),
-                    zone=ZONE.CHARACTERS,
+                    zone=Zone.CHARACTERS,
                     id=game_state.get_other_player(source.pid).just_get_active_character().get_id()
                 )
             ),
@@ -417,7 +417,7 @@ class Keqing(Character):
         effects: list[eft.Effect] = [
             eft.ReferredDamageEffect(
                 source=source,
-                target=DYNAMIC_CHARACTER_TARGET.OPPO_ACTIVE,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
                 element=Element.ELECTRO,
                 damage=3,
                 damage_type=DamageType(elemental_skill=True)
@@ -487,14 +487,14 @@ class Keqing(Character):
             ),
             eft.ReferredDamageEffect(
                 source=source,
-                target=DYNAMIC_CHARACTER_TARGET.OPPO_OFF_FIELD,
+                target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                 element=Element.PIERCING,
                 damage=3,
                 damage_type=DamageType(elemental_burst=True),
             ),
             eft.ReferredDamageEffect(
                 source=source,
-                target=DYNAMIC_CHARACTER_TARGET.OPPO_ACTIVE,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
                 element=Element.ELECTRO,
                 damage=4,
                 damage_type=DamageType(elemental_burst=True),
@@ -557,7 +557,7 @@ class Kaeya(Character):
         return (
             eft.ReferredDamageEffect(
                 source=source,
-                target=DYNAMIC_CHARACTER_TARGET.OPPO_ACTIVE,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
                 element=Element.CRYO,
                 damage=3,
                 damage_type=DamageType(elemental_skill=True),
@@ -573,7 +573,7 @@ class Kaeya(Character):
             ),
             eft.ReferredDamageEffect(
                 source=source,
-                target=DYNAMIC_CHARACTER_TARGET.OPPO_ACTIVE,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
                 element=Element.CRYO,
                 damage=1,
                 damage_type=DamageType(elemental_burst=True),
@@ -649,7 +649,7 @@ class RhodeiaOfLoch(Character):
     def _not_summoned_types(
             self,
             game_state: GameState,
-            pid: PID
+            pid: Pid
     ) -> tuple[type[sm.Summon], ...]:
         summons = game_state.get_player(pid).get_summons()
         return tuple(
@@ -727,7 +727,7 @@ class RhodeiaOfLoch(Character):
             ),
             eft.ReferredDamageEffect(
                 source=source,
-                target=DYNAMIC_CHARACTER_TARGET.OPPO_ACTIVE,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
                 element=Element.HYDRO,
                 damage=2 + 2 * len(summons),
                 damage_type=DamageType(elemental_burst=True)

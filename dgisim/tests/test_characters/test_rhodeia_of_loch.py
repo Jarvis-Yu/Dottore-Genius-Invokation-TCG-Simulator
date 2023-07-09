@@ -12,7 +12,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
             lambda hcs: hcs.add(StreamingSurge)  # TODO: replace with Rhodeia Talent Card
         ).build()
     ).f_player2(
-        lambda p: p.factory().phase(ACT.END_PHASE).build()
+        lambda p: p.factory().phase(Act.END_PHASE).build()
     ).build()
     assert type(BASE_GAME.get_player1().just_get_active_character()) is RhodeiaOfLoch
 
@@ -263,8 +263,8 @@ class TestRohdeiaOfLoch(unittest.TestCase):
             ).build()
         ).build()
         source = StaticTarget(
-            pid=PID.P1,
-            zone=ZONE.CHARACTERS,
+            pid=Pid.P1,
+            zone=Zone.CHARACTERS,
             id=1,
         )
 

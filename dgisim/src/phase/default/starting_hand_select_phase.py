@@ -6,7 +6,7 @@ from .. import phase as ph
 
 from ...action.action import PlayerAction, CharacterSelectAction
 from ...action.action_generator import ActionGenerator
-from ...state.enums import PID, ACT
+from ...state.enums import Pid, Act
 
 if TYPE_CHECKING:
     from ...action.types import DecidedChoiceType, GivenChoiceType
@@ -21,26 +21,26 @@ class StartingHandSelectPhase(ph.Phase):
 
     def _activate(self, game_state: GameState) -> GameState:
         return game_state.factory().player1(
-            game_state.get_player1().factory().phase(ACT.ACTION_PHASE).build()
+            game_state.get_player1().factory().phase(Act.ACTION_PHASE).build()
         ).player2(
-            game_state.get_player2().factory().phase(ACT.ACTION_PHASE).build()
+            game_state.get_player2().factory().phase(Act.ACTION_PHASE).build()
         ).build()
 
     def _to_roll_phase(self, game_state: GameState) -> GameState:
         return game_state.factory().phase(
             game_state.get_mode().roll_phase()
         ).player1(
-            game_state.get_player1().factory().phase(ACT.PASSIVE_WAIT_PHASE).build()
+            game_state.get_player1().factory().phase(Act.PASSIVE_WAIT_PHASE).build()
         ).player2(
-            game_state.get_player2().factory().phase(ACT.PASSIVE_WAIT_PHASE).build()
+            game_state.get_player2().factory().phase(Act.PASSIVE_WAIT_PHASE).build()
         ).build()
 
     def step(self, game_state: GameState) -> GameState:
         p1 = game_state.get_player1()
         p2 = game_state.get_player2()
-        if p1.get_phase() == ACT.PASSIVE_WAIT_PHASE and p2.get_phase() == ACT.PASSIVE_WAIT_PHASE:
+        if p1.get_phase() == Act.PASSIVE_WAIT_PHASE and p2.get_phase() == Act.PASSIVE_WAIT_PHASE:
             return self._activate(game_state)
-        elif p1.get_phase() is ACT.END_PHASE and p2.get_phase() is ACT.END_PHASE:
+        elif p1.get_phase() is Act.END_PHASE and p2.get_phase() is Act.END_PHASE:
             return self._to_roll_phase(game_state)
         else:
             raise Exception("Unknown Game State to process")
@@ -48,7 +48,7 @@ class StartingHandSelectPhase(ph.Phase):
     def _handle_picking_starting_hand(
             self,
             game_state: GameState,
-            pid: PID,
+            pid: Pid,
             action: CharacterSelectAction
     ) -> GameState:
         swap_action: CharacterSelectAction = action
@@ -64,14 +64,14 @@ class StartingHandSelectPhase(ph.Phase):
             pid,
             player.factory()
             .characters(new_chars)
-            .phase(ACT.END_PHASE)
+            .phase(Act.END_PHASE)
             .build()
         ).build()
 
     def step_action(
             self,
             game_state: GameState,
-            pid: PID,
+            pid: Pid,
             action: PlayerAction
     ) -> Optional[GameState]:
         if isinstance(action, CharacterSelectAction):
@@ -107,7 +107,7 @@ class StartingHandSelectPhase(ph.Phase):
             )
         )
 
-    def action_generator(self, game_state: GameState, pid: PID) -> ActionGenerator | None:
+    def action_generator(self, game_state: GameState, pid: Pid) -> ActionGenerator | None:
         return ActionGenerator(
             game_state=game_state,
             pid=pid,

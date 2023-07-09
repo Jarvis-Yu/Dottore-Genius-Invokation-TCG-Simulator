@@ -6,7 +6,7 @@ from .character.characters import Characters
 from .effect.effect import Effect
 from .effect.effect_stack import EffectStack
 from .phase import Phase
-from .state.enums import ACT, PID
+from .state.enums import Act, Pid
 from .state.game_state import GameState
 from .state.player_state import PlayerState
 from .status.status import Status
@@ -19,13 +19,13 @@ from .support.supports import Supports
 # module files
 from .cli import CLISession
 from .dices import AbstractDices, ActualDices, Dices
-from .element import Element, ElementalAura
+from .element import Element
 from .game_state_machine import GameStateMachine
 from .mode import DefaultMode, Mode
 from .player_agent import PlayerAgent
 
 __all__ = [
-    "ACT",
+    "Act",
     "AbstractDices",
     "ActualDices",
     "CLISession",
@@ -38,11 +38,10 @@ __all__ = [
     "Effect",
     "EffectStack",
     "Element",
-    "ElementalAura",
     "GameState",
     "GameStateMachine",
     "Mode",
-    "PID",
+    "Pid",
     "Phase",
     "PlayerAgent",
     "PlayerState",

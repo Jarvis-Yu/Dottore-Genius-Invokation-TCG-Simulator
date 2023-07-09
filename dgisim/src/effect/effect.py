@@ -23,10 +23,10 @@ from ..support import support as sp
 from ..character.enums import CharacterSkill
 from ..element import Element, Reaction, ReactionDetail
 from ..helper.quality_of_life import just, case_val
-from ..state.enums import PID, ACT
-from ..status.enums import PREPROCESSABLES
+from ..state.enums import Pid, Act
+from ..status.enums import Preprocessables
 from ..status.status_processing import StatusProcessing
-from .enums import DYNAMIC_CHARACTER_TARGET, TRIGGERING_SIGNAL, ZONE
+from .enums import DynamicCharacterTarget, TriggeringSignal, Zone
 from .structs import StaticTarget, DamageType
 
 if TYPE_CHECKING:
@@ -145,8 +145,8 @@ class AllStatusTriggererEffect(TriggerrbleEffect):
     """
     This effect triggers the characters' statuses with the provided signal in order.
     """
-    pid: PID
-    signal: TRIGGERING_SIGNAL
+    pid: Pid
+    signal: TriggeringSignal
 
     def execute(self, game_state: GameState) -> GameState:
         effects = StatusProcessing.trigger_all_statuses_effects(game_state, self.pid, self.signal)
@@ -159,7 +159,7 @@ class AllStatusTriggererEffect(TriggerrbleEffect):
 class TriggerStatusEffect(TriggerrbleEffect):
     target: StaticTarget
     status: type[Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]]
-    signal: TRIGGERING_SIGNAL
+    signal: TriggeringSignal
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
@@ -187,9 +187,9 @@ class TriggerStatusEffect(TriggerrbleEffect):
 
 @dataclass(frozen=True, repr=False)
 class TriggerCombatStatusEffect(TriggerrbleEffect):
-    target_pid: PID  # the player the status belongs to
+    target_pid: Pid  # the player the status belongs to
     status: type[stt.CombatStatus]
-    signal: TRIGGERING_SIGNAL
+    signal: TriggeringSignal
 
     def execute(self, game_state: GameState) -> GameState:
         effects: Iterable[Effect] = []
@@ -201,7 +201,7 @@ class TriggerCombatStatusEffect(TriggerrbleEffect):
             game_state,
             StaticTarget(
                 pid=self.target_pid,
-                zone=ZONE.COMBAT_STATUSES,
+                zone=Zone.COMBAT_STATUSES,
                 id=-1,
             ),
             self.signal,
@@ -213,9 +213,9 @@ class TriggerCombatStatusEffect(TriggerrbleEffect):
 
 @dataclass(frozen=True, repr=False)
 class TriggerSummonEffect(TriggerrbleEffect):
-    target_pid: PID
+    target_pid: Pid
     summon: type[sm.Summon]
-    signal: TRIGGERING_SIGNAL
+    signal: TriggeringSignal
 
     def execute(self, game_state: GameState) -> GameState:
         effects: Iterable[Effect] = []
@@ -227,7 +227,7 @@ class TriggerSummonEffect(TriggerrbleEffect):
             game_state,
             StaticTarget(
                 pid=self.target_pid,
-                zone=ZONE.SUMMONS,
+                zone=Zone.SUMMONS,
                 id=-1,
             ),
             self.signal,
@@ -239,10 +239,10 @@ class TriggerSummonEffect(TriggerrbleEffect):
 
 @dataclass(frozen=True, repr=False)
 class TriggerSupportEffect(TriggerrbleEffect):
-    target_pid: PID
+    target_pid: Pid
     support_type: type[sp.Support]
     sid: int
-    signal: TRIGGERING_SIGNAL
+    signal: TriggeringSignal
 
     def execute(self, game_state: GameState) -> GameState:
         effects: Iterable[Effect] = []
@@ -254,7 +254,7 @@ class TriggerSupportEffect(TriggerrbleEffect):
             game_state,
             StaticTarget(
                 pid=self.target_pid,
-                zone=ZONE.SUPPORTS,
+                zone=Zone.SUPPORTS,
                 id=self.sid,
             ),
             self.signal,
@@ -273,9 +273,9 @@ class DeathSwapPhaseStartEffect(PhaseEffect):
 
 @dataclass(frozen=True, repr=False)
 class DeathSwapPhaseEndEffect(PhaseEffect):
-    my_pid: PID
-    my_last_phase: ACT
-    other_last_phase: ACT
+    my_pid: Pid
+    my_last_phase: Act
+    other_last_phase: Act
 
     def execute(self, game_state: GameState) -> GameState:
         player = game_state.get_player(self.my_pid)
@@ -304,7 +304,7 @@ class EndPhaseCheckoutEffect(PhaseEffect):
         effects = [
             AllStatusTriggererEffect(
                 active_id,
-                TRIGGERING_SIGNAL.END_ROUND_CHECK_OUT
+                TriggeringSignal.END_ROUND_CHECK_OUT
             ),
             # TODO: add active_player's team status, summons status... here
         ]
@@ -325,7 +325,7 @@ class EndRoundEffect(PhaseEffect):
         effects = [
             AllStatusTriggererEffect(
                 active_id,
-                TRIGGERING_SIGNAL.ROUND_END
+                TriggeringSignal.ROUND_END
             ),
             # TODO: add active_player's team status, summons status... here
         ]
@@ -340,24 +340,24 @@ class TurnEndEffect(PhaseEffect):
         active_player_id = game_state.get_active_player_id()
         player = game_state.get_player(active_player_id)
         other_player = game_state.get_other_player(active_player_id)
-        assert player.get_phase() is ACT.ACTION_PHASE
+        assert player.get_phase() is Act.ACTION_PHASE
         # TODO: other tidy up
-        if other_player.get_phase() is ACT.END_PHASE:
+        if other_player.get_phase() is Act.END_PHASE:
             return game_state
         return game_state.factory().active_player_id(
             active_player_id.other()
         ).player(
             active_player_id,
-            player.factory().phase(ACT.PASSIVE_WAIT_PHASE).build()
+            player.factory().phase(Act.PASSIVE_WAIT_PHASE).build()
         ).other_player(
             active_player_id,
-            other_player.factory().phase(ACT.ACTION_PHASE).build()
+            other_player.factory().phase(Act.ACTION_PHASE).build()
         ).build()
 
 
 @dataclass(frozen=True, repr=False)
 class SetBothPlayerPhaseEffect(PhaseEffect):
-    phase: ACT
+    phase: Act
 
     def execute(self, game_state: GameState) -> GameState:
         return game_state.factory().f_player1(
@@ -381,11 +381,11 @@ class SwapCharacterCheckerEffect(CheckerEffect):
         my_pid = self.my_active.pid
         effects: list[Effect] = []
         if my_pid.is_player1():
-            my_signal = TRIGGERING_SIGNAL.SWAP_EVENT_1
-            oppo_signal = TRIGGERING_SIGNAL.SWAP_EVENT_2
+            my_signal = TriggeringSignal.SWAP_EVENT_1
+            oppo_signal = TriggeringSignal.SWAP_EVENT_2
         else:
-            my_signal = TRIGGERING_SIGNAL.SWAP_EVENT_2
-            oppo_signal = TRIGGERING_SIGNAL.SWAP_EVENT_1
+            my_signal = TriggeringSignal.SWAP_EVENT_2
+            oppo_signal = TriggeringSignal.SWAP_EVENT_1
         if my_ac_id != self.my_active.id:
             effects += [
                 AllStatusTriggererEffect(
@@ -413,11 +413,11 @@ class DeathCheckCheckerEffect(CheckerEffect):
         p1_character = game_state.get_player1().get_characters().get_active_character()
         p2_character = game_state.get_player2().get_characters().get_active_character()
         assert p1_character is not None and p2_character is not None
-        pid: PID
+        pid: Pid
         if p1_character.defeated():
-            pid = PID.P1
+            pid = Pid.P1
         elif p2_character.defeated():
-            pid = PID.P2
+            pid = Pid.P2
         else:  # if no one defeated, continue
             return game_state
         death_swap_player = game_state.get_player(pid)
@@ -438,12 +438,12 @@ class DeathCheckCheckerEffect(CheckerEffect):
         ).player(
             pid,
             game_state.get_player(pid).factory().phase(
-                ACT.ACTION_PHASE
+                Act.ACTION_PHASE
             ).build()
         ).other_player(
             pid,
             game_state.get_other_player(pid).factory().phase(
-                ACT.PASSIVE_WAIT_PHASE
+                Act.PASSIVE_WAIT_PHASE
             ).build()
         ).build()
 
@@ -464,7 +464,7 @@ class SwapCharacterEffect(DirectEffect):
     target: StaticTarget
 
     def execute(self, game_state: GameState) -> GameState:
-        assert self.target.zone == ZONE.CHARACTERS
+        assert self.target.zone == Zone.CHARACTERS
         pid = self.target.pid
         player = game_state.get_player(pid)
         if player.just_get_active_character().get_id() == self.target.id:
@@ -475,8 +475,8 @@ class SwapCharacterEffect(DirectEffect):
                 pid,
                 case_val(
                     pid.is_player1(),
-                    TRIGGERING_SIGNAL.SWAP_EVENT_1,
-                    TRIGGERING_SIGNAL.SWAP_EVENT_2,
+                    TriggeringSignal.SWAP_EVENT_1,
+                    TriggeringSignal.SWAP_EVENT_2,
                 ),
             ),
         ]
@@ -492,7 +492,7 @@ class SwapCharacterEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class ForwardSwapCharacterEffect(DirectEffect):
-    target_player: PID
+    target_player: Pid
 
     def execute(self, game_state: GameState) -> GameState:
         characters = game_state.get_player(self.target_player).get_characters()
@@ -536,7 +536,7 @@ class SpecificDamageEffect(DirectEffect):
 
     @staticmethod
     def _damage_preprocess(
-            game_state: GameState, damage: SpecificDamageEffect, pp_type: PREPROCESSABLES
+            game_state: GameState, damage: SpecificDamageEffect, pp_type: Preprocessables
     ) -> tuple[GameState, SpecificDamageEffect]:
         source_id = damage.source.pid
         game_state, item = StatusProcessing.preprocess_by_all_statuses(
@@ -554,7 +554,7 @@ class SpecificDamageEffect(DirectEffect):
             cls, game_state: GameState, damage: SpecificDamageEffect
     ) -> tuple[GameState, SpecificDamageEffect]:
         """ This is the pass to check final damage element """
-        return cls._damage_preprocess(game_state, damage, PREPROCESSABLES.DMG_ELEMENT)
+        return cls._damage_preprocess(game_state, damage, Preprocessables.DMG_ELEMENT)
 
     @classmethod
     def _reaction_confirmation(
@@ -596,7 +596,7 @@ class SpecificDamageEffect(DirectEffect):
             ).build()
 
         game_state, damage = cls._damage_preprocess(
-            game_state, damage, PREPROCESSABLES.DMG_REACTION
+            game_state, damage, Preprocessables.DMG_REACTION
         )
         return game_state, damage, reactionDetail
 
@@ -605,7 +605,7 @@ class SpecificDamageEffect(DirectEffect):
             cls, game_state: GameState, damage: SpecificDamageEffect
     ) -> tuple[GameState, SpecificDamageEffect]:
         """ This is the pass to check final damage amount """
-        return cls._damage_preprocess(game_state, damage, PREPROCESSABLES.DMG_AMOUNT)
+        return cls._damage_preprocess(game_state, damage, Preprocessables.DMG_AMOUNT)
 
     def execute(self, game_state: GameState) -> GameState:
         # Preprocessing
@@ -645,7 +645,7 @@ class SpecificDamageEffect(DirectEffect):
                 .get_player(actual_damage.target.pid) \
                 .just_get_active_character() \
                 .get_id()
-            assert actual_damage.target.zone is ZONE.CHARACTERS
+            assert actual_damage.target.zone is Zone.CHARACTERS
             if actual_damage.target.id is oppo_active_id:
                 effects.append(
                     ForwardSwapCharacterEffect(pid)
@@ -657,7 +657,7 @@ class SpecificDamageEffect(DirectEffect):
                 ReferredDamageEffect(
                     source=self.source,
                     target_ref=actual_damage.target,
-                    target=DYNAMIC_CHARACTER_TARGET.OPPO_OFF_FIELD,
+                    target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                     element=Element.PIERCING,
                     damage=1,
                     damage_type=DamageType(no_boost=True),
@@ -669,7 +669,7 @@ class SpecificDamageEffect(DirectEffect):
                 ReferredDamageEffect(
                     source=self.source,
                     target_ref=actual_damage.target,
-                    target=DYNAMIC_CHARACTER_TARGET.OPPO_OFF_FIELD,
+                    target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                     element=reaction.first_elem,
                     damage=1,
                     damage_type=DamageType(no_boost=True),
@@ -736,7 +736,7 @@ class SpecificDamageEffect(DirectEffect):
 @dataclass(frozen=True, repr=False)
 class ReferredDamageEffect(DirectEffect):
     source: StaticTarget
-    target: DYNAMIC_CHARACTER_TARGET
+    target: DynamicCharacterTarget
     element: Element
     damage: int
     damage_type: DamageType
@@ -752,18 +752,18 @@ class ReferredDamageEffect(DirectEffect):
         effects: list[Effect] = []
         char: Optional[chr.Character]
 
-        if self.target is DYNAMIC_CHARACTER_TARGET.OPPO_ACTIVE:
+        if self.target is DynamicCharacterTarget.OPPO_ACTIVE:
             targets.append(
                 game_state.get_other_player(self.source.pid).get_characters().get_active_character()
             )
-        elif self.target is DYNAMIC_CHARACTER_TARGET.OPPO_OFF_FIELD:
+        elif self.target is DynamicCharacterTarget.OPPO_OFF_FIELD:
             opponenet_characters = game_state.get_other_player(self.source.pid).get_characters()
             avoided_id: int
             if self.target_ref is None:
                 avoided_id = just(opponenet_characters.get_active_character_id())
             else:
                 assert self.target_ref.pid is self.source.pid.other()
-                assert self.target_ref.zone is ZONE.CHARACTERS
+                assert self.target_ref.zone is Zone.CHARACTERS
                 avoided_id = self.target_ref.id
             for char in opponenet_characters.get_characters():
                 if char.get_id() != avoided_id:
@@ -782,7 +782,7 @@ class ReferredDamageEffect(DirectEffect):
                     source=self.source,
                     target=StaticTarget(
                         pid=pid,
-                        zone=ZONE.CHARACTERS,
+                        zone=Zone.CHARACTERS,
                         id=char.get_id(),
                     ),
                     element=self.element,
@@ -866,7 +866,7 @@ class RecoverHPEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class PublicAddCardEffect(DirectEffect):
-    pid: PID
+    pid: Pid
     card: type[Card]
 
     def execute(self, game_state: GameState) -> GameState:
@@ -882,7 +882,7 @@ class PublicAddCardEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class PublicRemoveCardEffect(DirectEffect):
-    pid: PID
+    pid: Pid
     card: type[Card]
 
     def execute(self, game_state: GameState) -> GameState:
@@ -903,7 +903,7 @@ class PublicRemoveCardEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class PublicRemoveAllCardEffect(DirectEffect):
-    pid: PID
+    pid: Pid
     card: type[Card]
 
     def execute(self, game_state: GameState) -> GameState:
@@ -924,7 +924,7 @@ class PublicRemoveAllCardEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class RemoveDiceEffect(DirectEffect):
-    pid: PID
+    pid: Pid
     dices: ActualDices
 
     def execute(self, game_state: GameState) -> GameState:
@@ -1055,7 +1055,7 @@ class OverrideCharacterStatusEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class AddCombatStatusEffect(DirectEffect):
-    target_pid: PID
+    target_pid: Pid
     status: type[stt.CombatStatus]
 
     def execute(self, game_state: GameState) -> GameState:
@@ -1069,7 +1069,7 @@ class AddCombatStatusEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class RemoveCombatStatusEffect(DirectEffect):
-    target_pid: PID
+    target_pid: Pid
     status: type[stt.CombatStatus]
 
     def execute(self, game_state: GameState) -> GameState:
@@ -1083,7 +1083,7 @@ class RemoveCombatStatusEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class UpdateCombatStatusEffect(DirectEffect):
-    target_pid: PID
+    target_pid: Pid
     status: stt.CombatStatus
 
     def execute(self, game_state: GameState) -> GameState:
@@ -1097,7 +1097,7 @@ class UpdateCombatStatusEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class OverrideCombatStatusEffect(DirectEffect):
-    target_pid: PID
+    target_pid: Pid
     status: stt.CombatStatus
 
     def execute(self, game_state: GameState) -> GameState:
@@ -1111,7 +1111,7 @@ class OverrideCombatStatusEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class AddSummonEffect(DirectEffect):
-    target_pid: PID
+    target_pid: Pid
     summon: type[sm.Summon]
 
     def execute(self, game_state: GameState) -> GameState:
@@ -1125,7 +1125,7 @@ class AddSummonEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class RemoveSummonEffect(DirectEffect):
-    target_pid: PID
+    target_pid: Pid
     summon: type[sm.Summon]
 
     def execute(self, game_state: GameState) -> GameState:
@@ -1139,7 +1139,7 @@ class RemoveSummonEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class UpdateSummonEffect(DirectEffect):
-    target_pid: PID
+    target_pid: Pid
     summon: sm.Summon
 
     def execute(self, game_state: GameState) -> GameState:
@@ -1153,7 +1153,7 @@ class UpdateSummonEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class OverrideSummonEffect(DirectEffect):
-    target_pid: PID
+    target_pid: Pid
     summon: sm.Summon
 
     def execute(self, game_state: GameState) -> GameState:
@@ -1167,7 +1167,7 @@ class OverrideSummonEffect(DirectEffect):
 
 @dataclass(frozen=True, kw_only=True, repr=False)
 class AllSummonIncreaseUsage(DirectEffect):
-    target_pid: PID
+    target_pid: Pid
     d_usages: int = 1
 
     def execute(self, game_state: GameState) -> GameState:
@@ -1187,7 +1187,7 @@ class AllSummonIncreaseUsage(DirectEffect):
 
 @dataclass(frozen=True, kw_only=True, repr=False)
 class OneSummonIncreaseUsage(DirectEffect):
-    target_pid: PID
+    target_pid: Pid
     summon_type: type[sm.Summon]
     d_usages: int = 1
 
@@ -1211,7 +1211,7 @@ class OneSummonIncreaseUsage(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class AddSupportEffect(DirectEffect):
-    target_pid: PID
+    target_pid: Pid
     support: type[sp.Support]
 
     def execute(self, game_state: GameState) -> GameState:
@@ -1225,7 +1225,7 @@ class AddSupportEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class RemoveSupportEffect(DirectEffect):
-    target_pid: PID
+    target_pid: Pid
     sid: int
 
     def execute(self, game_state: GameState) -> GameState:
@@ -1239,7 +1239,7 @@ class RemoveSupportEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class UpdateSupportEffect(DirectEffect):
-    target_pid: PID
+    target_pid: Pid
     support: sp.Support
 
     def execute(self, game_state: GameState) -> GameState:
@@ -1253,7 +1253,7 @@ class UpdateSupportEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class OverrideSupportEffect(DirectEffect):
-    target_pid: PID
+    target_pid: Pid
     support: sp.Support
 
     def execute(self, game_state: GameState) -> GameState:

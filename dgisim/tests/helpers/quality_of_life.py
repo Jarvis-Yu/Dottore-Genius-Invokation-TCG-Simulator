@@ -3,13 +3,13 @@ from __future__ import annotations
 from dgisim.src.agents import *
 from dgisim.src.dices import ActualDices
 from dgisim.src.effect.effect import *
-from dgisim.src.effect.enums import DYNAMIC_CHARACTER_TARGET, ZONE
+from dgisim.src.effect.enums import DynamicCharacterTarget, Zone
 from dgisim.src.effect.structs import DamageType, StaticTarget
 from dgisim.src.element import *
 from dgisim.src.game_state_machine import GameStateMachine
 from dgisim.src.helper.level_print import GamePrinter
 from dgisim.src.helper.quality_of_life import *
-from dgisim.src.state.enums import PID
+from dgisim.src.state.enums import Pid
 from dgisim.src.state.game_state import GameState
 
 
@@ -56,7 +56,7 @@ def add_damage_effect(
         game_state: GameState,
         damage: int,
         elem: Element,
-        pid: PID = PID.P2,
+        pid: Pid = Pid.P2,
         char_id: None | int = None,
 ) -> GameState:
     """
@@ -68,10 +68,10 @@ def add_damage_effect(
             ReferredDamageEffect(
                 source=StaticTarget(
                     pid.other(),
-                    ZONE.CHARACTERS,
+                    Zone.CHARACTERS,
                     case_val(char_id is None, 1, char_id),  # type: ignore
                 ),
-                target=DYNAMIC_CHARACTER_TARGET.OPPO_ACTIVE,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
                 element=elem,
                 damage=damage,
                 damage_type=DamageType(),
@@ -84,7 +84,7 @@ def add_damage_effect(
 def kill_character(
         game_state: GameState,
         character_id: int,
-        pid: PID = PID.P2,
+        pid: Pid = Pid.P2,
         hp: int = 0,
 ) -> GameState:
     """
@@ -101,7 +101,7 @@ def kill_character(
     ).build()
 
 
-def set_active_player_id(game_state: GameState, pid: PID, character_id: int) -> GameState:
+def set_active_player_id(game_state: GameState, pid: Pid, character_id: int) -> GameState:
     return game_state.factory().f_player(
         pid,
         lambda p: p.factory().f_characters(

@@ -3,11 +3,11 @@ import unittest
 from dgisim.src.action.action import *
 from dgisim.src.agents import *
 from dgisim.src.effect.effect import *
-from dgisim.src.effect.enums import DYNAMIC_CHARACTER_TARGET
+from dgisim.src.effect.enums import DynamicCharacterTarget
 from dgisim.src.effect.structs import DamageType
 from dgisim.src.element import ElementalAura
 from dgisim.src.game_state_machine import GameStateMachine
-from dgisim.src.state.enums import PID
+from dgisim.src.state.enums import Pid
 from dgisim.src.state.game_state import GameState
 from dgisim.src.status.status import *
 from dgisim.src.summon.summon import *
@@ -249,11 +249,11 @@ class TestStatus(unittest.TestCase):
             lambda es: es.push_one(
                 ReferredDamageEffect(
                     source=StaticTarget(
-                        pid=PID.P1,
-                        zone=ZONE.CHARACTERS,
+                        pid=Pid.P1,
+                        zone=Zone.CHARACTERS,
                         id=1,
                     ),
-                    target=DYNAMIC_CHARACTER_TARGET.OPPO_OFF_FIELD,
+                    target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                     element=Element.ELECTRO,
                     damage=1,
                     damage_type=DamageType(),
@@ -611,8 +611,8 @@ class TestStatus(unittest.TestCase):
         # deals 1 electro damage to off-field characters
         game_state = base_game_state.factory().f_effect_stack(
             lambda es: es.push_one(ReferredDamageEffect(
-                source=StaticTarget(PID.P1, ZONE.CHARACTERS, 1),
-                target=DYNAMIC_CHARACTER_TARGET.OPPO_OFF_FIELD,
+                source=StaticTarget(Pid.P1, Zone.CHARACTERS, 1),
+                target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                 element=Element.ELECTRO,
                 damage=1,
                 damage_type=DamageType(),
@@ -716,8 +716,8 @@ class TestStatus(unittest.TestCase):
         # deals 1 electro damage to off-field characters
         game_state = base_game_state.factory().f_effect_stack(
             lambda es: es.push_one(ReferredDamageEffect(
-                source=StaticTarget(PID.P1, ZONE.CHARACTERS, 1),
-                target=DYNAMIC_CHARACTER_TARGET.OPPO_OFF_FIELD,
+                source=StaticTarget(Pid.P1, Zone.CHARACTERS, 1),
+                target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                 element=Element.ELECTRO,
                 damage=1,
                 damage_type=DamageType(),

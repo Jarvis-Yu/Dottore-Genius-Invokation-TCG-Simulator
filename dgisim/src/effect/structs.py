@@ -2,8 +2,8 @@ from dataclasses import dataclass, fields
 from typing import TYPE_CHECKING
 
 from ..helper.quality_of_life import dataclass_repr
-from ..state.enums import PID
-from .enums import ZONE
+from ..state.enums import Pid
+from .enums import Zone
 
 __all__ = [
     "DamageType",
@@ -13,8 +13,8 @@ __all__ = [
 
 @dataclass(frozen=True, repr=False)
 class StaticTarget:
-    pid: PID
-    zone: ZONE
+    pid: Pid
+    zone: Zone
     id: int
 
     def __repr__(self) -> str:

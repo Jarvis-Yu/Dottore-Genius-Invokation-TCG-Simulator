@@ -25,7 +25,7 @@ class Dices:
     _LEGAL_ELEMS = frozenset(elem for elem in Element)
 
     def __init__(self, dices: dict[Element, int]) -> None:
-        self._dices = HashableDict(dices)
+        self._dices = HashableDict.from_dict(dices)
 
     def __add__(self, other: Dices | dict[Element, int]) -> Self:
         dices: dict[Element, int]
@@ -54,9 +54,9 @@ class Dices:
         if self.is_legal():
             return self
         return type(self)(dict(
-            (elem, max(0, n))
+            (elem, n)
             for elem, n in self._dices.items()
-            if elem in self._LEGAL_ELEMS
+            if elem in self._LEGAL_ELEMS and n > 0
         ))
 
     def elems(self) -> Iterable[Element]:
@@ -93,7 +93,7 @@ class Dices:
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Dices):
             return False
-        return self._dices == other._dices
+        return self is other or self._dices == other._dices
 
     def __hash__(self) -> int:
         return hash(self._dices)

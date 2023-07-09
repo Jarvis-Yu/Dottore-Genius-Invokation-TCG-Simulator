@@ -2,20 +2,20 @@ from __future__ import annotations
 from enum import Enum
 
 __all__ = [
-    "DYNAMIC_CHARACTER_TARGET",
-    "TRIGGERING_SIGNAL",
-    "ZONE",
+    "DynamicCharacterTarget",
+    "TriggeringSignal",
+    "Zone",
 ]
 
 
-class ZONE(Enum):
+class Zone(Enum):
     CHARACTERS = "Characters"
     SUMMONS = "Summons"
     SUPPORTS = "Supports"
     COMBAT_STATUSES = "Combat-Statuses"
 
 
-class TRIGGERING_SIGNAL(Enum):
+class TriggeringSignal(Enum):
     FAST_ACTION = 0
     COMBAT_ACTION = 1
     DEATH_EVENT = 2
@@ -26,7 +26,7 @@ class TRIGGERING_SIGNAL(Enum):
     ROUND_END = 7  # remove frozen etc.
 
 
-class DYNAMIC_CHARACTER_TARGET(Enum):
+class DynamicCharacterTarget(Enum):
     SELF_SELF = 0
     SELF_ACTIVE = 1
     SELF_OFF_FIELD = 2
