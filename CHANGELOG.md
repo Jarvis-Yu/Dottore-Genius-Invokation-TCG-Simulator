@@ -1,6 +1,17 @@
 # Change Log
 
-## 0.1.dev0
+## v0.2.dev0
+
+### Added
+
+- Adds link to documentation
+
+### Updated
+
+- Refines API
+- CLI has full control of the player
+
+## v0.1.dev0
 
 ### Added
 

@@ -27,7 +27,7 @@ Once installed, you may have a try with the CLI to play the simulator in command
 You might want to run a simple python program like this:
 
 ```py
-from dgisim.cli import CLISession
+from dgisim import CLISession
 
 session = CLISession()
 session.run()
