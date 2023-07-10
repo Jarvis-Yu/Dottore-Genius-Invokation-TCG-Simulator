@@ -132,19 +132,22 @@ class PlayerState:
     def example_player(cls, mode: Mode) -> Self:
         cards = mode.all_cards()
         chars = mode.all_chars()
+        import random
+        selected_cards = random.sample(list(cards), k=15)
+        selected_chars = random.sample(list(chars), k=3)
         return cls(
             phase=Act.PASSIVE_WAIT_PHASE,
             card_redraw_chances=0,
             dice_reroll_chances=0,
             characters=Characters.from_default(
-                tuple([char.from_default(i + 1) for i, char in enumerate(chars)][:3])
+                tuple(char.from_default(i + 1) for i, char in enumerate(selected_chars))
             ),
             combat_statuses=sts.Statuses(()),
             summons=Summons((), mode.summons_limit()),
             supports=Supports((), mode.supports_limit()),
             dices=ActualDices({}),
             hand_cards=Cards({}),
-            deck_cards=Cards(dict([(card, mode.max_cards_per_kind()) for card in cards])),
+            deck_cards=Cards(dict([(card, mode.max_cards_per_kind()) for card in selected_cards])),
             publicly_used_cards=Cards({}),
             publicly_gained_cards=Cards({}),
         )

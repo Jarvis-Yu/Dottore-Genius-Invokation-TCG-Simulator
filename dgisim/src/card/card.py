@@ -80,6 +80,8 @@ __all__ = [
     "ThunderingPenance",
     ## Rhodeia of Loch ##
     "StreamingSurge",
+    ## Tighnari ##
+    "KeenSight",
 ]
 
 ############################## base ##############################
@@ -1121,5 +1123,53 @@ class StreamingSurge(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
             eft.CastSkillEffect(
                 target=target,
                 skill=CharacterSkill.ELEMENTAL_BURST,
+            ),
+        )
+
+#### Tighnari ####
+
+
+class KeenSight(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDices({Element.DENDRO: 4})
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        return _UsableFuncs.active_combat_talent_skill_card_usable(game_state, pid, chr.Tighnari) \
+            and super()._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        return isinstance(instruction, act.DiceOnlyInstruction) \
+            and cls._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.DiceOnlyInstruction)
+        target = StaticTarget(
+            pid=pid,
+            zone=Zone.CHARACTERS,
+            id=game_state.get_player(pid).just_get_active_character().get_id(),
+        )
+        return (
+            eft.AddCharacterStatusEffect(
+                target=target,
+                status=stt.KeenSightStatus,
+            ),
+            eft.CastSkillEffect(
+                target=target,
+                skill=CharacterSkill.ELEMENTAL_SKILL1,
             ),
         )

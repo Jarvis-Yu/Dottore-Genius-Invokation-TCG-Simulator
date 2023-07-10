@@ -72,6 +72,9 @@ __all__ = [
     "ThunderingPenanceStatus",
     ## Rhodeia of Loch ##
     "StreamingSurgeStatus",
+    ## Tighnari ##
+    "KeenSightStatus",
+    "VijnanaSuffusionStatus",
 ]
 
 
@@ -609,7 +612,7 @@ class ChangingShiftsStatus(CombatStatus):
     ) -> tuple[Preprocessable, Optional[Self]]:
         if signal is Preprocessables.SWAP:
             assert isinstance(item, GameEvent) and item.event_type is EventType.SWAP
-            if item.target.pid is status_source.pid \
+            if item.source.pid is status_source.pid \
                     and item.dices_cost.num_dices() >= self.COST_DEDUCTION:
                 assert item.dices_cost.num_dices() == item.dices_cost[Element.ANY]
                 new_cost = (item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
@@ -714,7 +717,7 @@ class LeaveItToMeStatus(CombatStatus):
     ) -> tuple[Preprocessable, Optional[Self]]:
         if signal is Preprocessables.SWAP:
             assert isinstance(item, GameEvent) and item.event_type is EventType.SWAP
-            if item.target.pid is status_source.pid \
+            if item.source.pid is status_source.pid \
                     and item.event_speed is EventSpeed.COMBAT_ACTION:
                 return replace(item, event_speed=EventSpeed.FAST_ACTION), None
         return super()._preprocess(game_state, status_source, item, signal)
@@ -788,7 +791,7 @@ class MintyMeatRollsStatus(CharacterStatus, _UsageStatus):
     ) -> tuple[Preprocessable, Optional[Self]]:
         if signal is Preprocessables.SKILL:
             assert isinstance(item, GameEvent)
-            if status_source == item.target \
+            if status_source == item.source \
                     and item.event_type is EventType.NORMAL_ATTACK \
                     and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION:
                 item = replace(
@@ -848,7 +851,7 @@ class NorthernSmokedChickenStatus(CharacterStatus, _UsageStatus):
     ) -> tuple[Preprocessable, Optional[Self]]:
         if signal is Preprocessables.SKILL:
             assert isinstance(item, GameEvent)
-            if status_source == item.target \
+            if status_source == item.source \
                     and item.event_type is EventType.NORMAL_ATTACK \
                     and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION:
                 item = replace(
@@ -935,7 +938,7 @@ class ColdBloodedStrikeStatus(EquipmentStatus):
         if not isinstance(information, CharacterSkill):
             return self
 
-        assert info_source != None
+        assert info_source is not None
         if status_source != info_source \
                 or information != CharacterSkill.ELEMENTAL_SKILL1:
             return self
@@ -1007,3 +1010,117 @@ class KeqingElectroInfusionStatus(ElectroInfusionStatus):
 @dataclass(frozen=True, kw_only=True)
 class StreamingSurgeStatus(EquipmentStatus):
     pass
+
+#### Tighnari ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class KeenSightStatus(EquipmentStatus):
+    COST_DEDUCTION: ClassVar[int] = 1
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: Preprocessable,
+            signal: Preprocessables,
+    ) -> tuple[Preprocessable, Optional[Self]]:
+        if signal is Preprocessables.SKILL:
+            assert isinstance(item, GameEvent)
+            player = game_state.get_player(status_source.pid)
+            characters = player.get_characters()
+            if (
+                    status_source == item.source
+                    and item.event_type is EventType.NORMAL_ATTACK
+                    and player.get_dices().is_even()
+                    and characters.just_get_character(
+                        status_source.id
+                    ).get_character_statuses().contains(VijnanaSuffusionStatus)
+                    and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION
+            ):
+                item = replace(
+                    item,
+                    dices_cost=(item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
+                )
+                return item, self
+        return super()._preprocess(game_state, status_source, item, signal)
+
+
+@dataclass(frozen=True, kw_only=True)
+class VijnanaSuffusionStatus(CharacterStatus, _UsageStatus):
+    usages: int = 2
+    activated: bool = False
+    MAX_USAGES: ClassVar[int] = 2
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            information: eft.SpecificDamageEffect | CharacterSkill | Card,
+            info_source: Optional[StaticTarget],
+    ) -> Self:
+        if (
+                self.activated
+                or self.usages == 0
+                or not isinstance(information, eft.SpecificDamageEffect)
+                or status_source != info_source
+                or not information.damage_type.charged_attack
+        ):
+            return self
+
+        return replace(self, activated=True)
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: Preprocessable,
+            signal: Preprocessables,
+    ) -> tuple[Preprocessable, Optional[Self]]:
+        new_item: Optional[eft.SpecificDamageEffect] = None
+        if isinstance(item, eft.SpecificDamageEffect):
+            if status_source != item.source:
+                return item, self
+            if signal is Preprocessables.DMG_ELEMENT:
+                if item.damage_type.charged_attack:
+                    new_item = replace(item, element=Element.DENDRO)
+        if new_item is not None:
+            return new_item, self
+        else:
+            return item, self
+
+    @override
+    def _react_to_signal(
+            self,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        es: list[eft.Effect] = []
+        new_self = self
+
+        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+            from ..summon.summon import ClusterbloomArrow
+            assert self.usages >= 1
+            es.append(
+                eft.AddSummonEffect(
+                    target_pid=source.pid,
+                    summon=ClusterbloomArrow,
+                )
+            )
+            new_self = replace(new_self, usages=-1, activated=False)
+
+        return es, new_self
+
+    @override
+    def _update(self, other: Self) -> None | Self:
+        new_usages = min(self.usages + other.usages, self.MAX_USAGES)
+        return type(self)(
+            usages=new_usages,
+            activated=other.activated,
+        )
+
+    def __str__(self) -> str:
+        return super().__str__() + f"({self.usages}{case_val(self.activated, '*', '')})"

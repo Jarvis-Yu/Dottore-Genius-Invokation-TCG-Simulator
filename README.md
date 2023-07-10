@@ -62,10 +62,11 @@ dictionary, and discover game states on different 'game branches' being actually
 - [x] Implement game phase of Starting Hand Select Phase (select active character)
 - [x] Implement game phase of Roll (Dice) Phase (roll dices between rounds)
 - [x] Implement game phase of Action Phase (players beat each other)
-  - [ ] Implement all cards (15/184 implemented)
+  - [ ] Implement all cards (16/184 implemented)
     - [x] Changing Shifts,
           ColdBlooded Strike,
           Jueyun Guoba,
+          Keen Sight,
           Leave It to Me!,
           Lightning Stiletto,
           Lotus Flower Crisp,
@@ -78,10 +79,11 @@ dictionary, and discover game states on different 'game branches' being actually
           Sweet Madame,
           Thundering Penance,
           Xudong,
-  - [ ] Implement all characters with their talent cards (3/48 implemented)
+  - [ ] Implement all characters with their talent cards (4/48 implemented)
     - [x] Kaeya,
           Keqing,
           Rhodeia of Loch,
+          Tighnari,
   - [x] Implement all reactions
 - [x] Implement game phase of End Phase (summons and some support card or statuses take action)
 - [x] Implement game phase of Game End Phase (one player wins or draw)

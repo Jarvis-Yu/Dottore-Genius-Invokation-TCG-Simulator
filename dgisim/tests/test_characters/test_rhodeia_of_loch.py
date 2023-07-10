@@ -124,7 +124,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         self.assertEqual(p2_ac.get_hp(), 5)
         self.assertTrue(p2_ac.get_elemental_aura().contains(Element.HYDRO))
 
-        # after second end round
+        # after third end round
         a1.inject_action(EndRoundAction())
         a2.inject_action(EndRoundAction())
 
@@ -262,11 +262,6 @@ class TestRohdeiaOfLoch(unittest.TestCase):
                 ).build()
             ).build()
         ).build()
-        source = StaticTarget(
-            pid=Pid.P1,
-            zone=Zone.CHARACTERS,
-            id=1,
-        )
 
         gsm = GameStateMachine(base_game, a1, a2)
         a1.inject_action(

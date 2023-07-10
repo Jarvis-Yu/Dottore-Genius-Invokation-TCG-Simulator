@@ -6,9 +6,10 @@ __all__ = [
 
 _DEFAULT_CARDS: list[type[Card]] = [
     # Equipment Card
-    ThunderingPenance,
     ColdBloodedStrike,
+    KeenSight,
     StreamingSurge,
+    ThunderingPenance,
 
     # Event Card
     ChangingShifts,

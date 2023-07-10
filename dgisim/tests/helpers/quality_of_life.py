@@ -51,6 +51,16 @@ def oppo_aura_elem(game_state: GameState, elem: Element, char_id: None | int = N
             ).build()
         ).build()
 
+def remove_aura(game_state: GameState, pid: Pid = Pid.P2, char_id: None | int = None) -> GameState:
+    return game_state.factory().f_player(
+        pid,
+        lambda p: p.factory().f_characters(
+            lambda cs: cs.factory().f_character(
+                case_val(char_id is None, cs.just_get_active_character_id(), char_id),  # type: ignore
+                lambda c: c.factory().elemental_aura(ElementalAura.from_default()).build()
+            ).build()
+        ).build()
+    ).build()
 
 def add_damage_effect(
         game_state: GameState,

@@ -10,6 +10,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     Keqing,
     Kaeya,
     RhodeiaOfLoch,
+    Tighnari,
 ]
 
 _DEFAULT_CHARACTER_FSET = None

@@ -33,6 +33,7 @@ __all__ = [
 
     # concrete implementations
     "BurningFlameSummon",
+    "ClusterbloomArrow",
     "OceanicMimicFrogSummon",
     "OceanicMimicRaptorSummon",
     "OceanicMimicSquirrelSummon",
@@ -118,6 +119,12 @@ class BurningFlameSummon(_DmgPerRoundSummon):
     DMG: ClassVar[int] = 1
     ELEMENT: ClassVar[Element] = Element.PYRO
 
+@dataclass(frozen=True, kw_only=True)
+class ClusterbloomArrow(_DmgPerRoundSummon):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.DENDRO
 
 @dataclass(frozen=True, kw_only=True)
 class OceanicMimicFrogSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):

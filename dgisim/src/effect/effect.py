@@ -622,6 +622,13 @@ class SpecificDamageEffect(DirectEffect):
                 damage=reactioned_damage.damage + reaction.reaction_type.damage_boost(),
             )
         game_state, actual_damage = self._damage_confirmation(game_state, reactioned_damage)
+        # Update all statuses with this damage
+        game_state = StatusProcessing.inform_all_statuses(
+            game_state,
+            actual_damage.source.pid,
+            actual_damage,
+            actual_damage.source,
+        )
 
         # Get damage target
         target = game_state.get_character_target(actual_damage.target)
@@ -635,7 +642,6 @@ class SpecificDamageEffect(DirectEffect):
         pid = self.target.pid
         effects: list[Effect] = [DefeatedCheckerEffect()]
 
-        # LATESET_TODO: use the reaction information to generate further effects
         if reaction is None:
             pass
 

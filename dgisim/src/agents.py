@@ -5,6 +5,7 @@ import random
 from typing import Any, Callable, Iterable, Optional, TYPE_CHECKING, TypeVar
 
 from .action.action import *
+from .action.enums import ActionType
 from .action.action_generator import *
 from .action.action_generator_generator import *
 from .action.types import DecidedChoiceType
@@ -12,6 +13,7 @@ from .card.card import *
 from .card.cards import Cards
 from .dices import AbstractDices, ActualDices
 from .effect.effect import *
+from .element import Element
 from .phase.default.action_phase import ActionPhase
 from .phase.default.card_select_phase import CardSelectPhase
 from .phase.default.end_phase import EndPhase
@@ -139,6 +141,9 @@ class RandomAgent(PlayerAgent):
             choices = action_generator.choices()
             choice: DecidedChoiceType  # type: ignore
             if isinstance(choices, tuple):
+                game_state = action_generator.game_state
+                if game_state.get_phase() == game_state.get_mode().roll_phase():
+                    choices = tuple(c for c in choices if c is not ActionType.END_ROUND)
                 choice = random.choice(choices)
                 action_generator = action_generator.choose(choice)
             elif isinstance(choices, AbstractDices):
@@ -153,7 +158,18 @@ class RandomAgent(PlayerAgent):
                 _, choice = choices.pick_random_cards(random.randint(0, choices.num_cards()))
                 action_generator = action_generator.choose(choice)
             elif isinstance(choices, ActualDices):
-                _, choice = choices.pick_random_dices(random.randint(0, choices.num_dices()))
+                game_state = action_generator.game_state
+                wanted_elems = game_state.get_player(
+                    action_generator.pid
+                ).get_characters().all_elems()
+                if game_state.get_phase() == game_state.get_mode().roll_phase():
+                    choice = ActualDices(dict(
+                        (elem, choices[elem])
+                        for elem in choices.elems()
+                        if not(elem is Element.OMNI or elem in wanted_elems)
+                    ))
+                else:
+                    _, choice = choices.pick_random_dices(random.randint(0, choices.num_dices()))
                 action_generator = action_generator.choose(choice)
             else:
                 raise NotImplementedError

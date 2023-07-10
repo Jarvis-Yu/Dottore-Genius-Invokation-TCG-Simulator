@@ -46,6 +46,9 @@ class Dices:
     def num_dices(self) -> int:
         return sum(self._dices.values())
 
+    def is_even(self) -> bool:
+        return self.num_dices() % 2 == 0
+
     def is_legal(self) -> bool:
         return all(map(lambda x: x >= 0, self._dices.values())) \
             and all(elem in self._LEGAL_ELEMS for elem in self._dices)

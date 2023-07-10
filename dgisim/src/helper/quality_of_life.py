@@ -9,22 +9,12 @@ __all__ = [
     "case_val",
     "dataclass_repr",
     "just",
+    "replace_tuple",
 ]
 
 _T = TypeVar('_T')
 
-
-def just(optional_val: None | _T, backup: None | _T = None) -> _T:
-    """
-    Removes Optional and get value directly
-    Throws exception if it is indeed None
-    """
-    if optional_val is None:
-        if backup is None:
-            raise Exception("Trying to just None")
-        else:
-            return backup
-    return optional_val
+BIG_INT = 0x7fffffff
 
 
 def case_val(condition: bool, first: _T, second: _T) -> _T:
@@ -48,4 +38,20 @@ def dataclass_repr(self) -> str:
     return f"{self.__class__.__name__}({', '.join(paired_fields)})"
 
 
-BIG_INT = 0x7fffffff
+def just(optional_val: None | _T, backup: None | _T = None) -> _T:
+    """
+    Removes Optional and get value directly
+    Throws exception if it is indeed None
+    """
+    if optional_val is None:
+        if backup is None:
+            raise Exception("Trying to just None")
+        else:
+            return backup
+    return optional_val
+
+
+def replace_tuple(tup: tuple[_T, ...], index: int, val: _T) -> tuple[_T, ...]:
+    vals = list(tup)
+    vals[index] = val
+    return tuple(vals)

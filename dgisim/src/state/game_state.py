@@ -406,7 +406,7 @@ class SwapChecker:
             game_state=game_state,
             pid=pid,
             item=GameEvent(
-                target=StaticTarget(
+                source=StaticTarget(
                     pid=pid,
                     zone=Zone.CHARACTERS,
                     id=char_id,
@@ -456,7 +456,7 @@ class SwapChecker:
                 game_state=game_state,
                 pid=pid,
                 item=GameEvent(
-                    target=StaticTarget(
+                    source=StaticTarget(
                         pid=pid,
                         zone=Zone.CHARACTERS,
                         id=action.char_id,
@@ -502,7 +502,7 @@ class SkillChecker:
             game_state=game_state,
             pid=pid,
             item=GameEvent(
-                target=StaticTarget(
+                source=StaticTarget(
                     pid=pid,
                     zone=Zone.CHARACTERS,
                     id=char_id,
@@ -548,7 +548,7 @@ class SkillChecker:
             game_state=game_state,
             pid=pid,
             item=GameEvent(
-                target=StaticTarget(
+                source=StaticTarget(
                     pid=pid,
                     zone=Zone.CHARACTERS,
                     id=character.get_id(),

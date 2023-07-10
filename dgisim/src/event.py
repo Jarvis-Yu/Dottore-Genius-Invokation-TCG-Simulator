@@ -32,7 +32,7 @@ class EventType(Enum):
 
 @dataclass(frozen=True, kw_only=True)
 class GameEvent:
-    target: StaticTarget
+    source: StaticTarget       # this source is who caused the GameEvent
     event_type: EventType
     event_speed: EventSpeed
     dices_cost: AbstractDices

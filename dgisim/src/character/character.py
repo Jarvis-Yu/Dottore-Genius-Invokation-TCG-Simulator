@@ -32,7 +32,9 @@ __all__ = [
     "Kaeya",
     "Keqing",
     "RhodeiaOfLoch",
+    "Tighnari",
 ]
+
 
 class Character:
     _ELEMENT = Element.ANY
@@ -373,6 +375,89 @@ class CharacterFactory:
         )
 
 
+class Kaeya(Character):
+    # basic info
+    _ELEMENT = Element.CRYO
+
+    @override
+    @staticmethod
+    def _talent_status() -> Optional[type[stt.EquipmentStatus]]:
+        return stt.ColdBloodedStrikeStatus
+
+    @override
+    @classmethod
+    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
+        if skill_type is CharacterSkill.NORMAL_ATTACK:
+            return AbstractDices({
+                Element.CRYO: 1,
+                Element.ANY: 2,
+            })
+        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
+            return AbstractDices({
+                Element.CRYO: 3,
+            })
+        elif skill_type is CharacterSkill.ELEMENTAL_BURST:
+            return AbstractDices({
+                Element.CRYO: 4,
+            })
+        return super().skill_cost(skill_type)
+
+    def _normal_attack(self, game_state: GameState) -> tuple[eft.Effect, ...]:
+        source = self.location(game_state)
+        return normal_attack_template(
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+            dices_num=game_state.get_player(source.pid).get_dices().num_dices()
+        )
+
+    def _elemental_skill1(self, game_state: GameState) -> tuple[eft.Effect, ...]:
+        source = self.location(game_state)
+        return (
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.CRYO,
+                damage=3,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+        )
+
+    def _elemental_burst(self, game_state: GameState) -> tuple[eft.Effect, ...]:
+        source = self.location(game_state)
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.get_max_energy(),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.CRYO,
+                damage=1,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            eft.OverrideCombatStatusEffect(
+                target_pid=source.pid,
+                status=stt.IcicleStatus(),
+            )
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Kaeya:
+        return cls(
+            id=id,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=2,
+            talents=stts.TalentStatuses(()),
+            equipments=stts.EquipmentStatuses(()),
+            statuses=stts.OrderedStatuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
 class Keqing(Character):
     # basic info
     _ELEMENT = Element.ELECTRO
@@ -512,89 +597,6 @@ class Keqing(Character):
             statuses=stts.OrderedStatuses(()),
             talents=stts.TalentStatuses((stt.KeqingTalentStatus(can_infuse=False),)),
             equipments=stts.EquipmentStatuses(()),
-            elemental_aura=ElementalAura.from_default(),
-        )
-
-
-class Kaeya(Character):
-    # basic info
-    _ELEMENT = Element.CRYO
-
-    @override
-    @staticmethod
-    def _talent_status() -> Optional[type[stt.EquipmentStatus]]:
-        return stt.ColdBloodedStrikeStatus
-
-    @override
-    @classmethod
-    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
-        if skill_type is CharacterSkill.NORMAL_ATTACK:
-            return AbstractDices({
-                Element.CRYO: 1,
-                Element.ANY: 2,
-            })
-        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
-            return AbstractDices({
-                Element.CRYO: 3,
-            })
-        elif skill_type is CharacterSkill.ELEMENTAL_BURST:
-            return AbstractDices({
-                Element.CRYO: 4,
-            })
-        return super().skill_cost(skill_type)
-
-    def _normal_attack(self, game_state: GameState) -> tuple[eft.Effect, ...]:
-        source = self.location(game_state)
-        return normal_attack_template(
-            source=source,
-            element=Element.PHYSICAL,
-            damage=2,
-            dices_num=game_state.get_player(source.pid).get_dices().num_dices()
-        )
-
-    def _elemental_skill1(self, game_state: GameState) -> tuple[eft.Effect, ...]:
-        source = self.location(game_state)
-        return (
-            eft.ReferredDamageEffect(
-                source=source,
-                target=DynamicCharacterTarget.OPPO_ACTIVE,
-                element=Element.CRYO,
-                damage=3,
-                damage_type=DamageType(elemental_skill=True),
-            ),
-        )
-
-    def _elemental_burst(self, game_state: GameState) -> tuple[eft.Effect, ...]:
-        source = self.location(game_state)
-        return (
-            eft.EnergyDrainEffect(
-                target=source,
-                drain=self.get_max_energy(),
-            ),
-            eft.ReferredDamageEffect(
-                source=source,
-                target=DynamicCharacterTarget.OPPO_ACTIVE,
-                element=Element.CRYO,
-                damage=1,
-                damage_type=DamageType(elemental_burst=True),
-            ),
-            eft.OverrideCombatStatusEffect(
-                target_pid=source.pid,
-                status=stt.IcicleStatus(),
-            )
-        )
-
-    @classmethod
-    def from_default(cls, id: int = -1) -> Kaeya:
-        return cls(
-            id=id,
-            hp=10,
-            max_hp=10,
-            energy=0,
-            max_energy=2,
-            talents=stts.TalentStatuses(()),
-            equipments=stts.EquipmentStatuses(()),
-            statuses=stts.OrderedStatuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
 
@@ -747,6 +749,87 @@ class RhodeiaOfLoch(Character):
             max_hp=10,
             energy=0,
             max_energy=3,
+            talents=stts.TalentStatuses(()),
+            equipments=stts.EquipmentStatuses(()),
+            statuses=stts.OrderedStatuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+class Tighnari(Character):
+    _ELEMENT = Element.DENDRO
+
+    @override
+    @staticmethod
+    def _talent_status() -> None | type[stt.EquipmentStatus]:
+        return stt.KeenSightStatus
+
+    @override
+    @classmethod
+    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
+        if skill_type is CharacterSkill.NORMAL_ATTACK:
+            return AbstractDices({Element.DENDRO: 1, Element.ANY: 2})
+        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
+            return AbstractDices({Element.DENDRO: 3})
+        elif skill_type is CharacterSkill.ELEMENTAL_BURST:
+            return AbstractDices({Element.DENDRO: 3})
+        return super().skill_cost(skill_type)
+
+    def _normal_attack(self, game_state: GameState) -> tuple[eft.Effect, ...]:
+        source = self.location(game_state)
+        return normal_attack_template(
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+            dices_num=game_state.get_player(source.pid).get_dices().num_dices()
+        )
+
+    def _elemental_skill1(self, game_state: GameState) -> tuple[eft.Effect, ...]:
+        source = self.location(game_state)
+        return (
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.DENDRO,
+                damage=2,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+            eft.AddCharacterStatusEffect(
+                target=source,
+                status=stt.VijnanaSuffusionStatus,
+            ),
+        )
+
+    def _elemental_burst(self, game_state: GameState) -> tuple[eft.Effect, ...]:
+        source = self.location(game_state)
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=2,
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_OFF_FIELD,
+                element=Element.PIERCING,
+                damage=1,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.DENDRO,
+                damage=4,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Tighnari:
+        return cls(
+            id=id,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=2,
             talents=stts.TalentStatuses(()),
             equipments=stts.EquipmentStatuses(()),
             statuses=stts.OrderedStatuses(()),

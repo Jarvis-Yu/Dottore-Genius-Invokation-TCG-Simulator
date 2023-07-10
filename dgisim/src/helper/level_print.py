@@ -107,7 +107,7 @@ class GamePrinter:
         board = StrDrawer()
         board.insert_at(0, 0, f"<{name}>")
         GamePrinter._insert_lines(board, 2, character, [
-            "id",
+            # "id",
             "Aura",
         ])
         board.insert_at_nextline(2, f"<HP: {character['HP']}/{character['Max HP']}>")

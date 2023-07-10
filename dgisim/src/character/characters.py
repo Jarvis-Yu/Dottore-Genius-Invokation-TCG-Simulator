@@ -3,10 +3,12 @@ from typing import Callable, Iterator, Optional, TYPE_CHECKING, Union, Iterable
 
 if TYPE_CHECKING:
     from .character import Character
+    from ..element import Element
 
 __all__ = [
     "Characters",
 ]
+
 
 class Characters:
     def __init__(self, characters: tuple[Character, ...], active_character_id: None | int):
@@ -32,6 +34,11 @@ class Characters:
 
     def get_active_character_id(self) -> None | int:
         return self._active_character_id
+
+    def just_get_active_character_id(self) -> int:
+        val = self.get_active_character_id()
+        assert val is not None
+        return val
 
     def get_character_in_activity_order(self) -> tuple[Character, ...]:
         for i, character in enumerate(self._characters):
@@ -113,6 +120,15 @@ class Characters:
     def num_characters(self) -> int:
         return len(self._characters)
 
+    def active_elem(self) -> Element:
+        return self.just_get_active_character().element()
+
+    def all_elems(self) -> set[Element]:
+        return set(
+            char.element()
+            for char in self._characters
+        )
+
     def factory(self) -> CharactersFactory:
         return CharactersFactory(self)
 
@@ -147,9 +163,9 @@ class Characters:
 
     def dict_str(self) -> Union[dict, str]:
         return {
-            "Active Character": self.get_active_character_name(),
+            "Active Character": f"{self.get_active_character_id()}-{self.get_active_character_name()}",
             "Characters": dict([
-                (char.name(), char.dict_str())
+                (f"{char.get_id()}-{char.name()}", char.dict_str())
                 for char in self._characters
             ]),
         }
