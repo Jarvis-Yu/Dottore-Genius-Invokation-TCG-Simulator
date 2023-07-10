@@ -149,6 +149,14 @@ class TestGameStateMachine(unittest.TestCase):
         self.assertIsNone(state_machine.get_winner())
 
     def test_random_agents_not_break_game(self):
+        from dgisim.src.mode import AllOmniMode
+        mode = AllOmniMode()
+        base_game = self._initial_state.factory().mode(
+            mode
+        ).phase(
+            mode.card_select_phase()
+        ).build()
+
         import os
         optional_repeats = os.getenv("RNG_PLAYS")
         repeats: int
@@ -157,11 +165,18 @@ class TestGameStateMachine(unittest.TestCase):
         except:
             repeats = 5
         for i in range(repeats):
-            state_machine = GameStateMachine(
-                self._initial_state,
-                RandomAgent(),
-                RandomAgent(),
-            )
+            if i % 3 == 0:
+                state_machine = GameStateMachine(
+                    self._initial_state,
+                    RandomAgent(),
+                    RandomAgent(),
+                )
+            else:
+                state_machine = GameStateMachine(
+                    base_game,
+                    RandomAgent(),
+                    RandomAgent(),
+                )
             game_end_phase = state_machine.get_game_state().get_mode().game_end_phase()
             try:
                 state_machine.step_until_phase(game_end_phase)

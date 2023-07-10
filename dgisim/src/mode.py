@@ -138,3 +138,9 @@ class DefaultMode(Mode):
 
     def __hash__(self) -> int:
         return hash(self.__class__.__name__)
+
+
+class AllOmniMode(DefaultMode):
+    def roll_phase(self) -> Phase:
+        from .phase.all_omni.roll_phase import RollPhase
+        return RollPhase()

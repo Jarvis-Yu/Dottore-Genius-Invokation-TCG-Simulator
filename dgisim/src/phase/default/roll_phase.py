@@ -1,6 +1,5 @@
 from __future__ import annotations
-from dataclasses import replace
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from .. import phase as ph
 
@@ -8,7 +7,6 @@ from ...action.action import DicesSelectAction, EndRoundAction, PlayerAction
 from ...action.action_generator import ActionGenerator
 from ...action.enums import ActionType
 from ...dices import ActualDices
-from ...element import Element
 from ...helper.quality_of_life import just
 from ...state.enums import Act, Pid
 
@@ -24,19 +22,17 @@ __all__ = [
 class RollPhase(ph.Phase):
     _NUM_DICES = 8
 
-    def _get_all_omni_and_activate(self, game_state: GameState) -> GameState:
+    def _get_all_dices_and_activate(self, game_state: GameState) -> GameState:
         return game_state.factory().f_player1(
             lambda p1: p1.factory()
             .phase(Act.ACTION_PHASE)
             .dice_reroll_chances(game_state.get_mode().dice_reroll_chances())
-            # .dices(ActualDices.from_all(RollPhase._NUM_DICES, Element.OMNI))
             .dices(ActualDices.from_random(RollPhase._NUM_DICES))
             .build()
         ).f_player2(
             lambda p2: p2.factory()
             .phase(Act.ACTION_PHASE)
             .dice_reroll_chances(game_state.get_mode().dice_reroll_chances())
-            # .dices(ActualDices.from_all(RollPhase._NUM_DICES, Element.OMNI))
             .dices(ActualDices.from_random(RollPhase._NUM_DICES))
             .build()
         ).build()
@@ -54,7 +50,7 @@ class RollPhase(ph.Phase):
         p1 = game_state.get_player1()
         p2 = game_state.get_player2()
         if p1.get_phase().is_passive_wait_phase() and p2.get_phase().is_passive_wait_phase():
-            return self._get_all_omni_and_activate(game_state)
+            return self._get_all_dices_and_activate(game_state)
         elif p1.get_phase().is_end_phase() and p2.get_phase().is_end_phase():
             return self._to_action_phase(game_state)
         else:
