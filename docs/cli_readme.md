@@ -1,12 +1,28 @@
 # CLI Introduction
 
 - [CLI Introduction](#cli-introduction)
+  - [If You Installed the `dgisim` Package](#if-you-installed-the-dgisim-package)
+  - [If You Cloned the Repository and Run Locally](#if-you-cloned-the-repository-and-run-locally)
   - [Show Case on How to Use the CLI](#show-case-on-how-to-use-the-cli)
 
-## Show Case on How to Use the CLI
+## If You Installed the `dgisim` Package
 
-After setting up the environment following the instructions in the main [README](../README.md),
-you may run `./scripts/sh/cli.sh` under the project directory to start a CLI session.
+Run the following code.
+
+```py
+from dgisim import CLISession
+
+session = CLISession()
+session.run()
+```
+
+## If You Cloned the Repository and Run Locally
+
+Set up the environment following the instructions in the dev-readme [README](dev_readme.md),
+then you may run `./scripts/sh/cli.sh` under the project directory to start a CLI session.
+(or `./scripts/ps1/cli.ps1` if you use powershell)
+
+## Show Case on How to Use the CLI
 
 Below shows some random CLI session as an example, comments are occasionally added
 in the format of `// ...`.
@@ -14,7 +30,6 @@ in the format of `// ...`.
 Note that prompts are of format `:>` or `::>`.
 
 ```
-$ ./scripts/sh/cli.sh 
 ==================================================
 Welcome to the Dottore Genius Invokation TCG Simulator CLI ver.
 This is currently just a basic version for debugging only.
