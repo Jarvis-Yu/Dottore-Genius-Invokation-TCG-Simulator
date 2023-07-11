@@ -2,6 +2,7 @@
 omit =
     dgisim/profiles/*
     dgisim/src/cli.py
+    dgisim/src/game_state_machine.py
 
 [report]
 exclude_also =
