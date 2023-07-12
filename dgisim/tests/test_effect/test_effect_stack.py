@@ -1,8 +1,8 @@
 import unittest
 from dataclasses import dataclass
 
-from dgisim.src import *
-from dgisim.src.effect.effect import *
+from dgisim.src.effect.effect_stack import EffectStack
+from dgisim.src.effect.effect import Effect
 
 
 @dataclass(frozen=True, kw_only=True)
