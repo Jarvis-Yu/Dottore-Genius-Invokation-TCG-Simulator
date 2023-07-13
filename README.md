@@ -35,6 +35,8 @@ session = CLISession()
 session.run()
 ```
 
+Or try it online on [Google Colab](https://colab.research.google.com/drive/1h6ckw4LQ2jMEnZAs9QQo6tHjCwWnR8KD?usp=sharing)
+
 See CLI's [README](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/cli_readme.md)
 for showcase and explanations of the CLI.
 
