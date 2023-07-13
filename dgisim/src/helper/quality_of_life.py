@@ -9,7 +9,6 @@ __all__ = [
     "case_val",
     "dataclass_repr",
     "just",
-    "replace_tuple",
 ]
 
 _T = TypeVar('_T')
@@ -49,9 +48,3 @@ def just(optional_val: None | _T, backup: None | _T = None) -> _T:
         else:
             return backup
     return optional_val
-
-
-def replace_tuple(tup: tuple[_T, ...], index: int, val: _T) -> tuple[_T, ...]:
-    vals = list(tup)
-    vals[index] = val
-    return tuple(vals)
