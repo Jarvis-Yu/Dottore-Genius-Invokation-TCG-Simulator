@@ -51,6 +51,7 @@ class HashableDict(dict):
         """
         # use a trick to bypass overriden __setattr__() avoiding exception
         object.__setattr__(self, "_frozen", False)
+        self._frozen_set = None
 
     def frozen(self) -> bool:
         if hasattr(self, "_frozen"):
@@ -104,7 +105,6 @@ class HashableDict(dict):
             assert self._frozen_set is not None
             return self._frozen_set
         else:
-            self._frozen_set = None
             return frozenset(
                 item
                 for item in self.items()
@@ -115,6 +115,9 @@ class HashableDict(dict):
         if not isinstance(other, HashableDict):
             return False
         return self is other or self._to_frozen_set() == other._to_frozen_set()
+
+    def __ne__(self, other: object) -> bool:
+        return not self.__eq__(other)
 
     def __hash__(self) -> int:  # type: ignore
         """ Exception is raised if the HashableDict is not frozen. """

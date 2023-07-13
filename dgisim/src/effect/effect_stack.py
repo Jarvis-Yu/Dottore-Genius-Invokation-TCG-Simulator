@@ -57,13 +57,10 @@ class EffectStack:
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, EffectStack):
             return False
-        return self._effects == other._effects
+        return self is other or self._effects == other._effects
 
     def __hash__(self) -> int:
         return hash(self._effects)
-
-    def to_string(self, indent: int) -> str:
-        return str(self)
 
     def __str__(self) -> str:
         return str(self._effects)

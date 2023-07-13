@@ -94,15 +94,8 @@ class Characters:
                 return c.get_id()
         return None
 
-    def get_by_id(self, id: int) -> Optional[Character]:
+    def get_by_id(self, id: int) -> Optional[Character]:  # pragma: no cover
         return self.get_character(id)
-
-    def alive_ids(self) -> list[int]:
-        ids: list[int] = []
-        for character in self._characters:
-            if character.alive():
-                ids.append(character.get_id())
-        return ids
 
     def all_defeated(self) -> bool:
         return all([c.defeated() for c in self._characters])
@@ -110,18 +103,8 @@ class Characters:
     def char_id_valid(self, char_id: int) -> bool:
         return char_id >= 1 and char_id <= len(self._characters)
 
-    def get_swappable_ids(self) -> tuple[int, ...]:
-        return tuple([
-            i
-            for i, c in enumerate(self._characters)
-            if not c.defeated()
-        ])
-
     def num_characters(self) -> int:
         return len(self._characters)
-
-    def active_elem(self) -> Element:
-        return self.just_get_active_character().element()
 
     def all_elems(self) -> set[Element]:
         return set(
@@ -140,6 +123,9 @@ class Characters:
             return False
         return self is other or self._all_unique_data() == other._all_unique_data()
 
+    def __ne__(self, other: object) -> bool:
+        return not self.__eq__(other)
+
     def __hash__(self) -> int:
         return hash(self._all_unique_data())
 
@@ -147,12 +133,13 @@ class Characters:
         return iter(self.get_characters())
 
     def contains(self, char: Character | type[Character]) -> bool:
+        from .character import Character
         if isinstance(char, Character):
             return any(
                 c == char
                 for c in self._characters
             )
-        else:  # assert char: type[chr.Character]
+        else:  # assert char: type[Character]
             return any(
                 type(c) is char
                 for c in self._characters
