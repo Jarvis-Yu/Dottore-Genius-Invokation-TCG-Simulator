@@ -37,7 +37,7 @@ class Supports:
             if s.sid == sid
         ), None)
 
-    def just_find_by_sid(self, sid: int) -> None | Support:
+    def just_find_by_sid(self, sid: int) -> None | Support:  # pragma: no cover
         return just(self.find_by_sid(sid))
 
     def update_support(self, incoming_support: Support, override: bool = False) -> Supports:
@@ -59,7 +59,7 @@ class Supports:
             supports[i] = new_support
             return Supports(tuple(supports), self._max_num)
         if len(supports) >= self._max_num:
-            raise Exception("Should not be reached. "
+            raise Exception("Not Reached. "
                             + "Handle support destruction before updating when supports are full.")
         if any(s.sid == incoming_support.sid for s in supports):
             raise Exception("Incoming support cannot be added when support with same sid exists.")
@@ -77,14 +77,14 @@ class Supports:
         return Supports(tuple(
             s
             for s in self._supports
-            if type(s) is support_type and s.sid == sid
+            if not(type(s) is support_type and s.sid == sid)
         ), self._max_num)
 
     def remove_by_sid(self, sid: int) -> Supports:
         return Supports(tuple(
             s
             for s in self._supports
-            if s.sid == sid
+            if s.sid != sid
         ), self._max_num)
 
     def full(self) -> bool:
