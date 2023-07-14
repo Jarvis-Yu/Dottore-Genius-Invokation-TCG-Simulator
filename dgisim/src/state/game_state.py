@@ -560,7 +560,9 @@ class SkillChecker:
             pp_type=Preprocessables.SKILL,
         )
         assert isinstance(skill_event, GameEvent)
-        if action.instruction.dices.just_satisfy(skill_event.dices_cost):
+        paid_dices = action.instruction.dices
+        if paid_dices.just_satisfy(skill_event.dices_cost) \
+                and (game_state.get_player(pid).get_dices() - paid_dices).is_legal():
             return game_state
         else:
             return None

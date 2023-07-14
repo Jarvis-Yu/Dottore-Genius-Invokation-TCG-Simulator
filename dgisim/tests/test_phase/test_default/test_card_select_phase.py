@@ -2,7 +2,6 @@ import unittest
 
 from dgisim.src.action.action import *
 from dgisim.src.card.cards import Cards
-from dgisim.src.phase.default.card_select_phase import CardSelectPhase
 from dgisim.src.state.enums import Act, Pid
 from dgisim.tests.helpers.game_state_templates import ACTION_TEMPLATE
 

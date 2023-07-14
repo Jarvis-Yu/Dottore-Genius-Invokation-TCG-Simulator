@@ -54,8 +54,6 @@ class ActionPhase(ph.Phase):
     def _execute_effect(self, game_state: GameState) -> GameState:
         effect_stack, effect = game_state.get_effect_stack().pop()
         new_game_state = game_state.factory().effect_stack(effect_stack).build()
-        if isinstance(effect, DeathSwapPhaseStartEffect):
-            print("AFTER DEATH:", new_game_state)
         return effect.execute(new_game_state)
 
     def _is_executing_effects(self, game_state: GameState) -> bool:
@@ -75,7 +73,7 @@ class ActionPhase(ph.Phase):
             return self._start_up_phase(game_state)
         elif p1p is Act.END_PHASE and p2p is Act.END_PHASE:
             return self._to_end_phase(game_state)
-        raise Exception("Unknown Game State to process")
+        raise Exception("Not Reached! Unknown Game State to process")
 
     def _handle_end_round(
             self,
@@ -91,11 +89,9 @@ class ActionPhase(ph.Phase):
             other_player_new_phase = Act.END_PHASE
         elif other_player.get_phase() is Act.PASSIVE_WAIT_PHASE:
             other_player_new_phase = Act.ACTION_PHASE
-        else:
+        else:  # pragma: no cover
             print(f"ERROR pid={pid}\n {game_state}")
             raise Exception(f"Unknown Game State to process {other_player.get_phase()}")
-        if pid is not active_player_id:
-            raise Exception("Unknown Game State to process")
         return game_state.factory().active_player_id(
             active_player_id.other()
         ).player(
@@ -123,19 +119,15 @@ class ActionPhase(ph.Phase):
         game_state = result
 
         player = game_state.get_player(pid)
-        # TODO: check validity of the action
         instruction = action.instruction
         new_effects: list[Effect] = []
-        # TODO: put pre checks
         # Costs
         dices = player.get_dices()
-        new_dices = dices - action.instruction.dices
-        if new_dices is None:
-            return None
+        new_dices = dices - instruction.dices
+        assert new_dices.is_legal()
         # Skill Effect
         active_character = player.get_characters().get_active_character()
-        if active_character is None:
-            return None
+        assert active_character is not None
         assert active_character.can_cast_skill()
         # note: it's important to cast skill before new_dices are putted into the game_state
         #       so that normal_attacks can correctly be marked as charged attack
@@ -225,10 +217,7 @@ class ActionPhase(ph.Phase):
         # Costs
         dices = player.get_dices()
         new_dices = dices - paid_dices
-        if not new_dices.is_legal():
-            print(f"Fail with new dices: <{new_dices}> for card: {card.name()}")
-            assert False
-            return None
+        assert new_dices.is_legal()
 
         # Card
         new_effects.append(PublicRemoveCardEffect(pid, card))
@@ -319,7 +308,7 @@ class ActionPhase(ph.Phase):
             return self._handle_elemental_tuning_action(game_state, pid, action)
         elif isinstance(action, DeathSwapAction):
             return self._handle_death_swap_action(game_state, pid, action)
-        raise Exception("Unhandld action", action)
+        raise Exception("Unhandld action", action)  # pragma: no cover
 
     def step_action(
             self,
@@ -341,7 +330,7 @@ class ActionPhase(ph.Phase):
             return self._handle_game_action(game_state, pid, action)
         elif isinstance(action, EndRoundAction):
             return self._handle_end_round(game_state, pid, action)
-        raise Exception("Unknown Game State to process")
+        raise Exception("Not Reached! Unknown Game State to process")
 
     def waiting_for(self, game_state: GameState) -> Optional[Pid]:
         effect_stack = game_state.get_effect_stack()
@@ -414,7 +403,7 @@ class ActionPhase(ph.Phase):
             return just(ElemTuningActGenGenerator.action_generator(game_state, pid))
         elif player_choice is ActionType.END_ROUND:
             return ActionGenerator(game_state=game_state, pid=pid, action=EndRoundAction())
-        else:
+        else:  # pragma: no cover
             action_type_name = ActionType.__name__
             if isinstance(player_choice, ActionType):
                 raise Exception(f"Unhandled player {action_type_name} {player_choice}")

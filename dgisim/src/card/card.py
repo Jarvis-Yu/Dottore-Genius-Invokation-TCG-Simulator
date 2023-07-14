@@ -183,7 +183,8 @@ class Card:
         """ Return the preprocessed game-state if instruction is valid, otherwise return None """
         if not game_state.get_player(pid).get_hand_cards().contains(cls) \
                 or not game_state.get_active_player_id() is pid \
-                or not cls._valid_instruction(game_state, pid, instruction):
+                or not cls._valid_instruction(game_state, pid, instruction) \
+                or not (game_state.get_player(pid).get_dices() - instruction.dices).is_legal():
             return None
         game_state, dices_cost = cls.preprocessed_dice_cost(game_state, pid)
         if instruction.dices.just_satisfy(dices_cost):

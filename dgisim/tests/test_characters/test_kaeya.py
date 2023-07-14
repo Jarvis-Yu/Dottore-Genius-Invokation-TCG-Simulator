@@ -1,5 +1,6 @@
 import unittest
 
+from dgisim.src.mode import AllOmniMode
 from dgisim.tests.test_characters.common_imports import *
 
 class TestKaeya(unittest.TestCase):
@@ -214,7 +215,7 @@ class TestKaeya(unittest.TestCase):
         a1, a2 = PuppetAgent(), PuppetAgent()
         initial_hp = 3
         base_game_state = kill_character(
-            game_state=self.BASE_GAME,
+            game_state=self.BASE_GAME.factory().mode(AllOmniMode()).build(),
             character_id=2,
             pid=Pid.P1,
             hp=initial_hp,
