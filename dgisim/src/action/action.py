@@ -37,7 +37,7 @@ __all__ = [
 @dataclass(frozen=True, repr=False)
 class PlayerAction:
     @classmethod
-    def _empty(cls) -> Self:
+    def _empty(cls) -> Self:  # pragma: no cover
         """
         This is just for action generator
         """
@@ -54,14 +54,6 @@ class PlayerAction:
             object.__setattr__(self, field.name, None)
         return self
 
-    def _set_attr(self, name: str, val: Any) -> Self:
-        """
-        This is just for action generator
-        """
-        other = replace(self)
-        object.__setattr__(other, name, val)
-        return other
-
     def _filled(self, exceptions: set[str] = set()) -> bool:
         """
         This is just for action generator
@@ -72,7 +64,7 @@ class PlayerAction:
             if field.name not in exceptions
         )
 
-    def legal(self) -> bool:
+    def legal(self) -> bool:  # pragma: no cover
         field_type_val = (
             (field.type, field.__getattribute__(field.name))
             for field in fields(self)
@@ -90,9 +82,6 @@ class PlayerAction:
 class CardsSelectAction(PlayerAction):
     selected_cards: Cards
 
-    def num_cards(self) -> int:
-        return self.selected_cards.num_cards()
-
     @classmethod
     def _empty(cls) -> Self:
         return cls(selected_cards=Cards({}))
@@ -101,9 +90,6 @@ class CardsSelectAction(PlayerAction):
 @dataclass(frozen=True, kw_only=True, repr=False)
 class DicesSelectAction(PlayerAction):
     selected_dices: ActualDices
-
-    def num_cards(self) -> int:
-        return self.selected_dices.num_dices()
 
     @classmethod
     def _empty(cls) -> Self:
@@ -126,8 +112,7 @@ class EndRoundAction(PlayerAction):
 
 @dataclass(frozen=True, kw_only=True, repr=False)
 class GameAction(PlayerAction):
-    def is_valid_action(self, game_state: GameState) -> bool:
-        raise Exception("Not overriden")
+    ...
 
 
 @dataclass(frozen=True, kw_only=True, repr=False)
@@ -199,14 +184,6 @@ class Instruction:
             object.__setattr__(self, field.name, None)
         return self
 
-    def _set_attr(self, name: str, val: Any) -> Self:
-        """
-        This is just for action generator
-        """
-        other = replace(self)
-        object.__setattr__(other, name, val)
-        return other
-
     def _filled(self, exceptions: set[str] = set()) -> bool:
         """
         This is just for action generator
@@ -217,7 +194,7 @@ class Instruction:
             if field.name not in exceptions
         )
 
-    def legal(self) -> bool:
+    def legal(self) -> bool:  # pragma: no cover
         field_type_val = (
             (field.type, field.__getattribute__(field.name))
             for field in fields(self)
@@ -258,7 +235,7 @@ class SourceTargetInstruction(Instruction):
     target: StaticTarget
 
     @classmethod
-    def _empty(cls) -> Self:
+    def _empty(cls) -> Self:  # pragma: no cover
         target = StaticTarget(
             pid=Pid.P1,
             zone=Zone.CHARACTERS,
