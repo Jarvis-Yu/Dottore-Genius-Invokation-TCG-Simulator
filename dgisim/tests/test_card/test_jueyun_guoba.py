@@ -1,6 +1,6 @@
 import unittest
 
-from dgisim.tests.test_cards.common_imports import *
+from dgisim.tests.test_card.common_imports import *
 
 
 class TestJueyunGuoba(unittest.TestCase):

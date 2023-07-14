@@ -64,8 +64,9 @@ dictionary, and discover game states on different 'game branches' being actually
 - [x] Implement game phase of Starting Hand Select Phase (select active character)
 - [x] Implement game phase of Roll (Dice) Phase (roll dices between rounds)
 - [x] Implement game phase of Action Phase (players beat each other)
-  - [ ] Implement all cards (16/184 implemented)
-    - [x] Changing Shifts,
+  - [ ] Implement all cards (17/184 implemented)
+    - [x] Calxs Arts,
+          Changing Shifts,
           ColdBlooded Strike,
           Jueyun Guoba,
           Keen Sight,

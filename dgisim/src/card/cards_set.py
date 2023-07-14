@@ -12,6 +12,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ThunderingPenance,
 
     # Event Card
+    CalxsArts,
     ChangingShifts,
     LeaveItToMe,
     Starsigns,
