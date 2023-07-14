@@ -6,6 +6,7 @@ omit =
     dgisim/src/game_state_machine.py
 
 [report]
+skip_empty = True
 exclude_also =
     def __repr__
     def __str__
