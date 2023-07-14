@@ -1,15 +1,14 @@
 import unittest
 
 from dgisim.src.action.action import *
-from dgisim.src.dices import ActualDices
-from dgisim.src.element import Element
+from dgisim.src.card.cards import Cards
+from dgisim.src.phase.default.card_select_phase import CardSelectPhase
 from dgisim.src.state.enums import Act, Pid
 from dgisim.tests.helpers.game_state_templates import ACTION_TEMPLATE
 
-
-class TestRollPhase(unittest.TestCase):
+class TestCardSelectPhase(unittest.TestCase):
     BASE_GAME_STATE = ACTION_TEMPLATE.factory().phase(
-        ACTION_TEMPLATE.get_mode().roll_phase()
+        ACTION_TEMPLATE.get_mode().card_select_phase()
     ).f_player1(
         lambda p1: p1.factory().phase(Act.ACTION_PHASE).build()
     ).f_player2(
@@ -20,13 +19,13 @@ class TestRollPhase(unittest.TestCase):
         game_state = self.BASE_GAME_STATE
         self.assertRaises(Exception, lambda: game_state.step())
 
-    def test_handle_dices_selection(self):
+    def test_handle_card_drawing(self):
         game_state = self.BASE_GAME_STATE.factory().f_player1(
-            lambda p1: p1.factory().dice_reroll_chances(2).build()
+            lambda p1: p1.factory().card_redraw_chances(2).build()
         ).build()
         game_state.action_step(
             Pid.P1,
-            DicesSelectAction(selected_dices=ActualDices({Element.OMNI: 2}))
+            CardsSelectAction(selected_cards=Cards({}))
         )
         self.assertIs(game_state.get_player1().get_phase(), Act.ACTION_PHASE)
 
