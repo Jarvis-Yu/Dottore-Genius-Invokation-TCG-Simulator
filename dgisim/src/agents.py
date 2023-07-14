@@ -142,7 +142,7 @@ class RandomAgent(PlayerAgent):
             choice: DecidedChoiceType  # type: ignore
             if isinstance(choices, tuple):
                 game_state = action_generator.game_state
-                if game_state.get_phase() == game_state.get_mode().roll_phase():
+                if game_state.get_phase() == game_state.get_mode().roll_phase() and random.random() < 0.8:
                     choices = tuple(c for c in choices if c is not ActionType.END_ROUND)
                 choice = random.choice(choices)
                 action_generator = action_generator.choose(choice)

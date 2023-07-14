@@ -129,7 +129,7 @@ class RollPhase(ph.Phase):
             return just(DicesSelectionActGenGenerator.action_generator(game_state, pid))
         elif player_choice is ActionType.END_ROUND:
             return ActionGenerator(game_state=game_state, pid=pid, action=EndRoundAction())
-        else:
+        else:  # pragma: no cover
             action_type_name = ActionType.__name__
             if isinstance(player_choice, ActionType):
                 raise Exception(f"Unhandled player {action_type_name} {player_choice}")
