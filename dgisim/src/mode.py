@@ -1,4 +1,5 @@
 from __future__ import annotations
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 from .dices import AbstractDices
@@ -17,7 +18,7 @@ __all__ = [
 ]
 
 
-class Mode:
+class Mode(ABC):
     """
     Base Mode for all modes.
 
@@ -64,29 +65,37 @@ class Mode:
     def swap_speed(self) -> EventSpeed:
         return self._SWAP_SPEED
 
+    @abstractmethod
     def all_cards(self) -> frozenset[type[Card]]:
-        raise Exception("Not Overridden")
+        pass
 
+    @abstractmethod
     def all_chars(self) -> frozenset[type[Character]]:
-        raise Exception("Not Overridden")
+        pass
 
+    @abstractmethod
     def card_select_phase(self) -> Phase:
-        raise Exception("Not Overridden")
+        pass
 
+    @abstractmethod
     def starting_hand_select_phase(self) -> Phase:
-        raise Exception("Not Overridden")
+        pass
 
+    @abstractmethod
     def roll_phase(self) -> Phase:
-        raise Exception("Not Overridden")
+        pass
 
+    @abstractmethod
     def action_phase(self) -> Phase:
-        raise Exception("Not Overridden")
+        pass
 
+    @abstractmethod
     def end_phase(self) -> Phase:
-        raise Exception("Not Overridden")
+        pass
 
+    @abstractmethod
     def game_end_phase(self) -> Phase:
-        raise Exception("Not Overridden")
+        pass
 
     def __eq__(self, other: object) -> bool:
         return type(self) == type(other)
@@ -135,9 +144,6 @@ class DefaultMode(Mode):
     def game_end_phase(self) -> Phase:
         from .phase.default.game_end_phase import GameEndPhase
         return GameEndPhase()
-
-    def __hash__(self) -> int:
-        return hash(self.__class__.__name__)
 
 
 class AllOmniMode(DefaultMode):

@@ -82,7 +82,7 @@ class Cards:
         return self - {card: 1}
 
     def remove_all(self, card: type[Card]) -> Cards:
-        if self._cards[card] >= 1:
+        if self[card] >= 1:
             return self - {card: self._cards[card]}
         else:
             # if the card doesn't exist, even though there might be OmniCards
@@ -99,7 +99,10 @@ class Cards:
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Cards):
             return False
-        return self._cards == other._cards
+        return self is other or self._cards == other._cards
+
+    def __ne__(self, other: object) -> bool:
+        return not self.__eq__(other)
 
     def __hash__(self) -> int:
         return hash(self._cards)

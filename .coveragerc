@@ -1,6 +1,7 @@
 [run]
 omit =
     dgisim/profiles/*
+    dgisim/src/helper/level_print.py
     dgisim/src/cli.py
     dgisim/src/game_state_machine.py
 
