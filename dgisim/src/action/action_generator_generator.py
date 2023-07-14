@@ -45,7 +45,7 @@ class CardActGenGenerator(ABC):
         pid = action_generator.pid
         return tuple(
             card_type
-            for card_type in game_state.get_player(pid).get_hand_cards()
+            for card_type in action_generator.hand_cards_available()
             if card_type.strictly_usable(game_state, pid)
         )
 
@@ -93,7 +93,7 @@ class CardsSelectionActGenGenerator(ABC):
         assert type(action_generator.action) is CardsSelectAction
         game_state = action_generator.game_state
         pid = action_generator.pid
-        hand_cards = game_state.get_player(pid).get_hand_cards()
+        hand_cards = action_generator.hand_cards_available()
         from ..card.card import OmniCard
         if hand_cards.contains(OmniCard):
             # TODO: further filter available cards
@@ -198,7 +198,7 @@ class ElemTuningActGenGenerator(ABC):
         assert type(action) is ElementalTuningAction
 
         if action.card is None:
-            return tuple(card for card in game_state.get_player(pid).get_hand_cards())
+            return tuple(card for card in action_generator.hand_cards_available())
 
         active_character = game_state.get_player(pid).just_get_active_character()
         if action.dice_elem is None:

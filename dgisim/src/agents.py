@@ -52,7 +52,8 @@ class LazyAgent(PlayerAgent):
 
         if isinstance(curr_phase, CardSelectPhase):
             _, selected_cards = game_state.get_player(
-                pid).get_hand_cards().pick_random_cards(self._NUM_PICKED_CARDS)
+                pid
+            ).get_hand_cards().pick_random_cards(self._NUM_PICKED_CARDS)
             return CardsSelectAction(selected_cards=selected_cards)
 
         elif isinstance(curr_phase, StartingHandSelectPhase):

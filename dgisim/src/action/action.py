@@ -64,16 +64,6 @@ class PlayerAction:
             if field.name not in exceptions
         )
 
-    def legal(self) -> bool:  # pragma: no cover
-        field_type_val = (
-            (field.type, field.__getattribute__(field.name))
-            for field in fields(self)
-        )
-        return all(
-            isinstance(val, field_type)
-            for field_type, val in field_type_val
-        )
-
     def __repr__(self) -> str:
         return dataclass_repr(self)
 

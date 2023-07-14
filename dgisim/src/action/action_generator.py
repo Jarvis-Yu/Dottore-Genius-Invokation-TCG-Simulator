@@ -52,21 +52,12 @@ class ActionGenerator:
         return self.instruction is None \
             or self.instruction._filled()
 
-    def _legal_action(self) -> bool:
-        return self.action is None or self.action.legal()
-
-    def _legal_instruction(self) -> bool:
-        return self.instruction is None or self.instruction.legal()
-
     def filled(self) -> bool:
         """
         Return if ActionGenerator is ready to produce the final action
         """
         return not (self.action is None and self.instruction is None) \
             and self._action_filled() and self._instruction_filled()
-
-    def valid(self) -> bool:
-        return self._legal_action() and self._legal_instruction()
 
     def generate_action(self) -> PlayerAction:
         assert self.filled()
