@@ -176,9 +176,3 @@ class EndPhase(ph.Phase):
         assert game_state.death_swapping(pid)
         from ...action.action_generator_generator import SwapActGenGenerator
         return SwapActGenGenerator.action_generator(game_state, pid)
-
-    def __eq__(self, other: object) -> bool:
-        return isinstance(other, EndPhase)
-
-    def __hash__(self) -> int:
-        return hash(self.__class__.__name__)

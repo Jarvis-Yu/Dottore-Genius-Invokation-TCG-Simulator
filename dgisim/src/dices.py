@@ -243,17 +243,22 @@ class ActualDices(Dices):
                     remaining[elem] -= pures[elem]
         if omni > 0:
             best_elem: Optional[Element] = None
-            count = BIG_INT
+            best_count = 0
             for elem in list(_PURE_ELEMS) + [Element.OMNI]:
                 this_count = remaining.get(elem, 0)
-                if this_count >= omni and this_count < count:
+                if best_count > omni and this_count >= omni and this_count < best_count:
+                        best_elem = elem
+                        best_count = this_count
+                elif best_count < omni and this_count > best_count:
                     best_elem = elem
-                    count = this_count
-            if best_elem is None:
-                return None
-            else:
-                answer[best_elem] += omni
-                remaining[best_elem] -= omni
+                    best_count = this_count
+                elif best_count == omni:
+                    break
+            assert best_elem is not None
+            best_count = min(best_count, omni)
+            answer[best_elem] += best_count
+            remaining[best_elem] -= best_count
+            omni_required += omni - best_count
         if any > 0:
             from operator import itemgetter
             sorted_elems = sorted(remaining.items(), key=itemgetter(1))
@@ -269,7 +274,7 @@ class ActualDices(Dices):
                 answer[Element.OMNI] += any
                 remaining[Element.OMNI] -= any
         if omni_required > 0:
-            if remaining[Element.OMNI] < omni_required:
+            if remaining.get(Element.OMNI, 0) < omni_required:
                 return None
             answer[Element.OMNI] += omni_required
         return ActualDices(answer)
@@ -316,14 +321,6 @@ class AbstractDices(Dices):
         Element.GEO,
         Element.ANY,
     })
-
-    @classmethod
-    def from_pre(cls, omni: int, any: int, element: Optional[Element] = None, num: Optional[int] = None) -> AbstractDices:
-        assert element is None or element in AbstractDices._LEGAL_ELEMS
-        dices = {Element.OMNI: omni, Element.ANY: any, }
-        if element is not None and num is not None:
-            dices[element] = num
-        return AbstractDices(dices)
 
     @classmethod
     def from_dices(cls, dices: Dices) -> Optional[AbstractDices]:

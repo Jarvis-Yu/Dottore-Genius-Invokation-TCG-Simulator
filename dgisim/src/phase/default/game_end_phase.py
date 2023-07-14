@@ -23,9 +23,3 @@ class GameEndPhase(ph.Phase):
 
     def action_generator(self, game_state: GameState, pid: Pid) -> None | ActionGenerator:
         raise Exception("Not Reached")
-
-    def __eq__(self, other: object) -> bool:
-        return isinstance(other, GameEndPhase)
-
-    def __hash__(self) -> int:
-        return hash(self.__class__.__name__)

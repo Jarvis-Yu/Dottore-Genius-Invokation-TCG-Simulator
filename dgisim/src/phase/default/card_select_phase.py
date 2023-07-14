@@ -149,9 +149,3 @@ class CardSelectPhase(ph.Phase):
             _choices_helper=self._choices_helper,
             _fill_helper=self._fill_helper,
         )
-
-    def __eq__(self, other: object) -> bool:
-        return isinstance(other, CardSelectPhase)
-
-    def __hash__(self) -> int:
-        return hash(self.__class__.__name__)
