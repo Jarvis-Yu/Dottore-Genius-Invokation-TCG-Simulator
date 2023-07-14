@@ -111,16 +111,16 @@ class EndPhase(ph.Phase):
         p1 = game_state.get_player1()
         p2 = game_state.get_player2()
         active_player_id = game_state.get_active_player_id()
-        if p1.get_phase() is Act.PASSIVE_WAIT_PHASE and p2.get_phase() is Act.PASSIVE_WAIT_PHASE:
+        if p1.get_phase().is_passive_wait_phase() and p2.get_phase().is_passive_wait_phase():
             return self._initialize_end_phase(game_state)
-        elif p1.get_phase() is Act.ACTIVE_WAIT_PHASE or p2.get_phase() is Act.ACTIVE_WAIT_PHASE:
+        elif p1.get_phase().is_active_wait_phase() or p2.get_phase().is_active_wait_phase():
             assert self._is_executing_effects(game_state)
             return self._execute_effect(game_state)
         elif p1.get_phase().is_action_phase() or p2.get_phase().is_action_phase():
             # handling death swap
             assert self._is_executing_effects(game_state)
             return self._execute_effect(game_state)
-        elif p1.get_phase() is Act.END_PHASE and p2.get_phase() is Act.END_PHASE:
+        elif p1.get_phase().is_end_phase() and p2.get_phase().is_end_phase():
             new_round = game_state.get_round() + 1
             if new_round > game_state.get_mode().round_limit():
                 return self._end_game(game_state)

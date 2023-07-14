@@ -1284,7 +1284,7 @@ class CastSkillEffect(DirectEffect):
         assert isinstance(character, chr.Character)
         if not character.can_cast_skill():
             return game_state
-        effects = character.skill(game_state, self.skill)
+        effects = character.skill(game_state, self.target, self.skill)
         if not effects:
             return game_state
         return game_state.factory().f_effect_stack(

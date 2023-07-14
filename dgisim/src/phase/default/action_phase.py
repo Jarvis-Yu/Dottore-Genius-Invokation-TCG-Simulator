@@ -66,12 +66,12 @@ class ActionPhase(ph.Phase):
         p2 = game_state.get_player2()
         p1p = p1.get_phase()
         p2p = p2.get_phase()
-        if p1p is Act.ACTION_PHASE or p2p is Act.ACTION_PHASE:
+        if p1p.is_action_phase() or p2p.is_action_phase():
             assert self._is_executing_effects(game_state)
             return self._execute_effect(game_state)
-        elif p1p is Act.PASSIVE_WAIT_PHASE and p2p is Act.PASSIVE_WAIT_PHASE:
+        elif p1p.is_passive_wait_phase() and p2p.is_passive_wait_phase():
             return self._start_up_phase(game_state)
-        elif p1p is Act.END_PHASE and p2p is Act.END_PHASE:
+        elif p1p.is_end_phase() and p2p.is_end_phase():
             return self._to_end_phase(game_state)
         raise Exception("Not Reached! Unknown Game State to process")
 
@@ -131,7 +131,11 @@ class ActionPhase(ph.Phase):
         assert active_character.can_cast_skill()
         # note: it's important to cast skill before new_dices are putted into the game_state
         #       so that normal_attacks can correctly be marked as charged attack
-        new_effects += active_character.skill(game_state, action.skill)
+        new_effects += active_character.skill(
+            game_state,
+            StaticTarget(pid, Zone.CHARACTERS, active_character.get_id()),
+            action.skill
+        )
         new_effects.append(AllStatusTriggererEffect(
             pid,
             TriggeringSignal.COMBAT_ACTION,

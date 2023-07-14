@@ -101,13 +101,6 @@ class Character:
     def factory(self) -> CharacterFactory:
         return CharacterFactory(self, type(self))
 
-    def location(self, game_state: GameState) -> StaticTarget:
-        pid = game_state.belongs_to(self)
-        if pid is None:
-            raise Exception("target character is not in the current game state")
-        me = StaticTarget(pid, Zone.CHARACTERS, self.get_id())
-        return me
-
     @classmethod
     def element(cls) -> Element:
         return cls._ELEMENT
@@ -135,31 +128,32 @@ class Character:
     def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
         raise NotImplementedError(f"{skill_type}'s cost is not defined for {cls.__name__}")
 
-    def skill(self, game_state: GameState, skill_type: CharacterSkill) -> tuple[eft.Effect, ...]:
+    def skill(self, game_state: GameState, source: StaticTarget, skill_type: CharacterSkill) -> tuple[eft.Effect, ...]:
         return self._post_skill(
             game_state,
+            source,
             skill_type,
-            self._skill(game_state, skill_type),
+            self._skill(game_state, source, skill_type),
         )
 
-    def _skill(self, game_state: GameState, skill_type: CharacterSkill) -> tuple[eft.Effect, ...]:
+    def _skill(self, game_state: GameState, source: StaticTarget, skill_type: CharacterSkill) -> tuple[eft.Effect, ...]:
         if skill_type is CharacterSkill.NORMAL_ATTACK:
-            return self.normal_attack(game_state)
+            return self.normal_attack(game_state, source)
         elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
-            return self.elemental_skill1(game_state)
+            return self.elemental_skill1(game_state, source)
         elif skill_type is CharacterSkill.ELEMENTAL_SKILL2:
-            return self.elemental_skill2(game_state)
+            return self.elemental_skill2(game_state, source)
         elif skill_type is CharacterSkill.ELEMENTAL_BURST:
-            return self.elemental_burst(game_state)
+            return self.elemental_burst(game_state, source)
         raise Exception(f"Not Overriden, skill_type={skill_type}")
 
     def _post_skill(
             self,
             game_state: GameState,
+            source: StaticTarget,
             skill_type: CharacterSkill,
             effects: tuple[eft.Effect, ...],
     ) -> tuple[eft.Effect, ...]:
-        source = self.location(game_state)
         return effects + (
             eft.BroadCastSkillInfoEffect(
                 source=source,
@@ -176,22 +170,27 @@ class Character:
             eft.DeathCheckCheckerEffect(),
         )
 
-    def normal_attack(self, game_state: GameState) -> tuple[eft.Effect, ...]:
+    def normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return self._post_normal_attack(
             game_state,
+            source,
             self._normal_attack(
-                self._pre_normal_attack(game_state)
+                self._pre_normal_attack(game_state, source), source
             )
         )
 
-    def _pre_normal_attack(self, game_state: GameState) -> GameState:
+    def _pre_normal_attack(self, game_state: GameState, source: StaticTarget) -> GameState:
         return game_state
 
-    def _normal_attack(self, game_state: GameState) -> tuple[eft.Effect, ...]:
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         raise Exception("Not Overriden")
 
-    def _post_normal_attack(self, game_state: GameState, effects: tuple[eft.Effect, ...]) -> tuple[eft.Effect, ...]:
-        source = self.location(game_state)
+    def _post_normal_attack(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            effects: tuple[eft.Effect, ...]
+    ) -> tuple[eft.Effect, ...]:
         return effects + (
             eft.EnergyRechargeEffect(
                 target=source,
@@ -199,22 +198,27 @@ class Character:
             ),
         )
 
-    def elemental_skill1(self, game_state: GameState) -> tuple[eft.Effect, ...]:
+    def elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return self._post_elemental_skill1(
             game_state,
+            source,
             self._elemental_skill1(
-                self._pre_elemental_skill1(game_state)
+                self._pre_elemental_skill1(game_state, source), source
             )
         )
 
-    def _pre_elemental_skill1(self, game_state: GameState) -> GameState:
+    def _pre_elemental_skill1(self, game_state: GameState, source: StaticTarget) -> GameState:
         return game_state
 
-    def _elemental_skill1(self, game_state: GameState) -> tuple[eft.Effect, ...]:
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         raise Exception("Not Overriden")
 
-    def _post_elemental_skill1(self, game_state: GameState, effects: tuple[eft.Effect, ...]) -> tuple[eft.Effect, ...]:
-        source = self.location(game_state)
+    def _post_elemental_skill1(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            effects: tuple[eft.Effect, ...]
+    ) -> tuple[eft.Effect, ...]:
         return effects + (
             eft.EnergyRechargeEffect(
                 target=source,
@@ -222,22 +226,22 @@ class Character:
             ),
         )
 
-    def elemental_skill2(self, game_state: GameState) -> tuple[eft.Effect, ...]:
+    def elemental_skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return self._post_elemental_skill2(
             game_state,
+            source,
             self._elemental_skill2(
-                self._pre_elemental_skill2(game_state)
+                self._pre_elemental_skill2(game_state, source), source
             )
         )
 
-    def _pre_elemental_skill2(self, game_state: GameState) -> GameState:
+    def _pre_elemental_skill2(self, game_state: GameState, source: StaticTarget) -> GameState:
         return game_state
 
-    def _elemental_skill2(self, game_state: GameState) -> tuple[eft.Effect, ...]:
+    def _elemental_skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         raise Exception("Not Overriden")
 
-    def _post_elemental_skill2(self, game_state: GameState, effects: tuple[eft.Effect, ...]) -> tuple[eft.Effect, ...]:
-        source = self.location(game_state)
+    def _post_elemental_skill2(self, game_state: GameState, source: StaticTarget, effects: tuple[eft.Effect, ...]) -> tuple[eft.Effect, ...]:
         return effects + (
             eft.EnergyRechargeEffect(
                 target=source,
@@ -245,21 +249,27 @@ class Character:
             ),
         )
 
-    def elemental_burst(self, game_state: GameState) -> tuple[eft.Effect, ...]:
+    def elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return self._post_elemental_burst(
             game_state,
+            source,
             self._elemental_burst(
-                self._pre_elemental_burst(game_state)
+                self._pre_elemental_burst(game_state, source), source
             )
         )
 
-    def _pre_elemental_burst(self, game_state: GameState) -> GameState:
+    def _pre_elemental_burst(self, game_state: GameState, source: StaticTarget) -> GameState:
         return game_state
 
-    def _elemental_burst(self, game_state: GameState) -> tuple[eft.Effect, ...]:
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         raise Exception("Not Overriden")
 
-    def _post_elemental_burst(self, game_state: GameState, effects: tuple[eft.Effect, ...]) -> tuple[eft.Effect, ...]:
+    def _post_elemental_burst(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            effects: tuple[eft.Effect, ...]
+    ) -> tuple[eft.Effect, ...]:
         return effects
 
     def talent_equiped(self) -> bool:
@@ -402,8 +412,7 @@ class Kaeya(Character):
             })
         return super().skill_cost(skill_type)
 
-    def _normal_attack(self, game_state: GameState) -> tuple[eft.Effect, ...]:
-        source = self.location(game_state)
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             source=source,
             element=Element.PHYSICAL,
@@ -411,8 +420,7 @@ class Kaeya(Character):
             dices_num=game_state.get_player(source.pid).get_dices().num_dices()
         )
 
-    def _elemental_skill1(self, game_state: GameState) -> tuple[eft.Effect, ...]:
-        source = self.location(game_state)
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ReferredDamageEffect(
                 source=source,
@@ -423,8 +431,7 @@ class Kaeya(Character):
             ),
         )
 
-    def _elemental_burst(self, game_state: GameState) -> tuple[eft.Effect, ...]:
-        source = self.location(game_state)
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.EnergyDrainEffect(
                 target=source,
@@ -488,8 +495,7 @@ class Keqing(Character):
             })
         return super().skill_cost(skill_type)
 
-    def _normal_attack(self, game_state: GameState) -> tuple[eft.Effect, ...]:
-        source = self.location(game_state)
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             source=source,
             element=Element.PHYSICAL,
@@ -497,8 +503,7 @@ class Keqing(Character):
             dices_num=game_state.get_player(source.pid).get_dices().num_dices()
         )
 
-    def _elemental_skill1(self, game_state: GameState) -> tuple[eft.Effect, ...]:
-        source = self.location(game_state)
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         effects: list[eft.Effect] = [
             eft.ReferredDamageEffect(
                 source=source,
@@ -562,9 +567,8 @@ class Keqing(Character):
 
         return tuple(effects)
 
-    def _elemental_burst(self, game_state: GameState) -> tuple[eft.Effect, ...]:
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         assert self.get_energy() == self.get_max_energy()
-        source = self.location(game_state)
         return (
             eft.EnergyDrainEffect(
                 target=source,
@@ -639,8 +643,7 @@ class RhodeiaOfLoch(Character):
             })
         return super().skill_cost(skill_type)
 
-    def _normal_attack(self, game_state: GameState) -> tuple[eft.Effect, ...]:
-        source = self.location(game_state)
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             source=source,
             element=Element.HYDRO,
@@ -660,10 +663,8 @@ class RhodeiaOfLoch(Character):
             if summon not in summons
         )
 
-    def _elemental_skill1(self, game_state: GameState) -> tuple[eft.Effect, ...]:
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         from random import choice
-        source = self.location(game_state)
-
         summons_to_choose = self._not_summoned_types(game_state, source.pid)
         summon: type[sm.Summon]
         if summons_to_choose:
@@ -677,9 +678,8 @@ class RhodeiaOfLoch(Character):
             ),
         )
 
-    def _elemental_skill2(self, game_state: GameState) -> tuple[eft.Effect, ...]:
+    def _elemental_skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         from random import choice
-        source = self.location(game_state)
 
         # first choice
         summons_to_choose = self._not_summoned_types(game_state, source.pid)
@@ -719,8 +719,7 @@ class RhodeiaOfLoch(Character):
             ),
         )
 
-    def _elemental_burst(self, game_state: GameState) -> tuple[eft.Effect, ...]:
-        source = self.location(game_state)
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         summons = game_state.get_player(source.pid).get_summons()
         effects: list[eft.Effect] = [
             eft.EnergyDrainEffect(
@@ -774,8 +773,7 @@ class Tighnari(Character):
             return AbstractDices({Element.DENDRO: 3})
         return super().skill_cost(skill_type)
 
-    def _normal_attack(self, game_state: GameState) -> tuple[eft.Effect, ...]:
-        source = self.location(game_state)
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             source=source,
             element=Element.PHYSICAL,
@@ -783,8 +781,7 @@ class Tighnari(Character):
             dices_num=game_state.get_player(source.pid).get_dices().num_dices()
         )
 
-    def _elemental_skill1(self, game_state: GameState) -> tuple[eft.Effect, ...]:
-        source = self.location(game_state)
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ReferredDamageEffect(
                 source=source,
@@ -799,8 +796,7 @@ class Tighnari(Character):
             ),
         )
 
-    def _elemental_burst(self, game_state: GameState) -> tuple[eft.Effect, ...]:
-        source = self.location(game_state)
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.EnergyDrainEffect(
                 target=source,
