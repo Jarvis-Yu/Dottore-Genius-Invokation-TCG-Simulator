@@ -74,7 +74,7 @@ class Statuses:
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Statuses):
             return False
-        return self is other or self == other
+        return self is other or self._statuses == other._statuses
 
     def __hash__(self) -> int:
         return hash(self._statuses)

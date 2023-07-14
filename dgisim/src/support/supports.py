@@ -117,6 +117,20 @@ class Supports:
     def __len__(self) -> int:
         return len(self._supports)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, type(self)):
+            return False
+        return self is other or (
+            self._supports == other._supports
+            and self._max_num == other._max_num
+        )
+
+    def __hash__(self) -> int:
+        return hash((
+            self._supports,
+            self._max_num,
+        ))
+
     def dict_str(self) -> dict:
         return dict(
             (

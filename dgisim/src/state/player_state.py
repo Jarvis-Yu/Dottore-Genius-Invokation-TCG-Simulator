@@ -173,13 +173,16 @@ class PlayerState:
         return (
             self._phase,
             self._card_redraw_chances,
+            self._dice_reroll_chances,
             self._characters,
-            self._dices,
+            self._combat_statuses,
             self._summons,
             self._supports,
+            self._dices,
             self._hand_cards,
             self._deck_cards,
             self._publicly_used_cards,
+            self._publicly_gained_cards,
         )
 
     def __eq__(self, other: object) -> bool:
@@ -229,14 +232,14 @@ class PlayerStateFactory:
         self._card_redraw_chances = chances
         return self
 
-    def f_card_redraw_chances(self, f: Callable[[int], int]) -> PlayerStateFactory:
+    def f_card_redraw_chances(self, f: Callable[[int], int]) -> PlayerStateFactory:  # pragma: no cover
         return self.card_redraw_chances(f(self._card_redraw_chances))
 
     def dice_reroll_chances(self, chances: int) -> PlayerStateFactory:
         self._dice_reroll_chances = chances
         return self
 
-    def f_dice_reroll_chances(self, f: Callable[[int], int]) -> PlayerStateFactory:
+    def f_dice_reroll_chances(self, f: Callable[[int], int]) -> PlayerStateFactory:  # pragma: no cover
         return self.dice_reroll_chances(f(self._dice_reroll_chances))
 
     def characters(self, characters: Characters) -> PlayerStateFactory:
