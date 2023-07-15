@@ -10,6 +10,7 @@ skip_empty = True
 exclude_also =
     def __repr__
     def __str__
+    def content_str
     def dict_str
     if __name__ == .__main__.:
     if TYPE_CHECKING:
