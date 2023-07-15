@@ -39,6 +39,9 @@ __all__ = [
     # type
     "CharacterTalentStatus",  # it should be statuses used to record character-talent related data
     "EquipmentStatus",  # talent / weapon / artifact
+    "TalentEquipmentStatus",
+    "WeaponEquipmentStatus",
+    "ArtifactEquipmentStatus",
     "CharacterStatus",  # statues that belongs to one character only
     "CombatStatus",  # statues that buffs the active character
 
@@ -328,6 +331,17 @@ class EquipmentStatus(Status):
     Basic status, describing weapon, artifact and character unique talents
     """
 
+@dataclass(frozen=True)
+class TalentEquipmentStatus(EquipmentStatus):
+    pass
+
+@dataclass(frozen=True)
+class WeaponEquipmentStatus(EquipmentStatus):
+    pass
+
+@dataclass(frozen=True)
+class ArtifactEquipmentStatus(EquipmentStatus):
+    pass
 
 @dataclass(frozen=True)
 class CharacterStatus(Status):
@@ -917,7 +931,7 @@ class IcicleStatus(CombatStatus, _UsageStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class ColdBloodedStrikeStatus(EquipmentStatus):
+class ColdBloodedStrikeStatus(TalentEquipmentStatus):
     """
     Equipping this status implies the equipped character is Kaeya
     """
@@ -993,7 +1007,7 @@ class KeqingTalentStatus(CharacterTalentStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class ThunderingPenanceStatus(EquipmentStatus):
+class ThunderingPenanceStatus(TalentEquipmentStatus):
     pass
 
 
@@ -1008,14 +1022,14 @@ class KeqingElectroInfusionStatus(ElectroInfusionStatus):
 #### Rhodeia of Loch ####
 
 @dataclass(frozen=True, kw_only=True)
-class StreamingSurgeStatus(EquipmentStatus):
+class StreamingSurgeStatus(TalentEquipmentStatus):
     pass
 
 #### Tighnari ####
 
 
 @dataclass(frozen=True, kw_only=True)
-class KeenSightStatus(EquipmentStatus):
+class KeenSightStatus(TalentEquipmentStatus):
     COST_DEDUCTION: ClassVar[int] = 1
 
     @override

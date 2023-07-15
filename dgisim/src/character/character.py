@@ -46,7 +46,7 @@ class Character:
         max_hp: int,
         energy: int,
         max_energy: int,
-        talents: stts.TalentStatuses,
+        talents: stts.Statuses,
         equipments: stts.EquipmentStatuses,
         statuses: stts.Statuses,
         elemental_aura: ElementalAura,
@@ -80,7 +80,7 @@ class Character:
     def get_max_energy(self) -> int:
         return self._max_energy
 
-    def get_talent_statuses(self) -> stts.TalentStatuses:
+    def get_talent_statuses(self) -> stts.Statuses:
         return self._talents
 
     def get_equipment_statuses(self) -> stts.EquipmentStatuses:
@@ -346,11 +346,11 @@ class CharacterFactory:
         self._energy = energy
         return self
 
-    def talents(self, talents: stts.TalentStatuses) -> CharacterFactory:
+    def talents(self, talents: stts.Statuses) -> CharacterFactory:
         self._talents = talents
         return self
 
-    def f_talents(self, f: Callable[[stts.TalentStatuses], stts.TalentStatuses]) -> CharacterFactory:
+    def f_talents(self, f: Callable[[stts.Statuses], stts.Statuses]) -> CharacterFactory:
         return self.talents(f(self._talents))
 
     def equipments(self, equipments: stts.EquipmentStatuses) -> CharacterFactory:
@@ -458,9 +458,9 @@ class Kaeya(Character):
             max_hp=10,
             energy=0,
             max_energy=2,
-            talents=stts.TalentStatuses(()),
+            talents=stts.Statuses(()),
             equipments=stts.EquipmentStatuses(()),
-            statuses=stts.OrderedStatuses(()),
+            statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
 
@@ -598,8 +598,8 @@ class Keqing(Character):
             max_hp=10,
             energy=0,
             max_energy=3,
-            statuses=stts.OrderedStatuses(()),
-            talents=stts.TalentStatuses((stt.KeqingTalentStatus(can_infuse=False),)),
+            statuses=stts.Statuses(()),
+            talents=stts.Statuses((stt.KeqingTalentStatus(can_infuse=False),)),
             equipments=stts.EquipmentStatuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -748,9 +748,9 @@ class RhodeiaOfLoch(Character):
             max_hp=10,
             energy=0,
             max_energy=3,
-            talents=stts.TalentStatuses(()),
+            talents=stts.Statuses(()),
             equipments=stts.EquipmentStatuses(()),
-            statuses=stts.OrderedStatuses(()),
+            statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
 
@@ -826,8 +826,8 @@ class Tighnari(Character):
             max_hp=10,
             energy=0,
             max_energy=2,
-            talents=stts.TalentStatuses(()),
+            talents=stts.Statuses(()),
             equipments=stts.EquipmentStatuses(()),
-            statuses=stts.OrderedStatuses(()),
+            statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
