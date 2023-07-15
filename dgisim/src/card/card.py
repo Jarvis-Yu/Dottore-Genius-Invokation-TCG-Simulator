@@ -11,7 +11,7 @@ ordered alphabetically.
 - concrete classes, the implementation of cards that are actually in the game
 """
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import cast, TYPE_CHECKING
 from dataclasses import replace
 from typing_extensions import override
 
@@ -20,6 +20,7 @@ from ..action import action_generator as acg
 from ..character import character as chr
 from ..effect import effect as eft
 from ..status import status as stt
+from ..summon import summon as sm
 from ..support import support as sp
 
 from ..character.enums import CharacterSkill
@@ -65,6 +66,7 @@ __all__ = [
     "CalxsArts",
     "ChangingShifts",
     "LeaveItToMe",
+    "QuickKnit",
     "Starsigns",
 
     # Support Card
@@ -366,6 +368,102 @@ class _CharTargetChoiceProvider(Card):
         assert isinstance(instruction, act.StaticTargetInstruction)
         if instruction.target is None:
             assert isinstance(player_choice, StaticTarget)
+            assert player_choice.zone is Zone.CHARACTERS
+            return replace(
+                action_generator,
+                instruction=replace(instruction, target=player_choice),
+            )
+
+        elif instruction.dices is None:
+            assert isinstance(player_choice, ActualDices)
+            return replace(
+                action_generator,
+                instruction=replace(instruction, dices=player_choice),
+            )
+
+        raise Exception("Not Reached!")
+
+    @override
+    @classmethod
+    def action_generator(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+    ) -> None | acg.ActionGenerator:
+        if not cls.strictly_usable(game_state, pid):  # pragma: no cover
+            return None
+        return acg.ActionGenerator(
+            game_state=game_state,
+            pid=pid,
+            action=replace(act.CardAction._all_none(), card=cls),
+            instruction=act.StaticTargetInstruction._all_none(),
+            _choices_helper=cls._choices_helper,
+            _fill_helper=cls._fill_helper,
+        )
+
+class _SummonTargetChoiceProvider(Card):
+    """
+    If _MY_SIDE is set to true, then all summons on my side can be chosen
+    If _OPPO_SIDE is set to true, then all summons on the opponent's side can be chosen
+    """
+    _MY_SIDE: bool = False
+    _OPPO_SIDE: bool = False
+
+    @classmethod
+    def _valid_summon(cls, summon: sm.Summon) -> bool:  # pragma: no cover
+        return True
+
+    @classmethod
+    def _choices_helper(
+            cls,
+            action_generator: acg.ActionGenerator,
+    ) -> GivenChoiceType:
+        game_state = action_generator.game_state
+        pid = action_generator.pid
+
+        assert action_generator._action_filled()
+
+        instruction = action_generator.instruction
+        assert type(instruction) is act.StaticTargetInstruction
+        if instruction.target is None:
+            pids = []
+            if cls._MY_SIDE:
+                pids.append(pid)
+            if cls._OPPO_SIDE:
+                pids.append(pid.other())
+            choices = []
+            for this_pid in pids:
+                summons = game_state.get_player(this_pid).get_summons()
+                choices += [
+                    StaticTarget(
+                        pid=this_pid,
+                        zone=Zone.SUMMONS,
+                        id=type(summon),
+                    )
+                    for summon in summons
+                    if cls._valid_summon(summon)
+                ]
+            return tuple(choices)
+
+        elif instruction.dices is None:
+            return cls.preprocessed_dice_cost(game_state, pid)[1]
+
+        raise Exception("Not Reached!"
+            + "Should be called when there is something to fill. action_generator:\n"
+            + f"{action_generator}"
+        )
+
+    @classmethod
+    def _fill_helper(
+        cls,
+        action_generator: acg.ActionGenerator,
+        player_choice: DecidedChoiceType,
+    ) -> acg.ActionGenerator:
+        instruction = action_generator.instruction
+        assert isinstance(instruction, act.StaticTargetInstruction)
+        if instruction.target is None:
+            assert isinstance(player_choice, StaticTarget)
+            assert player_choice.zone is Zone.SUMMONS
             return replace(
                 action_generator,
                 instruction=replace(instruction, target=player_choice),
@@ -455,7 +553,7 @@ class SupportCard(Card):
         if type(instruction) is act.StaticTargetInstruction:
             es.append(eft.RemoveSupportEffect(
                 target_pid=pid,
-                sid=instruction.target.id,
+                sid=cast(int, instruction.target.id),
             ))
         return tuple(es) + cls._effects(game_state, pid)
 
@@ -870,6 +968,48 @@ class LeaveItToMe(EventCard, _DiceOnlyChoiceProvider):
             ),
         )
 
+
+class QuickKnit(EventCard, _SummonTargetChoiceProvider):
+    _DICE_COST = AbstractDices({Element.OMNI: 1})
+    _MY_SIDE = True
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        return not game_state.get_player(pid).get_summons().empty()
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        if not isinstance(instruction, act.StaticTargetInstruction):  # pragma: no cover
+            return False
+        
+        return (
+            instruction.target.pid is pid
+            and game_state.get_target(instruction.target) is not None
+            and cls.loosely_usable(game_state, pid)
+        )
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.StaticTargetInstruction)
+        return (
+            eft.OneSummonIncreaseUsage(
+                target=instruction.target,
+                d_usages=1,
+            ),
+        )
 
 class Starsigns(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.ANY: 2})

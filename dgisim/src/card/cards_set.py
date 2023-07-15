@@ -15,6 +15,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     CalxsArts,
     ChangingShifts,
     LeaveItToMe,
+    QuickKnit,
     Starsigns,
 
     # Event Card / Food

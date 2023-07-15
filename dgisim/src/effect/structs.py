@@ -5,6 +5,9 @@ from ..helper.quality_of_life import dataclass_repr
 from ..state.enums import Pid
 from .enums import Zone
 
+if TYPE_CHECKING:
+    from ..summon.summon import Summon
+
 __all__ = [
     "DamageType",
     "StaticTarget",
@@ -15,7 +18,7 @@ __all__ = [
 class StaticTarget:
     pid: Pid
     zone: Zone
-    id: int
+    id: int | type["Summon"]
 
     def __repr__(self) -> str:
         return dataclass_repr(self)

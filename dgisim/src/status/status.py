@@ -14,7 +14,7 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from enum import Enum
 from math import ceil
-from typing import ClassVar, Optional, TYPE_CHECKING
+from typing import ClassVar, cast, Optional, TYPE_CHECKING
 from typing_extensions import override, Self
 
 from ..effect import effect as eft
@@ -1035,7 +1035,7 @@ class KeenSightStatus(EquipmentStatus):
                     and item.event_type is EventType.NORMAL_ATTACK
                     and player.get_dices().is_even()
                     and characters.just_get_character(
-                        status_source.id
+                        cast(int, status_source.id)
                     ).get_character_statuses().contains(VijnanaSuffusionStatus)
                     and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION
             ):

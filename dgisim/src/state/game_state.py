@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Callable, Optional
+from typing import Callable, cast, Optional
 from typing_extensions import Self
 
 from .. import mode as md
@@ -24,6 +24,7 @@ from ..event import *
 from ..helper.quality_of_life import case_val
 from ..status.status_processing import StatusProcessing
 from ..status.enums import Preprocessables
+from ..summon.summon import Summon
 from ..support.support import Support
 from .enums import Pid
 
@@ -173,15 +174,16 @@ class GameState:
         else:
             return None
 
-    def get_target(self, target: StaticTarget) -> None | Character | Support:
+    def get_target(self, target: StaticTarget) -> None | Character | Summon | Support:
         player = self.get_player(target.pid)
         if target.zone is Zone.CHARACTERS:
-            return player.get_characters().get_character(target.id)
+            return player.get_characters().get_character(cast(int, target.id))
+        elif target.zone is Zone.SUMMONS:
+            return player.get_summons().find(cast(type[Summon], target.id))
         elif target.zone is Zone.SUPPORTS:
-            return player.get_supports().find_by_sid(target.id)
+            return player.get_supports().find_by_sid(cast(int, target.id))
         else:
-            raise Exception("Not Implemented Yet")
-        return None
+            raise Exception("Not Reached!")
 
     def get_character_target(self, target: StaticTarget) -> None | Character:
         character = self.get_target(target)

@@ -12,7 +12,7 @@ ordered alphabetically.
 """
 from __future__ import annotations
 from dataclasses import asdict, dataclass, field, replace
-from typing import FrozenSet, Iterable, Optional, TYPE_CHECKING, Union
+from typing import cast, FrozenSet, Iterable, Optional, TYPE_CHECKING, Union
 
 from ..character import character as chr
 from ..helper.quality_of_life import dataclass_repr
@@ -104,7 +104,7 @@ __all__ = [
 
 @dataclass(frozen=True, repr=False)
 class Effect:
-    def execute(self, game_state: GameState) -> GameState:
+    def execute(self, game_state: GameState) -> GameState:  # pragma: no cover
         raise Exception("Not Overriden or Implemented")
 
     def name(self) -> str:
@@ -163,7 +163,7 @@ class TriggerStatusEffect(TriggerrbleEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
-        if not isinstance(character, chr.Character):
+        if not isinstance(character, chr.Character):  # pragma: no cover
             return game_state
         effects: Iterable[Effect] = []
 
@@ -174,7 +174,7 @@ class TriggerStatusEffect(TriggerrbleEffect):
             statuses = character.get_equipment_statuses()
         elif issubclass(self.status, stt.CharacterStatus):
             statuses = character.get_character_statuses()
-        else:
+        else:  # pragma: no cover
             raise Exception("Unexpected Status Type to Trigger", self.status)
         status = statuses.find(self.status)
         if status is None:
@@ -386,7 +386,7 @@ class SwapCharacterCheckerEffect(CheckerEffect):
         else:
             my_signal = TriggeringSignal.SWAP_EVENT_2
             oppo_signal = TriggeringSignal.SWAP_EVENT_1
-        if my_ac_id != self.my_active.id:
+        if my_ac_id != self.my_active.id:  # pragma: no cover
             effects += [
                 AllStatusTriggererEffect(
                     pid=my_pid,
@@ -424,7 +424,7 @@ class DeathCheckCheckerEffect(CheckerEffect):
         waiting_player = game_state.get_other_player(pid)
         # TODO: check if game ends
         if death_swap_player.defeated():
-            raise Exception("Not reached, should be caught by DefeatedCheckerEffect")
+            raise Exception("Not Reached! Should be caught by DefeatedCheckerEffect")
         effects: list[Effect] = []
         # TODO: trigger other death based effects
         effects.append(DeathSwapPhaseStartEffect())
@@ -483,7 +483,7 @@ class SwapCharacterEffect(DirectEffect):
         return game_state.factory().f_player(
             pid,
             lambda p: p.factory().f_characters(
-                lambda cs: cs.factory().active_character_id(self.target.id).build()
+                lambda cs: cs.factory().active_character_id(cast(int, self.target.id)).build()
             ).build()
         ).f_effect_stack(
             lambda es: es.push_many_fl(effects)
@@ -504,7 +504,7 @@ class ForwardSwapCharacterEffect(DirectEffect):
                 next_char = char
                 break
         if next_char is None:
-            raise Exception("Not reached, there should be defeat checker before")
+            raise Exception("Not Reached! There should be defeat checker before")
         return game_state.factory().f_player(
             self.target_player,
             lambda p: p.factory().f_characters(
@@ -632,7 +632,7 @@ class SpecificDamageEffect(DirectEffect):
 
         # Get damage target
         target = game_state.get_character_target(actual_damage.target)
-        if target is None:
+        if target is None:  # pragma: no cover
             return game_state
 
         # Damage Calculation
@@ -725,7 +725,7 @@ class SpecificDamageEffect(DirectEffect):
                 )
             )
 
-        else:
+        else:  # pragma: no cover
             # this exception shouldn't be reached by now, but leave it here just to be safe
             raise Exception(f"Reaction {reaction.reaction_type} not handled")
 
@@ -757,6 +757,7 @@ class ReferredDamageEffect(DirectEffect):
         return self.element in _DAMAGE_ELEMENTS
 
     def execute(self, game_state: GameState) -> GameState:
+        assert self.legal()
         targets: list[Optional[chr.Character]] = []
         effects: list[Effect] = []
         char: Optional[chr.Character]
@@ -773,18 +774,18 @@ class ReferredDamageEffect(DirectEffect):
             else:
                 assert self.target_ref.pid is self.source.pid.other()
                 assert self.target_ref.zone is Zone.CHARACTERS
-                avoided_id = self.target_ref.id
+                avoided_id = cast(int, self.target_ref.id)
             for char in opponenet_characters.get_characters():
                 if char.get_id() != avoided_id:
                     targets.append(char)
-        else:
+        else:  # pragma: no cover
             raise Exception("Not implemented yet")
 
         for char in targets:
-            if char is None:
+            if char is None:  # pragma: no cover
                 continue
             pid = game_state.belongs_to(char)
-            if pid is None:
+            if pid is None:  # pragma: no cover
                 continue
             effects.append(
                 SpecificDamageEffect(
@@ -813,7 +814,7 @@ class EnergyRechargeEffect(DirectEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
-        if not isinstance(character, chr.Character):
+        if not isinstance(character, chr.Character):  # pragma: no cover
             return game_state
         energy = min(character.get_energy() + self.recharge, character.get_max_energy())
         if energy == character.get_energy():
@@ -835,7 +836,7 @@ class EnergyDrainEffect(DirectEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
-        if not isinstance(character, chr.Character):
+        if not isinstance(character, chr.Character):  # pragma: no cover
             return game_state
         energy = max(character.get_energy() - self.drain, 0)
         if energy == character.get_energy():
@@ -857,7 +858,7 @@ class RecoverHPEffect(DirectEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
-        if not isinstance(character, chr.Character):
+        if not isinstance(character, chr.Character):  # pragma: no cover
             return game_state
         hp = min(character.get_hp() + self.recovery, character.get_max_hp())
         if hp == character.get_hp():
@@ -898,7 +899,7 @@ class PublicRemoveCardEffect(DirectEffect):
         pid = self.pid
         card = self.card
         hand_cards = game_state.get_player(pid).get_hand_cards()
-        if not hand_cards.contains(card):
+        if not hand_cards.contains(card):  # pragma: no cover
             return game_state
         return game_state.factory().f_player(
             pid,
@@ -919,7 +920,7 @@ class PublicRemoveAllCardEffect(DirectEffect):
         pid = self.pid
         card = self.card
         hand_cards = game_state.get_player(pid).get_hand_cards()
-        if not hand_cards.contains(card) or hand_cards[card] <= 0:
+        if not hand_cards.contains(card) or hand_cards[card] <= 0:  # pragma: no cover
             return game_state
         return game_state.factory().f_player(
             pid,
@@ -956,7 +957,7 @@ class AddCharacterStatusEffect(DirectEffect):
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
         assert isinstance(character, chr.Character)
-        if issubclass(self.status, stt.CharacterTalentStatus):
+        if issubclass(self.status, stt.CharacterTalentStatus):  # pragma: no cover
             character = character.factory().f_talents(
                 lambda ts: ts.update_status(self.status())
             ).build()
@@ -983,10 +984,10 @@ class RemoveCharacterStatusEffect(DirectEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_character_target(self.target)
-        if character is None:
+        if character is None:  # pragma: no cover
             return game_state
         new_character = character
-        if issubclass(self.status, stt.CharacterTalentStatus):
+        if issubclass(self.status, stt.CharacterTalentStatus):  # pragma: no cover
             new_character = character.factory().f_talents(
                 lambda ts: ts.remove(self.status)
             ).build()
@@ -1014,7 +1015,7 @@ class UpdateCharacterStatusEffect(DirectEffect):
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
         assert isinstance(character, chr.Character)
-        if isinstance(self.status, stt.CharacterTalentStatus):
+        if isinstance(self.status, stt.CharacterTalentStatus):  # pragma: no cover
             character = character.factory().f_talents(
                 lambda ts: ts.update_status(self.status)
             ).build()
@@ -1196,20 +1197,19 @@ class AllSummonIncreaseUsage(DirectEffect):
 
 @dataclass(frozen=True, kw_only=True, repr=False)
 class OneSummonIncreaseUsage(DirectEffect):
-    target_pid: Pid
-    summon_type: type[sm.Summon]
+    target: StaticTarget
     d_usages: int = 1
 
     def execute(self, game_state: GameState) -> GameState:
         effects: list[Effect] = []
-        summons = game_state.get_player(self.target_pid).get_summons()
-        summon = summons.find(summon_type=self.summon_type)
-        if summon is None:
+        summons = game_state.get_player(self.target.pid).get_summons()
+        summon = summons.find(summon_type=cast(type[sm.Summon], self.target.id))
+        if summon is None:  # pragma: no cover
             return game_state
 
         effects.append(
             OverrideSummonEffect(
-                target_pid=self.target_pid,
+                target_pid=self.target.pid,
                 summon=replace(summon, usages=summon.usages + 1),
             )
         )
@@ -1282,10 +1282,10 @@ class CastSkillEffect(DirectEffect):
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
         assert isinstance(character, chr.Character)
-        if not character.can_cast_skill():
+        if not character.can_cast_skill():  # pragma: no cover
             return game_state
         effects = character.skill(game_state, self.target, self.skill)
-        if not effects:
+        if not effects:  # pragma: no cover
             return game_state
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
