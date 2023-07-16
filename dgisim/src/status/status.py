@@ -19,7 +19,7 @@ from typing_extensions import override, Self
 
 from ..effect import effect as eft
 
-from ..character.enums import CharacterSkill
+from ..character.enums import CharacterSkill, WeaponType
 from ..effect.enums import Zone, TriggeringSignal, DynamicCharacterTarget
 from ..effect.structs import StaticTarget, DamageType
 from ..element import Element
@@ -48,6 +48,18 @@ __all__ = [
     # templates
     "StackedShieldStatus",
     "FixedShieldStatus",
+
+    # equipment status
+    ## bow ##
+    "RavenBowStatus",
+    ## catalyst ##
+    "MagicGuideStatus",
+    ## claymore ##
+    "WhiteIronGreatswordStatus",
+    ## polearm ##
+    "WhiteTasselStatus",
+    ## sword ##
+    "TravelersHandySword",
 
     # combat status
     "CatalyzingFieldStatus",
@@ -337,7 +349,31 @@ class TalentEquipmentStatus(EquipmentStatus):
 
 @dataclass(frozen=True)
 class WeaponEquipmentStatus(EquipmentStatus):
-    pass
+    WEAPON_TYPE: WeaponType
+    BASE_DAMAGE_BOOST: int = 1
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: Preprocessable,
+            signal: Preprocessables,
+    ) -> tuple[Preprocessable, Optional[Self]]:
+        if signal is Preprocessables.DMG_AMOUNT:
+            assert isinstance(item, eft.SpecificDamageEffect)
+            if (
+                item.source == status_source
+                and (
+                    item.damage_type.normal_attack
+                    or item.damage_type.elemental_skill
+                    or item.damage_type.elemental_burst
+                )
+                and item.element is not Element.PIERCING
+            ):
+                new_damage = replace(item, damage=item.damage + self.BASE_DAMAGE_BOOST)
+                return new_damage, self
+        return super()._preprocess(game_state, status_source, item, signal)
 
 @dataclass(frozen=True)
 class ArtifactEquipmentStatus(EquipmentStatus):
@@ -575,6 +611,39 @@ class _InfusionStatus(CharacterStatus, _UsageStatus):
 @dataclass(frozen=True, kw_only=True)
 class ElectroInfusionStatus(_InfusionStatus):
     ELEMENT: ClassVar[Optional[Element]] = Element.ELECTRO
+
+############################## Equipment Status ##############################
+
+########## Weapon Status ##########
+
+#### Bow ####
+@dataclass(frozen=True, kw_only=True)
+class RavenBowStatus(WeaponEquipmentStatus):
+    WEAPON_TYPE = WeaponType.BOW
+
+#### Caralyst ####
+
+@dataclass(frozen=True, kw_only=True)
+class MagicGuideStatus(WeaponEquipmentStatus):
+    WEAPON_TYPE = WeaponType.CATALYST
+
+#### Claymore ####
+
+@dataclass(frozen=True, kw_only=True)
+class WhiteIronGreatswordStatus(WeaponEquipmentStatus):
+    WEAPON_TYPE = WeaponType.CLAYMORE
+
+#### Polearm ####
+
+@dataclass(frozen=True, kw_only=True)
+class WhiteTasselStatus(WeaponEquipmentStatus):
+    WEAPON_TYPE = WeaponType.POLEARM
+
+#### Sword ####
+
+@dataclass(frozen=True, kw_only=True)
+class TravelersHandySword(WeaponEquipmentStatus):
+    WEAPON_TYPE = WeaponType.SWORD
 
 ############################## Combat Status ##############################
 

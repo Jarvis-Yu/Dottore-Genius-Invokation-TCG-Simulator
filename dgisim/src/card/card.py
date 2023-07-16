@@ -48,6 +48,9 @@ __all__ = [
     # type
     "EventCard",
     "EquipmentCard",
+    "TalentEquipmentCard",
+    "WeaponEquipmentCard",
+    "ArtifactEquipmentCard",
     "SupportCard",
     "CompanionCard",
     "LocationCard",
@@ -517,6 +520,15 @@ class EventCard(Card):
 
 
 class EquipmentCard(Card):
+    pass
+
+class TalentEquipmentCard(EquipmentCard):
+    pass
+
+class WeaponEquipmentCard(EquipmentCard):
+    pass
+
+class ArtifactEquipmentCard(EquipmentCard):
     pass
 
 
@@ -1085,7 +1097,7 @@ class Xudong(CompanionCard):
 #### Kaeya ####
 
 
-class ColdBloodedStrike(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
+class ColdBloodedStrike(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.CRYO: 4})
 
     @override
@@ -1190,7 +1202,7 @@ class LightningStiletto(EventCard, _CombatActionCard, _CharTargetChoiceProvider)
         )
 
 
-class ThunderingPenance(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
+class ThunderingPenance(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.ELECTRO: 3})
 
     @override
@@ -1238,7 +1250,7 @@ class ThunderingPenance(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvide
 
 #### Rhodeia of Loch ####
 
-class StreamingSurge(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
+class StreamingSurge(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.HYDRO: 4})
 
     @override
@@ -1286,7 +1298,7 @@ class StreamingSurge(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
 #### Tighnari ####
 
 
-class KeenSight(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
+class KeenSight(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.DENDRO: 4})
 
     @override
