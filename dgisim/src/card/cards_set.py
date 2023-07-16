@@ -6,6 +6,18 @@ __all__ = [
 
 _DEFAULT_CARDS: list[type[Card]] = [
     # Equipment Card
+    ## Weapons ##
+    ### Bow ###
+    RavenBow,
+    ### Catalyst ###
+    MagicGuide,
+    ### Claymore ###
+    WhiteIronGreatsword,
+    ### Polearm ###
+    WhiteTassel,
+    ### Sword ###
+    TravelersHandySword,
+    ## Talents ##
     ColdBloodedStrike,
     KeenSight,
     StreamingSurge,

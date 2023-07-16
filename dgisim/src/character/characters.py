@@ -53,6 +53,13 @@ class Characters:
             if char.get_id() != self.get_active_character_id()
         )
 
+    def get_alive_characters(self) -> tuple[Character, ...]:
+        return tuple(
+            char
+            for char in self._characters
+            if char.alive()
+        )
+
     def get_character(self, id: int) -> None | Character:
         for character in self._characters:
             if id == character.get_id():

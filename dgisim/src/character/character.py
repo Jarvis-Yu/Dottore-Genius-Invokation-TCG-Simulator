@@ -19,7 +19,7 @@ from ..effect.enums import Zone, DynamicCharacterTarget
 from ..effect.structs import StaticTarget, DamageType
 from ..element import *
 from ..state.enums import Pid
-from .enums import CharacterSkill
+from .enums import CharacterSkill, WeaponType
 
 if TYPE_CHECKING:
     from ..state.game_state import GameState
@@ -38,6 +38,7 @@ __all__ = [
 
 class Character:
     _ELEMENT = Element.ANY
+    _WEAPON_TYPE: WeaponType
 
     def __init__(
         self,
@@ -104,6 +105,10 @@ class Character:
     @classmethod
     def element(cls) -> Element:
         return cls._ELEMENT
+
+    @classmethod
+    def weapon_type(cls) -> WeaponType:
+        return cls._WEAPON_TYPE
 
     @classmethod
     def from_default(cls, id: int = -1) -> Character:
@@ -388,6 +393,7 @@ class CharacterFactory:
 class Kaeya(Character):
     # basic info
     _ELEMENT = Element.CRYO
+    _WEAPON_TYPE = WeaponType.SWORD
 
     @override
     @staticmethod
@@ -468,6 +474,7 @@ class Kaeya(Character):
 class Keqing(Character):
     # basic info
     _ELEMENT = Element.ELECTRO
+    _WEAPON_TYPE = WeaponType.SWORD
 
     # consts
     BASE_ELECTRO_INFUSION_DURATION: int = 2
@@ -608,6 +615,7 @@ class Keqing(Character):
 class RhodeiaOfLoch(Character):
     # basic info
     _ELEMENT = Element.HYDRO
+    _WEAPON_TYPE = WeaponType.NONE
 
     # consts
     _SUMMONS = (
@@ -756,6 +764,7 @@ class RhodeiaOfLoch(Character):
 
 class Tighnari(Character):
     _ELEMENT = Element.DENDRO
+    _WEAPON_TYPE = WeaponType.BOW
 
     @override
     @staticmethod

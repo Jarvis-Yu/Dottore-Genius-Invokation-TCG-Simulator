@@ -64,7 +64,7 @@ dictionary, and discover game states on different 'game branches' being actually
 - [x] Implement game phase of Starting Hand Select Phase (select active character)
 - [x] Implement game phase of Roll (Dice) Phase (roll dices between rounds)
 - [x] Implement game phase of Action Phase (players beat each other)
-  - [ ] Implement all cards (18/184 implemented)
+  - [ ] Implement all cards (23/184 implemented)
     - [x] Calxs Arts,
           Changing Shifts,
           ColdBlooded Strike,
@@ -73,15 +73,20 @@ dictionary, and discover game states on different 'game branches' being actually
           Leave It to Me!,
           Lightning Stiletto,
           Lotus Flower Crisp,
+          Magic Guide,
           Minty Meat Rolls,
           Mondstadt Hash Brown,
           Mushroom Pizza,
           Nothern Smoked Chicken,
           Quick Knit,
+          RavenBow,
           Starsigns,
           Streaming Surge,
           Sweet Madame,
           Thundering Penance,
+          TravelersHandySword,
+          White Iron Greatsword,
+          White Tassel,
           Xudong,
   - [ ] Implement all characters with their talent cards (4/48 implemented)
     - [x] Kaeya,

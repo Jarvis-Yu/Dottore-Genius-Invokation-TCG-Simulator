@@ -59,7 +59,7 @@ __all__ = [
     ## polearm ##
     "WhiteTasselStatus",
     ## sword ##
-    "TravelersHandySword",
+    "TravelersHandySwordStatus",
 
     # combat status
     "CatalyzingFieldStatus",
@@ -349,8 +349,8 @@ class TalentEquipmentStatus(EquipmentStatus):
 
 @dataclass(frozen=True)
 class WeaponEquipmentStatus(EquipmentStatus):
-    WEAPON_TYPE: WeaponType
-    BASE_DAMAGE_BOOST: int = 1
+    WEAPON_TYPE: ClassVar[WeaponType]
+    BASE_DAMAGE_BOOST: ClassVar[int] = 1
 
     @override
     def _preprocess(
@@ -619,31 +619,31 @@ class ElectroInfusionStatus(_InfusionStatus):
 #### Bow ####
 @dataclass(frozen=True, kw_only=True)
 class RavenBowStatus(WeaponEquipmentStatus):
-    WEAPON_TYPE = WeaponType.BOW
+    WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.BOW
 
-#### Caralyst ####
+#### Catalyst ####
 
 @dataclass(frozen=True, kw_only=True)
 class MagicGuideStatus(WeaponEquipmentStatus):
-    WEAPON_TYPE = WeaponType.CATALYST
+    WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CATALYST
 
 #### Claymore ####
 
 @dataclass(frozen=True, kw_only=True)
 class WhiteIronGreatswordStatus(WeaponEquipmentStatus):
-    WEAPON_TYPE = WeaponType.CLAYMORE
+    WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CLAYMORE
 
 #### Polearm ####
 
 @dataclass(frozen=True, kw_only=True)
 class WhiteTasselStatus(WeaponEquipmentStatus):
-    WEAPON_TYPE = WeaponType.POLEARM
+    WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.POLEARM
 
 #### Sword ####
 
 @dataclass(frozen=True, kw_only=True)
-class TravelersHandySword(WeaponEquipmentStatus):
-    WEAPON_TYPE = WeaponType.SWORD
+class TravelersHandySwordStatus(WeaponEquipmentStatus):
+    WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.SWORD
 
 ############################## Combat Status ##############################
 

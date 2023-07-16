@@ -23,7 +23,7 @@ from ..status import status as stt
 from ..summon import summon as sm
 from ..support import support as sp
 
-from ..character.enums import CharacterSkill
+from ..character.enums import CharacterSkill, WeaponType
 from ..dices import AbstractDices, ActualDices
 from ..effect.enums import Zone
 from ..effect.structs import StaticTarget
@@ -55,6 +55,18 @@ __all__ = [
     "CompanionCard",
     "LocationCard",
     "FoodCard",
+
+    # Weapon Card
+    ## Bow ##
+    "RavenBow",
+    ## Catalyst ##
+    "MagicGuide",
+    ## Claymore ##
+    "WhiteIronGreatsword",
+    ## Polearm ##
+    "WhiteTassel",
+    ## Sword ##
+    "TravelersHandySword",
 
     # Event Card
     ## Food Card ##
@@ -280,9 +292,9 @@ class _DiceOnlyChoiceProvider(Card):
             return cls.preprocessed_dice_cost(game_state, pid)[1]
 
         raise Exception("Not Reached!"
-            + "Should be called when there is something to fill. action_generator:\n"
-            + f"{action_generator}"
-        )
+                        + "Should be called when there is something to fill. action_generator:\n"
+                        + f"{action_generator}"
+                        )
 
     @classmethod
     def _fill_helper(
@@ -355,9 +367,9 @@ class _CharTargetChoiceProvider(Card):
             return cls.preprocessed_dice_cost(game_state, pid)[1]
 
         raise Exception("Not Reached!"
-            + "Should be called when there is something to fill. action_generator:\n"
-            + f"{action_generator}"
-        )
+                        + "Should be called when there is something to fill. action_generator:\n"
+                        + f"{action_generator}"
+                        )
 
     @classmethod
     def _fill_helper(
@@ -403,6 +415,7 @@ class _CharTargetChoiceProvider(Card):
             _choices_helper=cls._choices_helper,
             _fill_helper=cls._fill_helper,
         )
+
 
 class _SummonTargetChoiceProvider(Card):
     """
@@ -452,9 +465,9 @@ class _SummonTargetChoiceProvider(Card):
             return cls.preprocessed_dice_cost(game_state, pid)[1]
 
         raise Exception("Not Reached!"
-            + "Should be called when there is something to fill. action_generator:\n"
-            + f"{action_generator}"
-        )
+                        + "Should be called when there is something to fill. action_generator:\n"
+                        + f"{action_generator}"
+                        )
 
     @classmethod
     def _fill_helper(
@@ -522,11 +535,59 @@ class EventCard(Card):
 class EquipmentCard(Card):
     pass
 
+
 class TalentEquipmentCard(EquipmentCard):
     pass
 
-class WeaponEquipmentCard(EquipmentCard):
-    pass
+
+class WeaponEquipmentCard(EquipmentCard, _CharTargetChoiceProvider):
+    WEAPON_TYPE: WeaponType
+    WEAPON_STATUS: type[stt.WeaponEquipmentStatus]
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        chars = game_state.get_player(pid).get_characters().get_alive_characters()
+        return any(cls._valid_char(char) for char in chars) \
+            and super()._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def _valid_char(cls, char: chr.Character) -> bool:
+        return char.weapon_type() is cls.WEAPON_TYPE
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        if not isinstance(instruction, act.StaticTargetInstruction) \
+                or pid is not instruction.target.pid:
+            return False  # pragma: no cover
+        char = game_state.get_target(instruction.target)
+        if not isinstance(char, chr.Character):  # pragma: no cover
+            return False
+        return cls._valid_char(char) and super()._valid_instruction(game_state, pid, instruction)
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.StaticTargetInstruction)
+        return (
+            eft.AddCharacterStatusEffect(
+                target=instruction.target,
+                status=cls.WEAPON_STATUS,
+            ),
+        )
+
 
 class ArtifactEquipmentCard(EquipmentCard):
     pass
@@ -606,9 +667,9 @@ class SupportCard(Card):
             return cls.preprocessed_dice_cost(game_state, pid)[1]
 
         raise Exception("Not Reached!"
-            + "Should be called when there is something to fill. action_generator:\n"
-            + f"{action_generator}"
-        )
+                        + "Should be called when there is something to fill. action_generator:\n"
+                        + f"{action_generator}"
+                        )
 
     @classmethod
     def _fill_helper(
@@ -696,7 +757,8 @@ class FoodCard(EventCard):
         """ This only applies to food with a single target, override if needed """
         if not isinstance(instruction, act.StaticTargetInstruction):
             return False
-
+        if pid is not instruction.target.pid:
+            return False
         target = game_state.get_target(instruction.target)
         return isinstance(target, chr.Character) and not target.satiated()
 
@@ -748,6 +810,47 @@ class _DirectHealCard(FoodCard):
         return char.get_hp() < char.get_max_hp() \
             and super()._valid_char(char)
 
+# <<<<<<<<<<<<<<<<<<<< Equipment Cards <<<<<<<<<<<<<<<<<<<<
+########## Weapon Card ##########
+#### Bow ####
+
+
+class RavenBow(WeaponEquipmentCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 2})
+    WEAPON_TYPE = WeaponType.BOW
+    WEAPON_STATUS = stt.RavenBowStatus
+
+#### Catalyst ####
+
+
+class MagicGuide(WeaponEquipmentCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 2})
+    WEAPON_TYPE = WeaponType.CATALYST
+    WEAPON_STATUS = stt.MagicGuideStatus
+
+#### Claymore ####
+
+
+class WhiteIronGreatsword(WeaponEquipmentCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 2})
+    WEAPON_TYPE = WeaponType.CLAYMORE
+    WEAPON_STATUS = stt.WhiteIronGreatswordStatus
+
+#### Polearm ####
+
+
+class WhiteTassel(WeaponEquipmentCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 2})
+    WEAPON_TYPE = WeaponType.POLEARM
+    WEAPON_STATUS = stt.WhiteTasselStatus
+
+#### Sword ####
+
+
+class TravelersHandySword(WeaponEquipmentCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 2})
+    WEAPON_TYPE = WeaponType.SWORD
+    WEAPON_STATUS = stt.TravelersHandySwordStatus
 
 # <<<<<<<<<<<<<<<<<<<< Event Cards <<<<<<<<<<<<<<<<<<<<
 # <<<<<<<<<<<<<<<<<<<< Event Cards / Food Cards <<<<<<<<<<<<<<<<<<<<
@@ -1000,7 +1103,7 @@ class QuickKnit(EventCard, _SummonTargetChoiceProvider):
     ) -> bool:
         if not isinstance(instruction, act.StaticTargetInstruction):  # pragma: no cover
             return False
-        
+
         return (
             instruction.target.pid is pid
             and game_state.get_target(instruction.target) is not None
@@ -1022,6 +1125,7 @@ class QuickKnit(EventCard, _SummonTargetChoiceProvider):
                 d_usages=1,
             ),
         )
+
 
 class Starsigns(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.ANY: 2})
