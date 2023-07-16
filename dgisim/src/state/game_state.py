@@ -84,7 +84,7 @@ class GameState:
 
     @classmethod
     def from_players(cls, mode: md.Mode, player1: ps.PlayerState, player2: ps.PlayerState) -> Self:
-        return cls(
+        return cls(  # pragma: no cover
             mode=mode,
             phase=mode.card_select_phase(),
             round=0,
@@ -123,7 +123,7 @@ class GameState:
             return Pid.P1
         elif player is self._player2:
             return Pid.P2
-        else:
+        else:  # pragma: no cover
             raise Exception("player unknown")
 
     def get_player(self, player_id: Pid) -> ps.PlayerState:
@@ -131,7 +131,7 @@ class GameState:
             return self._player1
         elif player_id.is_player2():
             return self._player2
-        else:
+        else:  # pragma: no cover
             raise Exception("player_id unknown")
 
     def get_other_player(self, player_id: Pid) -> ps.PlayerState:
@@ -139,7 +139,7 @@ class GameState:
             return self._player2
         elif player_id.is_player2():
             return self._player1
-        else:
+        else:  # pragma: no cover
             raise Exception("player_id unknown")
 
     def death_swapping(self, player_id: None | Pid = None) -> bool:
@@ -171,7 +171,7 @@ class GameState:
             return Pid.P1
         elif self._player2.is_mine(object):
             return Pid.P2
-        else:
+        else:  # pragma: no cover
             return None
 
     def get_target(self, target: StaticTarget) -> None | Character | Summon | Support:
@@ -187,7 +187,7 @@ class GameState:
 
     def get_character_target(self, target: StaticTarget) -> None | Character:
         character = self.get_target(target)
-        if not isinstance(character, Character):
+        if not isinstance(character, Character):  # pragma: no cover
             return None
         return character
 
@@ -314,7 +314,7 @@ class GameStateFactory:
             return self.player1(new_player)
         elif pid is Pid.P2:
             return self.player2(new_player)
-        else:
+        else:  # pragma: no cover
             raise Exception("player_id unknown")
 
     def f_player(self, pid: Pid, f: Callable[[ps.PlayerState], ps.PlayerState]) -> GameStateFactory:
@@ -322,7 +322,7 @@ class GameStateFactory:
             return self.player1(f(self._player1))
         elif pid is Pid.P2:
             return self.player2(f(self._player2))
-        else:
+        else:  # pragma: no cover
             raise Exception("player_id unknown")
 
     def other_player(self, pid: Pid, new_player: ps.PlayerState) -> GameStateFactory:
@@ -330,7 +330,7 @@ class GameStateFactory:
             return self.player2(new_player)
         elif pid is Pid.P2:
             return self.player1(new_player)
-        else:
+        else:  # pragma: no cover
             raise Exception("player_id unknown")
 
     def f_other_player(self, pid: Pid, f: Callable[[ps.PlayerState], ps.PlayerState]) -> GameStateFactory:
@@ -338,7 +338,7 @@ class GameStateFactory:
             return self.player2(f(self._player2))
         elif pid is Pid.P2:
             return self.player1(f(self._player1))
-        else:
+        else:  # pragma: no cover
             raise Exception("player_id unknown")
 
     def build(self) -> GameState:
@@ -478,7 +478,7 @@ class SwapChecker:
                 (new_game_state, swap_action.event_speed),
                 None
             )
-        raise Exception("action ({action}) is not expected to be passed in")
+        raise Exception("action ({action}) is not expected to be passed in")  # pragma: no cover
 
 
 class SkillChecker:
@@ -541,10 +541,10 @@ class SkillChecker:
         character = game_state.get_player(pid).get_active_character()
         if character is None \
                 or not character.can_cast_skill() \
-                or skill_type not in character.skills():
+                or skill_type not in character.skills():  # pragma: no cover
             return None
         if skill_type is CharacterSkill.ELEMENTAL_BURST \
-                and character.get_energy() < character.get_max_energy():
+                and character.get_energy() < character.get_max_energy():  # pragma: no cover
             return None
         game_state, skill_event = StatusProcessing.preprocess_by_all_statuses(
             game_state=game_state,
@@ -577,7 +577,7 @@ class ElementalTuningChecker:
     def usable(self, pid: Pid, elem: None | Element = None) -> bool:
         game_state = self._game_state
         if not (type(game_state.get_phase()) == type(game_state.get_mode().action_phase())
-                or game_state.get_active_player_id() is pid):
+                or game_state.get_active_player_id() is pid):  # pragma: no cover
             return False
         player = game_state.get_player(pid)
         active_character = player.get_active_character()

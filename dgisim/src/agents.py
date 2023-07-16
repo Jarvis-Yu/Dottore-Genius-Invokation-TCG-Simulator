@@ -111,8 +111,7 @@ class RandomAgent(PlayerAgent):
 
     def _card_select_phase(self, history: list[GameState], pid: Pid) -> PlayerAction:
         game_state = history[-1]
-        phase = game_state.get_phase()
-        act_gen = phase.action_generator(game_state, pid)
+        act_gen = game_state.action_generator(pid)
         assert act_gen is not None
         player_action = self._random_action_generator_chooser(act_gen)
         return player_action
@@ -123,16 +122,14 @@ class RandomAgent(PlayerAgent):
             pid: Pid
     ) -> PlayerAction:
         game_state = history[-1]
-        phase = game_state.get_phase()
-        act_gen = phase.action_generator(game_state, pid)
+        act_gen = game_state.action_generator(pid)
         assert act_gen is not None
         player_action = self._random_action_generator_chooser(act_gen)
         return player_action
 
     def _roll_phase(self, history: list[GameState], pid: Pid) -> PlayerAction:
         game_state = history[-1]
-        phase = game_state.get_phase()
-        act_gen = phase.action_generator(game_state, pid)
+        act_gen = game_state.action_generator(pid)
         assert act_gen is not None
         player_action = self._random_action_generator_chooser(act_gen)
         return player_action
@@ -178,16 +175,14 @@ class RandomAgent(PlayerAgent):
 
     def _action_phase(self, history: list[GameState], pid: Pid) -> PlayerAction:
         game_state = history[-1]
-        phase = game_state.get_phase()
-        act_gen = phase.action_generator(game_state, pid)
+        act_gen = game_state.action_generator(pid)
         assert act_gen is not None
         player_action = self._random_action_generator_chooser(act_gen)
         return player_action
 
     def _end_phase(self, history: list[GameState], pid: Pid) -> PlayerAction:
         game_state = history[-1]
-        phase = game_state.get_phase()
-        act_gen = phase.action_generator(game_state, pid)
+        act_gen = game_state.action_generator(pid)
         assert act_gen is not None
         player_action = self._random_action_generator_chooser(act_gen)
         return player_action

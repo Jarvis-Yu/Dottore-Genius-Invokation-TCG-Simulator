@@ -10,7 +10,7 @@ from dgisim.src.phase.default.end_phase import EndPhase
 from dgisim.src.phase.default.game_end_phase import GameEndPhase
 from dgisim.src.phase.default.roll_phase import RollPhase
 from dgisim.src.phase.default.starting_hand_select_phase import StartingHandSelectPhase
-from dgisim.src.state.enums import Act
+from dgisim.src.state.enums import Act, Pid
 from dgisim.src.state.game_state import GameState
 
 
@@ -164,6 +164,8 @@ class TestGameStateMachine(unittest.TestCase):
             repeats = int(optional_repeats)  # type: ignore
         except:
             repeats = 5
+        from collections import defaultdict
+        wins: dict[None | Pid, int] = defaultdict(int)
         for i in range(repeats):
             if i % 3 == 0:
                 state_machine = GameStateMachine(
@@ -180,6 +182,7 @@ class TestGameStateMachine(unittest.TestCase):
             game_end_phase = state_machine.get_game_state().get_mode().game_end_phase()
             try:
                 state_machine.step_until_phase(game_end_phase)
+                wins[state_machine.get_winner()] += 1
             except Exception:
                 print(GamePrinter.dict_game_printer(state_machine.get_game_state().dict_str()))
                 raise Exception("Test failed")
