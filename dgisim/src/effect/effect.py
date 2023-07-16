@@ -90,6 +90,7 @@ __all__ = [
     "UpdateSummonEffect",
     "OverrideSummonEffect",
     "AllSummonIncreaseUsage",
+    "OneSummonDecreaseUsage",
     "OneSummonIncreaseUsage",
     "AddSupportEffect",
     "RemoveSupportEffect",
@@ -1210,7 +1211,30 @@ class OneSummonIncreaseUsage(DirectEffect):
         effects.append(
             OverrideSummonEffect(
                 target_pid=self.target.pid,
-                summon=replace(summon, usages=summon.usages + 1),
+                summon=replace(summon, usages=summon.usages + self.d_usages),
+            )
+        )
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_many_fl(effects)
+        ).build()
+
+
+@dataclass(frozen=True, kw_only=True, repr=False)
+class OneSummonDecreaseUsage(DirectEffect):
+    target: StaticTarget
+    d_usages: int = 1
+
+    def execute(self, game_state: GameState) -> GameState:
+        effects: list[Effect] = []
+        summons = game_state.get_player(self.target.pid).get_summons()
+        summon = summons.find(summon_type=cast(type[sm.Summon], self.target.id))
+        if summon is None:  # pragma: no cover
+            return game_state
+
+        effects.append(
+            UpdateSummonEffect(
+                target_pid=self.target.pid,
+                summon=replace(summon, usages=summon.usages + self.d_usages),
             )
         )
         return game_state.factory().f_effect_stack(

@@ -163,7 +163,7 @@ class TestGameStateMachine(unittest.TestCase):
         try:
             repeats = int(optional_repeats)  # type: ignore
         except:
-            repeats = 10
+            repeats = 5
         for i in range(repeats):
             if i % 3 == 0:
                 state_machine = GameStateMachine(

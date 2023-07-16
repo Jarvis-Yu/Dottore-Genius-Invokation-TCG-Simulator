@@ -755,10 +755,9 @@ class FoodCard(EventCard):
             instruction: act.Instruction
     ) -> bool:
         """ This only applies to food with a single target, override if needed """
-        if not isinstance(instruction, act.StaticTargetInstruction):
-            return False
-        if pid is not instruction.target.pid:
-            return False
+        if not isinstance(instruction, act.StaticTargetInstruction) \
+                or pid is not instruction.target.pid:
+            return False  # pragma: no cover
         target = game_state.get_target(instruction.target)
         return isinstance(target, chr.Character) and not target.satiated()
 
@@ -1106,7 +1105,7 @@ class QuickKnit(EventCard, _SummonTargetChoiceProvider):
 
         return (
             instruction.target.pid is pid
-            and game_state.get_target(instruction.target) is not None
+            and isinstance(game_state.get_target(instruction.target), sm.Summon)
             and cls.loosely_usable(game_state, pid)
         )
 
