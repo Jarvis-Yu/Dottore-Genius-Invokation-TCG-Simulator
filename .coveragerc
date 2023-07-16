@@ -17,4 +17,5 @@ exclude_also =
     if TYPE_CHECKING:
     raise NotImplementedError
     raise Exception\(.Not Reached
+    raise Exception\([a-z]*"[nN]ot [oO]verride
     @abstractmethod

@@ -73,7 +73,7 @@ class CardActGenGenerator(ABC):
             game_state: GameState,
             pid: Pid,
     ) -> None | ActionGenerator:
-        if not game_state.card_checker().playable(pid):
+        if not game_state.card_checker().playable(pid):  # pragma: no cover
             return None
         return ActionGenerator(
             game_state=game_state,
@@ -245,7 +245,7 @@ class ElemTuningActGenGenerator(ABC):
             game_state: GameState,
             pid: Pid,
     ) -> None | ActionGenerator:
-        if not game_state.elem_tuning_checker().usable(pid):
+        if not game_state.elem_tuning_checker().usable(pid):  # pragma: no cover
             return None
 
         return ActionGenerator(

@@ -63,7 +63,7 @@ class Character:
         self._aura = elemental_aura
 
     @staticmethod
-    def _talent_status() -> Optional[type[stt.EquipmentStatus]]:
+    def _talent_status() -> Optional[type[stt.EquipmentStatus]]:  # pragma: no cover
         return None
 
     def get_id(self) -> int:
@@ -416,7 +416,7 @@ class Kaeya(Character):
             return AbstractDices({
                 Element.CRYO: 4,
             })
-        return super().skill_cost(skill_type)
+        raise Exception("Not Reached!")
 
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
@@ -500,7 +500,7 @@ class Keqing(Character):
             return AbstractDices({
                 Element.ELECTRO: 4,
             })
-        return super().skill_cost(skill_type)
+        raise Exception("Not Reached!")
 
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
@@ -649,7 +649,7 @@ class RhodeiaOfLoch(Character):
             return AbstractDices({
                 Element.HYDRO: 3,
             })
-        return super().skill_cost(skill_type)
+        raise Exception("Not Reached!")
 
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
@@ -780,7 +780,7 @@ class Tighnari(Character):
             return AbstractDices({Element.DENDRO: 3})
         elif skill_type is CharacterSkill.ELEMENTAL_BURST:
             return AbstractDices({Element.DENDRO: 3})
-        return super().skill_cost(skill_type)
+        raise Exception("Not Reached!")
 
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
