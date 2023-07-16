@@ -63,6 +63,17 @@ class TestQuickKnit(unittest.TestCase):
         # test no action generator if no summon
         self.assertIsNone(QuickKnit.action_generator(base_game_no_summon, Pid.P1))
 
+        action_generator = just(QuickKnit.action_generator(base_game, Pid.P1))
+        choices = action_generator.choices()
+        assert isinstance(choices, tuple)
+        self.assertIsInstance(choices[0], StaticTarget)
+        action_generator = action_generator.choose(choices[0])
+        choices = action_generator.choices()
+        assert isinstance(choices, AbstractDices)
+        action_generator = action_generator.choose(
+            just(action_generator.dices_available().basically_satisfy(choices))
+        )
+
         # test right usage
         card_action = CardAction(
             card=QuickKnit,
