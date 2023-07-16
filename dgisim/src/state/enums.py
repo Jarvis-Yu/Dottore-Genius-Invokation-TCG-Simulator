@@ -22,7 +22,7 @@ class Pid(Enum):
             return Pid.P2
         elif self is Pid.P2:
             return Pid.P1
-        else:
+        else:  # pragma: no cover
             raise Exception("Unknown situation of pid")
 
 

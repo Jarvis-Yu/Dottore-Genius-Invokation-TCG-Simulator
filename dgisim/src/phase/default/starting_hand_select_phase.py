@@ -38,11 +38,11 @@ class StartingHandSelectPhase(ph.Phase):
     def step(self, game_state: GameState) -> GameState:
         p1 = game_state.get_player1()
         p2 = game_state.get_player2()
-        if p1.get_phase() == Act.PASSIVE_WAIT_PHASE and p2.get_phase() == Act.PASSIVE_WAIT_PHASE:
+        if p1.is_passive_wait_phase() and p2.is_passive_wait_phase():
             return self._activate(game_state)
-        elif p1.get_phase() is Act.END_PHASE and p2.get_phase() is Act.END_PHASE:
+        elif p1.is_end_phase() and p2.is_end_phase():
             return self._to_roll_phase(game_state)
-        else:
+        else:  # pragma: no cover
             raise Exception("Unknown Game State to process")
 
     def _handle_picking_starting_hand(
@@ -55,7 +55,7 @@ class StartingHandSelectPhase(ph.Phase):
         char_id = swap_action.char_id
         player = game_state.get_player(pid)
         chars = player.get_characters()
-        if not chars.char_id_valid(char_id):
+        if not chars.char_id_valid(char_id):  # pragma: no cover
             return game_state
         new_chars = chars.factory().active_character_id(char_id).build()
         return game_state.factory().active_player_id(
@@ -76,7 +76,7 @@ class StartingHandSelectPhase(ph.Phase):
     ) -> Optional[GameState]:
         if isinstance(action, CharacterSelectAction):
             return self._handle_picking_starting_hand(game_state, pid, action)
-        else:
+        else:  # pragma: no cover
             raise Exception("Unknown Game State to process")
 
     @classmethod
@@ -108,7 +108,7 @@ class StartingHandSelectPhase(ph.Phase):
         )
 
     def action_generator(self, game_state: GameState, pid: Pid) -> ActionGenerator | None:
-        if pid is not self.waiting_for(game_state):
+        if pid is not self.waiting_for(game_state):  # pragma: no cover
             return None
         return ActionGenerator(
             game_state=game_state,
