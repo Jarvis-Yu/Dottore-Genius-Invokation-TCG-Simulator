@@ -189,8 +189,8 @@ The effects are:
 Then `AddCharacterStatusEffect` adds the `ColdBloodedStrikeStatus` to this character.
 
 After that, `CastSkillEffect` is executed to generate the effects for the skill.
-If the target character cannot cast the skill at when the effect is executed,
-then not effects are generated.
+If the target character cannot cast the skill when the effect is executed,
+then no effects are generated.
 
 So after `CastSkillEffect` is executed, the `effect_stack` looks like this:
 
@@ -240,3 +240,60 @@ updating itself as used in this round.
 
 `TurnEndEffect` switches the player in action. That is make player2 the active
 player in this case.
+
+## Player Phase
+
+The two examples above should give you an impression how powerful the effect handling
+system can be. But not all logics of the game are handled by effects.
+
+Aside from the Game phase (Roll phase, Action phase...) that determines the state of the game,
+each player has their own state,
+mainly used to mark the phase of them inside the game phase.
+
+- `ACTION_PHASE`: the player is in action
+- `PASSIVE_WAIT_PHASE`: the player is waiting to be in `ACTION_PHASE`
+- `ACTIVE_WAIT_PHASE`: the player is waiting but more active than `PASSIVE_WAIT_PHASE`
+- `END_PHASE`: the player is all done for this game phase
+
+Typically, when a game phase is about to transit to the next phase,
+both phases of the players are `END_PHASE`.
+And when the game state just transits to a new phase,
+both phases of the players are `PASSIVE_WAIT_PHASE` waiting to be assigned
+some new phase by the game phase instance.
+
+Below shows how phases controls the flow inside action phase of the game.
+
+(`1AP;2PWP` means player1 is in `ACTION_PHASE`, and player2 is in `PASSIVE_WAIT_PHASE`)
+
+```mermaid
+stateDiagram-v2
+    state startup <<choice>>
+    PreviousGamePhase --> 1PWP,2PWP
+    state ActionPhase {
+        1PWP,2PWP --> startup
+        startup   --> 1AP,2PWP : if player1 should go first
+        startup   --> 1PWP,2AP : if player2 should go first
+        1AP,2PWP  --> 1AP,2PWP : fast-action
+        1PWP,2AP  --> 1PWP,2AP : fast-action
+        1AP,2PWP  --> 1PWP,2AP : combat-action
+        1PWP,2AP  --> 1AP,2PWP : combat-action
+        1AP,2PWP  --> 1EP,2AP  : end-round
+        1PWP,2AP  --> 1AP,2EP  : end-round
+        1AP,2EP   --> 1AP,2EP  : fast/combat-action
+        1EP,2AP   --> 1EP,2AP  : fast/combat-action
+        1AP,2EP   --> 1EP,2EP  : end-round
+        1EP,2AP   --> 1EP,2EP  : end-round
+    }
+    1EP,2EP   --> NextGamePhase
+```
+
+Note that the diagram doesn't include the handling of death-swaps for simplicity.
+(the insertion of request for player action because their active character is defeated)
+
+Whenever the effect which checks for the death of the active character of any player
+detects a death. Two effects are pushed to the `effect_stack` -
+`DeathSwapPhaseStartEffect` and `DeathSwapPhaseEndEffect`.
+The former one is caught by game's `action phase`,
+indicating the corresponding player action is required to proceed.
+The latter one saves the phases of each player at the time when _DeathSwap_ happens,
+restoring the original phases when it is executed.
