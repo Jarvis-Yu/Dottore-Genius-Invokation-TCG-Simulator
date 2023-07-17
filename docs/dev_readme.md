@@ -1,11 +1,17 @@
 # Dev README
 
 - [Dev README](#dev-readme)
+  - [Code Style](#code-style)
   - [Run the Project Locally](#run-the-project-locally)
     - [For unix based systems (MacOS, Linux...)](#for-unix-based-systems-macos-linux)
     - [For Windows based systems (Powershell)](#for-windows-based-systems-powershell)
+  - [Design Doc](#design-doc)
   - [Where to Start Reading the Code](#where-to-start-reading-the-code)
   - [QA](#qa)
+
+## Code Style
+
+Please check the [wiki page](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/wiki)
 
 ## Run the Project Locally
 
@@ -31,6 +37,8 @@ source ./scripts/sh/venv.sh
 
 Powershell scripts of the same name are in `./scripts/ps1/`,
 please refer to the guide above but execute the `.ps1` scripts instead.
+
+## [Design Doc](state_machine_design.md)
 
 ## Where to Start Reading the Code
 

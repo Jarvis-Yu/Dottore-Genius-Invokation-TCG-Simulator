@@ -57,6 +57,8 @@ memory.
 `GameState` implements `__eq__` and `__hash__`, enabling you to use any game state as a key in a
 dictionary, and discover game states on different 'game branches' being actually the same.
 
+## [State Machine Design](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/state_machine_design.md)
+
 ## Development Milestones
 
 - [x] Set up the framework for maintaining game states
@@ -102,7 +104,6 @@ dictionary, and discover game states on different 'game branches' being actually
 - [x] Implement random player agent for testing purposes
 - [x] Implement player action validity checker
 - [x] Implement player action choices provider
-- [ ] Implement greedy player agent for testing purposes
 
 > Just in case you don't know, **_WIP_** means "work in progress".
 
@@ -115,6 +116,6 @@ Once this project is done, I'll be reading relative papers and develop an AI for
 is supposed to be used for learning strategies and making decks, but not against another player
 directly.
 
-## Interested in the Project?
+## Wants To Contribute?
 
-Please read this [README](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/dev_readme.md).
+Please read [this](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/dev_readme.md).
