@@ -779,6 +779,10 @@ class ReferredDamageEffect(DirectEffect):
             for char in opponenet_characters.get_characters():
                 if char.get_id() != avoided_id:
                     targets.append(char)
+        elif self.target is DynamicCharacterTarget.SELF_SELF:
+            targets.append(
+                game_state.get_player(self.source.pid).get_characters().get_active_character()
+            )
         else:  # pragma: no cover
             raise Exception("Not implemented yet")
 

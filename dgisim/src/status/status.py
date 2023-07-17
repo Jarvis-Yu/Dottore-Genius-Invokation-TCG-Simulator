@@ -85,6 +85,10 @@ __all__ = [
     "KeqingElectroInfusionStatus",
     "KeqingTalentStatus",
     "ThunderingPenanceStatus",
+    ## Klee ##
+    "ExplosiveSparkStatus",
+    "PoundingSurpriseStatus",
+    "SparksnSplash",
     ## Rhodeia of Loch ##
     "StreamingSurgeStatus",
     ## Tighnari ##
@@ -435,7 +439,7 @@ class _UsageStatus(Status):
     @override
     def _update(self, other: Self) -> Optional[Self]:
         new_usages = min(self.usages + other.usages, self.MAX_USAGES)
-        return replace(self, usages=new_usages)
+        return replace(other, usages=new_usages)
 
     def __str__(self) -> str:
         return super().__str__() + f"({self.usages})"  # pragma: no cover
@@ -1014,7 +1018,7 @@ class ColdBloodedStrikeStatus(TalentEquipmentStatus):
             status_source: StaticTarget,
             information: eft.SpecificDamageEffect | CharacterSkill | Card,
             info_source: Optional[StaticTarget],
-    ) -> ColdBloodedStrikeStatus:
+    ) -> Self:
         if self.activated or self.usages == 0:
             return self
 
@@ -1087,6 +1091,108 @@ class KeqingElectroInfusionStatus(ElectroInfusionStatus):
     def __str__(self) -> str:
         return super().__str__() + f"({self.damage_boost})"
 
+#### Klee ####
+@dataclass(frozen=True, kw_only=True)
+class ExplosiveSparkStatus(CharacterStatus, _UsageStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 2
+    DAMAGE_BOOST: ClassVar[int] = 1
+    COST_DEDUCTION: ClassVar[int] = 1
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: Preprocessable,
+            signal: Preprocessables,
+    ) -> tuple[Preprocessable, Optional[Self]]:
+        if signal is Preprocessables.DMG_AMOUNT:
+            assert isinstance(item, eft.SpecificDamageEffect)
+            if status_source != item.source:
+                return item, self
+            if item.damage_type.charged_attack:
+                new_item = replace(item, damage=item.damage + self.DAMAGE_BOOST)
+                new_self = replace(self, usages=self.usages-1)
+                return new_item, new_self
+        elif signal is Preprocessables.SKILL:
+            assert isinstance(item, GameEvent)
+            player = game_state.get_player(status_source.pid)
+            if (
+                    status_source == item.source
+                    and item.event_type is EventType.NORMAL_ATTACK \
+                    and player.get_dices().is_even() \
+                    and item.dices_cost[Element.ANY] + item.dices_cost[Element.PYRO] > 0
+            ):
+                elems = [Element.PYRO, Element.ANY]
+                cost_deduction_left = self.COST_DEDUCTION
+                deduction: dict[Element, int] = {}
+                for elem in elems:
+                    deduction[elem] = cost_deduction_left
+                    cost_deduction_left -= item.dices_cost[elem]
+                    if cost_deduction_left <= 0:
+                        break
+                if item.dices_cost[Element.PYRO] > 0:
+                    item = replace(
+                        item,
+                        dices_cost=(item.dices_cost - deduction).validify()
+                    )
+                return item, self
+        return item, self
+
+@dataclass(frozen=True, kw_only=True)
+class PoundingSurpriseStatus(TalentEquipmentStatus):
+    pass
+
+@dataclass(frozen=True, kw_only=True)
+class SparksnSplash(CombatStatus, _UsageStatus):
+    usages: int = 2
+    activated: bool = False
+    MAX_USAGES: ClassVar[int] = 2
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            information: eft.SpecificDamageEffect | CharacterSkill | Card,
+            info_source: Optional[StaticTarget],
+    ) -> Self:
+        if self.activated or self.usages == 0:
+            return self
+
+        if not isinstance(information, CharacterSkill):
+            return self
+
+        assert info_source is not None
+        if status_source.pid is not info_source.pid:
+            return self
+
+        return replace(self, activated=True)
+
+    @override
+    def _react_to_signal(
+            self,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        es: list[eft.Effect] = []
+        new_self = self
+
+        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+            assert self.usages >= 1
+            es.append(
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.SELF_SELF,
+                    element=Element.PYRO,
+                    damage=2,
+                    damage_type=DamageType(status=True, no_boost=True)
+                )
+            )
+            new_self = replace(new_self, usages=-1, activated=False)
+
+        return es, new_self
 
 #### Rhodeia of Loch ####
 
@@ -1120,7 +1226,7 @@ class KeenSightStatus(TalentEquipmentStatus):
                     and characters.just_get_character(
                         cast(int, status_source.id)
                     ).get_character_statuses().contains(VijnanaSuffusionStatus)
-                    and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION
+                    and item.dices_cost[Element.ANY] > 0
             ):
                 item = replace(
                     item,

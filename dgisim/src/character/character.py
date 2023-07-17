@@ -4,7 +4,7 @@ and implementation of all characters. (in alphabetic order)
 """
 from __future__ import annotations
 from typing import Callable, Optional, TYPE_CHECKING, Union
-from typing_extensions import override
+from typing_extensions import override, Self
 from functools import lru_cache
 
 from ..card import card as cd
@@ -18,6 +18,7 @@ from ..effect.effects_template import *
 from ..effect.enums import Zone, DynamicCharacterTarget
 from ..effect.structs import StaticTarget, DamageType
 from ..element import *
+from ..helper.quality_of_life import case_val
 from ..state.enums import Pid
 from .enums import CharacterSkill, WeaponType
 
@@ -31,6 +32,7 @@ __all__ = [
     # concretes
     "Kaeya",
     "Keqing",
+    "Klee",
     "RhodeiaOfLoch",
     "Tighnari",
 ]
@@ -457,7 +459,7 @@ class Kaeya(Character):
         )
 
     @classmethod
-    def from_default(cls, id: int = -1) -> Kaeya:
+    def from_default(cls, id: int = -1) -> Self:
         return cls(
             id=id,
             hp=10,
@@ -612,6 +614,90 @@ class Keqing(Character):
         )
 
 
+class Klee(Character):
+    _ELEMENT = Element.PYRO
+    _WEAPON_TYPE = WeaponType.CATALYST
+
+    @override
+    @staticmethod
+    def _talent_status() -> type[stt.EquipmentStatus] | None:
+        return stt.PoundingSurpriseStatus
+
+    @override
+    @classmethod
+    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
+        if skill_type is CharacterSkill.NORMAL_ATTACK:
+            return AbstractDices({
+                Element.PYRO: 1,
+                Element.ANY: 2,
+            })
+        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
+            return AbstractDices({
+                Element.PYRO: 3,
+            })
+        elif skill_type is CharacterSkill.ELEMENTAL_BURST:
+            return AbstractDices({
+                Element.PYRO: 3,
+            })
+        raise Exception("Not Reached!")
+
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            source=source,
+            element=Element.PYRO,
+            damage=1,
+            dices_num=game_state.get_player(source.pid).get_dices().num_dices()
+        )
+
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.PYRO,
+                damage=3,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+            eft.OverrideCharacterStatusEffect(
+                target=source,
+                status=stt.ExplosiveSparkStatus(usages=case_val(self.talent_equiped(), 2, 1)),
+            ),
+        )
+
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.get_max_energy(),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.PYRO,
+                damage=3,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            eft.AddCombatStatusEffect(
+                target_pid=source.pid.other(),
+                status=stt.SparksnSplash,
+            ),
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=3,
+            talents=stts.Statuses(()),
+            equipments=stts.EquipmentStatuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
 class RhodeiaOfLoch(Character):
     # basic info
     _ELEMENT = Element.HYDRO
@@ -761,6 +847,7 @@ class RhodeiaOfLoch(Character):
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
+
 
 class Tighnari(Character):
     _ELEMENT = Element.DENDRO

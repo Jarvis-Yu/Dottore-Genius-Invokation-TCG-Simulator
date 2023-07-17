@@ -66,7 +66,7 @@ dictionary, and discover game states on different 'game branches' being actually
 - [x] Implement game phase of Starting Hand Select Phase (select active character)
 - [x] Implement game phase of Roll (Dice) Phase (roll dices between rounds)
 - [x] Implement game phase of Action Phase (players beat each other)
-  - [ ] Implement all cards (23/184 implemented)
+  - [ ] Implement all cards (24/184 implemented)
     - [x] Calxs Arts,
           Changing Shifts,
           ColdBlooded Strike,
@@ -80,6 +80,7 @@ dictionary, and discover game states on different 'game branches' being actually
           Mondstadt Hash Brown,
           Mushroom Pizza,
           Nothern Smoked Chicken,
+          Pounding Surprise,
           Quick Knit,
           RavenBow,
           Starsigns,
@@ -90,9 +91,10 @@ dictionary, and discover game states on different 'game branches' being actually
           White Iron Greatsword,
           White Tassel,
           Xudong,
-  - [ ] Implement all characters with their talent cards (4/48 implemented)
+  - [ ] Implement all characters with their talent cards (5/48 implemented)
     - [x] Kaeya,
           Keqing,
+          Klee,
           Rhodeia of Loch,
           Tighnari,
   - [x] Implement all reactions

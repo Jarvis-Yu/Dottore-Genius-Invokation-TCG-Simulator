@@ -187,6 +187,9 @@ class ElementalAura:
         assert elem in AURA_ELEMENTS
         return self._aura[elem]
 
+    def __contains__(self, elem: Element) -> bool:
+        return self.contains(elem)
+
     def has_aura(self) -> bool:
         return any(self._aura.values())
 

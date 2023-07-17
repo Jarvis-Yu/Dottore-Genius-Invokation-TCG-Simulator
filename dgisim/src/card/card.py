@@ -95,6 +95,8 @@ __all__ = [
     ## Keqing ##
     "LightningStiletto",
     "ThunderingPenance",
+    ## Klee ##
+    "PoundingSurprise",
     ## Rhodeia of Loch ##
     "StreamingSurge",
     ## Tighnari ##
@@ -1350,6 +1352,52 @@ class ThunderingPenance(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceP
             ),
         )
 
+#### Klee ####
+
+class PoundingSurprise(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDices({Element.PYRO: 3})
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        return _UsableFuncs.active_combat_talent_skill_card_usable(game_state, pid, chr.Klee) \
+            and super()._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        return isinstance(instruction, act.DiceOnlyInstruction) \
+            and cls._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.DiceOnlyInstruction)
+        target = StaticTarget(
+            pid=pid,
+            zone=Zone.CHARACTERS,
+            id=game_state.get_player(pid).just_get_active_character().get_id(),
+        )
+        return (
+            eft.AddCharacterStatusEffect(
+                target=target,
+                status=stt.PoundingSurpriseStatus,
+            ),
+            eft.CastSkillEffect(
+                target=target,
+                skill=CharacterSkill.ELEMENTAL_SKILL1,
+            ),
+        )
 
 #### Rhodeia of Loch ####
 
