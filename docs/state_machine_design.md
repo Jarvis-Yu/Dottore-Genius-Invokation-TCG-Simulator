@@ -297,3 +297,122 @@ The former one is caught by game's `action phase`,
 indicating the corresponding player action is required to proceed.
 The latter one saves the phases of each player at the time when _DeathSwap_ happens,
 restoring the original phases when it is executed.
+
+## Player Actions
+
+Each `phase` has a method called `action_generator()`.
+
+```py
+def action_generator(self, game_state: GameState, pid: Pid) -> None | ActionGenerator:
+   ...
+```
+
+Given a game state and the pid of the player who wants to make an action,
+it returns an instance of `ActionGenerator`,
+which is a class used to help generate 'correct' player actions.
+(note that this is another immutable class)
+
+The `ActionGenerator` has a few methods listed below.
+
+```py
+class ActionGenerator:
+   # note that the fields below are only readable (immutable)
+   game_state: GameState  # the game state that action generator used to refer to
+   pid: Pid               # the pid of the player who makes the action
+
+   def filled(self) -> bool:
+      """ Returns True if a PlayerAction is ready to be generated """
+      ...
+
+   def generate_action(self) -> PlayerAction:
+      """
+      Returns the generated PlayerAction
+
+      This method asserts self.filled() is True
+      """
+      ...
+
+   def choices(self) -> GivenChoiceType:
+      """
+      Returns the choices that the user can make from
+
+      GivenChoiceType is a type alias for a whole loads of types, you can find its
+      definition below.
+      """
+      ...
+
+   def choose(self, choice: DecidedChoiceType) -> ActionGenerator:
+      """
+      Returns the action generator that have the new choice provided recorded
+
+      An exception is raised if the choice is invalid
+
+      DecidedChoiceType is another type alias defined below
+      """
+      ...
+
+#### type aliases ####
+_SingleChoiceType = (
+    StaticTarget      # a reference of a target in the game
+    | int
+    | ActualDices
+    | CharacterSkill
+    | type[Card]
+    | Element
+    | ActionType      # the type of a player action
+)
+
+GivenChoiceType = tuple[_SingleChoiceType, ...] | ActualDices | AbstractDices | Cards
+
+DecidedChoiceType = _SingleChoiceType | ActualDices | Cards
+```
+
+Based on the comments you should be able to tell what each method is for,
+but the type aliases by the end may seem like a mass.
+Don't worry, it's quite simple.
+
+- If `GivenChoiceType` returns a `tuple`,
+  then you are expected to choose one item from the `tuple` as the chosen choice.
+
+- If `GivenChoiceType` returns `ActualDices`,
+  then you are expected to choose some of the dices from the returned one.
+  (As to how many and which dices to choose is based on the context
+  that needs to be judged by the user)
+
+- If `GivenChoiceType` returns `AbstractDices`,
+  then you are expected to provide some `ActualDices` that can satisfy the `AbstractDices`.
+  (the concept of `AbstractDices` and `ActualDices` will be discussed later)
+
+- If `GivenChoiceType` returns `Cards`,
+  then you are expected to choose some `Cards` from the returned one.
+
+So the workflow to use an `ActionGenerator` is like this:
+
+```py
+game_state: GameState = ...  # you should have the game state to generate action from
+# suppose you are making a choice for player 1
+action_generator = game_state.action_generator(Pid.P1)  # this is an 'alias' of 
+                                                        # game_state.get_phase(
+                                                        # ).action_generator(game_state)
+while not action_generator.filled():
+   choices = action_generator.choices()
+   choice = ...  # write some code to make a wise choice
+   action_generator = action_generator.choose(choice)
+
+player_action = action_generator.generate_action()
+# then you can use it to make a transition
+# e.g. new_game_state = game_state.action_step(Pid.P1, player_action)
+```
+
+The example above is a _linear_ choice maker,
+that is it only generates one player_action by the end.
+
+To implement an algorithm to generate all possible player_actions
+(or at least explore a few branches).
+You should save the old `action_generator`s by recursion or whatever to memorize
+the _history_ as a tree.
+
+That concludes the section of `ActionGenerator`,
+it is but a helper to generate correct `PlayerAction`s,
+you may write your own algorithm to directly generate a correct one without `ActionGenerator`
+and pass it to the game state any time.
