@@ -30,6 +30,7 @@ __all__ = [
     "Character",
 
     # concretes
+    "KaedeharaKazuha",
     "Kaeya",
     "Keqing",
     "Klee",
@@ -136,6 +137,11 @@ class Character:
         raise NotImplementedError(f"{skill_type}'s cost is not defined for {cls.__name__}")
 
     def skill(self, game_state: GameState, source: StaticTarget, skill_type: CharacterSkill) -> tuple[eft.Effect, ...]:
+        """
+        This should only be called to get effects right before the skill is to be executed.
+
+        Otherwise faulty effects may be generated.
+        """
         return self._post_skill(
             game_state,
             source,
@@ -389,6 +395,154 @@ class CharacterFactory:
             equipments=self._equipments,
             statuses=self._statuses,
             elemental_aura=self._aura,
+        )
+
+
+class KaedeharaKazuha(Character):
+    _ELEMENT = Element.ANEMO
+    _WEAPON_TYPE = WeaponType.SWORD
+
+    @override
+    @staticmethod
+    def _talent_status() -> Optional[type[stt.EquipmentStatus]]:
+        return stt.PoeticsOfFuubutsuStatus
+
+    @override
+    @classmethod
+    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
+        if skill_type is CharacterSkill.NORMAL_ATTACK:
+            return AbstractDices({
+                Element.ANEMO: 1,
+                Element.ANY: 2,
+            })
+        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
+            return AbstractDices({
+                Element.ANEMO: 3,
+            })
+        elif skill_type is CharacterSkill.ELEMENTAL_BURST:
+            return AbstractDices({
+                Element.ANEMO: 3,
+            })
+        raise Exception("Not Reached!")
+
+    @override
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+            dices_num=game_state.get_player(source.pid).get_dices().num_dices()
+        )
+
+    @override
+    def _elemental_skill1(
+            self,
+            game_state: GameState,
+            source: StaticTarget
+    ) -> tuple[eft.Effect, ...]:
+        midare_to_use: type[stt.MidareRanzanStatus] = stt.MidareRanzanStatus
+        oppo_active_character_aura = (
+            game_state
+            .get_player(source.pid.other())
+            .just_get_active_character()
+            .get_elemental_aura()
+        )
+        reaction = Reaction.consult_reaction_with_aura(oppo_active_character_aura, Element.ANEMO)
+        if reaction is not None and reaction.first_elem in stt._MIDARE_RANZAN_MAP:
+            midare_to_use = stt._MIDARE_RANZAN_MAP[reaction.first_elem]
+        return (
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.ANEMO,
+                damage=3,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+            eft.AddCharacterStatusEffect(
+                target=source,
+                status=midare_to_use,
+            ),
+        )
+
+    @override
+    def _post_skill(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            skill_type: CharacterSkill,
+            effects: tuple[eft.Effect, ...],
+    ) -> tuple[eft.Effect, ...]:
+        """ override for the afterwards swap of Kazuha's elemental skill """
+        appended_effects: tuple[eft.Effect, ...] = (
+            eft.BroadCastSkillInfoEffect(
+                source=source,
+                skill=skill_type,
+            ),
+            eft.SwapCharacterCheckerEffect(
+                my_active=source,
+                oppo_active=StaticTarget(
+                    pid=source.pid.other(),
+                    zone=Zone.CHARACTERS,
+                    id=game_state.get_other_player(source.pid).just_get_active_character().get_id()
+                )
+            ),
+            eft.DeathCheckCheckerEffect(),
+        )
+        if skill_type is CharacterSkill.ELEMENTAL_SKILL1:
+            appended_effects += (
+                eft.ForwardSwapCharacterCheckEffect(
+                    target_player=source.pid,
+                ),
+            )
+        return effects + appended_effects
+
+    @override
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        oppo_active_character_aura = (
+            game_state
+            .get_player(source.pid.other())
+            .just_get_active_character()
+            .get_elemental_aura()
+        )
+        reaction = Reaction.consult_reaction_with_aura(oppo_active_character_aura, Element.ANEMO)
+        summon_element: None | Element = None
+        if reaction is not None:
+            assert reaction.first_elem in stt._MIDARE_RANZAN_MAP
+            summon_element = reaction.first_elem
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.get_max_energy(),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.ANEMO,
+                damage=3,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            eft.UpdateSummonEffect(
+                target_pid=source.pid,
+                summon=sm.AutumnWhirlwindSummon(
+                    usages=2,
+                    curr_elem=Element.ANEMO,
+                    ready_elem=summon_element,
+                ),
+            ),
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=2,
+            talents=stts.Statuses(()),
+            equipments=stts.EquipmentStatuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
         )
 
 

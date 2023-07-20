@@ -68,6 +68,7 @@ __all__ = [
     # Direct Effect
     "SwapCharacterEffect",
     "ForwardSwapCharacterEffect",
+    "ForwardSwapCharacterCheckEffect",
     "SpecificDamageEffect",
     "ReferredDamageEffect",
     "EnergyRechargeEffect",
@@ -474,11 +475,7 @@ class SwapCharacterEffect(DirectEffect):
         effects: list[Effect] = [
             AllStatusTriggererEffect(
                 pid,
-                case_val(
-                    pid.is_player1(),
-                    TriggeringSignal.SWAP_EVENT_1,
-                    TriggeringSignal.SWAP_EVENT_2,
-                ),
+                TriggeringSignal.swap_event(pid),
             ),
         ]
         return game_state.factory().f_player(
@@ -493,19 +490,26 @@ class SwapCharacterEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class ForwardSwapCharacterEffect(DirectEffect):
+    """
+    Swap the to the next active character.
+
+    This effect doesn't auto-add swap checker.
+    """
     target_player: Pid
 
     def execute(self, game_state: GameState) -> GameState:
         characters = game_state.get_player(self.target_player).get_characters()
         ordered_chars = characters.get_character_in_activity_order()
-        next_char: Optional[chr.Character] = None
-        for char in ordered_chars[1:] + ordered_chars[:1]:
-            assert isinstance(char, chr.Character)
-            if char.alive():
-                next_char = char
-                break
+        next_char: Optional[chr.Character] = next(
+            (
+                char
+                for char in ordered_chars[1:]
+                if char.alive()
+            ),
+            None
+        )
         if next_char is None:
-            raise Exception("Not Reached! There should be defeat checker before")
+            return game_state
         return game_state.factory().f_player(
             self.target_player,
             lambda p: p.factory().f_characters(
@@ -513,6 +517,45 @@ class ForwardSwapCharacterEffect(DirectEffect):
                     next_char.get_id()  # type: ignore
                 ).build()
             ).build()
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class ForwardSwapCharacterCheckEffect(DirectEffect):
+    """
+    Swap the to the next active character.
+
+    This effect auto-adds swap checker.
+    """
+    target_player: Pid
+
+    def execute(self, game_state: GameState) -> GameState:
+        characters = game_state.get_player(self.target_player).get_characters()
+        ordered_chars = characters.get_character_in_activity_order()
+        next_char: Optional[chr.Character] = next(
+            (
+                char
+                for char in ordered_chars[1:]
+                if char.alive()
+            ),
+            None
+        )
+        if next_char is None:
+            return game_state
+        return game_state.factory().f_player(
+            self.target_player,
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().active_character_id(
+                    next_char.get_id()  # type: ignore
+                ).build()
+            ).build()
+        ).f_effect_stack(
+            lambda es: es.push_one(
+                AllStatusTriggererEffect(
+                    self.target_player,
+                    TriggeringSignal.swap_event(self.target_player),
+                )
+            )
         ).build()
 
 

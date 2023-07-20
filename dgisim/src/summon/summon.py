@@ -19,19 +19,23 @@ from typing_extensions import override, Self
 from ..effect import effect as eft
 from ..status import status as stt
 
+from ..character.enums import CharacterSkill
 from ..effect.enums import TriggeringSignal, DynamicCharacterTarget
 from ..effect.structs import DamageType
-from ..element import Element
+from ..element import Element, Reaction
 from ..helper.quality_of_life import BIG_INT
 
 if TYPE_CHECKING:
+    from ..card.card import Card
     from ..effect.structs import StaticTarget
+    from ..state.game_state import GameState
 
 __all__ = [
     # base
     "Summon",
 
     # concrete implementations
+    "AutumnWhirlwindSummon",
     "BurningFlameSummon",
     "ClusterbloomArrow",
     "OceanicMimicFrogSummon",
@@ -46,6 +50,9 @@ class Summon(stt.Status):
 
     def __str__(self) -> str:  # pragma: no cover
         return self.__class__.__name__.removesuffix("Summon") + f"({self.usages})"
+
+    def content_repr(self) -> str:
+        return f"{self.usages}"
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -89,6 +96,7 @@ class _DmgPerRoundSummon(_DestroyOnNumSummon):
 
     def _react_to_signal(
             self,
+            game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
@@ -113,11 +121,127 @@ class _DmgPerRoundSummon(_DestroyOnNumSummon):
 
 
 @dataclass(frozen=True, kw_only=True)
+class _ConvertableAnemoSummon(_DestroyOnNumSummon):
+    usages: int = -1
+    MAX_USAGES: ClassVar[int] = BIG_INT
+    curr_elem: Element = Element.ANEMO
+    ready_elem: None | Element = None
+    DMG: ClassVar[int]
+
+    def _convertable(self) -> bool:
+        return self.curr_elem is Element.ANEMO
+
+    def _to_be_converted(self) -> bool:
+        return self._convertable() and self.ready_elem is not None
+
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            information: eft.SpecificDamageEffect | CharacterSkill | Card,
+            info_source: Optional[StaticTarget],
+    ) -> Self:
+        if isinstance(information, eft.SpecificDamageEffect):
+            damage = information
+            assert info_source is not None
+            if (
+                    self._convertable()
+                    and info_source.pid is status_source.pid
+                    and (
+                        damage.damage_type.from_character()
+                        or damage.damage_type.from_summon()
+                    )
+                    and damage.reaction is not None
+                    and damage.reaction.reaction_type is Reaction.SWIRL
+            ):
+                return replace(
+                    self,
+                    ready_elem=damage.reaction.first_elem,
+                )
+        return self
+
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        es: list[eft.Effect] = []
+        new_self = self
+        if signal is TriggeringSignal.COMBAT_ACTION:
+            if self._to_be_converted():
+                new_self = replace(
+                    self,
+                    usages=0,  # this is delta-usages
+                    curr_elem=self.ready_elem,
+                    ready_elem=None
+                )
+                return [], new_self
+
+        elif signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            if self._to_be_converted():
+                new_self = replace(
+                    self,
+                    usages=0,  # this is delta-usages
+                    curr_elem=self.ready_elem,
+                    ready_elem=None,
+                )
+                es.append(eft.UpdateSummonEffect(source.pid, new_self))
+            es.append(
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=new_self.curr_elem,
+                    damage=new_self.DMG,
+                    damage_type=DamageType(summon=True),
+                )
+            )
+            if new_self._convertable():
+                opponent_aura = (
+                    game_state
+                    .get_player(source.pid.other())
+                    .just_get_active_character()
+                    .get_elemental_aura()
+                )
+                reaction = Reaction.consult_reaction_with_aura(opponent_aura, Element.ANEMO)
+                if reaction is not None and reaction.first_elem in stt._MIDARE_RANZAN_MAP:
+                    new_self = replace(
+                        new_self,
+                        curr_elem=reaction.first_elem,
+                        ready_elem=None,
+                    )
+            new_self = replace(
+                new_self,
+                usages=-1,
+            )
+
+        return es, new_self
+
+    def _update(self, other: Self) -> Self | None:
+        new_usage = min(self.usages + other.usages, max(self.usages, self.MAX_USAGES))
+        return replace(other, usages=new_usage)
+
+    def __str__(self) -> str:  # pragma: no cover
+        return super().__str__() + f"({self.curr_elem}|{self.ready_elem})"
+
+    def content_repr(self) -> str:
+        return f"{self.usages}, {self.curr_elem}|{self.ready_elem}"
+
+
+@dataclass(frozen=True, kw_only=True)
+class AutumnWhirlwindSummon(_ConvertableAnemoSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 1
+
+
+@dataclass(frozen=True, kw_only=True)
 class BurningFlameSummon(_DmgPerRoundSummon):
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 2
     DMG: ClassVar[int] = 1
     ELEMENT: ClassVar[Element] = Element.PYRO
+
 
 @dataclass(frozen=True, kw_only=True)
 class ClusterbloomArrow(_DmgPerRoundSummon):
@@ -125,6 +249,7 @@ class ClusterbloomArrow(_DmgPerRoundSummon):
     MAX_USAGES: ClassVar[int] = 2
     DMG: ClassVar[int] = 1
     ELEMENT: ClassVar[Element] = Element.DENDRO
+
 
 @dataclass(frozen=True, kw_only=True)
 class OceanicMimicFrogSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
@@ -141,6 +266,7 @@ class OceanicMimicFrogSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
     @override
     def _react_to_signal(
             self,
+            game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:

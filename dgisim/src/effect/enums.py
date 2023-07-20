@@ -1,5 +1,9 @@
 from __future__ import annotations
 from enum import Enum
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..state.enums import Pid
 
 __all__ = [
     "DynamicCharacterTarget",
@@ -24,6 +28,14 @@ class TriggeringSignal(Enum):
     ROUND_START = 5
     END_ROUND_CHECK_OUT = 6  # summons etc.
     ROUND_END = 7  # remove frozen etc.
+
+    @classmethod
+    def swap_event(cls, pid: Pid) -> TriggeringSignal:
+        if pid.is_player1():
+            return TriggeringSignal.SWAP_EVENT_1
+        elif pid.is_player2():
+            return TriggeringSignal.SWAP_EVENT_2
+        raise Exception("Not Reached!")
 
 
 class DynamicCharacterTarget(Enum):
