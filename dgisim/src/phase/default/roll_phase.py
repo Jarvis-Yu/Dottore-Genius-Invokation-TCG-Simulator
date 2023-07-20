@@ -23,7 +23,6 @@ class RollPhase(ph.Phase):
     _NUM_DICES = 8
 
     def _get_all_dices_and_activate(self, game_state: GameState) -> GameState:
-        from ...element import Element
         return game_state.factory().f_player1(
             lambda p1: p1.factory()
             .phase(Act.ACTION_PHASE)

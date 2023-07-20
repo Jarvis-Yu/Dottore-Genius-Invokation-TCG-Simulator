@@ -147,6 +147,8 @@ class DefaultMode(Mode):
 
 
 class AllOmniMode(DefaultMode):
+    _DICE_REROLL_CHANCES = 0
+
     def roll_phase(self) -> Phase:
         from .phase.all_omni.roll_phase import RollPhase
         return RollPhase()

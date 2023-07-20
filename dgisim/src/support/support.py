@@ -86,7 +86,7 @@ class XudongSupport(Support):
 
     @override
     def _react_to_signal(
-            self, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], type(self)(sid=self.sid)

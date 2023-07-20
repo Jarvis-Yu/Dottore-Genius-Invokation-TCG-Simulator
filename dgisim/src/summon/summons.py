@@ -94,6 +94,6 @@ class Summons:
 
     def dict_str(self) -> dict:
         return dict(
-            (summon.__class__.__name__.removesuffix("Summon"), str(summon.usages))
+            (summon.__class__.__name__.removesuffix("Summon"), str(summon.content_repr()))
             for summon in self
         )

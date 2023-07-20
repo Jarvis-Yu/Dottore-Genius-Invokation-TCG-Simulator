@@ -38,6 +38,24 @@ class DamageType:
     summon: bool = False
     no_boost: bool = False  # reaction secondary damage, Klee's burst status...
 
+    def from_character(self) -> bool:
+        return (
+            self.normal_attack
+            or self.elemental_skill
+            or self.elemental_burst
+            or self.charged_attack
+            or self.plunge_attack
+        )
+
+    def from_summon(self) -> bool:
+        return self.summon
+
+    def from_status(self) -> bool:
+        return self.status
+
+    def can_boost(self) -> bool:
+        return not self.no_boost
+
     def __repr__(self) -> str:
         cls_fields = fields(self)
         enabled_fields = [

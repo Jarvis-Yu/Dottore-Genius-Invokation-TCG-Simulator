@@ -9,3 +9,4 @@ from dgisim.src.game_state_machine import GameStateMachine
 from dgisim.src.state.enums import Pid, Act
 from dgisim.src.status.status import *
 from dgisim.src.summon.summon import *
+from dgisim.src.summon.summons import Summons

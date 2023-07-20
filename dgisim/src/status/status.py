@@ -24,6 +24,7 @@ from ..effect.enums import Zone, TriggeringSignal, DynamicCharacterTarget
 from ..effect.structs import StaticTarget, DamageType
 from ..element import Element
 from ..event import EventSpeed, EventType, GameEvent
+from ..helper.hashable_dict import HashableDict
 from ..helper.quality_of_life import just, BIG_INT, case_val
 from .enums import Preprocessables
 
@@ -78,6 +79,13 @@ __all__ = [
     "SatiatedStatus",
 
     # character specific status
+    ## Kaedehara Kazuha ##
+    "MidareRanzanStatus",
+    "MidareRanzanCryoStatus",
+    "MidareRanzanElectroStatus",
+    "MidareRanzanHydroStatus",
+    "MidareRanzanPyroStatus",
+    "PoeticsOfFuubutsuStatus",
     ## Kaeya ##
     "ColdBloodedStrikeStatus",
     "IcicleStatus",
@@ -202,7 +210,7 @@ class Status:
     def react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> list[eft.Effect]:
-        es, new_status = self._react_to_signal(source, signal)
+        es, new_status = self._react_to_signal(game_state, source, signal)
         es, new_status = self._post_react_to_signal(es, new_status, signal)
 
         from ..summon import summon as sm
@@ -304,7 +312,7 @@ class Status:
         return effects, self
 
     def _react_to_signal(
-            self, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         """
         Returns a tuple, containg the effects and how to update self
@@ -347,9 +355,11 @@ class EquipmentStatus(Status):
     Basic status, describing weapon, artifact and character unique talents
     """
 
+
 @dataclass(frozen=True)
 class TalentEquipmentStatus(EquipmentStatus):
     pass
+
 
 @dataclass(frozen=True)
 class WeaponEquipmentStatus(EquipmentStatus):
@@ -379,9 +389,11 @@ class WeaponEquipmentStatus(EquipmentStatus):
                 return new_damage, self
         return super()._preprocess(game_state, status_source, item, signal)
 
+
 @dataclass(frozen=True)
 class ArtifactEquipmentStatus(EquipmentStatus):
     pass
+
 
 @dataclass(frozen=True)
 class CharacterStatus(Status):
@@ -604,7 +616,7 @@ class _InfusionStatus(CharacterStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         d_usages = 0
         if signal is TriggeringSignal.ROUND_END:
@@ -621,11 +633,14 @@ class ElectroInfusionStatus(_InfusionStatus):
 ########## Weapon Status ##########
 
 #### Bow ####
+
+
 @dataclass(frozen=True, kw_only=True)
 class RavenBowStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.BOW
 
 #### Catalyst ####
+
 
 @dataclass(frozen=True, kw_only=True)
 class MagicGuideStatus(WeaponEquipmentStatus):
@@ -633,17 +648,20 @@ class MagicGuideStatus(WeaponEquipmentStatus):
 
 #### Claymore ####
 
+
 @dataclass(frozen=True, kw_only=True)
 class WhiteIronGreatswordStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CLAYMORE
 
 #### Polearm ####
 
+
 @dataclass(frozen=True, kw_only=True)
 class WhiteTasselStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.POLEARM
 
 #### Sword ####
+
 
 @dataclass(frozen=True, kw_only=True)
 class TravelersHandySwordStatus(WeaponEquipmentStatus):
@@ -785,7 +803,7 @@ class FrozenStatus(CharacterStatus):
 
     @override
     def _react_to_signal(
-            self, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[FrozenStatus]]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -836,7 +854,7 @@ class JueyunGuobaStatus(CharacterStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         d_usages = 0
         if signal is TriggeringSignal.ROUND_END:
@@ -853,6 +871,7 @@ class LotusFlowerCrispStatus(CharacterStatus, FixedShieldStatus):
     @override
     def _react_to_signal(
             self,
+            game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
@@ -890,7 +909,7 @@ class MintyMeatRollsStatus(CharacterStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         d_usages = 0
         if signal is TriggeringSignal.ROUND_END:
@@ -905,7 +924,7 @@ class MushroomPizzaStatus(CharacterStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         es: list[eft.Effect] = []
         d_usages = 0
@@ -950,7 +969,7 @@ class NorthernSmokedChickenStatus(CharacterStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         d_usages = 0
         if signal is TriggeringSignal.ROUND_END:
@@ -963,7 +982,7 @@ class SatiatedStatus(CharacterStatus):
 
     @override
     def _react_to_signal(
-            self, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -976,6 +995,48 @@ Group statues by characters, characters ordered alphabetically
 """
 
 
+#### Kaedehara Kazuha ####
+
+@dataclass(frozen=True, kw_only=True)
+class MidareRanzanStatus(CharacterStatus):
+    _protected: bool = True
+    _ELEMENT: ClassVar[Element] = Element.ANEMO
+    ...
+
+
+@dataclass(frozen=True, kw_only=True)
+class MidareRanzanCryoStatus(MidareRanzanStatus):
+    _ELEMENT: ClassVar[Element] = Element.CRYO
+
+
+@dataclass(frozen=True, kw_only=True)
+class MidareRanzanElectroStatus(MidareRanzanStatus):
+    _ELEMENT: ClassVar[Element] = Element.ELECTRO
+
+
+@dataclass(frozen=True, kw_only=True)
+class MidareRanzanHydroStatus(MidareRanzanStatus):
+    _ELEMENT: ClassVar[Element] = Element.HYDRO
+
+
+@dataclass(frozen=True, kw_only=True)
+class MidareRanzanPyroStatus(MidareRanzanStatus):
+    _ELEMENT: ClassVar[Element] = Element.PYRO
+
+
+_MIDARE_RANZAN_MAP: dict[Element, type[MidareRanzanStatus]] = HashableDict({
+    Element.ANEMO: MidareRanzanStatus,
+    Element.CRYO: MidareRanzanCryoStatus,
+    Element.ELECTRO: MidareRanzanElectroStatus,
+    Element.HYDRO: MidareRanzanHydroStatus,
+    Element.PYRO: MidareRanzanPyroStatus,
+})
+
+
+@dataclass(frozen=True, kw_only=True)
+class PoeticsOfFuubutsuStatus(TalentEquipmentStatus):
+    ...
+
 #### Kaeya ####
 
 
@@ -985,6 +1046,7 @@ class IcicleStatus(CombatStatus, _UsageStatus):
 
     def _react_to_signal(
             self,
+            game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[IcicleStatus]]:
@@ -1035,6 +1097,7 @@ class ColdBloodedStrikeStatus(TalentEquipmentStatus):
     @override
     def _react_to_signal(
             self,
+            game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[ColdBloodedStrikeStatus]]:
@@ -1068,6 +1131,7 @@ class KeqingTalentStatus(CharacterTalentStatus):
 
     def _react_to_signal(
             self,
+            game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[KeqingTalentStatus]]:
@@ -1092,6 +1156,8 @@ class KeqingElectroInfusionStatus(ElectroInfusionStatus):
         return super().__str__() + f"({self.damage_boost})"
 
 #### Klee ####
+
+
 @dataclass(frozen=True, kw_only=True)
 class ExplosiveSparkStatus(CharacterStatus, _UsageStatus):
     usages: int = 1
@@ -1113,15 +1179,15 @@ class ExplosiveSparkStatus(CharacterStatus, _UsageStatus):
                 return item, self
             if item.damage_type.charged_attack:
                 new_item = replace(item, damage=item.damage + self.DAMAGE_BOOST)
-                new_self = replace(self, usages=self.usages-1)
+                new_self = replace(self, usages=self.usages - 1)
                 return new_item, new_self
         elif signal is Preprocessables.SKILL:
             assert isinstance(item, GameEvent)
             player = game_state.get_player(status_source.pid)
             if (
                     status_source == item.source
-                    and item.event_type is EventType.NORMAL_ATTACK \
-                    and player.get_dices().is_even() \
+                    and item.event_type is EventType.NORMAL_ATTACK
+                    and player.get_dices().is_even()
                     and item.dices_cost[Element.ANY] + item.dices_cost[Element.PYRO] > 0
             ):
                 elems = [Element.PYRO, Element.ANY]
@@ -1140,9 +1206,11 @@ class ExplosiveSparkStatus(CharacterStatus, _UsageStatus):
                 return item, self
         return item, self
 
+
 @dataclass(frozen=True, kw_only=True)
 class PoundingSurpriseStatus(TalentEquipmentStatus):
     pass
+
 
 @dataclass(frozen=True, kw_only=True)
 class SparksnSplash(CombatStatus, _UsageStatus):
@@ -1173,6 +1241,7 @@ class SparksnSplash(CombatStatus, _UsageStatus):
     @override
     def _react_to_signal(
             self,
+            game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
@@ -1195,6 +1264,7 @@ class SparksnSplash(CombatStatus, _UsageStatus):
         return es, new_self
 
 #### Rhodeia of Loch ####
+
 
 @dataclass(frozen=True, kw_only=True)
 class StreamingSurgeStatus(TalentEquipmentStatus):
@@ -1284,6 +1354,7 @@ class VijnanaSuffusionStatus(CharacterStatus, _UsageStatus):
     @override
     def _react_to_signal(
             self,
+            game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
