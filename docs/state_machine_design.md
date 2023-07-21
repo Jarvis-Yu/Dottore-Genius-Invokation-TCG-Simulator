@@ -2,6 +2,19 @@
 
 Please note that some parts of this design document is simplified for easier understanding.
 
+- [State Machine Design](#state-machine-design)
+  - [Normal Game Flow (Linear Game Flow)](#normal-game-flow-linear-game-flow)
+  - [What a GameState Contains](#what-a-gamestate-contains)
+  - [How GameState Makes a Transition](#how-gamestate-makes-a-transition)
+    - [Transition Without Player Action](#transition-without-player-action)
+    - [Transition With Player Action](#transition-with-player-action)
+  - [Phase Transitions of Default Game Mode](#phase-transitions-of-default-game-mode)
+  - [Action Phase Player Action Handling](#action-phase-player-action-handling)
+    - [Example: Play the Card "Mondstadt Hash Brown"](#example-play-the-card-mondstadt-hash-brown)
+    - [Example: Play the Card "Cold-Blooded Strike"](#example-play-the-card-cold-blooded-strike)
+  - [Player Phase](#player-phase)
+  - [Player Actions](#player-actions)
+
 ## Normal Game Flow (Linear Game Flow)
 
 The `GameState` class is definitely the essence of this project,
@@ -51,16 +64,16 @@ Let me go over each of its fields.
 
 - `mode`: contains information about the game mode of the entire game
 - `phase`: contains all the logics for handling how the game state make the next transition.
-           e.g. executing an existing `effect`, asking for player action, transit to next phase
-           based on the `mode`
+  e.g. executing an existing `effect`, asking for player action, transit to next phase
+  based on the `mode`
 - `round`: an int representing which round the current game is in
 - `active_player_id`: tells which player is the active player in this game state
 - `player1`: contains all information about the player, including characters, summons,
-             and so on
+  and so on
 - `player2`: the other player which is the opponent of `player1`
 - `effect_stack`: contains the `effect`s waiting to be executed. Each `effect` can transit the
-                  game state to the next as programmed. e.g. a damage effect deals damage to
-                  opponent, a swap character effect changes the active character of a player...
+  game state to the next as programmed. e.g. a damage effect deals damage to
+  opponent, a swap character effect changes the active character of a player...
 
 ## How GameState Makes a Transition
 
@@ -243,6 +256,8 @@ player in this case.
 
 ## Player Phase
 
+Player phase determines the phase each player is in.
+
 The two examples above should give you an impression how powerful the effect handling
 system can be. But not all logics of the game are handled by effects.
 
@@ -300,6 +315,8 @@ restoring the original phases when it is executed.
 
 ## Player Actions
 
+A `PlayerAction` is what that can be processed by the `GameState` as an input from the player.
+
 Each `phase` has a method called `action_generator()`.
 
 ```py
@@ -356,7 +373,7 @@ _SingleChoiceType = (
     StaticTarget      # a reference of a target in the game
     | int
     | ActualDices
-    | CharacterSkill
+    | CharacterSkill  # enum of skill types
     | type[Card]
     | Element
     | ActionType      # the type of a player action
@@ -391,7 +408,7 @@ So the workflow to use an `ActionGenerator` is like this:
 ```py
 game_state: GameState = ...  # you should have the game state to generate action from
 # suppose you are making a choice for player 1
-action_generator = game_state.action_generator(Pid.P1)  # this is an 'alias' of 
+action_generator = game_state.action_generator(Pid.P1)  # this is an 'alias' of
                                                         # game_state.get_phase(
                                                         # ).action_generator(game_state)
 while not action_generator.filled():
@@ -407,7 +424,7 @@ player_action = action_generator.generate_action()
 The example above is a _linear_ choice maker,
 that is it only generates one player_action by the end.
 
-To implement an algorithm to generate all possible player_actions
+To implement an algorithm to generate all possible player actions
 (or at least explore a few branches).
 You should save the old `action_generator`s by recursion or whatever to memorize
 the _history_ as a tree.

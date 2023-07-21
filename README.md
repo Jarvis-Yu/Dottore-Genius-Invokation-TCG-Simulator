@@ -20,9 +20,13 @@ pip install dgisim
 Note that this is a developing project and the final API to users is not set in stone.
 So you may play with it, but using it in production is not recommended at the current stage.
 
-## [Documentation](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/wiki)
+## [Wiki](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/wiki)
 
-## Simple Guide
+- [v0.2.dev2 documentation](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/wiki/v0.2.dev2-Documentation)
+- [state machine design](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/state_machine_design.md)
+- [run cloned repository locally](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/dev_readme.md)
+
+## Simple Start With CLI
 
 Once installed, you may have a try with the CLI to play the simulator in command line.
 
@@ -35,7 +39,7 @@ session = CLISession()
 session.run()
 ```
 
-Or try it online on [Google Colab](https://colab.research.google.com/drive/1h6ckw4LQ2jMEnZAs9QQo6tHjCwWnR8KD?usp=sharing)
+Or try the CLI online on [Google Colab](https://colab.research.google.com/drive/1h6ckw4LQ2jMEnZAs9QQo6tHjCwWnR8KD?usp=sharing)
 
 See CLI's [README](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/cli_readme.md)
 for showcase and explanations of the CLI.
