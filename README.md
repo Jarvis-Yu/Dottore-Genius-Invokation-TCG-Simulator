@@ -70,40 +70,10 @@ dictionary, and discover game states on different 'game branches' being actually
 - [x] Implement game phase of Starting Hand Select Phase (select active character)
 - [x] Implement game phase of Roll (Dice) Phase (roll dices between rounds)
 - [x] Implement game phase of Action Phase (players beat each other)
-  - [ ] Implement all cards (25/192 implemented)
-    - [x] Calxs Arts,
-          Changing Shifts,
-          ColdBlooded Strike,
-          Jueyun Guoba,
-          Keen Sight,
-          Leave It to Me!,
-          Lightning Stiletto,
-          Lotus Flower Crisp,
-          Magic Guide,
-          Minty Meat Rolls,
-          Mondstadt Hash Brown,
-          Mushroom Pizza,
-          Nothern Smoked Chicken,
-          Poetics of Fuubutsu,
-          Pounding Surprise,
-          Quick Knit,
-          RavenBow,
-          Starsigns,
-          Streaming Surge,
-          Sweet Madame,
-          Thundering Penance,
-          TravelersHandySword,
-          White Iron Greatsword,
-          White Tassel,
-          Xudong,
-  - [ ] Implement all characters with their talent cards (6/51 implemented)
-    - [x] Kaedehara Kazuha,
-          Kaeya,
-          Keqing,
-          Klee,
-          Rhodeia of Loch,
-          Tighnari,
+  - [ ] Implement all cards (25/192 implemented) ([details](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/progress.md))
+  - [ ] Implement all characters with their talent cards (6/51 implemented) ([details](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/progress.md))
   - [x] Implement all reactions
+  - [x] Implement all logics to support the implemented cards and characters
 - [x] Implement game phase of End Phase (summons and some support card or statuses take action)
 - [x] Implement game phase of Game End Phase (one player wins or draw)
 - [x] Implement CLI for better debugging experience
@@ -112,8 +82,6 @@ dictionary, and discover game states on different 'game branches' being actually
 - [x] Implement random player agent for testing purposes
 - [x] Implement player action validity checker
 - [x] Implement player action choices provider
-
-> Just in case you don't know, **_WIP_** means "work in progress".
 
 ## Future Plans
 
