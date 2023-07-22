@@ -38,7 +38,7 @@ __all__ = [
     "Status",
 
     # type
-    "CharacterTalentStatus",  # it should be statuses used to record character-talent related data
+    "HiddenStatus",  # it should be statuses used to record character-talent related data
     "EquipmentStatus",  # talent / weapon / artifact
     "TalentEquipmentStatus",
     "WeaponEquipmentStatus",
@@ -166,7 +166,7 @@ class Status:
 
         from ..summon import summon as sm
         from ..support import support as sp
-        if isinstance(new_self, CharacterTalentStatus) \
+        if isinstance(new_self, HiddenStatus) \
                 or isinstance(new_self, EquipmentStatus) \
                 or isinstance(new_self, CharacterStatus):
             return eft.OverrideCharacterStatusEffect(
@@ -216,7 +216,7 @@ class Status:
         from ..summon import summon as sm
         from ..support import support as sp
         # do the removal or update of the status
-        if isinstance(self, CharacterTalentStatus) \
+        if isinstance(self, HiddenStatus) \
                 or isinstance(self, EquipmentStatus) \
                 or isinstance(self, CharacterStatus):
             if new_status is None:
@@ -342,7 +342,7 @@ class Status:
 
 ############################## type ##############################
 @dataclass(frozen=True)
-class CharacterTalentStatus(Status):
+class HiddenStatus(Status):
     """
     Basic status, describing character talents
     """
@@ -468,7 +468,7 @@ class _ShieldStatus(Status):
     ) -> bool:
         from ..summon import summon as sm
         assert isinstance(item, eft.SpecificDamageEffect)
-        if isinstance(self, CharacterTalentStatus) \
+        if isinstance(self, HiddenStatus) \
                 or isinstance(self, EquipmentStatus) \
                 or isinstance(self, CharacterStatus):
             return item.target == status_source
@@ -1126,7 +1126,7 @@ class ColdBloodedStrikeStatus(TalentEquipmentStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class KeqingTalentStatus(CharacterTalentStatus):
+class KeqingTalentStatus(HiddenStatus):
     can_infuse: bool
 
     def _react_to_signal(

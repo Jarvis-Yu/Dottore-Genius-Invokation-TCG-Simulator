@@ -160,7 +160,7 @@ class AllStatusTriggererEffect(TriggerrbleEffect):
 @dataclass(frozen=True, repr=False)
 class TriggerStatusEffect(TriggerrbleEffect):
     target: StaticTarget
-    status: type[Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]]
+    status: type[Union[stt.HiddenStatus, stt.EquipmentStatus, stt.CharacterStatus]]
     signal: TriggeringSignal
 
     def execute(self, game_state: GameState) -> GameState:
@@ -170,8 +170,8 @@ class TriggerStatusEffect(TriggerrbleEffect):
         effects: Iterable[Effect] = []
 
         statuses: Statuses
-        if issubclass(self.status, stt.CharacterTalentStatus):
-            statuses = character.get_talent_statuses()
+        if issubclass(self.status, stt.HiddenStatus):
+            statuses = character.get_hidden_statuses()
         elif issubclass(self.status, stt.EquipmentStatus):
             statuses = character.get_equipment_statuses()
         elif issubclass(self.status, stt.CharacterStatus):
@@ -1001,13 +1001,13 @@ class RemoveDiceEffect(DirectEffect):
 @dataclass(frozen=True, repr=False)
 class AddCharacterStatusEffect(DirectEffect):
     target: StaticTarget
-    status: type[Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]]
+    status: type[Union[stt.HiddenStatus, stt.EquipmentStatus, stt.CharacterStatus]]
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
         assert isinstance(character, chr.Character)
-        if issubclass(self.status, stt.CharacterTalentStatus):  # pragma: no cover
-            character = character.factory().f_talents(
+        if issubclass(self.status, stt.HiddenStatus):  # pragma: no cover
+            character = character.factory().f_hiddens(
                 lambda ts: ts.update_status(self.status())
             ).build()
         elif issubclass(self.status, stt.EquipmentStatus):
@@ -1029,15 +1029,15 @@ class AddCharacterStatusEffect(DirectEffect):
 @dataclass(frozen=True, repr=False)
 class RemoveCharacterStatusEffect(DirectEffect):
     target: StaticTarget
-    status: type[Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]]
+    status: type[Union[stt.HiddenStatus, stt.EquipmentStatus, stt.CharacterStatus]]
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_character_target(self.target)
         if character is None:  # pragma: no cover
             return game_state
         new_character = character
-        if issubclass(self.status, stt.CharacterTalentStatus):  # pragma: no cover
-            new_character = character.factory().f_talents(
+        if issubclass(self.status, stt.HiddenStatus):  # pragma: no cover
+            new_character = character.factory().f_hiddens(
                 lambda ts: ts.remove(self.status)
             ).build()
         elif issubclass(self.status, stt.EquipmentStatus):
@@ -1059,13 +1059,13 @@ class RemoveCharacterStatusEffect(DirectEffect):
 @dataclass(frozen=True, repr=False)
 class UpdateCharacterStatusEffect(DirectEffect):
     target: StaticTarget
-    status: Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]
+    status: Union[stt.HiddenStatus, stt.EquipmentStatus, stt.CharacterStatus]
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
         assert isinstance(character, chr.Character)
-        if isinstance(self.status, stt.CharacterTalentStatus):  # pragma: no cover
-            character = character.factory().f_talents(
+        if isinstance(self.status, stt.HiddenStatus):  # pragma: no cover
+            character = character.factory().f_hiddens(
                 lambda ts: ts.update_status(self.status)
             ).build()
         elif isinstance(self.status, stt.EquipmentStatus):
@@ -1087,13 +1087,13 @@ class UpdateCharacterStatusEffect(DirectEffect):
 @dataclass(frozen=True, repr=False)
 class OverrideCharacterStatusEffect(DirectEffect):
     target: StaticTarget
-    status: Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]
+    status: Union[stt.HiddenStatus, stt.EquipmentStatus, stt.CharacterStatus]
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
         assert isinstance(character, chr.Character)
-        if isinstance(self.status, stt.CharacterTalentStatus):
-            character = character.factory().f_talents(
+        if isinstance(self.status, stt.HiddenStatus):
+            character = character.factory().f_hiddens(
                 lambda ts: ts.update_status(self.status, override=True)
             ).build()
         elif isinstance(self.status, stt.EquipmentStatus):

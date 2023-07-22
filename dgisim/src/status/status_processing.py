@@ -115,7 +115,7 @@ class StatusProcessing:
 
         def f(game_state: GameState, status: stt.Status, target: StaticTarget) -> GameState:
             nonlocal effects
-            if isinstance(status, stt.CharacterTalentStatus) \
+            if isinstance(status, stt.HiddenStatus) \
                     or isinstance(status, stt.EquipmentStatus) \
                     or isinstance(status, stt.CharacterStatus):
                 effects.append(eft.TriggerStatusEffect(target, type(status), signal))
@@ -146,7 +146,7 @@ class StatusProcessing:
             nonlocal item
             item, new_status = status.preprocess(game_state, status_source, item, pp_type)
 
-            if isinstance(status, stt.CharacterTalentStatus) \
+            if isinstance(status, stt.HiddenStatus) \
                     or isinstance(status, stt.EquipmentStatus) \
                     or isinstance(status, stt.CharacterStatus):
                 if new_status is None:

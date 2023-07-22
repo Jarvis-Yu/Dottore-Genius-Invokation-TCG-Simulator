@@ -13,7 +13,7 @@ class TestTriggerStatusEffect(unittest.TestCase):
         self.assertIs(
             TriggerStatusEffect(
                 StaticTarget(Pid.P1, Zone.CHARACTERS, 1),
-                status=CharacterTalentStatus,
+                status=HiddenStatus,
                 signal=TriggeringSignal.COMBAT_ACTION,
             ).execute(ACTION_TEMPLATE),
             ACTION_TEMPLATE

@@ -60,7 +60,7 @@ class Character:
         self._max_hp = max_hp
         self._energy = energy
         self._max_energy = max_energy
-        self._talents = talents
+        self._hiddens = talents
         self._equipments = equipments
         self._statuses = statuses
         self._aura = elemental_aura
@@ -84,8 +84,8 @@ class Character:
     def get_max_energy(self) -> int:
         return self._max_energy
 
-    def get_talent_statuses(self) -> stts.Statuses:
-        return self._talents
+    def get_hidden_statuses(self) -> stts.Statuses:
+        return self._hiddens
 
     def get_equipment_statuses(self) -> stts.EquipmentStatuses:
         return self._equipments
@@ -97,7 +97,7 @@ class Character:
         return self._aura
 
     def get_all_statuses_ordered(self) -> list[stts.Statuses]:
-        return [self._talents, self._equipments, self._statuses]
+        return [self._hiddens, self._equipments, self._statuses]
 
     def get_all_statuses_ordered_flattened(self) -> tuple[stt.Status, ...]:
         return sum([statuses.get_statuses() for statuses in self.get_all_statuses_ordered()], ())
@@ -332,7 +332,7 @@ class Character:
             "Max HP": str(self._max_hp),
             "Energy": str(self._energy),
             "Max Energy": str(self._max_energy),
-            "Talents": self._talents.dict_str(),
+            "Hiddens": self._hiddens.dict_str(),
             "Equipments": self._equipments.dict_str(),
             "Statuses": self._statuses.dict_str(),
         }
@@ -346,7 +346,7 @@ class CharacterFactory:
         self._max_hp = character.get_max_hp()
         self._energy = character.get_energy()
         self._max_energy = character.get_max_energy()
-        self._talents = character.get_talent_statuses()
+        self._hiddens = character.get_hidden_statuses()
         self._equipments = character.get_equipment_statuses()
         self._statuses = character.get_character_statuses()
         self._aura = character.get_elemental_aura()
@@ -359,12 +359,12 @@ class CharacterFactory:
         self._energy = energy
         return self
 
-    def talents(self, talents: stts.Statuses) -> CharacterFactory:
-        self._talents = talents
+    def hiddens(self, hiddens: stts.Statuses) -> CharacterFactory:
+        self._hiddens = hiddens
         return self
 
-    def f_talents(self, f: Callable[[stts.Statuses], stts.Statuses]) -> CharacterFactory:
-        return self.talents(f(self._talents))
+    def f_hiddens(self, f: Callable[[stts.Statuses], stts.Statuses]) -> CharacterFactory:
+        return self.hiddens(f(self._hiddens))
 
     def equipments(self, equipments: stts.EquipmentStatuses) -> CharacterFactory:
         self._equipments = equipments
@@ -391,7 +391,7 @@ class CharacterFactory:
             max_hp=self._max_hp,
             energy=self._energy,
             max_energy=self._max_energy,
-            talents=self._talents,
+            talents=self._hiddens,
             equipments=self._equipments,
             statuses=self._statuses,
             elemental_aura=self._aura,
@@ -680,7 +680,7 @@ class Keqing(Character):
         # check if can gain ElectroInfusionStatus
         can_infuse = False
 
-        intrinsic_talent = self.get_talent_statuses().just_find(stt.KeqingTalentStatus)
+        intrinsic_talent = self.get_hidden_statuses().just_find(stt.KeqingTalentStatus)
         if intrinsic_talent.can_infuse:
             can_infuse = True
             effects.append(

@@ -114,7 +114,7 @@ class GamePrinter:
         board.insert_at_nextline(2, f"<Energy: {character['Energy']}/{character['Max Energy']}>")
         board.insert_board_at_nextline(
             2,
-            GamePrinter._insert_str_list("Talents", character["Talents"])
+            GamePrinter._insert_str_list("Hiddens", character["Hiddens"])
         )
         board.insert_board_at_nextline(
             2,
