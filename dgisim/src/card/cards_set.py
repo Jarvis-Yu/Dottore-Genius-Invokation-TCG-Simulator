@@ -20,6 +20,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ## Talents ##
     ColdBloodedStrike,
     KeenSight,
+    PoeticsOfFuubutsu,
     StreamingSurge,
     ThunderingPenance,
 

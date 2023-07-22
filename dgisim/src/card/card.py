@@ -90,6 +90,8 @@ __all__ = [
     ## Location ##
 
     # Character Specific
+    ## Kaedehara Kazuha ##
+    "PoeticsOfFuubutsu",
     ## Kaeya ##
     "ColdBloodedStrike",
     ## Keqing ##
@@ -1199,6 +1201,60 @@ class Xudong(CompanionCard):
 # >>>>>>>>>>>>>>>>>>>> Support Cards / Companion Cards >>>>>>>>>>>>>>>>>>>>
 # >>>>>>>>>>>>>>>>>>>> Support Cards >>>>>>>>>>>>>>>>>>>>
 
+#### Kaedehara Kazuha ####
+
+
+class PoeticsOfFuubutsu(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDices({Element.ANEMO: 3})
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        return (
+            _UsableFuncs.active_combat_talent_skill_card_usable(
+                game_state,
+                pid,
+                chr.KaedeharaKazuha
+            )
+            and super()._loosely_usable(game_state, pid)
+        )
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        return isinstance(instruction, act.DiceOnlyInstruction) \
+            and cls._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.DiceOnlyInstruction)
+        target = StaticTarget(
+            pid=pid,
+            zone=Zone.CHARACTERS,
+            id=game_state.get_player(pid).just_get_active_character().get_id(),
+        )
+        return (
+            eft.AddCharacterStatusEffect(
+                target=target,
+                status=stt.PoeticsOfFuubutsuStatus,
+            ),
+            eft.CastSkillEffect(
+                target=target,
+                skill=CharacterSkill.ELEMENTAL_SKILL1,
+            ),
+        )
+
 #### Kaeya ####
 
 
@@ -1354,6 +1410,7 @@ class ThunderingPenance(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceP
 
 #### Klee ####
 
+
 class PoundingSurprise(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.PYRO: 3})
 
@@ -1400,6 +1457,7 @@ class PoundingSurprise(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoicePr
         )
 
 #### Rhodeia of Loch ####
+
 
 class StreamingSurge(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.HYDRO: 4})

@@ -74,6 +74,7 @@ def add_damage_effect(
         elem: Element,
         pid: Pid = Pid.P2,
         char_id: None | int = None,
+        damage_type: None | DamageType = None,
 ) -> GameState:
     """
     Adds ReferredDamageEffect to Player2's active character with `damage` and `elem` from Player1's
@@ -90,7 +91,7 @@ def add_damage_effect(
                 target=DynamicCharacterTarget.OPPO_ACTIVE,
                 element=elem,
                 damage=damage,
-                damage_type=DamageType(),
+                damage_type=case_val(damage_type is None, DamageType(), damage_type),  # type: ignore
             ),
             DeathCheckCheckerEffect(),
         ))

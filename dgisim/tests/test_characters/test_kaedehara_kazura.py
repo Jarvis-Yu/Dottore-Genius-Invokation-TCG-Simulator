@@ -12,8 +12,8 @@ class TestKaedeharaKazuha(unittest.TestCase):
             ).character(
                 KaedeharaKazuha.from_default(2)
             ).build()
-            # ).f_hand_cards(
-            #     lambda hcs: hcs.add(PoeticsOfFuubutsu)
+        ).f_hand_cards(
+            lambda hcs: hcs.add(PoeticsOfFuubutsu)
         ).dices(
             ActualDices({Element.OMNI: 100})  # even number
         ).build()
@@ -130,7 +130,8 @@ class TestKaedeharaKazuha(unittest.TestCase):
                 new_midare_status = _MIDARE_RANZAN_MAP[elem]
 
                 gsm = GameStateMachine(game_state, a1, a2)
-                a1.clear(); a2.clear()
+                a1.clear()
+                a2.clear()
                 a1.inject_action(SkillAction(
                     skill=CharacterSkill.ELEMENTAL_SKILL1,
                     instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
@@ -337,3 +338,111 @@ class TestKaedeharaKazuha(unittest.TestCase):
                 self.assertIn(elem, p2_c1.get_elemental_aura())
                 self.assertIn(elem, p2_c2.get_elemental_aura())
                 self.assertIn(elem, p2_c3.get_elemental_aura())
+
+    def test_talent_card(self):
+        a1, a2 = PuppetAgent(), PuppetAgent()
+        base_game = self.BASE_GAME.factory().f_player2(
+            lambda p2: p2.factory().phase(Act.END_PHASE).build()
+        ).build()
+        gsm = GameStateMachine(base_game, a1, a2)
+        a1.inject_actions([
+            CardAction(
+                card=PoeticsOfFuubutsu,
+                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            ),
+            EndRoundAction(),
+        ])
+        gsm.step_until_next_phase()
+        p1ac = gsm.get_game_state().get_player1().just_get_active_character()
+        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
+        p1_kazuha = gsm.get_game_state().get_player1().get_characters().just_get_character(2)
+        self.assertEqual(p2ac.get_hp(), 7)
+        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+        self.assertEqual(p1ac.get_id(), 3)
+        self.assertIn(PoeticsOfFuubutsuStatus, p1_kazuha.get_equipment_statuses())
+
+    def test_poetics_of_fuubutsu_status(self):
+        a1, a2 = PuppetAgent(), PuppetAgent()
+        base_game = self.BASE_GAME.factory().f_player1(
+            lambda p1: p1.factory().f_characters(
+                lambda cs: cs.factory().f_active_character(
+                    lambda ac: ac.factory().f_equipments(
+                        lambda eqs: eqs.update_status(PoeticsOfFuubutsuStatus())
+                    ).build()
+                ).build()
+            ).build()
+        ).f_player2(
+            lambda p2: p2.factory().phase(Act.END_PHASE).build()
+        ).build()
+        game_state = oppo_aura_elem(base_game, Element.ELECTRO)
+        gsm = GameStateMachine(game_state, a1, a2)
+        a1.inject_action(
+            SkillAction(
+                skill=CharacterSkill.ELEMENTAL_SKILL1,
+                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            )
+        )
+        gsm.player_step()
+        gsm.auto_step()
+
+        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 7)
+        p1_combat_statuses = gsm.get_game_state().get_player1().get_combat_statuses()
+        self.assertEqual(p1_combat_statuses.just_find(PoeticsOfFuubutsuElectroStatus).usages, 2)
+        self.assertNotIn(PoeticsOfFuubutsuPyroStatus, p1_combat_statuses)
+        self.assertNotIn(PoeticsOfFuubutsuHydroStatus, p1_combat_statuses)
+        self.assertNotIn(PoeticsOfFuubutsuCryoStatus, p1_combat_statuses)
+
+        game_state = gsm.get_game_state()
+        game_state = add_damage_effect(
+            game_state,
+            1,
+            Element.ELECTRO,
+            char_id=3,
+            damage_type=DamageType(elemental_skill=True)
+        )
+        game_state = auto_step(game_state)
+
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 5)
+        p1_combat_statuses = game_state.get_player1().get_combat_statuses()
+        self.assertEqual(p1_combat_statuses.just_find(PoeticsOfFuubutsuElectroStatus).usages, 1)
+        self.assertNotIn(PoeticsOfFuubutsuPyroStatus, p1_combat_statuses)
+        self.assertNotIn(PoeticsOfFuubutsuHydroStatus, p1_combat_statuses)
+        self.assertNotIn(PoeticsOfFuubutsuCryoStatus, p1_combat_statuses)
+
+        game_state = remove_aura(game_state)
+        game_state = add_damage_effect(
+            game_state,
+            1,
+            Element.PYRO,
+            char_id=3,
+            damage_type=DamageType(elemental_skill=True)
+        )
+        game_state = auto_step(game_state)
+
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 4)
+
+        game_state = kill_character(game_state, 1, hp=10)
+        game_state = oppo_aura_elem(game_state, Element.PYRO)
+
+        gsm = GameStateMachine(game_state, a1, a2)
+        a1.inject_actions([
+            SwapAction(
+                char_id=2,
+                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1}))
+            ),
+            SkillAction(
+                skill=CharacterSkill.ELEMENTAL_SKILL1,
+                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            ),
+        ])
+        gsm.player_step()
+        gsm.player_step()
+        gsm.auto_step()
+        p1_combat_statuses = gsm.get_game_state().get_player1().get_combat_statuses()
+        self.assertEqual(p1_combat_statuses.just_find(PoeticsOfFuubutsuPyroStatus).usages, 2)
+        self.assertEqual(p1_combat_statuses.just_find(PoeticsOfFuubutsuElectroStatus).usages, 1)
+        self.assertNotIn(PoeticsOfFuubutsuHydroStatus, p1_combat_statuses)
+        self.assertNotIn(PoeticsOfFuubutsuCryoStatus, p1_combat_statuses)

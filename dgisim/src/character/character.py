@@ -427,6 +427,9 @@ class KaedeharaKazuha(Character):
 
     @override
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        # POTENTIAL BUG: if there's some ANEMO infusion in the future, normal attack cannot
+        #                trigger talent.
+        #                may need some redesigning in the future.
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -450,7 +453,7 @@ class KaedeharaKazuha(Character):
         reaction = Reaction.consult_reaction_with_aura(oppo_active_character_aura, Element.ANEMO)
         if reaction is not None and reaction.first_elem in stt._MIDARE_RANZAN_MAP:
             midare_to_use = stt._MIDARE_RANZAN_MAP[reaction.first_elem]
-        return (
+        effects: tuple[eft.Effect, ...] = (
             eft.ReferredDamageEffect(
                 source=source,
                 target=DynamicCharacterTarget.OPPO_ACTIVE,
@@ -463,6 +466,17 @@ class KaedeharaKazuha(Character):
                 status=midare_to_use,
             ),
         )
+        if self.talent_equiped() \
+                and reaction is not None \
+                and reaction.first_elem in stt._POETICS_OF_FUUBUTSU_MAP:
+            poetic_status = stt._POETICS_OF_FUUBUTSU_MAP[reaction.first_elem]
+            effects += (
+                eft.AddCombatStatusEffect(
+                    target_pid=source.pid,
+                    status=poetic_status,
+                ),
+            )
+        return effects
 
     @override
     def _post_skill(
@@ -509,7 +523,7 @@ class KaedeharaKazuha(Character):
         if reaction is not None:
             assert reaction.first_elem in stt._MIDARE_RANZAN_MAP
             summon_element = reaction.first_elem
-        return (
+        effects: tuple[eft.Effect, ...] = (
             eft.EnergyDrainEffect(
                 target=source,
                 drain=self.get_max_energy(),
@@ -530,6 +544,17 @@ class KaedeharaKazuha(Character):
                 ),
             ),
         )
+        if self.talent_equiped() \
+                and reaction is not None \
+                and reaction.first_elem in stt._POETICS_OF_FUUBUTSU_MAP:
+            poetic_status = stt._POETICS_OF_FUUBUTSU_MAP[reaction.first_elem]
+            effects += (
+                eft.AddCombatStatusEffect(
+                    target_pid=source.pid,
+                    status=poetic_status,
+                ),
+            )
+        return effects
 
     @classmethod
     def from_default(cls, id: int = -1) -> Self:

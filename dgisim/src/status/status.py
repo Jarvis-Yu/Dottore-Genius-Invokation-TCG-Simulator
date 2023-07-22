@@ -22,7 +22,7 @@ from ..effect import effect as eft
 from ..character.enums import CharacterSkill, WeaponType
 from ..effect.enums import Zone, TriggeringSignal, DynamicCharacterTarget
 from ..effect.structs import StaticTarget, DamageType
-from ..element import Element
+from ..element import Element, Reaction
 from ..event import EventSpeed, EventType, GameEvent
 from ..helper.hashable_dict import HashableDict
 from ..helper.quality_of_life import just, BIG_INT, case_val
@@ -90,6 +90,10 @@ __all__ = [
     "MidareRanzanHydroStatus",
     "MidareRanzanPyroStatus",
     "PoeticsOfFuubutsuStatus",
+    "PoeticsOfFuubutsuPyroStatus",
+    "PoeticsOfFuubutsuHydroStatus",
+    "PoeticsOfFuubutsuElectroStatus",
+    "PoeticsOfFuubutsuCryoStatus",
     ## Kaeya ##
     "ColdBloodedStrikeStatus",
     "IcicleStatus",
@@ -330,7 +334,7 @@ class Status:
     def _is_swapping_source(self, source: StaticTarget, signal: TriggeringSignal) -> bool:
         """ Returns True if characters of the source player is swapping """
         return source.pid.is_player1() and signal is TriggeringSignal.SWAP_EVENT_1 \
-                or source.pid.is_player2() and signal is TriggeringSignal.SWAP_EVENT_2
+            or source.pid.is_player2() and signal is TriggeringSignal.SWAP_EVENT_2
 
     def same_type_as(self, status: Status) -> bool:
         return type(self) == type(status)
@@ -1138,7 +1142,69 @@ _MIDARE_RANZAN_MAP: dict[Element, type[MidareRanzanStatus]] = HashableDict({
 
 @dataclass(frozen=True, kw_only=True)
 class PoeticsOfFuubutsuStatus(TalentEquipmentStatus):
-    ...
+    pass
+
+
+@dataclass(frozen=True, kw_only=True)
+class _PoeticsOfFuubutsuElementStatus(CombatStatus, _UsageStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    _ELEM: Element
+    _DMG_BOOST: ClassVar[int] = 1
+    _BOOSTABLE_ELEMS: ClassVar[frozenset[Element]] = Reaction.SWIRL.value.reaction_elems[0]
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: Preprocessable,
+            signal: Preprocessables,
+    ) -> tuple[Preprocessable, Optional[Self]]:
+        if isinstance(item, eft.SpecificDamageEffect):
+            if (
+                    signal is not Preprocessables.DMG_AMOUNT
+                    or status_source.pid != item.source.pid
+                    or not (
+                        item.damage_type.from_character()
+                        or item.damage_type.from_summon()
+                    )
+                    or item.element is not self._ELEM
+            ):
+                return item, self
+
+            assert self.usages > 0
+            new_item = replace(item, damage=item.damage + self._DMG_BOOST)
+            return new_item, replace(self, usages=self.usages - 1)
+        return item, self
+
+
+@dataclass(frozen=True, kw_only=True)
+class PoeticsOfFuubutsuPyroStatus(_PoeticsOfFuubutsuElementStatus):
+    _ELEM: Element = Element.PYRO
+
+
+@dataclass(frozen=True, kw_only=True)
+class PoeticsOfFuubutsuHydroStatus(_PoeticsOfFuubutsuElementStatus):
+    _ELEM: Element = Element.HYDRO
+
+
+@dataclass(frozen=True, kw_only=True)
+class PoeticsOfFuubutsuElectroStatus(_PoeticsOfFuubutsuElementStatus):
+    _ELEM: Element = Element.ELECTRO
+
+
+@dataclass(frozen=True, kw_only=True)
+class PoeticsOfFuubutsuCryoStatus(_PoeticsOfFuubutsuElementStatus):
+    _ELEM: Element = Element.CRYO
+
+
+_POETICS_OF_FUUBUTSU_MAP: dict[Element, type[_PoeticsOfFuubutsuElementStatus]] = HashableDict({
+    Element.CRYO: PoeticsOfFuubutsuCryoStatus,
+    Element.ELECTRO: PoeticsOfFuubutsuElectroStatus,
+    Element.HYDRO: PoeticsOfFuubutsuHydroStatus,
+    Element.PYRO: PoeticsOfFuubutsuPyroStatus,
+})
 
 #### Kaeya ####
 
