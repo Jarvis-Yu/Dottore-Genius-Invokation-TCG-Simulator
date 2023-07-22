@@ -67,7 +67,9 @@ class TestGameStateMachine(unittest.TestCase):
         state_machine.step_until_phase(StartingHandSelectPhase)
         state_machine.auto_step()
         state_machine.one_step()  # one player choose starting character
+        state_machine.auto_step()
         state_machine.one_step()  # other player choose starting character
+        state_machine.auto_step()
         state = state_machine.get_game_state()
         self.assertIsNotNone(state.get_player1().get_characters().get_active_character_id())
         self.assertIsNotNone(state.get_player2().get_characters().get_active_character_id())
@@ -92,12 +94,6 @@ class TestGameStateMachine(unittest.TestCase):
             LazyAgent(),
         )
         state_machine.step_until_phase(ActionPhase)
-        # cmd = ""
-        # while cmd == "":
-        #     print("===========================================")
-        #     print(state_machine.get_game_state())
-        #     state_machine.one_step()
-        #     cd = input()
         state_machine.step_until_phase(EndPhase)
         state = state_machine.get_game_state()
         self.assertIs(state.get_player1().get_phase(), Act.PASSIVE_WAIT_PHASE)

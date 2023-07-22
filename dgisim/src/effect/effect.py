@@ -469,7 +469,8 @@ class SwapCharacterEffect(DirectEffect):
         assert self.target.zone == Zone.CHARACTERS
         pid = self.target.pid
         player = game_state.get_player(pid)
-        if player.just_get_active_character().get_id() == self.target.id:
+        active_character = player.get_active_character()
+        if active_character is not None and active_character.get_id() == self.target.id:
             return game_state
 
         effects: list[Effect] = [
