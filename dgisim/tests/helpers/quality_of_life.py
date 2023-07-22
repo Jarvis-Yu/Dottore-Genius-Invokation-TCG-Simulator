@@ -24,6 +24,12 @@ def auto_step(game_state: GameState, observe: bool = False) -> GameState:
             input(":> ")
     return gsm.get_game_state()
 
+def full_action_step(game_state: GameState, observe: bool = False) -> GameState:
+    gsm = GameStateMachine(game_state, PuppetAgent(), PuppetAgent())
+    gsm.player_step(observe=observe)
+    gsm.auto_step(observe=observe)
+    return gsm.get_game_state()
+
 
 def oppo_aura_elem(game_state: GameState, elem: Element, char_id: None | int = None) -> GameState:
     """

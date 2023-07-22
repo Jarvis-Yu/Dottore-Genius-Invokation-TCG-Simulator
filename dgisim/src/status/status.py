@@ -1051,8 +1051,60 @@ Group statues by characters, characters ordered alphabetically
 @dataclass(frozen=True, kw_only=True)
 class MidareRanzanStatus(CharacterStatus):
     _protected: bool = True
+    _needs_removal: bool = False
     _ELEMENT: ClassVar[Element] = Element.ANEMO
-    ...
+    _DMG_BOOST: ClassVar[int] = 1
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            information: eft.SpecificDamageEffect | CharacterSkill | Card,
+            info_source: Optional[StaticTarget],
+    ) -> Self:
+        if isinstance(information, CharacterSkill) \
+                and info_source == status_source \
+                and not self._protected \
+                and not self._needs_removal:
+            return replace(self, _needs_removal=True)
+        return self
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: Preprocessable,
+            signal: Preprocessables,
+    ) -> tuple[Preprocessable, Optional[Self]]:
+        if isinstance(item, eft.SpecificDamageEffect):
+            if status_source != item.source:
+                return item, self
+
+            if signal is Preprocessables.DMG_ELEMENT:
+                if item.damage_type.plunge_attack:
+                    new_item = replace(item, element=self._ELEMENT)
+                    return new_item, self
+            elif signal is Preprocessables.DMG_AMOUNT:
+                if item.damage_type.plunge_attack:
+                    new_item = replace(item, damage=item.damage + self._DMG_BOOST)
+                    return new_item, None
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION:
+            if self._protected:
+                return [], replace(self, _protected=False)
+            elif self._needs_removal:
+                return [], None
+        return [], self
+
+    def __str__(self) -> str:
+        return super().__str__() + f"({self._protected}, {self._needs_removal})"
 
 
 @dataclass(frozen=True, kw_only=True)
