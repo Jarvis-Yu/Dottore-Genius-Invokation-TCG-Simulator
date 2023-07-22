@@ -30,6 +30,7 @@ from .enums import Preprocessables
 
 if TYPE_CHECKING:
     from ..card.card import Card
+    from ..character.character import Character
     from ..state.game_state import GameState
     from .types import Preprocessable
 
@@ -49,6 +50,9 @@ __all__ = [
     # templates
     "StackedShieldStatus",
     "FixedShieldStatus",
+
+    # hidden status
+    "PlungeAttackStatus",
 
     # equipment status
     ## bow ##
@@ -322,6 +326,11 @@ class Status:
         * if the returned new self is different object than myself, then it is taken as an update
         """
         return [], self
+
+    def _is_swapping_source(self, source: StaticTarget, signal: TriggeringSignal) -> bool:
+        """ Returns True if characters of the source player is swapping """
+        return source.pid.is_player1() and signal is TriggeringSignal.SWAP_EVENT_1 \
+                or source.pid.is_player2() and signal is TriggeringSignal.SWAP_EVENT_2
 
     def same_type_as(self, status: Status) -> bool:
         return type(self) == type(status)
@@ -627,6 +636,48 @@ class _InfusionStatus(CharacterStatus, _UsageStatus):
 @dataclass(frozen=True, kw_only=True)
 class ElectroInfusionStatus(_InfusionStatus):
     ELEMENT: ClassVar[Optional[Element]] = Element.ELECTRO
+
+############################## Hidden Status ##############################
+
+
+@dataclass(frozen=True, kw_only=True)
+class PlungeAttackStatus(HiddenStatus):
+    can_plunge: bool = False
+    invalidate: bool = False
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            information: eft.SpecificDamageEffect | CharacterSkill | Card,
+            info_source: Optional[StaticTarget],
+    ) -> Self:
+        if isinstance(information, CharacterSkill) \
+                and info_source == status_source \
+                and self.can_plunge:
+            return replace(self, invalidate=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.invalidate:
+            return [], replace(self, can_plunge=False, invalidate=False)
+        elif signal is TriggeringSignal.ROUND_END and self.can_plunge:
+            assert not self.invalidate
+            return [], replace(self, can_plunge=False)
+        elif self._is_swapping_source(source, signal):
+            characters = game_state.get_player(source.pid).get_characters()
+            active_char_id = characters.get_active_character_id()
+            if source.id == active_char_id and not self.can_plunge:
+                return [], replace(self, can_plunge=True)
+        return [], self
+
+    @override
+    def __str__(self) -> str:
+        return super().__str__() + f"({case_val(self.can_plunge, '*', '')})"
 
 ############################## Equipment Status ##############################
 
@@ -1050,8 +1101,7 @@ class IcicleStatus(CombatStatus, _UsageStatus):
             source: StaticTarget,
             signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[IcicleStatus]]:
-        if source.pid.is_player1() and signal is TriggeringSignal.SWAP_EVENT_1 \
-                or source.pid.is_player2() and signal is TriggeringSignal.SWAP_EVENT_2:
+        if self._is_swapping_source(source, signal):
             effects: list[eft.Effect] = [
                 eft.ReferredDamageEffect(
                     source=source,

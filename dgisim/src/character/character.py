@@ -50,7 +50,7 @@ class Character:
         max_hp: int,
         energy: int,
         max_energy: int,
-        talents: stts.Statuses,
+        hiddens: stts.Statuses,
         equipments: stts.EquipmentStatuses,
         statuses: stts.Statuses,
         elemental_aura: ElementalAura,
@@ -60,7 +60,7 @@ class Character:
         self._max_hp = max_hp
         self._energy = energy
         self._max_energy = max_energy
-        self._hiddens = talents
+        self._hiddens = hiddens
         self._equipments = equipments
         self._statuses = statuses
         self._aura = elemental_aura
@@ -391,7 +391,7 @@ class CharacterFactory:
             max_hp=self._max_hp,
             energy=self._energy,
             max_energy=self._max_energy,
-            talents=self._hiddens,
+            hiddens=self._hiddens,
             equipments=self._equipments,
             statuses=self._statuses,
             elemental_aura=self._aura,
@@ -428,10 +428,10 @@ class KaedeharaKazuha(Character):
     @override
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
+            game_state=game_state,
             source=source,
             element=Element.PHYSICAL,
             damage=2,
-            dices_num=game_state.get_player(source.pid).get_dices().num_dices()
         )
 
     @override
@@ -539,7 +539,7 @@ class KaedeharaKazuha(Character):
             max_hp=10,
             energy=0,
             max_energy=2,
-            talents=stts.Statuses(()),
+            hiddens=stts.Statuses((stt.PlungeAttackStatus(),)),
             equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
@@ -576,10 +576,10 @@ class Kaeya(Character):
 
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
+            game_state=game_state,
             source=source,
             element=Element.PHYSICAL,
             damage=2,
-            dices_num=game_state.get_player(source.pid).get_dices().num_dices()
         )
 
     def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
@@ -620,7 +620,7 @@ class Kaeya(Character):
             max_hp=10,
             energy=0,
             max_energy=2,
-            talents=stts.Statuses(()),
+            hiddens=stts.Statuses((stt.PlungeAttackStatus(),)),
             equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
@@ -660,10 +660,10 @@ class Keqing(Character):
 
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
+            game_state=game_state,
             source=source,
             element=Element.PHYSICAL,
             damage=2,
-            dices_num=game_state.get_player(source.pid).get_dices().num_dices()
         )
 
     def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
@@ -762,7 +762,10 @@ class Keqing(Character):
             energy=0,
             max_energy=3,
             statuses=stts.Statuses(()),
-            talents=stts.Statuses((stt.KeqingTalentStatus(can_infuse=False),)),
+            hiddens=stts.Statuses((
+                stt.PlungeAttackStatus(),
+                stt.KeqingTalentStatus(can_infuse=False),
+            )),
             equipments=stts.EquipmentStatuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -797,10 +800,10 @@ class Klee(Character):
 
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
+            game_state=game_state,
             source=source,
             element=Element.PYRO,
             damage=1,
-            dices_num=game_state.get_player(source.pid).get_dices().num_dices()
         )
 
     def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
@@ -845,7 +848,7 @@ class Klee(Character):
             max_hp=10,
             energy=0,
             max_energy=3,
-            talents=stts.Statuses(()),
+            hiddens=stts.Statuses((stt.PlungeAttackStatus(),)),
             equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
@@ -893,10 +896,10 @@ class RhodeiaOfLoch(Character):
 
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
+            game_state=game_state,
             source=source,
             element=Element.HYDRO,
             damage=1,
-            dices_num=game_state.get_player(source.pid).get_dices().num_dices()
         )
 
     def _not_summoned_types(
@@ -996,7 +999,7 @@ class RhodeiaOfLoch(Character):
             max_hp=10,
             energy=0,
             max_energy=3,
-            talents=stts.Statuses(()),
+            hiddens=stts.Statuses((stt.PlungeAttackStatus(),)),
             equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
@@ -1025,10 +1028,10 @@ class Tighnari(Character):
 
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
+            game_state=game_state,
             source=source,
             element=Element.PHYSICAL,
             damage=2,
-            dices_num=game_state.get_player(source.pid).get_dices().num_dices()
         )
 
     def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
@@ -1076,7 +1079,7 @@ class Tighnari(Character):
             max_hp=10,
             energy=0,
             max_energy=2,
-            talents=stts.Statuses(()),
+            hiddens=stts.Statuses((stt.PlungeAttackStatus(),)),
             equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
