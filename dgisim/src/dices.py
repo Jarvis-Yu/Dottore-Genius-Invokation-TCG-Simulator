@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import random
 from collections import defaultdict
-from typing import Optional, Iterator, Iterable, Union, List, Set, Tuple, Dict
+from typing import Optional, Iterator, Iterable, Union
 
 from typing_extensions import Self
 
@@ -11,7 +11,7 @@ from dgisim.src.helper.hashable_dict import HashableDict
 from dgisim.src.helper.level_print import level_print
 from dgisim.src.helper.quality_of_life import BIG_INT
 
-ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY: List[Element] = [Element.PYRO,
+ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY: list[Element] = [Element.PYRO,
                                                          Element.HYDRO,
                                                          Element.ANEMO,
                                                          Element.ELECTRO,
@@ -199,22 +199,22 @@ class ActualDices(Dices):
             self,
             requirement: AbstractDices,
             game_state: Optional[gs.GameState] = None,
-            local_precedence: Optional[List[Set[Element]]] = None,
+            local_precedence: Optional[list[set[Element]]] = None,
     ) -> Optional[ActualDices]:
-        result_dct: Dict[Element, int] = defaultdict(
+        result_dct: dict[Element, int] = defaultdict(
             int)  # result in dict format
 
-        supply: Dict[Element, int] = defaultdict(int)
+        supply: dict[Element, int] = defaultdict(int)
         supply.update(dict(self._dices))
 
-        need: Dict[Element, int] = defaultdict(int)
+        need: dict[Element, int] = defaultdict(int)
         need.update(dict(requirement._dices))
 
         local_precedence = local_precedence if local_precedence is not None else []
         first_priority_elements = ([] if local_precedence in [None, []]
                                    else local_precedence[0])  # list of first priority elements
 
-        def get_precedence(element: Element) -> Tuple[int, int]:
+        def get_precedence(element: Element) -> tuple[int, int]:
             nonlocal local_precedence
             """get precedence by element, bigger number is lower precedence"""
             for i, set_ in enumerate(local_precedence, start=1):
@@ -230,7 +230,7 @@ class ActualDices(Dices):
             need supply result_dct
             """
 
-            def check_dict(name: str, dct: Dict):
+            def check_dict(name: str, dct: dict):
                 for el, val in dct.items():
                     assert val >= 0, f"{el} in {name} < 0 {val=}"
 
@@ -242,7 +242,7 @@ class ActualDices(Dices):
 
         # 1 step - fill OMNI requirement
         if requirement[Element.OMNI] > 0:
-            def comparision(x: Tuple[Element, int]) -> Tuple[int, int, int]:
+            def comparision(x: tuple[Element, int]) -> tuple[int, int, int]:
                 """to sort by ascedence of least_spend"""
                 type_of_element: Element = x[0]
                 number_of_dices: Optional[int] = x[1]
@@ -252,7 +252,7 @@ class ActualDices(Dices):
                 # -1, type_of_element
                 return number_of_dices, priority_local, priority_global
 
-            array: List[Tuple[Element, Optional[int]]] = \
+            array: list[tuple[Element, Optional[int]]] = \
                 [(element,
                   self._how_much_omni_and_first_priority_spends(
                       element_supply=supply[element],
@@ -281,7 +281,7 @@ class ActualDices(Dices):
                                               for element
                                               in least_spend_omni_elements}
 
-            max_precedence_omni_potential_fillers: List[Element] = []
+            max_precedence_omni_potential_fillers: list[Element] = []
             max_precedence = max(precedence_of_least_spend_omni.values())
             for key, val in precedence_of_least_spend_omni.items():
                 if val == max_precedence:
@@ -314,7 +314,7 @@ class ActualDices(Dices):
 
         global ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY
 
-        reverse_order_need_list: List[Element] = list(
+        reverse_order_need_list: list[Element] = list(
             sorted(ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY,
                    key=lambda el: get_precedence(el)
                    ))[::-1]  # + [Element.ANY]
