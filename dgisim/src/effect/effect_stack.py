@@ -1,7 +1,13 @@
 from __future__ import annotations
-from typing import Iterable, Union
+from typing import Iterable, TYPE_CHECKING
 
-from dgisim.src.effect.effect import Effect
+if TYPE_CHECKING:
+    from .effect import Effect
+
+__all__ = [
+    "EffectStack",
+]
+
 
 class EffectStack:
     def __init__(self, effects: tuple[Effect, ...]) -> None:
@@ -51,18 +57,15 @@ class EffectStack:
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, EffectStack):
             return False
-        return self._effects == other._effects
+        return self is other or self._effects == other._effects
 
     def __hash__(self) -> int:
         return hash(self._effects)
 
-    def to_string(self, indent: int) -> str:
-        return str(self)
-
     def __str__(self) -> str:
         return str(self._effects)
 
-    def dict_str(self) -> Union[dict, str]:
+    def dict_str(self) -> dict | str:
         content = {}
         for i, effect in enumerate(reversed(self._effects)):
             content[f"{str(i)}-{effect.name()}"] = effect.dict_str()

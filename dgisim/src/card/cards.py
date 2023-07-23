@@ -1,16 +1,24 @@
 from __future__ import annotations
-from typing import Union, Iterator
-from collections import Counter
 import random
+from collections import Counter
+from typing import Iterator, TYPE_CHECKING
 
-from dgisim.src.card.card import Card
-from dgisim.src.helper.hashable_dict import HashableDict
-from dgisim.src.helper.level_print import level_print, INDENT, level_print_single
+from ..helper.hashable_dict import HashableDict
+
+if TYPE_CHECKING:
+    from .card import Card
+
+__all__ = [
+    "Cards",
+]
 
 
 class Cards:
-    def __init__(self, mapping: dict[type[Card], int]) -> None:
-        self._cards = HashableDict(mapping)
+    """
+    A container for easy management of cards.
+    """
+    def __init__(self, cards: dict[type[Card], int]) -> None:
+        self._cards = HashableDict.from_dict(cards)
 
     @classmethod
     def from_empty(cls) -> Cards:
@@ -47,52 +55,84 @@ class Cards:
     def num_cards(self) -> int:
         return sum(self._cards.values())
 
+    def is_legal(self) -> bool:
+        return all(val >= 0 for val in self._cards.values())
+
+    def empty(self) -> bool:
+        return all(value == 0 for value in self._cards.values())
+
+    def not_empty(self) -> bool:
+        return any(value > 0 for value in self._cards.values())
+
     def contains(self, card: type[Card]) -> bool:
-        for c in self._cards:
-            if c == card and self._cards[c] >= 1:
-                return True
-        return False
+        from .card import OmniCard
+        return self[card] > 0 or self[OmniCard] > 0
+
+    def __contains__(self, card: type[Card]) -> bool:
+        return self.contains(card)
 
     def add(self, card: type[Card]) -> Cards:
-        return self + Cards({card: 1})
+        return self + {card: 1}
 
     def remove(self, card: type[Card]) -> Cards:
-        assert card in self._cards
-        assert self._cards[card] >= 1
-        return self - Cards({card: 1})
+        from .card import OmniCard
+        if self[card] <= 0:
+            assert self[OmniCard] > 0
+            return self - {OmniCard: 1}  # type: ignore
+        return self - {card: 1}
 
     def remove_all(self, card: type[Card]) -> Cards:
-        assert card in self._cards
-        assert self._cards[card] >= 1
-        return self - Cards({card: self._cards[card]})
+        if self[card] >= 1:
+            return self - {card: self._cards[card]}
+        else:
+            # if the card doesn't exist, even though there might be OmniCards
+            # but we don't know how many to remove, so nothing is removed
+            return self
+
+    def hide_all(self) -> Cards:
+        from .card import OmniCard
+        return Cards({OmniCard: self.num_cards()})
 
     def __getitem__(self, card: type[Card]) -> int:
-        assert card in self._cards
-        return self._cards[card]
+        return self._cards.get(card, 0)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Cards):
             return False
-        return self._cards == other._cards
+        return self is other or self._cards == other._cards
+
+    def __ne__(self, other: object) -> bool:
+        return not self.__eq__(other)
 
     def __hash__(self) -> int:
         return hash(self._cards)
 
-    def __str__(self) -> str:
-        return self.to_string(0)
-
-    def __iter__(self) -> Iterator[type[Card]]:
-        return iter(self._cards.keys())
-
-    def to_string(self, indent: int = 0) -> str:
+    def __repr__(self) -> str:
         existing_cards = dict([
             (card.name(), str(num))
             for card, num in self._cards.items()
             if num != 0
         ])
-        return level_print(existing_cards, indent)
+        return (
+            '{'
+            + ", ".join(
+                f"{key}: {val}"
+                for key, val in existing_cards.items()
+            )
+            + '}'
+        )
 
-    def dict_str(self) -> Union[dict, str]:
+    def __iter__(self) -> Iterator[type[Card]]:
+        return (  # type: ignore
+            card
+            for card in self._cards.keys()
+            if self[card] > 0
+        )
+
+    def to_dict(self) -> dict[type[Card], int]:
+        return dict(self._cards.items())
+
+    def dict_str(self) -> dict:
         existing_cards = dict([
             (card.name(), str(num))
             for card, num in self._cards.items()

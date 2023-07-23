@@ -1,6 +1,13 @@
 from __future__ import annotations
-from typing import Dict, Union
 from dataclasses import dataclass
+from typing import Dict, Union
+
+__all__ = [
+    "GamePrinter",
+    "INDENT",
+    "StrDrawer",
+    "level_print",
+]
 
 _INDENTATION = "| "
 INDENT = len(_INDENTATION)
@@ -57,7 +64,7 @@ class StrDrawer:
 
     def insert_at_nextline(self, y: int, s: str) -> tuple[int, int]:
         return self.insert_at(self.lim_x() + 1, y, s)
-    
+
     def insert_board_at(self, x: int, y: int, other: StrDrawer) -> tuple[int, int]:
         max_x, max_y = 0, 0
         for insertion in other._insertions:
@@ -83,6 +90,7 @@ class StrDrawer:
                 board[insertion.x][insertion.y + i] = c
         return '\n'.join(''.join(cs).rstrip() for cs in board)
 
+
 class GamePrinter:
 
     @staticmethod
@@ -99,7 +107,7 @@ class GamePrinter:
         board = StrDrawer()
         board.insert_at(0, 0, f"<{name}>")
         GamePrinter._insert_lines(board, 2, character, [
-            "id",
+            # "id",
             "Aura",
         ])
         board.insert_at_nextline(2, f"<HP: {character['HP']}/{character['Max HP']}>")
@@ -184,6 +192,11 @@ class GamePrinter:
             0,
             GamePrinter._insert_str_str_dict("Publicly Used Cards", player["Publicly Used Cards"]),
         )
+        board.insert_board_at_nextline(
+            0,
+            GamePrinter._insert_str_str_dict(
+                "Publicly Gained Cards", player["Publicly Gained Cards"]),
+        )
         return board
 
     @staticmethod
@@ -199,7 +212,7 @@ class GamePrinter:
                 content = ''.join(c for c in str(content) if c != '\n')
                 board.insert_at_nextline(2, f"<{field}: {content}>")
         return board
-    
+
     @staticmethod
     def _insert_effects(name: str, effects: dict) -> StrDrawer:
         board = StrDrawer()
@@ -232,7 +245,7 @@ class GamePrinter:
         player_row_start = 2
         board.insert_board_at(player_row_start, 0, p1_board)
         px, py = board.insert_board_at(player_row_start, p1_board.lim_y() + 4, p2_board)
-        for i in range(player_row_start, board.lim_x()+1):
+        for i in range(player_row_start, board.lim_x() + 1):
             board.insert_at(i, p1_board.lim_y() + 2, '|')
             board.insert_at(i, py + 2, '|')
         board.insert_at_nextline(0, "-" * (board.lim_y()))
@@ -242,4 +255,5 @@ class GamePrinter:
             0,
             GamePrinter._insert_effects("Effects", game_state["Effects"]),
         )
+        board.insert_at_nextline(0, "=" * board.lim_y())
         return board.draw()

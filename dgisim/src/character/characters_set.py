@@ -1,17 +1,16 @@
 from typing import FrozenSet, Type
 
-from dgisim.src.character.character import *
+from .character import *
 
-DEFAULT_CHARACTERS: FrozenSet[Type[Character]] = frozenset({
-    Keqing,
-    Kaeya,
-    RhodeiaOfLoch,
-})
+__all__ = [
+    "default_characters",
+]
 
 _DEFAULT_CHARACTERS: list[type[Character]] = [
     Keqing,
     Kaeya,
     RhodeiaOfLoch,
+    Tighnari,
 ]
 
 _DEFAULT_CHARACTER_FSET = None

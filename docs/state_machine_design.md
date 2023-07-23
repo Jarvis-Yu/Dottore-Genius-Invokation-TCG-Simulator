@@ -1,5 +1,7 @@
 # Flow Chart
 
+***Note That the Following Design Is Partially Adopted Into The Actual Project***
+
 ## General Phases
 
 ```mermaid

@@ -1,17 +1,12 @@
 import unittest
 
-from dgisim.tests.helpers.game_state_templates import *
-from dgisim.src.game_state_machine import GameStateMachine
-from dgisim.src.character.character_skill_enum import CharacterSkill
-from dgisim.src.card.card import *
-from dgisim.src.card.cards import Cards
-from dgisim.src.dices import ActualDices
 from dgisim.src.action.action import *
 from dgisim.src.agents import PuppetAgent
-from dgisim.src.status.statuses import *
+from dgisim.src.card.card import *
+from dgisim.src.game_state_machine import GameStateMachine
 from dgisim.src.status.status import *
-from dgisim.src.helper.level_print import GamePrinter
-from dgisim.src.helper.quality_of_life import just
+from dgisim.src.status.statuses import *
+from dgisim.tests.helpers.game_state_templates import *
 from dgisim.tests.helpers.quality_of_life import *
 
 

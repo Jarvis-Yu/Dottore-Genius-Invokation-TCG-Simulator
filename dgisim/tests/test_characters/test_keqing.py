@@ -1,13 +1,6 @@
 import unittest
 
-from dgisim.tests.helpers.game_state_templates import *
-from dgisim.tests.helpers.quality_of_life import *
-from dgisim.src.game_state_machine import GameStateMachine
-from dgisim.src.agents import PuppetAgent
-from dgisim.src.action.action import *
-from dgisim.src.character.character import *
-from dgisim.src.card.card import *
-from dgisim.src.status.status import *
+from dgisim.tests.test_characters.common_imports import *
 
 
 class TestKeqing(unittest.TestCase):
@@ -18,7 +11,7 @@ class TestKeqing(unittest.TestCase):
             lambda hcs: hcs.add(ThunderingPenance)
         ).build()
     ).f_player2(
-        lambda p: p.factory().phase(PlayerState.Act.END_PHASE).build()
+        lambda p: p.factory().phase(Act.END_PHASE).build()
     ).build()
     assert type(BASE_GAME.get_player1().just_get_active_character()) is Keqing
 
@@ -77,7 +70,7 @@ class TestKeqing(unittest.TestCase):
         self.assertFalse(game_state_1_1.get_player1().get_hand_cards().contains(LightningStiletto))
 
         # second skill by using card, when Keqing on field
-        source = StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 3)
+        source = StaticTarget(Pid.P1, Zone.CHARACTERS, 3)
         gsm = GameStateMachine(game_state_1, a1, a2)
         a1.inject_action(CardAction(
             card=LightningStiletto,
@@ -140,7 +133,7 @@ class TestKeqing(unittest.TestCase):
         )
 
         # tests infusion doesn't apply to other characters
-        game_state = set_active_player_id(game_state_1_2, GameState.Pid.P1, 2)
+        game_state = set_active_player_id(game_state_1_2, Pid.P1, 2)
         gsm = GameStateMachine(game_state, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.NORMAL_ATTACK,
@@ -183,7 +176,9 @@ class TestKeqing(unittest.TestCase):
             1
         )
         # next round
-        gsm.step_until_phase(game_state.get_mode().end_phase())
+        gsm.step_until_phase(game_state.get_mode().roll_phase())
+        a1.inject_action(EndRoundAction()) # skip roll phase
+        a2.inject_action(EndRoundAction())
         gsm.step_until_phase(game_state.get_mode().action_phase())
         p1ac = gsm.get_game_state().get_player1().just_get_active_character()
         self.assertFalse(p1ac.get_character_statuses().contains(KeqingElectroInfusionStatus))
@@ -277,7 +272,7 @@ class TestKeqing(unittest.TestCase):
 
     def test_talent_card(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
-        source = StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 3)
+        source = StaticTarget(Pid.P1, Zone.CHARACTERS, 3)
         # test early equip
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_actions([
@@ -351,20 +346,20 @@ class TestKeqing(unittest.TestCase):
             ).build()
         ).build()
 
-        self.assertFalse(LightningStiletto.loosely_usable(game_state, GameState.Pid.P1))
+        self.assertFalse(LightningStiletto.loosely_usable(game_state, Pid.P1))
         self.assertIsNone(LightningStiletto.valid_instruction(
             game_state,
-            GameState.Pid.P1,
+            Pid.P1,
             DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         # False because frozen
         self.assertIsNone(LightningStiletto.valid_instruction(
             game_state,
-            GameState.Pid.P1,
+            Pid.P1,
             StaticTargetInstruction(
                 dices=ActualDices({Element.OMNI: 3}),
                 target=StaticTarget(
-                    pid=GameState.Pid.P1,
+                    pid=Pid.P1,
                     zone=Zone.CHARACTERS,
                     id=3,
                 )

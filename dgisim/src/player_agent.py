@@ -1,18 +1,25 @@
-from typing import List
+from __future__ import annotations
+from abc import abstractmethod
+from typing import TYPE_CHECKING
 
-from dgisim.src.state.game_state import GameState
-from dgisim.src.action.action import PlayerAction
+from .action.action import PlayerAction
 
+if TYPE_CHECKING:
+    from .state.enums import Pid
+    from .state.game_state import GameState
+
+__all__ = [
+    "PlayerAgent",
+]
 
 
 class PlayerAgent:
-    def choose_action(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
-        return PlayerAction()
+    """
+    The "interface" for all player agents.
 
-
-class PlayerProxyAgent(PlayerAgent):
-    pass
-
-class ProxyAgent(PlayerProxyAgent):
-    def choose_action(self, history: List[GameState], pid: GameState.Pid) -> PlayerAction:
-        return super().choose_action(history, pid)
+    A player agent is what that is accepted by GameStateMachine as a player to
+    interact with the game.
+    """
+    @abstractmethod
+    def choose_action(self, history: list[GameState], pid: Pid) -> PlayerAction:
+        pass

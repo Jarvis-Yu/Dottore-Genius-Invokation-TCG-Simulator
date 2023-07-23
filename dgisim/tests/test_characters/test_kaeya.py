@@ -1,14 +1,7 @@
 import unittest
 
-from dgisim.tests.helpers.game_state_templates import *
-from dgisim.tests.helpers.quality_of_life import *
-from dgisim.src.game_state_machine import GameStateMachine
-from dgisim.src.agents import PuppetAgent
-from dgisim.src.action.action import *
-from dgisim.src.character.character import *
-from dgisim.src.card.card import *
-from dgisim.src.status.status import *
-
+from dgisim.src.mode import AllOmniMode
+from dgisim.tests.test_characters.common_imports import *
 
 class TestKaeya(unittest.TestCase):
     BASE_GAME = ACTION_TEMPLATE.factory().f_player1(
@@ -19,7 +12,7 @@ class TestKaeya(unittest.TestCase):
         ).build()
     ).f_player2(
         lambda p: p.factory().phase(
-            PlayerState.Act.END_PHASE
+            Act.END_PHASE
         ).f_characters(
             lambda cs: cs.factory().active_character_id(
                 3  # make opponenet active characater Keqing
@@ -87,7 +80,7 @@ class TestKaeya(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 9)
         self.assertTrue(p2ac.get_elemental_aura().contains(Element.CRYO))
         self.assertEqual(
-            p1.get_combat_statuses().just_find(Icicle).usages,
+            p1.get_combat_statuses().just_find(IcicleStatus).usages,
             3
         )
 
@@ -98,7 +91,7 @@ class TestKaeya(unittest.TestCase):
             ).build()
         ).player2(
             self.BASE_GAME.get_player2().factory().f_combat_statuses(
-                lambda cs: cs.update_status(Icicle())
+                lambda cs: cs.update_status(IcicleStatus())
             ).build()
         ).build()
 
@@ -115,7 +108,7 @@ class TestKaeya(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 8)
         self.assertTrue(p2ac.get_elemental_aura().contains(Element.CRYO))
         self.assertEqual(
-            p1.get_combat_statuses().just_find(Icicle).usages,
+            p1.get_combat_statuses().just_find(IcicleStatus).usages,
             2
         )
 
@@ -124,13 +117,13 @@ class TestKaeya(unittest.TestCase):
             card=LightningStiletto,
             instruction=StaticTargetInstruction(
                 dices=ActualDices({Element.OMNI: 3}),
-                target=StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 3),
+                target=StaticTarget(Pid.P1, Zone.CHARACTERS, 3),
             )
         ))
         gsm = GameStateMachine(game_state_p1_move, a1, a2)
         gsm.player_step()
         gsm.step_until_holds(
-            lambda gs: gs.get_player1().get_combat_statuses().just_find(Icicle).usages == 2
+            lambda gs: gs.get_player1().get_combat_statuses().just_find(IcicleStatus).usages == 2
         )
         game_state = gsm.get_game_state()
         p2ac = game_state.get_player2().just_get_active_character()
@@ -147,16 +140,16 @@ class TestKaeya(unittest.TestCase):
         self.assertEqual(p2cs.just_get_character(3).get_hp(), 4)
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
         self.assertEqual(
-            p1.get_combat_statuses().just_find(Icicle).usages,
+            p1.get_combat_statuses().just_find(IcicleStatus).usages,
             2
         )
 
         # test self being overloaded
         game_state_p2_move = game_state_p1_move.factory().active_player_id(
-            GameState.Pid.P2
+            Pid.P2
         ).f_player1(
             lambda p: p.factory().phase(
-                PlayerState.Act.PASSIVE_WAIT_PHASE
+                Act.PASSIVE_WAIT_PHASE
             ).f_characters(
                 lambda cs: cs.factory().f_active_character(
                     lambda ac: ac.factory().elemental_aura(
@@ -165,7 +158,7 @@ class TestKaeya(unittest.TestCase):
                 ).build()
             ).build()
         ).f_player2(
-            lambda p: p.factory().phase(PlayerState.Act.ACTION_PHASE).build()
+            lambda p: p.factory().phase(Act.ACTION_PHASE).build()
         ).build()
 
         a2.inject_action(SkillAction(
@@ -181,7 +174,7 @@ class TestKaeya(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 8)
         self.assertTrue(p2ac.get_elemental_aura().contains(Element.CRYO))
         self.assertEqual(
-            p1.get_combat_statuses().just_find(Icicle).usages,
+            p1.get_combat_statuses().just_find(IcicleStatus).usages,
             2
         )
 
@@ -210,22 +203,21 @@ class TestKaeya(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 10)
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
         self.assertEqual(
-            p1.get_combat_statuses().just_find(Icicle).usages,
+            p1.get_combat_statuses().just_find(IcicleStatus).usages,
             2
         )
         self.assertEqual(
-            p2.get_combat_statuses().just_find(Icicle).usages,
+            p2.get_combat_statuses().just_find(IcicleStatus).usages,
             2
         )
 
     def test_talent_card(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
-        source = StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 2)
         initial_hp = 3
         base_game_state = kill_character(
-            game_state=self.BASE_GAME,
+            game_state=self.BASE_GAME.factory().mode(AllOmniMode()).build(),
             character_id=2,
-            pid=GameState.Pid.P1,
+            pid=Pid.P1,
             hp=initial_hp,
         )
 
@@ -248,7 +240,7 @@ class TestKaeya(unittest.TestCase):
         a2.inject_action(EndRoundAction())
 
         # equiping the talent card casts elemental skill and heals
-        gsm.player_step()
+        gsm.player_step()  # p1 equip talent card
         gsm.auto_step()
         p1ac = gsm.get_game_state().get_player1().just_get_active_character()
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -256,13 +248,16 @@ class TestKaeya(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 7)
 
         # second elemtnal skill in same round doesn't heal
-        gsm.player_step()
+        gsm.player_step()  # p1 elemental skill 1
         gsm.auto_step()
         p1ac = gsm.get_game_state().get_player1().just_get_active_character()
         self.assertEqual(p1ac.get_hp(), initial_hp + 2)
 
-        gsm.player_step()  # p1 end round, go to next roun
+        gsm.player_step()  # p1 end round, go to next round
         gsm.auto_step()
+        a1.inject_front_action(EndRoundAction())
+        a2.inject_front_action(EndRoundAction())
+        gsm.step_until_phase(base_game_state.get_mode().action_phase())
 
         gsm.player_step()  # p2 end round, let p1 play
         gsm.auto_step()

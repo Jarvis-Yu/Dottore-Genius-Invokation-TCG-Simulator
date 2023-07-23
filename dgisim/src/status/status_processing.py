@@ -1,22 +1,41 @@
 from __future__ import annotations
-from typing import Callable
+from typing import Callable, TYPE_CHECKING
 
-import dgisim.src.state.game_state as gs
-import dgisim.src.status.status as stt
-import dgisim.src.effect.effect as eft
-import dgisim.src.summon.summon as sm
-import dgisim.src.support.support as sp
-import dgisim.src.card.card as cd
-from dgisim.src.character.character_skill_enum import CharacterSkill
+from ..effect import effect as eft
+from ..status import status as stt
+from ..summon import summon as sm
+from ..support import support as sp
 
+from ..character.enums import CharacterSkill
+from ..state.enums import Pid
+from ..effect.enums import Zone, TriggeringSignal
+from ..effect.structs import StaticTarget
+from .enums import Preprocessables
+
+if TYPE_CHECKING:
+    from ..card.card import Card
+    from ..state.game_state import GameState
+
+    from .types import Preprocessable
+
+__all__ = [
+    "StatusProcessing",
+]
 
 class StatusProcessing:
+    """
+    This class holds static methods that facilitate the preprocessing of items by
+    all statuses.
+
+    e.g. 3 Pyro damage from Bennett with a sword equipped should actually be 4 after
+    preprocessing. (an equipment is also treated as a status)
+    """
     @staticmethod
     def loop_one_player_all_statuses(
-            game_state: gs.GameState,
-            pid: gs.GameState.Pid,
-            f: Callable[[gs.GameState, stt.Status, eft.StaticTarget], gs.GameState]
-    ) -> gs.GameState:
+            game_state: GameState,
+            pid: Pid,
+            f: Callable[[GameState, stt.Status, StaticTarget], GameState]
+    ) -> GameState:
         """
         Perform f on all statuses of player pid in order
         f(game_state, status, status_source) -> game_state
@@ -30,9 +49,9 @@ class StatusProcessing:
             # get character's private statuses and add triggerStatusEffect to global effect_stack
             statuses = character.get_all_statuses_ordered_flattened()
             character_id = character.get_id()
-            target = eft.StaticTarget(
+            target = StaticTarget(
                 pid,
-                eft.Zone.CHARACTERS,
+                Zone.CHARACTERS,
                 character_id
             )
             for status in statuses:
@@ -40,9 +59,9 @@ class StatusProcessing:
 
         # combat status
         combat_statuses = player.get_combat_statuses()
-        target = eft.StaticTarget(
+        target = StaticTarget(
             pid,
-            eft.Zone.COMBAT_STATUSES,
+            Zone.COMBAT_STATUSES,
             -1,  # not used
         )
         for status in combat_statuses:
@@ -50,9 +69,9 @@ class StatusProcessing:
 
         # summons
         summons = player.get_summons()
-        target = eft.StaticTarget(
+        target = StaticTarget(
             pid,
-            eft.Zone.SUMMONS,
+            Zone.SUMMONS,
             -1,
         )
         for summon in summons:
@@ -61,9 +80,9 @@ class StatusProcessing:
         # supports
         supports = player.get_supports()
         for support in supports:
-            target = eft.StaticTarget(
+            target = StaticTarget(
                 pid,
-                eft.Zone.SUPPORTS,
+                Zone.SUPPORTS,
                 support.sid,
             )
             game_state = f(game_state, support, target)
@@ -72,10 +91,10 @@ class StatusProcessing:
 
     @staticmethod
     def loop_all_statuses(
-            game_state: gs.GameState,
-            pid: gs.GameState.Pid,
-            f: Callable[[gs.GameState, stt.Status, eft.StaticTarget], gs.GameState]
-    ) -> gs.GameState:
+            game_state: GameState,
+            pid: Pid,
+            f: Callable[[GameState, stt.Status, StaticTarget], GameState]
+    ) -> GameState:
         """
         Perform f on all statuses of player pid and opponent in order
         f(game_state, status, status_source) -> game_state
@@ -86,7 +105,7 @@ class StatusProcessing:
 
     @staticmethod
     def trigger_all_statuses_effects(
-            game_state: gs.GameState, pid: gs.GameState.Pid, signal: eft.TriggeringSignal
+            game_state: GameState, pid: Pid, signal: TriggeringSignal
     ) -> list[eft.Effect]:
         """
         Takes the current game_state, trigger all statuses in order of player pid
@@ -94,7 +113,7 @@ class StatusProcessing:
         """
         effects: list[eft.Effect] = []
 
-        def f(game_state: gs.GameState, status: stt.Status, target: eft.StaticTarget) -> gs.GameState:
+        def f(game_state: GameState, status: stt.Status, target: StaticTarget) -> GameState:
             nonlocal effects
             if isinstance(status, stt.CharacterTalentStatus) \
                     or isinstance(status, stt.EquipmentStatus) \
@@ -108,7 +127,8 @@ class StatusProcessing:
                 effects.append(eft.TriggerSummonEffect(target.pid, type(status), signal))
 
             elif isinstance(status, sp.Support):
-                effects.append(eft.TriggerSupportEffect(target.pid, type(status), status.sid, signal))
+                effects.append(eft.TriggerSupportEffect(
+                    target.pid, type(status), status.sid, signal))
 
             return game_state
 
@@ -117,12 +137,12 @@ class StatusProcessing:
 
     @staticmethod
     def preprocess_by_all_statuses(
-            game_state: gs.GameState,
-            pid: gs.GameState.Pid,
-            item: eft.Preprocessable,
-            pp_type: stt.Status.PPType,
-    ) -> tuple[gs.GameState, eft.Preprocessable]:
-        def f(game_state: gs.GameState, status: stt.Status, status_source: eft.StaticTarget) -> gs.GameState:
+            game_state: GameState,
+            pid: Pid,
+            item: Preprocessable,
+            pp_type: Preprocessables,
+    ) -> tuple[GameState, Preprocessable]:
+        def f(game_state: GameState, status: stt.Status, status_source: StaticTarget) -> GameState:
             nonlocal item
             item, new_status = status.preprocess(game_state, status_source, item, pp_type)
 
@@ -191,12 +211,12 @@ class StatusProcessing:
 
     @staticmethod
     def inform_all_statuses(
-            game_state: gs.GameState,
-            pid: gs.GameState.Pid,
-            info: eft.SpecificDamageEffect | CharacterSkill | cd.Card,
-            source: None | eft.StaticTarget = None,
-    ) -> gs.GameState:
-        def f(game_state: gs.GameState, status: stt.Status, status_source: eft.StaticTarget) -> gs.GameState:
+            game_state: GameState,
+            pid: Pid,
+            info: eft.SpecificDamageEffect | CharacterSkill | Card,
+            source: None | StaticTarget = None,
+    ) -> GameState:
+        def f(game_state: GameState, status: stt.Status, status_source: StaticTarget) -> GameState:
             return status.inform(
                 game_state,
                 status_source,

@@ -1,29 +1,38 @@
-from typing import List, Type, Tuple, Optional, Callable, Union
+from typing import Callable, Optional
 
-from dgisim.src.state.game_state import GameState
-from dgisim.src.player_agent import PlayerAgent
-from dgisim.src.action.action import PlayerAction
-from dgisim.src.phase.phase import Phase
-from dgisim.src.helper.level_print import GamePrinter
+from .action.action import PlayerAction
+from .helper.level_print import GamePrinter
+from .phase.phase import Phase
+from .player_agent import PlayerAgent
+from .state.enums import Pid
+from .state.game_state import GameState
+
+__all__ = [
+    "GameStateMachine",
+]
 
 
 class GameStateMachine:
-    def __init__(self, game_state: GameState, player1: PlayerAgent, player2: PlayerAgent):
+    def __init__(self, game_state: GameState, agent1: PlayerAgent, agent2: PlayerAgent):
         self._history = [game_state]
+        self._perspective_history: dict[Pid, list[GameState]] = {
+            Pid.P1: [game_state.prespective_view(Pid.P1)],
+            Pid.P2: [game_state.prespective_view(Pid.P2)],
+        }
         self._action_history: list[int] = []
         self._actions: dict[int, PlayerAction] = {}
         self._game_state = game_state
-        self._playerAgent1 = player1
-        self._playerAgent2 = player2
+        self._player_agent1 = agent1
+        self._player_agent2 = agent2
 
     @classmethod
-    def from_default(cls, player1: PlayerAgent, player2: PlayerAgent):
-        return cls(GameState.from_default(), player1, player2)
+    def from_default(cls, agent1: PlayerAgent, agent2: PlayerAgent):
+        return cls(GameState.from_default(), agent1, agent2)
 
-    def get_history(self) -> Tuple[GameState, ...]:
+    def get_history(self) -> tuple[GameState, ...]:
         return tuple(self._history)
 
-    def get_action_history(self) -> Tuple[GameState, ...]:
+    def get_action_history(self) -> tuple[GameState, ...]:
         return tuple([self._history[i] for i in self._action_history])
 
     def get_last_action(self) -> Optional[PlayerAction]:
@@ -80,14 +89,19 @@ class GameStateMachine:
     def get_game_state_at(self, index: int) -> GameState:
         return self._history[index]
 
+    def _append_history(self, game_state: GameState) -> None:
+        self._history.append(self._game_state)
+        self._perspective_history[Pid.P1].append(self._game_state.prespective_view(Pid.P1))
+        self._perspective_history[Pid.P2].append(self._game_state.prespective_view(Pid.P2))
+
     def _step(self, observe=False) -> None:
         self._game_state = self._game_state.step()
         if observe:
             print(GamePrinter.dict_game_printer(self._game_state.dict_str()))
-            input(">>> ")
-        self._history.append(self._game_state)
+            input(":> ")
+        self._append_history(self._game_state)
 
-    def _action_step(self, pid: GameState.Pid, action: PlayerAction, observe=False) -> bool:
+    def _action_step(self, pid: Pid, action: PlayerAction, observe=False) -> bool:
         next_state = self._game_state.action_step(pid, action)
         if next_state is None:
             return False
@@ -97,11 +111,11 @@ class GameStateMachine:
         self._game_state = next_state
         if observe:
             print(GamePrinter.dict_game_printer(self._game_state.dict_str()))
-            input(">>> ")
-        self._history.append(self._game_state)
+            input(":> ")
+        self._append_history(self._game_state)
         return True
 
-    def step_until_phase(self, phase: Union[type[Phase], Phase], observe=False) -> None:
+    def step_until_phase(self, phase: type[Phase] | Phase, observe=False) -> None:
         if isinstance(phase, Phase):
             phase = type(phase)
         while isinstance(self._game_state.get_phase(), phase):
@@ -133,7 +147,7 @@ class GameStateMachine:
             while patience > 0 \
                     and not self._action_step(
                         pid,
-                        self.player_agent(pid).choose_action(self._history, pid),
+                        self.player_agent(pid).choose_action(self._perspective_history[pid], pid),
                         observe=observe,
                     ):
                 patience -= 1
@@ -174,16 +188,16 @@ class GameStateMachine:
             # TODO
             pass
 
-    def player_agent(self, id: GameState.Pid) -> PlayerAgent:
-        if id is GameState.Pid.P1:
-            return self._playerAgent1
-        elif id is GameState.Pid.P2:
-            return self._playerAgent2
+    def player_agent(self, id: Pid) -> PlayerAgent:
+        if id is Pid.P1:
+            return self._player_agent1
+        elif id is Pid.P2:
+            return self._player_agent2
         else:
             raise Exception("GameStateMachine.player(): Invalid player id")
 
     def game_end(self) -> bool:
         return self._game_state.game_end()
 
-    def get_winner(self) -> Optional[GameState.Pid]:
+    def get_winner(self) -> None | Pid:
         return self._game_state.get_winner()

@@ -1,12 +1,16 @@
 from __future__ import annotations
 
-from dgisim.src.state.game_state import GameState
+from dgisim.src.agents import *
+from dgisim.src.dices import ActualDices
+from dgisim.src.effect.effect import *
+from dgisim.src.effect.enums import DynamicCharacterTarget, Zone
+from dgisim.src.effect.structs import DamageType, StaticTarget
+from dgisim.src.element import *
 from dgisim.src.game_state_machine import GameStateMachine
-from dgisim.src.element.element import *
 from dgisim.src.helper.level_print import GamePrinter
 from dgisim.src.helper.quality_of_life import *
-from dgisim.src.agents import *
-from dgisim.src.effect.effect import *
+from dgisim.src.state.enums import Pid
+from dgisim.src.state.game_state import GameState
 
 
 def auto_step(game_state: GameState, observe: bool = False) -> GameState:
@@ -17,11 +21,11 @@ def auto_step(game_state: GameState, observe: bool = False) -> GameState:
         while gsm.get_game_state().waiting_for() is None:
             gsm.one_step()
             print(GamePrinter.dict_game_printer(gsm.get_game_state().dict_str()))
-            input(">>> ")
+            input(":> ")
     return gsm.get_game_state()
 
 
-def oppo_aura_elem(game_state: GameState, elem: Element, char_id: Optional[int] = None) -> GameState:
+def oppo_aura_elem(game_state: GameState, elem: Element, char_id: None | int = None) -> GameState:
     """
     Gives Player2's active character `elem` aura
     """
@@ -39,7 +43,7 @@ def oppo_aura_elem(game_state: GameState, elem: Element, char_id: Optional[int] 
         return game_state.factory().f_player2(
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().f_character(
-                    char_id,
+                    char_id,  # type: ignore
                     lambda ac: ac.factory().elemental_aura(
                         ElementalAura.from_default().add(elem)
                     ).build()
@@ -47,13 +51,23 @@ def oppo_aura_elem(game_state: GameState, elem: Element, char_id: Optional[int] 
             ).build()
         ).build()
 
+def remove_aura(game_state: GameState, pid: Pid = Pid.P2, char_id: None | int = None) -> GameState:
+    return game_state.factory().f_player(
+        pid,
+        lambda p: p.factory().f_characters(
+            lambda cs: cs.factory().f_character(
+                case_val(char_id is None, cs.just_get_active_character_id(), char_id),  # type: ignore
+                lambda c: c.factory().elemental_aura(ElementalAura.from_default()).build()
+            ).build()
+        ).build()
+    ).build()
 
 def add_damage_effect(
         game_state: GameState,
         damage: int,
         elem: Element,
-        pid: GameState.Pid = GameState.Pid.P2,
-        char_id: Optional[int] = None,
+        pid: Pid = Pid.P2,
+        char_id: None | int = None,
 ) -> GameState:
     """
     Adds ReferredDamageEffect to Player2's active character with `damage` and `elem` from Player1's
@@ -80,7 +94,7 @@ def add_damage_effect(
 def kill_character(
         game_state: GameState,
         character_id: int,
-        pid: GameState.Pid = GameState.Pid.P2,
+        pid: Pid = Pid.P2,
         hp: int = 0,
 ) -> GameState:
     """
@@ -97,7 +111,7 @@ def kill_character(
     ).build()
 
 
-def set_active_player_id(game_state: GameState, pid: GameState.Pid, character_id: int) -> GameState:
+def set_active_player_id(game_state: GameState, pid: Pid, character_id: int) -> GameState:
     return game_state.factory().f_player(
         pid,
         lambda p: p.factory().f_characters(

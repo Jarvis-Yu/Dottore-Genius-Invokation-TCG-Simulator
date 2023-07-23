@@ -1,9 +1,23 @@
 from __future__ import annotations
-
 import random
+from collections import Counter
+from typing import Any, Optional, Iterator, Iterable, TypeVar, Union
+from typing_extensions import Self, override, TYPE_CHECKING
+
+from .helper.hashable_dict import HashableDict
+from .helper.quality_of_life import BIG_INT
+from .element import Element
 from collections import defaultdict
 from typing import Optional, Iterator, Iterable, Union
 
+if TYPE_CHECKING:
+    from .state.game_state import GameState
+
+__all__ = [
+    "AbstractDices",
+    "ActualDices",
+    "Dices",
+]
 from typing_extensions import Self
 
 from dgisim.src.element.element import Element
@@ -21,10 +35,13 @@ ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY: list[Element] = [Element.PYRO,
 
 
 class Dices:
+    """
+    Base class for dices
+    """
     _LEGAL_ELEMS = frozenset(elem for elem in Element)
 
     def __init__(self, dices: dict[Element, int]) -> None:
-        self._dices = HashableDict(dices)
+        self._dices = HashableDict.from_dict(dices)
 
     def __add__(self, other: Dices | dict[Element, int]) -> Self:
         dices: dict[Element, int]
@@ -45,6 +62,9 @@ class Dices:
     def num_dices(self) -> int:
         return sum(self._dices.values())
 
+    def is_even(self) -> bool:
+        return self.num_dices() % 2 == 0
+
     def is_legal(self) -> bool:
         return all(map(lambda x: x >= 0, self._dices.values())) \
             and all(elem in self._LEGAL_ELEMS for elem in self._dices)
@@ -53,21 +73,41 @@ class Dices:
         if self.is_legal():
             return self
         return type(self)(dict(
-            (elem, max(0, n))
+            (elem, n)
             for elem, n in self._dices.items()
-            if elem in self._LEGAL_ELEMS
+            if elem in self._LEGAL_ELEMS and n > 0
         ))
 
     def elems(self) -> Iterable[Element]:
         return self._dices.keys()
 
+    def pick_random_dices(self, num: int) -> tuple[Self, Self]:
+        """
+        Returns the left dices and selected dices
+        """
+        num = min(self.num_dices(), num)
+        if num == 0:
+            return (self, type(self).from_empty())
+        picked_dices: dict[Element, int] = dict(Counter(
+            random.sample(list(self._dices.keys()), counts=self._dices.values(), k=num)
+        ))
+        return type(self)(self._dices - picked_dices), type(self)(picked_dices)
+
+    def __contains__(self, elem: Element) -> bool:
+        return (
+            elem in self._LEGAL_ELEMS
+            and self[elem] > 0
+        )
+
     def __iter__(self) -> Iterator[Element]:
-        return self._dices.__iter__()
+        return (
+            elem
+            for elem in self._dices
+            if self[elem] > 0
+        )
 
     def __getitem__(self, index: Element) -> int:
-        if index in self._dices:
-            return self._dices[index]
-        return 0
+        return self._dices.get(index, 0)
 
     def _normalized_dices(self):
         return {key: value for key, value in self._dices.items() if value != 0}
@@ -75,29 +115,43 @@ class Dices:
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Dices):
             return False
-        return self._normalized_dices() == other._normalized_dices()
+        return self is other or self._dices == other._dices
 
     def __hash__(self) -> int:
         return hash(self._dices)
 
-    def __str__(self) -> str:
-        return self.to_string(0)
-
-    def to_string(self, indent: int = 0) -> str:
+    def __repr__(self) -> str:
         existing_dices = dict([
             (dice.name, str(num))
             for dice, num in self._dices.items()
             if num != 0
         ])
-        return level_print(existing_dices, indent)
+        return (
+            '{'
+            + ", ".join(
+                f"{key}: {val}"
+                for key, val in existing_dices.items()
+            )
+            + '}'
+        )
 
-    def dict_str(self) -> Union[dict, str]:
+    def to_dict(self) -> dict[Element, int]:
+        return dict(self._dices.items())
+
+    def dict_str(self) -> dict[str, Any]:
         existing_dices = dict([
             (dice.name, str(num))
             for dice, num in self._dices.items()
             if num != 0
         ])
         return existing_dices
+
+    @classmethod
+    def from_empty(cls) -> Self:
+        return cls(dict([
+            (elem, 0)
+            for elem in cls._LEGAL_ELEMS
+        ]))
 
 
 _PURE_ELEMS = frozenset({
@@ -125,8 +179,6 @@ class ActualDices(Dices):
         Element.CRYO,
         Element.GEO,
     })
-
-    import dgisim.src.state.game_state as gs
 
     def _satisfy(self, requirement: AbstractDices) -> bool:
         assert self.is_legal() and requirement.is_legal()
@@ -377,7 +429,7 @@ class ActualDices(Dices):
     def basically_satisfy(
             self,
             requirement: AbstractDices,
-            game_state: Optional[gs.GameState] = None,
+            game_state: Optional[GameState] = None,
     ) -> Optional[ActualDices]:
         if requirement.num_dices() > self.num_dices():
             return None
@@ -396,7 +448,7 @@ class ActualDices(Dices):
                 omni = requirement[elem]
             elif elem is Element.ANY:
                 any = requirement[elem]
-            else:
+            else:  # pragma: no cover
                 raise Exception("Unknown element")
         if len(pures) > 0:
             for elem in pures:
@@ -409,17 +461,22 @@ class ActualDices(Dices):
                     remaining[elem] -= pures[elem]
         if omni > 0:
             best_elem: Optional[Element] = None
-            count = BIG_INT
+            best_count = 0
             for elem in list(_PURE_ELEMS) + [Element.OMNI]:
                 this_count = remaining.get(elem, 0)
-                if this_count >= omni and this_count < count:
+                if best_count > omni and this_count >= omni and this_count < best_count:
+                        best_elem = elem
+                        best_count = this_count
+                elif best_count < omni and this_count > best_count:
                     best_elem = elem
-                    count = this_count
-            if best_elem is None:
-                return None
-            else:
-                answer[best_elem] += omni
-                remaining[best_elem] -= omni
+                    best_count = this_count
+                elif best_count == omni:
+                    break
+            assert best_elem is not None
+            best_count = min(best_count, omni)
+            answer[best_elem] += best_count
+            remaining[best_elem] -= best_count
+            omni_required += omni - best_count
         if any > 0:
             from operator import itemgetter
             sorted_elems = sorted(remaining.items(), key=itemgetter(1))
@@ -435,17 +492,10 @@ class ActualDices(Dices):
                 answer[Element.OMNI] += any
                 remaining[Element.OMNI] -= any
         if omni_required > 0:
-            if remaining[Element.OMNI] < omni_required:
+            if remaining.get(Element.OMNI, 0) < omni_required:
                 return None
             answer[Element.OMNI] += omni_required
         return ActualDices(answer)
-
-    @classmethod
-    def from_empty(cls) -> ActualDices:
-        return ActualDices(dict([
-            (elem, 0)
-            for elem in ActualDices._LEGAL_ELEMS
-        ]))
 
     @classmethod
     def from_random(cls, size: int) -> ActualDices:
@@ -489,19 +539,6 @@ class AbstractDices(Dices):
         Element.GEO,
         Element.ANY,
     })
-
-    @classmethod
-    def from_pre(
-            cls,
-            omni: int,
-            any: int,
-            element: Optional[Element] = None,
-            num: Optional[int] = None) -> AbstractDices:
-        assert element is None or element in AbstractDices._LEGAL_ELEMS
-        dices = {Element.OMNI: omni, Element.ANY: any, }
-        if element is not None and num is not None:
-            dices[element] = num
-        return AbstractDices(dices)
 
     @classmethod
     def from_dices(cls, dices: Dices) -> Optional[AbstractDices]:

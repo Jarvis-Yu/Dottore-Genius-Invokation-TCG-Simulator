@@ -1,77 +1,110 @@
+"""
+This file contains the base class "Effect" for all effects,
+and implementation of all effects.
+
+The classes are divided into 5 sections ordered. Within each section, they are
+ordered alphabetically.
+
+- base class, which is Effect
+- type classes, used to identify what type of effect an effect is
+- phase classes, effects that controls the flow of the game
+- concrete classes, the implementation of effects that are actually in the game
+"""
 from __future__ import annotations
-from typing import FrozenSet, Optional, cast, Union, ClassVar, Iterable, Callable
-from enum import Enum
-from dataclasses import InitVar, dataclass, asdict, replace, field
-from itertools import chain
+from dataclasses import asdict, dataclass, field, replace
+from typing import FrozenSet, Iterable, Optional, TYPE_CHECKING, Union
 
-import dgisim.src.status.statuses as stts
-import dgisim.src.status.status as stt
-import dgisim.src.summon.summon as sm
-import dgisim.src.support.support as sp
-from dgisim.src.element.element import Element, Reaction, ReactionDetail
-import dgisim.src.character.character as chr
-from dgisim.src.character.character_skill_enum import CharacterSkill
-import dgisim.src.state.game_state as gs
-import dgisim.src.state.player_state as ps
-import dgisim.src.card.card as cd
-import dgisim.src.dices as ds
-import dgisim.src.event.event as evt
-from dgisim.src.status.status_processing import StatusProcessing
-from dgisim.src.helper.quality_of_life import just, case_val
+from ..character import character as chr
+from ..helper.quality_of_life import dataclass_repr
+from ..status import status as stt
+from ..summon import summon as sm
+from ..support import support as sp
+
+from ..character.enums import CharacterSkill
+from ..element import Element, Reaction, ReactionDetail
+from ..helper.quality_of_life import just, case_val
+from ..state.enums import Pid, Act
+from ..status.enums import Preprocessables
+from ..status.status_processing import StatusProcessing
+from .enums import DynamicCharacterTarget, TriggeringSignal, Zone
+from .structs import StaticTarget, DamageType
+
+if TYPE_CHECKING:
+    from ..card.card import Card
+    from ..dices import ActualDices
+    from ..state.game_state import GameState
+    from ..status.statuses import Statuses
+
+__all__ = [
+    # base
+    "Effect",
+
+    # type
+    "CheckerEffect",
+    "DirectEffect",
+    "PhaseEffect",
+    "TriggerrbleEffect",
+
+    # Triggerrable Effect
+    "AllStatusTriggererEffect",
+    "TriggerStatusEffect",
+    "TriggerCombatStatusEffect",
+    "TriggerSummonEffect",
+    "TriggerSupportEffect",
+
+    # Phase Effect
+    "DeathSwapPhaseStartEffect",
+    "DeathSwapPhaseEndEffect",
+    "EndPhaseCheckoutEffect",
+    "EndRoundEffect",
+    "TurnEndEffect",
+    "SetBothPlayerPhaseEffect",
+
+    # Checker Effect
+    "SwapCharacterCheckerEffect",
+    "DeathCheckCheckerEffect",
+    "DefeatedCheckerEffect",
+
+    # Direct Effect
+    "SwapCharacterEffect",
+    "ForwardSwapCharacterEffect",
+    "SpecificDamageEffect",
+    "ReferredDamageEffect",
+    "EnergyRechargeEffect",
+    "EnergyDrainEffect",
+    "RecoverHPEffect",
+    "PublicAddCardEffect",
+    "PublicRemoveCardEffect",
+    "PublicRemoveAllCardEffect",
+    "RemoveDiceEffect",
+    "AddCharacterStatusEffect",
+    "RemoveCharacterStatusEffect",
+    "UpdateCharacterStatusEffect",
+    "OverrideCharacterStatusEffect",
+    "AddCombatStatusEffect",
+    "RemoveCombatStatusEffect",
+    "UpdateCombatStatusEffect",
+    "OverrideCombatStatusEffect",
+    "AddSummonEffect",
+    "RemoveSummonEffect",
+    "UpdateSummonEffect",
+    "OverrideSummonEffect",
+    "AllSummonIncreaseUsage",
+    "OneSummonIncreaseUsage",
+    "AddSupportEffect",
+    "RemoveSupportEffect",
+    "UpdateSupportEffect",
+    "OverrideSupportEffect",
+    "CastSkillEffect",
+    "BroadCastSkillInfoEffect",
+]
+
+############################## base ##############################
 
 
-class Zone(Enum):
-    CHARACTERS = "Characters"
-    SUMMONS = "Summons"
-    SUPPORTS = "Supports"
-    COMBAT_STATUSES = "Combat-Statuses"
-
-
-class TriggeringSignal(Enum):
-    FAST_ACTION = 0
-    COMBAT_ACTION = 1
-    DEATH_EVENT = 2
-    SWAP_EVENT_1 = 3  # P1's swap
-    SWAP_EVENT_2 = 4  # P2's swap
-    ROUND_START = 5
-    END_ROUND_CHECK_OUT = 6  # summons etc.
-    ROUND_END = 7  # remove frozen etc.
-
-
-class DynamicCharacterTarget(Enum):
-    SELF_SELF = 0
-    SELF_ACTIVE = 1
-    SELF_OFF_FIELD = 2
-    SELF_ALL = 3
-    SELF_ABS = 4
-    OPPO_ACTIVE = 5
-    OPPO_OFF_FIELD = 6
-
-
-# TODO: postpone this until further tests are done
-#       needs to investigate how Klee's burst and Mona's or Sucrose's Talent co-work
-@dataclass(frozen=True, kw_only=True)
-class DamageType:
-    normal_attack: bool = False
-    charged_attack: bool = False
-    plunge_attack: bool = False
-    elemental_skill: bool = False
-    elemental_burst: bool = False
-    status: bool = False  # any talent, equipmenet, character status, combat status.
-    summon: bool = False
-    no_boost: bool = False  # reaction secondary damage, Klee's burst status...
-
-
-@dataclass(frozen=True)
-class StaticTarget:
-    pid: gs.GameState.Pid
-    zone: Zone
-    id: int
-
-
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class Effect:
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         raise Exception("Not Overriden or Implemented")
 
     def name(self) -> str:
@@ -80,44 +113,61 @@ class Effect:
     def dict_str(self) -> Union[dict, str]:
         return asdict(self)
 
-    def __str__(self) -> str:
-        return self.__class__.__name__
+    def __repr__(self) -> str:
+        return dataclass_repr(self)
 
 
-@dataclass(frozen=True)
+############################## type ##############################
+@dataclass(frozen=True, repr=False)
 class TriggerrbleEffect(Effect):
     pass
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class DirectEffect(Effect):
     pass
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class CheckerEffect(Effect):
     pass
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class PhaseEffect(Effect):
     pass
 
+############################## Triggerrable Effect ##############################
 
-@dataclass(frozen=True)
-class TriggerStatusEffect(Effect):
+
+@dataclass(frozen=True, repr=False)
+class AllStatusTriggererEffect(TriggerrbleEffect):
+    """
+    This effect triggers the characters' statuses with the provided signal in order.
+    """
+    pid: Pid
+    signal: TriggeringSignal
+
+    def execute(self, game_state: GameState) -> GameState:
+        effects = StatusProcessing.trigger_all_statuses_effects(game_state, self.pid, self.signal)
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_many_fl(effects)
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class TriggerStatusEffect(TriggerrbleEffect):
     target: StaticTarget
     status: type[Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]]
     signal: TriggeringSignal
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
         if not isinstance(character, chr.Character):
             return game_state
-        character = cast(chr.Character, character)
         effects: Iterable[Effect] = []
 
-        statuses: stts.Statuses
+        statuses: Statuses
         if issubclass(self.status, stt.CharacterTalentStatus):
             statuses = character.get_talent_statuses()
         elif issubclass(self.status, stt.EquipmentStatus):
@@ -135,13 +185,13 @@ class TriggerStatusEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
-class TriggerCombatStatusEffect(Effect):
-    target_pid: gs.GameState.Pid  # the player the status belongs to
+@dataclass(frozen=True, repr=False)
+class TriggerCombatStatusEffect(TriggerrbleEffect):
+    target_pid: Pid  # the player the status belongs to
     status: type[stt.CombatStatus]
     signal: TriggeringSignal
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         effects: Iterable[Effect] = []
         statuses = game_state.get_player(self.target_pid).get_combat_statuses()
         status = statuses.find(self.status)
@@ -161,13 +211,13 @@ class TriggerCombatStatusEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
-class TriggerSummonEffect(Effect):
-    target_pid: gs.GameState.Pid
+@dataclass(frozen=True, repr=False)
+class TriggerSummonEffect(TriggerrbleEffect):
+    target_pid: Pid
     summon: type[sm.Summon]
     signal: TriggeringSignal
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         effects: Iterable[Effect] = []
         summons = game_state.get_player(self.target_pid).get_summons()
         summon = summons.find(self.summon)
@@ -187,14 +237,14 @@ class TriggerSummonEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
-class TriggerSupportEffect(Effect):
-    target_pid: gs.GameState.Pid
+@dataclass(frozen=True, repr=False)
+class TriggerSupportEffect(TriggerrbleEffect):
+    target_pid: Pid
     support_type: type[sp.Support]
     sid: int
     signal: TriggeringSignal
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         effects: Iterable[Effect] = []
         supports = game_state.get_player(self.target_pid).get_supports()
         support = supports.find(self.support_type, self.sid)
@@ -213,28 +263,118 @@ class TriggerSupportEffect(Effect):
             lambda es: es.push_many_fl(effects)
         ).build()
 
+############################## Phase Effect ##############################
 
-@dataclass(frozen=True)
-class AllStatusTriggererEffect(TriggerrbleEffect):
-    """
-    This effect triggers the characters' statuses with the provided signal in order.
-    """
-    pid: gs.GameState.Pid
-    signal: TriggeringSignal
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
-        effects = StatusProcessing.trigger_all_statuses_effects(game_state, self.pid, self.signal)
+@dataclass(frozen=True, repr=False)
+class DeathSwapPhaseStartEffect(PhaseEffect):
+    pass
+
+
+@dataclass(frozen=True, repr=False)
+class DeathSwapPhaseEndEffect(PhaseEffect):
+    my_pid: Pid
+    my_last_phase: Act
+    other_last_phase: Act
+
+    def execute(self, game_state: GameState) -> GameState:
+        player = game_state.get_player(self.my_pid)
+        other_player = game_state.get_other_player(self.my_pid)
+        player = player.factory().phase(self.my_last_phase).build()
+        other_player = other_player.factory().phase(self.other_last_phase).build()
+        return game_state.factory().player(
+            self.my_pid,
+            player
+        ).other_player(
+            self.my_pid,
+            other_player
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class EndPhaseCheckoutEffect(PhaseEffect):
+    """
+    This is responsible for triggering character statuses/summons/supports by the
+    end of the round.
+    """
+
+    def execute(self, game_state: GameState) -> GameState:
+        active_id = game_state.get_active_player_id()
+        # active_player = game_state.get_player(active_id)
+        effects = [
+            AllStatusTriggererEffect(
+                active_id,
+                TriggeringSignal.END_ROUND_CHECK_OUT
+            ),
+            # TODO: add active_player's team status, summons status... here
+        ]
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
+class EndRoundEffect(PhaseEffect):
+    """
+    This is responsible for triggering other clean ups (e.g. remove satiated)
+    """
+
+    def execute(self, game_state: GameState) -> GameState:
+        active_id = game_state.get_active_player_id()
+        active_player = game_state.get_player(active_id)
+        effects = [
+            AllStatusTriggererEffect(
+                active_id,
+                TriggeringSignal.ROUND_END
+            ),
+            # TODO: add active_player's team status, summons status... here
+        ]
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_many_fl(effects)
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class TurnEndEffect(PhaseEffect):
+    def execute(self, game_state: GameState) -> GameState:
+        active_player_id = game_state.get_active_player_id()
+        player = game_state.get_player(active_player_id)
+        other_player = game_state.get_other_player(active_player_id)
+        assert player.get_phase() is Act.ACTION_PHASE
+        # TODO: other tidy up
+        if other_player.get_phase() is Act.END_PHASE:
+            return game_state
+        return game_state.factory().active_player_id(
+            active_player_id.other()
+        ).player(
+            active_player_id,
+            player.factory().phase(Act.PASSIVE_WAIT_PHASE).build()
+        ).other_player(
+            active_player_id,
+            other_player.factory().phase(Act.ACTION_PHASE).build()
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class SetBothPlayerPhaseEffect(PhaseEffect):
+    phase: Act
+
+    def execute(self, game_state: GameState) -> GameState:
+        return game_state.factory().f_player1(
+            lambda p: p.factory().phase(self.phase).build()
+        ).f_player2(
+            lambda p: p.factory().phase(self.phase).build()
+        ).build()
+
+############################## Checker Effect ##############################
+
+
+@dataclass(frozen=True, repr=False)
 class SwapCharacterCheckerEffect(CheckerEffect):
     my_active: StaticTarget
     oppo_active: StaticTarget
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         my_ac_id = game_state.get_player(self.my_active.pid).just_get_active_character().get_id()
         oppo_ac_id = game_state.get_player(
             self.oppo_active.pid).just_get_active_character().get_id()
@@ -267,17 +407,17 @@ class SwapCharacterCheckerEffect(CheckerEffect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class DeathCheckCheckerEffect(CheckerEffect):
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         p1_character = game_state.get_player1().get_characters().get_active_character()
         p2_character = game_state.get_player2().get_characters().get_active_character()
         assert p1_character is not None and p2_character is not None
-        pid: gs.GameState.Pid
+        pid: Pid
         if p1_character.defeated():
-            pid = gs.GameState.Pid.P1
+            pid = Pid.P1
         elif p2_character.defeated():
-            pid = gs.GameState.Pid.P2
+            pid = Pid.P2
         else:  # if no one defeated, continue
             return game_state
         death_swap_player = game_state.get_player(pid)
@@ -298,149 +438,32 @@ class DeathCheckCheckerEffect(CheckerEffect):
         ).player(
             pid,
             game_state.get_player(pid).factory().phase(
-                ps.PlayerState.Act.ACTION_PHASE
+                Act.ACTION_PHASE
             ).build()
         ).other_player(
             pid,
             game_state.get_other_player(pid).factory().phase(
-                ps.PlayerState.Act.PASSIVE_WAIT_PHASE
+                Act.PASSIVE_WAIT_PHASE
             ).build()
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class DefeatedCheckerEffect(CheckerEffect):
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         if game_state.get_player1().defeated() \
                 or game_state.get_player2().defeated():
             return game_state.factory().phase(game_state.get_mode().game_end_phase()).build()
         return game_state
 
-
-@dataclass(frozen=True)
-class DeathSwapPhaseStartEffect(PhaseEffect):
-    pass
+############################## Direct Effect ##############################
 
 
-@dataclass(frozen=True)
-class DeathSwapPhaseEndEffect(PhaseEffect):
-    my_pid: gs.GameState.Pid
-    my_last_phase: ps.PlayerState.Act
-    other_last_phase: ps.PlayerState.Act
-
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
-        player = game_state.get_player(self.my_pid)
-        other_player = game_state.get_other_player(self.my_pid)
-        player = player.factory().phase(self.my_last_phase).build()
-        other_player = other_player.factory().phase(self.other_last_phase).build()
-        return game_state.factory().player(
-            self.my_pid,
-            player
-        ).other_player(
-            self.my_pid,
-            other_player
-        ).build()
-
-
-@dataclass(frozen=True)
-class EndPhaseCheckoutEffect(PhaseEffect):
-    """
-    This is responsible for triggering character statuses/summons/supports by the
-    end of the round.
-    """
-
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
-        active_id = game_state.get_active_player_id()
-        # active_player = game_state.get_player(active_id)
-        effects = [
-            AllStatusTriggererEffect(
-                active_id,
-                TriggeringSignal.END_ROUND_CHECK_OUT
-            ),
-            # TODO: add active_player's team status, summons status... here
-        ]
-        return game_state.factory().f_effect_stack(
-            lambda es: es.push_many_fl(effects)
-        ).build()
-
-
-@dataclass(frozen=True)
-class EndRoundEffect(PhaseEffect):
-    """
-    This is responsible for triggering other clean ups (e.g. remove satiated)
-    """
-
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
-        active_id = game_state.get_active_player_id()
-        active_player = game_state.get_player(active_id)
-        effects = [
-            AllStatusTriggererEffect(
-                active_id,
-                TriggeringSignal.ROUND_END
-            ),
-            # TODO: add active_player's team status, summons status... here
-        ]
-        return game_state.factory().f_effect_stack(
-            lambda es: es.push_many_fl(effects)
-        ).build()
-
-
-@dataclass(frozen=True)
-class TurnEndEffect(PhaseEffect):
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
-        active_player_id = game_state.get_active_player_id()
-        player = game_state.get_player(active_player_id)
-        other_player = game_state.get_other_player(active_player_id)
-        assert player.get_phase() is ps.PlayerState.Act.ACTION_PHASE
-        # TODO: other tidy up
-        if other_player.get_phase() is ps.PlayerState.Act.END_PHASE:
-            return game_state
-        return game_state.factory().active_player_id(
-            active_player_id.other()
-        ).player(
-            active_player_id,
-            player.factory().phase(ps.PlayerState.Act.PASSIVE_WAIT_PHASE).build()
-        ).other_player(
-            active_player_id,
-            other_player.factory().phase(ps.PlayerState.Act.ACTION_PHASE).build()
-        ).build()
-
-
-@dataclass(frozen=True)
-class EndPhaseTurnEndEffect(PhaseEffect):
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
-        active_player_id = game_state.get_active_player_id()
-        player = game_state.get_player(active_player_id)
-        other_player = game_state.get_other_player(active_player_id)
-        assert player.get_phase() is ps.PlayerState.Act.ACTIVE_WAIT_PHASE
-        return game_state.factory().active_player_id(
-            active_player_id.other()
-        ).player(
-            active_player_id,
-            player.factory().phase(ps.PlayerState.Act.PASSIVE_WAIT_PHASE).build()
-        ).other_player(
-            active_player_id,
-            other_player.factory().phase(ps.PlayerState.Act.ACTIVE_WAIT_PHASE).build()
-        ).build()
-
-
-@dataclass(frozen=True)
-class SetBothPlayerPhaseEffect(PhaseEffect):
-    phase: ps.PlayerState.Act
-
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
-        return game_state.factory().f_player1(
-            lambda p: p.factory().phase(self.phase).build()
-        ).f_player2(
-            lambda p: p.factory().phase(self.phase).build()
-        ).build()
-
-
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class SwapCharacterEffect(DirectEffect):
     target: StaticTarget
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         assert self.target.zone == Zone.CHARACTERS
         pid = self.target.pid
         player = game_state.get_player(pid)
@@ -467,15 +490,16 @@ class SwapCharacterEffect(DirectEffect):
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class ForwardSwapCharacterEffect(DirectEffect):
-    target_player: gs.GameState.Pid
+    target_player: Pid
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         characters = game_state.get_player(self.target_player).get_characters()
         ordered_chars = characters.get_character_in_activity_order()
         next_char: Optional[chr.Character] = None
         for char in ordered_chars[1:] + ordered_chars[:1]:
+            assert isinstance(char, chr.Character)
             if char.alive():
                 next_char = char
                 break
@@ -484,7 +508,9 @@ class ForwardSwapCharacterEffect(DirectEffect):
         return game_state.factory().f_player(
             self.target_player,
             lambda p: p.factory().f_characters(
-                lambda cs: cs.factory().active_character_id(next_char.get_id()).build()
+                lambda cs: cs.factory().active_character_id(
+                    next_char.get_id()  # type: ignore
+                ).build()
             ).build()
         ).build()
 
@@ -502,8 +528,8 @@ _DAMAGE_ELEMENTS: FrozenSet[Element] = frozenset({
 })
 
 
-@dataclass(frozen=True, kw_only=True)
-class SpecificDamageEffect(Effect):
+@dataclass(frozen=True, kw_only=True, repr=False)
+class SpecificDamageEffect(DirectEffect):
     source: StaticTarget
     target: StaticTarget
     element: Element
@@ -513,8 +539,8 @@ class SpecificDamageEffect(Effect):
 
     @staticmethod
     def _damage_preprocess(
-            game_state: gs.GameState, damage: SpecificDamageEffect, pp_type: stt.Status.PPType
-    ) -> tuple[gs.GameState, SpecificDamageEffect]:
+            game_state: GameState, damage: SpecificDamageEffect, pp_type: Preprocessables
+    ) -> tuple[GameState, SpecificDamageEffect]:
         source_id = damage.source.pid
         game_state, item = StatusProcessing.preprocess_by_all_statuses(
             game_state,
@@ -528,15 +554,15 @@ class SpecificDamageEffect(Effect):
 
     @classmethod
     def _element_confirmation(
-            cls, game_state: gs.GameState, damage: SpecificDamageEffect
-    ) -> tuple[gs.GameState, SpecificDamageEffect]:
+            cls, game_state: GameState, damage: SpecificDamageEffect
+    ) -> tuple[GameState, SpecificDamageEffect]:
         """ This is the pass to check final damage element """
-        return cls._damage_preprocess(game_state, damage, stt.Status.PPType.DMG_ELEMENT)
+        return cls._damage_preprocess(game_state, damage, Preprocessables.DMG_ELEMENT)
 
     @classmethod
     def _reaction_confirmation(
-            cls, game_state: gs.GameState, damage: SpecificDamageEffect
-    ) -> tuple[gs.GameState, SpecificDamageEffect, Optional[ReactionDetail]]:
+            cls, game_state: GameState, damage: SpecificDamageEffect
+    ) -> tuple[GameState, SpecificDamageEffect, Optional[ReactionDetail]]:
         """ This is the pass to check final damage reaction type """
         target_char = game_state.get_character_target(damage.target)
         assert target_char is not None
@@ -567,24 +593,24 @@ class SpecificDamageEffect(Effect):
                 just(game_state.belongs_to(target_char)),
                 lambda p: p.factory().f_characters(
                     lambda cs: cs.factory().character(
-                        target_char.factory().elemental_aura(new_aura).build()
+                        target_char.factory().elemental_aura(new_aura).build()  # type: ignore
                     ).build()
                 ).build()
             ).build()
 
         game_state, damage = cls._damage_preprocess(
-            game_state, damage, stt.Status.PPType.DMG_REACTION
+            game_state, damage, Preprocessables.DMG_REACTION
         )
         return game_state, damage, reactionDetail
 
     @classmethod
     def _damage_confirmation(
-            cls, game_state: gs.GameState, damage: SpecificDamageEffect
-    ) -> tuple[gs.GameState, SpecificDamageEffect]:
+            cls, game_state: GameState, damage: SpecificDamageEffect
+    ) -> tuple[GameState, SpecificDamageEffect]:
         """ This is the pass to check final damage amount """
-        return cls._damage_preprocess(game_state, damage, stt.Status.PPType.DMG_AMOUNT)
+        return cls._damage_preprocess(game_state, damage, Preprocessables.DMG_AMOUNT)
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         # Preprocessing
         game_state, elemented_damage = self._element_confirmation(game_state, self)
         game_state, reactioned_damage, reaction = self._reaction_confirmation(
@@ -596,6 +622,13 @@ class SpecificDamageEffect(Effect):
                 damage=reactioned_damage.damage + reaction.reaction_type.damage_boost(),
             )
         game_state, actual_damage = self._damage_confirmation(game_state, reactioned_damage)
+        # Update all statuses with this damage
+        game_state = StatusProcessing.inform_all_statuses(
+            game_state,
+            actual_damage.source.pid,
+            actual_damage,
+            actual_damage.source,
+        )
 
         # Get damage target
         target = game_state.get_character_target(actual_damage.target)
@@ -609,7 +642,6 @@ class SpecificDamageEffect(Effect):
         pid = self.target.pid
         effects: list[Effect] = [DefeatedCheckerEffect()]
 
-        # LATESET_TODO: use the reaction information to generate further effects
         if reaction is None:
             pass
 
@@ -703,15 +735,15 @@ class SpecificDamageEffect(Effect):
         return game_state.factory().f_player(
             pid,
             lambda p: p.factory().f_characters(
-                lambda cs: cs.factory().character(target).build()
+                lambda cs: cs.factory().character(target).build()  # type: ignore
             ).build()
         ).f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
 
 
-@dataclass(frozen=True)
-class ReferredDamageEffect(Effect):
+@dataclass(frozen=True, repr=False)
+class ReferredDamageEffect(DirectEffect):
     source: StaticTarget
     target: DynamicCharacterTarget
     element: Element
@@ -724,7 +756,7 @@ class ReferredDamageEffect(Effect):
     def legal(self) -> bool:
         return self.element in _DAMAGE_ELEMENTS
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         targets: list[Optional[chr.Character]] = []
         effects: list[Effect] = []
         char: Optional[chr.Character]
@@ -774,16 +806,15 @@ class ReferredDamageEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
-class EnergyRechargeEffect(Effect):
+@dataclass(frozen=True, repr=False)
+class EnergyRechargeEffect(DirectEffect):
     target: StaticTarget
     recharge: int
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
         if not isinstance(character, chr.Character):
             return game_state
-        character = cast(chr.Character, character)
         energy = min(character.get_energy() + self.recharge, character.get_max_energy())
         if energy == character.get_energy():
             return game_state
@@ -797,16 +828,15 @@ class EnergyRechargeEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
-class EnergyDrainEffect(Effect):
+@dataclass(frozen=True, repr=False)
+class EnergyDrainEffect(DirectEffect):
     target: StaticTarget
     drain: int
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
         if not isinstance(character, chr.Character):
             return game_state
-        character = cast(chr.Character, character)
         energy = max(character.get_energy() - self.drain, 0)
         if energy == character.get_energy():
             return game_state
@@ -820,16 +850,15 @@ class EnergyDrainEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
-class RecoverHPEffect(Effect):
+@dataclass(frozen=True, repr=False)
+class RecoverHPEffect(DirectEffect):
     target: StaticTarget
     recovery: int
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
         if not isinstance(character, chr.Character):
             return game_state
-        character = cast(chr.Character, character)
         hp = min(character.get_hp() + self.recovery, character.get_max_hp())
         if hp == character.get_hp():
             return game_state
@@ -837,23 +866,39 @@ class RecoverHPEffect(Effect):
             self.target.pid,
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().f_character(
-                    character.get_id(),
+                    character.get_id(),  # type: ignore
                     lambda c: c.factory().hp(hp).build()
                 ).build()
             ).build()
         ).build()
 
 
-@dataclass(frozen=True)
-class RemoveCardEffect(Effect):
-    pid: gs.GameState.Pid
-    card: type[cd.Card]
+@dataclass(frozen=True, repr=False)
+class PublicAddCardEffect(DirectEffect):
+    pid: Pid
+    card: type[Card]
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
+        return game_state.factory().f_player(
+            self.pid,
+            lambda p: p.factory().f_hand_cards(
+                lambda cs: cs.add(self.card)
+            ).f_publicly_gained_cards(
+                lambda cs: cs.add(self.card)
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class PublicRemoveCardEffect(DirectEffect):
+    pid: Pid
+    card: type[Card]
+
+    def execute(self, game_state: GameState) -> GameState:
         pid = self.pid
         card = self.card
         hand_cards = game_state.get_player(pid).get_hand_cards()
-        if not hand_cards.contains(card) or hand_cards[card] <= 0:
+        if not hand_cards.contains(card):
             return game_state
         return game_state.factory().f_player(
             pid,
@@ -865,12 +910,12 @@ class RemoveCardEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
-class RemoveAllCardEffect(Effect):
-    pid: gs.GameState.Pid
-    card: type[cd.Card]
+@dataclass(frozen=True, repr=False)
+class PublicRemoveAllCardEffect(DirectEffect):
+    pid: Pid
+    card: type[Card]
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         pid = self.pid
         card = self.card
         hand_cards = game_state.get_player(pid).get_hand_cards()
@@ -880,16 +925,18 @@ class RemoveAllCardEffect(Effect):
             pid,
             lambda p: p.factory().f_hand_cards(
                 lambda cs: cs.remove_all(card)
+            ).f_publicly_used_cards(
+                lambda cs: cs + {card: hand_cards[card]}
             ).build()
         ).build()
 
 
-@dataclass(frozen=True)
-class RemoveDiceEffect(Effect):
-    pid: gs.GameState.Pid
-    dices: ds.ActualDices
+@dataclass(frozen=True, repr=False)
+class RemoveDiceEffect(DirectEffect):
+    pid: Pid
+    dices: ActualDices
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         pid = self.pid
         dices = self.dices
         new_dices = game_state.get_player(pid).get_dices() - dices
@@ -901,12 +948,12 @@ class RemoveDiceEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
-class AddCharacterStatusEffect(Effect):
+@dataclass(frozen=True, repr=False)
+class AddCharacterStatusEffect(DirectEffect):
     target: StaticTarget
     status: type[Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]]
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
         assert isinstance(character, chr.Character)
         if issubclass(self.status, stt.CharacterTalentStatus):
@@ -924,17 +971,17 @@ class AddCharacterStatusEffect(Effect):
         return game_state.factory().f_player(
             self.target.pid,
             lambda p: p.factory().f_characters(
-                lambda cs: cs.factory().character(character).build()
+                lambda cs: cs.factory().character(character).build()  # type: ignore
             ).build()
         ).build()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class RemoveCharacterStatusEffect(DirectEffect):
     target: StaticTarget
     status: type[Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]]
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_character_target(self.target)
         if character is None:
             return game_state
@@ -959,12 +1006,12 @@ class RemoveCharacterStatusEffect(DirectEffect):
         ).build()
 
 
-@dataclass(frozen=True)
-class UpdateCharacterStatusEffect(Effect):
+@dataclass(frozen=True, repr=False)
+class UpdateCharacterStatusEffect(DirectEffect):
     target: StaticTarget
     status: Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
         assert isinstance(character, chr.Character)
         if isinstance(self.status, stt.CharacterTalentStatus):
@@ -982,17 +1029,17 @@ class UpdateCharacterStatusEffect(Effect):
         return game_state.factory().f_player(
             self.target.pid,
             lambda p: p.factory().f_characters(
-                lambda cs: cs.factory().character(character).build()
+                lambda cs: cs.factory().character(character).build()  # type: ignore
             ).build()
         ).build()
 
 
-@dataclass(frozen=True)
-class OverrideCharacterStatusEffect(Effect):
+@dataclass(frozen=True, repr=False)
+class OverrideCharacterStatusEffect(DirectEffect):
     target: StaticTarget
     status: Union[stt.CharacterTalentStatus, stt.EquipmentStatus, stt.CharacterStatus]
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
         assert isinstance(character, chr.Character)
         if isinstance(self.status, stt.CharacterTalentStatus):
@@ -1010,17 +1057,17 @@ class OverrideCharacterStatusEffect(Effect):
         return game_state.factory().f_player(
             self.target.pid,
             lambda p: p.factory().f_characters(
-                lambda cs: cs.factory().character(character).build()
+                lambda cs: cs.factory().character(character).build()  # type: ignore
             ).build()
         ).build()
 
 
-@dataclass(frozen=True)
-class AddCombatStatusEffect(Effect):
-    target_pid: gs.GameState.Pid
+@dataclass(frozen=True, repr=False)
+class AddCombatStatusEffect(DirectEffect):
+    target_pid: Pid
     status: type[stt.CombatStatus]
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         return game_state.factory().f_player(
             self.target_pid,
             lambda p: p.factory().f_combat_statuses(
@@ -1029,12 +1076,12 @@ class AddCombatStatusEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
-class RemoveCombatStatusEffect(Effect):
-    target_pid: gs.GameState.Pid
+@dataclass(frozen=True, repr=False)
+class RemoveCombatStatusEffect(DirectEffect):
+    target_pid: Pid
     status: type[stt.CombatStatus]
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         return game_state.factory().f_player(
             self.target_pid,
             lambda p: p.factory().f_combat_statuses(
@@ -1043,12 +1090,12 @@ class RemoveCombatStatusEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
-class UpdateCombatStatusEffect(Effect):
-    target_pid: gs.GameState.Pid
+@dataclass(frozen=True, repr=False)
+class UpdateCombatStatusEffect(DirectEffect):
+    target_pid: Pid
     status: stt.CombatStatus
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         return game_state.factory().f_player(
             self.target_pid,
             lambda p: p.factory().f_combat_statuses(
@@ -1057,12 +1104,12 @@ class UpdateCombatStatusEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
-class OverrideCombatStatusEffect(Effect):
-    target_pid: gs.GameState.Pid
+@dataclass(frozen=True, repr=False)
+class OverrideCombatStatusEffect(DirectEffect):
+    target_pid: Pid
     status: stt.CombatStatus
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         return game_state.factory().f_player(
             self.target_pid,
             lambda p: p.factory().f_combat_statuses(
@@ -1071,12 +1118,12 @@ class OverrideCombatStatusEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
-class AddSummonEffect(Effect):
-    target_pid: gs.GameState.Pid
+@dataclass(frozen=True, repr=False)
+class AddSummonEffect(DirectEffect):
+    target_pid: Pid
     summon: type[sm.Summon]
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         return game_state.factory().f_player(
             self.target_pid,
             lambda p: p.factory().f_summons(
@@ -1085,12 +1132,12 @@ class AddSummonEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
-class RemoveSummonEffect(Effect):
-    target_pid: gs.GameState.Pid
+@dataclass(frozen=True, repr=False)
+class RemoveSummonEffect(DirectEffect):
+    target_pid: Pid
     summon: type[sm.Summon]
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         return game_state.factory().f_player(
             self.target_pid,
             lambda p: p.factory().f_summons(
@@ -1099,12 +1146,12 @@ class RemoveSummonEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
-class UpdateSummonEffect(Effect):
-    target_pid: gs.GameState.Pid
+@dataclass(frozen=True, repr=False)
+class UpdateSummonEffect(DirectEffect):
+    target_pid: Pid
     summon: sm.Summon
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         return game_state.factory().f_player(
             self.target_pid,
             lambda p: p.factory().f_summons(
@@ -1113,12 +1160,12 @@ class UpdateSummonEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
-class OverrideSummonEffect(Effect):
-    target_pid: gs.GameState.Pid
+@dataclass(frozen=True, repr=False)
+class OverrideSummonEffect(DirectEffect):
+    target_pid: Pid
     summon: sm.Summon
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         return game_state.factory().f_player(
             self.target_pid,
             lambda p: p.factory().f_summons(
@@ -1127,12 +1174,12 @@ class OverrideSummonEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True, kw_only=True)
-class AllSummonIncreaseUsage(Effect):
-    target_pid: gs.GameState.Pid
+@dataclass(frozen=True, kw_only=True, repr=False)
+class AllSummonIncreaseUsage(DirectEffect):
+    target_pid: Pid
     d_usages: int = 1
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         effects: list[Effect] = []
         summons = game_state.get_player(self.target_pid).get_summons()
         for summon in summons:
@@ -1147,13 +1194,13 @@ class AllSummonIncreaseUsage(Effect):
         ).build()
 
 
-@dataclass(frozen=True, kw_only=True)
-class OneSummonIncreaseUsage(Effect):
-    target_pid: gs.GameState.Pid
+@dataclass(frozen=True, kw_only=True, repr=False)
+class OneSummonIncreaseUsage(DirectEffect):
+    target_pid: Pid
     summon_type: type[sm.Summon]
     d_usages: int = 1
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         effects: list[Effect] = []
         summons = game_state.get_player(self.target_pid).get_summons()
         summon = summons.find(summon_type=self.summon_type)
@@ -1171,12 +1218,12 @@ class OneSummonIncreaseUsage(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
-class AddSupportEffect(Effect):
-    target_pid: gs.GameState.Pid
+@dataclass(frozen=True, repr=False)
+class AddSupportEffect(DirectEffect):
+    target_pid: Pid
     support: type[sp.Support]
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         return game_state.factory().f_player(
             self.target_pid,
             lambda p: p.factory().f_supports(
@@ -1185,12 +1232,12 @@ class AddSupportEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
-class RemoveSupportEffect(Effect):
-    target_pid: gs.GameState.Pid
+@dataclass(frozen=True, repr=False)
+class RemoveSupportEffect(DirectEffect):
+    target_pid: Pid
     sid: int
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         return game_state.factory().f_player(
             self.target_pid,
             lambda p: p.factory().f_supports(
@@ -1199,12 +1246,12 @@ class RemoveSupportEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
-class UpdateSupportEffect(Effect):
-    target_pid: gs.GameState.Pid
+@dataclass(frozen=True, repr=False)
+class UpdateSupportEffect(DirectEffect):
+    target_pid: Pid
     support: sp.Support
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         return game_state.factory().f_player(
             self.target_pid,
             lambda p: p.factory().f_supports(
@@ -1213,12 +1260,12 @@ class UpdateSupportEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
-class OverrideSupportEffect(Effect):
-    target_pid: gs.GameState.Pid
+@dataclass(frozen=True, repr=False)
+class OverrideSupportEffect(DirectEffect):
+    target_pid: Pid
     support: sp.Support
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         return game_state.factory().f_player(
             self.target_pid,
             lambda p: p.factory().f_supports(
@@ -1227,31 +1274,17 @@ class OverrideSupportEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
-class AddCardEffect(Effect):
-    pid: gs.GameState.Pid
-    card: type[cd.Card]
-
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
-        return game_state.factory().f_player(
-            self.pid,
-            lambda p: p.factory().f_hand_cards(
-                lambda cs: cs.add(self.card)
-            ).build()
-        ).build()
-
-
-@dataclass(frozen=True)
-class CastSkillEffect(Effect):
+@dataclass(frozen=True, repr=False)
+class CastSkillEffect(DirectEffect):
     target: StaticTarget
     skill: CharacterSkill
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
         assert isinstance(character, chr.Character)
         if not character.can_cast_skill():
             return game_state
-        effects = character.skill(game_state, self.skill)
+        effects = character.skill(game_state, self.target, self.skill)
         if not effects:
             return game_state
         return game_state.factory().f_effect_stack(
@@ -1259,19 +1292,15 @@ class CastSkillEffect(Effect):
         ).build()
 
 
-@dataclass(frozen=True)
-class BroadCastSkillInfoEffect(Effect):
+@dataclass(frozen=True, repr=False)
+class BroadCastSkillInfoEffect(DirectEffect):
     source: StaticTarget
     skill: CharacterSkill
 
-    def execute(self, game_state: gs.GameState) -> gs.GameState:
+    def execute(self, game_state: GameState) -> GameState:
         return StatusProcessing.inform_all_statuses(
             game_state,
             self.source.pid,
             self.skill,
             source=self.source,
         )
-
-
-# This has to be by the end of the file or there's cyclic import error
-Preprocessable = Union[SpecificDamageEffect, evt.GameEvent, evt.CardEvent]

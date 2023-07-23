@@ -1,11 +1,20 @@
 from __future__ import annotations
-from typing import Optional, Union, Iterator
+from typing import Iterator, Optional, TYPE_CHECKING, Union
 
-from dgisim.src.helper.quality_of_life import just
-from dgisim.src.summon.summon import Summon
+from ..helper.quality_of_life import just
+
+if TYPE_CHECKING:
+    from .summon import Summon
+
+__all__ = [
+    "Summons",
+]
 
 
 class Summons:
+    """
+    A container for easy summons managing.
+    """
     def __init__(self, summons: tuple[Summon, ...], max_num: int):
         assert len(summons) <= max_num
         self._summons = summons
@@ -14,13 +23,13 @@ class Summons:
     def get_summons(self) -> tuple[Summon, ...]:
         return self._summons
 
-    def find(self, summon_type: type[Summon]) -> Optional[Summon]:
+    def find(self, summon_type: type[Summon]) -> None | Summon:
         return next((s for s in self._summons if type(s) is summon_type), None)
 
     def just_find(self, summon_type: type[Summon]) -> Summon:
         return just(self.find(summon_type))
 
-    def update_summon(self, incoming_summon: Summon, override: bool=False) -> Summons:
+    def update_summon(self, incoming_summon: Summon, override: bool = False) -> Summons:
         summons = list(self._summons)
         for i, summon in enumerate(summons):
             if type(summon) != type(incoming_summon):
@@ -48,10 +57,10 @@ class Summons:
     def full(self) -> bool:
         return len(self) == self._max_num
 
-    def contains(self, summon_type: Union[type[Summon], Summon]) -> bool:
+    def contains(self, summon_type: type[Summon] | Summon) -> bool:
         return any(type(s) is summon_type for s in self._summons)
 
-    def __contains__(self, summon_type: Union[type[Summon], Summon]) -> bool:
+    def __contains__(self, summon_type: type[Summon] | Summon) -> bool:
         return self.contains(summon_type)
 
     def __iter__(self) -> Iterator[Summon]:
@@ -66,9 +75,22 @@ class Summons:
     def __len__(self) -> int:
         return len(self._summons)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, type(self)):
+            return False
+        return self is other or (
+            self._summons == other._summons
+            and self._max_num == other._max_num
+        )
+
+    def __hash__(self) -> int:
+        return hash((
+            self._summons,
+            self._max_num,
+        ))
+
     def dict_str(self) -> dict:
         return dict(
             (summon.__class__.__name__.removesuffix("Summon"), str(summon.usages))
             for summon in self
         )
-

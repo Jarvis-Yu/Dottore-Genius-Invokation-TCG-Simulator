@@ -1,15 +1,7 @@
 
 import unittest
 
-from dgisim.tests.helpers.game_state_templates import *
-from dgisim.tests.helpers.quality_of_life import *
-from dgisim.src.game_state_machine import GameStateMachine
-from dgisim.src.agents import PuppetAgent
-from dgisim.src.action.action import *
-from dgisim.src.character.character import *
-from dgisim.src.card.card import *
-from dgisim.src.status.status import *
-from dgisim.src.summon.summon import *
+from dgisim.tests.test_characters.common_imports import *
 
 
 class TestRohdeiaOfLoch(unittest.TestCase):
@@ -20,7 +12,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
             lambda hcs: hcs.add(StreamingSurge)  # TODO: replace with Rhodeia Talent Card
         ).build()
     ).f_player2(
-        lambda p: p.factory().phase(PlayerState.Act.END_PHASE).build()
+        lambda p: p.factory().phase(Act.END_PHASE).build()
     ).build()
     assert type(BASE_GAME.get_player1().just_get_active_character()) is RhodeiaOfLoch
 
@@ -102,6 +94,9 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm.player_step()  # P1 END
         gsm.player_step()  # p2 death swap
         gsm.auto_step()
+        a1.inject_action(EndRoundAction())  # skip roll phase
+        a2.inject_action(EndRoundAction())
+        gsm.step_until_phase(base_game.get_mode().action_phase())
 
         game_state = gsm.get_game_state()
         p1_summons = game_state.get_player1().get_summons()
@@ -114,12 +109,12 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         self.assertEqual(p2_c1.get_hp(), 0)
 
         # after second end round
-        a1.inject_action(EndRoundAction())
+        a1.inject_action(EndRoundAction())  # skip action phase
         a2.inject_action(EndRoundAction())
-
-        gsm.player_step()
-        gsm.player_step()
-        gsm.auto_step()
+        gsm.step_until_phase(game_state.get_mode().end_phase())
+        a1.inject_action(EndRoundAction())  # skip roll phase
+        a2.inject_action(EndRoundAction())
+        gsm.step_until_phase(game_state.get_mode().action_phase())
 
         game_state = gsm.get_game_state()
         p1_summons = game_state.get_player1().get_summons()
@@ -129,7 +124,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         self.assertEqual(p2_ac.get_hp(), 5)
         self.assertTrue(p2_ac.get_elemental_aura().contains(Element.HYDRO))
 
-        # after second end round
+        # after third end round
         a1.inject_action(EndRoundAction())
         a2.inject_action(EndRoundAction())
 
@@ -267,11 +262,6 @@ class TestRohdeiaOfLoch(unittest.TestCase):
                 ).build()
             ).build()
         ).build()
-        source = StaticTarget(
-            pid=GameState.Pid.P1,
-            zone=Zone.CHARACTERS,
-            id=1,
-        )
 
         gsm = GameStateMachine(base_game, a1, a2)
         a1.inject_action(

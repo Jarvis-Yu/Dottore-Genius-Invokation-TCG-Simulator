@@ -1,11 +1,17 @@
 from __future__ import annotations
 from typing import Iterator
 
-from dgisim.src.support.support import Support
-from dgisim.src.helper.quality_of_life import just
+from ..helper.quality_of_life import just
+from .support import Support
 
+__all__ = [
+    "Supports",
+]
 
 class Supports:
+    """
+    A container for easy supports managing.
+    """
     def __init__(self, supports: tuple[Support, ...], max_num: int):
         assert len(supports) <= max_num
         self._supports = supports
@@ -31,7 +37,7 @@ class Supports:
             if s.sid == sid
         ), None)
 
-    def just_find_by_sid(self, sid: int) -> None | Support:
+    def just_find_by_sid(self, sid: int) -> None | Support:  # pragma: no cover
         return just(self.find_by_sid(sid))
 
     def update_support(self, incoming_support: Support, override: bool = False) -> Supports:
@@ -53,7 +59,7 @@ class Supports:
             supports[i] = new_support
             return Supports(tuple(supports), self._max_num)
         if len(supports) >= self._max_num:
-            raise Exception("Should not be reached. "
+            raise Exception("Not Reached. "
                             + "Handle support destruction before updating when supports are full.")
         if any(s.sid == incoming_support.sid for s in supports):
             raise Exception("Incoming support cannot be added when support with same sid exists.")
@@ -71,17 +77,17 @@ class Supports:
         return Supports(tuple(
             s
             for s in self._supports
-            if type(s) is support_type and s.sid == sid
+            if not(type(s) is support_type and s.sid == sid)
         ), self._max_num)
 
     def remove_by_sid(self, sid: int) -> Supports:
         return Supports(tuple(
             s
             for s in self._supports
-            if s.sid == sid
+            if s.sid != sid
         ), self._max_num)
 
-    def is_full(self) -> bool:
+    def full(self) -> bool:
         return len(self) == self._max_num
 
     def contains_exactly(self, support_type: type[Support], sid: int) -> bool:
@@ -110,6 +116,20 @@ class Supports:
 
     def __len__(self) -> int:
         return len(self._supports)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, type(self)):
+            return False
+        return self is other or (
+            self._supports == other._supports
+            and self._max_num == other._max_num
+        )
+
+    def __hash__(self) -> int:
+        return hash((
+            self._supports,
+            self._max_num,
+        ))
 
     def dict_str(self) -> dict:
         return dict(

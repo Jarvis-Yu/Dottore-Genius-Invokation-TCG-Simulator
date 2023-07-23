@@ -1,15 +1,22 @@
 from __future__ import annotations
-from typing import TypeVar, Optional, Iterator
+from typing import Iterator, Optional, TYPE_CHECKING, TypeVar
 from typing_extensions import Self
 
-import dgisim.src.status.status as stt
-from dgisim.src.helper.quality_of_life import just
+from ..status import status as stt
 
+from ..helper.quality_of_life import just
+
+__all__ = [
+    "Statuses",
+]
 
 _U = TypeVar('_U')
 
 
 class Statuses:
+    """
+    A container for easy statuses managing.
+    """
     def __init__(self, statuses: tuple[stt.Status, ...]):
         self._statuses = statuses
 
@@ -40,7 +47,10 @@ class Statuses:
     def contains(self, status: type[stt.Status]) -> bool:
         return any(type(b) is status for b in self._statuses)
 
-    def find(self, status: type[stt.Status]) -> Optional[stt.Status]:
+    def __contains__(self, status: type[stt.Status]) -> bool:
+        return self.contains(status)
+
+    def find(self, status: type[stt.Status]) -> None | stt.Status:
         return next((bf for bf in self._statuses if type(bf) is status), None)
 
     def just_find(self, status: type[_U]) -> _U:
@@ -64,7 +74,7 @@ class Statuses:
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Statuses):
             return False
-        return self is other or self == other
+        return self is other or self._statuses == other._statuses
 
     def __hash__(self) -> int:
         return hash(self._statuses)

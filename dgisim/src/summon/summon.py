@@ -1,12 +1,43 @@
-from __future__ import annotations
-from typing import ClassVar, Optional
-from typing_extensions import override, Self
-from dataclasses import dataclass, replace
+"""
+This file contains the base class "Summon" for all summons,
+and implementation of all summons.
 
-from dgisim.src.helper.quality_of_life import BIG_INT
-import dgisim.src.status.status as stt
-import dgisim.src.effect.effect as eft
-from dgisim.src.element.element import Element
+Note that a summon is basically a Status.
+
+The classes are divided into 3 sections ordered. Within each section, they are
+ordered alphabetically.
+
+- base class, which is Summon
+- template classes, starting with an '_', are templates for other classes
+- concrete classes, the implementation of summons that are actually in the game
+"""
+from __future__ import annotations
+from dataclasses import dataclass, replace
+from typing import ClassVar, Optional, TYPE_CHECKING
+from typing_extensions import override, Self
+
+from ..effect import effect as eft
+from ..status import status as stt
+
+from ..effect.enums import TriggeringSignal, DynamicCharacterTarget
+from ..effect.structs import DamageType
+from ..element import Element
+from ..helper.quality_of_life import BIG_INT
+
+if TYPE_CHECKING:
+    from ..effect.structs import StaticTarget
+
+__all__ = [
+    # base
+    "Summon",
+
+    # concrete implementations
+    "BurningFlameSummon",
+    "ClusterbloomArrow",
+    "OceanicMimicFrogSummon",
+    "OceanicMimicRaptorSummon",
+    "OceanicMimicSquirrelSummon",
+]
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -37,12 +68,12 @@ class _DestoryOnEndNumSummon(Summon):
             self,
             effects: list[eft.Effect],
             new_status: Optional[Self],
-            signal: eft.TriggeringSignal,
+            signal: TriggeringSignal,
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         if new_status is None:
             return effects, new_status
 
-        if signal is eft.TriggeringSignal.END_ROUND_CHECK_OUT \
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT \
                 and self.usages + new_status.usages <= 0:
             return effects, None
 
@@ -58,20 +89,20 @@ class _DmgPerRoundSummon(_DestroyOnNumSummon):
 
     def _react_to_signal(
             self,
-            source: eft.StaticTarget,
-            signal: eft.TriggeringSignal
+            source: StaticTarget,
+            signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         es: list[eft.Effect] = []
         d_usages = 0
-        if signal is eft.TriggeringSignal.END_ROUND_CHECK_OUT:
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             d_usages = -1
             es.append(
                 eft.ReferredDamageEffect(
                     source=source,
-                    target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
                     element=self.ELEMENT,
                     damage=self.DMG,
-                    damage_type=eft.DamageType(summon=True),
+                    damage_type=DamageType(summon=True),
                 )
             )
         return es, replace(self, usages=d_usages)
@@ -88,6 +119,12 @@ class BurningFlameSummon(_DmgPerRoundSummon):
     DMG: ClassVar[int] = 1
     ELEMENT: ClassVar[Element] = Element.PYRO
 
+@dataclass(frozen=True, kw_only=True)
+class ClusterbloomArrow(_DmgPerRoundSummon):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.DENDRO
 
 @dataclass(frozen=True, kw_only=True)
 class OceanicMimicFrogSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
@@ -104,19 +141,19 @@ class OceanicMimicFrogSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
     @override
     def _react_to_signal(
             self,
-            source: eft.StaticTarget,
-            signal: eft.TriggeringSignal
+            source: StaticTarget,
+            signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         es: list[eft.Effect] = []
-        if signal is eft.TriggeringSignal.END_ROUND_CHECK_OUT \
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT \
                 and self.usages == 0:
             es.append(
                 eft.ReferredDamageEffect(
                     source=source,
-                    target=eft.DynamicCharacterTarget.OPPO_ACTIVE,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
                     element=Element.HYDRO,
                     damage=self.DMG,
-                    damage_type=eft.DamageType(summon=True),
+                    damage_type=DamageType(summon=True),
                 )
             )
             return es, None

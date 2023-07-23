@@ -1,15 +1,44 @@
-from __future__ import annotations
-from typing import ClassVar
-from typing_extensions import Self, override
-from dataclasses import dataclass, replace
+"""
+This file contains the base class "Support" for all supports,
+and implementation of all supports.
 
-import dgisim.src.state.game_state as gs
-import dgisim.src.card.card as cd
-import dgisim.src.status.status as stt
-import dgisim.src.effect.effect as eft
-import dgisim.src.event.event as evt
-from dgisim.src.helper.quality_of_life import BIG_INT
-from dgisim.src.element.element import Element
+Note that a summon is basically a Status.
+
+The classes are divided into 3 sections ordered. Within each section, they are
+ordered alphabetically.
+
+- base class, which is Support
+- template classes, starting with an '_', are templates for other classes
+- concrete classes, the implementation of summons that are actually in the game
+"""
+from __future__ import annotations
+from dataclasses import dataclass, replace
+from typing import ClassVar, TYPE_CHECKING
+from typing_extensions import Self, override
+
+from ..card import card as cd
+from ..effect import effect as eft
+from ..event import CardEvent
+from ..status import status as stt
+
+from ..effect.enums import TriggeringSignal
+from ..element import Element
+from ..helper.quality_of_life import BIG_INT
+from ..status.enums import Preprocessables
+
+if TYPE_CHECKING:
+    from ..state.game_state import GameState
+    from ..effect.structs import StaticTarget
+    from ..status.types import Preprocessable
+
+__all__ = [
+    # base
+    "Support",
+
+    # concrete implementations
+    "XudongSupport",
+]
+
 
 @dataclass(frozen=True, kw_only=True)
 class Support(stt.Status):
@@ -23,6 +52,7 @@ class Support(stt.Status):
     def content_str(self) -> str:  # pragma: no cover
         return ""
 
+
 @dataclass(frozen=True, kw_only=True)
 class XudongSupport(Support):
     usages: int = 1
@@ -31,13 +61,13 @@ class XudongSupport(Support):
     @override
     def _preprocess(
             self,
-            game_state: gs.GameState,
-            status_source: eft.StaticTarget,
-            item: eft.Preprocessable,
-            signal: stt.Status.PPType,
-    ) -> tuple[eft.Preprocessable, None | Self]:
-        if signal is stt.Status.PPType.CARD:
-            assert isinstance(item, evt.CardEvent)
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: Preprocessable,
+            signal: Preprocessables,
+    ) -> tuple[Preprocessable, None | Self]:
+        if signal is Preprocessables.CARD:
+            assert isinstance(item, CardEvent)
             if item.pid is status_source.pid \
                     and issubclass(item.card_type, cd.FoodCard) \
                     and item.dices_cost.num_dices() > 0 \
@@ -51,14 +81,14 @@ class XudongSupport(Support):
                 else:
                     raise NotImplementedError
                 new_cost = (item.dices_cost - {major_elem: self.COST_DEDUCTION}).validify()
-                return replace(item, dices_cost=new_cost), replace(self, usages=self.usages-1)
+                return replace(item, dices_cost=new_cost), replace(self, usages=self.usages - 1)
         return super()._preprocess(game_state, status_source, item, signal)
 
     @override
     def _react_to_signal(
-            self, source: eft.StaticTarget, signal: eft.TriggeringSignal
+            self, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is eft.TriggeringSignal.ROUND_END:
+        if signal is TriggeringSignal.ROUND_END:
             return [], type(self)(sid=self.sid)
         return [], self
 

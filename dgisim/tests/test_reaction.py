@@ -1,18 +1,19 @@
 import unittest
 
+from dgisim.src.action.action import *
+from dgisim.src.agents import *
+from dgisim.src.effect.effect import *
+from dgisim.src.effect.enums import DynamicCharacterTarget
+from dgisim.src.effect.structs import DamageType
+from dgisim.src.element import ElementalAura
+from dgisim.src.game_state_machine import GameStateMachine
+from dgisim.src.state.enums import Pid
+from dgisim.src.state.game_state import GameState
+from dgisim.src.status.status import *
+from dgisim.src.summon.summon import *
 from dgisim.tests.helpers.game_state_templates import *
 from dgisim.tests.helpers.quality_of_life import *
 from dgisim.tests.helpers.dummy_objects import *
-from dgisim.src.helper.quality_of_life import case_val
-from dgisim.src.state.game_state import GameState
-from dgisim.src.game_state_machine import GameStateMachine
-from dgisim.src.agents import *
-from dgisim.src.element.element import Reaction, ElementalAura
-from dgisim.src.effect.effect import *
-from dgisim.src.helper.level_print import GamePrinter
-from dgisim.src.status.status import *
-from dgisim.src.summon.summon import *
-from dgisim.src.action.action import *
 
 
 class TestStatus(unittest.TestCase):
@@ -248,7 +249,7 @@ class TestStatus(unittest.TestCase):
             lambda es: es.push_one(
                 ReferredDamageEffect(
                     source=StaticTarget(
-                        pid=GameState.Pid.P1,
+                        pid=Pid.P1,
                         zone=Zone.CHARACTERS,
                         id=1,
                     ),
@@ -610,7 +611,7 @@ class TestStatus(unittest.TestCase):
         # deals 1 electro damage to off-field characters
         game_state = base_game_state.factory().f_effect_stack(
             lambda es: es.push_one(ReferredDamageEffect(
-                source=StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 1),
+                source=StaticTarget(Pid.P1, Zone.CHARACTERS, 1),
                 target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                 element=Element.ELECTRO,
                 damage=1,
@@ -715,7 +716,7 @@ class TestStatus(unittest.TestCase):
         # deals 1 electro damage to off-field characters
         game_state = base_game_state.factory().f_effect_stack(
             lambda es: es.push_one(ReferredDamageEffect(
-                source=StaticTarget(GameState.Pid.P1, Zone.CHARACTERS, 1),
+                source=StaticTarget(Pid.P1, Zone.CHARACTERS, 1),
                 target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                 element=Element.ELECTRO,
                 damage=1,

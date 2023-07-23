@@ -1,21 +1,90 @@
-from __future__ import annotations
-from typing_extensions import override
-from dataclasses import replace
+"""
+This file contains the base class "Card" for all cards,
+and implementation of all cards.
 
-import dgisim.src.state.game_state as gs
-import dgisim.src.effect.effect as eft
-import dgisim.src.action.action as act
-import dgisim.src.action.action_generator as acg
-import dgisim.src.status.status as stt
-import dgisim.src.support.support as sp
-import dgisim.src.character.character as chr
-import dgisim.src.card.cards as cds
-from dgisim.src.character.character_skill_enum import CharacterSkill
-from dgisim.src.dices import AbstractDices, ActualDices
-from dgisim.src.element.element import Element
-from dgisim.src.helper.quality_of_life import BIG_INT
-from dgisim.src.event.event import CardEvent
-from dgisim.src.status.status_processing import StatusProcessing
+The classes are divided into 4 sections ordered. Within each section, they are
+ordered alphabetically.
+
+- base class, which is Card
+- type classes, used to identify what type of card a card is
+- template classes, starting with an '_', are templates for other classes
+- concrete classes, the implementation of cards that are actually in the game
+"""
+from __future__ import annotations
+from typing import TYPE_CHECKING
+from dataclasses import replace
+from typing_extensions import override
+
+from ..action import action as act
+from ..action import action_generator as acg
+from ..character import character as chr
+from ..effect import effect as eft
+from ..status import status as stt
+from ..support import support as sp
+
+from ..character.enums import CharacterSkill
+from ..dices import AbstractDices, ActualDices
+from ..effect.enums import Zone
+from ..effect.structs import StaticTarget
+from ..element import Element
+from ..event import CardEvent
+from ..helper.quality_of_life import BIG_INT
+from ..state.enums import Pid
+from ..status.enums import Preprocessables
+from ..status.status_processing import StatusProcessing
+
+if TYPE_CHECKING:
+    from ..action.types import DecidedChoiceType, GivenChoiceType
+    from ..state import game_state as gs
+
+__all__ = [
+    # base
+    "Card",
+
+    # special one
+    "OmniCard",
+
+    # type
+    "EventCard",
+    "EquipmentCard",
+    "SupportCard",
+    "CompanionCard",
+    "LocationCard",
+    "FoodCard",
+
+    # Event Card
+    ## Food Card ##
+    "JueyunGuoba",
+    "LotusFlowerCrisp",
+    "MintyMeatRolls",
+    "MondstadtHashBrown",
+    "MushroomPizza",
+    "NorthernSmokedChicken",
+    "SweetMadame",
+    ## Other ##
+    "CalxsArts",
+    "ChangingShifts",
+    "LeaveItToMe",
+    "Starsigns",
+
+    # Support Card
+    ## Companion ##
+    "Xudong",
+    ## Location ##
+
+    # Character Specific
+    ## Kaeya ##
+    "ColdBloodedStrike",
+    ## Keqing ##
+    "LightningStiletto",
+    "ThunderingPenance",
+    ## Rhodeia of Loch ##
+    "StreamingSurge",
+    ## Tighnari ##
+    "KeenSight",
+]
+
+############################## base ##############################
 
 
 class Card:
@@ -25,20 +94,20 @@ class Card:
     def effects(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         raise NotImplementedError
 
     @classmethod
-    def base_dice_cost(cls) -> AbstractDices:
+    def base_dice_cost(cls) -> AbstractDices:  # pragma: no cover
         return cls._DICE_COST
 
     @classmethod
     def preprocessed_dice_cost(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid
+            pid: Pid
     ) -> tuple[gs.GameState, AbstractDices]:
         """
         Return a tuple of GameState and AbstractDices:
@@ -53,7 +122,7 @@ class Card:
                 card_type=cls,
                 dices_cost=cls._DICE_COST,
             ),
-            pp_type=stt.Status.PPType.CARD
+            pp_type=Preprocessables.CARD
         )
         assert isinstance(card_event, CardEvent)
         return game_state, card_event.dices_cost
@@ -62,19 +131,19 @@ class Card:
     def just_preprocessed_dice_cost(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid
+            pid: Pid
     ) -> AbstractDices:
         return cls.preprocessed_dice_cost(game_state, pid)[1]
 
     # TODO add a post effect adding inform() to all status
 
     @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         """ doesn't check if player has the card in hand """
         return game_state.get_active_player_id() is pid
 
     @classmethod
-    def loosely_usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
+    def loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         """
         doesn't check if player has the card in hand
 
@@ -83,7 +152,7 @@ class Card:
         return cls._loosely_usable(game_state, pid) and game_state.get_effect_stack().is_empty()
 
     @classmethod
-    def usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
+    def usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         """
         checks if card can be used (but neglect if player have enough dices for this)
 
@@ -93,7 +162,7 @@ class Card:
             and cls.loosely_usable(game_state, pid)
 
     @classmethod
-    def strictly_usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
+    def strictly_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         """
         checks if card can be used
 
@@ -108,13 +177,14 @@ class Card:
     def valid_instruction(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
             instruction: act.Instruction
     ) -> None | gs.GameState:
         """ Return the preprocessed game-state if instruction is valid, otherwise return None """
         if not game_state.get_player(pid).get_hand_cards().contains(cls) \
                 or not game_state.get_active_player_id() is pid \
-                or not cls._valid_instruction(game_state, pid, instruction):
+                or not cls._valid_instruction(game_state, pid, instruction) \
+                or not (game_state.get_player(pid).get_dices() - instruction.dices).is_legal():
             return None
         game_state, dices_cost = cls.preprocessed_dice_cost(game_state, pid)
         if instruction.dices.just_satisfy(dices_cost):
@@ -126,7 +196,7 @@ class Card:
     def _valid_instruction(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
             instruction: act.Instruction
     ) -> bool:
         return True
@@ -135,14 +205,14 @@ class Card:
     def action_generator(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
     ) -> None | acg.ActionGenerator:
-        return None
+        return None  # pragma: no cover
 
-    def __eq__(self, other: object) -> bool:
+    def __eq__(self, other: object) -> bool:  # pragma: no cover
         return type(self) == type(other)
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         return self.__class__.__name__
 
     @staticmethod
@@ -153,17 +223,19 @@ class Card:
     def name(cls) -> str:
         return cls.__name__
 
+############################## helpers functions ##############################
+
 
 class _UsableFuncs:
     @staticmethod
     def active_combat_talent_skill_card_usable(
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
             char: type[chr.Character]
     ):
         """ Check if active character is the character type and can cast skill """
         ac = game_state.get_player(pid).get_active_character()
-        if ac is None:
+        if ac is None:  # pragma: no cover
             return False
         if type(ac) is not char or not ac.can_cast_skill():
             return False
@@ -172,7 +244,7 @@ class _UsableFuncs:
     @staticmethod
     def active_combat_talent_burst_card_usable(
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
             char: type[chr.Character]
     ):
         """
@@ -180,22 +252,153 @@ class _UsableFuncs:
         enough energy
         """
         active_character = game_state.get_player(pid).get_active_character()
-        if active_character is None:
+        if active_character is None:  # pragma: no cover
             return False
         return _UsableFuncs.active_combat_talent_skill_card_usable(game_state, pid, char) \
             and active_character.get_energy() == active_character.get_max_energy()
 
 
-class _ValidInstructionFuncs:
-    @staticmethod
-    def target_is_active_character(
+class _DiceOnlyChoiceProvider(Card):
+    @classmethod
+    def _choices_helper(
+            cls,
+            action_generator: acg.ActionGenerator,
+    ) -> GivenChoiceType:
+        game_state = action_generator.game_state
+        pid = action_generator.pid
+
+        assert action_generator._action_filled()
+
+        instruction = action_generator.instruction
+        assert type(instruction) is act.DiceOnlyInstruction
+        if instruction.dices is None:
+            return cls.preprocessed_dice_cost(game_state, pid)[1]
+
+        raise Exception("Not Reached!"
+            + "Should be called when there is something to fill. action_generator:\n"
+            + f"{action_generator}"
+        )
+
+    @classmethod
+    def _fill_helper(
+        cls,
+        action_generator: acg.ActionGenerator,
+        player_choice: DecidedChoiceType,
+    ) -> acg.ActionGenerator:
+        assert action_generator._action_filled()
+
+        instruction = action_generator.instruction
+        assert type(instruction) is act.DiceOnlyInstruction
+        if instruction.dices is None:
+            assert isinstance(player_choice, ActualDices)
+            return replace(
+                action_generator,
+                instruction=replace(instruction, dices=player_choice),
+            )
+
+        raise Exception("Not Reached!")
+
+    @override
+    @classmethod
+    def action_generator(
+            cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
-            instruction: act.StaticTargetInstruction,
-    ) -> bool:
-        return instruction.target.pid == pid \
-            and instruction.target.zone is eft.Zone.CHARACTERS \
-            and instruction.target.id == game_state.get_player(pid).get_characters().get_active_character_id()
+            pid: Pid,
+    ) -> None | acg.ActionGenerator:
+        if not cls.strictly_usable(game_state, pid):
+            return None
+        return acg.ActionGenerator(
+            game_state=game_state,
+            pid=pid,
+            action=replace(act.CardAction._all_none(), card=cls),
+            instruction=act.DiceOnlyInstruction._all_none(),
+            _choices_helper=cls._choices_helper,
+            _fill_helper=cls._fill_helper,
+        )
+
+
+class _CharTargetChoiceProvider(Card):
+    @classmethod
+    def _valid_char(cls, char: chr.Character) -> bool:  # pragma: no cover
+        return not char.defeated()
+
+    @classmethod
+    def _choices_helper(
+            cls,
+            action_generator: acg.ActionGenerator,
+    ) -> GivenChoiceType:
+        game_state = action_generator.game_state
+        pid = action_generator.pid
+
+        assert action_generator._action_filled()
+
+        instruction = action_generator.instruction
+        assert type(instruction) is act.StaticTargetInstruction
+        if instruction.target is None:
+            chars = game_state.get_player(pid).get_characters()
+            chars = [char for char in chars if cls._valid_char(char)]
+            return tuple(
+                StaticTarget(
+                    pid=pid,
+                    zone=Zone.CHARACTERS,
+                    id=char.get_id(),
+                )
+                for char in chars
+            )
+
+        elif instruction.dices is None:
+            return cls.preprocessed_dice_cost(game_state, pid)[1]
+
+        raise Exception("Not Reached!"
+            + "Should be called when there is something to fill. action_generator:\n"
+            + f"{action_generator}"
+        )
+
+    @classmethod
+    def _fill_helper(
+        cls,
+        action_generator: acg.ActionGenerator,
+        player_choice: DecidedChoiceType,
+    ) -> acg.ActionGenerator:
+        assert action_generator._action_filled()
+
+        instruction = action_generator.instruction
+        assert isinstance(instruction, act.StaticTargetInstruction)
+        if instruction.target is None:
+            assert isinstance(player_choice, StaticTarget)
+            return replace(
+                action_generator,
+                instruction=replace(instruction, target=player_choice),
+            )
+
+        elif instruction.dices is None:
+            assert isinstance(player_choice, ActualDices)
+            return replace(
+                action_generator,
+                instruction=replace(instruction, dices=player_choice),
+            )
+
+        raise Exception("Not Reached!")
+
+    @override
+    @classmethod
+    def action_generator(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+    ) -> None | acg.ActionGenerator:
+        if not cls.strictly_usable(game_state, pid):  # pragma: no cover
+            return None
+        return acg.ActionGenerator(
+            game_state=game_state,
+            pid=pid,
+            action=replace(act.CardAction._all_none(), card=cls),
+            instruction=act.StaticTargetInstruction._all_none(),
+            _choices_helper=cls._choices_helper,
+            _fill_helper=cls._fill_helper,
+        )
+
+############################## special card ##############################
 
 
 class OmniCard(Card):
@@ -203,6 +406,7 @@ class OmniCard(Card):
     pass
 
 
+############################## type card ##############################
 class _CombatActionCard(Card):
     @override
     @staticmethod
@@ -219,18 +423,16 @@ class EquipmentCard(Card):
 
 
 class SupportCard(Card):
-    # TODO: The effects are currently not handling support zone overflow
-
     @override
     @classmethod
     def valid_instruction(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
             instruction: act.Instruction
     ) -> None | gs.GameState:
         supports = game_state.get_player(pid).get_supports()
-        if supports.is_full():
+        if supports.full():
             if not isinstance(instruction, act.StaticTargetInstruction):
                 return None
             target = game_state.get_target(instruction.target)
@@ -246,7 +448,7 @@ class SupportCard(Card):
     def effects(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         es: list[eft.Effect] = []
@@ -261,15 +463,15 @@ class SupportCard(Card):
     def _effects(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
     ) -> tuple[eft.Effect, ...]:
-        raise
+        raise  # pragma: no cover
 
     @classmethod
     def _choices_helper(
             cls,
             action_generator: acg.ActionGenerator,
-    ) -> tuple[acg.Choosable, ...] | AbstractDices | cds.Cards:
+    ) -> GivenChoiceType:
         game_state = action_generator.game_state
         pid = action_generator.pid
 
@@ -279,9 +481,9 @@ class SupportCard(Card):
                 and instruction.target is None:
             supports = game_state.get_player(pid).get_supports()
             return tuple(
-                eft.StaticTarget(
+                StaticTarget(
                     pid=pid,
-                    zone=eft.Zone.SUPPORTS,
+                    zone=Zone.SUPPORTS,
                     id=support.sid,
                 )
                 for support in supports
@@ -293,8 +495,8 @@ class SupportCard(Card):
         if instruction.dices is None:
             return cls.preprocessed_dice_cost(game_state, pid)[1]
 
-        raise Exception(
-            "Not Reached! Should be called when there is something to fill. action_generator:\n"
+        raise Exception("Not Reached!"
+            + "Should be called when there is something to fill. action_generator:\n"
             + f"{action_generator}"
         )
 
@@ -302,7 +504,7 @@ class SupportCard(Card):
     def _fill_helper(
         cls,
         action_generator: acg.ActionGenerator,
-        player_choice: acg.Choosable | ActualDices | cds.Cards,
+        player_choice: DecidedChoiceType,
     ) -> acg.ActionGenerator:
         assert action_generator._action_filled()
 
@@ -310,7 +512,7 @@ class SupportCard(Card):
 
         if type(instruction) is act.StaticTargetInstruction \
                 and instruction.target is None:
-            assert isinstance(player_choice, eft.StaticTarget)
+            assert isinstance(player_choice, StaticTarget)
             return replace(
                 action_generator,
                 instruction=replace(instruction, target=player_choice),
@@ -332,11 +534,11 @@ class SupportCard(Card):
     def action_generator(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
     ) -> None | acg.ActionGenerator:
-        if not cls.strictly_usable(game_state, pid):
+        if not cls.strictly_usable(game_state, pid):  # pragma: no cover
             return None
-        if game_state.get_player(pid).get_supports().is_full():
+        if game_state.get_player(pid).get_supports().full():
             return acg.ActionGenerator(
                 game_state=game_state,
                 pid=pid,
@@ -364,156 +566,10 @@ class LocationCard(SupportCard):
     pass
 
 
-# <<<<<<<<<<<<<<<<<<<< Helpers <<<<<<<<<<<<<<<<<<<<
-class _DiceOnlyChoiceProvider(Card):
-    @classmethod
-    def _choices_helper(
-            cls,
-            action_generator: acg.ActionGenerator,
-    ) -> tuple[acg.Choosable, ...] | AbstractDices | cds.Cards:
-        game_state = action_generator.game_state
-        pid = action_generator.pid
-
-        assert action_generator._action_filled()
-
-        instruction = action_generator.instruction
-        assert type(instruction) is act.DiceOnlyInstruction
-        if instruction.dices is None:
-            return cls.preprocessed_dice_cost(game_state, pid)[1]
-
-        raise Exception(
-            "Not Reached! Should be called when there is something to fill. action_generator:\n"
-            + f"{action_generator}"
-        )
-
-    @classmethod
-    def _fill_helper(
-        cls,
-        action_generator: acg.ActionGenerator,
-        player_choice: acg.Choosable | ActualDices | cds.Cards,
-    ) -> acg.ActionGenerator:
-        assert action_generator._action_filled()
-
-        instruction = action_generator.instruction
-        assert type(instruction) is act.DiceOnlyInstruction
-        if instruction.dices is None:
-            assert isinstance(player_choice, ActualDices)
-            return replace(
-                action_generator,
-                instruction=replace(instruction, dices=player_choice),
-            )
-
-        raise Exception("Not Reached!")
-
-    @override
-    @classmethod
-    def action_generator(
-            cls,
-            game_state: gs.GameState,
-            pid: gs.GameState.Pid,
-    ) -> None | acg.ActionGenerator:
-        if not cls.strictly_usable(game_state, pid):
-            return None
-        return acg.ActionGenerator(
-            game_state=game_state,
-            pid=pid,
-            action=replace(act.CardAction._all_none(), card=cls),
-            instruction=act.DiceOnlyInstruction._all_none(),
-            _choices_helper=cls._choices_helper,
-            _fill_helper=cls._fill_helper,
-        )
-
-
-class _CharTargetChoiceProvider(Card):
-    @classmethod
-    def _valid_char(cls, char: chr.Character) -> bool:
-        return not char.defeated()
-
-    @classmethod
-    def _choices_helper(
-            cls,
-            action_generator: acg.ActionGenerator,
-    ) -> tuple[acg.Choosable, ...] | AbstractDices | cds.Cards:
-        game_state = action_generator.game_state
-        pid = action_generator.pid
-
-        assert action_generator._action_filled()
-
-        instruction = action_generator.instruction
-        assert type(instruction) is act.StaticTargetInstruction
-        if instruction.target is None:
-            chars = game_state.get_player(pid).get_characters()
-            chars = [char for char in chars if cls._valid_char(char)]
-            return tuple(
-                eft.StaticTarget(
-                    pid=pid,
-                    zone=eft.Zone.CHARACTERS,
-                    id=char.get_id(),
-                )
-                for char in chars
-            )
-
-        elif instruction.dices is None:
-            return cls.preprocessed_dice_cost(game_state, pid)[1]
-
-        raise Exception(
-            "Not Reached! Should be called when there is something to fill. action_generator:\n"
-            + f"{action_generator}"
-        )
-
-    @classmethod
-    def _fill_helper(
-        cls,
-        action_generator: acg.ActionGenerator,
-        player_choice: acg.Choosable | ActualDices | cds.Cards,
-    ) -> acg.ActionGenerator:
-        assert action_generator._action_filled()
-
-        instruction = action_generator.instruction
-        assert isinstance(instruction, act.StaticTargetInstruction)
-        if instruction.target is None:
-            assert isinstance(player_choice, eft.StaticTarget)
-            return replace(
-                action_generator,
-                instruction=replace(instruction, target=player_choice),
-            )
-
-        elif instruction.dices is None:
-            assert isinstance(player_choice, ActualDices)
-            return replace(
-                action_generator,
-                instruction=replace(instruction, dices=player_choice),
-            )
-
-        raise Exception("Not Reached!")
-
-    @override
-    @classmethod
-    def action_generator(
-            cls,
-            game_state: gs.GameState,
-            pid: gs.GameState.Pid,
-    ) -> None | acg.ActionGenerator:
-        if not cls.strictly_usable(game_state, pid):
-            return None
-        return acg.ActionGenerator(
-            game_state=game_state,
-            pid=pid,
-            action=replace(act.CardAction._all_none(), card=cls),
-            instruction=act.StaticTargetInstruction._all_none(),
-            _choices_helper=cls._choices_helper,
-            _fill_helper=cls._fill_helper,
-        )
-# >>>>>>>>>>>>>>>>>>>> Helpers >>>>>>>>>>>>>>>>>>>>
-
-# <<<<<<<<<<<<<<<<<<<< Event Cards <<<<<<<<<<<<<<<<<<<<
-# <<<<<<<<<<<<<<<<<<<< Event Cards / Food Cards <<<<<<<<<<<<<<<<<<<<
-
-
 class FoodCard(EventCard):
     @override
     @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         characters = game_state.get_player(pid).get_characters()
         if all(not cls._valid_char(char) for char in characters):
             return False
@@ -524,7 +580,7 @@ class FoodCard(EventCard):
     def _valid_instruction(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
             instruction: act.Instruction
     ) -> bool:
         """ This only applies to food with a single target, override if needed """
@@ -543,7 +599,7 @@ class FoodCard(EventCard):
     def effects(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.StaticTargetInstruction)
@@ -555,14 +611,14 @@ class FoodCard(EventCard):
         )
 
     @classmethod
-    def food_effects(cls, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
+    def food_effects(cls, instruction: act.Instruction) -> tuple[eft.Effect, ...]:  # pragma: no cover
         assert isinstance(instruction, act.StaticTargetInstruction)
         return ()
 
 
 class _DirectHealCard(FoodCard):
     @classmethod
-    def heal_amount(cls) -> int:
+    def heal_amount(cls) -> int:  # pragma: no cover
         return 0
 
     @override
@@ -583,22 +639,8 @@ class _DirectHealCard(FoodCard):
             and super()._valid_char(char)
 
 
-class SweetMadame(_DirectHealCard, _CharTargetChoiceProvider):
-    _DICE_COST = AbstractDices({})
-
-    @override
-    @classmethod
-    def heal_amount(cls) -> int:
-        return 1
-
-
-class MondstadtHashBrown(_DirectHealCard, _CharTargetChoiceProvider):
-    _DICE_COST = AbstractDices({Element.OMNI: 1})
-
-    @override
-    @classmethod
-    def heal_amount(cls) -> int:
-        return 2
+# <<<<<<<<<<<<<<<<<<<< Event Cards <<<<<<<<<<<<<<<<<<<<
+# <<<<<<<<<<<<<<<<<<<< Event Cards / Food Cards <<<<<<<<<<<<<<<<<<<<
 
 
 class JueyunGuoba(FoodCard, _CharTargetChoiceProvider):
@@ -646,6 +688,15 @@ class MintyMeatRolls(FoodCard, _CharTargetChoiceProvider):
         )
 
 
+class MondstadtHashBrown(_DirectHealCard, _CharTargetChoiceProvider):
+    _DICE_COST = AbstractDices({Element.OMNI: 1})
+
+    @override
+    @classmethod
+    def heal_amount(cls) -> int:
+        return 2
+
+
 class MushroomPizza(FoodCard, _CharTargetChoiceProvider):
     """
     Heal first then the status
@@ -688,53 +739,17 @@ class NorthernSmokedChicken(FoodCard, _CharTargetChoiceProvider):
             ),
         )
 
+
+class SweetMadame(_DirectHealCard, _CharTargetChoiceProvider):
+    _DICE_COST = AbstractDices({})
+
+    @override
+    @classmethod
+    def heal_amount(cls) -> int:
+        return 1
+
+
 # >>>>>>>>>>>>>>>>>>>> Event Cards / Food Cards >>>>>>>>>>>>>>>>>>>>
-
-
-class Starsigns(EventCard, _DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDices({Element.ANY: 2})
-
-    @override
-    @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
-        """ Check active character doesn't have full energy """
-        active_character = game_state.get_player(pid).get_active_character()
-        if active_character is None or active_character.get_energy() >= active_character.get_max_energy():
-            return False
-        return super()._loosely_usable(game_state, pid)
-
-    @override
-    @classmethod
-    def _valid_instruction(
-            cls,
-            game_state: gs.GameState,
-            pid: gs.GameState.Pid,
-            instruction: act.Instruction
-    ) -> bool:
-        """ Check target is active character and .loosely_usable() """
-        if not isinstance(instruction, act.DiceOnlyInstruction):
-            return False
-
-        return cls.loosely_usable(game_state, pid)
-
-    @override
-    @classmethod
-    def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: gs.GameState.Pid,
-            instruction: act.Instruction,
-    ) -> tuple[eft.Effect, ...]:
-        return (
-            eft.EnergyRechargeEffect(
-                eft.StaticTarget(
-                    pid=pid,
-                    zone=eft.Zone.CHARACTERS,
-                    id=game_state.get_player(pid).just_get_active_character().get_id(),
-                ),
-                1
-            ),
-        )
 
 
 class CalxsArts(EventCard, _DiceOnlyChoiceProvider):
@@ -742,7 +757,7 @@ class CalxsArts(EventCard, _DiceOnlyChoiceProvider):
 
     @override
     @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         """ Check active character doesn't have full energy and teammates have energy """
         ac = game_state.get_player(pid).get_active_character()
         cs = game_state.get_player(pid).get_characters()
@@ -761,11 +776,41 @@ class CalxsArts(EventCard, _DiceOnlyChoiceProvider):
     def _valid_instruction(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
             instruction: act.Instruction
     ) -> bool:
         return isinstance(instruction, act.DiceOnlyInstruction) \
             and cls.loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        player = game_state.get_player(pid)
+        none_active_chars = player.get_characters().get_none_active_characters()
+        active_char_id = player.just_get_active_character().get_id()
+        effects: list[eft.Effect] = [
+            eft.EnergyDrainEffect(
+                target=StaticTarget(
+                    Pid.P1, Zone.CHARACTERS, char.get_id()
+                ),
+                drain=1,
+            )
+            for char in none_active_chars
+        ]
+        effects.append(
+            eft.EnergyRechargeEffect(
+                target=StaticTarget(
+                    Pid.P1, Zone.CHARACTERS, active_char_id
+                ),
+                recharge=sum(1 for char in none_active_chars if char.get_energy() > 0),
+            )
+        )
+        return tuple(effects)
 
 
 class ChangingShifts(EventCard, _DiceOnlyChoiceProvider):
@@ -776,7 +821,7 @@ class ChangingShifts(EventCard, _DiceOnlyChoiceProvider):
     def _valid_instruction(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
             instruction: act.Instruction
     ) -> bool:
         return isinstance(instruction, act.DiceOnlyInstruction)
@@ -786,7 +831,7 @@ class ChangingShifts(EventCard, _DiceOnlyChoiceProvider):
     def effects(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         return (
@@ -805,7 +850,7 @@ class LeaveItToMe(EventCard, _DiceOnlyChoiceProvider):
     def _valid_instruction(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
             instruction: act.Instruction
     ) -> bool:
         return isinstance(instruction, act.DiceOnlyInstruction)
@@ -815,13 +860,59 @@ class LeaveItToMe(EventCard, _DiceOnlyChoiceProvider):
     def effects(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         return (
             eft.AddCombatStatusEffect(
                 target_pid=pid,
                 status=stt.LeaveItToMeStatus,
+            ),
+        )
+
+
+class Starsigns(EventCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDices({Element.ANY: 2})
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        """ Check active character doesn't have full energy """
+        active_character = game_state.get_player(pid).get_active_character()
+        if active_character is None or active_character.get_energy() >= active_character.get_max_energy():
+            return False
+        return super()._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        """ Check target is active character and .loosely_usable() """
+        if not isinstance(instruction, act.DiceOnlyInstruction):  # pragma: no cover
+            return False
+
+        return cls.loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.EnergyRechargeEffect(
+                StaticTarget(
+                    pid=pid,
+                    zone=Zone.CHARACTERS,
+                    id=game_state.get_player(pid).just_get_active_character().get_id(),
+                ),
+                1
             ),
         )
 
@@ -839,7 +930,7 @@ class Xudong(CompanionCard):
     def _effects(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
     ) -> tuple[eft.Effect, ...]:
         return (
             eft.AddSupportEffect(
@@ -850,6 +941,54 @@ class Xudong(CompanionCard):
 
 # >>>>>>>>>>>>>>>>>>>> Support Cards / Companion Cards >>>>>>>>>>>>>>>>>>>>
 # >>>>>>>>>>>>>>>>>>>> Support Cards >>>>>>>>>>>>>>>>>>>>
+
+#### Kaeya ####
+
+
+class ColdBloodedStrike(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDices({Element.CRYO: 4})
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        return _UsableFuncs.active_combat_talent_skill_card_usable(game_state, pid, chr.Kaeya) \
+            and super()._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        return isinstance(instruction, act.DiceOnlyInstruction) \
+            and cls._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.DiceOnlyInstruction)
+        target = StaticTarget(
+            pid=pid,
+            zone=Zone.CHARACTERS,
+            id=game_state.get_player(pid).just_get_active_character().get_id(),
+        )
+        return (
+            eft.AddCharacterStatusEffect(
+                target=target,
+                status=stt.ColdBloodedStrikeStatus,
+            ),
+            eft.CastSkillEffect(
+                target=target,
+                skill=CharacterSkill.ELEMENTAL_SKILL1,
+            ),
+        )
 
 #### Keqing ####
 
@@ -865,10 +1004,10 @@ class LightningStiletto(EventCard, _CombatActionCard, _CharTargetChoiceProvider)
 
     @override
     @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         cs = game_state.get_player(pid).get_characters()
         keqings = [char for char in cs if type(char) is chr.Keqing]
-        if not keqings:
+        if not keqings:  # pragma: no cover
             return False
         if all(not keqing.can_cast_skill() for keqing in keqings):
             return False
@@ -879,7 +1018,7 @@ class LightningStiletto(EventCard, _CombatActionCard, _CharTargetChoiceProvider)
     def _valid_instruction(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
             instruction: act.Instruction
     ) -> bool:
         if not isinstance(instruction, act.StaticTargetInstruction):
@@ -892,7 +1031,7 @@ class LightningStiletto(EventCard, _CombatActionCard, _CharTargetChoiceProvider)
     def effects(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.StaticTargetInstruction)
@@ -916,7 +1055,7 @@ class ThunderingPenance(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvide
 
     @override
     @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         return _UsableFuncs.active_combat_talent_skill_card_usable(game_state, pid, chr.Keqing) \
             and super()._loosely_usable(game_state, pid)
 
@@ -925,7 +1064,7 @@ class ThunderingPenance(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvide
     def _valid_instruction(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
             instruction: act.Instruction
     ) -> bool:
         return isinstance(instruction, act.DiceOnlyInstruction) \
@@ -936,67 +1075,19 @@ class ThunderingPenance(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvide
     def effects(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.DiceOnlyInstruction)
-        target = eft.StaticTarget(
+        target = StaticTarget(
             pid=pid,
-            zone=eft.Zone.CHARACTERS,
+            zone=Zone.CHARACTERS,
             id=game_state.get_player(pid).just_get_active_character().get_id(),
         )
         return (
             eft.AddCharacterStatusEffect(
                 target=target,
                 status=stt.ThunderingPenanceStatus,
-            ),
-            eft.CastSkillEffect(
-                target=target,
-                skill=CharacterSkill.ELEMENTAL_SKILL1,
-            ),
-        )
-
-#### Kaeya ####
-
-
-class ColdBloodedStrike(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDices({Element.CRYO: 4})
-
-    @override
-    @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
-        return _UsableFuncs.active_combat_talent_skill_card_usable(game_state, pid, chr.Kaeya) \
-            and super()._loosely_usable(game_state, pid)
-
-    @override
-    @classmethod
-    def _valid_instruction(
-            cls,
-            game_state: gs.GameState,
-            pid: gs.GameState.Pid,
-            instruction: act.Instruction
-    ) -> bool:
-        return isinstance(instruction, act.DiceOnlyInstruction) \
-            and cls._loosely_usable(game_state, pid)
-
-    @override
-    @classmethod
-    def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: gs.GameState.Pid,
-            instruction: act.Instruction,
-    ) -> tuple[eft.Effect, ...]:
-        assert isinstance(instruction, act.DiceOnlyInstruction)
-        target = eft.StaticTarget(
-            pid=pid,
-            zone=eft.Zone.CHARACTERS,
-            id=game_state.get_player(pid).just_get_active_character().get_id(),
-        )
-        return (
-            eft.AddCharacterStatusEffect(
-                target=target,
-                status=stt.ColdBloodedStrikeStatus,
             ),
             eft.CastSkillEffect(
                 target=target,
@@ -1012,7 +1103,7 @@ class StreamingSurge(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
 
     @override
     @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: gs.GameState.Pid) -> bool:
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         return _UsableFuncs.active_combat_talent_burst_card_usable(game_state, pid, chr.RhodeiaOfLoch) \
             and super()._loosely_usable(game_state, pid)
 
@@ -1021,7 +1112,7 @@ class StreamingSurge(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     def _valid_instruction(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
             instruction: act.Instruction
     ) -> bool:
         return isinstance(instruction, act.DiceOnlyInstruction) \
@@ -1032,13 +1123,13 @@ class StreamingSurge(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     def effects(
             cls,
             game_state: gs.GameState,
-            pid: gs.GameState.Pid,
+            pid: Pid,
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.DiceOnlyInstruction)
-        target = eft.StaticTarget(
+        target = StaticTarget(
             pid=pid,
-            zone=eft.Zone.CHARACTERS,
+            zone=Zone.CHARACTERS,
             id=game_state.get_player(pid).just_get_active_character().get_id(),
         )
         return (
@@ -1049,5 +1140,53 @@ class StreamingSurge(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
             eft.CastSkillEffect(
                 target=target,
                 skill=CharacterSkill.ELEMENTAL_BURST,
+            ),
+        )
+
+#### Tighnari ####
+
+
+class KeenSight(EquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDices({Element.DENDRO: 4})
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        return _UsableFuncs.active_combat_talent_skill_card_usable(game_state, pid, chr.Tighnari) \
+            and super()._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        return isinstance(instruction, act.DiceOnlyInstruction) \
+            and cls._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.DiceOnlyInstruction)
+        target = StaticTarget(
+            pid=pid,
+            zone=Zone.CHARACTERS,
+            id=game_state.get_player(pid).just_get_active_character().get_id(),
+        )
+        return (
+            eft.AddCharacterStatusEffect(
+                target=target,
+                status=stt.KeenSightStatus,
+            ),
+            eft.CastSkillEffect(
+                target=target,
+                skill=CharacterSkill.ELEMENTAL_SKILL1,
             ),
         )
