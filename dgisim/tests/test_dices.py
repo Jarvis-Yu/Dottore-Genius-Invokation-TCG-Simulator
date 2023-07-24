@@ -1,7 +1,9 @@
 import unittest
+from typing import Optional
 
 from dgisim.src.dices import *
-from dgisim.src.element.element import *
+from dgisim.src.dices import ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY
+from dgisim.src.element import *
 
 
 class TestDices(unittest.TestCase):
@@ -173,7 +175,8 @@ class TestDices(unittest.TestCase):
 
         requirement = AbstractDices({Element.OMNI: 3})
         payment = ActualDices({Element.CRYO: 2, Element.OMNI: 2})
-        self.assertEqual(payment.basically_satisfy(requirement), ActualDices({Element.CRYO: 2, Element.OMNI: 1}))
+        self.assertEqual(payment.basically_satisfy(requirement),
+                         ActualDices({Element.CRYO: 2, Element.OMNI: 1}))
 
     def test_basically_satisfy_failures(self):
         requirement = AbstractDices({Element.ANY: 8})
@@ -181,15 +184,15 @@ class TestDices(unittest.TestCase):
         self.assertIsNone(payment.basically_satisfy(requirement))
 
         requirement = AbstractDices({Element.OMNI: 4})
-        payment = ActualDices({Element.GEO: 3, Element.ELECTRO: 2, Element.HYDRO: 1, Element.DENDRO: 3})
+        payment = ActualDices({Element.GEO: 3, Element.ELECTRO: 2,
+                              Element.HYDRO: 1, Element.DENDRO: 3})
         self.assertIsNone(payment.basically_satisfy(requirement))
-
 
     # test_smart_selection template
     # def test_smart_selection(self):
     #     input_actual_dices: ActualDices = ActualDices()
     #     input_abstract_dices: AbstractDices = AbstractDices()
-    #     input_precedence: List[Set[Element]] = []
+    #     input_precedence: List[set[Element]] = []
     #     #
     #     # self.assertEqual()
 
@@ -199,19 +202,17 @@ class TestDices(unittest.TestCase):
         input_actual_dices: ActualDices = ActualDices(dices={element: k})
         input_abstract_dices: AbstractDices = AbstractDices(
             dices={Element.OMNI: n})
-        input_precedence: List[Set[Element]] = []
+        input_precedence: list[set[Element]] = []
 
         actual = input_actual_dices.smart_selection(
             requirement=input_abstract_dices,
             game_state=None,
-            local_precedence=input_precedence)
+            local_precedence_arg=input_precedence)
 
         if k >= n:
             expected = ActualDices(dices={element: n})
         else:
             expected = None
-        print(actual.to_string())
-        print(expected.to_string())
         self.assertEqual(actual, expected)
 
     def test_smart_selection_any(
@@ -219,12 +220,12 @@ class TestDices(unittest.TestCase):
         input_actual_dices: ActualDices = ActualDices(dices={element: k})
         input_abstract_dices: AbstractDices = AbstractDices(
             dices={Element.ANY: n})
-        input_precedence: List[Set[Element]] = []
+        input_precedence: list[set[Element]] = []
 
         actual = input_actual_dices.smart_selection(
             requirement=input_abstract_dices,
             game_state=None,
-            local_precedence=input_precedence)
+            local_precedence_arg=input_precedence)
 
         if k >= n:
             expected = ActualDices(dices={element: n})
@@ -240,7 +241,7 @@ class TestDices(unittest.TestCase):
 
     NUMBER_OF_ELEMENTS: int = len(ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY)
 
-    all_elements: List[Element] = ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY
+    all_elements: tuple[Element, ...] = ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY
 
     def test_smart_selection_all_any(self, number_of_any: int = 6):
         """one die of every element"""
@@ -249,17 +250,17 @@ class TestDices(unittest.TestCase):
             dices={el: 1 for el in self.all_elements})
         input_abstract_dices: AbstractDices = AbstractDices(
             dices={Element.ANY: number_of_any})
-        input_precedence: List[Set[Element]] = [
+        input_precedence: list[set[Element]] = [
             {el} for el in self.all_elements]
 
-        actual: ActualDices = input_actual_dices.smart_selection(
-            requirement=input_abstract_dices, game_state=None, local_precedence=input_precedence)
+        actual: Optional[ActualDices] = input_actual_dices.smart_selection(
+            requirement=input_abstract_dices, game_state=None, local_precedence_arg=input_precedence)
 
         if self.NUMBER_OF_ELEMENTS >= number_of_any:
             expected: Optional[ActualDices] = ActualDices(
                 {el: 1 for el in self.all_elements[-number_of_any:]})
         else:
-            expected: Optional[ActualDices] = None
+            expected = None
 
         self.assertEqual(actual, expected)
 
@@ -268,18 +269,18 @@ class TestDices(unittest.TestCase):
         """one die of every element"""
 
         input_actual_dices: ActualDices = ActualDices(
-            dices={el: 1 for el in self.all_elements[-(number_of_any_need - 1):] + [Element.OMNI]})
+            dices={el: 1 for el in self.all_elements[-(number_of_any_need - 1):] + (Element.OMNI,)})
         input_abstract_dices: AbstractDices = AbstractDices(
             dices={Element.ANY: number_of_any_need})
-        input_precedence: List[Set[Element]] = [
+        input_precedence: list[set[Element]] = [
             {el} for el in self.all_elements]
 
-        actual: ActualDices = input_actual_dices.smart_selection(
-            requirement=input_abstract_dices, game_state=None, local_precedence=input_precedence)
+        actual: Optional[ActualDices] = input_actual_dices.smart_selection(
+            requirement=input_abstract_dices, game_state=None, local_precedence_arg=input_precedence)
 
         if number_of_any_need <= self.NUMBER_OF_ELEMENTS + 1:
             expected: Optional[ActualDices] = input_actual_dices
         else:
-            expected: Optional[ActualDices] = None
+            expected = None
 
         self.assertEqual(actual, expected)

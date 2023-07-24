@@ -1,14 +1,12 @@
 from __future__ import annotations
+
 import random
 from collections import Counter
-from typing import Any, Optional, Iterator, Iterable, TypeVar, Union
-from typing_extensions import Self, override, TYPE_CHECKING
-
-from .helper.hashable_dict import HashableDict
-from .helper.quality_of_life import BIG_INT
-from .element import Element
 from collections import defaultdict
-from typing import Optional, Iterator, Iterable, Union
+from typing import Any
+from typing import Optional, Iterator, Iterable
+
+from typing_extensions import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .state.game_state import GameState
@@ -18,20 +16,22 @@ __all__ = [
     "ActualDices",
     "Dices",
 ]
+
 from typing_extensions import Self
 
-from dgisim.src.element.element import Element
+from dgisim.src.element import Element
 from dgisim.src.helper.hashable_dict import HashableDict
-from dgisim.src.helper.level_print import level_print
 from dgisim.src.helper.quality_of_life import BIG_INT
 
-ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY: list[Element] = [Element.PYRO,
-                                                         Element.HYDRO,
-                                                         Element.ANEMO,
-                                                         Element.ELECTRO,
-                                                         Element.DENDRO,
-                                                         Element.CRYO,
-                                                         Element.GEO, ]
+ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY: tuple[Element, ...] = (Element.PYRO,
+                                                               Element.HYDRO,
+                                                               Element.ANEMO,
+                                                               Element.ELECTRO,
+                                                               Element.DENDRO,
+                                                               Element.CRYO,
+                                                               Element.GEO,)
+ELEMENTS_BY_INCREASING_GLOBAL_PRIORITY: tuple[Element,
+                                              ...] = ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY[::-1]
 
 
 class Dices:
@@ -109,8 +109,9 @@ class Dices:
     def __getitem__(self, index: Element) -> int:
         return self._dices.get(index, 0)
 
-    def _normalized_dices(self):
-        return {key: value for key, value in self._dices.items() if value != 0}
+    #
+    # def _normalized_dices(self):
+    #     return {key: value for key, value in self._dices.items() if value != 0}
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Dices):
@@ -228,21 +229,23 @@ class ActualDices(Dices):
         return self._satisfy(requirement)
 
     @staticmethod
-    def _how_much_omni_and_first_priority_spends(*,
-                                                 element_supply: int,
-                                                 omni_supply: int,
-                                                 omni_need: int, element_need: int,
-                                                 element_priority: bool) -> int:
+    def _how_much_omni_and_first_priority_to_spend(*,
+                                                   omni_supply: int,
+                                                   omni_needed: int,
+                                                   element_supply: int,
+                                                   element_needed: int,
+                                                   element_prioritized: bool
+                                                   ) -> int:
         """
         how many OMNI (+ first priority elements if it so) spend if we select this ELEMENT as OMNI filler.
         return BIG_INT if no possibility
         """
         # TODO сделать возврат сколько и чего
-        if element_supply + omni_supply > element_need + omni_need:
-            if element_priority:
-                return element_need + omni_need
+        if element_supply + omni_supply > element_needed + omni_needed:
+            if element_prioritized:
+                return element_needed + omni_needed
             else:
-                return max((element_need + omni_need) - element_supply, 0)
+                return max((element_needed + omni_needed) - element_supply, 0)
         else:
             # return None
             return BIG_INT
@@ -250,8 +253,8 @@ class ActualDices(Dices):
     def smart_selection(
             self,
             requirement: AbstractDices,
-            game_state: Optional[gs.GameState] = None,
-            local_precedence: Optional[list[set[Element]]] = None,
+            game_state: Optional[GameState] = None,
+            local_precedence_arg: Optional[list[set[Element]]] = None,
     ) -> Optional[ActualDices]:
         result_dct: dict[Element, int] = defaultdict(
             int)  # result in dict format
@@ -262,8 +265,11 @@ class ActualDices(Dices):
         need: dict[Element, int] = defaultdict(int)
         need.update(dict(requirement._dices))
 
-        local_precedence = local_precedence if local_precedence is not None else []
-        first_priority_elements = ([] if local_precedence in [None, []]
+        local_precedence: list[set[Element]] = \
+            [] if local_precedence_arg is None else local_precedence_arg
+        assert local_precedence is not None
+
+        first_priority_elements = ([] if local_precedence == []
                                    else local_precedence[0])  # list of first priority elements
 
         def get_precedence(element: Element) -> tuple[int, int]:
@@ -271,10 +277,10 @@ class ActualDices(Dices):
             """get precedence by element, bigger number is lower precedence"""
             for i, set_ in enumerate(local_precedence, start=1):
                 if element in set_:
-                    return i, ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY[::-1].index(
+                    return i, ELEMENTS_BY_INCREASING_GLOBAL_PRIORITY.index(
                         element)
             else:
-                return BIG_INT, 0
+                return BIG_INT, ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY[::-1].index(element)
 
         def check_asserts():
             """
@@ -292,58 +298,60 @@ class ActualDices(Dices):
             check_dict("supply", supply)
             check_dict("need", need)
 
-        # 1 step - fill OMNI requirement
+        # 1st step - fill OMNI requirement
         if requirement[Element.OMNI] > 0:
             def comparision(x: tuple[Element, int]) -> tuple[int, int, int]:
                 """to sort by ascedence of least_spend"""
                 type_of_element: Element = x[0]
-                number_of_dices: Optional[int] = x[1]
+                number_of_dices: int = x[1]
                 priority_local, priority_global = (
                     get_precedence(type_of_element))
                 # return number_of_dices if number_of_dices is not None else
                 # -1, type_of_element
                 return number_of_dices, priority_local, priority_global
 
-            array: list[tuple[Element, Optional[int]]] = \
+            elements_how_many_omni_to_spent_if_fill_omni: list[tuple[Element, Optional[int]]] = \
                 [(element,
-                  self._how_much_omni_and_first_priority_spends(
+                  self._how_much_omni_and_first_priority_to_spend(
                       element_supply=supply[element],
-                      element_need=need[element],
-                      omni_need=need[Element.OMNI],
-                      element_priority=element in first_priority_elements,
+                      element_needed=need[element],
+                      omni_needed=need[Element.OMNI],
+                      element_prioritized=element in first_priority_elements,
                       omni_supply=supply[Element.OMNI])
                   )
                  for element in _PURE_ELEMS]
 
-            # TODO rewrite minimum get
-            array = list(sorted(array, key=comparision))
-
-            least_spend = array[0][1]
-            least_spend_omni_elements = []
+            least_spend = min(
+                elements_how_many_omni_to_spent_if_fill_omni,
+                key=comparision)[1]  # type: ignore
+            least_spend_omni_elements: list[Element] = []
             if least_spend != BIG_INT:
-                for el in array:
-                    if el[1] == least_spend:
-                        least_spend_omni_elements.append(el[0])
+                for elmnt, omni_to_spent in elements_how_many_omni_to_spent_if_fill_omni:
+                    if omni_to_spent == least_spend:
+                        least_spend_omni_elements.append(elmnt)
             else:
-                raise Exception("Cant feed OMNI requirement")
+                # Cant feed OMNI requirement
+                return None
 
             assert least_spend_omni_elements, "Unknown error"
 
-            precedence_of_least_spend_omni = {element: get_precedence(element)
-                                              for element
-                                              in least_spend_omni_elements}
+            precedence_of_least_spend_omni: list[tuple[Element, tuple[int, int]]] = \
+                [(element, get_precedence(element))
+                 for element
+                 in least_spend_omni_elements]
 
             max_precedence_omni_potential_fillers: list[Element] = []
-            max_precedence = max(precedence_of_least_spend_omni.values())
-            for key, val in precedence_of_least_spend_omni.items():
-                if val == max_precedence:
-                    max_precedence_omni_potential_fillers.append(key)
+            max_precedence: tuple[int, int] = max(
+                precedence_of_least_spend_omni, key=lambda x: x[1])[1]
+            for elmnt, precedence in precedence_of_least_spend_omni:
+                if precedence == max_precedence:
+                    max_precedence_omni_potential_fillers.append(elmnt)
 
-            # TODO: выбор наилучшего заполнителя OMNI - now just first
+            # TODO: selection of best filler for OMNI - now just first
             filler_element: Element = max_precedence_omni_potential_fillers[0]
 
             # how many omni and how many filler (we already know Element which
-            # is filler)
+            # is filler_element)
             if supply[filler_element] >= need[Element.OMNI]:
                 filler_element_count = need[Element.OMNI]
                 filler_omni_count = 0
@@ -362,24 +370,24 @@ class ActualDices(Dices):
             assert supply[filler_element] >= 0, "supply <0"
             assert supply[Element.OMNI] >= 0, "supply <0"
 
-        # 2 step - fill the Elements needs and ANY (files ANY parallely)
+        # 2nd step - fill the Elements needs and ANY (files ANY parallely)
 
         global ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY
 
-        reverse_order_need_list: list[Element] = list(
-            sorted(ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY,
-                   key=lambda el: get_precedence(el)
-                   ))[::-1]  # + [Element.ANY]
+        reverse_order_need_list: Iterable[Element] = sorted(
+            ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY,
+            key=get_precedence,
+            reverse=True)  # + [Element.ANY]
 
         for el in reverse_order_need_list:
-            if need[el] <= supply[el]:  # if element can fill itself
-                number_of_el = need[el]
-                # print(number_of_el)
+            number_of_el = min(need[el], supply[el])
 
-                result_dct[el] += number_of_el
-                need[el] -= number_of_el
-                supply[el] -= number_of_el
-                check_asserts()
+            result_dct[el] += number_of_el
+            need[el] -= number_of_el
+            supply[el] -= number_of_el
+
+            check_asserts()
+            if need[el] <= supply[el]:  # if element can fill itself
 
                 if supply[el] > 0 and need[Element.ANY] > 0:
                     number_of_el = min(supply[el], need[Element.ANY])
@@ -390,14 +398,6 @@ class ActualDices(Dices):
                     supply[el] -= number_of_el
                     check_asserts()
             else:  # if OMNI dices needs
-                number_of_el = supply[el]
-
-                result_dct[el] += number_of_el
-                need[el] -= number_of_el
-                supply[el] -= number_of_el
-
-                check_asserts()
-
                 if need[el] <= supply[Element.OMNI]:
                     number_of_omni = need[el]
 
@@ -465,8 +465,8 @@ class ActualDices(Dices):
             for elem in list(_PURE_ELEMS) + [Element.OMNI]:
                 this_count = remaining.get(elem, 0)
                 if best_count > omni and this_count >= omni and this_count < best_count:
-                        best_elem = elem
-                        best_count = this_count
+                    best_elem = elem
+                    best_count = this_count
                 elif best_count < omni and this_count > best_count:
                     best_elem = elem
                     best_count = this_count
