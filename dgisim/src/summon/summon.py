@@ -342,13 +342,26 @@ class UshiSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
             info_type: Informables,
             information: InformableEvent,
     ) -> Self:
-        if isinstance(information, DmgIEvent):
+        if info_type is Informables.DMG_DELT:
+            assert isinstance(information, DmgIEvent)
             if (
                     self._is_target(game_state, status_source, information.dmg)
                     and self.status_gaining_usages > 0
                     and self.status_gaining_available is False
             ):
                 return replace(self, status_gaining_available=True)
+        elif info_type is Informables.CHARACTER_DEATH:
+            """ This is a bug that currently exists in the official game """
+            assert isinstance(information, CharacterDeathIEvent)
+            if not self.status_gaining_available:
+                return self
+            my_active_character_ref = StaticTarget(
+                pid=status_source.pid,
+                zone=Zone.CHARACTERS,
+                id=game_state.get_player(status_source.pid).just_get_active_character().get_id()
+            )
+            if information.target == my_active_character_ref:
+                return replace(self, status_gaining_available=False)
         return self
 
     @override

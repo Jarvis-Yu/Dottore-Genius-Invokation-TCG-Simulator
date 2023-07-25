@@ -788,12 +788,13 @@ class SpecificDamageEffect(DirectEffect):
             lambda es: es.push_many_fl(effects)
         ).build()
 
-        # if target.defeated():
-        #     game_state = StatusProcessing.inform_all_statuses(
-        #         game_state,
-        #         self.source.pid,
-        #         self.target,
-        #     )
+        if target.defeated():
+            game_state = StatusProcessing.inform_all_statuses(
+                game_state,
+                self.source.pid,
+                Informables.CHARACTER_DEATH,
+                CharacterDeathIEvent(target=self.target),
+            )
 
         return game_state
 

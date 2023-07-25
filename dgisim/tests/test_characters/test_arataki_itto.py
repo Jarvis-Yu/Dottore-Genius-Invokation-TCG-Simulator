@@ -209,3 +209,56 @@ class TestAratakiItto(unittest.TestCase):
                 lambda sms: sms.update_summon(BurningFlameSummon())
             ).build()
         ).build()
+
+        game_state = auto_step(base_game)
+        p1 = game_state.get_player1()
+        p1ac = p1.just_get_active_character()
+        self.assertIn(SuperlativeSuperstrengthStatus, p1ac.get_character_statuses())
+        self.assertEqual(
+            p1ac.get_character_statuses().just_find(
+                SuperlativeSuperstrengthStatus
+            ).usages,
+            1,
+        )
+        self.assertNotIn(UshiSummon, p1.get_summons())
+
+    def test_ushi_summon_not_triggered_if_dmg_kill_active_char(self):
+        """ This is a test for existing bug in the official game """
+        base_game = AddSummonEffect(
+            target_pid=Pid.P1, summon=UshiSummon
+        ).execute(self.BASE_GAME).factory().active_player_id(
+            Pid.P2,
+        ).f_player1(
+            lambda p1: p1.factory().phase(
+            Act.END_PHASE
+        ).f_characters(
+            # need someone other than Itto to die
+            lambda cs: cs.factory().active_character_id(1).build()
+        ).build()
+        ).f_player2(
+            lambda p2: p2.factory().phase(
+                Act.ACTION_PHASE
+            ).f_characters(
+                # 1 is Rhodeia, I need some one who deals 2 damage for normal attack
+                lambda cs: cs.factory().active_character_id(2).build()
+            ).build()
+        ).build()
+        base_game = kill_character(base_game, character_id=1, pid=Pid.P1, hp=1)
+
+        # first character damage triggers ushi
+        game_state = base_game.action_step(Pid.P2, SkillAction(
+            skill=CharacterSkill.NORMAL_ATTACK,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+        ))
+        game_state = auto_step(just(game_state))
+        game_state = game_state.action_step(Pid.P1, DeathSwapAction(char_id=2))
+        game_state = auto_step(just(game_state))
+
+        p1 = game_state.get_player1()
+        p1ac = p1.just_get_active_character()
+        self.assertNotIn(SuperlativeSuperstrengthStatus, p1ac.get_character_statuses())
+        self.assertIn(UshiSummon, p1.get_summons())
+        ushi = p1.get_summons().just_find(UshiSummon)
+        assert isinstance(ushi, UshiSummon)
+        self.assertEqual(ushi.status_gaining_usages, 1)
+        self.assertEqual(ushi.status_gaining_available, False)
