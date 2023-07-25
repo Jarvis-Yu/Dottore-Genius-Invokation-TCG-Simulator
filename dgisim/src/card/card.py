@@ -28,7 +28,7 @@ from ..dices import AbstractDices, ActualDices
 from ..effect.enums import Zone
 from ..effect.structs import StaticTarget
 from ..element import Element
-from ..event import CardEvent
+from ..event import CardPEvent
 from ..helper.quality_of_life import BIG_INT
 from ..state.enums import Pid
 from ..status.enums import Preprocessables
@@ -138,14 +138,14 @@ class Card:
         game_state, card_event = StatusProcessing.preprocess_by_all_statuses(
             game_state=game_state,
             pid=pid,
-            item=CardEvent(
+            item=CardPEvent(
                 pid=pid,
                 card_type=cls,
                 dices_cost=cls._DICE_COST,
             ),
             pp_type=Preprocessables.CARD
         )
-        assert isinstance(card_event, CardEvent)
+        assert isinstance(card_event, CardPEvent)
         return game_state, card_event.dices_cost
 
     @classmethod

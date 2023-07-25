@@ -23,7 +23,7 @@ from ..character.enums import CharacterSkill, WeaponType
 from ..effect.enums import Zone, TriggeringSignal, DynamicCharacterTarget
 from ..effect.structs import StaticTarget, DamageType
 from ..element import Element, Reaction
-from ..event import EventSpeed, EventType, ActionEvent
+from ..event import *
 from ..helper.hashable_dict import HashableDict
 from ..helper.quality_of_life import just, BIG_INT, case_val
 from .enums import Preprocessables
@@ -32,7 +32,6 @@ if TYPE_CHECKING:
     from ..card.card import Card
     from ..character.character import Character
     from ..state.game_state import GameState
-    from .types import Preprocessable
 
 __all__ = [
     # base
@@ -130,11 +129,11 @@ class Status:
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[Preprocessable, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
         """
-        Returns the processed Preprocessable and possibly updated or deleted self
+        Returns the processed PreprocessableEvent and possibly updated or deleted self
         """
         new_item, new_self = self._preprocess(game_state, status_source, item, signal)
         return self._post_preprocess(
@@ -150,20 +149,20 @@ class Status:
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[Preprocessable, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
         return item, self
 
     def _post_preprocess(
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             signal: Preprocessables,
-            new_item: Preprocessable,
+            new_item: PreprocessableEvent,
             new_self: Optional[Self],
-    ) -> tuple[Preprocessable, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
         return (new_item, new_self)
 
     def inform(
@@ -326,7 +325,6 @@ class Status:
                 ))
         return effects, case_val(new_status == self, self, new_status)
 
-
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
@@ -392,22 +390,23 @@ class WeaponEquipmentStatus(EquipmentStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[Preprocessable, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
         if signal is Preprocessables.DMG_AMOUNT:
-            assert isinstance(item, eft.SpecificDamageEffect)
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
             if (
-                item.source == status_source
+                dmg.source == status_source
                 and (
-                    item.damage_type.normal_attack
-                    or item.damage_type.elemental_skill
-                    or item.damage_type.elemental_burst
+                    dmg.damage_type.normal_attack
+                    or dmg.damage_type.elemental_skill
+                    or dmg.damage_type.elemental_burst
                 )
-                and item.element is not Element.PIERCING
+                and dmg.element is not Element.PIERCING
             ):
-                new_damage = replace(item, damage=item.damage + self.BASE_DAMAGE_BOOST)
-                return new_damage, self
+                new_damage = replace(dmg, damage=dmg.damage + self.BASE_DAMAGE_BOOST)
+                return DmgPEvent(dmg=new_damage), self
         return super()._preprocess(game_state, status_source, item, signal)
 
 
@@ -447,11 +446,11 @@ class _UsageStatus(Status):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             signal: Preprocessables,
-            new_item: Preprocessable,
+            new_item: PreprocessableEvent,
             new_self: Optional[Self],
-    ) -> tuple[Preprocessable, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
         if new_self is not None:
             if self._auto_destroy() and new_self.usages <= 0:
                 new_self = None
@@ -484,10 +483,9 @@ class _ShieldStatus(Status):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: eft.SpecificDamageEffect,
     ) -> bool:
         from ..summon import summon as sm
-        assert isinstance(item, eft.SpecificDamageEffect)
         if isinstance(self, HiddenStatus) \
                 or isinstance(self, EquipmentStatus) \
                 or isinstance(self, CharacterStatus):
@@ -528,18 +526,20 @@ class FixedShieldStatus(_ShieldStatus, _UsageStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[Preprocessable, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
         cls = type(self)
         if signal is Preprocessables.DMG_AMOUNT:
-            assert isinstance(item, eft.SpecificDamageEffect)
-            if item.damage > 0 and self.usages > 0 \
-                    and item.element != Element.PIERCING \
-                    and self._is_target(game_state, status_source, item) \
-                    and self._trigerring_condition(item):
-                new_dmg = max(0, item.damage - cls.SHIELD_AMOUNT)
-                new_item = replace(item, damage=new_dmg)
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            if dmg.damage > 0 and self.usages > 0 \
+                    and dmg.element != Element.PIERCING \
+                    and self._is_target(game_state, status_source, dmg) \
+                    and self._trigerring_condition(dmg):
+                new_dmg_amount = max(0, dmg.damage - cls.SHIELD_AMOUNT)
+                new_dmg = replace(dmg, damage=new_dmg_amount)
+                new_item = DmgPEvent(dmg=new_dmg)
                 new_usages = self.usages - 1
                 if self._auto_destroy() and new_usages == 0:
                     return new_item, None
@@ -561,19 +561,21 @@ class StackedShieldStatus(_ShieldStatus, _UsageStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[Preprocessable, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
         cls = type(self)
         if signal is Preprocessables.DMG_AMOUNT:
-            assert isinstance(item, eft.SpecificDamageEffect)
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
             assert self.usages <= type(self).MAX_USAGES
-            if item.damage > 0 and self.usages > 0 \
-                    and item.element != Element.PIERCING \
-                    and self._is_target(game_state, status_source, item):
-                usages_consumed = min(ceil(item.damage / cls.SHIELD_AMOUNT), self.usages)
-                new_dmg = max(0, item.damage - usages_consumed * cls.SHIELD_AMOUNT)
-                new_item = replace(item, damage=new_dmg)
+            if dmg.damage > 0 and self.usages > 0 \
+                    and dmg.element != Element.PIERCING \
+                    and self._is_target(game_state, status_source, dmg):
+                usages_consumed = min(ceil(dmg.damage / cls.SHIELD_AMOUNT), self.usages)
+                new_dmg_amount = max(0, dmg.damage - usages_consumed * cls.SHIELD_AMOUNT)
+                new_dmg = replace(dmg, damage=new_dmg_amount)
+                new_item = DmgPEvent(dmg=new_dmg)
                 new_usages = self.usages - usages_consumed
                 if new_usages == 0:
                     return new_item, None
@@ -600,18 +602,20 @@ class _InfusionStatus(_UsageStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[Preprocessable, Optional[Self]]:
-        new_item: Optional[eft.SpecificDamageEffect] = None
-        if isinstance(item, eft.SpecificDamageEffect):
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+        new_item: Optional[DmgPEvent] = None
+        if isinstance(item, DmgPEvent):
+            dmg = item.dmg
             if signal is Preprocessables.DMG_ELEMENT:
-                if self._dmg_element_condition(game_state, status_source, item):
-                    new_item = replace(item, element=self.ELEMENT)
+                if self._dmg_element_condition(game_state, status_source, dmg):
+                    new_item = replace(item, dmg=replace(dmg, element=self.ELEMENT))
             if signal is Preprocessables.DMG_AMOUNT:
                 if self.damage_boost != 0  \
-                        and self._dmg_boost_condition(game_state, status_source, item):
-                    new_item = replace(item, damage=item.damage + self.damage_boost)
+                        and self._dmg_boost_condition(game_state, status_source, dmg):
+                    new_item = replace(item, dmg=replace(
+                        dmg, damage=dmg.damage + self.damage_boost))
         if new_item is not None:
             return new_item, self
         else:
@@ -746,23 +750,25 @@ class CatalyzingFieldStatus(CombatStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[Preprocessable, Optional[CatalyzingFieldStatus]]:
+    ) -> tuple[PreprocessableEvent, Optional[CatalyzingFieldStatus]]:
         if signal is Preprocessables.DMG_AMOUNT:
-            assert isinstance(item, eft.SpecificDamageEffect)
+            assert isinstance(item, eft.DmgPEvent)
+            dmg = item.dmg
             assert self.usages >= 1
-            elem_can_boost = item.element is Element.ELECTRO or item.element is Element.DENDRO
-            legal_to_boost = status_source.pid is item.source.pid
-            target_is_active = item.target.id == game_state.get_player(
-                item.target.pid
+            elem_can_boost = dmg.element is Element.ELECTRO or dmg.element is Element.DENDRO
+            legal_to_boost = status_source.pid is dmg.source.pid
+            target_is_active = dmg.target.id == game_state.get_player(
+                dmg.target.pid
             ).just_get_active_character().get_id()
             if elem_can_boost and legal_to_boost and target_is_active:
-                new_damage = replace(item, damage=item.damage + CatalyzingFieldStatus.damage_boost)
+                new_damage = replace(dmg, damage=dmg.damage + CatalyzingFieldStatus.damage_boost)
+                new_item = DmgPEvent(dmg=new_damage)
                 if self.usages == 1:
-                    return new_damage, None
+                    return new_item, None
                 else:
-                    return new_damage, CatalyzingFieldStatus(self.usages - 1)
+                    return new_item, CatalyzingFieldStatus(self.usages - 1)
         return super()._preprocess(game_state, status_source, item, signal)
 
     def __str__(self) -> str:
@@ -778,11 +784,11 @@ class ChangingShiftsStatus(CombatStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[Preprocessable, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
         if signal is Preprocessables.SWAP:
-            assert isinstance(item, ActionEvent) and item.event_type is EventType.SWAP
+            assert isinstance(item, ActionPEvent) and item.event_type is EventType.SWAP
             if item.source.pid is status_source.pid \
                     and item.dices_cost.num_dices() >= self.COST_DEDUCTION:
                 assert item.dices_cost.num_dices() == item.dices_cost[Element.ANY]
@@ -819,23 +825,25 @@ class DendroCoreStatus(CombatStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[Preprocessable, Optional[DendroCoreStatus]]:
+    ) -> tuple[PreprocessableEvent, Optional[DendroCoreStatus]]:
         if signal is Preprocessables.DMG_AMOUNT:
-            assert isinstance(item, eft.SpecificDamageEffect)
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
             assert self.usages >= 1
-            elem_can_boost = item.element is Element.ELECTRO or item.element is Element.PYRO
-            legal_to_boost = status_source.pid is item.source.pid
-            target_is_active = item.target.id == game_state.get_player(
-                item.target.pid
+            elem_can_boost = dmg.element is Element.ELECTRO or dmg.element is Element.PYRO
+            legal_to_boost = status_source.pid is dmg.source.pid
+            target_is_active = dmg.target.id == game_state.get_player(
+                dmg.target.pid
             ).just_get_active_character().get_id()
             if elem_can_boost and legal_to_boost and target_is_active:
-                new_damage = replace(item, damage=item.damage + DendroCoreStatus.damage_boost)
+                new_damage = replace(dmg, damage=dmg.damage + DendroCoreStatus.damage_boost)
+                new_item = DmgPEvent(dmg=new_damage)
                 if self.usages == 1:
-                    return new_damage, None
+                    return new_item, None
                 else:
-                    return new_damage, DendroCoreStatus(self.usages - 1)
+                    return new_item, DendroCoreStatus(self.usages - 1)
         return super()._preprocess(game_state, status_source, item, signal)
 
     # @override
@@ -859,15 +867,19 @@ class FrozenStatus(CharacterStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[Preprocessable, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
         if signal is Preprocessables.DMG_AMOUNT:
-            assert isinstance(item, eft.SpecificDamageEffect)
-            can_reaction = item.element is Element.PYRO or item.element is Element.PHYSICAL
-            is_damage_target = item.target == status_source
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            can_reaction = dmg.element is Element.PYRO or dmg.element is Element.PHYSICAL
+            is_damage_target = dmg.target == status_source
             if is_damage_target and can_reaction:
-                return replace(item, damage=item.damage + FrozenStatus.damage_boost), None
+                return (
+                    DmgPEvent(dmg=replace(dmg, damage=dmg.damage + FrozenStatus.damage_boost)),
+                    None
+                )
         return super()._preprocess(game_state, status_source, item, signal)
 
     @override
@@ -886,11 +898,11 @@ class LeaveItToMeStatus(CombatStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[Preprocessable, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
         if signal is Preprocessables.SWAP:
-            assert isinstance(item, ActionEvent) and item.event_type is EventType.SWAP
+            assert isinstance(item, ActionPEvent) and item.event_type is EventType.SWAP
             if item.source.pid is status_source.pid \
                     and item.event_speed is EventSpeed.COMBAT_ACTION:
                 return replace(item, event_speed=EventSpeed.FAST_ACTION), None
@@ -914,14 +926,15 @@ class JueyunGuobaStatus(CharacterStatus, _UsageStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[Preprocessable, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
         if signal is Preprocessables.DMG_AMOUNT:
-            assert isinstance(item, eft.SpecificDamageEffect)
-            if item.source == status_source and item.damage_type.normal_attack:
-                item = replace(item, damage=item.damage + JueyunGuobaStatus.damage_boost)
-                return item, replace(self, usages=self.usages - 1)
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            if dmg.source == status_source and dmg.damage_type.normal_attack:
+                dmg = replace(dmg, damage=dmg.damage + JueyunGuobaStatus.damage_boost)
+                return DmgPEvent(dmg=dmg), replace(self, usages=self.usages - 1)
         return super()._preprocess(game_state, status_source, item, signal)
 
     @override
@@ -970,11 +983,11 @@ class MintyMeatRollsStatus(CharacterStatus, _UsageStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[Preprocessable, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
         if signal is Preprocessables.SKILL:
-            assert isinstance(item, ActionEvent)
+            assert isinstance(item, ActionPEvent)
             if status_source == item.source \
                     and item.event_type is EventType.NORMAL_ATTACK \
                     and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION:
@@ -1037,11 +1050,11 @@ class NorthernSmokedChickenStatus(CharacterStatus, _UsageStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[Preprocessable, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
         if signal is Preprocessables.SKILL:
-            assert isinstance(item, ActionEvent)
+            assert isinstance(item, ActionPEvent)
             if status_source == item.source \
                     and item.event_type is EventType.NORMAL_ATTACK \
                     and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION:
@@ -1146,19 +1159,20 @@ class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[Preprocessable, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
         if signal is Preprocessables.DMG_AMOUNT:
-            assert isinstance(item, eft.SpecificDamageEffect)
-            if status_source != item.source:
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            if status_source != dmg.source:
                 return item, self
-            if item.damage_type.charged_attack:
-                new_item = replace(item, damage=item.damage + self.DAMAGE_BOOST)
+            if dmg.damage_type.charged_attack:
+                new_item = DmgPEvent(dmg=replace(dmg, damage=dmg.damage + self.DAMAGE_BOOST))
                 new_self = replace(self, usages=self.usages - 1)
                 return new_item, new_self
         elif signal is Preprocessables.SKILL:
-            assert isinstance(item, ActionEvent)
+            assert isinstance(item, ActionPEvent)
             player = game_state.get_player(status_source.pid)
             if (
                     self.usages >= 2
@@ -1207,20 +1221,21 @@ class MidareRanzanStatus(CharacterStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[Preprocessable, Optional[Self]]:
-        if isinstance(item, eft.SpecificDamageEffect):
-            if status_source != item.source:
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+        if isinstance(item, DmgPEvent):
+            dmg = item.dmg
+            if status_source != dmg.source:
                 return item, self
 
             if signal is Preprocessables.DMG_ELEMENT:
-                if item.damage_type.plunge_attack:
-                    new_item = replace(item, element=self._ELEMENT)
+                if dmg.damage_type.plunge_attack:
+                    new_item = DmgPEvent(dmg=replace(dmg, element=self._ELEMENT))
                     return new_item, self
             elif signal is Preprocessables.DMG_AMOUNT:
-                if item.damage_type.plunge_attack:
-                    new_item = replace(item, damage=item.damage + self._DMG_BOOST)
+                if dmg.damage_type.plunge_attack:
+                    new_item = DmgPEvent(dmg=replace(dmg, damage=dmg.damage + self._DMG_BOOST))
                     return new_item, None
         return item, self
 
@@ -1286,23 +1301,24 @@ class _PoeticsOfFuubutsuElementStatus(CombatStatus, _UsageStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[Preprocessable, Optional[Self]]:
-        if isinstance(item, eft.SpecificDamageEffect):
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+        if signal is Preprocessables.DMG_AMOUNT:
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
             if (
-                    signal is not Preprocessables.DMG_AMOUNT
-                    or status_source.pid != item.source.pid
+                    status_source.pid != dmg.source.pid
                     or not (
-                        item.damage_type.from_character()
-                        or item.damage_type.from_summon()
+                        dmg.damage_type.from_character()
+                        or dmg.damage_type.from_summon()
                     )
-                    or item.element is not self._ELEM
+                    or dmg.element is not self._ELEM
             ):
                 return item, self
 
             assert self.usages > 0
-            new_item = replace(item, damage=item.damage + self._DMG_BOOST)
+            new_item = DmgPEvent(dmg=replace(dmg, damage=dmg.damage + self._DMG_BOOST))
             return new_item, replace(self, usages=self.usages - 1)
         return item, self
 
@@ -1477,19 +1493,20 @@ class ExplosiveSparkStatus(CharacterStatus, _UsageStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[Preprocessable, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
         if signal is Preprocessables.DMG_AMOUNT:
-            assert isinstance(item, eft.SpecificDamageEffect)
-            if status_source != item.source:
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            if status_source != dmg.source:
                 return item, self
-            if item.damage_type.charged_attack:
-                new_item = replace(item, damage=item.damage + self.DAMAGE_BOOST)
+            if dmg.damage_type.charged_attack:
+                new_item = DmgPEvent(dmg=replace(dmg, damage=dmg.damage + self.DAMAGE_BOOST))
                 new_self = replace(self, usages=self.usages - 1)
                 return new_item, new_self
         elif signal is Preprocessables.SKILL:
-            assert isinstance(item, ActionEvent)
+            assert isinstance(item, ActionPEvent)
             player = game_state.get_player(status_source.pid)
             if (
                     status_source == item.source
@@ -1592,11 +1609,11 @@ class KeenSightStatus(TalentEquipmentStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[Preprocessable, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
         if signal is Preprocessables.SKILL:
-            assert isinstance(item, ActionEvent)
+            assert isinstance(item, ActionPEvent)
             player = game_state.get_player(status_source.pid)
             characters = player.get_characters()
             if (
@@ -1649,16 +1666,17 @@ class VijnanaSuffusionStatus(CharacterStatus, _UsageStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[Preprocessable, Optional[Self]]:
-        new_item: Optional[eft.SpecificDamageEffect] = None
-        if isinstance(item, eft.SpecificDamageEffect):
-            if status_source != item.source:
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+        new_item: None | DmgPEvent = None
+        if signal is Preprocessables.DMG_ELEMENT:
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            if status_source != dmg.source:
                 return item, self
-            if signal is Preprocessables.DMG_ELEMENT:
-                if item.damage_type.charged_attack:
-                    new_item = replace(item, element=Element.DENDRO)
+            if dmg.damage_type.charged_attack:
+                new_item = DmgPEvent(dmg=replace(dmg, element=Element.DENDRO))
         if new_item is not None:
             return new_item, self
         else:

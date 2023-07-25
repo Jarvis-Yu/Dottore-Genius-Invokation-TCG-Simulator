@@ -407,7 +407,7 @@ class SwapChecker:
         _, swap_action = StatusProcessing.preprocess_by_all_statuses(
             game_state=game_state,
             pid=pid,
-            item=ActionEvent(
+            item=ActionPEvent(
                 source=StaticTarget(
                     pid=pid,
                     zone=Zone.CHARACTERS,
@@ -419,7 +419,7 @@ class SwapChecker:
             ),
             pp_type=Preprocessables.SWAP,
         )
-        assert isinstance(swap_action, ActionEvent)
+        assert isinstance(swap_action, ActionPEvent)
         if game_state.get_player(pid).get_dices().loosely_satisfy(swap_action.dices_cost):
             return swap_action.event_speed, swap_action.dices_cost
         else:
@@ -457,7 +457,7 @@ class SwapChecker:
             new_game_state, swap_action = StatusProcessing.preprocess_by_all_statuses(
                 game_state=game_state,
                 pid=pid,
-                item=ActionEvent(
+                item=ActionPEvent(
                     source=StaticTarget(
                         pid=pid,
                         zone=Zone.CHARACTERS,
@@ -469,7 +469,7 @@ class SwapChecker:
                 ),
                 pp_type=Preprocessables.SWAP,
             )
-            assert isinstance(swap_action, ActionEvent)
+            assert isinstance(swap_action, ActionPEvent)
             instruction_dices = action.instruction.dices
             player_dices = game_state.get_player(pid).get_dices()
             return case_val(
@@ -503,7 +503,7 @@ class SkillChecker:
         new_game_state, skill_event = StatusProcessing.preprocess_by_all_statuses(
             game_state=game_state,
             pid=pid,
-            item=ActionEvent(
+            item=ActionPEvent(
                 source=StaticTarget(
                     pid=pid,
                     zone=Zone.CHARACTERS,
@@ -515,7 +515,7 @@ class SkillChecker:
             ),
             pp_type=Preprocessables.SKILL,
         )
-        assert isinstance(skill_event, ActionEvent)
+        assert isinstance(skill_event, ActionPEvent)
         if game_state.get_player(pid).get_dices().loosely_satisfy(skill_event.dices_cost):
             return new_game_state, skill_event.dices_cost
         else:
@@ -549,7 +549,7 @@ class SkillChecker:
         game_state, skill_event = StatusProcessing.preprocess_by_all_statuses(
             game_state=game_state,
             pid=pid,
-            item=ActionEvent(
+            item=ActionPEvent(
                 source=StaticTarget(
                     pid=pid,
                     zone=Zone.CHARACTERS,
@@ -561,7 +561,7 @@ class SkillChecker:
             ),
             pp_type=Preprocessables.SKILL,
         )
-        assert isinstance(skill_event, ActionEvent)
+        assert isinstance(skill_event, ActionPEvent)
         paid_dices = action.instruction.dices
         if paid_dices.just_satisfy(skill_event.dices_cost) \
                 and (game_state.get_player(pid).get_dices() - paid_dices).is_legal():

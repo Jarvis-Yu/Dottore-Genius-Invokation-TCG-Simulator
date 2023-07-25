@@ -22,6 +22,7 @@ from ..support import support as sp
 
 from ..character.enums import CharacterSkill
 from ..element import Element, Reaction, ReactionDetail
+from ..event import *
 from ..helper.quality_of_life import just, case_val
 from ..state.enums import Pid, Act
 from ..status.enums import Preprocessables, Informables
@@ -590,11 +591,11 @@ class SpecificDamageEffect(DirectEffect):
         game_state, item = StatusProcessing.preprocess_by_all_statuses(
             game_state,
             source_id,
-            damage,
+            DmgPEvent(dmg=damage),
             pp_type
         )
-        assert type(item) == SpecificDamageEffect
-        damage = item
+        assert isinstance(item, DmgPEvent), item
+        damage = item.dmg
         return game_state, damage
 
     @classmethod

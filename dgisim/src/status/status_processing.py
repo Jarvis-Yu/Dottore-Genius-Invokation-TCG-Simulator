@@ -10,6 +10,7 @@ from ..character.enums import CharacterSkill
 from ..state.enums import Pid
 from ..effect.enums import Zone, TriggeringSignal
 from ..effect.structs import StaticTarget
+from ..event import *
 from .enums import Preprocessables
 
 if TYPE_CHECKING:
@@ -142,9 +143,9 @@ class StatusProcessing:
     def preprocess_by_all_statuses(
             game_state: GameState,
             pid: Pid,
-            item: Preprocessable,
+            item: PreprocessableEvent,
             pp_type: Preprocessables,
-    ) -> tuple[GameState, Preprocessable]:
+    ) -> tuple[GameState, PreprocessableEvent]:
         def f(game_state: GameState, status: stt.Status, status_source: StaticTarget) -> GameState:
             nonlocal item
             item, new_status = status.preprocess(game_state, status_source, item, pp_type)
