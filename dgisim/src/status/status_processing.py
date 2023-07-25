@@ -11,7 +11,7 @@ from ..state.enums import Pid
 from ..effect.enums import Zone, TriggeringSignal
 from ..effect.structs import StaticTarget
 from ..event import *
-from .enums import Preprocessables
+from .enums import Preprocessables, Informables
 
 if TYPE_CHECKING:
     from ..card.card import Card
@@ -143,8 +143,8 @@ class StatusProcessing:
     def preprocess_by_all_statuses(
             game_state: GameState,
             pid: Pid,
-            item: PreprocessableEvent,
             pp_type: Preprocessables,
+            item: PreprocessableEvent,
     ) -> tuple[GameState, PreprocessableEvent]:
         def f(game_state: GameState, status: stt.Status, status_source: StaticTarget) -> GameState:
             nonlocal item
@@ -217,15 +217,15 @@ class StatusProcessing:
     def inform_all_statuses(
             game_state: GameState,
             pid: Pid,
-            info: eft.SpecificDamageEffect | CharacterSkill | Card,
-            source: None | StaticTarget = None,
+            info_type: Informables,
+            info: InformableEvent,
     ) -> GameState:
         def f(game_state: GameState, status: stt.Status, status_source: StaticTarget) -> GameState:
             return status.inform(
                 game_state,
                 status_source,
+                info_type,
                 info,
-                info_source=source,
             )
 
         game_state = StatusProcessing.loop_all_statuses(game_state, pid, f)

@@ -138,12 +138,12 @@ class Card:
         game_state, card_event = StatusProcessing.preprocess_by_all_statuses(
             game_state=game_state,
             pid=pid,
+            pp_type=Preprocessables.CARD,
             item=CardPEvent(
                 pid=pid,
                 card_type=cls,
                 dices_cost=cls._DICE_COST,
             ),
-            pp_type=Preprocessables.CARD
         )
         assert isinstance(card_event, CardPEvent)
         return game_state, card_event.dices_cost

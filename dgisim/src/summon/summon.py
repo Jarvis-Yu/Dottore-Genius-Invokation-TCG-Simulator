@@ -23,8 +23,9 @@ from ..character.enums import CharacterSkill
 from ..effect.enums import TriggeringSignal, DynamicCharacterTarget, Zone
 from ..effect.structs import DamageType, StaticTarget
 from ..element import Element, Reaction
+from ..event import *
 from ..helper.quality_of_life import BIG_INT
-from ..status.enums import Preprocessables
+from ..status.enums import Preprocessables, Informables
 
 if TYPE_CHECKING:
     from ..card.card import Card
@@ -148,15 +149,14 @@ class _ConvertableAnemoSummon(_DestroyOnNumSummon):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            information: eft.SpecificDamageEffect | CharacterSkill | Card,
-            info_source: Optional[StaticTarget],
+            info_type: Informables,
+            information: InformableEvent,
     ) -> Self:
-        if isinstance(information, eft.SpecificDamageEffect):
-            damage = information
-            assert info_source is not None
+        if isinstance(information, DmgIEvent):
+            damage = information.dmg
             if (
                     self._convertable()
-                    and info_source.pid is status_source.pid
+                    and damage.source.pid is status_source.pid
                     and (
                         damage.damage_type.from_character()
                         or damage.damage_type.from_summon()
@@ -339,12 +339,12 @@ class UshiSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            information: eft.SpecificDamageEffect | CharacterSkill | Card,
-            info_source: Optional[StaticTarget],
+            info_type: Informables,
+            information: InformableEvent,
     ) -> Self:
-        if isinstance(information, eft.SpecificDamageEffect):
+        if isinstance(information, DmgIEvent):
             if (
-                    self._is_target(game_state, status_source, information)
+                    self._is_target(game_state, status_source, information.dmg)
                     and self.status_gaining_usages > 0
                     and self.status_gaining_available is False
             ):

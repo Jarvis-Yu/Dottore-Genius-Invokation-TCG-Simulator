@@ -591,8 +591,8 @@ class SpecificDamageEffect(DirectEffect):
         game_state, item = StatusProcessing.preprocess_by_all_statuses(
             game_state,
             source_id,
+            pp_type,
             DmgPEvent(dmg=damage),
-            pp_type
         )
         assert isinstance(item, DmgPEvent), item
         damage = item.dmg
@@ -672,8 +672,8 @@ class SpecificDamageEffect(DirectEffect):
         game_state = StatusProcessing.inform_all_statuses(
             game_state,
             actual_damage.source.pid,
-            actual_damage,
-            actual_damage.source,
+            Informables.DMG_DELT,
+            DmgIEvent(dmg=actual_damage),
         )
 
         # Get damage target
@@ -1384,6 +1384,9 @@ class BroadCastSkillInfoEffect(DirectEffect):
         return StatusProcessing.inform_all_statuses(
             game_state,
             self.source.pid,
-            self.skill,
-            source=self.source,
+            Informables.SKILL_USAGE,
+            SkillIEvent(
+                source=self.source,
+                skill_type=self.skill,
+            ),
         )

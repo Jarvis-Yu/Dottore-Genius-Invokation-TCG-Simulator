@@ -26,7 +26,7 @@ from ..element import Element, Reaction
 from ..event import *
 from ..helper.hashable_dict import HashableDict
 from ..helper.quality_of_life import just, BIG_INT, case_val
-from .enums import Preprocessables
+from .enums import Preprocessables, Informables
 
 if TYPE_CHECKING:
     from ..card.card import Card
@@ -169,10 +169,10 @@ class Status:
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            information: eft.SpecificDamageEffect | CharacterSkill | Card,
-            info_source: Optional[StaticTarget] = None,
+            info_type: Informables,
+            information: InformableEvent,
     ) -> GameState:
-        new_self = self._inform(game_state, status_source, information, info_source)
+        new_self = self._inform(game_state, status_source, info_type, information)
         if new_self == self:
             return game_state
 
@@ -211,8 +211,8 @@ class Status:
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            information: eft.SpecificDamageEffect | CharacterSkill | Card,
-            info_source: Optional[StaticTarget],
+            info_type: Informables,
+            information: InformableEvent,
     ) -> Self:
         return self
 
@@ -669,13 +669,14 @@ class PlungeAttackStatus(HiddenStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            information: eft.SpecificDamageEffect | CharacterSkill | Card,
-            info_source: Optional[StaticTarget],
+            info_type: Informables,
+            information: InformableEvent,
     ) -> Self:
-        if isinstance(information, CharacterSkill) \
-                and info_source == status_source \
-                and self.can_plunge:
-            return replace(self, invalidate=True)
+        if info_type is Informables.SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if information.source == status_source \
+                    and self.can_plunge:
+                return replace(self, invalidate=True)
         return self
 
     @override
@@ -1120,14 +1121,15 @@ class RagingOniKing(CharacterStatus, _InfusionStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            information: eft.SpecificDamageEffect | CharacterSkill | Card,
-            info_source: Optional[StaticTarget],
+            info_type: Informables,
+            information: InformableEvent,
     ) -> Self:
-        if isinstance(information, CharacterSkill) \
-                and info_source == status_source \
-                and information is CharacterSkill.NORMAL_ATTACK \
-                and not self.status_gaining_available:
-            return replace(self, status_gaining_available=True)
+        if info_type is Informables.SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if information.source == status_source \
+                    and information.skill_type is CharacterSkill.NORMAL_ATTACK \
+                    and not self.status_gaining_available:
+                return replace(self, status_gaining_available=True)
         return self
 
     @override
@@ -1206,14 +1208,15 @@ class MidareRanzanStatus(CharacterStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            information: eft.SpecificDamageEffect | CharacterSkill | Card,
-            info_source: Optional[StaticTarget],
+            info_type: Informables,
+            information: InformableEvent,
     ) -> Self:
-        if isinstance(information, CharacterSkill) \
-                and info_source == status_source \
-                and not self._protected \
-                and not self._needs_removal:
-            return replace(self, _needs_removal=True)
+        if info_type is Informables.SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if information.source == status_source \
+                    and not self._protected \
+                    and not self._needs_removal:
+                return replace(self, _needs_removal=True)
         return self
 
     @override
@@ -1398,18 +1401,18 @@ class ColdBloodedStrikeStatus(TalentEquipmentStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            information: eft.SpecificDamageEffect | CharacterSkill | Card,
-            info_source: Optional[StaticTarget],
+            info_type: Informables,
+            information: InformableEvent,
     ) -> Self:
         if self.activated or self.usages == 0:
             return self
 
-        if not isinstance(information, CharacterSkill):
+        if info_type is not Informables.SKILL_USAGE:
             return self
 
-        assert info_source is not None
-        if status_source != info_source \
-                or information != CharacterSkill.ELEMENTAL_SKILL1:
+        assert isinstance(information, SkillIEvent)
+        if status_source != information.source \
+                or information.skill_type != CharacterSkill.ELEMENTAL_SKILL1:
             return self
 
         return replace(self, activated=True)
@@ -1550,17 +1553,17 @@ class SparksnSplash(CombatStatus, _UsageStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            information: eft.SpecificDamageEffect | CharacterSkill | Card,
-            info_source: Optional[StaticTarget],
+            info_type: Informables,
+            information: InformableEvent,
     ) -> Self:
         if self.activated or self.usages == 0:
             return self
 
-        if not isinstance(information, CharacterSkill):
+        if info_type is not Informables.SKILL_USAGE:
             return self
 
-        assert info_source is not None
-        if status_source.pid is not info_source.pid:
+        assert isinstance(information, SkillIEvent), information
+        if status_source.pid is not information.source.pid:
             return self
 
         return replace(self, activated=True)
@@ -1647,15 +1650,15 @@ class VijnanaSuffusionStatus(CharacterStatus, _UsageStatus):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            information: eft.SpecificDamageEffect | CharacterSkill | Card,
-            info_source: Optional[StaticTarget],
+            info_type: Informables,
+            information: InformableEvent,
     ) -> Self:
         if (
                 self.activated
                 or self.usages == 0
-                or not isinstance(information, eft.SpecificDamageEffect)
-                or status_source != info_source
-                or not information.damage_type.charged_attack
+                or not isinstance(information, DmgIEvent)
+                or status_source != information.dmg.source
+                or not information.dmg.damage_type.charged_attack
         ):
             return self
 
