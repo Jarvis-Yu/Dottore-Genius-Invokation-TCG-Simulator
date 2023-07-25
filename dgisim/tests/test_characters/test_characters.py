@@ -62,8 +62,9 @@ class TestCharacters(unittest.TestCase):
                 lambda cs: cs.factory().active_character_id(None).build()  # type: ignore
             ).build()
         ).build()
-        ordered_chars = base_game.get_player1().get_characters().get_character_in_activity_order()
-        self.assertFalse(ordered_chars)
+        characters = base_game.get_player1().get_characters()
+        ordered_chars = characters.get_character_in_activity_order()
+        self.assertEqual(ordered_chars, characters._characters)
 
     def test_get_none_active_characters(self):
         characters = Characters.from_list([Keqing, Keqing, Keqing])

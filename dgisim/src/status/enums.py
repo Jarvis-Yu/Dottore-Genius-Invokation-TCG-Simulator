@@ -3,6 +3,7 @@ from enum import Enum
 
 __all__ = [
     "Preprocessables",
+    "Informables",
 ]
 
 
@@ -19,3 +20,8 @@ class Preprocessables(Enum):
     DMG_ELEMENT = "DmgElement"    # To determine the element
     DMG_REACTION = "DmgReaction"  # To determine the reaction
     DMG_AMOUNT = "DmgNumber"      # To determine final amount of damage
+
+class Informables(Enum):
+    DMG_DELT = "DmgDelt"
+    SKILL_USAGE = "SkillUsage"
+    CHARACTER_DEATH = "CharacterDeath"

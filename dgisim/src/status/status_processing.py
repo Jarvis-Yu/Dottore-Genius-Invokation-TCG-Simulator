@@ -115,6 +115,9 @@ class StatusProcessing:
 
         def f(game_state: GameState, status: stt.Status, target: StaticTarget) -> GameState:
             nonlocal effects
+            if signal not in status.REACTABLE_SIGNALS:
+                return game_state
+
             if isinstance(status, stt.HiddenStatus) \
                     or isinstance(status, stt.EquipmentStatus) \
                     or isinstance(status, stt.CharacterStatus):

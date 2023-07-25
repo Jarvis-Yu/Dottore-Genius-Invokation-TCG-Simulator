@@ -15,7 +15,7 @@ from ..summon import summon as sm
 
 from ..dices import AbstractDices
 from ..effect.effects_template import *
-from ..effect.enums import Zone, DynamicCharacterTarget
+from ..effect.enums import Zone, DynamicCharacterTarget, TriggeringSignal
 from ..effect.structs import StaticTarget, DamageType
 from ..element import *
 from ..helper.quality_of_life import case_val
@@ -30,6 +30,7 @@ __all__ = [
     "Character",
 
     # concretes
+    "AratakiItto",
     "KaedeharaKazuha",
     "Kaeya",
     "Keqing",
@@ -172,7 +173,7 @@ class Character:
                 source=source,
                 skill=skill_type,
             ),
-            eft.SwapCharacterCheckerEffect(
+            eft.SwapCharacterCheckerEffect(  # handle swap events
                 my_active=source,
                 oppo_active=StaticTarget(
                     pid=source.pid.other(),
@@ -180,7 +181,11 @@ class Character:
                     id=game_state.get_other_player(source.pid).just_get_active_character().get_id()
                 )
             ),
-            eft.DeathCheckCheckerEffect(),
+            eft.DeathCheckCheckerEffect(),  # detect death swap request
+            eft.AllStatusTriggererEffect(
+                pid=source.pid,
+                signal=TriggeringSignal.POST_DMG,
+            ),
         )
 
     def normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
@@ -395,6 +400,96 @@ class CharacterFactory:
             equipments=self._equipments,
             statuses=self._statuses,
             elemental_aura=self._aura,
+        )
+
+
+class AratakiItto(Character):
+    _ELEMENT = Element.GEO
+    _WEAPON_TYPE = WeaponType.CLAYMORE
+
+    @override
+    @staticmethod
+    def _talent_status() -> Optional[type[stt.EquipmentStatus]]:
+        return stt.AratakiIchibanStatus
+
+    @override
+    @classmethod
+    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
+        if skill_type is CharacterSkill.NORMAL_ATTACK:
+            return AbstractDices({
+                Element.GEO: 1,
+                Element.ANY: 2,
+            })
+        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
+            return AbstractDices({
+                Element.GEO: 3,
+            })
+        elif skill_type is CharacterSkill.ELEMENTAL_BURST:
+            return AbstractDices({
+                Element.GEO: 3,
+            })
+        raise Exception("Not Reached!")
+
+    @override
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        )
+
+    @override
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.GEO,
+                damage=1,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+            eft.AddCharacterStatusEffect(
+                target=source,
+                status=stt.SuperlativeSuperstrengthStatus,
+            ),
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=sm.UshiSummon,
+            ),
+        )
+
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.get_max_energy(),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.GEO,
+                damage=5,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            eft.AddCharacterStatusEffect(
+                target=source,
+                status=stt.RagingOniKing,
+            ),
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=3,
+            hiddens=stts.Statuses((stt.PlungeAttackStatus(),)),
+            equipments=stts.EquipmentStatuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
         )
 
 

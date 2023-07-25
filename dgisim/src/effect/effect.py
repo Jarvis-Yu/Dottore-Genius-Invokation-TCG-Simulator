@@ -24,7 +24,7 @@ from ..character.enums import CharacterSkill
 from ..element import Element, Reaction, ReactionDetail
 from ..helper.quality_of_life import just, case_val
 from ..state.enums import Pid, Act
-from ..status.enums import Preprocessables
+from ..status.enums import Preprocessables, Informables
 from ..status.status_processing import StatusProcessing
 from .enums import DynamicCharacterTarget, TriggeringSignal, Zone
 from .structs import StaticTarget, DamageType
@@ -684,8 +684,11 @@ class SpecificDamageEffect(DirectEffect):
         hp = target.get_hp()
         hp = max(0, hp - actual_damage.damage)
 
-        pid = self.target.pid
+        target_pid = self.target.pid
         effects: list[Effect] = [DefeatedCheckerEffect()]
+
+        if hp != target.get_hp():
+            target = target.factory().hp(hp).build()
 
         if reaction is None:
             pass
@@ -702,7 +705,7 @@ class SpecificDamageEffect(DirectEffect):
             assert actual_damage.target.zone is Zone.CHARACTERS
             if actual_damage.target.id is oppo_active_id:
                 effects.append(
-                    ForwardSwapCharacterEffect(pid)
+                    ForwardSwapCharacterEffect(target_pid)
                 )
 
         elif reaction.reaction_type is Reaction.SUPERCONDUCT \
@@ -774,17 +777,24 @@ class SpecificDamageEffect(DirectEffect):
             # this exception shouldn't be reached by now, but leave it here just to be safe
             raise Exception(f"Reaction {reaction.reaction_type} not handled")
 
-        if hp != target.get_hp():
-            target = target.factory().hp(hp).build()
-
-        return game_state.factory().f_player(
-            pid,
+        # damaged game state
+        game_state = game_state.factory().f_player(
+            target_pid,
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().character(target).build()  # type: ignore
             ).build()
         ).f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
+
+        # if target.defeated():
+        #     game_state = StatusProcessing.inform_all_statuses(
+        #         game_state,
+        #         self.source.pid,
+        #         self.target,
+        #     )
+
+        return game_state
 
 
 @dataclass(frozen=True, repr=False)

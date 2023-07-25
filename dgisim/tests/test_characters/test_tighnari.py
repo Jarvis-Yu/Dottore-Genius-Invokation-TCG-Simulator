@@ -76,7 +76,7 @@ class TestTighnari(unittest.TestCase):
             p1ac.get_character_statuses().just_find(VijnanaSuffusionStatus).usages,
             2
         )
-        self.assertTrue(ClusterbloomArrow not in p1.get_summons())
+        self.assertTrue(ClusterbloomArrowSummon not in p1.get_summons())
 
         # second normal attack (charged)
         a1.inject_action(SkillAction(
@@ -96,7 +96,7 @@ class TestTighnari(unittest.TestCase):
             1
         )
         self.assertEqual(
-            p1.get_summons().just_find(ClusterbloomArrow).usages,
+            p1.get_summons().just_find(ClusterbloomArrowSummon).usages,
             1,
         )
 
@@ -119,7 +119,7 @@ class TestTighnari(unittest.TestCase):
         self.assertFalse(p1.get_dices().is_even())
         self.assertTrue(VijnanaSuffusionStatus not in p1ac.get_character_statuses())
         self.assertEqual(
-            p1.get_summons().just_find(ClusterbloomArrow).usages,
+            p1.get_summons().just_find(ClusterbloomArrowSummon).usages,
             2,
         )
 
@@ -163,14 +163,14 @@ class TestTighnari(unittest.TestCase):
         base_game = self.BASE_GAME.factory().f_player1(
             lambda p: p.factory().f_summons(
                 lambda ss: ss.update_summon(
-                    ClusterbloomArrow()
+                    ClusterbloomArrowSummon()
                 ).update_summon(
-                    ClusterbloomArrow()
+                    ClusterbloomArrowSummon()
                 )
             ).build()
         ).build()
         p1_summons = base_game.get_player1().get_summons()
-        self.assertEqual(p1_summons.just_find(ClusterbloomArrow).usages, 2)
+        self.assertEqual(p1_summons.just_find(ClusterbloomArrowSummon).usages, 2)
 
         a1.inject_action(EndRoundAction())
         gsm = GameStateMachine(base_game, a1, a2)
@@ -185,7 +185,7 @@ class TestTighnari(unittest.TestCase):
         game_state = gsm.get_game_state()
         p1_summons = game_state.get_player1().get_summons()
         p2_ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p1_summons.just_find(ClusterbloomArrow).usages, 1)
+        self.assertEqual(p1_summons.just_find(ClusterbloomArrowSummon).usages, 1)
         self.assertEqual(p2_ac.get_hp(), 9)
         self.assertTrue(p2_ac.get_elemental_aura().contains(Element.DENDRO))
 
@@ -201,7 +201,7 @@ class TestTighnari(unittest.TestCase):
         game_state = gsm.get_game_state()
         p1_summons = game_state.get_player1().get_summons()
         p2_ac = game_state.get_player2().just_get_active_character()
-        self.assertTrue(ClusterbloomArrow not in p1_summons)
+        self.assertTrue(ClusterbloomArrowSummon not in p1_summons)
         self.assertEqual(p2_ac.get_hp(), 8)
         self.assertTrue(p2_ac.get_elemental_aura().contains(Element.DENDRO))
 

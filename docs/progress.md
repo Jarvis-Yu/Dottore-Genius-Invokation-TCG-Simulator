@@ -27,7 +27,7 @@ all I need now is to implement each card and character.
 ## Card (25/192 implemented)
 
 - [ ] Equipment Card
-  - [ ] Character Talent Equipment
+  - [ ] Character Talent Card
     - [x] ColdBlooded Strike
     - [x] Keen Sight
     - [x] Poetics of Fuubutsu

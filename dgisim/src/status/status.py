@@ -23,7 +23,7 @@ from ..character.enums import CharacterSkill, WeaponType
 from ..effect.enums import Zone, TriggeringSignal, DynamicCharacterTarget
 from ..effect.structs import StaticTarget, DamageType
 from ..element import Element, Reaction
-from ..event import EventSpeed, EventType, GameEvent
+from ..event import EventSpeed, EventType, ActionEvent
 from ..helper.hashable_dict import HashableDict
 from ..helper.quality_of_life import just, BIG_INT, case_val
 from .enums import Preprocessables
@@ -83,6 +83,10 @@ __all__ = [
     "SatiatedStatus",
 
     # character specific status
+    ## Arataki Itto ##
+    "AratakiIchibanStatus",
+    "RagingOniKing",
+    "SuperlativeSuperstrengthStatus",
     ## Kaedehara Kazuha ##
     "MidareRanzanStatus",
     "MidareRanzanCryoStatus",
@@ -90,10 +94,10 @@ __all__ = [
     "MidareRanzanHydroStatus",
     "MidareRanzanPyroStatus",
     "PoeticsOfFuubutsuStatus",
-    "PoeticsOfFuubutsuPyroStatus",
-    "PoeticsOfFuubutsuHydroStatus",
-    "PoeticsOfFuubutsuElectroStatus",
     "PoeticsOfFuubutsuCryoStatus",
+    "PoeticsOfFuubutsuElectroStatus",
+    "PoeticsOfFuubutsuHydroStatus",
+    "PoeticsOfFuubutsuPyroStatus",
     ## Kaeya ##
     "ColdBloodedStrikeStatus",
     "IcicleStatus",
@@ -116,6 +120,7 @@ __all__ = [
 ############################## base ##############################
 @dataclass(frozen=True)
 class Status:
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset()
 
     def __init__(self) -> None:
         if type(self) is Status:  # pragma: no cover
@@ -212,14 +217,11 @@ class Status:
     ) -> Self:
         return self
 
-    # def react_to_event(self, game_state: gs.GameState, event: TriggerringEvent) -> gs.GameState:
-    #     raise Exception("TODO")
-
     def react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> list[eft.Effect]:
         es, new_status = self._react_to_signal(game_state, source, signal)
-        es, new_status = self._post_react_to_signal(es, new_status, signal)
+        es, new_status = self._post_react_to_signal(es, new_status, source, signal)
 
         from ..summon import summon as sm
         from ..support import support as sp
@@ -313,11 +315,17 @@ class Status:
             self,
             effects: list[eft.Effect],
             new_status: Optional[Self],
+            source: StaticTarget,
             signal: TriggeringSignal,
     ) -> tuple[list[eft.Effect], Optional[Self]]:
-        if new_status != self:
-            return effects, new_status
-        return effects, self
+        if effects:
+            if any(isinstance(effect, eft.ReferredDamageEffect) for effect in effects):
+                effects.append(eft.AllStatusTriggererEffect(
+                    pid=source.pid,
+                    signal=TriggeringSignal.POST_DMG,
+                ))
+        return effects, case_val(new_status == self, self, new_status)
+
 
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
@@ -477,7 +485,6 @@ class _ShieldStatus(Status):
             game_state: GameState,
             status_source: StaticTarget,
             item: Preprocessable,
-            signal: Preprocessables,
     ) -> bool:
         from ..summon import summon as sm
         assert isinstance(item, eft.SpecificDamageEffect)
@@ -529,7 +536,7 @@ class FixedShieldStatus(_ShieldStatus, _UsageStatus):
             assert isinstance(item, eft.SpecificDamageEffect)
             if item.damage > 0 and self.usages > 0 \
                     and item.element != Element.PIERCING \
-                    and self._is_target(game_state, status_source, item, signal) \
+                    and self._is_target(game_state, status_source, item) \
                     and self._trigerring_condition(item):
                 new_dmg = max(0, item.damage - cls.SHIELD_AMOUNT)
                 new_item = replace(item, damage=new_dmg)
@@ -563,7 +570,7 @@ class StackedShieldStatus(_ShieldStatus, _UsageStatus):
             assert self.usages <= type(self).MAX_USAGES
             if item.damage > 0 and self.usages > 0 \
                     and item.element != Element.PIERCING \
-                    and self._is_target(game_state, status_source, item, signal):
+                    and self._is_target(game_state, status_source, item):
                 usages_consumed = min(ceil(item.damage / cls.SHIELD_AMOUNT), self.usages)
                 new_dmg = max(0, item.damage - usages_consumed * cls.SHIELD_AMOUNT)
                 new_item = replace(item, damage=new_dmg)
@@ -580,10 +587,13 @@ class StackedShieldStatus(_ShieldStatus, _UsageStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class _InfusionStatus(CharacterStatus, _UsageStatus):
+class _InfusionStatus(_UsageStatus):
     MAX_USAGES: ClassVar[int] = BIG_INT
-    ELEMENT: ClassVar[Optional[Element]] = None
+    ELEMENT: ClassVar[Element]
     damage_boost: int = 0
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
 
     @override
     def _preprocess(
@@ -593,7 +603,6 @@ class _InfusionStatus(CharacterStatus, _UsageStatus):
             item: Preprocessable,
             signal: Preprocessables,
     ) -> tuple[Preprocessable, Optional[Self]]:
-        assert self.ELEMENT is not None
         new_item: Optional[eft.SpecificDamageEffect] = None
         if isinstance(item, eft.SpecificDamageEffect):
             if signal is Preprocessables.DMG_ELEMENT:
@@ -637,10 +646,6 @@ class _InfusionStatus(CharacterStatus, _UsageStatus):
         return [], replace(self, usages=d_usages)
 
 
-@dataclass(frozen=True, kw_only=True)
-class ElectroInfusionStatus(_InfusionStatus):
-    ELEMENT: ClassVar[Optional[Element]] = Element.ELECTRO
-
 ############################## Hidden Status ##############################
 
 
@@ -648,6 +653,12 @@ class ElectroInfusionStatus(_InfusionStatus):
 class PlungeAttackStatus(HiddenStatus):
     can_plunge: bool = False
     invalidate: bool = False
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.ROUND_END,
+        TriggeringSignal.SWAP_EVENT_1,
+        TriggeringSignal.SWAP_EVENT_2,
+    ))
 
     @override
     def _inform(
@@ -771,7 +782,7 @@ class ChangingShiftsStatus(CombatStatus):
             signal: Preprocessables,
     ) -> tuple[Preprocessable, Optional[Self]]:
         if signal is Preprocessables.SWAP:
-            assert isinstance(item, GameEvent) and item.event_type is EventType.SWAP
+            assert isinstance(item, ActionEvent) and item.event_type is EventType.SWAP
             if item.source.pid is status_source.pid \
                     and item.dices_cost.num_dices() >= self.COST_DEDUCTION:
                 assert item.dices_cost.num_dices() == item.dices_cost[Element.ANY]
@@ -839,6 +850,9 @@ class DendroCoreStatus(CombatStatus):
 @dataclass(frozen=True)
 class FrozenStatus(CharacterStatus):
     damage_boost: ClassVar[int] = 2
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
 
     @override
     def _preprocess(
@@ -876,7 +890,7 @@ class LeaveItToMeStatus(CombatStatus):
             signal: Preprocessables,
     ) -> tuple[Preprocessable, Optional[Self]]:
         if signal is Preprocessables.SWAP:
-            assert isinstance(item, GameEvent) and item.event_type is EventType.SWAP
+            assert isinstance(item, ActionEvent) and item.event_type is EventType.SWAP
             if item.source.pid is status_source.pid \
                     and item.event_speed is EventSpeed.COMBAT_ACTION:
                 return replace(item, event_speed=EventSpeed.FAST_ACTION), None
@@ -891,6 +905,9 @@ class JueyunGuobaStatus(CharacterStatus, _UsageStatus):
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 1
     damage_boost: ClassVar[int] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
 
     @override
     def _preprocess(
@@ -922,6 +939,9 @@ class LotusFlowerCrispStatus(CharacterStatus, FixedShieldStatus):
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 1
     SHIELD_AMOUNT: ClassVar[int] = 3
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
 
     @override
     def _react_to_signal(
@@ -941,6 +961,9 @@ class MintyMeatRollsStatus(CharacterStatus, _UsageStatus):
     usages: int = 3
     MAX_USAGES: ClassVar[int] = 3
     COST_DEDUCTION: ClassVar[int] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
 
     @override
     def _preprocess(
@@ -951,7 +974,7 @@ class MintyMeatRollsStatus(CharacterStatus, _UsageStatus):
             signal: Preprocessables,
     ) -> tuple[Preprocessable, Optional[Self]]:
         if signal is Preprocessables.SKILL:
-            assert isinstance(item, GameEvent)
+            assert isinstance(item, ActionEvent)
             if status_source == item.source \
                     and item.event_type is EventType.NORMAL_ATTACK \
                     and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION:
@@ -976,6 +999,10 @@ class MintyMeatRollsStatus(CharacterStatus, _UsageStatus):
 class MushroomPizzaStatus(CharacterStatus, _UsageStatus):
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+        TriggeringSignal.ROUND_END,
+    ))
 
     @override
     def _react_to_signal(
@@ -1001,6 +1028,9 @@ class NorthernSmokedChickenStatus(CharacterStatus, _UsageStatus):
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 1
     COST_DEDUCTION: ClassVar[int] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
 
     @override
     def _preprocess(
@@ -1011,7 +1041,7 @@ class NorthernSmokedChickenStatus(CharacterStatus, _UsageStatus):
             signal: Preprocessables,
     ) -> tuple[Preprocessable, Optional[Self]]:
         if signal is Preprocessables.SKILL:
-            assert isinstance(item, GameEvent)
+            assert isinstance(item, ActionEvent)
             if status_source == item.source \
                     and item.event_type is EventType.NORMAL_ATTACK \
                     and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION:
@@ -1034,6 +1064,9 @@ class NorthernSmokedChickenStatus(CharacterStatus, _UsageStatus):
 
 @dataclass(frozen=True)
 class SatiatedStatus(CharacterStatus):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
 
     @override
     def _react_to_signal(
@@ -1049,8 +1082,100 @@ class SatiatedStatus(CharacterStatus):
 Group statues by characters, characters ordered alphabetically
 """
 
+#### Arataki Itto ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class AratakiIchibanStatus(TalentEquipmentStatus):
+    pass
+
+
+@dataclass(frozen=True, kw_only=True)
+class RagingOniKing(CharacterStatus, _InfusionStatus):
+    usages: int = 2  # duration
+    ELEMENT: ClassVar[Element] = Element.GEO
+    damage_boost: int = 2
+    status_gaining_usages: int = 1
+    status_gaining_available: bool = False
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            information: eft.SpecificDamageEffect | CharacterSkill | Card,
+            info_source: Optional[StaticTarget],
+    ) -> Self:
+        if isinstance(information, CharacterSkill) \
+                and info_source == status_source \
+                and information is CharacterSkill.NORMAL_ATTACK \
+                and not self.status_gaining_available:
+            return replace(self, status_gaining_available=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], replace(self, usages=-1)
+        elif signal is TriggeringSignal.COMBAT_ACTION:
+            if self.status_gaining_available:
+                return [
+                    eft.AddCharacterStatusEffect(
+                        target=source,
+                        status=SuperlativeSuperstrengthStatus,
+                    ),
+                ], replace(self, usages=0, status_gaining_usages=0, status_gaining_available=False)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 3
+    DAMAGE_BOOST: ClassVar[int] = 1
+    COST_DEDUCTION: ClassVar[int] = 1
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: Preprocessable,
+            signal: Preprocessables,
+    ) -> tuple[Preprocessable, Optional[Self]]:
+        if signal is Preprocessables.DMG_AMOUNT:
+            assert isinstance(item, eft.SpecificDamageEffect)
+            if status_source != item.source:
+                return item, self
+            if item.damage_type.charged_attack:
+                new_item = replace(item, damage=item.damage + self.DAMAGE_BOOST)
+                new_self = replace(self, usages=self.usages - 1)
+                return new_item, new_self
+        elif signal is Preprocessables.SKILL:
+            assert isinstance(item, ActionEvent)
+            player = game_state.get_player(status_source.pid)
+            if (
+                    self.usages >= 2
+                    and status_source == item.source
+                    and item.event_type is EventType.NORMAL_ATTACK
+                    and player.get_dices().is_even()
+                    and item.dices_cost[Element.ANY] > 0
+            ):
+                item = replace(
+                    item,
+                    dices_cost=(item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
+                )
+                return item, self
+        return item, self
 
 #### Kaedehara Kazuha ####
+
 
 @dataclass(frozen=True, kw_only=True)
 class MidareRanzanStatus(CharacterStatus):
@@ -1058,6 +1183,9 @@ class MidareRanzanStatus(CharacterStatus):
     _needs_removal: bool = False
     _ELEMENT: ClassVar[Element] = Element.ANEMO
     _DMG_BOOST: ClassVar[int] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+    ))
 
     @override
     def _inform(
@@ -1180,13 +1308,8 @@ class _PoeticsOfFuubutsuElementStatus(CombatStatus, _UsageStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class PoeticsOfFuubutsuPyroStatus(_PoeticsOfFuubutsuElementStatus):
-    _ELEM: Element = Element.PYRO
-
-
-@dataclass(frozen=True, kw_only=True)
-class PoeticsOfFuubutsuHydroStatus(_PoeticsOfFuubutsuElementStatus):
-    _ELEM: Element = Element.HYDRO
+class PoeticsOfFuubutsuCryoStatus(_PoeticsOfFuubutsuElementStatus):
+    _ELEM: Element = Element.CRYO
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1195,8 +1318,13 @@ class PoeticsOfFuubutsuElectroStatus(_PoeticsOfFuubutsuElementStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class PoeticsOfFuubutsuCryoStatus(_PoeticsOfFuubutsuElementStatus):
-    _ELEM: Element = Element.CRYO
+class PoeticsOfFuubutsuHydroStatus(_PoeticsOfFuubutsuElementStatus):
+    _ELEM: Element = Element.HYDRO
+
+
+@dataclass(frozen=True, kw_only=True)
+class PoeticsOfFuubutsuPyroStatus(_PoeticsOfFuubutsuElementStatus):
+    _ELEM: Element = Element.PYRO
 
 
 _POETICS_OF_FUUBUTSU_MAP: dict[Element, type[_PoeticsOfFuubutsuElementStatus]] = HashableDict({
@@ -1212,6 +1340,10 @@ _POETICS_OF_FUUBUTSU_MAP: dict[Element, type[_PoeticsOfFuubutsuElementStatus]] =
 @dataclass(frozen=True, kw_only=True)
 class IcicleStatus(CombatStatus, _UsageStatus):
     usages: int = 3
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.SWAP_EVENT_1,
+        TriggeringSignal.SWAP_EVENT_2,
+    ))
 
     def _react_to_signal(
             self,
@@ -1240,6 +1372,10 @@ class ColdBloodedStrikeStatus(TalentEquipmentStatus):
     """
     usages: int = 1
     activated: bool = False
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.ROUND_END,
+    ))
 
     @override
     def _inform(
@@ -1296,6 +1432,9 @@ class ColdBloodedStrikeStatus(TalentEquipmentStatus):
 @dataclass(frozen=True, kw_only=True)
 class KeqingTalentStatus(HiddenStatus):
     can_infuse: bool
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+    ))
 
     def _react_to_signal(
             self,
@@ -1317,8 +1456,8 @@ class ThunderingPenanceStatus(TalentEquipmentStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class KeqingElectroInfusionStatus(ElectroInfusionStatus):
-    pass
+class KeqingElectroInfusionStatus(CharacterStatus, _InfusionStatus):
+    ELEMENT: ClassVar[Element] = Element.ELECTRO
 
     def __str__(self) -> str:
         return super().__str__() + f"({self.damage_boost})"
@@ -1350,7 +1489,7 @@ class ExplosiveSparkStatus(CharacterStatus, _UsageStatus):
                 new_self = replace(self, usages=self.usages - 1)
                 return new_item, new_self
         elif signal is Preprocessables.SKILL:
-            assert isinstance(item, GameEvent)
+            assert isinstance(item, ActionEvent)
             player = game_state.get_player(status_source.pid)
             if (
                     status_source == item.source
@@ -1385,6 +1524,9 @@ class SparksnSplash(CombatStatus, _UsageStatus):
     usages: int = 2
     activated: bool = False
     MAX_USAGES: ClassVar[int] = 2
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+    ))
 
     @override
     def _inform(
@@ -1454,7 +1596,7 @@ class KeenSightStatus(TalentEquipmentStatus):
             signal: Preprocessables,
     ) -> tuple[Preprocessable, Optional[Self]]:
         if signal is Preprocessables.SKILL:
-            assert isinstance(item, GameEvent)
+            assert isinstance(item, ActionEvent)
             player = game_state.get_player(status_source.pid)
             characters = player.get_characters()
             if (
@@ -1479,6 +1621,9 @@ class VijnanaSuffusionStatus(CharacterStatus, _UsageStatus):
     usages: int = 2
     activated: bool = False
     MAX_USAGES: ClassVar[int] = 2
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+    ))
 
     @override
     def _inform(
@@ -1530,12 +1675,12 @@ class VijnanaSuffusionStatus(CharacterStatus, _UsageStatus):
         new_self = self
 
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
-            from ..summon.summon import ClusterbloomArrow
+            from ..summon.summon import ClusterbloomArrowSummon
             assert self.usages >= 1
             es.append(
                 eft.AddSummonEffect(
                     target_pid=source.pid,
-                    summon=ClusterbloomArrow,
+                    summon=ClusterbloomArrowSummon,
                 )
             )
             new_self = replace(new_self, usages=-1, activated=False)

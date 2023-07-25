@@ -27,7 +27,8 @@ class TriggeringSignal(Enum):
     SWAP_EVENT_2 = 4  # P2's swap
     ROUND_START = 5
     END_ROUND_CHECK_OUT = 6  # summons etc.
-    ROUND_END = 7  # remove frozen etc.
+    POST_DMG = 7  # triggering after each summon effect
+    ROUND_END = 8  # remove frozen etc.
 
     @classmethod
     def swap_event(cls, pid: Pid) -> TriggeringSignal:

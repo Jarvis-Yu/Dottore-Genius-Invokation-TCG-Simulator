@@ -5,15 +5,17 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .card.card import Card
+    from .effect.effect import SpecificDamageEffect
     from .effect.structs import StaticTarget
     from .dices import AbstractDices
     from .state.enums import Pid
 
 __all__ = [
+    "ActionEvent",
     "CardEvent",
+    "DmgEvent",
     "EventSpeed",
     "EventType",
-    "GameEvent",
 ]
 
 
@@ -32,6 +34,16 @@ class EventType(Enum):
 
 @dataclass(frozen=True, kw_only=True)
 class GameEvent:
+    pass
+
+
+@dataclass(frozen=True, kw_only=True)
+class DmgEvent(GameEvent):
+    dmg: SpecificDamageEffect
+
+
+@dataclass(frozen=True, kw_only=True)
+class ActionEvent(GameEvent):
     source: StaticTarget       # this source is who caused the GameEvent
     event_type: EventType
     event_speed: EventSpeed
@@ -39,7 +51,7 @@ class GameEvent:
 
 
 @dataclass(frozen=True, kw_only=True)
-class CardEvent:
+class CardEvent(GameEvent):
     pid: Pid
     card_type: type[Card]
     dices_cost: AbstractDices

@@ -57,6 +57,9 @@ class Support(stt.Status):
 class XudongSupport(Support):
     usages: int = 1
     COST_DEDUCTION: ClassVar[int] = 2
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
 
     @override
     def _preprocess(

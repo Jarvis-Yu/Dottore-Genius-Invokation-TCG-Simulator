@@ -20,15 +20,16 @@ from ..effect import effect as eft
 from ..status import status as stt
 
 from ..character.enums import CharacterSkill
-from ..effect.enums import TriggeringSignal, DynamicCharacterTarget
-from ..effect.structs import DamageType
+from ..effect.enums import TriggeringSignal, DynamicCharacterTarget, Zone
+from ..effect.structs import DamageType, StaticTarget
 from ..element import Element, Reaction
 from ..helper.quality_of_life import BIG_INT
+from ..status.enums import Preprocessables
 
 if TYPE_CHECKING:
     from ..card.card import Card
-    from ..effect.structs import StaticTarget
     from ..state.game_state import GameState
+    from ..status.types import Preprocessable
 
 __all__ = [
     # base
@@ -37,10 +38,11 @@ __all__ = [
     # concrete implementations
     "AutumnWhirlwindSummon",
     "BurningFlameSummon",
-    "ClusterbloomArrow",
+    "ClusterbloomArrowSummon",
     "OceanicMimicFrogSummon",
     "OceanicMimicRaptorSummon",
     "OceanicMimicSquirrelSummon",
+    "UshiSummon",
 ]
 
 
@@ -75,16 +77,17 @@ class _DestoryOnEndNumSummon(Summon):
             self,
             effects: list[eft.Effect],
             new_status: Optional[Self],
+            source: StaticTarget,
             signal: TriggeringSignal,
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         if new_status is None:
-            return effects, new_status
+            return super()._post_react_to_signal(effects, new_status, source, signal)
 
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT \
                 and self.usages + new_status.usages <= 0:
-            return effects, None
+            return super()._post_react_to_signal(effects, None, source, signal)
 
-        return effects, new_status
+        return super()._post_react_to_signal(effects, new_status, source, signal)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -92,7 +95,10 @@ class _DmgPerRoundSummon(_DestroyOnNumSummon):
     usages: int = -1
     MAX_USAGES: ClassVar[int] = BIG_INT
     DMG: ClassVar[int] = 0
-    ELEMENT: ClassVar[Element] = Element.ANY  # should be overriden
+    ELEMENT: ClassVar[Element]
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    ))
 
     def _react_to_signal(
             self,
@@ -127,6 +133,10 @@ class _ConvertableAnemoSummon(_DestroyOnNumSummon):
     curr_elem: Element = Element.ANEMO
     ready_elem: None | Element = None
     DMG: ClassVar[int]
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    ))
 
     def _convertable(self) -> bool:
         return self.curr_elem is Element.ANEMO
@@ -244,7 +254,7 @@ class BurningFlameSummon(_DmgPerRoundSummon):
 
 
 @dataclass(frozen=True, kw_only=True)
-class ClusterbloomArrow(_DmgPerRoundSummon):
+class ClusterbloomArrowSummon(_DmgPerRoundSummon):
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 2
     DMG: ClassVar[int] = 1
@@ -257,6 +267,9 @@ class OceanicMimicFrogSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
     MAX_USAGES: ClassVar[int] = 2
     SHIELD_AMOUNT: ClassVar[int] = 1
     DMG: ClassVar[int] = 2
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    ))
 
     @override
     @staticmethod
@@ -301,3 +314,83 @@ class OceanicMimicSquirrelSummon(_DmgPerRoundSummon):
     MAX_USAGES: ClassVar[int] = 2
     DMG: ClassVar[int] = 2
     ELEMENT: ClassVar[Element] = Element.HYDRO
+
+
+@dataclass(frozen=True, kw_only=True)
+class UshiSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    SHIELD_AMOUNT: ClassVar[int] = 1
+    DMG: ClassVar[int] = 1
+    status_gaining_usages: int = 1
+    status_gaining_available: bool = False
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+        TriggeringSignal.POST_DMG,
+    ))
+
+    @override
+    @staticmethod
+    def _auto_destroy() -> bool:
+        return False
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            information: eft.SpecificDamageEffect | CharacterSkill | Card,
+            info_source: Optional[StaticTarget],
+    ) -> Self:
+        if isinstance(information, eft.SpecificDamageEffect):
+            if (
+                    self._is_target(game_state, status_source, information)
+                    and self.status_gaining_usages > 0
+                    and self.status_gaining_available is False
+            ):
+                return replace(self, status_gaining_available=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            return [
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=Element.GEO,
+                    damage=self.DMG,
+                    damage_type=DamageType(summon=True),
+                )
+            ], None
+
+        elif signal is TriggeringSignal.POST_DMG:
+            if self.status_gaining_available is False:
+                return [], self
+            assert self.status_gaining_usages > 0
+            from ..character.character import AratakiItto
+            itto = game_state.get_player(
+                source.pid).get_characters().find_first_character(AratakiItto)
+            assert itto is not None
+            return [
+                eft.AddCharacterStatusEffect(
+                    target=StaticTarget(
+                        pid=source.pid,
+                        zone=Zone.CHARACTERS,
+                        id=itto.get_id(),
+                    ),
+                    status=stt.SuperlativeSuperstrengthStatus
+                )
+            ], replace(
+                self,
+                usages=0,
+                status_gaining_usages=self.status_gaining_usages - 1,
+                status_gaining_available=False,
+            )
+
+        return [], self

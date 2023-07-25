@@ -44,7 +44,7 @@ class Characters:
         for i, character in enumerate(self._characters):
             if character.get_id() == self._active_character_id:
                 return self._characters[i:] + self._characters[:i]
-        return tuple()
+        return self._characters
 
     def get_none_active_characters(self) -> tuple[Character, ...]:
         return tuple(
