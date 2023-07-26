@@ -1,5 +1,36 @@
 # Change Log
 
+## v0.2.dev3
+
+### Added
+
+At least one character of each element is now implemented
+
+- New Characters:
+  - Arataki Itto
+  - Kaedehara Kazuha
+  - Klee
+  - Tighnari
+- New Cards:
+  - Charcter Talenet Card:
+    - Arataki Ichiban
+    - Keen Sight
+    - Poetics of Fuubutsu
+    - Pounding Surprise
+  - Weapon Card:
+    - Magic Guide
+    - Raven Bow
+    - Traveler's Handy Sword
+    - White Iron Greatsword
+    - White Tassel
+  - Event Card:
+    - Calxs Arts
+    - Quick Knit
+
+### Updated
+
+- minor API change
+
 ## v0.2.dev2
 
 ### Updated
