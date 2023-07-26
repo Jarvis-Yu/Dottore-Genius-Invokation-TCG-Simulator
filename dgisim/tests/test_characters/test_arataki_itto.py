@@ -12,8 +12,8 @@ class TestAratakiItto(unittest.TestCase):
             ).character(
                 AratakiItto.from_default(2)
             ).build()
-            # ).f_hand_cards(
-            #     lambda hcs: hcs.add(PoeticsOfFuubutsu)
+            ).f_hand_cards(
+                lambda hcs: hcs.add(AratakiIchiban)
         ).dices(
             ActualDices({Element.OMNI: 100})  # even number
         ).build()
@@ -317,3 +317,60 @@ class TestAratakiItto(unittest.TestCase):
             p1ac.get_character_statuses().just_find(RagingOniKing).usages,
             2
         )
+
+        # going to next phase reduces the usages (duration)
+        gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
+        gsm.step_until_phase(game_state.get_mode().end_phase())
+        gsm.step_until_phase(game_state.get_mode().action_phase())
+
+        p1ac = gsm.get_game_state().get_player1().just_get_active_character()
+        self.assertIn(RagingOniKing, p1ac.get_character_statuses())
+        self.assertEqual(
+            p1ac.get_character_statuses().just_find(RagingOniKing).usages,
+            1
+        )
+
+        gsm.step_until_phase(game_state.get_mode().end_phase())
+        gsm.step_until_phase(game_state.get_mode().action_phase())
+
+        p1ac = gsm.get_game_state().get_player1().just_get_active_character()
+        self.assertNotIn(RagingOniKing, p1ac.get_character_statuses())
+
+    def test_talent_card(self):
+        a1, a2 = PuppetAgent(), PuppetAgent()
+        base_game = self.BASE_GAME
+        gsm = GameStateMachine(base_game, a1, a2)
+        a1.inject_actions([
+            CardAction(  # even dices; first normal attack
+                card=AratakiIchiban,
+                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            ),
+            SkillAction(  # odd dices
+                skill=CharacterSkill.ELEMENTAL_SKILL1,
+                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            ),
+            SkillAction(  # even dices; second normal attach (charged)
+                skill=CharacterSkill.NORMAL_ATTACK,
+                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            ),
+            EndRoundAction(),
+        ])
+        gsm.step_until_next_phase()
+        game_state = gsm.get_game_state()
+        p1ac = game_state.get_player1().just_get_active_character()
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 3)
+        self.assertNotIn(SuperlativeSuperstrengthStatus, p1ac.get_character_statuses())
+        self.assertIn(AratakiIchibanStatus, p1ac.get_equipment_statuses())
+        talent = p1ac.get_equipment_statuses().just_find(AratakiIchibanStatus)
+        self.assertTrue(talent.activated())
+        self.assertEqual(talent.usages, 1)
+
+        # getting to next phase resets talent equipement statics
+        gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
+        gsm.step_until_phase(game_state.get_mode().action_phase())
+        p1ac = gsm.get_game_state().get_player1().just_get_active_character()
+        self.assertIn(AratakiIchibanStatus, p1ac.get_equipment_statuses())
+        talent = p1ac.get_equipment_statuses().just_find(AratakiIchibanStatus)
+        self.assertFalse(talent.activated())
+        self.assertEqual(talent.usages, 0)

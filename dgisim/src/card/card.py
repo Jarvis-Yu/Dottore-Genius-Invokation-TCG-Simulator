@@ -90,6 +90,8 @@ __all__ = [
     ## Location ##
 
     # Character Specific
+    ## Arataki Itto ##
+    "AratakiIchiban",
     ## Kaedehara Kazuha ##
     "PoeticsOfFuubutsu",
     ## Kaeya ##
@@ -1200,6 +1202,60 @@ class Xudong(CompanionCard):
 
 # >>>>>>>>>>>>>>>>>>>> Support Cards / Companion Cards >>>>>>>>>>>>>>>>>>>>
 # >>>>>>>>>>>>>>>>>>>> Support Cards >>>>>>>>>>>>>>>>>>>>
+
+#### Arataki Itto ####
+
+
+class AratakiIchiban(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDices({Element.GEO: 1, Element.ANY: 2})
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        return (
+            _UsableFuncs.active_combat_talent_skill_card_usable(
+                game_state,
+                pid,
+                chr.AratakiItto
+            )
+            and super()._loosely_usable(game_state, pid)
+        )
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        return isinstance(instruction, act.DiceOnlyInstruction) \
+            and cls._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.DiceOnlyInstruction)
+        target = StaticTarget(
+            pid=pid,
+            zone=Zone.CHARACTERS,
+            id=game_state.get_player(pid).just_get_active_character().get_id(),
+        )
+        return (
+            eft.AddCharacterStatusEffect(
+                target=target,
+                status=stt.AratakiIchibanStatus,
+            ),
+            eft.CastSkillEffect(
+                target=target,
+                skill=CharacterSkill.NORMAL_ATTACK,
+            ),
+        )
 
 #### Kaedehara Kazuha ####
 

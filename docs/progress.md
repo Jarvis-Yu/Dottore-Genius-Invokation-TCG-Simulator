@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (6/51 implemented)](#character-651-implemented)
-  - [Card (25/192 implemented)](#card-25192-implemented)
+  - [Character (7/51 implemented)](#character-751-implemented)
+  - [Card (26/192 implemented)](#card-26192-implemented)
 
-## Character (6/51 implemented)
+## Character (7/51 implemented)
 
 - [ ] Pyro
   - [x] Klee
@@ -22,12 +22,13 @@ all I need now is to implement each card and character.
 - [ ] Cryo
   - [x] Kaeya
 - [ ] Geo
-  - [ ] Arataki Itto _<-- WIP_
+  - [x] Arataki Itto
 
-## Card (25/192 implemented)
+## Card (26/192 implemented)
 
 - [ ] Equipment Card
   - [ ] Character Talent Card
+    - [x] Arataki Ichiban
     - [x] ColdBlooded Strike
     - [x] Keen Sight
     - [x] Poetics of Fuubutsu

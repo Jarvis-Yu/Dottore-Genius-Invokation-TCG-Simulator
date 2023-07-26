@@ -1100,8 +1100,51 @@ Group statues by characters, characters ordered alphabetically
 
 
 @dataclass(frozen=True, kw_only=True)
-class AratakiIchibanStatus(TalentEquipmentStatus):
-    pass
+class AratakiIchibanStatus(TalentEquipmentStatus, _UsageStatus):
+    usages: int = 0  # here means num of normal attacks in the past
+    ACTIVATION_THRESHOLD: ClassVar[int] = 2
+    DAMAGE_BOOST: ClassVar[int] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @staticmethod
+    def _auto_destroy() -> bool:
+        return False
+
+    def activated(self) -> bool:
+        return self.usages + 1 >= self.ACTIVATION_THRESHOLD
+
+    @property
+    def dmg_boost(self) -> int:
+        return self.DAMAGE_BOOST
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if self.activated() \
+                or info_type is not Informables.SKILL_USAGE:
+            return self
+
+        assert isinstance(information, SkillIEvent)
+        if status_source != information.source \
+                or information.skill_type != CharacterSkill.NORMAL_ATTACK:
+            return self
+
+        return replace(self, usages=self.usages+1)
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], replace(self, usages=-self.usages)
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1154,6 +1197,7 @@ class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 3
     DAMAGE_BOOST: ClassVar[int] = 1
+    TALENT_DAMAGE_BOOST: ClassVar[int] = 1
     COST_DEDUCTION: ClassVar[int] = 1
 
     @override
@@ -1170,7 +1214,14 @@ class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
             if status_source != dmg.source:
                 return item, self
             if dmg.damage_type.charged_attack:
-                new_item = DmgPEvent(dmg=replace(dmg, damage=dmg.damage + self.DAMAGE_BOOST))
+                character = game_state.get_character_target(status_source)
+                assert character is not None, f"source {status_source} in {game_state}"
+                dmg_boost = self.DAMAGE_BOOST
+                if character.talent_equiped():
+                    talent = character.get_equipment_statuses().just_find(AratakiIchibanStatus)
+                    if talent.activated():
+                        dmg_boost += talent.dmg_boost
+                new_item = DmgPEvent(dmg=replace(dmg, damage=dmg.damage + dmg_boost))
                 new_self = replace(self, usages=self.usages - 1)
                 return new_item, new_self
         elif signal is Preprocessables.SKILL:

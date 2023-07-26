@@ -18,9 +18,11 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ### Sword ###
     TravelersHandySword,
     ## Talents ##
+    AratakiIchiban,
     ColdBloodedStrike,
     KeenSight,
     PoeticsOfFuubutsu,
+    PoundingSurprise,
     StreamingSurge,
     ThunderingPenance,
 
