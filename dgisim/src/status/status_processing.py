@@ -17,8 +17,6 @@ if TYPE_CHECKING:
     from ..card.card import Card
     from ..state.game_state import GameState
 
-    from .types import Preprocessable
-
 __all__ = [
     "StatusProcessing",
 ]

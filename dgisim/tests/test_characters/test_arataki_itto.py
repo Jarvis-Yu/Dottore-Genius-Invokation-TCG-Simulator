@@ -230,11 +230,11 @@ class TestAratakiItto(unittest.TestCase):
             Pid.P2,
         ).f_player1(
             lambda p1: p1.factory().phase(
-            Act.END_PHASE
-        ).f_characters(
-            # need someone other than Itto to die
-            lambda cs: cs.factory().active_character_id(1).build()
-        ).build()
+                Act.END_PHASE
+            ).f_characters(
+                # need someone other than Itto to die
+                lambda cs: cs.factory().active_character_id(1).build()
+            ).build()
         ).f_player2(
             lambda p2: p2.factory().phase(
                 Act.ACTION_PHASE
@@ -262,3 +262,58 @@ class TestAratakiItto(unittest.TestCase):
         assert isinstance(ushi, UshiSummon)
         self.assertEqual(ushi.status_gaining_usages, 1)
         self.assertEqual(ushi.status_gaining_available, False)
+
+    def test_raging_oni_king_status(self):
+        game_state = self.BASE_GAME.factory().f_player1(
+            lambda p1: p1.factory().f_characters(
+                lambda cs: cs.factory().f_active_character(
+                    lambda ac: ac.factory().f_character_statuses(
+                        lambda csts: csts.update_status(RagingOniKing())
+                    ).build()
+                ).build()
+            ).build()
+        ).build()
+        assert game_state.get_player1().get_dices().is_even()
+
+        # first normal attack
+        game_state = oppo_aura_elem(game_state, Element.CRYO)
+        game_state = just(game_state.action_step(
+            Pid.P1,
+            SkillAction(
+                skill=CharacterSkill.NORMAL_ATTACK,
+                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+            )
+        ))
+        game_state = auto_step(game_state)
+        p1ac = game_state.get_player1().just_get_active_character()
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 5)
+        self.assertIn(CrystallizeStatus, game_state.get_player1().get_combat_statuses())
+        self.assertIn(SuperlativeSuperstrengthStatus, p1ac.get_character_statuses())
+        self.assertEqual(
+            p1ac.get_character_statuses().just_find(SuperlativeSuperstrengthStatus).usages,
+            1
+        )
+        self.assertIn(RagingOniKing, p1ac.get_character_statuses())
+        self.assertEqual(
+            p1ac.get_character_statuses().just_find(RagingOniKing).usages,
+            2
+        )
+
+        # second normal attack, none charged
+        game_state = just(game_state.action_step(
+            Pid.P1,
+            SkillAction(
+                skill=CharacterSkill.NORMAL_ATTACK,
+                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+            )
+        ))
+        game_state = auto_step(game_state)
+        p1ac = game_state.get_player1().just_get_active_character()
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 1)
+        self.assertIn(RagingOniKing, p1ac.get_character_statuses())
+        self.assertEqual(
+            p1ac.get_character_statuses().just_find(RagingOniKing).usages,
+            2
+        )

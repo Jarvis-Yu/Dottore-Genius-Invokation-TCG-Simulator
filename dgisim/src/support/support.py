@@ -29,7 +29,6 @@ from ..status.enums import Preprocessables
 if TYPE_CHECKING:
     from ..state.game_state import GameState
     from ..effect.structs import StaticTarget
-    from ..status.types import Preprocessable
 
 __all__ = [
     # base

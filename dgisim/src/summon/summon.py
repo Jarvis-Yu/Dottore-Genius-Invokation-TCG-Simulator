@@ -30,7 +30,6 @@ from ..status.enums import Preprocessables, Informables
 if TYPE_CHECKING:
     from ..card.card import Card
     from ..state.game_state import GameState
-    from ..status.types import Preprocessable
 
 __all__ = [
     # base
