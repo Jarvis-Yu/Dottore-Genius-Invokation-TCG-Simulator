@@ -20,6 +20,7 @@ from typing_extensions import override, Self
 from ..effect import effect as eft
 
 from ..character.enums import CharacterSkill, WeaponType
+from ..dices import ActualDices
 from ..effect.enums import Zone, TriggeringSignal, DynamicCharacterTarget
 from ..effect.structs import StaticTarget, DamageType
 from ..element import Element, Reaction
@@ -54,16 +55,19 @@ __all__ = [
     "PlungeAttackStatus",
 
     # equipment status
-    ## bow ##
+    ## Weapon ##
+    ### bow ###
     "RavenBowStatus",
-    ## catalyst ##
+    ### catalyst ###
     "MagicGuideStatus",
-    ## claymore ##
+    ### claymore ###
     "WhiteIronGreatswordStatus",
-    ## polearm ##
+    ### polearm ###
     "WhiteTasselStatus",
-    ## sword ##
+    ### sword ###
     "TravelersHandySwordStatus",
+    ## Artifact ##
+    "GamblersEarringsStatus",
 
     # combat status
     "CatalyzingFieldStatus",
@@ -738,6 +742,68 @@ class WhiteTasselStatus(WeaponEquipmentStatus):
 class TravelersHandySwordStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.SWORD
 
+########## Artifact Status ##########
+
+
+@dataclass(frozen=True, kw_only=True)
+class GamblersEarringsStatus(ArtifactEquipmentStatus):
+    informed_num: int = 0
+    triggered_num: int = 0
+    MAX_TRIGGER_NUM: ClassVar[int] = 3
+    NUM_DICES_PER_TRIGGER: ClassVar[int] = 2
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.DEATH_EVENT,
+    ))
+
+    def triggerable(self) -> bool:
+        return self.triggered_num < self.MAX_TRIGGER_NUM and self.informed_num > 0
+
+    def informable(self) -> bool:
+        return self.triggered_num + self.informed_num < self.MAX_TRIGGER_NUM
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.CHARACTER_DEATH:
+            assert isinstance(information, CharacterDeathIEvent)
+            if information.target.pid is status_source.pid.other() \
+                    and self.informable():
+                return replace(self, informed_num=self.informed_num + 1)
+        return self
+
+    @override
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        if signal is TriggeringSignal.DEATH_EVENT:
+            if self.triggerable():
+                this_player = game_state.get_player(source.pid)
+                active_char_id = this_player.just_get_active_character().get_id()
+                if active_char_id is not source.id:
+                    return [], replace(self, informed_num=0)
+                additions = self.informed_num * self.NUM_DICES_PER_TRIGGER
+                return [
+                    eft.AddDiceEffect(pid=source.pid, dices=ActualDices({Element.OMNI: additions}))
+                ], replace(
+                    self,
+                    triggered_num=self.triggered_num + self.informed_num,
+                    informed_num=0
+                )
+        return [], self
+
+    def __str__(self) -> str:
+        return super().__str__() + f"({self.informed_num},{self.triggered_num})"
+
+
 ############################## Combat Status ##############################
 
 
@@ -1136,7 +1202,7 @@ class AratakiIchibanStatus(TalentEquipmentStatus, _UsageStatus):
                 or information.skill_type != CharacterSkill.NORMAL_ATTACK:
             return self
 
-        return replace(self, usages=self.usages+1)
+        return replace(self, usages=self.usages + 1)
 
     @override
     def _react_to_signal(

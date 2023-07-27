@@ -68,6 +68,9 @@ __all__ = [
     ## Sword ##
     "TravelersHandySword",
 
+    # Artifact Card
+    "GamblersEarrings",
+
     # Event Card
     ## Food Card ##
     "JueyunGuoba",
@@ -595,8 +598,47 @@ class WeaponEquipmentCard(EquipmentCard, _CharTargetChoiceProvider):
         )
 
 
-class ArtifactEquipmentCard(EquipmentCard):
-    pass
+class ArtifactEquipmentCard(EquipmentCard, _CharTargetChoiceProvider):
+    ARTIFACT_STATUS: type[stt.ArtifactEquipmentStatus]
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        chars = game_state.get_player(pid).get_characters().get_alive_characters()
+        return any(cls._valid_char(char) for char in chars) \
+            and super()._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        if not isinstance(instruction, act.StaticTargetInstruction) \
+                or pid is not instruction.target.pid:
+            return False  # pragma: no cover
+        char = game_state.get_target(instruction.target)
+        if not isinstance(char, chr.Character):  # pragma: no cover
+            return False
+        return cls._valid_char(char) and super()._valid_instruction(game_state, pid, instruction)
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.StaticTargetInstruction)
+        return (
+            eft.AddCharacterStatusEffect(
+                target=instruction.target,
+                status=cls.ARTIFACT_STATUS,
+            ),
+        )
 
 
 class SupportCard(Card):
@@ -856,6 +898,13 @@ class TravelersHandySword(WeaponEquipmentCard):
     _DICE_COST = AbstractDices({Element.OMNI: 2})
     WEAPON_TYPE = WeaponType.SWORD
     WEAPON_STATUS = stt.TravelersHandySwordStatus
+
+########## Artifact Card ##########
+
+
+class GamblersEarrings(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 1})
+    ARTIFACT_STATUS = stt.GamblersEarringsStatus
 
 # <<<<<<<<<<<<<<<<<<<< Event Cards <<<<<<<<<<<<<<<<<<<<
 # <<<<<<<<<<<<<<<<<<<< Event Cards / Food Cards <<<<<<<<<<<<<<<<<<<<

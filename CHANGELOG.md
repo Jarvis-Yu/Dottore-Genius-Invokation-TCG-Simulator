@@ -1,5 +1,13 @@
 # Change Log
 
+## v0.2.dev4 (not released yet)
+
+### Added
+
+- New Cards:
+  - Artifact Card:
+    - Gambler's Earrings
+
 ## v0.2.dev3
 
 ### Added

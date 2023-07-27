@@ -5,17 +5,19 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (7/51 implemented)](#character-751-implemented)
-  - [Card (26/192 implemented)](#card-26192-implemented)
+  - [Card (27/192 implemented)](#card-27192-implemented)
 
 ## Character (7/51 implemented)
 
 - [ ] Pyro
   - [x] Klee
 - [ ] Hydro
+  - [ ] Mona _<-- WIP_
   - [x] Rhodeia of Loch
 - [ ] Anemo
   - [x] Kaedehara Kazuha
 - [ ] Electro
+  - [ ] Electro Hypostasis _<-- WIP_
   - [x] Keqing
 - [ ] Dendro
   - [x] Tighnari
@@ -24,7 +26,7 @@ all I need now is to implement each card and character.
 - [ ] Geo
   - [x] Arataki Itto
 
-## Card (26/192 implemented)
+## Card (27/192 implemented)
 
 - [ ] Equipment Card
   - [ ] Character Talent Card
@@ -47,16 +49,18 @@ all I need now is to implement each card and character.
     - [ ] Sword
       - [x] Traveler's Handy Sword
   - [ ] Artifact Card
-    - [ ] Gambler's Earrings _<-- WIP_
+    - [x] Gambler's Earrings
 - [ ] Support Card
   - [ ] Companion Card
     - [ ] Liben _<-- WIP_
     - [x] Xudong
   - [ ] Location Card
     - [ ] Knights of Favonius Library _<-- WIP_
+    - [ ] Vanarana _<-- WIP_
 - [ ] Event Card
   - [x] Calxs Arts
   - [x] Changing Shifts
+  - [ ] I Haven't Lost Yet! _<-- WIP_
   - [x] Leave It to Me!
   - [x] Lightning Stiletto
   - [x] Quick Knit
@@ -69,3 +73,4 @@ all I need now is to implement each card and character.
     - [x] Mushroom Pizza
     - [x] Nothern Smoked Chicken
     - [x] Sweet Madame
+    - [ ] Teyvat Fried Egg _<-- WIP_

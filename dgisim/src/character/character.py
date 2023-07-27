@@ -181,6 +181,10 @@ class Character:
                     id=game_state.get_other_player(source.pid).just_get_active_character().get_id()
                 )
             ),
+            eft.AllStatusTriggererEffect(
+                pid=source.pid,
+                signal=TriggeringSignal.DEATH_EVENT,
+            ),
             eft.DeathCheckCheckerEffect(),  # detect death swap request
             eft.AllStatusTriggererEffect(
                 pid=source.pid,

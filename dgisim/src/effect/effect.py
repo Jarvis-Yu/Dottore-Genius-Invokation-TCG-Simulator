@@ -78,6 +78,7 @@ __all__ = [
     "PublicAddCardEffect",
     "PublicRemoveCardEffect",
     "PublicRemoveAllCardEffect",
+    "AddDiceEffect",
     "RemoveDiceEffect",
     "AddCharacterStatusEffect",
     "RemoveCharacterStatusEffect",
@@ -990,6 +991,23 @@ class PublicRemoveAllCardEffect(DirectEffect):
             ).f_publicly_used_cards(
                 lambda cs: cs + {card: hand_cards[card]}
             ).build()
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class AddDiceEffect(DirectEffect):
+    pid: Pid
+    dices: ActualDices
+
+    def execute(self, game_state: GameState) -> GameState:
+        pid = self.pid
+        dices = self.dices
+        new_dices = game_state.get_player(pid).get_dices() + dices
+        if not new_dices.is_legal():
+            raise Exception("Not enough dices for this effect")
+        return game_state.factory().f_player(
+            pid,
+            lambda p: p.factory().dices(new_dices).build()
         ).build()
 
 
