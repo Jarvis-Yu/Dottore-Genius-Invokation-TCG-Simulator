@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (7/51 implemented)](#character-751-implemented)
-  - [Card (27/192 implemented)](#card-27192-implemented)
+  - [Card (28/192 implemented)](#card-28192-implemented)
 
 ## Character (7/51 implemented)
 
@@ -26,7 +26,7 @@ all I need now is to implement each card and character.
 - [ ] Geo
   - [x] Arataki Itto
 
-## Card (27/192 implemented)
+## Card (28/192 implemented)
 
 - [ ] Equipment Card
   - [ ] Character Talent Card
@@ -60,7 +60,7 @@ all I need now is to implement each card and character.
 - [ ] Event Card
   - [x] Calxs Arts
   - [x] Changing Shifts
-  - [ ] I Haven't Lost Yet! _<-- WIP_
+  - [x] I Haven't Lost Yet!
   - [x] Leave It to Me!
   - [x] Lightning Stiletto
   - [x] Quick Knit

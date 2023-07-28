@@ -147,7 +147,7 @@ class RandomAgent(PlayerAgent):
             elif isinstance(choices, AbstractDices):
                 optional_choice = action_generator.dices_available().basically_satisfy(choices)
                 if optional_choice is None:
-                    raise Exception(f"There's not enough dices for {choices} from "
+                    raise Exception(f"There's not enough dices for {choices} from "  # pragma: no cover
                                     + f"{action_generator.dices_available()} at game_state:"
                                     + f"{action_generator.game_state}")
                 choice = optional_choice

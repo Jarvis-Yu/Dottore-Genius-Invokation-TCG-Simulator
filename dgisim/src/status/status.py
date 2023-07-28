@@ -53,6 +53,7 @@ __all__ = [
 
     # hidden status
     "PlungeAttackStatus",
+    "DeathThisRoundStatus",
 
     # equipment status
     ## Weapon ##
@@ -342,15 +343,12 @@ class Status:
         * if the returned new self is none, then it is taken as a removal request
         * if the returned new self is different object than myself, then it is taken as an update
         """
-        return [], self
+        return [], self  # pragma: no cover
 
     def _is_swapping_source(self, source: StaticTarget, signal: TriggeringSignal) -> bool:
         """ Returns True if characters of the source player is swapping """
         return source.pid.is_player1() and signal is TriggeringSignal.SWAP_EVENT_1 \
             or source.pid.is_player2() and signal is TriggeringSignal.SWAP_EVENT_2
-
-    def same_type_as(self, status: Status) -> bool:
-        return type(self) == type(status)
 
     def update(self, other: Self) -> None | Self:
         new_self = self._update(other)
@@ -706,6 +704,44 @@ class PlungeAttackStatus(HiddenStatus):
     def __str__(self) -> str:
         return super().__str__() + f"({case_val(self.can_plunge, '*', '')})"
 
+
+@dataclass(frozen=True, kw_only=True)
+class DeathThisRoundStatus(HiddenStatus):
+    activated: bool = False
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.CHARACTER_DEATH:
+            assert isinstance(information, CharacterDeathIEvent)
+            if not self.activated and information.target == status_source:
+                return replace(self, activated=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        if signal is TriggeringSignal.ROUND_END:
+            if self.activated:
+                return [], replace(self, activated=False)
+        return [], self
+
+    def __str__(self) -> str:
+        return super().__str__() + f"({case_val(self.activated, '*', '')})"
+
 ############################## Equipment Status ##############################
 
 ########## Weapon Status ##########
@@ -958,7 +994,7 @@ class FrozenStatus(CharacterStatus):
     ) -> tuple[list[eft.Effect], Optional[FrozenStatus]]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
-        return [], self
+        return [], self  # pragma: no cover
 
 
 @dataclass(frozen=True)
@@ -1157,7 +1193,7 @@ class SatiatedStatus(CharacterStatus):
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
-        return [], self
+        return [], self  # pragma: no cover
 
 
 ############################## Character Specific Status ##############################
@@ -1213,7 +1249,7 @@ class AratakiIchibanStatus(TalentEquipmentStatus, _UsageStatus):
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], replace(self, usages=-self.usages)
-        return [], self
+        return [], self  # pragma: no cover
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1583,7 +1619,7 @@ class KeqingTalentStatus(HiddenStatus):
     ) -> tuple[list[eft.Effect], Optional[KeqingTalentStatus]]:
         if signal is TriggeringSignal.COMBAT_ACTION:
             return [], type(self)(can_infuse=False)
-        return [], self
+        return [], self  # pragma: no cover
 
     def __str__(self) -> str:
         return super().__str__() + f"({case_val(self.can_infuse, 1, 0)})"  # pragma: no cover

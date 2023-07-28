@@ -83,6 +83,7 @@ __all__ = [
     ## Other ##
     "CalxsArts",
     "ChangingShifts",
+    "IHaventLostYet",
     "LeaveItToMe",
     "QuickKnit",
     "Starsigns",
@@ -1105,6 +1106,57 @@ class ChangingShifts(EventCard, _DiceOnlyChoiceProvider):
             eft.AddCombatStatusEffect(
                 target_pid=pid,
                 status=stt.ChangingShiftsStatus,
+            ),
+        )
+
+
+class IHaventLostYet(EventCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDices({})
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        characters = game_state.get_player(pid).get_characters()
+        return any(
+            char.get_hidden_statuses().just_find(stt.DeathThisRoundStatus).activated
+            for char in characters
+        )
+
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        return (
+            isinstance(instruction, act.DiceOnlyInstruction)
+            and cls.loosely_usable(game_state, pid)
+        )
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        target = StaticTarget(
+            pid,
+            Zone.CHARACTERS,
+            game_state.get_player(pid).just_get_active_character().get_id(),
+        )
+        return (
+            eft.AddDiceEffect(
+                pid=pid,
+                dices=ActualDices({Element.OMNI: 1}),
+            ),
+            eft.EnergyRechargeEffect(
+                target=target,
+                recharge=1,
             ),
         )
 

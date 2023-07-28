@@ -7,6 +7,8 @@
 - New Cards:
   - Artifact Card:
     - Gambler's Earrings
+  - Event Card:
+    - I Haven't Lost Yet!
 
 ## v0.2.dev3
 
