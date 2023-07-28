@@ -293,6 +293,11 @@ class Status:
                 or isinstance(effect, eft.SpecificDamageEffect)
             has_swap = has_swap or isinstance(effect, eft.SwapCharacterEffect)  \
                 or isinstance(effect, eft.ForwardSwapCharacterEffect)
+        if has_damage:
+            es.append(eft.AllStatusTriggererEffect(
+                pid=source.pid,
+                signal=TriggeringSignal.POST_DMG,
+            ))
         if has_swap or has_damage:
             es.append(
                 eft.SwapCharacterCheckerEffect(
@@ -310,6 +315,10 @@ class Status:
                 )
             )
         if has_damage:
+            es.append(eft.AllStatusTriggererEffect(
+                pid=source.pid,
+                signal=TriggeringSignal.DEATH_EVENT,
+            ))
             es.append(eft.DeathCheckCheckerEffect())
 
         return es
@@ -321,12 +330,6 @@ class Status:
             source: StaticTarget,
             signal: TriggeringSignal,
     ) -> tuple[list[eft.Effect], Optional[Self]]:
-        if effects:
-            if any(isinstance(effect, eft.ReferredDamageEffect) for effect in effects):
-                effects.append(eft.AllStatusTriggererEffect(
-                    pid=source.pid,
-                    signal=TriggeringSignal.POST_DMG,
-                ))
         return effects, case_val(new_status == self, self, new_status)
 
     def _react_to_signal(

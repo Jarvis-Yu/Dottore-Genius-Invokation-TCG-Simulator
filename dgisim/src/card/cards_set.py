@@ -6,6 +6,14 @@ __all__ = [
 
 _DEFAULT_CARDS: list[type[Card]] = [
     # Equipment Card
+    ## Talents ##
+    AratakiIchiban,
+    ColdBloodedStrike,
+    KeenSight,
+    PoeticsOfFuubutsu,
+    PoundingSurprise,
+    StreamingSurge,
+    ThunderingPenance,
     ## Weapons ##
     ### Bow ###
     RavenBow,
@@ -17,14 +25,8 @@ _DEFAULT_CARDS: list[type[Card]] = [
     WhiteTassel,
     ### Sword ###
     TravelersHandySword,
-    ## Talents ##
-    AratakiIchiban,
-    ColdBloodedStrike,
-    KeenSight,
-    PoeticsOfFuubutsu,
-    PoundingSurprise,
-    StreamingSurge,
-    ThunderingPenance,
+    ## Artifact ##
+    GamblersEarrings,
 
     # Event Card
     CalxsArts,
