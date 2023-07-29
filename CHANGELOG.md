@@ -10,7 +10,7 @@
   - Event Card:
     - I Haven't Lost Yet!
 
-## v0.2.dev3
+## v0.2.dev3 (27 Jul 2023)
 
 ### Added
 
@@ -41,13 +41,13 @@ At least one character of each element is now implemented
 
 - minor API change
 
-## v0.2.dev2
+## v0.2.dev2 (9 Jul 2023)
 
 ### Updated
 
 - minor API change
 
-## v0.2.dev1
+## v0.2.dev1 (9 Jul 2023)
 
 ### Added
 
@@ -55,7 +55,7 @@ At least one character of each element is now implemented
 - includes some container classes in root dgisim
 - unifies PS1 format
 
-## v0.2.dev0
+## v0.2.dev0 (9 Jul 2023)
 
 ### Added
 
@@ -66,7 +66,7 @@ At least one character of each element is now implemented
 - Refines API
 - CLI has full control of the player
 
-## v0.1.dev0
+## v0.1.dev0 (3 Jul 2023)
 
 ### Added
 

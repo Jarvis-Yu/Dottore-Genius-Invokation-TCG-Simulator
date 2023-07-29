@@ -14,6 +14,7 @@ Please note that some parts of this design document is simplified for easier und
     - [Example: Play the Card "Cold-Blooded Strike"](#example-play-the-card-cold-blooded-strike)
   - [Player Phase](#player-phase)
   - [Player Actions](#player-actions)
+  - [Conclusion](#conclusion)
 
 ## Normal Game Flow (Linear Game Flow)
 
@@ -433,3 +434,13 @@ That concludes the section of `ActionGenerator`,
 it is but a helper to generate correct `PlayerAction`s,
 you may write your own algorithm to directly generate a correct one without `ActionGenerator`
 and pass it to the game state any time.
+
+## Conclusion
+
+I hope the content above explains the basics of the design to you.
+If you still find it confusing please don't hesitate to join the discord
+server and contact me.
+I cannot spare too much time on these documentations unless I know someone needs
+to read it.
+
+You may find the link of the discord server in the project's [README](../README.md).
