@@ -94,7 +94,7 @@ class CLISession:
 
     def _welcome(self) -> None:
         print("Welcome to the Dottore Genius Invokation TCG Simulator CLI ver.")
-        print("This is currently just a basic version for debugging only.")
+        # print("This is currently just a basic version for debugging only.")
 
     def _mode_prompt(self) -> None:
         print("Please choose the cli mode:")

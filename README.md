@@ -1,34 +1,41 @@
 # Dottore Genius Invokation TCG Simulator
 
-![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)
-[![Coverage Status](https://coveralls.io/repos/github/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/badge.svg?branch=master)](https://coveralls.io/github/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator?branch=master)
+[![PyPI Version](https://img.shields.io/pypi/v/dgisim.svg)](https://pypi.org/project/dgisim/)
+![Python 3.10](https://img.shields.io/badge/python->=3.10-blue.svg)
+[![Coverage Status](https://coveralls.io/repos/github/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/badge.svg?branch=master)](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/LICENSE)
+[![license](https://img.shields.io/github/license/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator)](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/LICENSE)
 
-A Genshin Impact Genius Invokation TCG simulator intended to be used for AI training (for now).
+A Genshin Impact Genius Invokation TCG simulator intended to be used for AI training.
+
+- [**Documentation**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/wiki#package-documentations)
+- [**Source code**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator)
+- [**Contributing**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/dev_readme.md)
+- [**Game Design**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/state_machine_design.md)
+- [**Bug reports**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/issues)
+- [**Discord Server**](https://discord.gg/arammB6BEY)
+
+This package aims to help programmers code things based on Genius Invokation
+TCG with ease. e.g. AI, desktop application, website...
 
 The simulator is modeled as a finite state machine, where all game states are immutable.
+The package optimizes for efficiency, so common parts between neighbouring game states
+are shared.
 
-Basic rules of Genius Invokation TCG can be found [here](https://genshin-impact.fandom.com/wiki/Genius_Invokation_TCG).
+Basic rules of Genius Invokation TCG can be found on [Fandom](https://genshin-impact.fandom.com/wiki/Genius_Invokation_TCG).
 
 ## Installation
 
-Make sure your Python version `>= 3.10`.
+Please make sure your Python version `>= 3.10` before installing.
 
 ```
 pip install dgisim
 ```
 
-Note that this is a developing project and the final API to users is not set in stone.
-So you may play with it, but using it in production is not recommended at the current stage.
-
-## [Wiki](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/wiki)
-
-- [v0.2.dev2 documentation](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/wiki/v0.2.dev2-Documentation)
-- [state machine design](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/state_machine_design.md)
-- [run cloned repository locally](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/dev_readme.md)
-
 ## Simple Start With CLI
 
-Once installed, you may have a try with the CLI to play the simulator in command line.
+### Run Locally
+
+Once installed, you may start by trying the CLI to play the game first.
 
 You might want to run a simple python program like this:
 
@@ -39,45 +46,45 @@ session = CLISession()
 session.run()
 ```
 
-Or try the CLI online on [Google Colab](https://colab.research.google.com/drive/1h6ckw4LQ2jMEnZAs9QQo6tHjCwWnR8KD?usp=sharing)
+### Run Remotely
+
+You may try the CLI online on [Google Colab](https://colab.research.google.com/drive/1h6ckw4LQ2jMEnZAs9QQo6tHjCwWnR8KD?usp=sharing)
+
+### CLI Simple Usages
 
 See CLI's [README](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/cli_readme.md)
 for showcase and explanations of the CLI.
 
-## Features of This Simulator
+## Features
 
-First of all, it is modeled as a finite state machine, which means any intermediate state can be
+This simulator is modeled as a finite state machine, which means any intermediate state can be
 standalone and be used to proceed to other states.
 
-Also, the `GameState` class, which represents some game state in the state machine, uses passed in
+The `GameState` class represents some game state in the state machine. It uses passed in
 `Phase` object to determine how to transform to another state, which means the game flow is
-highly customizable.
+highly customizable. (Default Mode and some Heated Battle Modes are implemented already)
 
-Everything in the `GameState` object are immutable, so traversing game history and exploring different
-branches of possibilities in the future are not error-prone. Do not worry about memory efficiency,
-everything is immutable, so only the modified part between neighbouring game states are added to the
-memory.
+Everything in the `GameState` object are immutable, so traversing game history
+and exploring different branches of possibilities in the future are not error-prone.
+The simulator did optimizations for immutability.
+The unchanged data are shared among neighbouring game states.
 
 `GameState` implements `__eq__` and `__hash__`, enabling you to use any game state as a key in a
 dictionary, and discover game states on different 'game branches' being actually the same.
 
-## [State Machine Design](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/state_machine_design.md)
+An `ActionGenerator` can be returned by any valid `GameState` to help
+generate valid player actions.
 
 ## Development Milestones
 
-- [x] Set up the framework for maintaining game states
-- [x] Implement game phase of Card Selection (card selection at the start of the game)
-- [x] Implement game phase of Starting Hand Select Phase (select active character)
-- [x] Implement game phase of Roll (Dice) Phase (roll dices between rounds)
-- [x] Implement game phase of Action Phase (players beat each other)
-  - [ ] Implement all cards (28/192 implemented) ([details](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/progress.md))
-  - [ ] Implement all characters with their talent cards (7/51 implemented) ([details](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/progress.md))
-  - [x] Implement all reactions
-  - [x] Implement all logics to support the implemented cards and characters
-- [x] Implement game phase of End Phase (summons and some support card or statuses take action)
-- [x] Implement game phase of Game End Phase (one player wins or draw)
-- [x] Implement CLI for better debugging experience
-- [x] Implement interactive active CLI that accepts user input as action
+Currently a full game can be played with any combination of the characters and cards implemented.
+
+- [x] Implement all game phases (Action Phase, End Phase...)
+- [ ] Implement all cards (28/192 implemented) ([details](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/progress.md))
+- [ ] Implement all characters with their talent cards (7/51 implemented) ([details](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/progress.md))
+- [x] Implement all reactions
+- [x] Implement all game logics to support the implemented cards and characters
+- [x] Implement interactive CLI for better debugging experience
 - [x] Implement lazy player agent for minimal testing purposes
 - [x] Implement random player agent for testing purposes
 - [x] Implement player action validity checker
@@ -91,7 +98,3 @@ be in a separate repo.
 Once this project is done, I'll be reading relative papers and develop an AI for this game. The AI
 is supposed to be used for learning strategies and making decks, but not against another player
 directly.
-
-## Wants To Contribute?
-
-Please read [this](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/dev_readme.md).
