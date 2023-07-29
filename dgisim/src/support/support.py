@@ -40,6 +40,7 @@ __all__ = [
     "XudongSupport",
 
     ## Locations ##
+    "KnightsOfFavoniusLibrarySupport",
     "VanaranaSupport",
 ]
 
@@ -102,6 +103,12 @@ class XudongSupport(Support):
     @override
     def content_str(self) -> str:
         return f"({self.usages})"
+
+
+@dataclass(frozen=True, kw_only=True)
+class KnightsOfFavoniusLibrarySupport(Support):
+    ...
+
 
 @dataclass(frozen=True, kw_only=True)
 class VanaranaSupport(Support):

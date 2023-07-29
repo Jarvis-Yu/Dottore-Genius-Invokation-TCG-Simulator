@@ -34,7 +34,7 @@ class TestVanaranan(unittest.TestCase):
                         instruction=DiceOnlyInstruction(dices=ActualDices({})),
                     ),
                     EndRoundAction(),
-                    EndRoundAction(),  # roll phase
+                    DicesSelectAction(selected_dices=ActualDices({})),  # roll phase
                 ])
                 gsm.step_until_next_phase()
                 gsm.step_until_phase(base_game.get_mode().action_phase(), observe=False)

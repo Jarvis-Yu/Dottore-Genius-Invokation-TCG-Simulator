@@ -44,6 +44,7 @@ __all__ = [
     "CheckerEffect",
     "DirectEffect",
     "PhaseEffect",
+    "PhaseStartEffect",
     "TriggerrbleEffect",
 
     # Triggerrable Effect
@@ -58,8 +59,9 @@ __all__ = [
     "DeathSwapPhaseEndEffect",
     "EndPhaseCheckoutEffect",
     "EndRoundEffect",
-    "TurnEndEffect",
+    "RollPhaseStartEffect",
     "SetBothPlayerPhaseEffect",
+    "TurnEndEffect",
 
     # Checker Effect
     "SwapCharacterCheckerEffect",
@@ -80,6 +82,7 @@ __all__ = [
     "PublicRemoveAllCardEffect",
     "AddDiceEffect",
     "RemoveDiceEffect",
+    # ...,
     "AddCharacterStatusEffect",
     "RemoveCharacterStatusEffect",
     "UpdateCharacterStatusEffect",
@@ -139,6 +142,12 @@ class CheckerEffect(Effect):
 
 @dataclass(frozen=True, repr=False)
 class PhaseEffect(Effect):
+    pass
+
+
+@dataclass(frozen=True, repr=False)
+class PhaseStartEffect(Effect):
+    """ The effects needs to be manually handled and removed by the Phase class """
     pass
 
 ############################## Triggerrable Effect ##############################
@@ -271,7 +280,7 @@ class TriggerSupportEffect(TriggerrbleEffect):
 
 
 @dataclass(frozen=True, repr=False)
-class DeathSwapPhaseStartEffect(PhaseEffect):
+class DeathSwapPhaseStartEffect(PhaseStartEffect):
     pass
 
 
@@ -339,6 +348,23 @@ class EndRoundEffect(PhaseEffect):
 
 
 @dataclass(frozen=True, repr=False)
+class RollPhaseStartEffect(PhaseStartEffect):
+    pass
+
+
+@dataclass(frozen=True, repr=False)
+class SetBothPlayerPhaseEffect(PhaseEffect):
+    phase: Act
+
+    def execute(self, game_state: GameState) -> GameState:
+        return game_state.factory().f_player1(
+            lambda p: p.factory().phase(self.phase).build()
+        ).f_player2(
+            lambda p: p.factory().phase(self.phase).build()
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
 class TurnEndEffect(PhaseEffect):
     def execute(self, game_state: GameState) -> GameState:
         active_player_id = game_state.get_active_player_id()
@@ -358,17 +384,6 @@ class TurnEndEffect(PhaseEffect):
             other_player.factory().phase(Act.ACTION_PHASE).build()
         ).build()
 
-
-@dataclass(frozen=True, repr=False)
-class SetBothPlayerPhaseEffect(PhaseEffect):
-    phase: Act
-
-    def execute(self, game_state: GameState) -> GameState:
-        return game_state.factory().f_player1(
-            lambda p: p.factory().phase(self.phase).build()
-        ).f_player2(
-            lambda p: p.factory().phase(self.phase).build()
-        ).build()
 
 ############################## Checker Effect ##############################
 
@@ -1025,6 +1040,20 @@ class RemoveDiceEffect(DirectEffect):
         return game_state.factory().f_player(
             pid,
             lambda p: p.factory().dices(new_dices).build()
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class AddRerollChancesEffect(DirectEffect):
+    pid: Pid
+    d_chances: int
+
+    def execute(self, game_state: GameState) -> GameState:
+        return game_state.factory().f_player(
+            self.pid,
+            lambda p: p.factory().f_dice_reroll_chances(
+                lambda n: n + self.d_chances
+            ).build()
         ).build()
 
 

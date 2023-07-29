@@ -680,7 +680,12 @@ class SupportCard(Card):
                 target_pid=pid,
                 sid=cast(int, instruction.target.id),
             ))
-        return tuple(es) + cls._effects(game_state, pid)
+        return tuple(es) + (
+            eft.AddSupportEffect(
+                target_pid=pid,
+                support=cls._SUPPORT_STATUS,
+            ),
+        ) + cls._effects(game_state, pid)
 
     @classmethod
     def _effects(
@@ -688,12 +693,8 @@ class SupportCard(Card):
             game_state: gs.GameState,
             pid: Pid,
     ) -> tuple[eft.Effect, ...]:
-        return (
-            eft.AddSupportEffect(
-                target_pid=pid,
-                support=cls._SUPPORT_STATUS,
-            ),
-        )
+        """ effects that are after the addition of the support """
+        return ()  # pragma: no cover
 
     @classmethod
     def _choices_helper(
@@ -1130,7 +1131,6 @@ class IHaventLostYet(EventCard, _DiceOnlyChoiceProvider):
             for char in characters
         )
 
-
     @override
     @classmethod
     def _valid_instruction(
@@ -1299,6 +1299,20 @@ class Xudong(CompanionCard):
 # >>>>>>>>>>>>>>>>>>>> Support Cards / Companion Cards >>>>>>>>>>>>>>>>>>>>
 
 # <<<<<<<<<<<<<<<<<<<< Support Cards / Location Cards <<<<<<<<<<<<<<<<<<<<
+
+
+class KnightsOfFavoniusLibrary(LocationCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 1})
+    _SUPPORT_STATUS = sp.KnightsOfFavoniusLibrarySupport
+
+    @classmethod
+    def _effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+    ) -> tuple[eft.Effect, ...]:
+        raise NotImplementedError
+
 
 class Vanarana(LocationCard):
     _DICE_COST = AbstractDices({})

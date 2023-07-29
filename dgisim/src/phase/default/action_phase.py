@@ -327,6 +327,14 @@ class ActionPhase(ph.Phase):
             return self._handle_death_swap_action(game_state, pid, action)
         raise Exception("Unhandld action", action)  # pragma: no cover
 
+    def _handle_dices_select_action(
+            self,
+            game_state: GameState,
+            pid: Pid,
+            action: DicesSelectAction
+    ) -> Optional[GameState]:
+        ...
+
     def step_action(
             self,
             game_state: GameState,
@@ -341,19 +349,37 @@ class ActionPhase(ph.Phase):
         if game_state.death_swapping(pid):
             if not isinstance(action, DeathSwapAction):
                 raise Exception(f"Trying to execute {action} when a death swap is expected")
-            # game_state = game_state.factory().effect_stack(effect_stack.pop()[0]).build()
+
+        elif self._rolling(game_state):
+            if not isinstance(action, DicesSelectAction):
+                raise Exception(f"Trying to execute {action} when a dices selection is expected")
 
         if isinstance(action, GameAction):
             return self._handle_game_action(game_state, pid, action)
+        elif isinstance(action, DicesSelectAction):
+            return self._handle_dices_select_action(game_state, pid, action)
         elif isinstance(action, EndRoundAction):
             return self._handle_end_round(game_state, pid, action)
         raise Exception("Not Reached! Unknown Game State to process")
+
+    def _rolling(self, game_state: GameState) -> bool:
+        effect_stack = game_state.get_effect_stack()
+        return (
+            effect_stack.is_not_empty()
+            and isinstance(effect_stack.peek(), RollPhaseStartEffect)
+        )
 
     def waiting_for(self, game_state: GameState) -> Optional[Pid]:
         effect_stack = game_state.get_effect_stack()
         # if no effects are to be executed or death swap phase is inserted
         if effect_stack.is_empty() or game_state.death_swapping():
             return super().waiting_for(game_state)
+        elif isinstance(effect_stack.peek(), PhaseStartEffect):
+            effect = effect_stack.peek()
+            if isinstance(effect, RollPhaseStartEffect):
+                return super().waiting_for(game_state)
+            else:
+                raise NotImplementedError
         else:
             return None
 

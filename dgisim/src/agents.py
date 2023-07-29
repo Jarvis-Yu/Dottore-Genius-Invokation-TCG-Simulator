@@ -60,7 +60,7 @@ class LazyAgent(PlayerAgent):
             return CharacterSelectAction(char_id=1)
 
         elif isinstance(curr_phase, RollPhase):
-            return EndRoundAction()
+            return DicesSelectAction(selected_dices=ActualDices({}))
 
         elif isinstance(curr_phase, ActionPhase):
             return EndRoundAction()

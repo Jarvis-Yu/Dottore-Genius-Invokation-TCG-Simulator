@@ -63,6 +63,9 @@ class RollPhase(ph.Phase):
             pid: Pid,
             action: DicesSelectAction
     ) -> None | GameState:
+        if action.selected_dices.is_empty():
+            return self._handle_end_round(game_state, pid)
+
         player = game_state.get_player(pid)
         dices = player.get_dices()
         kept_dices = dices - action.selected_dices
@@ -88,7 +91,6 @@ class RollPhase(ph.Phase):
             self,
             game_state: GameState,
             pid: Pid,
-            action: EndRoundAction
     ) -> None | GameState:
         return game_state.factory().f_player(
             pid,
@@ -106,14 +108,12 @@ class RollPhase(ph.Phase):
     ) -> None | GameState:
         if isinstance(action, DicesSelectAction):
             return self._handle_dices_selection(game_state, pid, action)
-        elif isinstance(action, EndRoundAction):
-            return self._handle_end_round(game_state, pid, action)
         else:
             raise ValueError(f"Unknown action {action} provided for game state:\n{game_state}")
 
     @classmethod
     def _choices_helper(cls, action_generator: ActionGenerator) -> GivenChoiceType:
-        return (ActionType.SELECT_DICES, ActionType.END_ROUND)
+        return (ActionType.SELECT_DICES, )
 
     @classmethod
     def _fill_helper(
@@ -127,8 +127,6 @@ class RollPhase(ph.Phase):
         if player_choice is ActionType.SELECT_DICES:
             from ...action.action_generator_generator import DicesSelectionActGenGenerator
             return just(DicesSelectionActGenGenerator.action_generator(game_state, pid))
-        elif player_choice is ActionType.END_ROUND:
-            return ActionGenerator(game_state=game_state, pid=pid, action=EndRoundAction())
         else:  # pragma: no cover
             action_type_name = ActionType.__name__
             if isinstance(player_choice, ActionType):

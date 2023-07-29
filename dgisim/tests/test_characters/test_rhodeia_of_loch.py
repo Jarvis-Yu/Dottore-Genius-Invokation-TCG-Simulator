@@ -94,8 +94,8 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm.player_step()  # P1 END
         gsm.player_step()  # p2 death swap
         gsm.auto_step()
-        a1.inject_action(EndRoundAction())  # skip roll phase
-        a2.inject_action(EndRoundAction())
+        a1.inject_action(DicesSelectAction(selected_dices=ActualDices({})))  # skip roll phase
+        a2.inject_action(DicesSelectAction(selected_dices=ActualDices({})))
         gsm.step_until_phase(base_game.get_mode().action_phase())
 
         game_state = gsm.get_game_state()
@@ -112,8 +112,8 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         a1.inject_action(EndRoundAction())  # skip action phase
         a2.inject_action(EndRoundAction())
         gsm.step_until_phase(game_state.get_mode().end_phase())
-        a1.inject_action(EndRoundAction())  # skip roll phase
-        a2.inject_action(EndRoundAction())
+        a1.inject_action(DicesSelectAction(selected_dices=ActualDices({})))  # skip roll phase
+        a2.inject_action(DicesSelectAction(selected_dices=ActualDices({})))
         gsm.step_until_phase(game_state.get_mode().action_phase())
 
         game_state = gsm.get_game_state()

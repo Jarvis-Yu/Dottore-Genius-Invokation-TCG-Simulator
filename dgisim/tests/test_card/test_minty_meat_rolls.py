@@ -95,8 +95,8 @@ class TestMintyMeatRolls(unittest.TestCase):
         gsm = GameStateMachine(buffed_game_state, a1, a2)
         a1.inject_action(EndRoundAction()) # skip action phase
         a2.inject_action(EndRoundAction())
-        a1.inject_action(EndRoundAction()) # skip roll phase
-        a2.inject_action(EndRoundAction())
+        a1.inject_action(DicesSelectAction(selected_dices=ActualDices({}))) # skip roll phase
+        a2.inject_action(DicesSelectAction(selected_dices=ActualDices({})))
         gsm.step_until_next_phase()
         gsm.step_until_phase(buffed_game_state.get_mode().action_phase())
         game_state = gsm.get_game_state()

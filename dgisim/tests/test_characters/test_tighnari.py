@@ -178,8 +178,8 @@ class TestTighnari(unittest.TestCase):
         # after first end round
         gsm.player_step()  # P1 END
         gsm.auto_step()
-        a1.inject_action(EndRoundAction())  # skip roll phase
-        a2.inject_action(EndRoundAction())
+        a1.inject_action(DicesSelectAction(selected_dices=ActualDices({})))  # skip roll phase
+        a2.inject_action(DicesSelectAction(selected_dices=ActualDices({})))
         gsm.step_until_phase(base_game.get_mode().action_phase())
 
         game_state = gsm.get_game_state()
@@ -194,8 +194,8 @@ class TestTighnari(unittest.TestCase):
         a2.inject_action(EndRoundAction())
         gsm.step_until_next_phase() # to End Phase
         gsm.auto_step()
-        a1.inject_action(EndRoundAction())  # skip roll phase
-        a2.inject_action(EndRoundAction())
+        a1.inject_action(DicesSelectAction(selected_dices=ActualDices({})))  # skip roll phase
+        a2.inject_action(DicesSelectAction(selected_dices=ActualDices({})))
         gsm.step_until_phase(base_game.get_mode().action_phase())
 
         game_state = gsm.get_game_state()
