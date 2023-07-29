@@ -9,27 +9,27 @@ all I need now is to implement each card and character.
 
 ## Character (7/51 implemented)
 
-- [ ] Pyro
+- [ ] Pyro:
   - [x] Klee
-- [ ] Hydro
+- [ ] Hydro:
   - [ ] Mona _<-- WIP_
   - [x] Rhodeia of Loch
-- [ ] Anemo
+- [ ] Anemo:
   - [x] Kaedehara Kazuha
-- [ ] Electro
+- [ ] Electro:
   - [ ] Electro Hypostasis _<-- WIP_
   - [x] Keqing
-- [ ] Dendro
+- [ ] Dendro:
   - [x] Tighnari
-- [ ] Cryo
+- [ ] Cryo:
   - [x] Kaeya
-- [ ] Geo
+- [ ] Geo:
   - [x] Arataki Itto
 
 ## Card (28/192 implemented)
 
-- [ ] Equipment Card
-  - [ ] Character Talent Card
+- [ ] Equipment Card (13/103):
+  - [ ] Character Talent Card:
     - [x] Arataki Ichiban
     - [x] ColdBlooded Strike
     - [x] Keen Sight
@@ -37,35 +37,30 @@ all I need now is to implement each card and character.
     - [x] Pounding Surprise
     - [x] Streaming Surge
     - [x] Thundering Penance
-  - [ ] Weapon Card
-    - [ ] Bow
+  - [ ] Weapon Card:
+    - [ ] Bow:
       - [x] Raven Bow
-    - [ ] Catalyst
+      - [ ] Amos' Bow _<-- WIP_
+    - [ ] Catalyst:
       - [x] Magic Guide
-    - [ ] Claymore
+      - [ ] A Thousand Floating Dreams _<-- WIP_
+    - [ ] Claymore:
       - [x] White Iron Greatsword
-    - [ ] Polearm
+    - [ ] Polearm:
       - [x] White Tassel
-    - [ ] Sword
+    - [ ] Sword:
       - [x] Traveler's Handy Sword
-  - [ ] Artifact Card
+  - [ ] Artifact Card:
     - [x] Gambler's Earrings
-- [ ] Support Card
-  - [ ] Companion Card
+- [ ] Support Card (1/34):
+  - [ ] Companion Card:
     - [ ] Liben _<-- WIP_
     - [x] Xudong
-  - [ ] Location Card
+  - [ ] Location Card:
     - [ ] Knights of Favonius Library _<-- WIP_
     - [ ] Vanarana _<-- WIP_
-- [ ] Event Card
-  - [x] Calxs Arts
-  - [x] Changing Shifts
-  - [x] I Haven't Lost Yet!
-  - [x] Leave It to Me!
-  - [x] Lightning Stiletto
-  - [x] Quick Knit
-  - [x] Starsigns
-  - [ ] Food Card
+- [ ] Event Card (14/55):
+  - [ ] Food Card:
     - [x] Jueyun Guoba
     - [x] Lotus Flower Crisp
     - [x] Minty Meat Rolls
@@ -74,3 +69,12 @@ all I need now is to implement each card and character.
     - [x] Nothern Smoked Chicken
     - [x] Sweet Madame
     - [ ] Teyvat Fried Egg _<-- WIP_
+  - [ ] Other Card:
+    - [x] Calxs Arts
+    - [x] Changing Shifts
+    - [x] I Haven't Lost Yet!
+    - [x] Leave It to Me!
+    - [x] Lightning Stiletto
+    - [x] Quick Knit
+    - [ ] Send Off _<-- WIP_
+    - [x] Starsigns
