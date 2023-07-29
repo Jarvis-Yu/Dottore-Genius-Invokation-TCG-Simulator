@@ -1,15 +1,18 @@
 from __future__ import annotations
 import random
 from collections import Counter
-from typing import Any, Optional, Iterator, Iterable, TypeVar, Union
+from functools import lru_cache
+from typing import Any, Optional, Iterator, Iterable
+
 from typing_extensions import Self, override, TYPE_CHECKING
 
 from .helper.hashable_dict import HashableDict
-from .helper.quality_of_life import BIG_INT
+from .helper.quality_of_life import BIG_INT, case_val
 from .element import Element
 
 if TYPE_CHECKING:
     from .state.game_state import GameState
+    from .state.player_state import PlayerState
 
 __all__ = [
     "AbstractDices",
@@ -161,6 +164,27 @@ class ActualDices(Dices):
         Element.GEO,
     })
 
+    # tested against the actual game in Genshin
+    _LEGAL_ELEMS_ORDERED: tuple[Element, ...] = (
+        Element.OMNI,
+        Element.CRYO,
+        Element.HYDRO,
+        Element.PYRO,
+        Element.ELECTRO,
+        Element.GEO,
+        Element.DENDRO,
+        Element.ANEMO,
+    )
+    # the bigger the i, the higher the priority
+    _LEGAL_ELEMS_ORDERED_DICT: dict[Element, int] = {
+        elem: i
+        for i, elem in enumerate(reversed(_LEGAL_ELEMS_ORDERED))
+    }
+    _LEGAL_ELEMS_ORDERED_DICT_REV: dict[int, Element] = {
+        i: elem
+        for elem, i in _LEGAL_ELEMS_ORDERED_DICT.items()
+    }
+
     def _satisfy(self, requirement: AbstractDices) -> bool:
         assert self.is_legal() and requirement.is_legal()
 
@@ -247,8 +271,8 @@ class ActualDices(Dices):
             for elem in list(_PURE_ELEMS) + [Element.OMNI]:
                 this_count = remaining.get(elem, 0)
                 if best_count > omni and this_count >= omni and this_count < best_count:
-                        best_elem = elem
-                        best_count = this_count
+                    best_elem = elem
+                    best_count = this_count
                 elif best_count < omni and this_count > best_count:
                     best_elem = elem
                     best_count = this_count
@@ -278,6 +302,48 @@ class ActualDices(Dices):
                 return None
             answer[Element.OMNI] += omni_required
         return ActualDices(answer)
+
+    # @lru_cache(maxsize=4)
+    def _init_ordered_dices(self, priority_elems: None | frozenset[Element]) -> HashableDict:
+        character_elems: frozenset[Element]
+        if priority_elems is None:
+            character_elems = frozenset()
+        else:
+            character_elems = priority_elems
+
+        dices = {}
+        if self[Element.OMNI] > 0:
+            dices[Element.OMNI] = self[Element.OMNI]
+        # list[tuple[alive chars have elem, num of elem, priority of elem]]
+        sorted_categories: list[tuple[int, int, int]] = sorted(
+            (
+                (
+                    case_val(elem in character_elems, 1, 0),
+                    self[elem],
+                    self._LEGAL_ELEMS_ORDERED_DICT[elem],
+                )
+                for elem in self.elems()
+                if elem is not Element.OMNI and self[elem] > 0
+            ),
+            reverse=True
+        )
+        for _, _, priority in sorted_categories:
+            elem = self._LEGAL_ELEMS_ORDERED_DICT_REV[priority]
+            dices[elem] = self[elem]
+        return HashableDict.from_dict(dices)
+
+    def dices_ordered(self, player_state: None | PlayerState) -> dict[Element, int]:
+        return dict(self.readonly_dices_ordered(player_state))
+
+    def readonly_dices_ordered(self, player_state: None | PlayerState) -> dict[Element, int]:
+        return self._init_ordered_dices(
+            None
+            if player_state is None
+            else frozenset(
+                char.element()
+                for char in player_state.get_characters().get_alive_characters()
+            )
+        )
 
     @classmethod
     def from_random(cls, size: int) -> ActualDices:
