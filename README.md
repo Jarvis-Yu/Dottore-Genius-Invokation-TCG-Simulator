@@ -3,23 +3,22 @@
 [![PyPI Version](https://img.shields.io/pypi/v/dgisim.svg)](https://pypi.org/project/dgisim/)
 ![Python 3.10](https://img.shields.io/badge/python->=3.10-blue.svg)
 [![Coverage Status](https://coveralls.io/repos/github/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/badge.svg?branch=master)](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/LICENSE)
-[![license](https://img.shields.io/github/license/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator)](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/LICENSE)
+[![license](https://img.shields.io/github/license/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator)](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/LICENSE)
 
 A Genshin Impact Genius Invokation TCG simulator intended to be used for AI training.
 
 - [**Documentation**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/wiki#package-documentations)
 - [**Source code**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator)
 - [**Contributing**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/dev_readme.md)
-- [**Game Design**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/state_machine_design.md)
+- [**Game design**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/state_machine_design.md)
 - [**Bug reports**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/issues)
-- [**Discord Server**](https://discord.gg/arammB6BEY)
+- [**Discord server**](https://discord.gg/arammB6BEY)
 
 This package aims to help programmers code things based on Genius Invokation
 TCG with ease. e.g. AI, desktop application, website...
 
 The simulator is modeled as a finite state machine, where all game states are immutable.
-The package optimizes for efficiency, so common parts between neighbouring game states
-are shared.
+Optimizations are done to make sure immutability doesn't impact performance.
 
 Basic rules of Genius Invokation TCG can be found on [Fandom](https://genshin-impact.fandom.com/wiki/Genius_Invokation_TCG).
 
@@ -83,6 +82,7 @@ Currently a full game can be played with any combination of the characters and c
 - [ ] Implement all cards (28/192 implemented) ([details](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/progress.md))
 - [ ] Implement all characters with their talent cards (7/51 implemented) ([details](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/progress.md))
 - [x] Implement all reactions
+- [x] Implement death handling
 - [x] Implement all game logics to support the implemented cards and characters
 - [x] Implement interactive CLI for better debugging experience
 - [x] Implement lazy player agent for minimal testing purposes
@@ -92,9 +92,9 @@ Currently a full game can be played with any combination of the characters and c
 
 ## Future Plans
 
-I have the plan to implement a simple cross-platform GUI interface for the simulator. But that will
-be in a separate repo.
+I have the plan to implement a simple cross-platform GUI interface for the simulator.
+But that will be in a separate repo.
 
-Once this project is done, I'll be reading relative papers and develop an AI for this game. The AI
-is supposed to be used for learning strategies and making decks, but not against another player
-directly.
+Once this project is done, I'll be reading relative papers and develop an AI for this game.
+The AI is supposed to be used for learning strategies and making decks,
+but not against another player directly.
