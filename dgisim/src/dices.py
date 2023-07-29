@@ -52,6 +52,9 @@ class Dices:
     def is_even(self) -> bool:
         return self.num_dices() % 2 == 0
 
+    def is_empty(self) -> bool:
+        return not any(val > 0 for val in self._dices.values())
+
     def is_legal(self) -> bool:
         return all(map(lambda x: x >= 0, self._dices.values())) \
             and all(elem in self._LEGAL_ELEMS for elem in self._dices)
@@ -129,6 +132,12 @@ class Dices:
             if num != 0
         ])
         return existing_dices
+
+    def __copy__(self) -> Self:
+        return self
+
+    def __deepcopy__(self, _) -> Self:
+        return self
 
     @classmethod
     def from_empty(cls) -> Self:
@@ -303,7 +312,6 @@ class ActualDices(Dices):
             answer[Element.OMNI] += omni_required
         return ActualDices(answer)
 
-    # @lru_cache(maxsize=4)
     def _init_ordered_dices(self, priority_elems: None | frozenset[Element]) -> HashableDict:
         character_elems: frozenset[Element]
         if priority_elems is None:

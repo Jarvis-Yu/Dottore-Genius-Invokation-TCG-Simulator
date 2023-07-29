@@ -1,6 +1,8 @@
 from __future__ import annotations
 from typing import Any
 
+from typing_extensions import Self
+
 __all__ = [
     "HashableDict"
 ]
@@ -89,6 +91,14 @@ class HashableDict(dict):
         return HashableDict(
             [(key, self.get(key, 0) - other.get(key, 0)) for key in keys]
         )
+
+    def __copy__(self) -> Self:
+        assert self.frozen()
+        return self
+
+    def __deepcopy__(self, _) -> Self:
+        assert self.frozen()
+        return self
 
     def _to_frozen_set(self) -> frozenset:
         if self._frozen:

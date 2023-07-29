@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (7/51 implemented)](#character-751-implemented)
-  - [Card (28/192 implemented)](#card-28192-implemented)
+  - [Card (29/192 implemented)](#card-29192-implemented)
 
 ## Character (7/51 implemented)
 
@@ -26,7 +26,7 @@ all I need now is to implement each card and character.
 - [ ] Geo:
   - [x] Arataki Itto
 
-## Card (28/192 implemented)
+## Card (29/192 implemented)
 
 - [ ] Equipment Card (13/103):
   - [ ] Character Talent Card:
@@ -52,13 +52,13 @@ all I need now is to implement each card and character.
       - [x] Traveler's Handy Sword
   - [ ] Artifact Card:
     - [x] Gambler's Earrings
-- [ ] Support Card (1/34):
+- [ ] Support Card (2/34):
   - [ ] Companion Card:
     - [ ] Liben _<-- WIP_
     - [x] Xudong
   - [ ] Location Card:
     - [ ] Knights of Favonius Library _<-- WIP_
-    - [ ] Vanarana _<-- WIP_
+    - [x] Vanarana
 - [ ] Event Card (14/55):
   - [ ] Food Card:
     - [x] Jueyun Guoba

@@ -7,6 +7,8 @@
 - New Cards:
   - Artifact Card:
     - Gambler's Earrings
+  - Location Card:
+    - Vanarana
   - Event Card:
     - I Haven't Lost Yet!
 

@@ -26,11 +26,24 @@ __all__ = [
 
 class ActionPhase(ph.Phase):
     def _start_up_phase(self, game_state: GameState) -> GameState:
-        # TODO: Handle before action statuses
         active_player_id = game_state.get_active_player_id()
-        return game_state.factory().player(
+        return game_state.factory().f_player(
             active_player_id,
-            game_state.get_player(active_player_id).factory().phase(
+            lambda p: p.factory().phase(
+                Act.ACTIVE_WAIT_PHASE
+            ).build()
+        ).f_effect_stack(
+            lambda es: es.push_one(AllStatusTriggererEffect(
+                active_player_id, 
+                TriggeringSignal.ROUND_START,
+            ))
+        ).build()
+
+    def _begin_action_phase(self, game_state: GameState) -> GameState:
+        active_player_id = game_state.get_active_player_id()
+        return game_state.factory().f_player(
+            active_player_id,
+            lambda p: p.factory().phase(
                 Act.ACTION_PHASE
             ).build()
         ).build()
@@ -69,6 +82,8 @@ class ActionPhase(ph.Phase):
             return self._execute_effect(game_state)
         elif p1.is_passive_wait_phase() and p2.is_passive_wait_phase():
             return self._start_up_phase(game_state)
+        elif p1.is_active_wait_phase() or p2.is_active_wait_phase():
+            return self._begin_action_phase(game_state)
         elif p1.is_end_phase() and p2.is_end_phase():
             return self._to_end_phase(game_state)
         raise Exception("Not Reached! Unknown Game State to process")

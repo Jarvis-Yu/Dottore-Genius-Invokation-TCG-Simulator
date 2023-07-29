@@ -92,6 +92,7 @@ __all__ = [
     ## Companion ##
     "Xudong",
     ## Location ##
+    "Vanarana",
 
     # Character Specific
     ## Arataki Itto ##
@@ -643,6 +644,8 @@ class ArtifactEquipmentCard(EquipmentCard, _CharTargetChoiceProvider):
 
 
 class SupportCard(Card):
+    _SUPPORT_STATUS: type[sp.Support]
+
     @override
     @classmethod
     def valid_instruction(
@@ -685,7 +688,12 @@ class SupportCard(Card):
             game_state: gs.GameState,
             pid: Pid,
     ) -> tuple[eft.Effect, ...]:
-        raise  # pragma: no cover
+        return (
+            eft.AddSupportEffect(
+                target_pid=pid,
+                support=cls._SUPPORT_STATUS,
+            ),
+        )
 
     @classmethod
     def _choices_helper(
@@ -1286,27 +1294,15 @@ class Starsigns(EventCard, _DiceOnlyChoiceProvider):
 
 class Xudong(CompanionCard):
     _DICE_COST = AbstractDices({Element.ANY: 2})
-
-    @override
-    @classmethod
-    def _effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-    ) -> tuple[eft.Effect, ...]:
-        return (
-            eft.AddSupportEffect(
-                target_pid=pid,
-                support=sp.XudongSupport,
-            ),
-        )
+    _SUPPORT_STATUS = sp.XudongSupport
 
 # >>>>>>>>>>>>>>>>>>>> Support Cards / Companion Cards >>>>>>>>>>>>>>>>>>>>
 
 # <<<<<<<<<<<<<<<<<<<< Support Cards / Location Cards <<<<<<<<<<<<<<<<<<<<
 
 class Vanarana(LocationCard):
-    ...
+    _DICE_COST = AbstractDices({})
+    _SUPPORT_STATUS = sp.VanaranaSupport
 
 # >>>>>>>>>>>>>>>>>>>> Support Cards / Location Cards >>>>>>>>>>>>>>>>>>>>
 

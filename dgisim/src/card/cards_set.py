@@ -36,7 +36,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     QuickKnit,
     Starsigns,
 
-    # Event Card / Food
+    ## Event Card / Food ##
     JueyunGuoba,
     LotusFlowerCrisp,
     MondstadtHashBrown,
@@ -46,7 +46,10 @@ _DEFAULT_CARDS: list[type[Card]] = [
     SweetMadame,
 
     # Support Card
+    ## Support Card / Companion ##
     Xudong,
+    ## Support Card / Location ##
+    Vanarana,
 ]
 
 _DEFAULT_CARDS_FSET = None
