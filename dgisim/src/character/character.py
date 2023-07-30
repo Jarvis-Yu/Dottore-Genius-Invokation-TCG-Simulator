@@ -43,6 +43,7 @@ __all__ = [
 class Character:
     _ELEMENT = Element.ANY
     _WEAPON_TYPE: WeaponType
+    _TALENT_STATUS: None | type[stt.TalentEquipmentStatus]
 
     def __init__(
         self,
@@ -66,9 +67,9 @@ class Character:
         self._statuses = statuses
         self._aura = elemental_aura
 
-    @staticmethod
-    def _talent_status() -> Optional[type[stt.EquipmentStatus]]:  # pragma: no cover
-        return None
+    @classmethod
+    def _talent_status(cls) -> None | type[stt.TalentEquipmentStatus]:
+        return cls._TALENT_STATUS
 
     def get_id(self) -> int:
         return self._id
@@ -296,7 +297,8 @@ class Character:
 
     def talent_equiped(self) -> bool:
         talent_status = self._talent_status()
-        assert talent_status is not None
+        if talent_status is None:
+            return False
         return self.get_equipment_statuses().contains(talent_status)
 
     def alive(self) -> bool:
@@ -410,11 +412,7 @@ class CharacterFactory:
 class AratakiItto(Character):
     _ELEMENT = Element.GEO
     _WEAPON_TYPE = WeaponType.CLAYMORE
-
-    @override
-    @staticmethod
-    def _talent_status() -> Optional[type[stt.EquipmentStatus]]:
-        return stt.AratakiIchibanStatus
+    _TALENT_STATUS = stt.AratakiIchibanStatus
 
     @override
     @classmethod
@@ -496,15 +494,16 @@ class AratakiItto(Character):
             elemental_aura=ElementalAura.from_default(),
         )
 
+class ElectroHypostasis(Character):
+    _ELEMENT = Element.ELECTRO
+    _WEAPON_TYPE = WeaponType.NONE
+    _TALENT_STATUS = None
+    ...
 
 class KaedeharaKazuha(Character):
     _ELEMENT = Element.ANEMO
     _WEAPON_TYPE = WeaponType.SWORD
-
-    @override
-    @staticmethod
-    def _talent_status() -> Optional[type[stt.EquipmentStatus]]:
-        return stt.PoeticsOfFuubutsuStatus
+    _TALENT_STATUS = stt.PoeticsOfFuubutsuStatus
 
     @override
     @classmethod
@@ -674,11 +673,7 @@ class Kaeya(Character):
     # basic info
     _ELEMENT = Element.CRYO
     _WEAPON_TYPE = WeaponType.SWORD
-
-    @override
-    @staticmethod
-    def _talent_status() -> Optional[type[stt.EquipmentStatus]]:
-        return stt.ColdBloodedStrikeStatus
+    _TALENT_STATUS = stt.ColdBloodedStrikeStatus
 
     @override
     @classmethod
@@ -755,14 +750,10 @@ class Keqing(Character):
     # basic info
     _ELEMENT = Element.ELECTRO
     _WEAPON_TYPE = WeaponType.SWORD
+    _TALENT_STATUS = stt.ThunderingPenanceStatus
 
     # consts
     BASE_ELECTRO_INFUSION_DURATION: int = 2
-
-    @override
-    @staticmethod
-    def _talent_status() -> Optional[type[stt.EquipmentStatus]]:
-        return stt.ThunderingPenanceStatus
 
     @override
     @classmethod
@@ -899,11 +890,7 @@ class Keqing(Character):
 class Klee(Character):
     _ELEMENT = Element.PYRO
     _WEAPON_TYPE = WeaponType.CATALYST
-
-    @override
-    @staticmethod
-    def _talent_status() -> type[stt.EquipmentStatus] | None:
-        return stt.PoundingSurpriseStatus
+    _TALENT_STATUS = stt.PoundingSurpriseStatus
 
     @override
     @classmethod
@@ -987,6 +974,7 @@ class RhodeiaOfLoch(Character):
     # basic info
     _ELEMENT = Element.HYDRO
     _WEAPON_TYPE = WeaponType.NONE
+    _TALENT_STATUS = stt.StreamingSurgeStatus
 
     # consts
     _SUMMONS = (
@@ -994,11 +982,6 @@ class RhodeiaOfLoch(Character):
         sm.OceanicMimicRaptorSummon,
         sm.OceanicMimicFrogSummon,
     )
-
-    @override
-    @staticmethod
-    def _talent_status() -> Optional[type[stt.EquipmentStatus]]:
-        return stt.StreamingSurgeStatus
 
     @override
     @classmethod
@@ -1140,11 +1123,7 @@ class RhodeiaOfLoch(Character):
 class Tighnari(Character):
     _ELEMENT = Element.DENDRO
     _WEAPON_TYPE = WeaponType.BOW
-
-    @override
-    @staticmethod
-    def _talent_status() -> None | type[stt.EquipmentStatus]:
-        return stt.KeenSightStatus
+    _TALENT_STATUS = stt.KeenSightStatus
 
     @override
     @classmethod

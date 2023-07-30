@@ -91,6 +91,8 @@ __all__ = [
     "AratakiIchibanStatus",
     "RagingOniKing",
     "SuperlativeSuperstrengthStatus",
+    ## Electro Hypostasis ##
+    "AbsorbingPrismStatus",
     ## Kaedehara Kazuha ##
     "MidareRanzanStatus",
     "MidareRanzanCryoStatus",
@@ -1345,6 +1347,13 @@ class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
                 )
                 return item, self
         return item, self
+
+#### Electro Hypostasis ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class AbsorbingPrismStatus(TalentEquipmentStatus):
+    pass
 
 #### Kaedehara Kazuha ####
 
