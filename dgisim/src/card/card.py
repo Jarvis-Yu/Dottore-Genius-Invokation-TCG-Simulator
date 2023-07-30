@@ -92,6 +92,7 @@ __all__ = [
     ## Companion ##
     "Xudong",
     ## Location ##
+    "KnightsOfFavoniusLibrary",
     "Vanarana",
 
     # Character Specific
@@ -1311,7 +1312,9 @@ class KnightsOfFavoniusLibrary(LocationCard):
             game_state: gs.GameState,
             pid: Pid,
     ) -> tuple[eft.Effect, ...]:
-        raise NotImplementedError
+        return (
+            eft.RollPhaseStartEffect(),
+        )
 
 
 class Vanarana(LocationCard):

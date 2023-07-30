@@ -393,7 +393,8 @@ class ActionPhase(ph.Phase):
             return self._handle_end_round(game_state, pid, action)
         raise Exception("Not Reached! Unknown Game State to process")
 
-    def _rolling(self, game_state: GameState) -> bool:
+    @classmethod
+    def _rolling(cls, game_state: GameState) -> bool:
         effect_stack = game_state.get_effect_stack()
         return (
             effect_stack.is_not_empty()
@@ -422,6 +423,10 @@ class ActionPhase(ph.Phase):
         # death swap check
         if game_state.death_swapping(pid):
             return (ActionType.SWAP_CHARACTER, )
+
+        # inserted roll phase
+        if cls._rolling(action_generator.game_state):
+            return (ActionType.SELECT_DICES, )
 
         choices: list[ActionType] = []
 
@@ -454,10 +459,17 @@ class ActionPhase(ph.Phase):
         game_state = action_generator.game_state
         pid = action_generator.pid
 
+        # death swap handling
         if game_state.death_swapping(pid):
             assert player_choice is ActionType.SWAP_CHARACTER
             from ...action.action_generator_generator import SwapActGenGenerator
             return just(SwapActGenGenerator.action_generator(game_state, pid))
+
+        # inserted roll phase
+        if cls._rolling(action_generator.game_state):
+            assert player_choice is ActionType.SELECT_DICES
+            from ...action.action_generator_generator import DicesSelectionActGenGenerator
+            return just(DicesSelectionActGenGenerator.action_generator(game_state, pid))
 
         if player_choice is ActionType.PLAY_CARD:
             assert game_state.card_checker().playable(pid)

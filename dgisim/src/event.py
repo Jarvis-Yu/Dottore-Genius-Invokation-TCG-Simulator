@@ -29,6 +29,7 @@ __all__ = [
     "ActionPEvent",
     "CardPEvent",
     "DmgPEvent",
+    "RollChancePEvent",
 ]
 
 
@@ -72,11 +73,6 @@ class PreprocessableEvent:
 
 
 @dataclass(frozen=True, kw_only=True)
-class DmgPEvent(PreprocessableEvent):
-    dmg: SpecificDamageEffect
-
-
-@dataclass(frozen=True, kw_only=True)
 class ActionPEvent(PreprocessableEvent):
     source: StaticTarget       # this source is who caused the GameEvent
     event_type: EventType
@@ -89,3 +85,14 @@ class CardPEvent(PreprocessableEvent):
     pid: Pid
     card_type: type[Card]
     dices_cost: AbstractDices
+
+
+@dataclass(frozen=True, kw_only=True)
+class DmgPEvent(PreprocessableEvent):
+    dmg: SpecificDamageEffect
+
+
+@dataclass(frozen=True, kw_only=True)
+class RollChancePEvent(PreprocessableEvent):
+    pid: Pid
+    chances: int

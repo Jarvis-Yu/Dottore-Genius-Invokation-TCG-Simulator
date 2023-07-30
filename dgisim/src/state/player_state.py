@@ -196,7 +196,7 @@ class PlayerState:
     def dict_str(self) -> dict[str, Union[dict, str]]:
         return {
             "Phase": self._phase.value,
-            "Card Redraw Chances": str(self._card_redraw_chances),
+            "Card/Dice Redraw Chances": f"{self._card_redraw_chances}/{self._dice_reroll_chances}",
             "Characters": self._characters.dict_str(),
             "Combat Statuses": str(self._combat_statuses),
             "Summons": self._summons.dict_str(),

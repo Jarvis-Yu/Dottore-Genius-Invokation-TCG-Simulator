@@ -107,7 +107,19 @@ class XudongSupport(Support):
 
 @dataclass(frozen=True, kw_only=True)
 class KnightsOfFavoniusLibrarySupport(Support):
-    ...
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.ROLL_CHANCES:
+            assert isinstance(item, RollChancePEvent)
+            if item.pid is status_source.pid:
+                return replace(item, chances=item.chances + 1), self
+        return item, self
 
 
 @dataclass(frozen=True, kw_only=True)

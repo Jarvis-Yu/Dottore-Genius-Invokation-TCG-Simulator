@@ -162,7 +162,7 @@ class GamePrinter:
         board = StrDrawer()
         board.insert_at(0, 0, f"<Player: {name}>")
         board.insert_at_nextline(0, GamePrinter._pair(player, "Phase"))
-        board.insert_at_nextline(0, GamePrinter._pair(player, "Card Redraw Chances"))
+        board.insert_at_nextline(0, GamePrinter._pair(player, "Card/Dice Redraw Chances"))
         board.insert_board_at_nextline(
             0,
             GamePrinter._insert_characters(player["Characters"]),

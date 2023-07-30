@@ -3,12 +3,15 @@ from typing import TYPE_CHECKING
 
 from .. import phase as ph
 
+from ...event import RollChancePEvent
 from ...action.action import DicesSelectAction, EndRoundAction, PlayerAction
 from ...action.action_generator import ActionGenerator
 from ...action.enums import ActionType
 from ...dices import ActualDices
 from ...helper.quality_of_life import just
 from ...state.enums import Act, Pid
+from ...status.status_processing import StatusProcessing
+from ...status.enums import Preprocessables
 
 if TYPE_CHECKING:
     from ...action.types import DecidedChoiceType, GivenChoiceType
@@ -23,16 +26,27 @@ class RollPhase(ph.Phase):
     _NUM_DICES = 8
 
     def _get_all_dices_and_activate(self, game_state: GameState) -> GameState:
+        base_roll_chances = game_state.get_mode().dice_reroll_chances()
+        game_state, p1_chances = StatusProcessing.preprocess_by_all_statuses(
+            game_state, Pid.P1, Preprocessables.ROLL_CHANCES,
+            RollChancePEvent(pid=Pid.P1, chances=base_roll_chances)
+        )
+        assert isinstance(p1_chances, RollChancePEvent)
+        game_state, p2_chances = StatusProcessing.preprocess_by_all_statuses(
+            game_state, Pid.P2, Preprocessables.ROLL_CHANCES,
+            RollChancePEvent(pid=Pid.P2, chances=base_roll_chances)
+        )
+        assert isinstance(p2_chances, RollChancePEvent)
         return game_state.factory().f_player1(
             lambda p1: p1.factory()
             .phase(Act.ACTION_PHASE)
-            .dice_reroll_chances(game_state.get_mode().dice_reroll_chances())
+            .dice_reroll_chances(p1_chances.chances)  # type: ignore
             .dices(ActualDices.from_random(RollPhase._NUM_DICES))
             .build()
         ).f_player2(
             lambda p2: p2.factory()
             .phase(Act.ACTION_PHASE)
-            .dice_reroll_chances(game_state.get_mode().dice_reroll_chances())
+            .dice_reroll_chances(p2_chances.chances)  # type: ignore
             .dices(ActualDices.from_random(RollPhase._NUM_DICES))
             .build()
         ).build()

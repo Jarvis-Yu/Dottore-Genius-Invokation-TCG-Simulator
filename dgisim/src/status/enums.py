@@ -20,6 +20,8 @@ class Preprocessables(Enum):
     DMG_ELEMENT = "DmgElement"    # To determine the element
     DMG_REACTION = "DmgReaction"  # To determine the reaction
     DMG_AMOUNT = "DmgNumber"      # To determine final amount of damage
+    # Roll Phase
+    ROLL_CHANCES = "RollChances"  # To modify the roll chances
 
 class Informables(Enum):
     DMG_DELT = "DmgDelt"
