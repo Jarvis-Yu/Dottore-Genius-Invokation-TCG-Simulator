@@ -8,6 +8,7 @@
   - Artifact Card:
     - Gambler's Earrings
   - Location Card:
+    - Knights of Favonius Library
     - Vanarana
   - Event Card:
     - I Haven't Lost Yet!
