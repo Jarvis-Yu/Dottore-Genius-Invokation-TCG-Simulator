@@ -7,6 +7,7 @@ from ...action.action import *
 from ...action.action_generator import ActionGenerator
 from ...action.enums import ActionType
 from ...character.enums import CharacterSkill
+from ...dices import ActualDices
 from ...effect.effect import *
 from ...effect.enums import TriggeringSignal, Zone
 from ...effect.structs import StaticTarget
@@ -17,6 +18,7 @@ from ...state.enums import Pid, Act
 
 if TYPE_CHECKING:
     from ...action.types import DecidedChoiceType, GivenChoiceType
+    from ...effect.effect_stack import EffectStack
     from ...state.game_state import GameState
 
 __all__ = [
@@ -34,7 +36,7 @@ class ActionPhase(ph.Phase):
             ).build()
         ).f_effect_stack(
             lambda es: es.push_one(AllStatusTriggererEffect(
-                active_player_id, 
+                active_player_id,
                 TriggeringSignal.ROUND_START,
             ))
         ).build()
@@ -333,7 +335,36 @@ class ActionPhase(ph.Phase):
             pid: Pid,
             action: DicesSelectAction
     ) -> Optional[GameState]:
-        ...
+        if action.selected_dices.is_empty():
+            return game_state.factory().f_player(
+                pid,
+                lambda p: p.factory().dice_reroll_chances(0).build()
+            ).f_effect_stack(
+                lambda es: es.pop()[0]  # removes rolling phase effect
+            ).build()
+
+        player = game_state.get_player(pid)
+        dices = player.get_dices()
+        kept_dices = dices - action.selected_dices
+        assert kept_dices.is_legal()
+        replacement_dices = ActualDices.from_random(action.selected_dices.num_dices())
+        new_dices = kept_dices + replacement_dices
+        new_reroll_chances = player.get_dice_reroll_chances() - 1
+        new_effect_stack: EffectStack
+        if new_reroll_chances > 0:
+            new_effect_stack = game_state.get_effect_stack()
+        else:
+            # removes rolling phase effect
+            new_effect_stack = game_state.get_effect_stack().pop()[0]
+        return game_state.factory().f_player(
+            pid,
+            lambda p: p.factory()
+            .dice_reroll_chances(new_reroll_chances)
+            .dices(new_dices)
+            .build()
+        ).effect_stack(
+            new_effect_stack
+        ).build()
 
     def step_action(
             self,
