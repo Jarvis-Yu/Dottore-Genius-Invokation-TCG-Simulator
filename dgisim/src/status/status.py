@@ -50,6 +50,7 @@ __all__ = [
     # templates
     "StackedShieldStatus",
     "FixedShieldStatus",
+    "PrepareSkillStatus",
 
     # hidden status
     "PlungeAttackStatus",
@@ -92,7 +93,8 @@ __all__ = [
     "RagingOniKing",
     "SuperlativeSuperstrengthStatus",
     ## Electro Hypostasis ##
-    "AbsorbingPrismStatus",
+    "RockPaperScissorsComboScissorsStatus",
+    "RockPaperScissorsComboPaperStatus",
     ## Kaedehara Kazuha ##
     "MidareRanzanStatus",
     "MidareRanzanCryoStatus",
@@ -593,6 +595,11 @@ class StackedShieldStatus(_ShieldStatus, _UsageStatus):
 
     def __str__(self) -> str:
         return super().__str__() + f"({self.usages})"  # pragma: no cover
+
+
+@dataclass(frozen=True, kw_only=True)
+class PrepareSkillStatus(Status):
+    ...
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1352,8 +1359,13 @@ class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class AbsorbingPrismStatus(TalentEquipmentStatus):
-    pass
+class RockPaperScissorsComboScissorsStatus(CharacterStatus, PrepareSkillStatus):
+    ...
+
+
+@dataclass(frozen=True, kw_only=True)
+class RockPaperScissorsComboPaperStatus(CharacterStatus, PrepareSkillStatus):
+    ...
 
 #### Kaedehara Kazuha ####
 

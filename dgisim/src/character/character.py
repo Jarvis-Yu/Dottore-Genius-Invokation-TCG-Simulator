@@ -494,11 +494,55 @@ class AratakiItto(Character):
             elemental_aura=ElementalAura.from_default(),
         )
 
+
 class ElectroHypostasis(Character):
     _ELEMENT = Element.ELECTRO
     _WEAPON_TYPE = WeaponType.NONE
     _TALENT_STATUS = None
-    ...
+
+    @override
+    @classmethod
+    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
+        if skill_type is CharacterSkill.NORMAL_ATTACK:
+            return AbstractDices({
+                Element.ELECTRO: 1,
+                Element.ANY: 2,
+            })
+        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
+            return AbstractDices({
+                Element.ELECTRO: 5,
+            })
+        elif skill_type is CharacterSkill.ELEMENTAL_BURST:
+            return AbstractDices({
+                Element.ELECTRO: 3,
+            })
+        raise Exception("Not Reached!")
+
+    @override
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.ELECTRO,
+            damage=1,
+        )
+
+    @override
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.ELECTRO,
+                damage=2,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+            eft.AddCharacterStatusEffect(
+                target=source,
+                status=stt.RockPaperScissorsComboScissorsStatus,
+            ),
+        )
+
 
 class KaedeharaKazuha(Character):
     _ELEMENT = Element.ANEMO
