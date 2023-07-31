@@ -142,3 +142,93 @@ class TestAratakiItto(unittest.TestCase):
         )
         self.assertEqual(p2ac.get_hp(), 10)
         self.assertEqual(gsm.get_game_state().get_active_player_id(), Pid.P1)
+
+    def test_elemental_burst(self):
+        a1, a2 = PuppetAgent(), PuppetAgent()
+        base_game = self.BASE_GAME.factory().f_player1(
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().f_active_character(
+                    lambda ac: ac.factory().energy(
+                        ac.get_max_energy()
+                    ).build()
+                ).build()
+            ).build()
+        ).build()
+
+        # test burst base damage
+        a1.inject_action(SkillAction(
+            skill=CharacterSkill.ELEMENTAL_BURST,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+        ))
+        gsm = GameStateMachine(base_game, a1, a2)
+        gsm.player_step()
+        gsm.auto_step()
+        game_state = gsm.get_game_state()
+        p1 = game_state.get_player1()
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 8)
+        self.assertIn(Element.ELECTRO, p2ac.get_elemental_aura())
+        self.assertIn(ChainsOfWardingThunderSummon, p1.get_summons())
+        summon = p1.get_summons().just_find(ChainsOfWardingThunderSummon)
+        assert isinstance(summon, ChainsOfWardingThunderSummon)
+        self.assertEqual(summon.usages, 2)
+        self.assertEqual(summon.swap_reduce_usages, 1)
+
+    def test_chains_of_warding_thunder_summon(self):
+        base_game = AddSummonEffect(
+            target_pid=Pid.P1, summon=ChainsOfWardingThunderSummon
+        ).execute(self.BASE_GAME).factory().active_player_id(
+            Pid.P2,
+        ).f_player1(
+            lambda p1: p1.factory().phase(Act.END_PHASE).build()
+        ).f_player2(
+            lambda p2: p2.factory().phase(Act.ACTION_PHASE).build()
+        ).build()
+
+        a1: PlayerAgent; a2: PlayerAgent
+        a1, a2 = PuppetAgent(), PuppetAgent()
+        gsm = GameStateMachine(base_game, a1, a2)
+        a2.inject_actions([
+            SwapAction(
+                char_id=2,
+                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2})),
+            ),
+            SwapAction(
+                char_id=1,
+                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
+            ),
+        ])
+        gsm.player_step()  # first swap costs more due to summon
+        gsm.player_step()  # second swap costs the same cause usages run out
+        p1_summons = gsm.get_game_state().get_player1().get_summons()
+        self.assertIn(ChainsOfWardingThunderSummon, p1_summons)
+        character_summon = p1_summons.just_find(ChainsOfWardingThunderSummon)
+        assert isinstance(character_summon, ChainsOfWardingThunderSummon)
+        self.assertEqual(character_summon.usages, 2)
+        self.assertEqual(character_summon.swap_reduce_usages, 0)
+
+        # second round resets swap cost raise
+        a1, a2 = LazyAgent(), LazyAgent()
+        gsm = GameStateMachine(gsm.get_game_state(), a1, a2)
+        gsm.step_until_phase(base_game.get_mode().action_phase())
+        a1, a2 = LazyAgent(), PuppetAgent()
+        gsm = GameStateMachine(fill_dices_with_omni(gsm.get_game_state()), a1, a2)
+        gsm.player_step()  # p1 ends round
+        a2.inject_actions([
+            SwapAction(
+                char_id=2,
+                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2})),
+            ),
+            SwapAction(
+                char_id=1,
+                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
+            ),
+        ])
+        gsm.player_step()  # first swap costs more due to summon
+        gsm.player_step()  # second swap costs the same cause usages run out
+        p1_summons = gsm.get_game_state().get_player1().get_summons()
+        self.assertIn(ChainsOfWardingThunderSummon, p1_summons)
+        character_summon = p1_summons.just_find(ChainsOfWardingThunderSummon)
+        assert isinstance(character_summon, ChainsOfWardingThunderSummon)
+        self.assertEqual(character_summon.usages, 1)
+        self.assertEqual(character_summon.swap_reduce_usages, 0)

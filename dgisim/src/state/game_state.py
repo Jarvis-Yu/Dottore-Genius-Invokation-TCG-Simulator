@@ -406,7 +406,7 @@ class SwapChecker:
         # Check if player can afford Normal Swap
         _, swap_action = StatusProcessing.preprocess_by_all_statuses(
             game_state=game_state,
-            pid=pid,
+            pid=pid.other(),  # start from opponent because cost raise goes first
             pp_type=Preprocessables.SWAP,
             item=ActionPEvent(
                 source=StaticTarget(
@@ -456,7 +456,7 @@ class SwapChecker:
         elif isinstance(action, act.SwapAction):
             new_game_state, swap_action = StatusProcessing.preprocess_by_all_statuses(
                 game_state=game_state,
-                pid=pid,
+                pid=pid.other(),  # start from opponent because cost raise goes first
                 pp_type=Preprocessables.SWAP,
                 item=ActionPEvent(
                     source=StaticTarget(

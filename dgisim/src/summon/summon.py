@@ -38,6 +38,7 @@ __all__ = [
     # concrete implementations
     "AutumnWhirlwindSummon",
     "BurningFlameSummon",
+    "ChainsOfWardingThunderSummon",
     "ClusterbloomArrowSummon",
     "OceanicMimicFrogSummon",
     "OceanicMimicRaptorSummon",
@@ -119,11 +120,13 @@ class _DmgPerRoundSummon(_DestroyOnNumSummon):
                     damage_type=DamageType(summon=True),
                 )
             )
+        if d_usages == 0:
+            return es, self
         return es, replace(self, usages=d_usages)
 
     def _update(self, other: Self) -> Optional[Self]:
         new_usages = min(max(self.usages, self.MAX_USAGES), self.usages + other.usages)
-        return type(self)(usages=new_usages)
+        return replace(other, usages=new_usages)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -250,6 +253,60 @@ class BurningFlameSummon(_DmgPerRoundSummon):
     MAX_USAGES: ClassVar[int] = 2
     DMG: ClassVar[int] = 1
     ELEMENT: ClassVar[Element] = Element.PYRO
+
+
+@dataclass(frozen=True, kw_only=True)
+class ChainsOfWardingThunderSummon(_DmgPerRoundSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    swap_reduce_usages: int = 1
+    SWAP_REDUCE_MAX_USAGES: int = 1
+    DMG: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.ELECTRO
+    COST_RAISE: ClassVar[int] = 1
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset(
+        tuple(_DmgPerRoundSummon.REACTABLE_SIGNALS) +
+        (
+            TriggeringSignal.ROUND_END,
+        )
+    )
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+        if signal is Preprocessables.SWAP:
+            assert isinstance(item, ActionPEvent) and item.event_type is EventType.SWAP
+            if item.source.pid is status_source.pid.other() \
+                    and self.swap_reduce_usages > 0:
+                assert item.dices_cost.num_dices() == item.dices_cost[Element.ANY]
+                new_cost = item.dices_cost + {Element.ANY: self.COST_RAISE}
+                return replace(item, dices_cost=new_cost), replace(
+                    self, swap_reduce_usages=self.swap_reduce_usages - 1
+                )
+        return super()._preprocess(game_state, status_source, item, signal)
+
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        es, new_self = super()._react_to_signal(game_state, source, signal)
+        if new_self is None:
+            return es, None
+        if signal is TriggeringSignal.ROUND_END \
+                and new_self.swap_reduce_usages < self.SWAP_REDUCE_MAX_USAGES:
+            return es, replace(new_self, usages=0, swap_reduce_usages=self.SWAP_REDUCE_MAX_USAGES)
+        return es, new_self
+
+    def content_repr(self) -> str:
+        return super().content_repr() + f",{self.swap_reduce_usages}"
 
 
 @dataclass(frozen=True, kw_only=True)

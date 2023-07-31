@@ -559,10 +559,10 @@ class ElectroHypostasis(Character):
                 damage=2,
                 damage_type=DamageType(elemental_burst=True),
             ),
-            # eft.AddSummonEffect(
-            #     target=source,
-            #     status=stt.RagingOniKing,
-            # ),
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=sm.ChainsOfWardingThunderSummon,
+            ),
         )
 
     @classmethod
