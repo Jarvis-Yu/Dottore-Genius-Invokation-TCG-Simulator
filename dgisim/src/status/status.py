@@ -705,20 +705,20 @@ class PlungeAttackStatus(PlayerHiddenStatus):
         TriggeringSignal.SWAP_EVENT_2,
     ))
 
-    @override
-    def _inform(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            info_type: Informables,
-            information: InformableEvent,
-    ) -> Self:
-        if info_type is Informables.SKILL_USAGE:
-            assert isinstance(information, SkillIEvent)
-            if information.source == status_source \
-                    and self.can_plunge:
-                return replace(self, can_plunge=False)
-        return self
+    # @override
+    # def _inform(
+    #         self,
+    #         game_state: GameState,
+    #         status_source: StaticTarget,
+    #         info_type: Informables,
+    #         information: InformableEvent,
+    # ) -> Self:
+    #     if info_type is Informables.SKILL_USAGE:
+    #         assert isinstance(information, SkillIEvent)
+    #         if information.source == status_source \
+    #                 and self.can_plunge:
+    #             return replace(self, can_plunge=False)
+    #     return self
 
     @override
     def _react_to_signal(
