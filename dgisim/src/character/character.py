@@ -31,6 +31,7 @@ __all__ = [
 
     # concretes
     "AratakiItto",
+    "ElectroHypostasis",
     "KaedeharaKazuha",
     "Kaeya",
     "Keqing",
@@ -461,6 +462,7 @@ class AratakiItto(Character):
             ),
         )
 
+    @override
     def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.EnergyDrainEffect(
@@ -541,6 +543,40 @@ class ElectroHypostasis(Character):
                 target=source,
                 status=stt.RockPaperScissorsComboScissorsStatus,
             ),
+        )
+
+    @override
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.get_max_energy(),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.ELECTRO,
+                damage=2,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            # eft.AddSummonEffect(
+            #     target=source,
+            #     status=stt.RagingOniKing,
+            # ),
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            hp=8,
+            max_hp=8,
+            energy=0,
+            max_energy=2,
+            hiddens=stts.Statuses((stt.PlungeAttackStatus(), stt.DeathThisRoundStatus())),
+            equipments=stts.EquipmentStatuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
         )
 
 

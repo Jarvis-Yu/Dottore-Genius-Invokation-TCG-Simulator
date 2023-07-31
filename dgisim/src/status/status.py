@@ -94,8 +94,8 @@ __all__ = [
     "RagingOniKing",
     "SuperlativeSuperstrengthStatus",
     ## Electro Hypostasis ##
-    "RockPaperScissorsComboScissorsStatus",
     "RockPaperScissorsComboPaperStatus",
+    "RockPaperScissorsComboScissorsStatus",
     ## Kaedehara Kazuha ##
     "MidareRanzanStatus",
     "MidareRanzanCryoStatus",
@@ -1362,13 +1362,73 @@ class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class RockPaperScissorsComboScissorsStatus(CharacterStatus, PrepareSkillStatus):
-    ...
+class RockPaperScissorsComboPaperStatus(CharacterStatus, PrepareSkillStatus):
+    DAMAGE: ClassVar[int] = 3
+
+    REACTABLE_SIGNALS = frozenset({
+        TriggeringSignal.SWAP_EVENT_1,
+        TriggeringSignal.SWAP_EVENT_2,
+        TriggeringSignal.ACT_PRE_SKILL,
+    })
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ACT_PRE_SKILL:
+            return [
+                eft.RemoveCharacterStatusEffect(
+                    target=source,
+                    status=type(self),
+                ),
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=Element.ELECTRO,
+                    damage=self.DAMAGE,
+                    damage_type=DamageType(elemental_skill=True, status=True),
+                ),
+            ], self
+        elif self._is_swapping_source(source, signal):
+            return [], None
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)
-class RockPaperScissorsComboPaperStatus(CharacterStatus, PrepareSkillStatus):
-    ...
+class RockPaperScissorsComboScissorsStatus(CharacterStatus, PrepareSkillStatus):
+    DAMAGE: ClassVar[int] = 2
+
+    REACTABLE_SIGNALS = frozenset({
+        TriggeringSignal.SWAP_EVENT_1,
+        TriggeringSignal.SWAP_EVENT_2,
+        TriggeringSignal.ACT_PRE_SKILL,
+    })
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ACT_PRE_SKILL:
+            return [
+                eft.RemoveCharacterStatusEffect(
+                    target=source,
+                    status=type(self),
+                ),
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=Element.ELECTRO,
+                    damage=self.DAMAGE,
+                    damage_type=DamageType(elemental_skill=True, status=True),
+                ),
+                eft.AddCharacterStatusEffect(
+                    target=source,
+                    status=RockPaperScissorsComboPaperStatus,
+                ),
+            ], self
+        elif self._is_swapping_source(source, signal):
+            return [], None
+        return [], self
 
 #### Kaedehara Kazuha ####
 

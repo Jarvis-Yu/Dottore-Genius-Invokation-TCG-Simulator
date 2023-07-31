@@ -115,6 +115,8 @@ class ActionPhase(ph.Phase):
         player = game_state.get_player(pid)
         active_character = player.get_active_character()
         assert active_character is not None, game_state
+        if not active_character.can_cast_skill():
+            return None
         prepare_skill_status = next((
             status
             for status in active_character.get_all_statuses_ordered_flattened()

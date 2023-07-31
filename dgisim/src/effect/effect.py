@@ -371,17 +371,24 @@ class TurnEndEffect(PhaseEffect):
         player = game_state.get_player(active_player_id)
         other_player = game_state.get_other_player(active_player_id)
         assert player.get_phase() is Act.ACTION_PHASE
-        # TODO: other tidy up
-        if other_player.get_phase() is Act.END_PHASE:
-            return game_state
-        return game_state.factory().active_player_id(
-            active_player_id.other()
-        ).player(
-            active_player_id,
-            player.factory().phase(Act.PASSIVE_WAIT_PHASE).build()
-        ).other_player(
-            active_player_id,
-            other_player.factory().phase(Act.ACTION_PHASE).build()
+        if other_player.get_phase() is not Act.END_PHASE:
+            game_state = game_state.factory().active_player_id(
+                active_player_id.other()
+            ).player(
+                active_player_id,
+                player.factory().phase(Act.PASSIVE_WAIT_PHASE).build()
+            ).other_player(
+                active_player_id,
+                other_player.factory().phase(Act.ACTION_PHASE).build()
+            ).build()
+        active_player_id = game_state.get_active_player_id()
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_one(
+                AllStatusTriggererEffect(
+                    active_player_id,
+                    TriggeringSignal.PRE_ACTION,
+                )
+            )
         ).build()
 
 
@@ -1152,7 +1159,7 @@ class UpdateCharacterStatusEffect(DirectEffect):
 @dataclass(frozen=True, repr=False)
 class OverrideCharacterStatusEffect(DirectEffect):
     target: StaticTarget
-    status: stt.PersonalStatus 
+    status: stt.PersonalStatus
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)

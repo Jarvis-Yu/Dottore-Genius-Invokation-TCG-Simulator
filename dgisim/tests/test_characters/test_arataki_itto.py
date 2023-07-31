@@ -12,8 +12,8 @@ class TestAratakiItto(unittest.TestCase):
             ).character(
                 AratakiItto.from_default(2)
             ).build()
-            ).f_hand_cards(
-                lambda hcs: hcs.add(AratakiIchiban)
+        ).f_hand_cards(
+            lambda hcs: hcs.add(AratakiIchiban)
         ).dices(
             ActualDices({Element.OMNI: 100})  # even number
         ).build()
