@@ -27,6 +27,7 @@ class PlayerState:
         self,
         phase: Act,
         characters: Characters,
+        hidden_statuses: sts.Statuses,
         combat_statuses: sts.Statuses,
         summons: Summons,
         supports: Supports,
@@ -43,6 +44,7 @@ class PlayerState:
         self._card_redraw_chances = card_redraw_chances
         self._dice_reroll_chances = dice_reroll_chances
         self._characters = characters
+        self._hidden_statuses = hidden_statuses
         self._combat_statuses = combat_statuses
         self._summons = summons
         self._supports = supports
@@ -66,6 +68,9 @@ class PlayerState:
 
     def get_characters(self) -> Characters:
         return self._characters
+
+    def get_hidden_statuses(self) -> sts.Statuses:
+        return self._hidden_statuses
 
     def get_combat_statuses(self) -> sts.Statuses:
         return self._combat_statuses
@@ -130,6 +135,7 @@ class PlayerState:
 
     @classmethod
     def example_player(cls, mode: Mode) -> Self:
+        from ..status.status import PlungeAttackStatus
         cards = mode.all_cards()
         chars = mode.all_chars()
         import random
@@ -142,6 +148,7 @@ class PlayerState:
             characters=Characters.from_default(
                 tuple(char.from_default(i + 1) for i, char in enumerate(selected_chars))
             ),
+            hidden_statuses=sts.Statuses((PlungeAttackStatus(),)),
             combat_statuses=sts.Statuses(()),
             summons=Summons((), mode.summons_limit()),
             supports=Supports((), mode.supports_limit()),
@@ -154,11 +161,13 @@ class PlayerState:
 
     @classmethod
     def from_deck(cls, mode: Mode, characters: Characters, cards: Cards) -> Self:
+        from ..status.status import PlungeAttackStatus
         return cls(
             phase=Act.PASSIVE_WAIT_PHASE,
             card_redraw_chances=0,
             dice_reroll_chances=0,
             characters=characters,
+            hidden_statuses=sts.Statuses((PlungeAttackStatus(),)),
             combat_statuses=sts.Statuses(()),
             summons=Summons((), mode.summons_limit()),
             supports=Supports((), mode.supports_limit()),
@@ -175,6 +184,7 @@ class PlayerState:
             self._card_redraw_chances,
             self._dice_reroll_chances,
             self._characters,
+            self._hidden_statuses,
             self._combat_statuses,
             self._summons,
             self._supports,
@@ -198,6 +208,7 @@ class PlayerState:
             "Phase": self._phase.value,
             "Card/Dice Redraw Chances": f"{self._card_redraw_chances}/{self._dice_reroll_chances}",
             "Characters": self._characters.dict_str(),
+            "Hidden Statuses": str(self._hidden_statuses),
             "Combat Statuses": str(self._combat_statuses),
             "Summons": self._summons.dict_str(),
             "Supports": self._supports.dict_str(),
@@ -215,6 +226,7 @@ class PlayerStateFactory:
         self._card_redraw_chances = player_state.get_card_redraw_chances()
         self._dice_reroll_chances = player_state.get_dice_reroll_chances()
         self._characters = player_state.get_characters()
+        self._hidden_statuses = player_state.get_hidden_statuses()
         self._combat_statuses = player_state.get_combat_statuses()
         self._summons = player_state.get_summons()
         self._supports = player_state.get_supports()
@@ -249,6 +261,13 @@ class PlayerStateFactory:
     def f_characters(self, f: Callable[[Characters], Characters]) -> PlayerStateFactory:
         self._characters = f(self._characters)
         return self
+
+    def hidden_statuses(self, hidden_statuses: sts.Statuses) -> PlayerStateFactory:
+        self._hidden_statuses = hidden_statuses
+        return self
+
+    def f_hidden_statuses(self, f: Callable[[sts.Statuses], sts.Statuses]) -> PlayerStateFactory:
+        return self.hidden_statuses(f(self._hidden_statuses))
 
     def combat_statuses(self, combat_statuses: sts.Statuses) -> PlayerStateFactory:
         self._combat_statuses = combat_statuses
@@ -312,6 +331,7 @@ class PlayerStateFactory:
             card_redraw_chances=self._card_redraw_chances,
             dice_reroll_chances=self._dice_reroll_chances,
             characters=self._characters,
+            hidden_statuses=self._hidden_statuses,
             combat_statuses=self._combat_statuses,
             summons=self._summons,
             supports=self._supports,

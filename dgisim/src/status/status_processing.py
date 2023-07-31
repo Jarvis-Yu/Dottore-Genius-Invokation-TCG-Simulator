@@ -56,6 +56,16 @@ class StatusProcessing:
             for status in statuses:
                 game_state = f(game_state, status, target)
 
+        # hidden status
+        hidden_statuses = player.get_hidden_statuses()
+        target = StaticTarget(
+            pid,
+            Zone.HIDDEN_STATUSES,
+            -1,  # not used
+        )
+        for status in hidden_statuses:
+            game_state = f(game_state, status, target)
+
         # combat status
         combat_statuses = player.get_combat_statuses()
         target = StaticTarget(
@@ -119,6 +129,9 @@ class StatusProcessing:
 
             if isinstance(status, stt.PersonalStatus):
                 effects.append(eft.TriggerStatusEffect(target, type(status), signal))
+
+            elif isinstance(status, stt.PlayerHiddenStatus):
+                effects.append(eft.TriggerHiddenStatusEffect(target.pid, type(status), signal))
 
             elif isinstance(status, stt.CombatStatus):
                 effects.append(eft.TriggerCombatStatusEffect(target.pid, type(status), signal))

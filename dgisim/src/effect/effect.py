@@ -50,6 +50,7 @@ __all__ = [
     # Triggerrable Effect
     "AllStatusTriggererEffect",
     "TriggerStatusEffect",
+    "TriggerHiddenStatusEffect",
     "TriggerCombatStatusEffect",
     "TriggerSummonEffect",
     "TriggerSupportEffect",
@@ -82,11 +83,14 @@ __all__ = [
     "PublicRemoveAllCardEffect",
     "AddDiceEffect",
     "RemoveDiceEffect",
-    # ...,
     "AddCharacterStatusEffect",
     "RemoveCharacterStatusEffect",
     "UpdateCharacterStatusEffect",
     "OverrideCharacterStatusEffect",
+    "AddHiddenStatusEffect",
+    "RemoveHiddenStatusEffect",
+    "UpdateHiddenStatusEffect",
+    "OverrideHiddenStatusEffect",
     "AddCombatStatusEffect",
     "RemoveCombatStatusEffect",
     "UpdateCombatStatusEffect",
@@ -193,6 +197,32 @@ class TriggerStatusEffect(TriggerrbleEffect):
         if status is None:
             return game_state
         effects = status.react_to_signal(game_state, self.target, self.signal)
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_many_fl(effects)
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class TriggerHiddenStatusEffect(TriggerrbleEffect):
+    target_pid: Pid  # the player the status belongs to
+    status: type[stt.PlayerHiddenStatus]
+    signal: TriggeringSignal
+
+    def execute(self, game_state: GameState) -> GameState:
+        effects: Iterable[Effect] = []
+        statuses = game_state.get_player(self.target_pid).get_hidden_statuses()
+        status = statuses.find(self.status)
+        if status is None:
+            return game_state
+        effects = status.react_to_signal(
+            game_state,
+            StaticTarget(
+                pid=self.target_pid,
+                zone=Zone.HIDDEN_STATUSES,
+                id=-1,
+            ),
+            self.signal,
+        )
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
@@ -1182,6 +1212,62 @@ class OverrideCharacterStatusEffect(DirectEffect):
             self.target.pid,
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().character(character).build()  # type: ignore
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class AddHiddenStatusEffect(DirectEffect):
+    target_pid: Pid
+    status: type[stt.PlayerHiddenStatus]
+
+    def execute(self, game_state: GameState) -> GameState:
+        return game_state.factory().f_player(
+            self.target_pid,
+            lambda p: p.factory().f_hidden_statuses(
+                lambda ss: ss.update_status(self.status())
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class RemoveHiddenStatusEffect(DirectEffect):
+    target_pid: Pid
+    status: type[stt.PlayerHiddenStatus]
+
+    def execute(self, game_state: GameState) -> GameState:
+        return game_state.factory().f_player(
+            self.target_pid,
+            lambda p: p.factory().f_hidden_statuses(
+                lambda ss: ss.remove(self.status)
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class UpdateHiddenStatusEffect(DirectEffect):
+    target_pid: Pid
+    status: stt.PlayerHiddenStatus
+
+    def execute(self, game_state: GameState) -> GameState:
+        return game_state.factory().f_player(
+            self.target_pid,
+            lambda p: p.factory().f_hidden_statuses(
+                lambda ss: ss.update_status(self.status)
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class OverrideHiddenStatusEffect(DirectEffect):
+    target_pid: Pid
+    status: stt.PlayerHiddenStatus
+
+    def execute(self, game_state: GameState) -> GameState:
+        return game_state.factory().f_player(
+            self.target_pid,
+            lambda p: p.factory().f_hidden_statuses(
+                lambda ss: ss.update_status(self.status, override=True)
             ).build()
         ).build()
 

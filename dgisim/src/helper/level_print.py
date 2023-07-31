@@ -167,6 +167,7 @@ class GamePrinter:
             0,
             GamePrinter._insert_characters(player["Characters"]),
         )
+        board.insert_at_nextline(0, GamePrinter._pair(player, "Hidden Statuses"))
         board.insert_at_nextline(0, GamePrinter._pair(player, "Combat Statuses"))
         board.insert_board_at_nextline(
             0,

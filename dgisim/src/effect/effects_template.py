@@ -22,11 +22,12 @@ def normal_attack_template(
         element: eft.Element,
         damage: int,
 ) -> tuple[eft.Effect, ...]:
-    dices_num = game_state.get_player(source.pid).get_dices().num_dices()
+    player = game_state.get_player(source.pid)
+    dices_num = player.get_dices().num_dices()
     character = game_state.get_character_target(source)
     assert character is not None
-    assert stt.PlungeAttackStatus in character.get_hidden_statuses()
-    plunge_status = character.get_hidden_statuses().just_find(stt.PlungeAttackStatus)
+    assert stt.PlungeAttackStatus in player.get_hidden_statuses()
+    plunge_status = player.get_hidden_statuses().just_find(stt.PlungeAttackStatus)
     effects: list[eft.Effect] = []
     effects.append(eft.ReferredDamageEffect(
         source=source,

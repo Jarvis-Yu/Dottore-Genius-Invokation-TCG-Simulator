@@ -39,6 +39,7 @@ __all__ = [
     "Status",
 
     # type
+    "PlayerHiddenStatus",
     "PersonalStatus",
     "HiddenStatus",  # it should be statuses used to record character-talent related data
     "EquipmentStatus",  # talent / weapon / artifact
@@ -248,6 +249,19 @@ class Status:
                     new_status,  # type: ignore
                 ))
 
+        elif isinstance(self, PlayerHiddenStatus):
+            if new_status is None:
+                es.append(eft.RemoveHiddenStatusEffect(
+                    source.pid,
+                    type(self),
+                ))
+            elif new_status is not self and self.update(new_status) != self:  # type: ignore
+                assert type(self) == type(new_status)
+                es.append(eft.UpdateHiddenStatusEffect(
+                    source.pid,
+                    new_status,  # type: ignore
+                ))
+
         elif isinstance(self, CombatStatus):
             if new_status is None:
                 es.append(eft.RemoveCombatStatusEffect(
@@ -368,6 +382,11 @@ class Status:
 
 
 ############################## type ##############################
+
+@dataclass(frozen=True)
+class PlayerHiddenStatus(Status):
+    pass
+
 
 @dataclass(frozen=True)
 class PersonalStatus(Status):
@@ -671,9 +690,8 @@ class _InfusionStatus(_UsageStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class PlungeAttackStatus(HiddenStatus):
+class PlungeAttackStatus(PlayerHiddenStatus):
     can_plunge: bool = False
-    invalidate: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.COMBAT_ACTION,
         TriggeringSignal.ROUND_END,
@@ -693,22 +711,19 @@ class PlungeAttackStatus(HiddenStatus):
             assert isinstance(information, SkillIEvent)
             if information.source == status_source \
                     and self.can_plunge:
-                return replace(self, invalidate=True)
+                return replace(self, can_plunge=False)
         return self
 
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.invalidate:
-            return [], replace(self, can_plunge=False, invalidate=False)
+        if signal is TriggeringSignal.COMBAT_ACTION and self.can_plunge:
+            return [], replace(self, can_plunge=False)
         elif signal is TriggeringSignal.ROUND_END and self.can_plunge:
-            assert not self.invalidate
             return [], replace(self, can_plunge=False)
         elif self._is_swapping_source(source, signal):
-            characters = game_state.get_player(source.pid).get_characters()
-            active_char_id = characters.get_active_character_id()
-            if source.id == active_char_id and not self.can_plunge:
+            if not self.can_plunge:
                 return [], replace(self, can_plunge=True)
         return [], self
 

@@ -16,6 +16,7 @@ class Zone(Enum):
     CHARACTERS = "Characters"
     SUMMONS = "Summons"
     SUPPORTS = "Supports"
+    HIDDEN_STATUSES = "Hidden-Statuses"
     COMBAT_STATUSES = "Combat-Statuses"
 
 

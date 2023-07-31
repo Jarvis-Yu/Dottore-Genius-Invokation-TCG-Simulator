@@ -244,20 +244,7 @@ class ActionPhase(ph.Phase):
         ))
 
         if action_speed is EventSpeed.COMBAT_ACTION:
-            new_effects.append(
-                AllStatusTriggererEffect(
-                    pid=pid,
-                    signal=TriggeringSignal.COMBAT_ACTION,
-                )
-            )
             new_effects.append(TurnEndEffect())
-        elif action_speed is EventSpeed.FAST_ACTION:
-            new_effects.append(
-                AllStatusTriggererEffect(
-                    pid=pid,
-                    signal=TriggeringSignal.FAST_ACTION,
-                )
-            )
 
         return game_state.factory().effect_stack(
             game_state.get_effect_stack().push_many_fl(new_effects)
