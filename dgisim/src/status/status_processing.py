@@ -117,9 +117,7 @@ class StatusProcessing:
             if signal not in status.REACTABLE_SIGNALS:
                 return game_state
 
-            if isinstance(status, stt.HiddenStatus) \
-                    or isinstance(status, stt.EquipmentStatus) \
-                    or isinstance(status, stt.CharacterStatus):
+            if isinstance(status, stt.PersonalStatus):
                 effects.append(eft.TriggerStatusEffect(target, type(status), signal))
 
             elif isinstance(status, stt.CombatStatus):
@@ -148,9 +146,7 @@ class StatusProcessing:
             nonlocal item
             item, new_status = status.preprocess(game_state, status_source, item, pp_type)
 
-            if isinstance(status, stt.HiddenStatus) \
-                    or isinstance(status, stt.EquipmentStatus) \
-                    or isinstance(status, stt.CharacterStatus):
+            if isinstance(status, stt.PersonalStatus):
                 if new_status is None:
                     game_state = eft.RemoveCharacterStatusEffect(
                         status_source, type(status)).execute(game_state)

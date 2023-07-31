@@ -39,6 +39,7 @@ __all__ = [
     "Status",
 
     # type
+    "PersonalStatus",
     "HiddenStatus",  # it should be statuses used to record character-talent related data
     "EquipmentStatus",  # talent / weapon / artifact
     "TalentEquipmentStatus",
@@ -187,9 +188,7 @@ class Status:
 
         from ..summon import summon as sm
         from ..support import support as sp
-        if isinstance(new_self, HiddenStatus) \
-                or isinstance(new_self, EquipmentStatus) \
-                or isinstance(new_self, CharacterStatus):
+        if isinstance(new_self, PersonalStatus):
             return eft.OverrideCharacterStatusEffect(
                 target=status_source,
                 status=new_self,
@@ -369,8 +368,14 @@ class Status:
 
 
 ############################## type ##############################
+
 @dataclass(frozen=True)
-class HiddenStatus(Status):
+class PersonalStatus(Status):
+    pass
+
+
+@dataclass(frozen=True)
+class HiddenStatus(PersonalStatus):
     """
     Basic status, describing character talents
     """
@@ -378,7 +383,7 @@ class HiddenStatus(Status):
 
 
 @dataclass(frozen=True)
-class EquipmentStatus(Status):
+class EquipmentStatus(PersonalStatus):
     """
     Basic status, describing weapon, artifact and character unique talents
     """
@@ -425,7 +430,7 @@ class ArtifactEquipmentStatus(EquipmentStatus):
 
 
 @dataclass(frozen=True)
-class CharacterStatus(Status):
+class CharacterStatus(PersonalStatus):
     """
     Basic status, private status to each character
     """
@@ -495,9 +500,7 @@ class _ShieldStatus(Status):
             item: eft.SpecificDamageEffect,
     ) -> bool:
         from ..summon import summon as sm
-        if isinstance(self, HiddenStatus) \
-                or isinstance(self, EquipmentStatus) \
-                or isinstance(self, CharacterStatus):
+        if isinstance(self, PersonalStatus):
             return item.target == status_source
 
         elif isinstance(self, CombatStatus):

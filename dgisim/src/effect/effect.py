@@ -171,7 +171,7 @@ class AllStatusTriggererEffect(TriggerrbleEffect):
 @dataclass(frozen=True, repr=False)
 class TriggerStatusEffect(TriggerrbleEffect):
     target: StaticTarget
-    status: type[Union[stt.HiddenStatus, stt.EquipmentStatus, stt.CharacterStatus]]
+    status: type[stt.PersonalStatus]
     signal: TriggeringSignal
 
     def execute(self, game_state: GameState) -> GameState:
@@ -1060,7 +1060,7 @@ class AddRerollChancesEffect(DirectEffect):
 @dataclass(frozen=True, repr=False)
 class AddCharacterStatusEffect(DirectEffect):
     target: StaticTarget
-    status: type[Union[stt.HiddenStatus, stt.EquipmentStatus, stt.CharacterStatus]]
+    status: type[stt.PersonalStatus]
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
@@ -1077,6 +1077,8 @@ class AddCharacterStatusEffect(DirectEffect):
             character = character.factory().f_character_statuses(
                 lambda cs: cs.update_status(self.status())
             ).build()
+        else:
+            raise NotImplementedError(self.status)
         return game_state.factory().f_player(
             self.target.pid,
             lambda p: p.factory().f_characters(
@@ -1088,7 +1090,7 @@ class AddCharacterStatusEffect(DirectEffect):
 @dataclass(frozen=True, repr=False)
 class RemoveCharacterStatusEffect(DirectEffect):
     target: StaticTarget
-    status: type[Union[stt.HiddenStatus, stt.EquipmentStatus, stt.CharacterStatus]]
+    status: type[stt.PersonalStatus]
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_character_target(self.target)
@@ -1107,6 +1109,8 @@ class RemoveCharacterStatusEffect(DirectEffect):
             new_character = character.factory().f_character_statuses(
                 lambda cs: cs.remove(self.status)
             ).build()
+        else:
+            raise NotImplementedError(self.status)
         return game_state.factory().f_player(
             self.target.pid,
             lambda p: p.factory().f_characters(
@@ -1118,7 +1122,7 @@ class RemoveCharacterStatusEffect(DirectEffect):
 @dataclass(frozen=True, repr=False)
 class UpdateCharacterStatusEffect(DirectEffect):
     target: StaticTarget
-    status: Union[stt.HiddenStatus, stt.EquipmentStatus, stt.CharacterStatus]
+    status: stt.PersonalStatus
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
@@ -1135,6 +1139,8 @@ class UpdateCharacterStatusEffect(DirectEffect):
             character = character.factory().f_character_statuses(
                 lambda cs: cs.update_status(self.status)
             ).build()
+        else:
+            raise NotImplementedError(self.status)
         return game_state.factory().f_player(
             self.target.pid,
             lambda p: p.factory().f_characters(
@@ -1146,7 +1152,7 @@ class UpdateCharacterStatusEffect(DirectEffect):
 @dataclass(frozen=True, repr=False)
 class OverrideCharacterStatusEffect(DirectEffect):
     target: StaticTarget
-    status: Union[stt.HiddenStatus, stt.EquipmentStatus, stt.CharacterStatus]
+    status: stt.PersonalStatus 
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
@@ -1163,6 +1169,8 @@ class OverrideCharacterStatusEffect(DirectEffect):
             character = character.factory().f_character_statuses(
                 lambda cs: cs.update_status(self.status, override=True)
             ).build()
+        else:
+            raise NotImplementedError(self.status)
         return game_state.factory().f_player(
             self.target.pid,
             lambda p: p.factory().f_characters(

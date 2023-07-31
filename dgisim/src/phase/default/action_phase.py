@@ -15,6 +15,7 @@ from ...element import Element
 from ...event import *
 from ...helper.quality_of_life import just
 from ...state.enums import Pid, Act
+from ...status.status import PersonalStatus, PrepareSkillStatus
 
 if TYPE_CHECKING:
     from ...action.types import DecidedChoiceType, GivenChoiceType
@@ -48,6 +49,13 @@ class ActionPhase(ph.Phase):
             lambda p: p.factory().phase(
                 Act.ACTION_PHASE
             ).build()
+        ).f_effect_stack(
+            lambda es: es.push_one(
+                AllStatusTriggererEffect(
+                    active_player_id,
+                    TriggeringSignal.PRE_ACTION,
+                )
+            )
         ).build()
 
     def _to_end_phase(self, game_state: GameState) -> GameState:
@@ -71,20 +79,63 @@ class ActionPhase(ph.Phase):
         new_game_state = game_state.factory().effect_stack(effect_stack).build()
         return effect.execute(new_game_state)
 
+    def _handle_prepare_skill(self, game_state: GameState) -> GameState:
+        pid = super().waiting_for(game_state)
+        assert pid is not None
+        prepare_skill_status = self._get_prepare_skill_status(game_state, pid)
+        assert prepare_skill_status is not None
+        status_source = StaticTarget(
+            pid,
+            Zone.CHARACTERS,
+            game_state.get_player(pid).just_get_active_character().get_id(),
+        )
+        assert isinstance(prepare_skill_status, PersonalStatus), prepare_skill_status
+        effects = [
+            TriggerStatusEffect(
+                target=status_source,
+                status=type(prepare_skill_status),
+                signal=TriggeringSignal.ACT_PRE_SKILL,
+            ),
+            AllStatusTriggererEffect(
+                pid,
+                TriggeringSignal.COMBAT_ACTION,
+            ),
+            TurnEndEffect(),
+        ]
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_many_fl(effects)
+        ).build()
+
     def _is_executing_effects(self, game_state: GameState) -> bool:
         effect_stack = game_state.get_effect_stack()
         return not effect_stack.is_empty() \
             and not isinstance(effect_stack.peek(), DeathSwapPhaseStartEffect)
 
+    def _get_prepare_skill_status(self, game_state: GameState, pid: Pid) -> None | PrepareSkillStatus:
+        player = game_state.get_player(pid)
+        active_character = player.get_active_character()
+        assert active_character is not None, game_state
+        prepare_skill_status = next((
+            status
+            for status in active_character.get_all_statuses_ordered_flattened()
+            if isinstance(status, PrepareSkillStatus)
+        ), None)
+        return prepare_skill_status
+
     def step(self, game_state: GameState) -> GameState:
         p1 = game_state.get_player1()
         p2 = game_state.get_player2()
         if p1.is_action_phase() or p2.is_action_phase():
-            assert self._is_executing_effects(game_state)
-            return self._execute_effect(game_state)
+            if self._is_executing_effects(game_state):
+                return self._execute_effect(game_state)
+            else:
+                assert self.waiting_for(game_state) is None
+                return self._handle_prepare_skill(game_state)
         elif p1.is_passive_wait_phase() and p2.is_passive_wait_phase():
             return self._start_up_phase(game_state)
         elif p1.is_active_wait_phase() or p2.is_active_wait_phase():
+            if self._is_executing_effects(game_state):
+                return self._execute_effect(game_state)
             return self._begin_action_phase(game_state)
         elif p1.is_end_phase() and p2.is_end_phase():
             return self._to_end_phase(game_state)
@@ -404,7 +455,14 @@ class ActionPhase(ph.Phase):
     def waiting_for(self, game_state: GameState) -> Optional[Pid]:
         effect_stack = game_state.get_effect_stack()
         # if no effects are to be executed or death swap phase is inserted
-        if effect_stack.is_empty() or game_state.death_swapping():
+        if effect_stack.is_empty():
+            pid = super().waiting_for(game_state)
+            if pid is None:
+                return pid
+            if self._get_prepare_skill_status(game_state, pid) is None:
+                return pid
+            return None
+        elif game_state.death_swapping():
             return super().waiting_for(game_state)
         elif isinstance(effect_stack.peek(), PhaseStartEffect):
             effect = effect_stack.peek()

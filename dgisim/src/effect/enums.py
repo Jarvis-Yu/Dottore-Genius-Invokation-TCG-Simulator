@@ -25,10 +25,12 @@ class TriggeringSignal(Enum):
     DEATH_EVENT = 2
     SWAP_EVENT_1 = 3  # P1's swap
     SWAP_EVENT_2 = 4  # P2's swap
-    ROUND_START = 5
-    END_ROUND_CHECK_OUT = 6  # summons etc.
-    POST_DMG = 7  # triggering after each summon effect
-    ROUND_END = 8  # remove frozen etc.
+    POST_DMG = 5  # triggering after each summon effect
+    ROUND_START = 6
+    PRE_ACTION = 7
+    ACT_PRE_SKILL = 8  # trigger prepare skill
+    END_ROUND_CHECK_OUT = 9  # summons etc.
+    ROUND_END = 10  # remove frozen etc.
 
     @classmethod
     def swap_event(cls, pid: Pid) -> TriggeringSignal:
