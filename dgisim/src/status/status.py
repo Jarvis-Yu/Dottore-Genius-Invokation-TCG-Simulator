@@ -195,6 +195,12 @@ class Status:
                 status=new_self,
             ).execute(game_state)
 
+        elif isinstance(new_self, PlayerHiddenStatus):
+            return eft.OverrideHiddenStatusEffect(
+                target_pid=status_source.pid,
+                status=new_self,
+            ).execute(game_state)
+
         elif isinstance(new_self, CombatStatus):
             return eft.OverrideCombatStatusEffect(
                 target_pid=status_source.pid,
@@ -733,7 +739,7 @@ class PlungeAttackStatus(PlayerHiddenStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class DeathThisRoundStatus(HiddenStatus):
+class DeathThisRoundStatus(PlayerHiddenStatus):
     activated: bool = False
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
@@ -750,7 +756,7 @@ class DeathThisRoundStatus(HiddenStatus):
     ) -> Self:
         if info_type is Informables.CHARACTER_DEATH:
             assert isinstance(information, CharacterDeathIEvent)
-            if not self.activated and information.target == status_source:
+            if not self.activated and information.target.pid == status_source.pid:
                 return replace(self, activated=True)
         return self
 

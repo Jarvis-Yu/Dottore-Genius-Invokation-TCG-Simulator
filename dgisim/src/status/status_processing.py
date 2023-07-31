@@ -170,6 +170,19 @@ class StatusProcessing:
                         new_status,  # type: ignore
                     ).execute(game_state)
 
+            elif isinstance(status, stt.PlayerHiddenStatus):
+                if new_status is None:
+                    game_state = eft.RemoveHiddenStatusEffect(
+                        status_source.pid,
+                        type(status),
+                    ).execute(game_state)
+                elif new_status != status:
+                    assert type(status) == type(new_status)
+                    game_state = eft.OverrideHiddenStatusEffect(
+                        status_source.pid,
+                        new_status,  # type: ignore
+                    ).execute(game_state)
+
             elif isinstance(status, stt.CombatStatus):
                 if new_status is None:
                     game_state = eft.RemoveCombatStatusEffect(

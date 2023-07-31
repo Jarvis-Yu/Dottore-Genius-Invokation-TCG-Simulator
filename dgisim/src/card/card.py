@@ -1126,10 +1126,10 @@ class IHaventLostYet(EventCard, _DiceOnlyChoiceProvider):
     @override
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        characters = game_state.get_player(pid).get_characters()
-        return any(
-            char.get_hidden_statuses().just_find(stt.DeathThisRoundStatus).activated
-            for char in characters
+        return (
+            game_state.get_player(pid)
+            .get_hidden_statuses()
+            .just_find(stt.DeathThisRoundStatus).activated
         )
 
     @override

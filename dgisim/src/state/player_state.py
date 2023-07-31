@@ -135,7 +135,7 @@ class PlayerState:
 
     @classmethod
     def example_player(cls, mode: Mode) -> Self:
-        from ..status.status import PlungeAttackStatus
+        from ..status.status import DeathThisRoundStatus, PlungeAttackStatus
         cards = mode.all_cards()
         chars = mode.all_chars()
         import random
@@ -148,7 +148,10 @@ class PlayerState:
             characters=Characters.from_default(
                 tuple(char.from_default(i + 1) for i, char in enumerate(selected_chars))
             ),
-            hidden_statuses=sts.Statuses((PlungeAttackStatus(),)),
+            hidden_statuses=sts.Statuses((
+                PlungeAttackStatus(),
+                DeathThisRoundStatus(),
+            )),
             combat_statuses=sts.Statuses(()),
             summons=Summons((), mode.summons_limit()),
             supports=Supports((), mode.supports_limit()),
@@ -161,13 +164,16 @@ class PlayerState:
 
     @classmethod
     def from_deck(cls, mode: Mode, characters: Characters, cards: Cards) -> Self:
-        from ..status.status import PlungeAttackStatus
+        from ..status.status import DeathThisRoundStatus, PlungeAttackStatus
         return cls(
             phase=Act.PASSIVE_WAIT_PHASE,
             card_redraw_chances=0,
             dice_reroll_chances=0,
             characters=characters,
-            hidden_statuses=sts.Statuses((PlungeAttackStatus(),)),
+            hidden_statuses=sts.Statuses((
+                PlungeAttackStatus(),
+                DeathThisRoundStatus(),
+            )),
             combat_statuses=sts.Statuses(()),
             summons=Summons((), mode.summons_limit()),
             supports=Supports((), mode.supports_limit()),
