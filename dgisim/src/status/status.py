@@ -95,6 +95,8 @@ __all__ = [
     "RagingOniKing",
     "SuperlativeSuperstrengthStatus",
     ## Electro Hypostasis ##
+    "ElectroCrystalCoreHiddenStatus",
+    "ElectroCrystalCoreStatus",
     "RockPaperScissorsComboPaperStatus",
     "RockPaperScissorsComboScissorsStatus",
     ## Kaedehara Kazuha ##
@@ -1380,6 +1382,16 @@ class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
         return item, self
 
 #### Electro Hypostasis ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class ElectroCrystalCoreHiddenStatus(HiddenStatus):
+    ...
+
+
+@dataclass(frozen=True, kw_only=True)
+class ElectroCrystalCoreStatus(CharacterStatus):
+    ...
 
 
 @dataclass(frozen=True, kw_only=True)
