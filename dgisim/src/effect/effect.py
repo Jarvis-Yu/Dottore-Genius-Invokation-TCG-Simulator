@@ -431,7 +431,7 @@ class AliveMarkCheckerEffect(CheckerEffect):
     def execute(self, game_state: GameState) -> GameState:
         active_pid = game_state.get_active_player_id()
         for pid in (active_pid, active_pid.other()):
-            for char in game_state.get_player(pid).get_characters():
+            for char in game_state.get_player(pid).get_characters().get_character_in_activity_order():
                 if not char.alive() or char.get_hp() > 0:
                     continue
                 char_source = StaticTarget(pid, Zone.CHARACTERS, char.get_id())

@@ -1401,7 +1401,7 @@ class ElectroCrystalCoreHiddenStatus(HiddenStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class ElectroCrystalCoreStatus(CharacterStatus):
+class ElectroCrystalCoreStatus(CharacterStatus, RevivalStatus):
     ...
 
 

@@ -690,20 +690,8 @@ class KaedeharaKazuha(Character):
             effects: tuple[eft.Effect, ...],
     ) -> tuple[eft.Effect, ...]:
         """ override for the afterwards swap of Kazuha's elemental skill """
-        appended_effects: tuple[eft.Effect, ...] = (
-            eft.BroadCastSkillInfoEffect(
-                source=source,
-                skill=skill_type,
-            ),
-            eft.SwapCharacterCheckerEffect(
-                my_active=source,
-                oppo_active=StaticTarget(
-                    pid=source.pid.other(),
-                    zone=Zone.CHARACTERS,
-                    id=game_state.get_other_player(source.pid).just_get_active_character().get_id()
-                )
-            ),
-            eft.DeathCheckCheckerEffect(),
+        appended_effects: tuple[eft.Effect, ...] = super()._post_skill(
+            game_state, source, skill_type, effects
         )
         if skill_type is CharacterSkill.ELEMENTAL_SKILL1:
             appended_effects += (
@@ -711,7 +699,7 @@ class KaedeharaKazuha(Character):
                     target_player=source.pid,
                 ),
             )
-        return effects + appended_effects
+        return appended_effects
 
     @override
     def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:

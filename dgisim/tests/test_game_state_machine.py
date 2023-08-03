@@ -153,7 +153,7 @@ class TestGameStateMachine(unittest.TestCase):
             mode.card_select_phase()
         ).build()
 
-        import os
+        import os, sys, time
         optional_repeats = os.getenv("RNG_PLAYS")
         repeats: int
         try:
@@ -162,7 +162,14 @@ class TestGameStateMachine(unittest.TestCase):
             repeats = 5
         from collections import defaultdict
         wins: dict[None | Pid, int] = defaultdict(int)
+        prev_progress = ""
+        times: list[float] = []
         for i in range(repeats):
+            print(end='\b' * len(prev_progress))
+            prev_progress = f"[{i}/{repeats}]"
+            print(end=prev_progress)
+            sys.stdout.flush()
+            start = time.time()
             if i % 3 == 0:
                 state_machine = GameStateMachine(
                     self._initial_state,
@@ -178,7 +185,19 @@ class TestGameStateMachine(unittest.TestCase):
             game_end_phase = state_machine.get_game_state().get_mode().game_end_phase()
             try:
                 state_machine.step_until_phase(game_end_phase)
+                end = time.time()
+                times.append(end - start)
                 wins[state_machine.get_winner()] += 1
             except Exception:
-                print(GamePrinter.dict_game_printer(state_machine.get_game_state().dict_str()))
-                raise Exception("Test failed")
+                all_state = state_machine.get_history()
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                print("AN EXCEPTION IS THROWN WHEN EXECUTING THE GAME")
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                for i, game_state in enumerate(all_state[-5:]):
+                    print(f"<<<{i+1}>>>")
+                    print(game_state)
+                raise Exception("Test failed because random agent triggers an excpetion")
+        print(end='\b' * len(prev_progress))
+        sys.stdout.flush()
+        average_time_in_ms = sum(times) / len(times) * 1000
+        print(end=f"[[A random game takes {round(average_time_in_ms, 1)} ms on average]]")
