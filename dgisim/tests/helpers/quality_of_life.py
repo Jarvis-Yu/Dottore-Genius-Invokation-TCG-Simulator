@@ -93,6 +93,7 @@ def add_damage_effect(
                 damage=damage,
                 damage_type=case_val(damage_type is None, DamageType(), damage_type),  # type: ignore
             ),
+            AliveMarkCheckerEffect(),
             DeathCheckCheckerEffect(),
         ))
     ).build()
@@ -112,7 +113,7 @@ def kill_character(
         lambda p: p.factory().f_characters(
             lambda cs: cs.factory().f_character(
                 character_id,
-                lambda c: c.factory().hp(hp).build()
+                lambda c: c.factory().hp(hp).alive(hp > 0).build()
             ).build()
         ).build()
     ).build()

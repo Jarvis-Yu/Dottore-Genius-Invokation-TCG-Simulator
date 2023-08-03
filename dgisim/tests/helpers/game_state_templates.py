@@ -67,7 +67,7 @@ OPPO_DEATH_WAIT = BASE_GAME.factory().f_phase(
     .f_characters(
         lambda cs: cs.factory()
         .active_character_id(1)
-        .f_character(1, lambda c: c.factory().hp(0).build())
+        .f_character(1, lambda c: c.factory().hp(0).alive(False).build())
         .build()
     )
     .phase(Act.PASSIVE_WAIT_PHASE)

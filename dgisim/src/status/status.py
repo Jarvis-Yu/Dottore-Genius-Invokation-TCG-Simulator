@@ -11,6 +11,7 @@ ordered alphabetically.
 - concrete classes, the implementation of statuses that are actually in the game
 """
 from __future__ import annotations
+from abc import abstractmethod
 from dataclasses import dataclass, replace
 from enum import Enum
 from math import ceil
@@ -53,6 +54,7 @@ __all__ = [
     "StackedShieldStatus",
     "FixedShieldStatus",
     "PrepareSkillStatus",
+    "RevivalStatus",
 
     # hidden status
     "PlungeAttackStatus",
@@ -320,6 +322,8 @@ class Status:
             has_swap = has_swap or isinstance(effect, eft.SwapCharacterEffect)  \
                 or isinstance(effect, eft.ForwardSwapCharacterEffect)
         if has_damage:
+            es.append(eft.AliveMarkCheckerEffect())
+            es.append(eft.DefeatedCheckerEffect())
             es.append(eft.AllStatusTriggererEffect(
                 pid=source.pid,
                 signal=TriggeringSignal.POST_DMG,
@@ -629,7 +633,14 @@ class StackedShieldStatus(_ShieldStatus, _UsageStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class PrepareSkillStatus(Status):
-    ...
+    pass
+
+
+@dataclass(frozen=True, kw_only=True)
+class RevivalStatus(Status):
+    @abstractmethod
+    def revivable(self, game_state: GameState, char: StaticTarget) -> bool:
+        pass
 
 
 @dataclass(frozen=True, kw_only=True)

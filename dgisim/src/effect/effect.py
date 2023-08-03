@@ -65,8 +65,9 @@ __all__ = [
     "TurnEndEffect",
 
     # Checker Effect
-    "SwapCharacterCheckerEffect",
-    "DeathCheckCheckerEffect",
+    "AliveMarkCheckerEffect",  # mark dead characters defeated and revive the revivables
+    "SwapCharacterCheckerEffect",  # detect on swap
+    "DeathCheckCheckerEffect",  # detect death swap
     "DefeatedCheckerEffect",
 
     # Direct Effect
@@ -426,6 +427,43 @@ class TurnEndEffect(PhaseEffect):
 
 
 @dataclass(frozen=True, repr=False)
+class AliveMarkCheckerEffect(CheckerEffect):
+    def execute(self, game_state: GameState) -> GameState:
+        active_pid = game_state.get_active_player_id()
+        for pid in (active_pid, active_pid.other()):
+            for char in game_state.get_player(pid).get_characters():
+                if not char.alive() or char.get_hp() > 0:
+                    continue
+                char_source = StaticTarget(pid, Zone.CHARACTERS, char.get_id())
+                revival_status = next((
+                    status
+                    for status in char.get_all_statuses_ordered_flattened()
+                    if (
+                        isinstance(status, stt.RevivalStatus)
+                        and status.revivable(game_state, char_source)
+                    )
+                ), None)
+                if revival_status is None:
+                    game_state = StatusProcessing.inform_all_statuses(
+                        game_state,
+                        pid,
+                        Informables.CHARACTER_DEATH,
+                        CharacterDeathIEvent(target=char_source),
+                    ).factory().f_player(
+                        pid,
+                        lambda p: p.factory().f_characters(
+                            lambda cs: cs.factory().f_character(
+                                char.get_id(),
+                                lambda c: c.factory().alive(False).build()
+                            ).build()
+                        ).build()
+                    ).build()
+                else:
+                    raise NotImplementedError
+        return game_state
+
+
+@dataclass(frozen=True, repr=False)
 class SwapCharacterCheckerEffect(CheckerEffect):
     my_active: StaticTarget
     oppo_active: StaticTarget
@@ -739,7 +777,7 @@ class SpecificDamageEffect(DirectEffect):
         hp = max(0, hp - actual_damage.damage)
 
         target_pid = self.target.pid
-        effects: list[Effect] = [DefeatedCheckerEffect()]
+        effects: list[Effect] = []
 
         if hp != target.get_hp():
             target = target.factory().hp(hp).build()
@@ -840,14 +878,6 @@ class SpecificDamageEffect(DirectEffect):
         ).f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
-
-        if target.defeated():
-            game_state = StatusProcessing.inform_all_statuses(
-                game_state,
-                self.source.pid,
-                Informables.CHARACTER_DEATH,
-                CharacterDeathIEvent(target=self.target),
-            )
 
         return game_state
 

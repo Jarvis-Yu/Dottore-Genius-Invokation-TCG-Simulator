@@ -49,6 +49,7 @@ class Character:
     def __init__(
         self,
         id: int,
+        alive: bool,
         hp: int,
         max_hp: int,
         energy: int,
@@ -59,6 +60,7 @@ class Character:
         elemental_aura: ElementalAura,
     ):
         self._id = id
+        self._alive = alive
         self._hp = hp
         self._max_hp = max_hp
         self._energy = energy
@@ -74,6 +76,9 @@ class Character:
 
     def get_id(self) -> int:
         return self._id
+
+    def get_alive(self) -> bool:
+        return self._alive
 
     def get_hp(self) -> int:
         return self._hp
@@ -171,6 +176,7 @@ class Character:
             effects: tuple[eft.Effect, ...],
     ) -> tuple[eft.Effect, ...]:
         return effects + (
+            eft.DefeatedCheckerEffect(),
             eft.BroadCastSkillInfoEffect(
                 source=source,
                 skill=skill_type,
@@ -216,6 +222,7 @@ class Character:
             effects: tuple[eft.Effect, ...]
     ) -> tuple[eft.Effect, ...]:
         return effects + (
+            eft.AliveMarkCheckerEffect(),
             eft.EnergyRechargeEffect(
                 target=source,
                 recharge=1,
@@ -244,6 +251,7 @@ class Character:
             effects: tuple[eft.Effect, ...]
     ) -> tuple[eft.Effect, ...]:
         return effects + (
+            eft.AliveMarkCheckerEffect(),
             eft.EnergyRechargeEffect(
                 target=source,
                 recharge=1,
@@ -267,6 +275,7 @@ class Character:
 
     def _post_elemental_skill2(self, game_state: GameState, source: StaticTarget, effects: tuple[eft.Effect, ...]) -> tuple[eft.Effect, ...]:
         return effects + (
+            eft.AliveMarkCheckerEffect(),
             eft.EnergyRechargeEffect(
                 target=source,
                 recharge=1,
@@ -294,7 +303,9 @@ class Character:
             source: StaticTarget,
             effects: tuple[eft.Effect, ...]
     ) -> tuple[eft.Effect, ...]:
-        return effects
+        return effects + (
+            eft.AliveMarkCheckerEffect(),
+        )
 
     def talent_equiped(self) -> bool:
         talent_status = self._talent_status()
@@ -303,10 +314,10 @@ class Character:
         return self.get_equipment_statuses().contains(talent_status)
 
     def alive(self) -> bool:
-        return not self.defeated()
+        return self._alive
 
     def defeated(self) -> bool:
-        return self._hp == 0
+        return not self._alive
 
     def satiated(self) -> bool:
         from ..status.status import SatiatedStatus
@@ -322,10 +333,15 @@ class Character:
     def _all_unique_data(self) -> tuple:
         return (
             self._id,
+            self._alive,
             self._hp,
             self._max_hp,
             self._energy,
             self._max_energy,
+            self._hiddens,
+            self._equipments,
+            self._statuses,
+            self._aura,
         )
 
     def __eq__(self, other: object) -> bool:
@@ -339,6 +355,7 @@ class Character:
     def dict_str(self) -> Union[dict, str]:
         return {
             "id": str(self._id),
+            "Alive": str(self._alive),
             "Aura": str(self._aura),
             "HP": str(self._hp),
             "Max HP": str(self._max_hp),
@@ -354,6 +371,7 @@ class CharacterFactory:
     def __init__(self, character: Character, char_type: type[Character]) -> None:
         self._char = char_type
         self._id = character.get_id()
+        self._alive = character.get_alive()
         self._hp = character.get_hp()
         self._max_hp = character.get_max_hp()
         self._energy = character.get_energy()
@@ -362,6 +380,10 @@ class CharacterFactory:
         self._equipments = character.get_equipment_statuses()
         self._statuses = character.get_character_statuses()
         self._aura = character.get_elemental_aura()
+
+    def alive(self, alive: bool) -> CharacterFactory:
+        self._alive = alive
+        return self
 
     def hp(self, hp: int) -> CharacterFactory:
         self._hp = hp
@@ -399,6 +421,7 @@ class CharacterFactory:
     def build(self) -> Character:
         return self._char(
             id=self._id,
+            alive=self._alive,
             hp=self._hp,
             max_hp=self._max_hp,
             energy=self._energy,
@@ -486,6 +509,7 @@ class AratakiItto(Character):
     def from_default(cls, id: int = -1) -> Self:
         return cls(
             id=id,
+            alive=True,
             hp=10,
             max_hp=10,
             energy=0,
@@ -569,6 +593,7 @@ class ElectroHypostasis(Character):
     def from_default(cls, id: int = -1) -> Self:
         return cls(
             id=id,
+            alive=True,
             hp=8,
             max_hp=8,
             energy=0,
@@ -738,6 +763,7 @@ class KaedeharaKazuha(Character):
     def from_default(cls, id: int = -1) -> Self:
         return cls(
             id=id,
+            alive=True,
             hp=10,
             max_hp=10,
             energy=0,
@@ -815,6 +841,7 @@ class Kaeya(Character):
     def from_default(cls, id: int = -1) -> Self:
         return cls(
             id=id,
+            alive=True,
             hp=10,
             max_hp=10,
             energy=0,
@@ -952,6 +979,7 @@ class Keqing(Character):
     def from_default(cls, id: int = -1) -> Keqing:
         return cls(
             id=id,
+            alive=True,
             hp=10,
             max_hp=10,
             energy=0,
@@ -1034,6 +1062,7 @@ class Klee(Character):
     def from_default(cls, id: int = -1) -> Self:
         return cls(
             id=id,
+            alive=True,
             hp=10,
             max_hp=10,
             energy=0,
@@ -1181,6 +1210,7 @@ class RhodeiaOfLoch(Character):
     def from_default(cls, id: int = -1) -> RhodeiaOfLoch:
         return cls(
             id=id,
+            alive=True,
             hp=10,
             max_hp=10,
             energy=0,
@@ -1257,6 +1287,7 @@ class Tighnari(Character):
     def from_default(cls, id: int = -1) -> Tighnari:
         return cls(
             id=id,
+            alive=True,
             hp=10,
             max_hp=10,
             energy=0,
