@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dgisim.src.action.action import PlayerAction
 from dgisim.src.agents import *
 from dgisim.src.dices import ActualDices
 from dgisim.src.effect.effect import *
@@ -23,6 +24,17 @@ def auto_step(game_state: GameState, observe: bool = False) -> GameState:
             print(GamePrinter.dict_game_printer(gsm.get_game_state().dict_str()))
             input(":> ")
     return gsm.get_game_state()
+
+
+def step_action(
+        game_state: GameState,
+        pid: Pid,
+        player_action: PlayerAction,
+        observe: bool = False
+) -> GameState:
+    game_state = just(game_state.action_step(pid, player_action))
+    return auto_step(game_state, observe=observe)
+
 
 def full_action_step(game_state: GameState, observe: bool = False) -> GameState:
     gsm = GameStateMachine(game_state, PuppetAgent(), PuppetAgent())
@@ -57,6 +69,7 @@ def oppo_aura_elem(game_state: GameState, elem: Element, char_id: None | int = N
             ).build()
         ).build()
 
+
 def remove_aura(game_state: GameState, pid: Pid = Pid.P2, char_id: None | int = None) -> GameState:
     return game_state.factory().f_player(
         pid,
@@ -67,6 +80,7 @@ def remove_aura(game_state: GameState, pid: Pid = Pid.P2, char_id: None | int = 
             ).build()
         ).build()
     ).build()
+
 
 def add_damage_effect(
         game_state: GameState,
@@ -91,7 +105,8 @@ def add_damage_effect(
                 target=DynamicCharacterTarget.OPPO_ACTIVE,
                 element=elem,
                 damage=damage,
-                damage_type=case_val(damage_type is None, DamageType(), damage_type),  # type: ignore
+                damage_type=case_val(damage_type is None, DamageType(),
+                                     damage_type),  # type: ignore
             ),
             AliveMarkCheckerEffect(),
             DeathCheckCheckerEffect(),
@@ -126,6 +141,7 @@ def set_active_player_id(game_state: GameState, pid: Pid, character_id: int) -> 
             lambda cs: cs.factory().active_character_id(character_id).build()
         ).build()
     ).build()
+
 
 def fill_dices_with_omni(game_state: GameState) -> GameState:
     return game_state.factory().f_player1(

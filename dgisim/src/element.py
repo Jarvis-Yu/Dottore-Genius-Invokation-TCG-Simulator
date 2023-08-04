@@ -146,6 +146,9 @@ class ReactionDetail:
     first_elem: Element
     second_elem: Element
 
+    def elem_reaction(self, elem: Element) -> bool:
+        return self.first_elem is elem or self.second_elem is elem
+
     def __post_init__(self):
         if Reaction.consult_reaction(self.first_elem, self.second_elem) != self.reaction_type:
             raise Exception(

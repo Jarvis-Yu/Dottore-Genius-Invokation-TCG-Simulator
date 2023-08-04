@@ -13,6 +13,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     KeenSight,
     PoeticsOfFuubutsu,
     PoundingSurprise,
+    ProphecyOfSubmersion,
     StreamingSurge,
     ThunderingPenance,
     ## Weapons ##

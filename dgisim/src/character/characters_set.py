@@ -13,6 +13,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     Keqing,
     Kaeya,
     Klee,
+    Mona,
     RhodeiaOfLoch,
     Tighnari,
 ]

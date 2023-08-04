@@ -6,15 +6,19 @@
 
 - New Characters:
   - Electro Hypostasis
+  - Mona
 - New Cards:
+  - Talent Equipment Card:
+    - Prophecy of Submersion
   - Artifact Card:
     - Gambler's Earrings
   - Location Card:
     - Knights of Favonius Library
     - Vanarana
   - Event Card:
-    - Absorbing Prism
     - I Haven't Lost Yet!
+    - Talent Card:
+      - Absorbing Prism
 
 ## v0.2.dev3 (27 Jul 2023)
 

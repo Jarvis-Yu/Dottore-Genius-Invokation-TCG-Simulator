@@ -75,6 +75,7 @@ class PreprocessableEvent:
 @dataclass(frozen=True, kw_only=True)
 class ActionPEvent(PreprocessableEvent):
     source: StaticTarget       # this source is who caused the GameEvent
+    target: None | StaticTarget = None
     event_type: EventType
     event_speed: EventSpeed
     dices_cost: AbstractDices

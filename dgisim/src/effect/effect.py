@@ -759,7 +759,9 @@ class SpecificDamageEffect(DirectEffect):
             cls, game_state: GameState, damage: SpecificDamageEffect
     ) -> tuple[GameState, SpecificDamageEffect]:
         """ This is the pass to check final damage amount """
-        return cls._damage_preprocess(game_state, damage, Preprocessables.DMG_AMOUNT)
+        game_state, damage = cls._damage_preprocess(game_state, damage, Preprocessables.DMG_AMOUNT_PLUS)
+        game_state, damage = cls._damage_preprocess(game_state, damage, Preprocessables.DMG_AMOUNT_MUL)
+        return cls._damage_preprocess(game_state, damage, Preprocessables.DMG_AMOUNT_MINUS)
 
     def execute(self, game_state: GameState) -> GameState:
         # Preprocessing

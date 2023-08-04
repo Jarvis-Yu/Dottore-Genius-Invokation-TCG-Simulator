@@ -111,6 +111,8 @@ __all__ = [
     "ThunderingPenance",
     ## Klee ##
     "PoundingSurprise",
+    ## Mona ##
+    "ProphecyOfSubmersion",
     ## Rhodeia of Loch ##
     "StreamingSurge",
     ## Tighnari ##
@@ -567,8 +569,10 @@ class EquipmentCard(Card):
 class TalentCard(Card):
     pass
 
+
 class TalentEventCard(EventCard, TalentCard):
     pass
+
 
 class TalentEquipmentCard(EquipmentCard, TalentCard):
     pass
@@ -1048,6 +1052,9 @@ class SweetMadame(_DirectHealCard, _CharTargetChoiceProvider):
     def heal_amount(cls) -> int:
         return 1
 
+
+class TeyvatFriedEgg(FoodCard, _CharTargetChoiceProvider):
+    ...
 
 # >>>>>>>>>>>>>>>>>>>> Event Cards / Food Cards >>>>>>>>>>>>>>>>>>>>
 
@@ -1701,6 +1708,54 @@ class PoundingSurprise(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoicePr
             eft.CastSkillEffect(
                 target=target,
                 skill=CharacterSkill.ELEMENTAL_SKILL1,
+            ),
+        )
+
+#### Mona ####
+
+
+class ProphecyOfSubmersion(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDices({Element.HYDRO: 3})
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        return _UsableFuncs.active_combat_talent_burst_card_usable(game_state, pid, chr.Mona) \
+            and super()._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        return isinstance(instruction, act.DiceOnlyInstruction) \
+            and cls._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.DiceOnlyInstruction)
+        target = StaticTarget(
+            pid=pid,
+            zone=Zone.CHARACTERS,
+            id=game_state.get_player(pid).just_get_active_character().get_id(),
+        )
+        return (
+            eft.AddCharacterStatusEffect(
+                target=target,
+                status=stt.ProphecyOfSubmersionStatus,
+            ),
+            eft.CastSkillEffect(
+                target=target,
+                skill=CharacterSkill.ELEMENTAL_BURST,
             ),
         )
 

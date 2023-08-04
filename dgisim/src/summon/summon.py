@@ -43,6 +43,7 @@ __all__ = [
     "OceanicMimicFrogSummon",
     "OceanicMimicRaptorSummon",
     "OceanicMimicSquirrelSummon",
+    "ReflectionSummon",
     "UshiSummon",
 ]
 
@@ -372,6 +373,43 @@ class OceanicMimicSquirrelSummon(_DmgPerRoundSummon):
     DMG: ClassVar[int] = 2
     ELEMENT: ClassVar[Element] = Element.HYDRO
 
+
+@dataclass(frozen=True, kw_only=True)
+class ReflectionSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    SHIELD_AMOUNT: ClassVar[int] = 1
+    DMG: ClassVar[int] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    ))
+
+    @override
+    @staticmethod
+    def _auto_destroy() -> bool:
+        return False
+
+    @override
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        es: list[eft.Effect] = []
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            es.append(
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=Element.HYDRO,
+                    damage=self.DMG,
+                    damage_type=DamageType(summon=True),
+                )
+            )
+            return es, None
+
+        return es, self
 
 @dataclass(frozen=True, kw_only=True)
 class UshiSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):

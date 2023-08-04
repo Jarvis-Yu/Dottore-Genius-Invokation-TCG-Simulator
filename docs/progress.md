@@ -4,24 +4,24 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (8/51 implemented)](#character-851-implemented)
-  - [Card (31/192 implemented)](#card-31192-implemented)
+  - [Character (9/51 implemented)](#character-951-implemented)
+  - [Card (32/192 implemented)](#card-32192-implemented)
 
-## Character (8/51 implemented)
+## Character (9/51 implemented)
 
 - [ ] Pyro:
-  - [ ] Bennett _<-- WIP #4_
+  - [ ] Bennett _<-- WIP #3_
   - [x] Klee
 - [ ] Hydro:
-  - [ ] Mona _<-- WIP #1_
+  - [x] Mona
   - [x] Rhodeia of Loch
-  - [ ] Xingqiu _<-- WIP #2_
+  - [ ] Xingqiu _<-- WIP #1_
 - [ ] Anemo:
   - [x] Kaedehara Kazuha
 - [ ] Electro:
   - [x] Electro Hypostasis
   - [x] Keqing
-  - [ ] Yae Miko _<-- WIP #3_
+  - [ ] Yae Miko _<-- WIP #2_
 - [ ] Dendro:
   - [x] Tighnari
 - [ ] Cryo:
@@ -29,15 +29,16 @@ all I need now is to implement each card and character.
 - [ ] Geo:
   - [x] Arataki Itto
 
-## Card (31/192 implemented)
+## Card (32/192 implemented)
 
-- [ ] Equipment Card (13/103):
+- [ ] Equipment Card (14/103):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] ColdBlooded Strike
     - [x] Keen Sight
     - [x] Poetics of Fuubutsu
     - [x] Pounding Surprise
+    - [x] Prophecy of Submersion
     - [x] Streaming Surge
     - [x] Thundering Penance
   - [ ] Weapon Card:

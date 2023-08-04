@@ -395,6 +395,7 @@ class SwapChecker:
         game_state = self._game_state
         selected_char = game_state.get_player(pid).get_characters().get_character(char_id)
         active_character_id = game_state.get_player(pid).get_characters().get_active_character_id()
+        assert active_character_id is not None
         if selected_char is None \
                 or selected_char.defeated() \
                 or selected_char.get_id() == active_character_id:
@@ -410,6 +411,11 @@ class SwapChecker:
             pp_type=Preprocessables.SWAP,
             item=ActionPEvent(
                 source=StaticTarget(
+                    pid=pid,
+                    zone=Zone.CHARACTERS,
+                    id=active_character_id,
+                ),
+                target=StaticTarget(
                     pid=pid,
                     zone=Zone.CHARACTERS,
                     id=char_id,
@@ -439,6 +445,7 @@ class SwapChecker:
             pid
         ).get_characters().get_character(action.char_id)
         active_character_id = game_state.get_player(pid).get_characters().get_active_character_id()
+        assert active_character_id is not None
         if selected_char is None \
                 or selected_char.defeated() \
                 or selected_char.get_id() == active_character_id:
@@ -460,6 +467,11 @@ class SwapChecker:
                 pp_type=Preprocessables.SWAP,
                 item=ActionPEvent(
                     source=StaticTarget(
+                        pid=pid,
+                        zone=Zone.CHARACTERS,
+                        id=active_character_id,
+                    ),
+                    target=StaticTarget(
                         pid=pid,
                         zone=Zone.CHARACTERS,
                         id=action.char_id,

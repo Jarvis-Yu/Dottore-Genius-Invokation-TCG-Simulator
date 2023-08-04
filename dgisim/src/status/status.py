@@ -123,6 +123,10 @@ __all__ = [
     "ExplosiveSparkStatus",
     "PoundingSurpriseStatus",
     "SparksnSplash",
+    ## Mona ##
+    "IllusoryBubbleStatus",
+    "IllusoryTorrentStatus",
+    "ProphecyOfSubmersionStatus",
     ## Rhodeia of Loch ##
     "StreamingSurgeStatus",
     ## Tighnari ##
@@ -450,7 +454,7 @@ class WeaponEquipmentStatus(EquipmentStatus):
             item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, Optional[Self]]:
-        if signal is Preprocessables.DMG_AMOUNT:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
             if (
@@ -585,7 +589,7 @@ class FixedShieldStatus(_ShieldStatus, _UsageStatus):
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, Optional[Self]]:
         cls = type(self)
-        if signal is Preprocessables.DMG_AMOUNT:
+        if signal is Preprocessables.DMG_AMOUNT_MINUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
             if dmg.damage > 0 and self.usages > 0 \
@@ -620,7 +624,7 @@ class StackedShieldStatus(_ShieldStatus, _UsageStatus):
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, Optional[Self]]:
         cls = type(self)
-        if signal is Preprocessables.DMG_AMOUNT:
+        if signal is Preprocessables.DMG_AMOUNT_MINUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
             assert self.usages <= type(self).MAX_USAGES
@@ -678,7 +682,7 @@ class _InfusionStatus(_UsageStatus):
             if signal is Preprocessables.DMG_ELEMENT:
                 if self._dmg_element_condition(game_state, status_source, dmg):
                     new_item = replace(item, dmg=replace(dmg, element=self.ELEMENT))
-            if signal is Preprocessables.DMG_AMOUNT:
+            if signal is Preprocessables.DMG_AMOUNT_PLUS:
                 if self.damage_boost != 0  \
                         and self._dmg_boost_condition(game_state, status_source, dmg):
                     new_item = replace(item, dmg=replace(
@@ -917,7 +921,7 @@ class CatalyzingFieldStatus(CombatStatus):
             item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, Optional[CatalyzingFieldStatus]]:
-        if signal is Preprocessables.DMG_AMOUNT:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, eft.DmgPEvent)
             dmg = item.dmg
             assert self.usages >= 1
@@ -992,7 +996,7 @@ class DendroCoreStatus(CombatStatus):
             item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, Optional[DendroCoreStatus]]:
-        if signal is Preprocessables.DMG_AMOUNT:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
             assert self.usages >= 1
@@ -1006,7 +1010,7 @@ class DendroCoreStatus(CombatStatus):
                 new_item = DmgPEvent(dmg=new_damage)
                 if self.usages == 1:
                     return new_item, None
-                else:
+                else:  # pragma: no cover
                     return new_item, DendroCoreStatus(self.usages - 1)
         return super()._preprocess(game_state, status_source, item, signal)
 
@@ -1034,7 +1038,7 @@ class FrozenStatus(CharacterStatus):
             item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, Optional[Self]]:
-        if signal is Preprocessables.DMG_AMOUNT:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
             can_reaction = dmg.element is Element.PYRO or dmg.element is Element.PHYSICAL
@@ -1093,7 +1097,7 @@ class JueyunGuobaStatus(CharacterStatus, _UsageStatus):
             item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, Optional[Self]]:
-        if signal is Preprocessables.DMG_AMOUNT:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
             if dmg.source == status_source and dmg.damage_type.normal_attack:
@@ -1105,10 +1109,9 @@ class JueyunGuobaStatus(CharacterStatus, _UsageStatus):
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
-        d_usages = 0
         if signal is TriggeringSignal.ROUND_END:
-            d_usages = -1
-        return [], replace(self, usages=d_usages)
+            return [], None
+        return [], self
 
 
 @dataclass(frozen=True)
@@ -1371,7 +1374,7 @@ class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
             item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, Optional[Self]]:
-        if signal is Preprocessables.DMG_AMOUNT:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
             if status_source != dmg.source:
@@ -1582,7 +1585,7 @@ class MidareRanzanStatus(CharacterStatus):
                 if dmg.damage_type.plunge_attack:
                     new_item = DmgPEvent(dmg=replace(dmg, element=self._ELEMENT))
                     return new_item, self
-            elif signal is Preprocessables.DMG_AMOUNT:
+            elif signal is Preprocessables.DMG_AMOUNT_PLUS:
                 if dmg.damage_type.plunge_attack:
                     new_item = DmgPEvent(dmg=replace(dmg, damage=dmg.damage + self._DMG_BOOST))
                     return new_item, None
@@ -1653,7 +1656,7 @@ class _PoeticsOfFuubutsuElementStatus(CombatStatus, _UsageStatus):
             item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, Optional[Self]]:
-        if signal is Preprocessables.DMG_AMOUNT:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
             if (
@@ -1845,7 +1848,7 @@ class ExplosiveSparkStatus(CharacterStatus, _UsageStatus):
             item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, Optional[Self]]:
-        if signal is Preprocessables.DMG_AMOUNT:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
             if status_source != dmg.source:
@@ -1938,6 +1941,100 @@ class SparksnSplash(CombatStatus, _UsageStatus):
             new_self = replace(new_self, usages=-1, activated=False)
 
         return es, new_self
+
+
+#### Mona ####
+
+
+@dataclass(frozen=True)
+class IllusoryBubbleStatus(CombatStatus):
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_MUL:
+            assert isinstance(item, DmgPEvent)
+            if (
+                    item.dmg.source.pid is status_source.pid
+                    and item.dmg.damage_type.from_character()
+            ):
+                return replace(item, dmg=replace(item.dmg, damage=item.dmg.damage * 2)), None
+        return super()._preprocess(game_state, status_source, item, signal)
+
+
+@dataclass(frozen=True)
+class IllusoryTorrentStatus(HiddenStatus):
+    available: bool = True
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.SWAP:
+            assert isinstance(item, ActionPEvent) and item.event_type is EventType.SWAP
+            if self.available \
+                    and item.source == status_source \
+                    and item.event_speed is EventSpeed.COMBAT_ACTION:
+                return replace(
+                    item, event_speed=EventSpeed.FAST_ACTION
+                ), replace(self, available=False)
+        return super()._preprocess(game_state, status_source, item, signal)
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        new_self = self
+        if signal is TriggeringSignal.ROUND_END:
+            if not self.available:
+                new_self = replace(new_self, available=True)
+        return [], new_self
+
+    def __str__(self) -> str:
+        return super().__str__() + f"({'*' if self.available else ''})"
+
+
+@dataclass(frozen=True)
+class ProphecyOfSubmersionStatus(TalentEquipmentStatus):
+    DMG_BOOST: ClassVar[int] = 2
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            if (
+                    dmg.source.pid is status_source.pid
+                    and not dmg.damage_type.no_boost
+                    and dmg.reaction is not None
+                    and dmg.reaction.elem_reaction(Element.HYDRO)
+                    and (
+                        game_state.get_player(
+                            status_source.pid
+                        ).just_get_active_character().get_id() == status_source.id
+                    )
+            ):
+                dmg = replace(dmg, damage=dmg.damage + self.DMG_BOOST)
+                return DmgPEvent(dmg=dmg), self
+        return super()._preprocess(game_state, status_source, item, signal)
+
 
 #### Rhodeia of Loch ####
 
