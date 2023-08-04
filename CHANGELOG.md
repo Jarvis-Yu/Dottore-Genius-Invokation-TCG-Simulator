@@ -13,6 +13,7 @@
     - Knights of Favonius Library
     - Vanarana
   - Event Card:
+    - Absorbing Prism
     - I Haven't Lost Yet!
 
 ## v0.2.dev3 (27 Jul 2023)

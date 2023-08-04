@@ -15,8 +15,8 @@ class TestAratakiItto(unittest.TestCase):
                     lambda cstts: cstts.update_status(ElectroCrystalCoreStatus())
                 ).build()
             ).build()
-            # ).f_hand_cards(
-            #     lambda hcs: hcs.add(AratakiIchiban)
+            ).f_hand_cards(
+                lambda hcs: hcs.add(AbsorbingPrism)
         ).build()
     ).build()
     assert type(BASE_GAME.get_player1().just_get_active_character()) is ElectroHypostasis
@@ -323,3 +323,28 @@ class TestAratakiItto(unittest.TestCase):
         self.assertEqual(p2.get_dices().num_dices(), p2_dices_after_attack)
         # check it's P1's turn again as usual
         self.assertIs(game_state.waiting_for(), Pid.P1)
+
+    def test_talent_card(self):
+        base_game = kill_character(self.BASE_GAME, character_id=2, pid=Pid.P1, hp=1)
+        base_game = base_game.factory().f_player1(
+            lambda p1: p1.factory().f_characters(
+                lambda cs: cs.factory().f_active_character(
+                    lambda ac: ac.factory().f_character_statuses(
+                        lambda cstts: cstts.remove(ElectroCrystalCoreStatus)
+                    ).build()
+                ).build()
+            ).build()
+        ).build()
+
+        a1, a2 = PuppetAgent(), PuppetAgent()
+        gsm = GameStateMachine(base_game, a1, a2)
+        a1.inject_action(CardAction(
+            card=AbsorbingPrism,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.ELECTRO: 3})),
+        ))
+        gsm.player_step()
+        gsm.auto_step()
+
+        p1ac = gsm.get_game_state().get_player1().just_get_active_character()
+        self.assertEqual(p1ac.get_hp(), 4)
+        self.assertIn(ElectroCrystalCoreStatus, p1ac.get_character_statuses())

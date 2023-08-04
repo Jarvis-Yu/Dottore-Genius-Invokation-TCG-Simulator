@@ -48,6 +48,7 @@ __all__ = [
     # type
     "EventCard",
     "EquipmentCard",
+    "TalentCard",
     "TalentEquipmentCard",
     "WeaponEquipmentCard",
     "ArtifactEquipmentCard",
@@ -98,6 +99,8 @@ __all__ = [
     # Character Specific
     ## Arataki Itto ##
     "AratakiIchiban",
+    ## Electro Hypostasis ##
+    "AbsorbingPrism",
     ## Kaedehara Kazuha ##
     "PoeticsOfFuubutsu",
     ## Kaeya ##
@@ -256,6 +259,18 @@ class Card:
 
 
 class _UsableFuncs:
+    @staticmethod
+    def active_combat_talent_card_usable(
+            game_state: gs.GameState,
+            pid: Pid,
+            char: type[chr.Character]
+    ):
+        """ Check if active character is the character type """
+        ac = game_state.get_player(pid).get_active_character()
+        if ac is None:  # pragma: no cover
+            return False
+        return type(ac) is char
+
     @staticmethod
     def active_combat_talent_skill_card_usable(
             game_state: gs.GameState,
@@ -548,7 +563,11 @@ class EquipmentCard(Card):
     pass
 
 
-class TalentEquipmentCard(EquipmentCard):
+class TalentCard(Card):
+    pass
+
+
+class TalentEquipmentCard(EquipmentCard, TalentCard):
     pass
 
 
@@ -1376,6 +1395,54 @@ class AratakiIchiban(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProv
             eft.CastSkillEffect(
                 target=target,
                 skill=CharacterSkill.NORMAL_ATTACK,
+            ),
+        )
+
+#### Electro Hypostasis ####
+
+
+class AbsorbingPrism(TalentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDices({Element.ELECTRO: 3})
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        return _UsableFuncs.active_combat_talent_card_usable(game_state, pid, chr.ElectroHypostasis) \
+            and super()._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        return isinstance(instruction, act.DiceOnlyInstruction) \
+            and cls._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.DiceOnlyInstruction)
+        target = StaticTarget(
+            pid=pid,
+            zone=Zone.CHARACTERS,
+            id=game_state.get_player(pid).just_get_active_character().get_id(),
+        )
+        return (
+            eft.RecoverHPEffect(
+                target=target,
+                recovery=3,
+            ),
+            eft.AddCharacterStatusEffect(
+                target=target,
+                status=stt.ElectroCrystalCoreStatus,
             ),
         )
 

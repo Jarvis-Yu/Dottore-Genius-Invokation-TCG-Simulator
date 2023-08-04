@@ -7,6 +7,7 @@ __all__ = [
 _DEFAULT_CARDS: list[type[Card]] = [
     # Equipment Card
     ## Talents ##
+    AbsorbingPrism,
     AratakiIchiban,
     ColdBloodedStrike,
     KeenSight,

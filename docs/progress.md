@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (8/51 implemented)](#character-851-implemented)
-  - [Card (30/192 implemented)](#card-30192-implemented)
+  - [Card (31/192 implemented)](#card-31192-implemented)
 
 ## Character (8/51 implemented)
 
@@ -26,7 +26,7 @@ all I need now is to implement each card and character.
 - [ ] Geo:
   - [x] Arataki Itto
 
-## Card (30/192 implemented)
+## Card (31/192 implemented)
 
 - [ ] Equipment Card (13/103):
   - [ ] Character Talent Card:
@@ -59,7 +59,10 @@ all I need now is to implement each card and character.
   - [ ] Location Card:
     - [x] Knights of Favonius Library
     - [x] Vanarana
-- [ ] Event Card (14/55):
+- [ ] Event Card (15/55):
+  - [ ] Talent Card:
+    - [x] Absorbing Prism
+    - [x] Lightning Stiletto
   - [ ] Food Card:
     - [x] Jueyun Guoba
     - [x] Lotus Flower Crisp
@@ -74,7 +77,6 @@ all I need now is to implement each card and character.
     - [x] Changing Shifts
     - [x] I Haven't Lost Yet!
     - [x] Leave It to Me!
-    - [x] Lightning Stiletto
     - [x] Quick Knit
     - [ ] Send Off _<-- WIP_
     - [x] Starsigns
