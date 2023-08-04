@@ -2,6 +2,7 @@ import unittest
 
 from dgisim.src.dices import *
 from dgisim.src.element import *
+from dgisim.src.helper import just
 
 
 class TestDices(unittest.TestCase):
@@ -175,6 +176,11 @@ class TestDices(unittest.TestCase):
         payment = ActualDices({Element.CRYO: 2, Element.OMNI: 2})
         self.assertEqual(payment.basically_satisfy(requirement),
                          ActualDices({Element.CRYO: 2, Element.OMNI: 1}))
+
+        requirement = AbstractDices({Element.OMNI: 3})
+        payment = ActualDices({Element.ANEMO: 1, Element.ELECTRO: 1,
+                              Element.PYRO: 1, Element.OMNI: 2})
+        self.assertEqual(just(payment.basically_satisfy(requirement))[Element.OMNI], 2)
 
     def test_basically_satisfy_failures(self):
         requirement = AbstractDices({Element.ANY: 8})

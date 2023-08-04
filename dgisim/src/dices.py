@@ -277,7 +277,7 @@ class ActualDices(Dices):
         if omni > 0:
             best_elem: Optional[Element] = None
             best_count = 0
-            for elem in list(_PURE_ELEMS) + [Element.OMNI]:
+            for elem in list(_PURE_ELEMS):
                 this_count = remaining.get(elem, 0)
                 if best_count > omni and this_count >= omni and this_count < best_count:
                     best_elem = elem
@@ -287,11 +287,13 @@ class ActualDices(Dices):
                     best_count = this_count
                 elif best_count == omni:
                     break
-            assert best_elem is not None
-            best_count = min(best_count, omni)
-            answer[best_elem] += best_count
-            remaining[best_elem] -= best_count
-            omni_required += omni - best_count
+            if best_elem is not None:
+                best_count = min(best_count, omni)
+                answer[best_elem] += best_count
+                remaining[best_elem] -= best_count
+                omni_required += omni - best_count
+            else:
+                omni_required += omni
         if any > 0:
             from operator import itemgetter
             sorted_elems = sorted(remaining.items(), key=itemgetter(1))
