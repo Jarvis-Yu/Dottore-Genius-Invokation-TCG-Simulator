@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from dgisim.src.action.action import PlayerAction
+from dgisim.src.action.action import *
 from dgisim.src.agents import *
+from dgisim.src.character.enums import CharacterSkill
 from dgisim.src.dices import ActualDices
 from dgisim.src.effect.effect import *
 from dgisim.src.effect.enums import DynamicCharacterTarget, Zone
@@ -34,6 +35,22 @@ def step_action(
 ) -> GameState:
     game_state = just(game_state.action_step(pid, player_action))
     return auto_step(game_state, observe=observe)
+
+
+def step_skill(
+        game_state: GameState,
+        pid: Pid,
+        skill: CharacterSkill,
+        observe: bool = False,
+) -> GameState:
+    active_character = game_state.get_player(pid).just_get_active_character()
+    player_action = SkillAction(
+        skill=skill,
+        instruction=DiceOnlyInstruction(
+            dices=ActualDices({Element.OMNI: active_character.skill_cost(skill).num_dices()})
+        )
+    )
+    return step_action(game_state, pid, player_action)
 
 
 def full_action_step(game_state: GameState, observe: bool = False) -> GameState:

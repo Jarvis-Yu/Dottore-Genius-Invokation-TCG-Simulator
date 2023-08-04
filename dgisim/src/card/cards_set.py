@@ -46,6 +46,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     MintyMeatRolls,
     NorthernSmokedChicken,
     SweetMadame,
+    TeyvatFriedEgg,
 
     # Support Card
     ## Support Card / Companion ##

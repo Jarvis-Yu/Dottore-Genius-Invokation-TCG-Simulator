@@ -82,6 +82,7 @@ __all__ = [
     "MushroomPizza",
     "NorthernSmokedChicken",
     "SweetMadame",
+    "TeyvatFriedEgg",
     ## Other ##
     "CalxsArts",
     "ChangingShifts",
@@ -844,7 +845,11 @@ class FoodCard(EventCard):
                 or pid is not instruction.target.pid:
             return False  # pragma: no cover
         target = game_state.get_target(instruction.target)
-        return isinstance(target, chr.Character) and not target.satiated()
+        return (
+            isinstance(target, chr.Character)
+            and not target.satiated()
+            and target.alive()
+        )
 
     @classmethod
     def _valid_char(cls, char: chr.Character) -> bool:
@@ -1054,7 +1059,75 @@ class SweetMadame(_DirectHealCard, _CharTargetChoiceProvider):
 
 
 class TeyvatFriedEgg(FoodCard, _CharTargetChoiceProvider):
-    ...
+    _DICE_COST = AbstractDices({Element.OMNI: 3})
+
+    @classmethod
+    def revive_on_cooldown(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        return stt.ReviveOnCooldown in game_state.get_player(pid).get_combat_statuses()
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        return (
+            super()._loosely_usable(game_state, pid)
+            and not cls.revive_on_cooldown(game_state, pid)
+        )
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        """ This only applies to food with a single target, override if needed """
+        if not isinstance(instruction, act.StaticTargetInstruction) \
+                or pid is not instruction.target.pid:
+            return False  # pragma: no cover
+        target = game_state.get_target(instruction.target)
+        return (
+            isinstance(target, chr.Character)
+            and not target.satiated()
+            and target.defeated()
+            and not cls.revive_on_cooldown(game_state, pid)
+        )
+
+    @override
+    @classmethod
+    def _valid_char(cls, char: chr.Character) -> bool:
+        return not char.satiated() and char.defeated()
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.StaticTargetInstruction)
+        return cls.food_effects(instruction) + (
+            eft.AddCharacterStatusEffect(
+                instruction.target,
+                stt.SatiatedStatus,
+            ),
+            eft.AddCombatStatusEffect(
+                instruction.target.pid,
+                stt.ReviveOnCooldown,
+            )
+        )
+
+    @override
+    @classmethod
+    def food_effects(cls, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.StaticTargetInstruction)
+        return (
+            eft.ReviveRecoverHPEffect(
+                target=instruction.target,
+                recovery=3,
+            ),
+        )
 
 # >>>>>>>>>>>>>>>>>>>> Event Cards / Food Cards >>>>>>>>>>>>>>>>>>>>
 

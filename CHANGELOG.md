@@ -17,6 +17,8 @@
     - Vanarana
   - Event Card:
     - I Haven't Lost Yet!
+    - Food Card:
+      - Teyvat Fried Egg
     - Talent Card:
       - Absorbing Prism
 

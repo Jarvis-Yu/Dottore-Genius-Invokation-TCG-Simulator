@@ -82,6 +82,7 @@ __all__ = [
     "DendroCoreStatus",
     "FrozenStatus",
     "LeaveItToMeStatus",
+    "ReviveOnCooldown",
 
     # character status
     "JueyunGuobaStatus",
@@ -1076,6 +1077,19 @@ class LeaveItToMeStatus(CombatStatus):
                 return replace(item, event_speed=EventSpeed.FAST_ACTION), None
         return super()._preprocess(game_state, status_source, item, signal)
 
+@dataclass(frozen=True)
+class ReviveOnCooldown(CombatStatus):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], None
+        return [], self  # pragma: no cover
 
 ############################## Character Status ##############################
 

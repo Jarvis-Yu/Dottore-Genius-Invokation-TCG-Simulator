@@ -21,6 +21,7 @@ __all__ = [
     "StatusProcessing",
 ]
 
+
 class StatusProcessing:
     """
     This class holds static methods that facilitate the preprocessing of items by
@@ -29,6 +30,23 @@ class StatusProcessing:
     e.g. 3 Pyro damage from Bennett with a sword equipped should actually be 4 after
     preprocessing. (an equipment is also treated as a status)
     """
+    @staticmethod
+    def loop_character_personal_statuses(
+            game_state: GameState,
+            target: StaticTarget,
+            f: Callable[[GameState, stt.Status, StaticTarget], GameState]
+    ) -> GameState:
+        """
+        Perform f on all statuses of one particular character
+        f(game_state, status, status_source) -> game_state
+        """
+        character = game_state.get_character_target(target)
+        assert character is not None
+        statuses = character.get_all_statuses_ordered_flattened()
+        for status in statuses:
+            game_state = f(game_state, status, target)
+        return game_state
+
     @staticmethod
     def loop_one_player_all_statuses(
             game_state: GameState,
@@ -146,6 +164,29 @@ class StatusProcessing:
             return game_state
 
         StatusProcessing.loop_all_statuses(game_state, pid, f)
+        return effects
+
+    @staticmethod
+    def trigger_personal_statuses_effect(
+            game_state: GameState, target: StaticTarget, signal: TriggeringSignal
+    ) -> list[eft.Effect]:
+        """
+        Takes the current game_state, trigger all statuses in order of character target
+        Returns the triggering effects in order (first to last)
+        """
+        effects: list[eft.Effect] = []
+
+        def f(game_state: GameState, status: stt.Status, target: StaticTarget) -> GameState:
+            nonlocal effects
+            if signal not in status.REACTABLE_SIGNALS:
+                return game_state
+
+            assert isinstance(status, stt.PersonalStatus)
+            effects.append(eft.TriggerStatusEffect(target, type(status), signal))
+
+            return game_state
+
+        StatusProcessing.loop_character_personal_statuses(game_state, target, f)
         return effects
 
     @staticmethod

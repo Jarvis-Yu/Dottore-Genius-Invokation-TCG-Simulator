@@ -14,6 +14,8 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field, replace
 from typing import cast, FrozenSet, Iterable, Optional, TYPE_CHECKING, Union
 
+from typing_extensions import override
+
 from ..character import character as chr
 from ..helper.quality_of_life import dataclass_repr
 from ..status import status as stt
@@ -49,6 +51,7 @@ __all__ = [
 
     # Triggerrable Effect
     "AllStatusTriggererEffect",
+    "PersonalStatusTriggerEffect",
     "TriggerStatusEffect",
     "TriggerHiddenStatusEffect",
     "TriggerCombatStatusEffect",
@@ -169,6 +172,22 @@ class AllStatusTriggererEffect(TriggerrbleEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         effects = StatusProcessing.trigger_all_statuses_effects(game_state, self.pid, self.signal)
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_many_fl(effects)
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class PersonalStatusTriggerEffect(TriggerrbleEffect):
+    target: StaticTarget
+    signal: TriggeringSignal
+
+    def execute(self, game_state: GameState) -> GameState:
+        effects = StatusProcessing.trigger_personal_statuses_effect(
+            game_state,
+            self.target,
+            self.signal
+        )
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
@@ -456,8 +475,8 @@ class AliveMarkCheckerEffect(CheckerEffect):
                         lambda p: p.factory().f_characters(
                             lambda cs: cs.factory().f_character(
                                 char.get_id(),
-                                # TODO: remove all statuses that should be removed here
-                                lambda c: c.factory().alive(False).build()
+                                lambda c: type(c).from_default(c.get_id()).factory()
+                                .hp(0).alive(False).build()
                             ).build()
                         ).build()
                     ).build()
@@ -759,8 +778,10 @@ class SpecificDamageEffect(DirectEffect):
             cls, game_state: GameState, damage: SpecificDamageEffect
     ) -> tuple[GameState, SpecificDamageEffect]:
         """ This is the pass to check final damage amount """
-        game_state, damage = cls._damage_preprocess(game_state, damage, Preprocessables.DMG_AMOUNT_PLUS)
-        game_state, damage = cls._damage_preprocess(game_state, damage, Preprocessables.DMG_AMOUNT_MUL)
+        game_state, damage = cls._damage_preprocess(
+            game_state, damage, Preprocessables.DMG_AMOUNT_PLUS)
+        game_state, damage = cls._damage_preprocess(
+            game_state, damage, Preprocessables.DMG_AMOUNT_MUL)
         return cls._damage_preprocess(game_state, damage, Preprocessables.DMG_AMOUNT_MINUS)
 
     def execute(self, game_state: GameState) -> GameState:
@@ -1036,7 +1057,29 @@ class RecoverHPEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class ReviveRecoverHPEffect(RecoverHPEffect):
-    pass
+    @override
+    def execute(self, game_state: GameState) -> GameState:
+        character = game_state.get_target(self.target)
+        if not isinstance(character, chr.Character):  # pragma: no cover
+            return game_state
+        assert character.get_hp() == 0, game_state
+        hp = min(self.recovery, character.get_max_hp())
+        if hp == 0:
+            return game_state
+        return game_state.factory().f_player(
+            self.target.pid,
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().f_character(
+                    character.get_id(),  # type: ignore
+                    lambda c: c.factory().alive(True).hp(hp).build()
+                ).build()
+            ).build()
+        ).f_effect_stack(
+            lambda es: es.push_one(PersonalStatusTriggerEffect(
+                target=self.target,
+                signal=TriggeringSignal.GAME_START,
+            ))
+        ).build()
 
 
 @dataclass(frozen=True, repr=False)

@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (9/51 implemented)](#character-951-implemented)
-  - [Card (32/192 implemented)](#card-32192-implemented)
+  - [Card (33/192 implemented)](#card-33192-implemented)
 
 ## Character (9/51 implemented)
 
@@ -29,7 +29,7 @@ all I need now is to implement each card and character.
 - [ ] Geo:
   - [x] Arataki Itto
 
-## Card (32/192 implemented)
+## Card (33/192 implemented)
 
 - [ ] Equipment Card (14/103):
   - [ ] Talent Card:
@@ -65,7 +65,7 @@ all I need now is to implement each card and character.
   - [ ] Location Card:
     - [x] Knights of Favonius Library
     - [x] Vanarana
-- [ ] Event Card (15/55):
+- [ ] Event Card (16/55):
   - [ ] Talent Card:
     - [x] Absorbing Prism
     - [x] Lightning Stiletto
@@ -77,7 +77,7 @@ all I need now is to implement each card and character.
     - [x] Mushroom Pizza
     - [x] Nothern Smoked Chicken
     - [x] Sweet Madame
-    - [ ] Teyvat Fried Egg _<-- WIP_
+    - [x] Teyvat Fried Egg
   - [ ] Other Card:
     - [x] Calxs Arts
     - [x] Changing Shifts
