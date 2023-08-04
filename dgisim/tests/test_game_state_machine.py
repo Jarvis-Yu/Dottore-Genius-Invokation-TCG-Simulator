@@ -155,20 +155,29 @@ class TestGameStateMachine(unittest.TestCase):
 
         import os, sys, time
         optional_repeats = os.getenv("RNG_PLAYS")
+        optional_show_progress = os.getenv("SHOW_PROGRESS")
         repeats: int
+        show_progress: bool
         try:
-            repeats = int(optional_repeats)  # type: ignore
+            repeats = int(optional_repeats) if optional_repeats is not None else 5
+            show_progress = (
+                int(optional_show_progress) != 0
+                if optional_show_progress is not None
+                else False
+            )
         except:
             repeats = 5
+            show_progress = False
         from collections import defaultdict
         wins: dict[None | Pid, int] = defaultdict(int)
         prev_progress = ""
         times: list[float] = []
         for i in range(repeats):
-            print(end='\b' * len(prev_progress))
-            prev_progress = f"[{i}/{repeats}]"
-            print(end=prev_progress)
-            sys.stdout.flush()
+            if show_progress:
+                print(end='\b' * len(prev_progress))
+                prev_progress = f"[{i}/{repeats}]"
+                print(end=prev_progress)
+                sys.stdout.flush()
             start = time.time()
             if i % 3 == 0:
                 state_machine = GameStateMachine(
@@ -197,7 +206,8 @@ class TestGameStateMachine(unittest.TestCase):
                     print(f"<<<{i+1}>>>")
                     print(game_state)
                 raise Exception("Test failed because random agent triggers an excpetion")
-        print(end='\b' * len(prev_progress))
-        sys.stdout.flush()
+        if show_progress:
+            print(end='\b' * len(prev_progress))
+            sys.stdout.flush()
         average_time_in_ms = sum(times) / len(times) * 1000
         print(end=f"[[A random game takes {round(average_time_in_ms, 1)} ms on average]]")

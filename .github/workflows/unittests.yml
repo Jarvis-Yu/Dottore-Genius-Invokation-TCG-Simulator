@@ -20,9 +20,10 @@ jobs:
 
     - name: Unittest and Coverage
       run: |
-        coverage run -m unittest && coverage report && coverage lcov
+        coverage run -m unittest && echo && coverage report && coverage lcov
       env:
         RNG_PLAYS: 500
+        SHOW_PROGRESS: 0
 
     - name: Coveralls
       if: github.ref == 'refs/heads/master'

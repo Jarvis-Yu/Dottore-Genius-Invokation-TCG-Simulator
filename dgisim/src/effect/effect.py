@@ -79,6 +79,7 @@ __all__ = [
     "EnergyRechargeEffect",
     "EnergyDrainEffect",
     "RecoverHPEffect",
+    "ReviveRecoverHPEffect",
     "PublicAddCardEffect",
     "PublicRemoveCardEffect",
     "PublicRemoveAllCardEffect",
@@ -430,6 +431,7 @@ class TurnEndEffect(PhaseEffect):
 class AliveMarkCheckerEffect(CheckerEffect):
     def execute(self, game_state: GameState) -> GameState:
         active_pid = game_state.get_active_player_id()
+        revival_effects: list[Effect] = []
         for pid in (active_pid, active_pid.other()):
             for char in game_state.get_player(pid).get_characters().get_character_in_activity_order():
                 if not char.alive() or char.get_hp() > 0:
@@ -454,12 +456,24 @@ class AliveMarkCheckerEffect(CheckerEffect):
                         lambda p: p.factory().f_characters(
                             lambda cs: cs.factory().f_character(
                                 char.get_id(),
+                                # TODO: remove all statuses that should be removed here
                                 lambda c: c.factory().alive(False).build()
                             ).build()
                         ).build()
                     ).build()
                 else:
-                    raise NotImplementedError
+                    assert isinstance(revival_status, stt.PersonalStatus)
+                    revival_effects.append(
+                        TriggerStatusEffect(
+                            target=char_source,
+                            status=revival_status.__class__,
+                            signal=TriggeringSignal.TRIGGER_REVIVAL,
+                        )
+                    )
+        if revival_effects:
+            game_state = game_state.factory().f_effect_stack(
+                lambda es: es.push_many_fl(revival_effects)
+            ).build()
         return game_state
 
 
@@ -1016,6 +1030,11 @@ class RecoverHPEffect(DirectEffect):
                 ).build()
             ).build()
         ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class ReviveRecoverHPEffect(RecoverHPEffect):
+    pass
 
 
 @dataclass(frozen=True, repr=False)

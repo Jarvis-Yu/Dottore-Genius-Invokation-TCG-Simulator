@@ -105,7 +105,7 @@ class GamePrinter:
     @staticmethod
     def _insert_character(name: str, character: dict) -> StrDrawer:
         board = StrDrawer()
-        board.insert_at(0, 0, f"<{name}{'[x]' if character['Alive'] else ''}>")
+        board.insert_at(0, 0, f"<{name}{'[x]' if not character['Alive'] else ''}>")
         GamePrinter._insert_lines(board, 2, character, [
             # "id",
             "Aura",

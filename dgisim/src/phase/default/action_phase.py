@@ -30,16 +30,27 @@ __all__ = [
 class ActionPhase(ph.Phase):
     def _start_up_phase(self, game_state: GameState) -> GameState:
         active_player_id = game_state.get_active_player_id()
+        appended_effects: list[Effect] = []
+        if (game_state.get_round() == 0):
+            appended_effects.append(
+                AllStatusTriggererEffect(
+                    active_player_id,
+                    TriggeringSignal.GAME_START,
+                )
+            )
+        appended_effects.append(
+            AllStatusTriggererEffect(
+                active_player_id,
+                TriggeringSignal.ROUND_START,
+            )
+        )
         return game_state.factory().f_player(
             active_player_id,
             lambda p: p.factory().phase(
                 Act.ACTIVE_WAIT_PHASE
             ).build()
         ).f_effect_stack(
-            lambda es: es.push_one(AllStatusTriggererEffect(
-                active_player_id,
-                TriggeringSignal.ROUND_START,
-            ))
+            lambda es: es.push_many_fl(appended_effects)
         ).build()
 
     def _begin_action_phase(self, game_state: GameState) -> GameState:

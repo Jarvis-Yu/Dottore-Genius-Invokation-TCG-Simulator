@@ -76,19 +76,20 @@ class _DestoryOnEndNumSummon(Summon):
     @override
     def _post_react_to_signal(
             self,
+            game_state: GameState,
             effects: list[eft.Effect],
             new_status: Optional[Self],
             source: StaticTarget,
             signal: TriggeringSignal,
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         if new_status is None:
-            return super()._post_react_to_signal(effects, new_status, source, signal)
+            return super()._post_react_to_signal(game_state, effects, new_status, source, signal)
 
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT \
                 and self.usages + new_status.usages <= 0:
-            return super()._post_react_to_signal(effects, None, source, signal)
+            return super()._post_react_to_signal(game_state, effects, None, source, signal)
 
-        return super()._post_react_to_signal(effects, new_status, source, signal)
+        return super()._post_react_to_signal(game_state, effects, new_status, source, signal)
 
 
 @dataclass(frozen=True, kw_only=True)

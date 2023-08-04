@@ -239,7 +239,7 @@ class Status:
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> list[eft.Effect]:
         es, new_status = self._react_to_signal(game_state, source, signal)
-        es, new_status = self._post_react_to_signal(es, new_status, source, signal)
+        es, new_status = self._post_react_to_signal(game_state, es, new_status, source, signal)
 
         from ..summon import summon as sm
         from ..support import support as sp
@@ -314,6 +314,8 @@ class Status:
         else:  # pragma: no cover
             raise NotImplementedError
 
+        es = self._post_update_react_to_signal(game_state, es, source, signal)
+
         has_damage = False
         has_swap = False
         for effect in es:
@@ -353,8 +355,18 @@ class Status:
 
         return es
 
+    def _post_update_react_to_signal(
+            self,
+            game_state: GameState,
+            effects: list[eft.Effect],
+            source: StaticTarget,
+            signal: TriggeringSignal,
+    ) -> list[eft.Effect]:
+        return effects
+
     def _post_react_to_signal(
             self,
+            game_state: GameState,
             effects: list[eft.Effect],
             new_status: Optional[Self],
             source: StaticTarget,
@@ -1397,12 +1409,62 @@ class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class ElectroCrystalCoreHiddenStatus(HiddenStatus):
-    ...
+    REACTABLE_SIGNALS = frozenset({
+        TriggeringSignal.GAME_START,
+    })
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.GAME_START:
+            return [
+                eft.AddCharacterStatusEffect(
+                    target=source,
+                    status=ElectroCrystalCoreStatus,
+                )
+            ], None
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)
 class ElectroCrystalCoreStatus(CharacterStatus, RevivalStatus):
-    ...
+    _HEAL_AMOUNT: ClassVar[int] = 3
+    REACTABLE_SIGNALS = frozenset({
+        TriggeringSignal.TRIGGER_REVIVAL,
+    })
+
+    @override
+    def revivable(self, game_state: GameState, char: StaticTarget) -> bool:
+        return True
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.TRIGGER_REVIVAL:
+            character = game_state.get_character_target(source)
+            assert character is not None
+            assert character.get_hp() == 0
+            return [], None
+        return [], self
+
+    @override
+    def _post_update_react_to_signal(
+            self,
+            game_state: GameState,
+            effects: list[eft.Effect],
+            source: StaticTarget,
+            signal: TriggeringSignal,
+    ) -> list[eft.Effect]:
+        if signal is TriggeringSignal.TRIGGER_REVIVAL:
+            effects.append(
+                eft.ReviveRecoverHPEffect(
+                    target=source,
+                    recovery=self._HEAL_AMOUNT,
+                )
+            )
+        return effects
 
 
 @dataclass(frozen=True, kw_only=True)

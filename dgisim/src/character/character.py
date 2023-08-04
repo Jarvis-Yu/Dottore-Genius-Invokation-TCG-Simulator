@@ -598,7 +598,7 @@ class ElectroHypostasis(Character):
             max_hp=8,
             energy=0,
             max_energy=2,
-            hiddens=stts.Statuses(()),
+            hiddens=stts.Statuses((stt.ElectroCrystalCoreHiddenStatus(),)),
             equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
