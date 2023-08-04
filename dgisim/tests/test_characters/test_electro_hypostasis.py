@@ -9,7 +9,11 @@ class TestAratakiItto(unittest.TestCase):
             lambda cs: cs.factory().active_character_id(
                 2
             ).character(
-                ElectroHypostasis.from_default(2)
+                ElectroHypostasis.from_default(2).factory().f_hiddens(
+                    lambda hiddens: hiddens.remove(ElectroCrystalCoreHiddenStatus)
+                ).f_character_statuses(
+                    lambda cstts: cstts.update_status(ElectroCrystalCoreStatus())
+                ).build()
             ).build()
             # ).f_hand_cards(
             #     lambda hcs: hcs.add(AratakiIchiban)
@@ -232,3 +236,90 @@ class TestAratakiItto(unittest.TestCase):
         assert isinstance(character_summon, ChainsOfWardingThunderSummon)
         self.assertEqual(character_summon.usages, 1)
         self.assertEqual(character_summon.swap_reduce_usages, 0)
+
+    def test_gaining_electro_crystal_core_status(self):
+        """ Test Electro Crystal Core Status is gained at the start of the first round """
+        # start with hidden status only
+        game_state = GameState.from_default().factory().f_player1(
+            lambda p1: p1.factory().f_characters(
+                lambda cs: cs.factory().character(
+                    ElectroHypostasis.from_default(2)
+                ).build()
+            ).build()
+        ).build()
+        electro_hypostasis = game_state.get_player1().get_characters().get_character(2)
+        assert electro_hypostasis is not None
+        self.assertIn(ElectroCrystalCoreHiddenStatus, electro_hypostasis.get_hidden_statuses())
+        self.assertNotIn(ElectroCrystalCoreStatus, electro_hypostasis.get_character_statuses())
+
+        # gain character status ver electro core status on first action phase start
+        gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
+        gsm.step_until_phase(game_state.get_mode().action_phase())
+        gsm.step_until_holds(lambda gs: gs.waiting_for() is not None)
+        game_state = gsm.get_game_state()
+        electro_hypostasis = game_state.get_player1().get_characters().get_character(2)
+        assert electro_hypostasis is not None
+        self.assertNotIn(ElectroCrystalCoreHiddenStatus, electro_hypostasis.get_hidden_statuses())
+        self.assertIn(ElectroCrystalCoreStatus, electro_hypostasis.get_character_statuses())
+
+    def test_triggering_electro_crystal_core_status(self):
+        """ Test Electro Crystal Core Status does revive the character """
+        base_game = kill_character(self.BASE_GAME, character_id=2, pid=Pid.P1, hp=1)
+        base_game = base_game.factory().f_player2(
+            lambda p2: p2.factory().f_characters(
+                lambda cs: cs.factory().f_active_character(
+                    lambda ac: ac.factory().f_equipments(
+                        lambda eqs: eqs.update_status(GamblersEarringsStatus())
+                    ).build()
+                ).build()
+            ).build()
+        ).build()
+        a1, a2 = PuppetAgent(), PuppetAgent()
+        gsm = GameStateMachine(base_game, a1, a2)
+        a1.inject_action(SkillAction(
+            skill=CharacterSkill.NORMAL_ATTACK,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+        ))
+        a2.inject_action(SkillAction(
+            skill=CharacterSkill.NORMAL_ATTACK,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+        ))
+        gsm.player_step()  # P1 normal attack
+        gsm.player_step()  # P2 normal attack; kills P1
+        gsm.step_until_holds(lambda gs:
+                             gs.get_effect_stack().is_not_empty()
+                             and isinstance(gs.get_effect_stack().peek(), AliveMarkCheckerEffect)
+                             )
+        p2_dices_after_attack = gsm.get_game_state().get_player2().get_dices().num_dices()
+        # checks alive check is before skill energy recharge
+        p1ac = gsm.get_game_state().get_player1().just_get_active_character()
+        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
+        self.assertTrue(p1ac.alive())
+        self.assertEqual(p1ac.get_hp(), 0)
+        self.assertIn(ElectroCrystalCoreStatus, p1ac.get_character_statuses())
+        self.assertEqual(p2ac.get_energy(), 0)
+
+        gsm.step_until_holds(lambda gs: gs.get_player1().just_get_active_character().get_hp() > 0)
+
+        # checks revival is before skill energy recharge
+        p1ac = gsm.get_game_state().get_player1().just_get_active_character()
+        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
+        self.assertTrue(p1ac.alive())
+        self.assertEqual(p1ac.get_hp(), 3)
+        self.assertNotIn(ElectroCrystalCoreStatus, p1ac.get_character_statuses())
+        self.assertEqual(p2ac.get_energy(), 0)
+
+        gsm.auto_step()
+        # checks after math
+        game_state = gsm.get_game_state()
+        p1ac = game_state.get_player1().just_get_active_character()
+        p2 = game_state.get_player2()
+        p2ac = p2.just_get_active_character()
+        self.assertTrue(p1ac.alive())
+        self.assertEqual(p1ac.get_hp(), 3)
+        self.assertNotIn(ElectroCrystalCoreStatus, p1ac.get_character_statuses())
+        self.assertEqual(p2ac.get_energy(), 1)
+        # checks Gambler's Earrings not triggered
+        self.assertEqual(p2.get_dices().num_dices(), p2_dices_after_attack)
+        # check it's P1's turn again as usual
+        self.assertIs(game_state.waiting_for(), Pid.P1)

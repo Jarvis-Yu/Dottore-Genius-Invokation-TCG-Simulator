@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (7/51 implemented)](#character-751-implemented)
+  - [Character (8/51 implemented)](#character-851-implemented)
   - [Card (30/192 implemented)](#card-30192-implemented)
 
-## Character (7/51 implemented)
+## Character (8/51 implemented)
 
 - [ ] Pyro:
   - [x] Klee
@@ -17,7 +17,7 @@ all I need now is to implement each card and character.
 - [ ] Anemo:
   - [x] Kaedehara Kazuha
 - [ ] Electro:
-  - [ ] Electro Hypostasis _<-- WIP_
+  - [x] Electro Hypostasis
   - [x] Keqing
 - [ ] Dendro:
   - [x] Tighnari

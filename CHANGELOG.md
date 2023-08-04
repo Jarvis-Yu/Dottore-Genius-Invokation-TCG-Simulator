@@ -4,6 +4,8 @@
 
 ### Added
 
+- New Characters:
+  - Electro Hypostasis
 - New Cards:
   - Artifact Card:
     - Gambler's Earrings
