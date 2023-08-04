@@ -49,6 +49,7 @@ __all__ = [
     "EventCard",
     "EquipmentCard",
     "TalentCard",
+    "TalentEventCard",
     "TalentEquipmentCard",
     "WeaponEquipmentCard",
     "ArtifactEquipmentCard",
@@ -566,6 +567,8 @@ class EquipmentCard(Card):
 class TalentCard(Card):
     pass
 
+class TalentEventCard(EventCard, TalentCard):
+    pass
 
 class TalentEquipmentCard(EquipmentCard, TalentCard):
     pass
@@ -1401,7 +1404,7 @@ class AratakiIchiban(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProv
 #### Electro Hypostasis ####
 
 
-class AbsorbingPrism(TalentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
+class AbsorbingPrism(TalentEventCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.ELECTRO: 3})
 
     @override

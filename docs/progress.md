@@ -10,15 +10,18 @@ all I need now is to implement each card and character.
 ## Character (8/51 implemented)
 
 - [ ] Pyro:
+  - [ ] Bennett _<-- WIP #4_
   - [x] Klee
 - [ ] Hydro:
-  - [ ] Mona _<-- WIP_
+  - [ ] Mona _<-- WIP #1_
   - [x] Rhodeia of Loch
+  - [ ] Xingqiu _<-- WIP #2_
 - [ ] Anemo:
   - [x] Kaedehara Kazuha
 - [ ] Electro:
   - [x] Electro Hypostasis
   - [x] Keqing
+  - [ ] Yae Miko _<-- WIP #3_
 - [ ] Dendro:
   - [x] Tighnari
 - [ ] Cryo:
@@ -29,7 +32,7 @@ all I need now is to implement each card and character.
 ## Card (31/192 implemented)
 
 - [ ] Equipment Card (13/103):
-  - [ ] Character Talent Card:
+  - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] ColdBlooded Strike
     - [x] Keen Sight
@@ -56,6 +59,8 @@ all I need now is to implement each card and character.
   - [ ] Companion Card:
     - [ ] Liben _<-- WIP_
     - [x] Xudong
+  - [ ] Item Card:
+    - [ ] Parametric Transformer _<-- WIP_
   - [ ] Location Card:
     - [x] Knights of Favonius Library
     - [x] Vanarana
@@ -80,3 +85,4 @@ all I need now is to implement each card and character.
     - [x] Quick Knit
     - [ ] Send Off _<-- WIP_
     - [x] Starsigns
+    - [ ] Wind and Freedom _<-- WIP_
