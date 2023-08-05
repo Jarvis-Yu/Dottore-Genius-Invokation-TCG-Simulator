@@ -1218,9 +1218,7 @@ class MushroomPizzaStatus(CharacterStatus, _UsageStatus):
 
 
 @dataclass(frozen=True)
-class NorthernSmokedChickenStatus(CharacterStatus, _UsageStatus):
-    usages: int = 1
-    MAX_USAGES: ClassVar[int] = 1
+class NorthernSmokedChickenStatus(CharacterStatus):
     COST_DEDUCTION: ClassVar[int] = 1
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
@@ -1243,17 +1241,16 @@ class NorthernSmokedChickenStatus(CharacterStatus, _UsageStatus):
                     item,
                     dices_cost=(item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
                 )
-                return item, replace(self, usages=self.usages - 1)
+                return item, None
         return super()._preprocess(game_state, status_source, item, signal)
 
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
-        d_usages = 0
         if signal is TriggeringSignal.ROUND_END:
-            d_usages = -BIG_INT
-        return [], replace(self, usages=d_usages)
+            return [], None
+        return [], self
 
 
 @dataclass(frozen=True)
@@ -2036,7 +2033,7 @@ class ProphecyOfSubmersionStatus(TalentEquipmentStatus):
             dmg = item.dmg
             if (
                     dmg.source.pid is status_source.pid
-                    and not dmg.damage_type.no_boost
+                    and dmg.damage_type.can_boost()
                     and dmg.reaction is not None
                     and dmg.reaction.elem_reaction(Element.HYDRO)
                     and (

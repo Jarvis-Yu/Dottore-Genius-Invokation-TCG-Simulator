@@ -15,6 +15,7 @@ exclude_also =
     def dict_str
     if __name__ == .__main__.:
     if TYPE_CHECKING:
+    return \[\], self
     raise NotImplementedError
     raise Exception\(.Not Reached
     raise Exception\([a-z]*"[nN]ot [oO]verride

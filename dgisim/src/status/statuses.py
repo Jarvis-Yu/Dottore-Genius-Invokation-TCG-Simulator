@@ -8,6 +8,7 @@ from ..helper.quality_of_life import just
 
 __all__ = [
     "Statuses",
+    "EquipmentStatuses",
 ]
 
 _U = TypeVar('_U')
@@ -73,7 +74,7 @@ class Statuses:
         return iter(self._statuses)
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Statuses):
+        if not isinstance(other, Statuses):  # pragma: no cover
             return False
         return self is other or self._statuses == other._statuses
 
@@ -102,12 +103,10 @@ class EquipmentStatuses(Statuses):
         cls = type(self)
         statuses = list(self._statuses)
         for i, status in enumerate(statuses):
-            same_category = False
-            for category in self._CATEGORIES:
-                if isinstance(incoming_status, category) and isinstance(status, category):
-                    same_category = True
-                    break
-            if not same_category:
+            if not any(
+                isinstance(incoming_status, category) and isinstance(status, category)
+                for category in self._CATEGORIES
+            ):
                 continue
             if type(status) is not type(incoming_status):
                 return self.remove(type(status)).update_status(incoming_status)
@@ -119,7 +118,7 @@ class EquipmentStatuses(Statuses):
                 new_status = status.update(incoming_status)  # type: ignore
             if status == new_status:
                 return self
-            if new_status is None:
+            if new_status is None:  # pragma: no cover
                 return self.remove(type(status))
             statuses[i] = new_status
             return cls(tuple(statuses))

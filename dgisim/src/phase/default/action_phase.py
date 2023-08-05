@@ -432,7 +432,7 @@ class ActionPhase(ph.Phase):
             if not isinstance(action, DeathSwapAction):
                 raise Exception(f"Trying to execute {action} when a death swap is expected")
 
-        elif self._rolling(game_state):
+        elif self._rolling(game_state):  # pragma: no cover
             if not isinstance(action, DicesSelectAction):
                 raise Exception(f"Trying to execute {action} when a dices selection is expected")
 

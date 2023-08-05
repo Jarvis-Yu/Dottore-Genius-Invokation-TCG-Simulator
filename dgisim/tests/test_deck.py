@@ -7,6 +7,7 @@ from dgisim.src.helper.hashable_dict import HashableDict
 from dgisim.src.mode import DefaultMode
 from dgisim.src.state.game_state import GameState
 
+
 class TestDeck(unittest.TestCase):
     def test_valid_decks(self):
         deck1 = FrozenDeck(
@@ -37,6 +38,7 @@ class TestDeck(unittest.TestCase):
         assert len(deck1.chars) == 3
         assert sum(deck1.cards.values()) == 30
         self.assertTrue(DefaultMode().valid_deck(deck1))
+        self.assertTrue(DefaultMode().partially_valid_deck(deck1))
         game_state = GameState.from_decks(DefaultMode(), deck1, deck1)
 
     def test_invalid_for_not_enough_char(self):
@@ -67,6 +69,7 @@ class TestDeck(unittest.TestCase):
         assert len(deck1.chars) < 3
         assert sum(deck1.cards.values()) == 30
         self.assertFalse(DefaultMode().valid_deck(deck1))
+        self.assertTrue(DefaultMode().partially_valid_deck(deck1))
 
     def test_invalid_for_unmatching_talent_card(self):
         deck1 = FrozenDeck(
@@ -97,6 +100,24 @@ class TestDeck(unittest.TestCase):
         assert len(deck1.chars) == 3
         assert sum(deck1.cards.values()) == 30
         self.assertFalse(DefaultMode().valid_deck(deck1))
+        self.assertFalse(DefaultMode().partially_valid_deck(deck1))
+
+    def test_mutability(self):
+        immutable_deck = FrozenDeck(
+            chars=(
+                Klee,
+                KaedeharaKazuha,
+            ),
+            cards=HashableDict({
+                PoundingSurprise: 1,
+                GamblersEarrings: 2,
+            })
+        )
+        mutable_deck = immutable_deck.to_mutable()
+        assert not mutable_deck.immutable
+        immutable_again_deck = mutable_deck.to_frozen()
+        self.assertEqual(immutable_deck, immutable_again_deck)
+        self.assertEqual(mutable_deck, immutable_again_deck.to_mutable())
 
     def test_cards(self):
         def test_card(card: type[Card], chars: list[type[Character]]) -> bool:

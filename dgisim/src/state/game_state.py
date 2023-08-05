@@ -229,7 +229,7 @@ class GameState:
     def action_generator(self, pid: Pid) -> None | acg.ActionGenerator:
         return self._phase.action_generator(self, pid)
 
-    def get_winner(self) -> Optional[Pid]:
+    def get_winner(self) -> Optional[Pid]:  # pragma: no cover
         assert self.game_end()
         if self.get_player1().defeated():
             return Pid.P2
@@ -246,6 +246,12 @@ class GameState:
             pid.other(),
             lambda p: p.hide_cards()
         ).build()
+
+    def __copy__(self) -> Self:  # pragma: no cover
+        return self
+
+    def __deepcopy__(self, _) -> Self:  # pragma: no cover
+        return self
 
     def _all_unique_data(self) -> tuple:
         return (

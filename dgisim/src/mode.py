@@ -70,6 +70,7 @@ class Mode(ABC):
             and max(deck.cards.values()) <= self.deck_card_limit_per_kind()
             and all(char in self.all_chars() for char in deck.chars)
             and all(card in self.all_cards() for card in deck.cards)
+            and all(card.valid_in_deck(deck) for card in deck.cards)
         )
 
     def valid_deck(self, deck: Deck) -> bool:

@@ -4,6 +4,7 @@
 
 ### Added
 
+- **Deck** related classes with card validity checking
 - New Characters:
   - Electro Hypostasis
   - Mona

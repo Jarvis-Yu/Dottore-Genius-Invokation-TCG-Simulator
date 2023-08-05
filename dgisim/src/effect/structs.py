@@ -47,10 +47,10 @@ class DamageType:
             or self.plunge_attack
         )
 
-    def from_summon(self) -> bool:
+    def from_summon(self) -> bool:  # pragma: no cover
         return self.summon
 
-    def from_status(self) -> bool:
+    def from_status(self) -> bool:  # pragma: no cover
         return self.status
 
     def can_boost(self) -> bool:

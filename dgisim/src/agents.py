@@ -80,7 +80,7 @@ class PuppetAgent(PlayerAgent):
     def __init__(self, actions: Optional[list[PlayerAction]] = None) -> None:
         if actions is None:
             self._actions = []
-        else:
+        else:  # pragma: no cover
             self._actions = actions
 
     def inject_action(self, action: PlayerAction) -> None:

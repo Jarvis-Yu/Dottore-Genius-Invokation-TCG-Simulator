@@ -96,11 +96,11 @@ class HashableDict(dict, Mapping[_T, _U]):
             ((key, self.get(key, 0) - other.get(key, 0)) for key in keys)
         )
 
-    def __copy__(self) -> Self:
+    def __copy__(self) -> Self:  # pragma: no cover
         assert self.frozen()
         return self
 
-    def __deepcopy__(self, _) -> Self:
+    def __deepcopy__(self, _) -> Self:  # pragma: no cover
         assert self.frozen()
         return self
 

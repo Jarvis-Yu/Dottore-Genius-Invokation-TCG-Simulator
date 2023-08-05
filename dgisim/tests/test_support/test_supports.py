@@ -73,3 +73,14 @@ class TestSupports(unittest.TestCase):
         supports = supports.remove_by_sid(1)
         self.assertEqual(supports.len(), 2)
         self.assertEqual(len(supports), 2)
+
+    def test_eq_hash(self):
+        supports_1 = Supports((SupportA(sid=1), SupportB(sid=3), SupportA(sid=2)), max_num=4)
+        supports_2 = Supports((SupportA(sid=1), SupportB(sid=3), SupportA(sid=2)), max_num=4)
+        supports_3 = Supports((SupportB(sid=1), SupportA(sid=3), SupportA(sid=2)), max_num=4)
+        supports_4 = Supports((SupportA(sid=2), SupportB(sid=3), SupportA(sid=1)), max_num=4)
+        self.assertEqual(supports_1, supports_2)
+        self.assertEqual(hash(supports_1), hash(supports_2))
+        self.assertNotEqual(supports_1, supports_3)
+        self.assertNotEqual(supports_1, supports_4)
+        self.assertNotEqual(supports_1, "supports_1")
