@@ -251,9 +251,9 @@ class TestDices(unittest.TestCase):
         from dgisim.src.character.characters import Characters
         from dgisim.src.mode import DefaultMode
         from dgisim.src.state.player_state import PlayerState
-        player_state = PlayerState.from_deck(
+        player_state = PlayerState.from_chars_cards(
             DefaultMode(),
-            Characters.from_list(
+            Characters.from_iterable(
                 [AratakiItto, Klee, Keqing]
             ).factory().active_character_id(2).build(),
             Cards({}),

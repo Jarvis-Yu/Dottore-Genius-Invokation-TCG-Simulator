@@ -15,6 +15,7 @@ from ..support.supports import Supports
 from .enums import Act
 
 if TYPE_CHECKING:
+    from ..deck import Deck
     from ..mode import Mode
 
 __all__ = [
@@ -148,38 +149,49 @@ class PlayerState:
             characters=Characters.from_default(
                 tuple(char.from_default(i + 1) for i, char in enumerate(selected_chars))
             ),
-            hidden_statuses=sts.Statuses((
-                PlungeAttackStatus(),
-                DeathThisRoundStatus(),
-            )),
+            hidden_statuses=mode.player_default_hidden_statuses(),
             combat_statuses=sts.Statuses(()),
             summons=Summons((), mode.summons_limit()),
             supports=Supports((), mode.supports_limit()),
             dices=ActualDices({}),
             hand_cards=Cards({}),
-            deck_cards=Cards(dict([(card, mode.max_cards_per_kind()) for card in selected_cards])),
+            deck_cards=Cards(dict([(card, mode.deck_card_limit_per_kind()) for card in selected_cards])),
             publicly_used_cards=Cards({}),
             publicly_gained_cards=Cards({}),
         )
 
     @classmethod
-    def from_deck(cls, mode: Mode, characters: Characters, cards: Cards) -> Self:
-        from ..status.status import DeathThisRoundStatus, PlungeAttackStatus
+    def from_chars_cards(cls, mode: Mode, characters: Characters, cards: Cards) -> Self:
         return cls(
             phase=Act.PASSIVE_WAIT_PHASE,
             card_redraw_chances=0,
             dice_reroll_chances=0,
             characters=characters,
-            hidden_statuses=sts.Statuses((
-                PlungeAttackStatus(),
-                DeathThisRoundStatus(),
-            )),
+            hidden_statuses=mode.player_default_hidden_statuses(),
             combat_statuses=sts.Statuses(()),
             summons=Summons((), mode.summons_limit()),
             supports=Supports((), mode.supports_limit()),
             dices=ActualDices({}),
             hand_cards=Cards({}),
             deck_cards=cards,
+            publicly_used_cards=Cards({}),
+            publicly_gained_cards=Cards({}),
+        )
+
+    @classmethod
+    def from_deck(cls, mode: Mode, deck: Deck) -> Self:
+        return cls(
+            phase=Act.PASSIVE_WAIT_PHASE,
+            card_redraw_chances=0,
+            dice_reroll_chances=0,
+            characters=Characters.from_iterable(deck.chars),
+            hidden_statuses=mode.player_default_hidden_statuses(),
+            combat_statuses=sts.Statuses(()),
+            summons=Summons((), mode.summons_limit()),
+            supports=Supports((), mode.supports_limit()),
+            dices=ActualDices({}),
+            hand_cards=Cards({}),
+            deck_cards=Cards(deck.cards),
             publicly_used_cards=Cards({}),
             publicly_gained_cards=Cards({}),
         )

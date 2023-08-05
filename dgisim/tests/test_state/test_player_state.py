@@ -25,9 +25,9 @@ class TestPlayerState(unittest.TestCase):
         self.assertFalse(player_state.is_mine(SupportB(sid=3)))
 
     def test_from_deck(self):
-        player_state = PlayerState.from_deck(
+        player_state = PlayerState.from_chars_cards(
             DefaultMode(),
-            Characters.from_list([Keqing, RhodeiaOfLoch, Tighnari, Kaeya, Keqing]),
+            Characters.from_iterable([Keqing, RhodeiaOfLoch, Tighnari, Kaeya, Keqing]),
             Cards({Starsigns: 1, MondstadtHashBrown: 6}),
         )
         self.assertTrue(player_state.get_characters().num_characters(), 5)
@@ -36,14 +36,14 @@ class TestPlayerState(unittest.TestCase):
         self.assertTrue(player_state.get_deck_cards().num_cards(), 7)
 
     def test_eq_and_hash(self):
-        player_state1 = PlayerState.from_deck(
+        player_state1 = PlayerState.from_chars_cards(
             DefaultMode(),
-            Characters.from_list([Keqing, RhodeiaOfLoch, Tighnari, Kaeya, Keqing]),
+            Characters.from_iterable([Keqing, RhodeiaOfLoch, Tighnari, Kaeya, Keqing]),
             Cards({Starsigns: 1, MondstadtHashBrown: 6}),
         )
-        player_state2 = PlayerState.from_deck(
+        player_state2 = PlayerState.from_chars_cards(
             DefaultMode(),
-            Characters.from_list([Keqing, RhodeiaOfLoch, Tighnari, Kaeya, Keqing]),
+            Characters.from_iterable([Keqing, RhodeiaOfLoch, Tighnari, Kaeya, Keqing]),
             Cards({Starsigns: 1, MondstadtHashBrown: 6}),
         )
         player_state3 = player_state2.factory().card_redraw_chances(8848).build()

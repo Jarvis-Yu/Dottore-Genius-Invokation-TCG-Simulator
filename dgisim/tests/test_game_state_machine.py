@@ -201,9 +201,9 @@ class TestGameStateMachine(unittest.TestCase):
                 wins[state_machine.get_winner()] += 1
             except Exception:
                 all_state = state_machine.get_history()
-                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                print("AN EXCEPTION IS THROWN WHEN EXECUTING THE GAME")
-                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                print("! AN EXCEPTION IS THROWN WHEN EXECUTING THE GAME !")
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 for i, game_state in enumerate(all_state[-5:]):
                     print(f"<<<{i+1}>>>")
                     print(game_state)

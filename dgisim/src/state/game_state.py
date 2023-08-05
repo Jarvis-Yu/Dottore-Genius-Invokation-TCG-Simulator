@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import Callable, cast, Optional
+from typing import Callable, Optional, TYPE_CHECKING, cast
+
 from typing_extensions import Self
 
 from .. import mode as md
@@ -27,6 +28,10 @@ from ..status.enums import Preprocessables
 from ..summon.summon import Summon
 from ..support.support import Support
 from .enums import Pid
+
+if TYPE_CHECKING:
+    from ..deck import Deck
+
 
 __all__ = [
     "GameState",
@@ -74,7 +79,7 @@ class GameState:
         mode = md.DefaultMode()
         return cls(
             mode=mode,
-            phase=mode.card_select_phase(),
+            phase=mode.first_phase(),
             round=0,
             active_player_id=Pid.P1,
             player1=ps.PlayerState.example_player(mode),
@@ -86,11 +91,29 @@ class GameState:
     def from_players(cls, mode: md.Mode, player1: ps.PlayerState, player2: ps.PlayerState) -> Self:
         return cls(  # pragma: no cover
             mode=mode,
-            phase=mode.card_select_phase(),
+            phase=mode.first_phase(),
             round=0,
             active_player_id=Pid.P1,
             player1=player1,
             player2=player2,
+            effect_stack=EffectStack(()),
+        )
+
+    @classmethod
+    def from_decks(cls, mode: md.Mode, p1_deck: Deck, p2_deck: Deck) -> Self:  # pragma: no cover
+        if not p1_deck.immutable:
+            p1_deck = p1_deck.to_frozen()
+        if not p2_deck.immutable:
+            p2_deck = p2_deck.to_frozen()
+        assert mode.valid_deck(p1_deck)
+        assert mode.valid_deck(p2_deck)
+        return cls(
+            mode=mode,
+            phase=mode.first_phase(),
+            round=0,
+            active_player_id=Pid.P1,
+            player1=ps.PlayerState.from_deck(mode, p1_deck),
+            player2=ps.PlayerState.from_deck(mode, p2_deck),
             effect_stack=EffectStack(()),
         )
 

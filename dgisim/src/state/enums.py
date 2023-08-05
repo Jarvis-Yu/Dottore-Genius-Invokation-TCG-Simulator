@@ -32,14 +32,14 @@ class Act(Enum):
     ACTIVE_WAIT_PHASE = "Aggressive Wait Phase"
     END_PHASE = "End Phase"
 
-    def is_action_phase(self) -> bool:
+    def is_action_phase(self) -> bool:  # pragma: no cover
         return self is Act.ACTION_PHASE
 
-    def is_passive_wait_phase(self) -> bool:
+    def is_passive_wait_phase(self) -> bool:  # pragma: no cover
         return self is Act.PASSIVE_WAIT_PHASE
 
-    def is_active_wait_phase(self) -> bool:
+    def is_active_wait_phase(self) -> bool:  # pragma: no cover
         return self is Act.ACTIVE_WAIT_PHASE
 
-    def is_end_phase(self) -> bool:
+    def is_end_phase(self) -> bool:  # pragma: no cover
         return self is Act.END_PHASE

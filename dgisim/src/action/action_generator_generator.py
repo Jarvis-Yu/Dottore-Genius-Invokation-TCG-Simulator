@@ -102,7 +102,7 @@ class CardsSelectionActGenGenerator(ABC):
             return tuple(
                 card
                 for card in mode.all_cards()
-                if publicly_used_cards[card] < mode.max_cards_per_kind()
+                if publicly_used_cards[card] < mode.deck_card_limit_per_kind()
             )
         return hand_cards
 

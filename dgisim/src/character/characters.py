@@ -20,7 +20,7 @@ class Characters:
         return cls(characters, None)
 
     @classmethod
-    def from_list(cls, characters: Iterable[type[Character]]) -> Characters:
+    def from_iterable(cls, characters: Iterable[type[Character]]) -> Characters:
         return Characters(
             tuple(
                 char.from_default(i + 1)

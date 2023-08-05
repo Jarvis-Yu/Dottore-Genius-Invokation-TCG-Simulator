@@ -36,6 +36,7 @@ from ..status.status_processing import StatusProcessing
 
 if TYPE_CHECKING:
     from ..action.types import DecidedChoiceType, GivenChoiceType
+    from ..deck import Deck
     from ..state import game_state as gs
 
 __all__ = [
@@ -134,6 +135,10 @@ class Card:
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         raise NotImplementedError
+
+    @classmethod
+    def valid_in_deck(cls, deck: Deck) -> bool:
+        return True
 
     @classmethod
     def base_dice_cost(cls) -> AbstractDices:  # pragma: no cover
@@ -568,15 +573,70 @@ class EquipmentCard(Card):
 
 
 class TalentCard(Card):
-    pass
+    _CHARACTER: type[chr.Character]
+
+    @override
+    @classmethod
+    def valid_in_deck(cls, deck: Deck) -> bool:
+        return cls._CHARACTER in deck.chars
 
 
 class TalentEventCard(EventCard, TalentCard):
-    pass
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        ret_val = True
+        if issubclass(cls, _CombatActionCard):
+            ret_val = (
+                ret_val
+                and _UsableFuncs.active_combat_talent_card_usable(
+                    game_state, pid, cls._CHARACTER
+                )
+            )
+        return ret_val and super()._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        ret_val = True
+        if issubclass(cls, _DiceOnlyChoiceProvider):
+            ret_val = ret_val and isinstance(instruction, act.DiceOnlyInstruction)
+        return ret_val and cls._loosely_usable(game_state, pid)
 
 
 class TalentEquipmentCard(EquipmentCard, TalentCard):
-    pass
+    _IS_SKILL: bool = True
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        ret_val = True
+        if issubclass(cls, _CombatActionCard) and cls._IS_SKILL:
+            ret_val = (
+                ret_val
+                and _UsableFuncs.active_combat_talent_skill_card_usable(
+                    game_state, pid, cls._CHARACTER
+                )
+            )
+        return ret_val and super()._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        ret_val = True
+        if issubclass(cls, _DiceOnlyChoiceProvider):
+            ret_val = ret_val and isinstance(instruction, act.DiceOnlyInstruction)
+        return ret_val and cls._loosely_usable(game_state, pid)
 
 
 class WeaponEquipmentCard(EquipmentCard, _CharTargetChoiceProvider):
@@ -1432,29 +1492,7 @@ class Vanarana(LocationCard):
 
 class AratakiIchiban(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.GEO: 1, Element.ANY: 2})
-
-    @override
-    @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        return (
-            _UsableFuncs.active_combat_talent_skill_card_usable(
-                game_state,
-                pid,
-                chr.AratakiItto
-            )
-            and super()._loosely_usable(game_state, pid)
-        )
-
-    @override
-    @classmethod
-    def _valid_instruction(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction
-    ) -> bool:
-        return isinstance(instruction, act.DiceOnlyInstruction) \
-            and cls._loosely_usable(game_state, pid)
+    _CHARACTER = chr.AratakiItto
 
     @override
     @classmethod
@@ -1486,23 +1524,7 @@ class AratakiIchiban(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProv
 
 class AbsorbingPrism(TalentEventCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.ELECTRO: 3})
-
-    @override
-    @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        return _UsableFuncs.active_combat_talent_card_usable(game_state, pid, chr.ElectroHypostasis) \
-            and super()._loosely_usable(game_state, pid)
-
-    @override
-    @classmethod
-    def _valid_instruction(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction
-    ) -> bool:
-        return isinstance(instruction, act.DiceOnlyInstruction) \
-            and cls._loosely_usable(game_state, pid)
+    _CHARACTER = chr.ElectroHypostasis
 
     @override
     @classmethod
@@ -1534,29 +1556,7 @@ class AbsorbingPrism(TalentEventCard, _CombatActionCard, _DiceOnlyChoiceProvider
 
 class PoeticsOfFuubutsu(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.ANEMO: 3})
-
-    @override
-    @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        return (
-            _UsableFuncs.active_combat_talent_skill_card_usable(
-                game_state,
-                pid,
-                chr.KaedeharaKazuha
-            )
-            and super()._loosely_usable(game_state, pid)
-        )
-
-    @override
-    @classmethod
-    def _valid_instruction(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction
-    ) -> bool:
-        return isinstance(instruction, act.DiceOnlyInstruction) \
-            and cls._loosely_usable(game_state, pid)
+    _CHARACTER = chr.KaedeharaKazuha
 
     @override
     @classmethod
@@ -1588,23 +1588,7 @@ class PoeticsOfFuubutsu(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceP
 
 class ColdBloodedStrike(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.CRYO: 4})
-
-    @override
-    @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        return _UsableFuncs.active_combat_talent_skill_card_usable(game_state, pid, chr.Kaeya) \
-            and super()._loosely_usable(game_state, pid)
-
-    @override
-    @classmethod
-    def _valid_instruction(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction
-    ) -> bool:
-        return isinstance(instruction, act.DiceOnlyInstruction) \
-            and cls._loosely_usable(game_state, pid)
+    _CHARACTER = chr.Kaeya
 
     @override
     @classmethod
@@ -1634,8 +1618,13 @@ class ColdBloodedStrike(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceP
 #### Keqing ####
 
 
-class LightningStiletto(EventCard, _CombatActionCard, _CharTargetChoiceProvider):
+class LightningStiletto(TalentEventCard, _CombatActionCard, _CharTargetChoiceProvider):
     _DICE_COST = AbstractDices({Element.ELECTRO: 3})
+
+    @override
+    @classmethod
+    def valid_in_deck(cls, deck: Deck) -> bool:
+        return False
 
     @override
     @classmethod
@@ -1652,7 +1641,7 @@ class LightningStiletto(EventCard, _CombatActionCard, _CharTargetChoiceProvider)
             return False
         if all(not keqing.can_cast_skill() for keqing in keqings):
             return False
-        return super()._loosely_usable(game_state, pid)
+        return Card._loosely_usable(game_state, pid)
 
     @override
     @classmethod
@@ -1693,23 +1682,7 @@ class LightningStiletto(EventCard, _CombatActionCard, _CharTargetChoiceProvider)
 
 class ThunderingPenance(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.ELECTRO: 3})
-
-    @override
-    @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        return _UsableFuncs.active_combat_talent_skill_card_usable(game_state, pid, chr.Keqing) \
-            and super()._loosely_usable(game_state, pid)
-
-    @override
-    @classmethod
-    def _valid_instruction(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction
-    ) -> bool:
-        return isinstance(instruction, act.DiceOnlyInstruction) \
-            and cls._loosely_usable(game_state, pid)
+    _CHARACTER = chr.Keqing
 
     @override
     @classmethod
@@ -1741,23 +1714,7 @@ class ThunderingPenance(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceP
 
 class PoundingSurprise(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.PYRO: 3})
-
-    @override
-    @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        return _UsableFuncs.active_combat_talent_skill_card_usable(game_state, pid, chr.Klee) \
-            and super()._loosely_usable(game_state, pid)
-
-    @override
-    @classmethod
-    def _valid_instruction(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction
-    ) -> bool:
-        return isinstance(instruction, act.DiceOnlyInstruction) \
-            and cls._loosely_usable(game_state, pid)
+    _CHARACTER = chr.Klee
 
     @override
     @classmethod
@@ -1789,23 +1746,7 @@ class PoundingSurprise(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoicePr
 
 class ProphecyOfSubmersion(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.HYDRO: 3})
-
-    @override
-    @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        return _UsableFuncs.active_combat_talent_burst_card_usable(game_state, pid, chr.Mona) \
-            and super()._loosely_usable(game_state, pid)
-
-    @override
-    @classmethod
-    def _valid_instruction(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction
-    ) -> bool:
-        return isinstance(instruction, act.DiceOnlyInstruction) \
-            and cls._loosely_usable(game_state, pid)
+    _CHARACTER = chr.Mona
 
     @override
     @classmethod
@@ -1837,23 +1778,7 @@ class ProphecyOfSubmersion(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoi
 
 class StreamingSurge(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.HYDRO: 4})
-
-    @override
-    @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        return _UsableFuncs.active_combat_talent_burst_card_usable(game_state, pid, chr.RhodeiaOfLoch) \
-            and super()._loosely_usable(game_state, pid)
-
-    @override
-    @classmethod
-    def _valid_instruction(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction
-    ) -> bool:
-        return isinstance(instruction, act.DiceOnlyInstruction) \
-            and cls._loosely_usable(game_state, pid)
+    _CHARACTER = chr.RhodeiaOfLoch
 
     @override
     @classmethod
@@ -1885,23 +1810,7 @@ class StreamingSurge(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProv
 
 class KeenSight(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.DENDRO: 4})
-
-    @override
-    @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        return _UsableFuncs.active_combat_talent_skill_card_usable(game_state, pid, chr.Tighnari) \
-            and super()._loosely_usable(game_state, pid)
-
-    @override
-    @classmethod
-    def _valid_instruction(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction
-    ) -> bool:
-        return isinstance(instruction, act.DiceOnlyInstruction) \
-            and cls._loosely_usable(game_state, pid)
+    _CHARACTER = chr.Tighnari
 
     @override
     @classmethod

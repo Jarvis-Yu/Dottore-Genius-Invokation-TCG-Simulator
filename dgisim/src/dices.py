@@ -78,7 +78,7 @@ class Dices:
         num = min(self.num_dices(), num)
         if num == 0:
             return (self, type(self).from_empty())
-        picked_dices: dict[Element, int] = dict(Counter(
+        picked_dices: dict[Element, int] = HashableDict(Counter(
             random.sample(list(self._dices.keys()), counts=self._dices.values(), k=num)
         ))
         return type(self)(self._dices - picked_dices), type(self)(picked_dices)
@@ -123,7 +123,7 @@ class Dices:
         )
 
     def to_dict(self) -> dict[Element, int]:
-        return dict(self._dices.items())
+        return self._dices.to_dict()
 
     def dict_str(self) -> dict[str, Any]:
         existing_dices = dict([
@@ -141,10 +141,10 @@ class Dices:
 
     @classmethod
     def from_empty(cls) -> Self:
-        return cls(dict([
+        return cls(HashableDict((
             (elem, 0)
             for elem in cls._LEGAL_ELEMS
-        ]))
+        )))
 
 
 _PURE_ELEMS = frozenset({
@@ -198,7 +198,7 @@ class ActualDices(Dices):
         assert self.is_legal() and requirement.is_legal()
 
         # satisfy all pure elements first
-        pure_deducted = HashableDict((
+        pure_deducted: HashableDict[Element, int] = HashableDict((
             (elem, self[elem] - requirement[elem])
             for elem in _PURE_ELEMS
         ), frozen=False)
@@ -314,14 +314,17 @@ class ActualDices(Dices):
             answer[Element.OMNI] += omni_required
         return ActualDices(answer)
 
-    def _init_ordered_dices(self, priority_elems: None | frozenset[Element]) -> HashableDict:
+    def _init_ordered_dices(
+            self,
+            priority_elems: None | frozenset[Element]
+    ) -> HashableDict[Element, int]:
         character_elems: frozenset[Element]
         if priority_elems is None:
             character_elems = frozenset()
         else:
             character_elems = priority_elems
 
-        dices = {}
+        dices: dict[Element, int] = {}
         if self[Element.OMNI] > 0:
             dices[Element.OMNI] = self[Element.OMNI]
         # list[tuple[alive chars have elem, num of elem, priority of elem]]
@@ -343,9 +346,9 @@ class ActualDices(Dices):
         return HashableDict.from_dict(dices)
 
     def dices_ordered(self, player_state: None | PlayerState) -> dict[Element, int]:
-        return dict(self.readonly_dices_ordered(player_state))
+        return self.readonly_dices_ordered(player_state).to_dict()
 
-    def readonly_dices_ordered(self, player_state: None | PlayerState) -> dict[Element, int]:
+    def readonly_dices_ordered(self, player_state: None | PlayerState) -> HashableDict[Element, int]:
         return self._init_ordered_dices(
             None
             if player_state is None

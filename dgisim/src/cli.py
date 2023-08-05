@@ -168,7 +168,9 @@ class CLISession:
             )
 
         tuple_list = list(tuple(item) for item in choices.items())
-        original_dict = HashableDict((i, val) for i, val in enumerate(choices.values()))
+        original_dict: HashableDict[int, int] = HashableDict(
+            (i, val) for i, val in enumerate(choices.values())
+        )
         dict_display = "  |||  ".join(
             f"@{i}: <{cls._display_choice(pair[0])}, {pair[1]}>"
             for i, pair in enumerate(tuple_list)
