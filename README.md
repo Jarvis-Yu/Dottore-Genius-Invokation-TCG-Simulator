@@ -54,6 +54,48 @@ You may try the CLI online on [Google Colab](https://colab.research.google.com/d
 See CLI's [README](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/cli_readme.md)
 for showcase and explanations of the CLI.
 
+## Customize Player Agents
+
+A player agent controls all actions of a player in a game.
+
+To implement a player agent, all you need to do is to inherit the abstact class
+`PlayerAgent` and implement the method `choose_action()`.
+
+A simple example is shown below, the agent implemented choose 3 random cards to
+replace during _Card Select Phase_, and normal attacks until there's no dices
+for it during _Action Phase_.
+
+```py
+class ExampleAgent(PlayerAgent):
+    def choose_action(self, history: list[GameState], pid: Pid) -> PlayerAction:
+        latest_game_state: GameState = history[-1]
+        game_mode: Mode = latest_game_state.get_mode()
+        curr_phase: Phase = latest_game_state.get_phase()
+
+        if isinstance(curr_phase, game_mode.card_select_phase):
+            cards_to_select_from: Cards = latest_game_state.get_player(pid).get_hand_cards()
+            _, selected_cards = cards_to_select_from.pick_random_cards(num=3)
+            return CardsSelectAction(selected_cards=selected_cards)
+
+        elif isinstance(curr_phase, game_mode.action_phase):
+            me: PlayerState = latest_game_state.get_player(pid)
+            active_character: Character = me.just_get_active_character()
+            dices: ActualDices = me.get_dices()
+            # check if dices are enough for normal attack
+            normal_attack_cost = active_character.skill_cost(CharacterSkill.NORMAL_ATTACK)
+            dices_to_use = dices.basically_satisfy(normal_attack_cost)
+            if dices_to_use is not None:
+                # normal attack if dices can be found to pay for normal attack
+                return SkillAction(
+                    skill=CharacterSkill.NORMAL_ATTACK,
+                    instruction=DiceOnlyInstruction(dices=dices_to_use),
+                )
+            return EndRoundAction()  # end round otherwise
+
+        else:
+            raise NotImplementedError(f"actions for {curr_phase} not defined yet")
+```
+
 ## Features
 
 This simulator is modeled as a finite state machine, which means any intermediate state can be

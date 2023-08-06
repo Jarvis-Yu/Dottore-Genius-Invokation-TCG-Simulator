@@ -164,7 +164,7 @@ class RandomAgent(PlayerAgent):
                     choice = ActualDices(dict(
                         (elem, choices[elem])
                         for elem in choices.elems()
-                        if not(elem is Element.OMNI or elem in wanted_elems)
+                        if not (elem is Element.OMNI or elem in wanted_elems)
                     ))
                 else:
                     _, choice = choices.pick_random_dices(random.randint(0, choices.num_dices()))

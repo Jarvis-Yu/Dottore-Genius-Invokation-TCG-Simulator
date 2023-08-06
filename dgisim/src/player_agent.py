@@ -1,5 +1,5 @@
 from __future__ import annotations
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from typing import TYPE_CHECKING
 
 from .action.action import PlayerAction
@@ -13,7 +13,7 @@ __all__ = [
 ]
 
 
-class PlayerAgent:
+class PlayerAgent(ABC):
     """
     The "interface" for all player agents.
 

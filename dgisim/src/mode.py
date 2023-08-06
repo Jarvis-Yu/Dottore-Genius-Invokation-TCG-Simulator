@@ -119,32 +119,39 @@ class Mode(ABC):
     def all_chars(self) -> frozenset[type[Character]]:
         pass
 
+    @property
     @abstractmethod
-    def first_phase(self) -> Phase:
+    def first_phase(self) -> type[Phase]:
         pass
 
+    @property
     @abstractmethod
-    def card_select_phase(self) -> Phase:
+    def card_select_phase(self) -> type[Phase]:
         pass
 
+    @property
     @abstractmethod
-    def starting_hand_select_phase(self) -> Phase:
+    def starting_hand_select_phase(self) -> type[Phase]:
         pass
 
+    @property
     @abstractmethod
-    def roll_phase(self) -> Phase:
+    def roll_phase(self) -> type[Phase]:
         pass
 
+    @property
     @abstractmethod
-    def action_phase(self) -> Phase:
+    def action_phase(self) -> type[Phase]:
         pass
 
+    @property
     @abstractmethod
-    def end_phase(self) -> Phase:
+    def end_phase(self) -> type[Phase]:
         pass
 
+    @property
     @abstractmethod
-    def game_end_phase(self) -> Phase:
+    def game_end_phase(self) -> type[Phase]:
         pass
 
     def __eq__(self, other: object) -> bool:
@@ -170,38 +177,45 @@ class DefaultMode(Mode):
         from .character.characters_set import default_characters
         return default_characters()
 
-    def first_phase(self) -> Phase:
-        return self.card_select_phase()
+    @property
+    def first_phase(self) -> type[Phase]:
+        return self.card_select_phase
 
-    # Initial phase of this mode
-    def card_select_phase(self) -> Phase:
+    @property
+    def card_select_phase(self) -> type[Phase]:
         from .phase.default.card_select_phase import CardSelectPhase
-        return CardSelectPhase()
+        return CardSelectPhase
 
-    def starting_hand_select_phase(self) -> Phase:
+    @property
+    def starting_hand_select_phase(self) -> type[Phase]:
         from .phase.default.starting_hand_select_phase import StartingHandSelectPhase
-        return StartingHandSelectPhase()
+        return StartingHandSelectPhase
 
-    def roll_phase(self) -> Phase:
+    @property
+    def roll_phase(self) -> type[Phase]:
         from .phase.default.roll_phase import RollPhase
-        return RollPhase()
+        return RollPhase
 
-    def action_phase(self) -> Phase:
+    @property
+    def action_phase(self) -> type[Phase]:
         from .phase.default.action_phase import ActionPhase
-        return ActionPhase()
+        return ActionPhase
 
-    def end_phase(self) -> Phase:
+    @property
+    def end_phase(self) -> type[Phase]:
         from .phase.default.end_phase import EndPhase
-        return EndPhase()
+        return EndPhase
 
-    def game_end_phase(self) -> Phase:
+    @property
+    def game_end_phase(self) -> type[Phase]:
         from .phase.default.game_end_phase import GameEndPhase
-        return GameEndPhase()
+        return GameEndPhase
 
 
 class AllOmniMode(DefaultMode):
     _DICE_REROLL_CHANCES = 0
 
-    def roll_phase(self) -> Phase:
+    @property
+    def roll_phase(self) -> type[Phase]:
         from .phase.all_omni.roll_phase import RollPhase
-        return RollPhase()
+        return RollPhase
