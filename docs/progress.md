@@ -4,24 +4,24 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (9/51 implemented)](#character-951-implemented)
-  - [Card (33/192 implemented)](#card-33192-implemented)
+  - [Character (10/51 implemented)](#character-1051-implemented)
+  - [Card (34/192 implemented)](#card-34192-implemented)
 
-## Character (9/51 implemented)
+## Character (10/51 implemented)
 
 - [ ] Pyro:
-  - [ ] Bennett _<-- WIP #3_
+  - [ ] Bennett _<-- WIP #2_
   - [x] Klee
 - [ ] Hydro:
   - [x] Mona
   - [x] Rhodeia of Loch
-  - [ ] Xingqiu _<-- WIP #1_
+  - [x] Xingqiu
 - [ ] Anemo:
   - [x] Kaedehara Kazuha
 - [ ] Electro:
   - [x] Electro Hypostasis
   - [x] Keqing
-  - [ ] Yae Miko _<-- WIP #2_
+  - [ ] Yae Miko _<-- WIP #1_
 - [ ] Dendro:
   - [x] Tighnari
 - [ ] Cryo:
@@ -29,9 +29,9 @@ all I need now is to implement each card and character.
 - [ ] Geo:
   - [x] Arataki Itto
 
-## Card (33/192 implemented)
+## Card (34/192 implemented)
 
-- [ ] Equipment Card (14/103):
+- [ ] Equipment Card (15/103):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] ColdBlooded Strike
@@ -40,6 +40,7 @@ all I need now is to implement each card and character.
     - [x] Pounding Surprise
     - [x] Prophecy of Submersion
     - [x] Streaming Surge
+    - [x] The Scent Remained
     - [x] Thundering Penance
   - [ ] Weapon Card:
     - [ ] Bow:

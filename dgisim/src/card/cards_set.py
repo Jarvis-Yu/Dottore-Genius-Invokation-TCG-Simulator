@@ -15,6 +15,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     PoundingSurprise,
     ProphecyOfSubmersion,
     StreamingSurge,
+    TheScentRemained,
     ThunderingPenance,
     ## Weapons ##
     ### Bow ###

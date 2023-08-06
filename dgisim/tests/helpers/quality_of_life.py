@@ -50,7 +50,22 @@ def step_skill(
             dices=ActualDices({Element.OMNI: active_character.skill_cost(skill).num_dices()})
         )
     )
-    return step_action(game_state, pid, player_action)
+    return step_action(game_state, pid, player_action, observe=observe)
+
+def step_swap(
+        game_state: GameState,
+        pid: Pid,
+        char_id: int,
+        cost: int = 1,
+        observe: bool = False,
+) -> GameState:
+    player_action = SwapAction(
+        char_id=char_id,
+        instruction=DiceOnlyInstruction(
+            dices=ActualDices({Element.OMNI: cost})
+        )
+    )
+    return step_action(game_state, pid, player_action, observe=observe)
 
 
 def full_action_step(game_state: GameState, observe: bool = False) -> GameState:

@@ -1,4 +1,3 @@
-
 import unittest
 
 from dgisim.tests.test_characters.common_imports import *

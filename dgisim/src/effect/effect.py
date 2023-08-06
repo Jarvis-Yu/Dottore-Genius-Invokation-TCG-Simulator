@@ -77,6 +77,7 @@ __all__ = [
     "SwapCharacterEffect",
     "ForwardSwapCharacterEffect",
     "ForwardSwapCharacterCheckEffect",
+    "ApplyElementalAuraEffect",
     "SpecificDamageEffect",
     "ReferredDamageEffect",
     "EnergyRechargeEffect",
@@ -699,6 +700,82 @@ _DAMAGE_ELEMENTS: FrozenSet[Element] = frozenset({
 
 
 @dataclass(frozen=True, kw_only=True, repr=False)
+class ApplyElementalAuraEffect(DirectEffect):
+    target: StaticTarget
+    element: Element
+
+    def execute(self, game_state: GameState) -> GameState:
+        target_char = game_state.get_character_target(self.target)
+        assert target_char is not None
+        all_aura = target_char.get_elemental_aura()
+        if target_char.defeated() or self.element in all_aura:
+            return game_state
+        reaction_detail = all_aura.consult_reaction(self.element)
+        new_aura = all_aura
+        effects: list[Effect] = []
+        if reaction_detail is None:
+            new_aura = new_aura.add(self.element)
+        else:
+            new_aura = new_aura.remove(reaction_detail.first_elem)
+            if reaction_detail.reaction_type is Reaction.BLOOM:
+                effects.append(
+                    AddCombatStatusEffect(
+                        target_pid=self.target.pid.other(),
+                        status=stt.DendroCoreStatus,
+                    )
+                )
+            elif reaction_detail.reaction_type is Reaction.BURNING:
+                effects.append(
+                    AddSummonEffect(
+                        target_pid=self.target.pid.other(),
+                        summon=sm.BurningFlameSummon,
+                    )
+                )
+            elif reaction_detail.reaction_type is Reaction.CRYSTALLIZE:
+                effects.append(
+                    AddCombatStatusEffect(
+                        target_pid=self.target.pid.other(),
+                        status=stt.CrystallizeStatus,
+                    )
+                )
+            elif reaction_detail.reaction_type is Reaction.FROZEN:
+                effects.append(
+                    AddCharacterStatusEffect(
+                        target=self.target,
+                        status=stt.FrozenStatus,
+                    )
+                )
+            elif reaction_detail.reaction_type is Reaction.QUICKEN:
+                effects.append(
+                    AddCombatStatusEffect(
+                        target_pid=self.target.pid.other(),
+                        status=stt.CatalyzingFieldStatus,
+                    )
+                )
+            else:
+                assert reaction_detail.reaction_type in {
+                    Reaction.VAPORIZE,
+                    Reaction.MELT,
+                    Reaction.OVERLOADED,
+                    Reaction.SUPERCONDUCT,
+                    Reaction.ELECTRO_CHARGED,
+                    Reaction.SWIRL,
+                }, f"{reaction_detail.reaction_type} is not covered"
+
+        return game_state.factory().f_player(
+            self.target.pid,
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().f_character(
+                    cast(int, self.target.id),
+                    lambda c: c.factory().elemental_aura(new_aura).build()
+                ).build()
+            ).build()
+        ).f_effect_stack(
+            lambda efs: efs.push_many_fl(effects)
+        ).build()
+
+
+@dataclass(frozen=True, kw_only=True, repr=False)
 class SpecificDamageEffect(DirectEffect):
     source: StaticTarget
     target: StaticTarget
@@ -740,21 +817,13 @@ class SpecificDamageEffect(DirectEffect):
         # try to identify the reaction
         second_elem = damage.element
         all_aura = target_char.get_elemental_aura()
-        reaction: Optional[Reaction] = None
-        reactionDetail: Optional[ReactionDetail] = None
-        first_elem: Optional[Element] = None
-        for first_elem in all_aura:
-            reaction = Reaction.consult_reaction(first_elem, second_elem)
-            if reaction is not None:
-                break
+        reaction_detail = all_aura.consult_reaction(second_elem)
 
         # generate & update new aura
         new_aura = all_aura
-        if reaction is not None:
-            assert first_elem is not None
-            new_aura = new_aura.remove(first_elem)
-            reactionDetail = ReactionDetail(reaction, first_elem, second_elem)
-            damage = replace(damage, reaction=reactionDetail)
+        if reaction_detail is not None:
+            new_aura = new_aura.remove(reaction_detail.first_elem)
+            damage = replace(damage, reaction=reaction_detail)
         elif new_aura.aurable(second_elem):
             new_aura = new_aura.add(second_elem)
 
@@ -771,7 +840,7 @@ class SpecificDamageEffect(DirectEffect):
         game_state, damage = cls._damage_preprocess(
             game_state, damage, Preprocessables.DMG_REACTION
         )
-        return game_state, damage, reactionDetail
+        return game_state, damage, reaction_detail
 
     @classmethod
     def _damage_confirmation(
@@ -873,7 +942,7 @@ class SpecificDamageEffect(DirectEffect):
         elif reaction.reaction_type is Reaction.QUICKEN:
             effects.append(
                 AddCombatStatusEffect(
-                    target_pid=actual_damage.source.pid,
+                    target_pid=actual_damage.target.pid.other(),
                     status=stt.CatalyzingFieldStatus,
                 )
             )
@@ -881,7 +950,7 @@ class SpecificDamageEffect(DirectEffect):
         elif reaction.reaction_type is Reaction.BLOOM:
             effects.append(
                 AddCombatStatusEffect(
-                    target_pid=actual_damage.source.pid,
+                    target_pid=actual_damage.target.pid.other(),
                     status=stt.DendroCoreStatus,
                 )
             )
@@ -889,7 +958,7 @@ class SpecificDamageEffect(DirectEffect):
         elif reaction.reaction_type is Reaction.CRYSTALLIZE:
             effects.append(
                 AddCombatStatusEffect(
-                    target_pid=actual_damage.source.pid,
+                    target_pid=actual_damage.target.pid.other(),
                     status=stt.CrystallizeStatus,
                 )
             )
@@ -897,7 +966,7 @@ class SpecificDamageEffect(DirectEffect):
         elif reaction.reaction_type is Reaction.BURNING:
             effects.append(
                 AddSummonEffect(
-                    target_pid=actual_damage.source.pid,
+                    target_pid=actual_damage.target.pid.other(),
                     summon=sm.BurningFlameSummon,
                 )
             )

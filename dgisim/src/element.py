@@ -212,6 +212,9 @@ class ElementalAura:
     def elem_auras(self) -> tuple[Element, ...]:
         return tuple(iter(self))
 
+    def consult_reaction(self, incoming_elem: Element) -> None | ReactionDetail:
+        return Reaction.consult_reaction_with_aura(self, incoming_elem)
+
     def __iter__(self) -> Iterator[Element]:
         return (
             elem

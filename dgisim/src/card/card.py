@@ -119,6 +119,8 @@ __all__ = [
     "StreamingSurge",
     ## Tighnari ##
     "KeenSight",
+    ## Xingqiu ##
+    "TheScentRemained",
 ]
 
 ############################## base ##############################
@@ -611,18 +613,31 @@ class TalentEventCard(EventCard, TalentCard):
 
 class TalentEquipmentCard(EquipmentCard, TalentCard):
     _IS_SKILL: bool = True
+    _SKILL: CharacterSkill
 
     @override
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         ret_val = True
         if issubclass(cls, _CombatActionCard) and cls._IS_SKILL:
-            ret_val = (
-                ret_val
-                and _UsableFuncs.active_combat_talent_skill_card_usable(
-                    game_state, pid, cls._CHARACTER
+            if cls._SKILL in {
+                    CharacterSkill.NORMAL_ATTACK,
+                    CharacterSkill.ELEMENTAL_SKILL1,
+                    CharacterSkill.ELEMENTAL_SKILL2,
+            }:
+                ret_val = (
+                    ret_val
+                    and _UsableFuncs.active_combat_talent_skill_card_usable(
+                        game_state, pid, cls._CHARACTER
+                    )
                 )
-            )
+            elif cls._SKILL is CharacterSkill.ELEMENTAL_BURST:
+                ret_val = (
+                    ret_val
+                    and _UsableFuncs.active_combat_talent_burst_card_usable(
+                        game_state, pid, cls._CHARACTER
+                    )
+                )
         return ret_val and super()._loosely_usable(game_state, pid)
 
     @override
@@ -637,6 +652,35 @@ class TalentEquipmentCard(EquipmentCard, TalentCard):
         if issubclass(cls, _DiceOnlyChoiceProvider):
             ret_val = ret_val and isinstance(instruction, act.DiceOnlyInstruction)
         return ret_val and cls._loosely_usable(game_state, pid)
+
+
+class _TalentEquipmentSkillCard(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
+    _EQUIPMENT_STATUS: type[stt.EquipmentStatus]
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.DiceOnlyInstruction)
+        target = StaticTarget(
+            pid=pid,
+            zone=Zone.CHARACTERS,
+            id=game_state.get_player(pid).just_get_active_character().get_id(),
+        )
+        return (
+            eft.AddCharacterStatusEffect(
+                target=target,
+                status=cls._EQUIPMENT_STATUS,
+            ),
+            eft.CastSkillEffect(
+                target=target,
+                skill=cls._SKILL,
+            ),
+        )
 
 
 class WeaponEquipmentCard(EquipmentCard, _CharTargetChoiceProvider):
@@ -1490,34 +1534,11 @@ class Vanarana(LocationCard):
 #### Arataki Itto ####
 
 
-class AratakiIchiban(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
+class AratakiIchiban(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.GEO: 1, Element.ANY: 2})
     _CHARACTER = chr.AratakiItto
-
-    @override
-    @classmethod
-    def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
-    ) -> tuple[eft.Effect, ...]:
-        assert isinstance(instruction, act.DiceOnlyInstruction)
-        target = StaticTarget(
-            pid=pid,
-            zone=Zone.CHARACTERS,
-            id=game_state.get_player(pid).just_get_active_character().get_id(),
-        )
-        return (
-            eft.AddCharacterStatusEffect(
-                target=target,
-                status=stt.AratakiIchibanStatus,
-            ),
-            eft.CastSkillEffect(
-                target=target,
-                skill=CharacterSkill.NORMAL_ATTACK,
-            ),
-        )
+    _EQUIPMENT_STATUS = stt.AratakiIchibanStatus
+    _SKILL = CharacterSkill.NORMAL_ATTACK
 
 #### Electro Hypostasis ####
 
@@ -1554,66 +1575,20 @@ class AbsorbingPrism(TalentEventCard, _CombatActionCard, _DiceOnlyChoiceProvider
 #### Kaedehara Kazuha ####
 
 
-class PoeticsOfFuubutsu(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
+class PoeticsOfFuubutsu(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.ANEMO: 3})
     _CHARACTER = chr.KaedeharaKazuha
-
-    @override
-    @classmethod
-    def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
-    ) -> tuple[eft.Effect, ...]:
-        assert isinstance(instruction, act.DiceOnlyInstruction)
-        target = StaticTarget(
-            pid=pid,
-            zone=Zone.CHARACTERS,
-            id=game_state.get_player(pid).just_get_active_character().get_id(),
-        )
-        return (
-            eft.AddCharacterStatusEffect(
-                target=target,
-                status=stt.PoeticsOfFuubutsuStatus,
-            ),
-            eft.CastSkillEffect(
-                target=target,
-                skill=CharacterSkill.ELEMENTAL_SKILL1,
-            ),
-        )
+    _EQUIPMENT_STATUS = stt.PoeticsOfFuubutsuStatus
+    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
 
 #### Kaeya ####
 
 
-class ColdBloodedStrike(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
+class ColdBloodedStrike(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.CRYO: 4})
     _CHARACTER = chr.Kaeya
-
-    @override
-    @classmethod
-    def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
-    ) -> tuple[eft.Effect, ...]:
-        assert isinstance(instruction, act.DiceOnlyInstruction)
-        target = StaticTarget(
-            pid=pid,
-            zone=Zone.CHARACTERS,
-            id=game_state.get_player(pid).just_get_active_character().get_id(),
-        )
-        return (
-            eft.AddCharacterStatusEffect(
-                target=target,
-                status=stt.ColdBloodedStrikeStatus,
-            ),
-            eft.CastSkillEffect(
-                target=target,
-                skill=CharacterSkill.ELEMENTAL_SKILL1,
-            ),
-        )
+    _EQUIPMENT_STATUS = stt.ColdBloodedStrikeStatus
+    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
 
 #### Keqing ####
 
@@ -1680,159 +1655,53 @@ class LightningStiletto(TalentEventCard, _CombatActionCard, _CharTargetChoicePro
         )
 
 
-class ThunderingPenance(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
+class ThunderingPenance(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.ELECTRO: 3})
     _CHARACTER = chr.Keqing
-
-    @override
-    @classmethod
-    def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
-    ) -> tuple[eft.Effect, ...]:
-        assert isinstance(instruction, act.DiceOnlyInstruction)
-        target = StaticTarget(
-            pid=pid,
-            zone=Zone.CHARACTERS,
-            id=game_state.get_player(pid).just_get_active_character().get_id(),
-        )
-        return (
-            eft.AddCharacterStatusEffect(
-                target=target,
-                status=stt.ThunderingPenanceStatus,
-            ),
-            eft.CastSkillEffect(
-                target=target,
-                skill=CharacterSkill.ELEMENTAL_SKILL1,
-            ),
-        )
+    _EQUIPMENT_STATUS = stt.ThunderingPenanceStatus
+    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
 
 #### Klee ####
 
 
-class PoundingSurprise(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
+class PoundingSurprise(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.PYRO: 3})
     _CHARACTER = chr.Klee
-
-    @override
-    @classmethod
-    def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
-    ) -> tuple[eft.Effect, ...]:
-        assert isinstance(instruction, act.DiceOnlyInstruction)
-        target = StaticTarget(
-            pid=pid,
-            zone=Zone.CHARACTERS,
-            id=game_state.get_player(pid).just_get_active_character().get_id(),
-        )
-        return (
-            eft.AddCharacterStatusEffect(
-                target=target,
-                status=stt.PoundingSurpriseStatus,
-            ),
-            eft.CastSkillEffect(
-                target=target,
-                skill=CharacterSkill.ELEMENTAL_SKILL1,
-            ),
-        )
+    _EQUIPMENT_STATUS = stt.PoundingSurpriseStatus
+    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
 
 #### Mona ####
 
 
-class ProphecyOfSubmersion(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
+class ProphecyOfSubmersion(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.HYDRO: 3})
     _CHARACTER = chr.Mona
-
-    @override
-    @classmethod
-    def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
-    ) -> tuple[eft.Effect, ...]:
-        assert isinstance(instruction, act.DiceOnlyInstruction)
-        target = StaticTarget(
-            pid=pid,
-            zone=Zone.CHARACTERS,
-            id=game_state.get_player(pid).just_get_active_character().get_id(),
-        )
-        return (
-            eft.AddCharacterStatusEffect(
-                target=target,
-                status=stt.ProphecyOfSubmersionStatus,
-            ),
-            eft.CastSkillEffect(
-                target=target,
-                skill=CharacterSkill.ELEMENTAL_BURST,
-            ),
-        )
+    _EQUIPMENT_STATUS = stt.ProphecyOfSubmersionStatus
+    _SKILL = CharacterSkill.ELEMENTAL_BURST
 
 #### Rhodeia of Loch ####
 
 
-class StreamingSurge(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
+class StreamingSurge(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.HYDRO: 4})
     _CHARACTER = chr.RhodeiaOfLoch
-
-    @override
-    @classmethod
-    def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
-    ) -> tuple[eft.Effect, ...]:
-        assert isinstance(instruction, act.DiceOnlyInstruction)
-        target = StaticTarget(
-            pid=pid,
-            zone=Zone.CHARACTERS,
-            id=game_state.get_player(pid).just_get_active_character().get_id(),
-        )
-        return (
-            eft.AddCharacterStatusEffect(
-                target=target,
-                status=stt.StreamingSurgeStatus,
-            ),
-            eft.CastSkillEffect(
-                target=target,
-                skill=CharacterSkill.ELEMENTAL_BURST,
-            ),
-        )
+    _EQUIPMENT_STATUS = stt.StreamingSurgeStatus
+    _SKILL = CharacterSkill.ELEMENTAL_BURST
 
 #### Tighnari ####
 
 
-class KeenSight(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
+class KeenSight(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.DENDRO: 4})
     _CHARACTER = chr.Tighnari
+    _EQUIPMENT_STATUS = stt.KeenSightStatus
+    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
 
-    @override
-    @classmethod
-    def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
-    ) -> tuple[eft.Effect, ...]:
-        assert isinstance(instruction, act.DiceOnlyInstruction)
-        target = StaticTarget(
-            pid=pid,
-            zone=Zone.CHARACTERS,
-            id=game_state.get_player(pid).just_get_active_character().get_id(),
-        )
-        return (
-            eft.AddCharacterStatusEffect(
-                target=target,
-                status=stt.KeenSightStatus,
-            ),
-            eft.CastSkillEffect(
-                target=target,
-                skill=CharacterSkill.ELEMENTAL_SKILL1,
-            ),
-        )
+#### Xingqiu ####
+
+
+class TheScentRemained(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDices({Element.HYDRO: 4})
+    _CHARACTER = chr.Xingqiu
+    _EQUIPMENT_STATUS = stt.TheScentRemainedStatus
+    _SKILL = CharacterSkill.ELEMENTAL_SKILL1

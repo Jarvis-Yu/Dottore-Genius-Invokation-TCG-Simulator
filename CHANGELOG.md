@@ -8,9 +8,11 @@
 - New Characters:
   - Electro Hypostasis
   - Mona
+  - Xingqiu
 - New Cards:
   - Talent Equipment Card:
     - Prophecy of Submersion
+    - The Scent Remained
   - Artifact Card:
     - Gambler's Earrings
   - Location Card:

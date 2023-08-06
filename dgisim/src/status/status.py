@@ -133,6 +133,10 @@ __all__ = [
     ## Tighnari ##
     "KeenSightStatus",
     "VijnanaSuffusionStatus",
+    ## Xingqiu ##
+    "RainSwordStatus",
+    "RainbowBladeworkStatus",
+    "TheScentRemainedStatus",
 ]
 
 
@@ -532,7 +536,8 @@ class _UsageStatus(Status):
 
     @override
     def _update(self, other: Self) -> Optional[Self]:
-        new_usages = min(self.usages + other.usages, self.MAX_USAGES)
+        max_usages = max((self.usages, other.usages, self.MAX_USAGES))
+        new_usages = min(self.usages + other.usages, max_usages)
         return replace(other, usages=new_usages)
 
     def __str__(self) -> str:
@@ -578,7 +583,7 @@ class FixedShieldStatus(_ShieldStatus, _UsageStatus):
     MAX_USAGES: ClassVar[int] = BIG_INT
     SHIELD_AMOUNT: ClassVar[int] = 0  # shield amount per stack
 
-    def _trigerring_condition(self, damage: eft.SpecificDamageEffect) -> bool:
+    def _triggering_condition(self, damage: eft.SpecificDamageEffect) -> bool:
         return True
 
     @override
@@ -596,7 +601,7 @@ class FixedShieldStatus(_ShieldStatus, _UsageStatus):
             if dmg.damage > 0 and self.usages > 0 \
                     and dmg.element != Element.PIERCING \
                     and self._is_target(game_state, status_source, dmg) \
-                    and self._trigerring_condition(dmg):
+                    and self._triggering_condition(dmg):
                 new_dmg_amount = max(0, dmg.damage - cls.SHIELD_AMOUNT)
                 new_dmg = replace(dmg, damage=new_dmg_amount)
                 new_item = DmgPEvent(dmg=new_dmg)
@@ -1076,6 +1081,7 @@ class LeaveItToMeStatus(CombatStatus):
                     and item.event_speed is EventSpeed.COMBAT_ACTION:
                 return replace(item, event_speed=EventSpeed.FAST_ACTION), None
         return super()._preprocess(game_state, status_source, item, signal)
+
 
 @dataclass(frozen=True)
 class ReviveOnCooldown(CombatStatus):
@@ -2172,3 +2178,72 @@ class VijnanaSuffusionStatus(CharacterStatus, _UsageStatus):
 
     def __str__(self) -> str:
         return super().__str__() + f"({self.usages}{case_val(self.activated, '*', '')})"
+
+
+#### Xingqiu ####
+
+@dataclass(frozen=True, kw_only=True)
+class RainSwordStatus(CombatStatus, FixedShieldStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    SHIELD_AMOUNT: ClassVar[int] = 1
+    DAMAGE_THRESHOLD: ClassVar[int] = 3
+
+    @override
+    def _triggering_condition(self, damage: eft.SpecificDamageEffect) -> bool:
+        return damage.damage >= self.DAMAGE_THRESHOLD
+
+
+@dataclass(frozen=True, kw_only=True)
+class RainbowBladeworkStatus(CombatStatus, _UsageStatus):
+    activated: bool = False
+    usages: int = 3
+    MAX_USAGES: ClassVar[int] = 3
+    DAMAGE: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.HYDRO
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+    ))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if (
+                not isinstance(information, SkillIEvent)
+                or information.skill_type is not CharacterSkill.NORMAL_ATTACK
+                or status_source.pid is not information.source.pid
+        ):
+            return self
+
+        return replace(self, activated=True)
+
+    @override
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+            assert self.usages >= 1
+            return [
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=self.ELEMENT,
+                    damage=self.DAMAGE,
+                    damage_type=DamageType(status=True),
+                )
+            ], replace(self, usages=-1, activated=False)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class TheScentRemainedStatus(TalentEquipmentStatus):
+    pass
