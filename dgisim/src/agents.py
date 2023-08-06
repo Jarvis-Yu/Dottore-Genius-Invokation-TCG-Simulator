@@ -48,21 +48,22 @@ class LazyAgent(PlayerAgent):
 
     def choose_action(self, history: list[GameState], pid: Pid) -> PlayerAction:
         game_state = history[-1]
+        mode = game_state.get_mode()
         curr_phase = game_state.get_phase()
 
-        if isinstance(curr_phase, CardSelectPhase):
+        if isinstance(curr_phase, mode.card_select_phase):
             _, selected_cards = game_state.get_player(
                 pid
             ).get_hand_cards().pick_random_cards(self._NUM_PICKED_CARDS)
             return CardsSelectAction(selected_cards=selected_cards)
 
-        elif isinstance(curr_phase, StartingHandSelectPhase):
+        elif isinstance(curr_phase, mode.starting_hand_select_phase):
             return CharacterSelectAction(char_id=1)
 
-        elif isinstance(curr_phase, RollPhase):
+        elif isinstance(curr_phase, mode.roll_phase):
             return DicesSelectAction(selected_dices=ActualDices({}))
 
-        elif isinstance(curr_phase, ActionPhase):
+        elif isinstance(curr_phase, mode.action_phase):
             return EndRoundAction()
 
         else:  # pragma: no cover
@@ -74,7 +75,7 @@ class PuppetAgent(PlayerAgent):
     A player agent that gives the game PlayerActions passed into the object by
     the user.
 
-    This agent is meaningly used for controlled testing.
+    This agent is mainly used for controlled testing.
     """
 
     def __init__(self, actions: Optional[list[PlayerAction]] = None) -> None:
@@ -189,17 +190,18 @@ class RandomAgent(PlayerAgent):
 
     def choose_action(self, history: list[GameState], pid: Pid) -> PlayerAction:
         game_state = history[-1]
+        mode = game_state.get_mode()
         curr_phase = game_state.get_phase()
 
-        if isinstance(curr_phase, CardSelectPhase):
+        if isinstance(curr_phase, mode.card_select_phase):
             return self._card_select_phase(history, pid)
-        elif isinstance(curr_phase, StartingHandSelectPhase):
+        elif isinstance(curr_phase, mode.starting_hand_select_phase):
             return self._starting_hand_select_phase(history, pid)
-        elif isinstance(curr_phase, RollPhase):
+        elif isinstance(curr_phase, mode.roll_phase):
             return self._roll_phase(history, pid)
-        elif isinstance(curr_phase, ActionPhase):
+        elif isinstance(curr_phase, mode.action_phase):
             return self._action_phase(history, pid)
-        elif isinstance(curr_phase, EndPhase):
+        elif isinstance(curr_phase, mode.end_phase):
             return self._end_phase(history, pid)
 
         raise NotImplementedError

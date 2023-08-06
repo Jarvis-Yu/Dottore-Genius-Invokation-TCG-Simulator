@@ -54,7 +54,7 @@ You may try the CLI online on [Google Colab](https://colab.research.google.com/d
 See CLI's [README](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/cli_readme.md)
 for showcase and explanations of the CLI.
 
-## Customize Player Agents
+## Customize Player Agents _(Important For AI Or Building App)_
 
 A player agent controls all actions of a player in a game.
 
@@ -95,6 +95,16 @@ class ExampleAgent(PlayerAgent):
         else:
             raise NotImplementedError(f"actions for {curr_phase} not defined yet")
 ```
+
+The above example manually tests if there are dices for some action, which is
+straightforward but takes time to exhaust all options.
+So the `GameState` can return an `ActionGenerator` object which automatically
+provides you with all valid actions to choose from.
+More about `ActionGenerator` will be updated later.
+
+You can find more examples of implementations of `PlayerAgent` in `dgisim/src/agents.py`.
+The `RandomAgent` in `agents.py` is implemented based on `ActionGenerator` mentioned above
+to make random but valid decision.
 
 ## Features
 
