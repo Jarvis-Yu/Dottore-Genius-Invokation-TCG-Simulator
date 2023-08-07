@@ -3,6 +3,7 @@ from .card.card import Card
 from .card.cards import Cards
 from .character.character import Character
 from .character.characters import Characters
+from .character.enums import CharacterSkill
 from .effect.effect import Effect
 from .effect.effect_stack import EffectStack
 from .phase import Phase
@@ -32,6 +33,7 @@ __all__ = [
     "Card",
     "Cards",
     "Character",
+    "CharacterSkill",
     "Characters",
     "DefaultMode",
     "Dices",

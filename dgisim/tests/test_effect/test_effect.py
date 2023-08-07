@@ -11,7 +11,7 @@ from dgisim.tests.helpers.game_state_templates import *
 class TestEffect(unittest.TestCase):
     # A game state where P1 just killed the active character of P2
 
-    def testDeathCheckCheckerEffect(self):
+    def test_death_check_checker_effect(self):
         game_state = OPPO_DEATH_WAIT
         assert game_state.waiting_for() is None
         game_state = game_state.step()
@@ -26,11 +26,11 @@ class TestEffect(unittest.TestCase):
             ))
         )
 
-    def testDeathSwapPhaseStartEffect(self):
+    def test_death_swap_phase_start_effect(self):
         game_state = OPPO_DEATH_WAIT.step()
         self.assertEqual(game_state.waiting_for(), Pid.P2)
 
-    def testDeathSwapPhaseEndEffect1(self):
+    def test_death_swap_phase_end_effect1(self):
         game_state = OPPO_DEATH_WAIT.step()
         game_state = game_state.factory().f_effect_stack(
             # removes DeathSwapPhaseStartEffect which is just for information
@@ -40,7 +40,7 @@ class TestEffect(unittest.TestCase):
         self.assertEqual(game_state.get_player1().get_phase(), Act.ACTION_PHASE)
         self.assertEqual(game_state.get_player2().get_phase(), Act.PASSIVE_WAIT_PHASE)
 
-    def testDeathSwapPhaseEndEffect2(self):
+    def test_death_swap_phase_end_effect2(self):
         game_state = OPPO_DEATH_END.step()
         game_state = game_state.factory().f_effect_stack(
             # removes DeathSwapPhaseStartEffect which is just for information
@@ -50,7 +50,7 @@ class TestEffect(unittest.TestCase):
         self.assertEqual(game_state.get_player1().get_phase(), Act.ACTION_PHASE)
         self.assertEqual(game_state.get_player2().get_phase(), Act.END_PHASE)
 
-    def testRecoverHPEffect(self):
+    def test_recover_HP_effect(self):
         game_state = ACTION_TEMPLATE.factory().f_player1(
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().f_character(
@@ -84,7 +84,7 @@ class TestEffect(unittest.TestCase):
         assert c is not None
         self.assertEqual(c.get_hp(), 10)
 
-    def testEnergyRechargeEffect(self):
+    def test_energy_recharge_effect(self):
         # set up game
         game_state = ACTION_TEMPLATE.factory().f_player1(
             lambda p: p.factory().f_characters(
@@ -133,7 +133,7 @@ class TestEffect(unittest.TestCase):
         self.assertEqual(c.get_energy(), c.get_max_energy())
             
 
-    def testEnergyDrainEffect(self):
+    def test_energy_drain_effect(self):
         # create game state where char has 3 energy
         game_state = ACTION_TEMPLATE.factory().f_player1(
             lambda p: p.factory().f_characters(

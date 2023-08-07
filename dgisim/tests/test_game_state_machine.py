@@ -10,7 +10,7 @@ from dgisim.src.phase.default.end_phase import EndPhase
 from dgisim.src.phase.default.game_end_phase import GameEndPhase
 from dgisim.src.phase.default.roll_phase import RollPhase
 from dgisim.src.phase.default.starting_hand_select_phase import StartingHandSelectPhase
-from dgisim.src.state.enums import Act
+from dgisim.src.state.enums import Act, Pid
 from dgisim.src.state.game_state import GameState
 
 
@@ -67,7 +67,9 @@ class TestGameStateMachine(unittest.TestCase):
         state_machine.step_until_phase(StartingHandSelectPhase)
         state_machine.auto_step()
         state_machine.one_step()  # one player choose starting character
+        state_machine.auto_step()
         state_machine.one_step()  # other player choose starting character
+        state_machine.auto_step()
         state = state_machine.get_game_state()
         self.assertIsNotNone(state.get_player1().get_characters().get_active_character_id())
         self.assertIsNotNone(state.get_player2().get_characters().get_active_character_id())
@@ -92,12 +94,6 @@ class TestGameStateMachine(unittest.TestCase):
             LazyAgent(),
         )
         state_machine.step_until_phase(ActionPhase)
-        # cmd = ""
-        # while cmd == "":
-        #     print("===========================================")
-        #     print(state_machine.get_game_state())
-        #     state_machine.one_step()
-        #     cd = input()
         state_machine.step_until_phase(EndPhase)
         state = state_machine.get_game_state()
         self.assertIs(state.get_player1().get_phase(), Act.PASSIVE_WAIT_PHASE)
@@ -157,14 +153,33 @@ class TestGameStateMachine(unittest.TestCase):
             mode.card_select_phase()
         ).build()
 
-        import os
+        import os, sys, time
         optional_repeats = os.getenv("RNG_PLAYS")
+        optional_show_progress = os.getenv("SHOW_PROGRESS")
         repeats: int
+        show_progress: bool
         try:
-            repeats = int(optional_repeats)  # type: ignore
+            repeats = int(optional_repeats) if optional_repeats is not None else 5
+            show_progress = (
+                int(optional_show_progress) != 0
+                if optional_show_progress is not None
+                else False
+            )
         except:
             repeats = 5
+            show_progress = False
+        from collections import defaultdict
+        wins: dict[None | Pid, int] = defaultdict(int)
+        prev_progress = ""
+        times: list[float] = []
+        num_transitions = 0
         for i in range(repeats):
+            if show_progress:
+                print(end='\b' * len(prev_progress))
+                prev_progress = f"[{i}/{repeats}]"
+                print(end=prev_progress)
+                sys.stdout.flush()
+            start = time.time()
             if i % 3 == 0:
                 state_machine = GameStateMachine(
                     self._initial_state,
@@ -180,6 +195,23 @@ class TestGameStateMachine(unittest.TestCase):
             game_end_phase = state_machine.get_game_state().get_mode().game_end_phase()
             try:
                 state_machine.step_until_phase(game_end_phase)
+                end = time.time()
+                times.append(end - start)
+                num_transitions += len(state_machine.get_history())
+                wins[state_machine.get_winner()] += 1
             except Exception:
-                print(GamePrinter.dict_game_printer(state_machine.get_game_state().dict_str()))
-                raise Exception("Test failed")
+                all_state = state_machine.get_history()
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                print("! AN EXCEPTION IS THROWN WHEN EXECUTING THE GAME !")
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                for i, game_state in enumerate(all_state[-5:]):
+                    print(f"<<<{i+1}>>>")
+                    print(game_state)
+                raise Exception("Test failed because random agent triggers an excpetion")
+        if show_progress:
+            print(end='\b' * len(prev_progress))
+            sys.stdout.flush()
+        average_time_in_ms = sum(times) / len(times) * 1000
+        average_state_time_in_μs = average_time_in_ms / (num_transitions / len(times)) * 1000
+        print(end=f"[[A random game takes {round(average_time_in_ms, 1)} ms on average, "
+              + f"{round(average_state_time_in_μs)} μs per state]]")

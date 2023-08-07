@@ -94,7 +94,7 @@ class CLISession:
 
     def _welcome(self) -> None:
         print("Welcome to the Dottore Genius Invokation TCG Simulator CLI ver.")
-        print("This is currently just a basic version for debugging only.")
+        # print("This is currently just a basic version for debugging only.")
 
     def _mode_prompt(self) -> None:
         print("Please choose the cli mode:")
@@ -168,7 +168,9 @@ class CLISession:
             )
 
         tuple_list = list(tuple(item) for item in choices.items())
-        original_dict = HashableDict((i, val) for i, val in enumerate(choices.values()))
+        original_dict: HashableDict[int, int] = HashableDict(
+            (i, val) for i, val in enumerate(choices.values())
+        )
         dict_display = "  |||  ".join(
             f"@{i}: <{cls._display_choice(pair[0])}, {pair[1]}>"
             for i, pair in enumerate(tuple_list)

@@ -2,6 +2,7 @@ import unittest
 
 from dgisim.src.action.action import *
 from dgisim.src.agents import *
+from dgisim.src.character.enums import CharacterSkill
 from dgisim.src.effect.effect import *
 from dgisim.src.effect.enums import DynamicCharacterTarget
 from dgisim.src.effect.structs import DamageType
@@ -272,6 +273,37 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(p2_active_id, 1)
         p2_c2 = game_state.get_player2().get_characters().just_get_character(2)
         self.assertEqual(p2_c2.get_hp(), 7)
+
+    def test_same_skill_overload_to_just_kill_character_causes_death_swap(self):
+        """
+        Test that Keqing's burst to *(10)(Pyro) (3) (?) overloads to the second character
+        though just killed by the burst.
+
+        (This one feels like a bug in the actual Genius Invokation game, but it does happen.
+                                                                              ---- 1/8/2023)
+        """
+        base_game = oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
+        base_game = kill_character(base_game, character_id=2, hp=1)
+        base_game = base_game.factory().f_player1(
+            lambda p1: p1.factory().f_characters(
+                lambda cs: cs.factory().active_character_id(
+                    3
+                ).f_active_character(
+                    lambda ac: ac.factory().energy(ac.get_max_energy()).build()
+                ).build()
+            ).build()
+        ).build()
+        assert isinstance(base_game.get_player1().just_get_active_character(), Keqing)
+        a1, a2 = PuppetAgent(), PuppetAgent()
+        gsm = GameStateMachine(base_game, a1, a2)
+        a1.inject_action(SkillAction(
+            skill=CharacterSkill.ELEMENTAL_BURST,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 4}))
+        ))
+        gsm.player_step()
+        gsm.auto_step()
+        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_id(), 2)
 
     ############################## ElectroCharged ##############################
     def testElectroCharged(self):

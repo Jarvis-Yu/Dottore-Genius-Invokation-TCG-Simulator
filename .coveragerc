@@ -1,6 +1,7 @@
 [run]
 omit =
     dgisim/profiles/*
+    dgisim/tests/*
     dgisim/src/helper/level_print.py
     dgisim/src/cli.py
     dgisim/src/game_state_machine.py
@@ -10,9 +11,12 @@ skip_empty = True
 exclude_also =
     def __repr__
     def __str__
+    def content_str
     def dict_str
     if __name__ == .__main__.:
     if TYPE_CHECKING:
+    return \[\], self
     raise NotImplementedError
     raise Exception\(.Not Reached
+    raise Exception\([a-z]*"[nN]ot [oO]verride
     @abstractmethod

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from dgisim.src.action.action import *
 from dgisim.src.agents import *
+from dgisim.src.character.enums import CharacterSkill
 from dgisim.src.dices import ActualDices
 from dgisim.src.effect.effect import *
 from dgisim.src.effect.enums import DynamicCharacterTarget, Zone
@@ -22,6 +24,54 @@ def auto_step(game_state: GameState, observe: bool = False) -> GameState:
             gsm.one_step()
             print(GamePrinter.dict_game_printer(gsm.get_game_state().dict_str()))
             input(":> ")
+    return gsm.get_game_state()
+
+
+def step_action(
+        game_state: GameState,
+        pid: Pid,
+        player_action: PlayerAction,
+        observe: bool = False
+) -> GameState:
+    game_state = just(game_state.action_step(pid, player_action))
+    return auto_step(game_state, observe=observe)
+
+
+def step_skill(
+        game_state: GameState,
+        pid: Pid,
+        skill: CharacterSkill,
+        observe: bool = False,
+) -> GameState:
+    active_character = game_state.get_player(pid).just_get_active_character()
+    player_action = SkillAction(
+        skill=skill,
+        instruction=DiceOnlyInstruction(
+            dices=ActualDices({Element.OMNI: active_character.skill_cost(skill).num_dices()})
+        )
+    )
+    return step_action(game_state, pid, player_action, observe=observe)
+
+def step_swap(
+        game_state: GameState,
+        pid: Pid,
+        char_id: int,
+        cost: int = 1,
+        observe: bool = False,
+) -> GameState:
+    player_action = SwapAction(
+        char_id=char_id,
+        instruction=DiceOnlyInstruction(
+            dices=ActualDices({Element.OMNI: cost})
+        )
+    )
+    return step_action(game_state, pid, player_action, observe=observe)
+
+
+def full_action_step(game_state: GameState, observe: bool = False) -> GameState:
+    gsm = GameStateMachine(game_state, PuppetAgent(), PuppetAgent())
+    gsm.player_step(observe=observe)
+    gsm.auto_step(observe=observe)
     return gsm.get_game_state()
 
 
@@ -51,6 +101,7 @@ def oppo_aura_elem(game_state: GameState, elem: Element, char_id: None | int = N
             ).build()
         ).build()
 
+
 def remove_aura(game_state: GameState, pid: Pid = Pid.P2, char_id: None | int = None) -> GameState:
     return game_state.factory().f_player(
         pid,
@@ -62,12 +113,14 @@ def remove_aura(game_state: GameState, pid: Pid = Pid.P2, char_id: None | int = 
         ).build()
     ).build()
 
+
 def add_damage_effect(
         game_state: GameState,
         damage: int,
         elem: Element,
         pid: Pid = Pid.P2,
         char_id: None | int = None,
+        damage_type: None | DamageType = None,
 ) -> GameState:
     """
     Adds ReferredDamageEffect to Player2's active character with `damage` and `elem` from Player1's
@@ -84,8 +137,10 @@ def add_damage_effect(
                 target=DynamicCharacterTarget.OPPO_ACTIVE,
                 element=elem,
                 damage=damage,
-                damage_type=DamageType(),
+                damage_type=case_val(damage_type is None, DamageType(),
+                                     damage_type),  # type: ignore
             ),
+            AliveMarkCheckerEffect(),
             DeathCheckCheckerEffect(),
         ))
     ).build()
@@ -105,7 +160,7 @@ def kill_character(
         lambda p: p.factory().f_characters(
             lambda cs: cs.factory().f_character(
                 character_id,
-                lambda c: c.factory().hp(hp).build()
+                lambda c: c.factory().hp(hp).alive(hp > 0).build()
             ).build()
         ).build()
     ).build()
@@ -118,6 +173,7 @@ def set_active_player_id(game_state: GameState, pid: Pid, character_id: int) -> 
             lambda cs: cs.factory().active_character_id(character_id).build()
         ).build()
     ).build()
+
 
 def fill_dices_with_omni(game_state: GameState) -> GameState:
     return game_state.factory().f_player1(

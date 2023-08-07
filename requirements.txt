@@ -3,5 +3,5 @@ coverage==7.2.7
 mypy==1.3.0
 setuptools==67.3.2
 snakeviz==2.2.0
-typing-extensions==4.5.0
+typing-extensions==4.7.1
 twine==4.0.2

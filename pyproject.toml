@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dgisim"
-version = "0.2.dev2"
+version = "0.3.dev0"
 license = {file = "LICENSE"}
 
 description = "A highly customizable Genius Invokation TCG Simulator for AI training"
@@ -30,7 +30,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "typing-extensions == 4.5.0",
+    "typing-extensions == 4.7.1",
 ]
 
 [project.urls]

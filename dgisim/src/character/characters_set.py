@@ -7,10 +7,16 @@ __all__ = [
 ]
 
 _DEFAULT_CHARACTERS: list[type[Character]] = [
+    AratakiItto,
+    ElectroHypostasis,
+    KaedeharaKazuha,
     Keqing,
     Kaeya,
+    Klee,
+    Mona,
     RhodeiaOfLoch,
     Tighnari,
+    Xingqiu,
 ]
 
 _DEFAULT_CHARACTER_FSET = None

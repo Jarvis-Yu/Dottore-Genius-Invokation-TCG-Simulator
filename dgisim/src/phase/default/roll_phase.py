@@ -3,12 +3,15 @@ from typing import TYPE_CHECKING
 
 from .. import phase as ph
 
+from ...event import RollChancePEvent
 from ...action.action import DicesSelectAction, EndRoundAction, PlayerAction
 from ...action.action_generator import ActionGenerator
 from ...action.enums import ActionType
 from ...dices import ActualDices
 from ...helper.quality_of_life import just
 from ...state.enums import Act, Pid
+from ...status.status_processing import StatusProcessing
+from ...status.enums import Preprocessables
 
 if TYPE_CHECKING:
     from ...action.types import DecidedChoiceType, GivenChoiceType
@@ -23,17 +26,27 @@ class RollPhase(ph.Phase):
     _NUM_DICES = 8
 
     def _get_all_dices_and_activate(self, game_state: GameState) -> GameState:
-        from ...element import Element
+        base_roll_chances = game_state.get_mode().dice_reroll_chances()
+        game_state, p1_chances = StatusProcessing.preprocess_by_all_statuses(
+            game_state, Pid.P1, Preprocessables.ROLL_CHANCES,
+            RollChancePEvent(pid=Pid.P1, chances=base_roll_chances)
+        )
+        assert isinstance(p1_chances, RollChancePEvent)
+        game_state, p2_chances = StatusProcessing.preprocess_by_all_statuses(
+            game_state, Pid.P2, Preprocessables.ROLL_CHANCES,
+            RollChancePEvent(pid=Pid.P2, chances=base_roll_chances)
+        )
+        assert isinstance(p2_chances, RollChancePEvent)
         return game_state.factory().f_player1(
             lambda p1: p1.factory()
             .phase(Act.ACTION_PHASE)
-            .dice_reroll_chances(game_state.get_mode().dice_reroll_chances())
+            .dice_reroll_chances(p1_chances.chances)  # type: ignore
             .dices(ActualDices.from_random(RollPhase._NUM_DICES))
             .build()
         ).f_player2(
             lambda p2: p2.factory()
             .phase(Act.ACTION_PHASE)
-            .dice_reroll_chances(game_state.get_mode().dice_reroll_chances())
+            .dice_reroll_chances(p2_chances.chances)  # type: ignore
             .dices(ActualDices.from_random(RollPhase._NUM_DICES))
             .build()
         ).build()
@@ -64,6 +77,9 @@ class RollPhase(ph.Phase):
             pid: Pid,
             action: DicesSelectAction
     ) -> None | GameState:
+        if action.selected_dices.is_empty():
+            return self._handle_end_round(game_state, pid)
+
         player = game_state.get_player(pid)
         dices = player.get_dices()
         kept_dices = dices - action.selected_dices
@@ -89,7 +105,6 @@ class RollPhase(ph.Phase):
             self,
             game_state: GameState,
             pid: Pid,
-            action: EndRoundAction
     ) -> None | GameState:
         return game_state.factory().f_player(
             pid,
@@ -107,14 +122,12 @@ class RollPhase(ph.Phase):
     ) -> None | GameState:
         if isinstance(action, DicesSelectAction):
             return self._handle_dices_selection(game_state, pid, action)
-        elif isinstance(action, EndRoundAction):
-            return self._handle_end_round(game_state, pid, action)
         else:
             raise ValueError(f"Unknown action {action} provided for game state:\n{game_state}")
 
     @classmethod
     def _choices_helper(cls, action_generator: ActionGenerator) -> GivenChoiceType:
-        return (ActionType.SELECT_DICES, ActionType.END_ROUND)
+        return (ActionType.SELECT_DICES, )
 
     @classmethod
     def _fill_helper(
@@ -128,8 +141,6 @@ class RollPhase(ph.Phase):
         if player_choice is ActionType.SELECT_DICES:
             from ...action.action_generator_generator import DicesSelectionActGenGenerator
             return just(DicesSelectionActGenGenerator.action_generator(game_state, pid))
-        elif player_choice is ActionType.END_ROUND:
-            return ActionGenerator(game_state=game_state, pid=pid, action=EndRoundAction())
         else:  # pragma: no cover
             action_type_name = ActionType.__name__
             if isinstance(player_choice, ActionType):

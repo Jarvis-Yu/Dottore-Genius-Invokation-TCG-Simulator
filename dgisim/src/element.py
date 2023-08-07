@@ -31,6 +31,9 @@ class Element(Enum):
     PIERCING = 9
     ANY = 10
 
+    def __repr__(self) -> str:
+        return self.name
+
 
 AURA_ELEMENTS_ORDERED: tuple[Element, ...] = (
     Element.PYRO,
@@ -123,6 +126,16 @@ class Reaction(Enum):
                 return reaction
         return None
 
+    @classmethod
+    def consult_reaction_with_aura(
+            cls, aura: ElementalAura, second: Element
+    ) -> None | ReactionDetail:
+        for elem in aura:
+            reaction = cls.consult_reaction(elem, second)
+            if reaction is not None:
+                return ReactionDetail(reaction, elem, second)
+        return None
+
     def damage_boost(self) -> int:
         return self.value.damage_boost
 
@@ -132,6 +145,9 @@ class ReactionDetail:
     reaction_type: Reaction
     first_elem: Element
     second_elem: Element
+
+    def elem_reaction(self, elem: Element) -> bool:
+        return self.first_elem is elem or self.second_elem is elem
 
     def __post_init__(self):
         if Reaction.consult_reaction(self.first_elem, self.second_elem) != self.reaction_type:
@@ -187,11 +203,17 @@ class ElementalAura:
         assert elem in AURA_ELEMENTS
         return self._aura[elem]
 
+    def __contains__(self, elem: Element) -> bool:
+        return self.contains(elem)
+
     def has_aura(self) -> bool:
         return any(self._aura.values())
 
     def elem_auras(self) -> tuple[Element, ...]:
         return tuple(iter(self))
+
+    def consult_reaction(self, incoming_elem: Element) -> None | ReactionDetail:
+        return Reaction.consult_reaction_with_aura(self, incoming_elem)
 
     def __iter__(self) -> Iterator[Element]:
         return (

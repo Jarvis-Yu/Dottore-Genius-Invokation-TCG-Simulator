@@ -8,6 +8,7 @@ from ..helper.quality_of_life import just
 
 __all__ = [
     "Statuses",
+    "EquipmentStatuses",
 ]
 
 _U = TypeVar('_U')
@@ -17,6 +18,7 @@ class Statuses:
     """
     A container for easy statuses managing.
     """
+
     def __init__(self, statuses: tuple[stt.Status, ...]):
         self._statuses = statuses
 
@@ -72,7 +74,7 @@ class Statuses:
         return iter(self._statuses)
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Statuses):
+        if not isinstance(other, Statuses):  # pragma: no cover
             return False
         return self is other or self._statuses == other._statuses
 
@@ -90,12 +92,35 @@ class Statuses:
 
 
 class EquipmentStatuses(Statuses):
-    pass
+    _CATEGORIES = (stt.TalentEquipmentStatus, stt.WeaponEquipmentStatus,
+                   stt.ArtifactEquipmentStatus)
 
-
-class OrderedStatuses(Statuses):
-    pass
-
-
-class TalentStatuses(Statuses):
-    pass
+    def update_status(self, incoming_status: stt.Status, override: bool = False) -> Self:
+        """
+        Replaces existing status of the same type with the new_status,
+        or append the new_status to the end of current statuses
+        """
+        cls = type(self)
+        statuses = list(self._statuses)
+        for i, status in enumerate(statuses):
+            if not any(
+                isinstance(incoming_status, category) and isinstance(status, category)
+                for category in self._CATEGORIES
+            ):
+                continue
+            if type(status) is not type(incoming_status):
+                return self.remove(type(status)).update_status(incoming_status)
+            new_status: Optional[stt.Status]
+            if override:
+                new_status = incoming_status
+            else:
+                assert type(status) is type(incoming_status)
+                new_status = status.update(incoming_status)  # type: ignore
+            if status == new_status:
+                return self
+            if new_status is None:  # pragma: no cover
+                return self.remove(type(status))
+            statuses[i] = new_status
+            return cls(tuple(statuses))
+        statuses.append(incoming_status)
+        return cls(tuple(statuses))

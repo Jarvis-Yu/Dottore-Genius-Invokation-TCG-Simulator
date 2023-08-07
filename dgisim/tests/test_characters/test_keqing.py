@@ -150,17 +150,7 @@ class TestKeqing(unittest.TestCase):
         )
 
         # test ElectroInfusion disappear when two round ends
-        gsm = GameStateMachine(game_state_infused, a1, a2)
-        a1.inject_actions([
-            EndRoundAction(),
-            EndRoundAction(),
-            EndRoundAction(),
-        ])
-        a2.inject_actions([
-            EndRoundAction(),
-            EndRoundAction(),
-            EndRoundAction(),
-        ])
+        gsm = GameStateMachine(game_state_infused, LazyAgent(), LazyAgent())
         # initially
         p1ac = gsm.get_game_state().get_player1().just_get_active_character()
         self.assertEqual(
@@ -177,8 +167,6 @@ class TestKeqing(unittest.TestCase):
         )
         # next round
         gsm.step_until_phase(game_state.get_mode().roll_phase())
-        a1.inject_action(EndRoundAction()) # skip roll phase
-        a2.inject_action(EndRoundAction())
         gsm.step_until_phase(game_state.get_mode().action_phase())
         p1ac = gsm.get_game_state().get_player1().just_get_active_character()
         self.assertFalse(p1ac.get_character_statuses().contains(KeqingElectroInfusionStatus))

@@ -73,7 +73,7 @@ class CardActGenGenerator(ABC):
             game_state: GameState,
             pid: Pid,
     ) -> None | ActionGenerator:
-        if not game_state.card_checker().playable(pid):
+        if not game_state.card_checker().playable(pid):  # pragma: no cover
             return None
         return ActionGenerator(
             game_state=game_state,
@@ -102,7 +102,7 @@ class CardsSelectionActGenGenerator(ABC):
             return tuple(
                 card
                 for card in mode.all_cards()
-                if publicly_used_cards[card] < mode.max_cards_per_kind()
+                if publicly_used_cards[card] < mode.deck_card_limit_per_kind()
             )
         return hand_cards
 
@@ -245,7 +245,7 @@ class ElemTuningActGenGenerator(ABC):
             game_state: GameState,
             pid: Pid,
     ) -> None | ActionGenerator:
-        if not game_state.elem_tuning_checker().usable(pid):
+        if not game_state.elem_tuning_checker().usable(pid):  # pragma: no cover
             return None
 
         return ActionGenerator(

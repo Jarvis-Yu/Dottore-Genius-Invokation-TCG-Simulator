@@ -79,17 +79,6 @@ class EndPhase(ph.Phase):
             ).build()
         ).build()
 
-    def _end_both_players(self, game_state: GameState) -> GameState:
-        return game_state.factory().f_player1(
-            lambda p: p.factory().phase(
-                Act.END_PHASE
-            ).build()
-        ).f_player2(
-            lambda p: p.factory().phase(
-                Act.END_PHASE
-            ).build()
-        ).build()
-
     def _end_game(self, game_state: GameState) -> GameState:
         return game_state.factory().phase(
             game_state.get_mode().game_end_phase()
@@ -99,7 +88,7 @@ class EndPhase(ph.Phase):
         effect_stack, effect = game_state.get_effect_stack().pop()
         new_game_state = game_state.factory().effect_stack(effect_stack).build()
         if isinstance(effect, DeathSwapPhaseStartEffect):
-            print("AFTER DEATH:", new_game_state)
+            raise Exception("Not Reached!")
         return effect.execute(new_game_state)
 
     def _is_executing_effects(self, game_state: GameState) -> bool:
@@ -126,7 +115,7 @@ class EndPhase(ph.Phase):
                 return self._end_game(game_state)
             else:
                 return self._to_roll_phase(game_state, new_round)
-        raise Exception("Unknown Game State to process")
+        raise Exception("Unknown Game State to process")  # pragma: no cover
 
     def _handle_death_swap_action(
             self,
@@ -171,7 +160,7 @@ class EndPhase(ph.Phase):
             return None
 
     def action_generator(self, game_state: GameState, pid: Pid) -> ActionGenerator | None:
-        if pid is not self.waiting_for(game_state):
+        if pid is not self.waiting_for(game_state):  # pragma: no cover
             return None
         assert game_state.death_swapping(pid)
         from ...action.action_generator_generator import SwapActGenGenerator

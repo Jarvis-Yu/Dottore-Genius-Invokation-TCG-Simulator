@@ -105,7 +105,7 @@ class GamePrinter:
     @staticmethod
     def _insert_character(name: str, character: dict) -> StrDrawer:
         board = StrDrawer()
-        board.insert_at(0, 0, f"<{name}>")
+        board.insert_at(0, 0, f"<{name}{'[x]' if not character['Alive'] else ''}>")
         GamePrinter._insert_lines(board, 2, character, [
             # "id",
             "Aura",
@@ -114,7 +114,7 @@ class GamePrinter:
         board.insert_at_nextline(2, f"<Energy: {character['Energy']}/{character['Max Energy']}>")
         board.insert_board_at_nextline(
             2,
-            GamePrinter._insert_str_list("Talents", character["Talents"])
+            GamePrinter._insert_str_list("Hiddens", character["Hiddens"])
         )
         board.insert_board_at_nextline(
             2,
@@ -162,11 +162,12 @@ class GamePrinter:
         board = StrDrawer()
         board.insert_at(0, 0, f"<Player: {name}>")
         board.insert_at_nextline(0, GamePrinter._pair(player, "Phase"))
-        board.insert_at_nextline(0, GamePrinter._pair(player, "Card Redraw Chances"))
+        board.insert_at_nextline(0, GamePrinter._pair(player, "Card/Dice Redraw Chances"))
         board.insert_board_at_nextline(
             0,
             GamePrinter._insert_characters(player["Characters"]),
         )
+        board.insert_at_nextline(0, GamePrinter._pair(player, "Hidden Statuses"))
         board.insert_at_nextline(0, GamePrinter._pair(player, "Combat Statuses"))
         board.insert_board_at_nextline(
             0,

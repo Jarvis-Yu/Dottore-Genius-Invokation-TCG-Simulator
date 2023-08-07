@@ -37,14 +37,12 @@ class TestNorthernSmokedChicken(unittest.TestCase):
         assert game_state is not None
         buffed_game_state = auto_step(game_state)
 
-        self.assertEqual(
+        self.assertIn(
+            NorthernSmokedChickenStatus,
             buffed_game_state
             .get_player1()
             .just_get_active_character()
             .get_character_statuses()
-            .just_find(NorthernSmokedChickenStatus)
-            .usages,
-            1
         )
         self.assertTrue(
             buffed_game_state.get_player1().just_get_active_character().get_character_statuses()

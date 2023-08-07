@@ -2,6 +2,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
+from typing_extensions import override
+
 from .dices import AbstractDices
 from .element import *
 from .event import *
@@ -10,7 +12,9 @@ from .helper.level_print import level_print_single
 if TYPE_CHECKING:
     from .card.card import Card
     from .character.character import Character
+    from .deck import Deck
     from .phase.phase import Phase
+    from .status.statuses import Statuses
 
 __all__ = [
     "Mode",
@@ -29,6 +33,10 @@ class Mode(ABC):
     """
 
     _CARD_REDRAW_CHANCES = 1
+    _DECK_CARDS_REQUIREMENT = 30
+    _DECK_CARD_LIMIT_PER_KIND = 2
+    _DECK_CHARS_REQUIREMENT = 3
+    _DECK_CHAR_LIMIT_PER_KIND = 1
     _DICE_REROLL_CHANCES = 1
     _HAND_CARD_LIMIT = 10
     _MAX_CARDS_PER_KIND = 2
@@ -41,6 +49,42 @@ class Mode(ABC):
     def card_redraw_chances(self) -> int:
         return self._CARD_REDRAW_CHANCES
 
+    def deck_cards_requirement(self) -> int:
+        return self._DECK_CARDS_REQUIREMENT
+
+    def deck_card_limit_per_kind(self) -> int:
+        return self._DECK_CARD_LIMIT_PER_KIND
+
+    def deck_chars_requirement(self) -> int:
+        return self._DECK_CHARS_REQUIREMENT
+
+    def deck_char_limit_per_kind(self) -> int:
+        return self._DECK_CHAR_LIMIT_PER_KIND
+
+    def partially_valid_deck(self, deck: Deck) -> bool:
+        from collections import Counter
+        return (
+            len(deck.chars) <= self.deck_chars_requirement()
+            and sum(deck.cards.values()) <= self.deck_cards_requirement()
+            and Counter(deck.chars).most_common(1)[0][1] <= self.deck_char_limit_per_kind()
+            and max(deck.cards.values()) <= self.deck_card_limit_per_kind()
+            and all(char in self.all_chars() for char in deck.chars)
+            and all(card in self.all_cards() for card in deck.cards)
+            and all(card.valid_in_deck(deck) for card in deck.cards)
+        )
+
+    def valid_deck(self, deck: Deck) -> bool:
+        from collections import Counter
+        return (
+            len(deck.chars) == self.deck_chars_requirement()
+            and sum(deck.cards.values()) == self.deck_cards_requirement()
+            and Counter(deck.chars).most_common(1)[0][1] <= self.deck_char_limit_per_kind()
+            and max(deck.cards.values()) <= self.deck_card_limit_per_kind()
+            and all(char in self.all_chars() for char in deck.chars)
+            and all(card in self.all_cards() for card in deck.cards)
+            and all(card.valid_in_deck(deck) for card in deck.cards)
+        )
+
     def dice_reroll_chances(self) -> int:
         return self._DICE_REROLL_CHANCES
 
@@ -49,9 +93,6 @@ class Mode(ABC):
 
     def hand_card_limit(self) -> int:
         return self._HAND_CARD_LIMIT
-
-    def max_cards_per_kind(self) -> int:
-        return self._MAX_CARDS_PER_KIND
 
     def summons_limit(self) -> int:
         return self._SUMMONS_LIMIT
@@ -65,6 +106,11 @@ class Mode(ABC):
     def swap_speed(self) -> EventSpeed:
         return self._SWAP_SPEED
 
+    def player_default_hidden_statuses(self) -> Statuses:
+        from .status.statuses import Statuses
+        from .status.status import PlungeAttackStatus, DeathThisRoundStatus
+        return Statuses((PlungeAttackStatus(), DeathThisRoundStatus()))
+
     @abstractmethod
     def all_cards(self) -> frozenset[type[Card]]:
         pass
@@ -73,28 +119,39 @@ class Mode(ABC):
     def all_chars(self) -> frozenset[type[Character]]:
         pass
 
+    @property
     @abstractmethod
-    def card_select_phase(self) -> Phase:
+    def first_phase(self) -> type[Phase]:
         pass
 
+    @property
     @abstractmethod
-    def starting_hand_select_phase(self) -> Phase:
+    def card_select_phase(self) -> type[Phase]:
         pass
 
+    @property
     @abstractmethod
-    def roll_phase(self) -> Phase:
+    def starting_hand_select_phase(self) -> type[Phase]:
         pass
 
+    @property
     @abstractmethod
-    def action_phase(self) -> Phase:
+    def roll_phase(self) -> type[Phase]:
         pass
 
+    @property
     @abstractmethod
-    def end_phase(self) -> Phase:
+    def action_phase(self) -> type[Phase]:
         pass
 
+    @property
     @abstractmethod
-    def game_end_phase(self) -> Phase:
+    def end_phase(self) -> type[Phase]:
+        pass
+
+    @property
+    @abstractmethod
+    def game_end_phase(self) -> type[Phase]:
         pass
 
     def __eq__(self, other: object) -> bool:
@@ -120,33 +177,45 @@ class DefaultMode(Mode):
         from .character.characters_set import default_characters
         return default_characters()
 
-    # Initial phase of this mode
-    def card_select_phase(self) -> Phase:
+    @property
+    def first_phase(self) -> type[Phase]:
+        return self.card_select_phase
+
+    @property
+    def card_select_phase(self) -> type[Phase]:
         from .phase.default.card_select_phase import CardSelectPhase
-        return CardSelectPhase()
+        return CardSelectPhase
 
-    def starting_hand_select_phase(self) -> Phase:
+    @property
+    def starting_hand_select_phase(self) -> type[Phase]:
         from .phase.default.starting_hand_select_phase import StartingHandSelectPhase
-        return StartingHandSelectPhase()
+        return StartingHandSelectPhase
 
-    def roll_phase(self) -> Phase:
+    @property
+    def roll_phase(self) -> type[Phase]:
         from .phase.default.roll_phase import RollPhase
-        return RollPhase()
+        return RollPhase
 
-    def action_phase(self) -> Phase:
+    @property
+    def action_phase(self) -> type[Phase]:
         from .phase.default.action_phase import ActionPhase
-        return ActionPhase()
+        return ActionPhase
 
-    def end_phase(self) -> Phase:
+    @property
+    def end_phase(self) -> type[Phase]:
         from .phase.default.end_phase import EndPhase
-        return EndPhase()
+        return EndPhase
 
-    def game_end_phase(self) -> Phase:
+    @property
+    def game_end_phase(self) -> type[Phase]:
         from .phase.default.game_end_phase import GameEndPhase
-        return GameEndPhase()
+        return GameEndPhase
 
 
 class AllOmniMode(DefaultMode):
-    def roll_phase(self) -> Phase:
+    _DICE_REROLL_CHANCES = 0
+
+    @property
+    def roll_phase(self) -> type[Phase]:
         from .phase.all_omni.roll_phase import RollPhase
-        return RollPhase()
+        return RollPhase

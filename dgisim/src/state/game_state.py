@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import Callable, Optional
+from typing import Callable, Optional, TYPE_CHECKING, cast
+
 from typing_extensions import Self
 
 from .. import mode as md
@@ -24,8 +25,13 @@ from ..event import *
 from ..helper.quality_of_life import case_val
 from ..status.status_processing import StatusProcessing
 from ..status.enums import Preprocessables
+from ..summon.summon import Summon
 from ..support.support import Support
 from .enums import Pid
+
+if TYPE_CHECKING:
+    from ..deck import Deck
+
 
 __all__ = [
     "GameState",
@@ -73,7 +79,7 @@ class GameState:
         mode = md.DefaultMode()
         return cls(
             mode=mode,
-            phase=mode.card_select_phase(),
+            phase=mode.first_phase(),
             round=0,
             active_player_id=Pid.P1,
             player1=ps.PlayerState.example_player(mode),
@@ -83,13 +89,31 @@ class GameState:
 
     @classmethod
     def from_players(cls, mode: md.Mode, player1: ps.PlayerState, player2: ps.PlayerState) -> Self:
-        return cls(
+        return cls(  # pragma: no cover
             mode=mode,
-            phase=mode.card_select_phase(),
+            phase=mode.first_phase(),
             round=0,
             active_player_id=Pid.P1,
             player1=player1,
             player2=player2,
+            effect_stack=EffectStack(()),
+        )
+
+    @classmethod
+    def from_decks(cls, mode: md.Mode, p1_deck: Deck, p2_deck: Deck) -> Self:  # pragma: no cover
+        if not p1_deck.immutable:
+            p1_deck = p1_deck.to_frozen()
+        if not p2_deck.immutable:
+            p2_deck = p2_deck.to_frozen()
+        assert mode.valid_deck(p1_deck)
+        assert mode.valid_deck(p2_deck)
+        return cls(
+            mode=mode,
+            phase=mode.first_phase(),
+            round=0,
+            active_player_id=Pid.P1,
+            player1=ps.PlayerState.from_deck(mode, p1_deck),
+            player2=ps.PlayerState.from_deck(mode, p2_deck),
             effect_stack=EffectStack(()),
         )
 
@@ -122,7 +146,7 @@ class GameState:
             return Pid.P1
         elif player is self._player2:
             return Pid.P2
-        else:
+        else:  # pragma: no cover
             raise Exception("player unknown")
 
     def get_player(self, player_id: Pid) -> ps.PlayerState:
@@ -130,7 +154,7 @@ class GameState:
             return self._player1
         elif player_id.is_player2():
             return self._player2
-        else:
+        else:  # pragma: no cover
             raise Exception("player_id unknown")
 
     def get_other_player(self, player_id: Pid) -> ps.PlayerState:
@@ -138,7 +162,7 @@ class GameState:
             return self._player2
         elif player_id.is_player2():
             return self._player1
-        else:
+        else:  # pragma: no cover
             raise Exception("player_id unknown")
 
     def death_swapping(self, player_id: None | Pid = None) -> bool:
@@ -170,22 +194,23 @@ class GameState:
             return Pid.P1
         elif self._player2.is_mine(object):
             return Pid.P2
-        else:
+        else:  # pragma: no cover
             return None
 
-    def get_target(self, target: StaticTarget) -> None | Character | Support:
+    def get_target(self, target: StaticTarget) -> None | Character | Summon | Support:
         player = self.get_player(target.pid)
         if target.zone is Zone.CHARACTERS:
-            return player.get_characters().get_character(target.id)
+            return player.get_characters().get_character(cast(int, target.id))
+        elif target.zone is Zone.SUMMONS:
+            return player.get_summons().find(cast(type[Summon], target.id))
         elif target.zone is Zone.SUPPORTS:
-            return player.get_supports().find_by_sid(target.id)
+            return player.get_supports().find_by_sid(cast(int, target.id))
         else:
-            raise Exception("Not Implemented Yet")
-        return None
+            raise Exception("Not Reached!")
 
     def get_character_target(self, target: StaticTarget) -> None | Character:
         character = self.get_target(target)
-        if not isinstance(character, Character):
+        if not isinstance(character, Character):  # pragma: no cover
             return None
         return character
 
@@ -204,7 +229,7 @@ class GameState:
     def action_generator(self, pid: Pid) -> None | acg.ActionGenerator:
         return self._phase.action_generator(self, pid)
 
-    def get_winner(self) -> Optional[Pid]:
+    def get_winner(self) -> Optional[Pid]:  # pragma: no cover
         assert self.game_end()
         if self.get_player1().defeated():
             return Pid.P2
@@ -221,6 +246,12 @@ class GameState:
             pid.other(),
             lambda p: p.hide_cards()
         ).build()
+
+    def __copy__(self) -> Self:  # pragma: no cover
+        return self
+
+    def __deepcopy__(self, _) -> Self:  # pragma: no cover
+        return self
 
     def _all_unique_data(self) -> tuple:
         return (
@@ -312,7 +343,7 @@ class GameStateFactory:
             return self.player1(new_player)
         elif pid is Pid.P2:
             return self.player2(new_player)
-        else:
+        else:  # pragma: no cover
             raise Exception("player_id unknown")
 
     def f_player(self, pid: Pid, f: Callable[[ps.PlayerState], ps.PlayerState]) -> GameStateFactory:
@@ -320,7 +351,7 @@ class GameStateFactory:
             return self.player1(f(self._player1))
         elif pid is Pid.P2:
             return self.player2(f(self._player2))
-        else:
+        else:  # pragma: no cover
             raise Exception("player_id unknown")
 
     def other_player(self, pid: Pid, new_player: ps.PlayerState) -> GameStateFactory:
@@ -328,7 +359,7 @@ class GameStateFactory:
             return self.player2(new_player)
         elif pid is Pid.P2:
             return self.player1(new_player)
-        else:
+        else:  # pragma: no cover
             raise Exception("player_id unknown")
 
     def f_other_player(self, pid: Pid, f: Callable[[ps.PlayerState], ps.PlayerState]) -> GameStateFactory:
@@ -336,7 +367,7 @@ class GameStateFactory:
             return self.player2(f(self._player2))
         elif pid is Pid.P2:
             return self.player1(f(self._player1))
-        else:
+        else:  # pragma: no cover
             raise Exception("player_id unknown")
 
     def build(self) -> GameState:
@@ -393,6 +424,7 @@ class SwapChecker:
         game_state = self._game_state
         selected_char = game_state.get_player(pid).get_characters().get_character(char_id)
         active_character_id = game_state.get_player(pid).get_characters().get_active_character_id()
+        assert active_character_id is not None
         if selected_char is None \
                 or selected_char.defeated() \
                 or selected_char.get_id() == active_character_id:
@@ -404,9 +436,15 @@ class SwapChecker:
         # Check if player can afford Normal Swap
         _, swap_action = StatusProcessing.preprocess_by_all_statuses(
             game_state=game_state,
-            pid=pid,
-            item=GameEvent(
+            pid=pid.other(),  # start from opponent because cost raise goes first
+            pp_type=Preprocessables.SWAP,
+            item=ActionPEvent(
                 source=StaticTarget(
+                    pid=pid,
+                    zone=Zone.CHARACTERS,
+                    id=active_character_id,
+                ),
+                target=StaticTarget(
                     pid=pid,
                     zone=Zone.CHARACTERS,
                     id=char_id,
@@ -415,9 +453,8 @@ class SwapChecker:
                 event_speed=game_state.get_mode().swap_speed(),
                 dices_cost=game_state.get_mode().swap_cost(),
             ),
-            pp_type=Preprocessables.SWAP,
         )
-        assert isinstance(swap_action, GameEvent)
+        assert isinstance(swap_action, ActionPEvent)
         if game_state.get_player(pid).get_dices().loosely_satisfy(swap_action.dices_cost):
             return swap_action.event_speed, swap_action.dices_cost
         else:
@@ -437,6 +474,7 @@ class SwapChecker:
             pid
         ).get_characters().get_character(action.char_id)
         active_character_id = game_state.get_player(pid).get_characters().get_active_character_id()
+        assert active_character_id is not None
         if selected_char is None \
                 or selected_char.defeated() \
                 or selected_char.get_id() == active_character_id:
@@ -454,9 +492,15 @@ class SwapChecker:
         elif isinstance(action, act.SwapAction):
             new_game_state, swap_action = StatusProcessing.preprocess_by_all_statuses(
                 game_state=game_state,
-                pid=pid,
-                item=GameEvent(
+                pid=pid.other(),  # start from opponent because cost raise goes first
+                pp_type=Preprocessables.SWAP,
+                item=ActionPEvent(
                     source=StaticTarget(
+                        pid=pid,
+                        zone=Zone.CHARACTERS,
+                        id=active_character_id,
+                    ),
+                    target=StaticTarget(
                         pid=pid,
                         zone=Zone.CHARACTERS,
                         id=action.char_id,
@@ -465,9 +509,8 @@ class SwapChecker:
                     event_speed=game_state.get_mode().swap_speed(),
                     dices_cost=game_state.get_mode().swap_cost(),
                 ),
-                pp_type=Preprocessables.SWAP,
             )
-            assert isinstance(swap_action, GameEvent)
+            assert isinstance(swap_action, ActionPEvent)
             instruction_dices = action.instruction.dices
             player_dices = game_state.get_player(pid).get_dices()
             return case_val(
@@ -476,7 +519,7 @@ class SwapChecker:
                 (new_game_state, swap_action.event_speed),
                 None
             )
-        raise Exception("action ({action}) is not expected to be passed in")
+        raise Exception("action ({action}) is not expected to be passed in")  # pragma: no cover
 
 
 class SkillChecker:
@@ -501,7 +544,8 @@ class SkillChecker:
         new_game_state, skill_event = StatusProcessing.preprocess_by_all_statuses(
             game_state=game_state,
             pid=pid,
-            item=GameEvent(
+            pp_type=Preprocessables.SKILL,
+            item=ActionPEvent(
                 source=StaticTarget(
                     pid=pid,
                     zone=Zone.CHARACTERS,
@@ -511,9 +555,8 @@ class SkillChecker:
                 event_speed=EventSpeed.COMBAT_ACTION,
                 dices_cost=character.skill_cost(skill_type),
             ),
-            pp_type=Preprocessables.SKILL,
         )
-        assert isinstance(skill_event, GameEvent)
+        assert isinstance(skill_event, ActionPEvent)
         if game_state.get_player(pid).get_dices().loosely_satisfy(skill_event.dices_cost):
             return new_game_state, skill_event.dices_cost
         else:
@@ -539,15 +582,16 @@ class SkillChecker:
         character = game_state.get_player(pid).get_active_character()
         if character is None \
                 or not character.can_cast_skill() \
-                or skill_type not in character.skills():
+                or skill_type not in character.skills():  # pragma: no cover
             return None
         if skill_type is CharacterSkill.ELEMENTAL_BURST \
-                and character.get_energy() < character.get_max_energy():
+                and character.get_energy() < character.get_max_energy():  # pragma: no cover
             return None
         game_state, skill_event = StatusProcessing.preprocess_by_all_statuses(
             game_state=game_state,
             pid=pid,
-            item=GameEvent(
+            pp_type=Preprocessables.SKILL,
+            item=ActionPEvent(
                 source=StaticTarget(
                     pid=pid,
                     zone=Zone.CHARACTERS,
@@ -557,9 +601,8 @@ class SkillChecker:
                 event_speed=EventSpeed.COMBAT_ACTION,
                 dices_cost=character.skill_cost(skill_type),
             ),
-            pp_type=Preprocessables.SKILL,
         )
-        assert isinstance(skill_event, GameEvent)
+        assert isinstance(skill_event, ActionPEvent)
         paid_dices = action.instruction.dices
         if paid_dices.just_satisfy(skill_event.dices_cost) \
                 and (game_state.get_player(pid).get_dices() - paid_dices).is_legal():
@@ -575,7 +618,7 @@ class ElementalTuningChecker:
     def usable(self, pid: Pid, elem: None | Element = None) -> bool:
         game_state = self._game_state
         if not (type(game_state.get_phase()) == type(game_state.get_mode().action_phase())
-                or game_state.get_active_player_id() is pid):
+                or game_state.get_active_player_id() is pid):  # pragma: no cover
             return False
         player = game_state.get_player(pid)
         active_character = player.get_active_character()

@@ -48,21 +48,22 @@ class LazyAgent(PlayerAgent):
 
     def choose_action(self, history: list[GameState], pid: Pid) -> PlayerAction:
         game_state = history[-1]
+        mode = game_state.get_mode()
         curr_phase = game_state.get_phase()
 
-        if isinstance(curr_phase, CardSelectPhase):
+        if isinstance(curr_phase, mode.card_select_phase):
             _, selected_cards = game_state.get_player(
                 pid
             ).get_hand_cards().pick_random_cards(self._NUM_PICKED_CARDS)
             return CardsSelectAction(selected_cards=selected_cards)
 
-        elif isinstance(curr_phase, StartingHandSelectPhase):
+        elif isinstance(curr_phase, mode.starting_hand_select_phase):
             return CharacterSelectAction(char_id=1)
 
-        elif isinstance(curr_phase, RollPhase):
-            return EndRoundAction()
+        elif isinstance(curr_phase, mode.roll_phase):
+            return DicesSelectAction(selected_dices=ActualDices({}))
 
-        elif isinstance(curr_phase, ActionPhase):
+        elif isinstance(curr_phase, mode.action_phase):
             return EndRoundAction()
 
         else:  # pragma: no cover
@@ -74,13 +75,13 @@ class PuppetAgent(PlayerAgent):
     A player agent that gives the game PlayerActions passed into the object by
     the user.
 
-    This agent is meaningly used for controlled testing.
+    This agent is mainly used for controlled testing.
     """
 
     def __init__(self, actions: Optional[list[PlayerAction]] = None) -> None:
         if actions is None:
             self._actions = []
-        else:
+        else:  # pragma: no cover
             self._actions = actions
 
     def inject_action(self, action: PlayerAction) -> None:
@@ -111,8 +112,7 @@ class RandomAgent(PlayerAgent):
 
     def _card_select_phase(self, history: list[GameState], pid: Pid) -> PlayerAction:
         game_state = history[-1]
-        phase = game_state.get_phase()
-        act_gen = phase.action_generator(game_state, pid)
+        act_gen = game_state.action_generator(pid)
         assert act_gen is not None
         player_action = self._random_action_generator_chooser(act_gen)
         return player_action
@@ -123,16 +123,14 @@ class RandomAgent(PlayerAgent):
             pid: Pid
     ) -> PlayerAction:
         game_state = history[-1]
-        phase = game_state.get_phase()
-        act_gen = phase.action_generator(game_state, pid)
+        act_gen = game_state.action_generator(pid)
         assert act_gen is not None
         player_action = self._random_action_generator_chooser(act_gen)
         return player_action
 
     def _roll_phase(self, history: list[GameState], pid: Pid) -> PlayerAction:
         game_state = history[-1]
-        phase = game_state.get_phase()
-        act_gen = phase.action_generator(game_state, pid)
+        act_gen = game_state.action_generator(pid)
         assert act_gen is not None
         player_action = self._random_action_generator_chooser(act_gen)
         return player_action
@@ -150,7 +148,7 @@ class RandomAgent(PlayerAgent):
             elif isinstance(choices, AbstractDices):
                 optional_choice = action_generator.dices_available().basically_satisfy(choices)
                 if optional_choice is None:
-                    raise Exception(f"There's not enough dices for {choices} from "
+                    raise Exception(f"There's not enough dices for {choices} from "  # pragma: no cover
                                     + f"{action_generator.dices_available()} at game_state:"
                                     + f"{action_generator.game_state}")
                 choice = optional_choice
@@ -167,7 +165,7 @@ class RandomAgent(PlayerAgent):
                     choice = ActualDices(dict(
                         (elem, choices[elem])
                         for elem in choices.elems()
-                        if not(elem is Element.OMNI or elem in wanted_elems)
+                        if not (elem is Element.OMNI or elem in wanted_elems)
                     ))
                 else:
                     _, choice = choices.pick_random_dices(random.randint(0, choices.num_dices()))
@@ -178,33 +176,32 @@ class RandomAgent(PlayerAgent):
 
     def _action_phase(self, history: list[GameState], pid: Pid) -> PlayerAction:
         game_state = history[-1]
-        phase = game_state.get_phase()
-        act_gen = phase.action_generator(game_state, pid)
+        act_gen = game_state.action_generator(pid)
         assert act_gen is not None
         player_action = self._random_action_generator_chooser(act_gen)
         return player_action
 
     def _end_phase(self, history: list[GameState], pid: Pid) -> PlayerAction:
         game_state = history[-1]
-        phase = game_state.get_phase()
-        act_gen = phase.action_generator(game_state, pid)
+        act_gen = game_state.action_generator(pid)
         assert act_gen is not None
         player_action = self._random_action_generator_chooser(act_gen)
         return player_action
 
     def choose_action(self, history: list[GameState], pid: Pid) -> PlayerAction:
         game_state = history[-1]
+        mode = game_state.get_mode()
         curr_phase = game_state.get_phase()
 
-        if isinstance(curr_phase, CardSelectPhase):
+        if isinstance(curr_phase, mode.card_select_phase):
             return self._card_select_phase(history, pid)
-        elif isinstance(curr_phase, StartingHandSelectPhase):
+        elif isinstance(curr_phase, mode.starting_hand_select_phase):
             return self._starting_hand_select_phase(history, pid)
-        elif isinstance(curr_phase, RollPhase):
+        elif isinstance(curr_phase, mode.roll_phase):
             return self._roll_phase(history, pid)
-        elif isinstance(curr_phase, ActionPhase):
+        elif isinstance(curr_phase, mode.action_phase):
             return self._action_phase(history, pid)
-        elif isinstance(curr_phase, EndPhase):
+        elif isinstance(curr_phase, mode.end_phase):
             return self._end_phase(history, pid)
 
         raise NotImplementedError

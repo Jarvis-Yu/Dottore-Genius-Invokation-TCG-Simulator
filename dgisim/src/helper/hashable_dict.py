@@ -1,12 +1,16 @@
 from __future__ import annotations
-from typing import Any
+from typing import Any, Mapping, TypeVar
+
+from typing_extensions import Self
 
 __all__ = [
     "HashableDict"
 ]
 
+_T = TypeVar("_T")
+_U = TypeVar("_U")
 
-class HashableDict(dict):
+class HashableDict(dict, Mapping[_T, _U]):
     """
     Inheritates dict but implements __hash__().
 
@@ -78,17 +82,27 @@ class HashableDict(dict):
             raise Exception("Calling __delitem__() to a frozen HashableDict!")
         super().__delitem__(*args, **kwargs)
 
-    def __add__(self, other: dict[Any, int]):
+    def __add__(self, other: dict[_T, int]):
+        """ should only be used if the value is int, otherwise good luck """
         keys = set(self.keys()).union(other.keys())
         return HashableDict(
-            [(key, self.get(key, 0) + other.get(key, 0)) for key in keys]
+            ((key, self.get(key, 0) + other.get(key, 0)) for key in keys)
         )
 
-    def __sub__(self, other: dict[Any, int]):
+    def __sub__(self, other: dict[_T, int]):
+        """ should only be used if the value is int, otherwise good luck """
         keys = set(self.keys()).union(other.keys())
         return HashableDict(
-            [(key, self.get(key, 0) - other.get(key, 0)) for key in keys]
+            ((key, self.get(key, 0) - other.get(key, 0)) for key in keys)
         )
+
+    def __copy__(self) -> Self:  # pragma: no cover
+        assert self.frozen()
+        return self
+
+    def __deepcopy__(self, _) -> Self:  # pragma: no cover
+        assert self.frozen()
+        return self
 
     def _to_frozen_set(self) -> frozenset:
         if self._frozen:
@@ -111,6 +125,9 @@ class HashableDict(dict):
                 if item[1] != 0
             )
 
+    def to_dict(self) -> dict[_T, _U]:
+        return dict(self)
+
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, HashableDict):
             return False
@@ -129,7 +146,7 @@ class HashableDict(dict):
         return all(val >= 0 for val in self.values())
 
     @classmethod
-    def from_dict(cls, d: dict) -> HashableDict:
+    def from_dict(cls, d: dict[_T, _U]) -> HashableDict[_T, _U]:
         """
         This method is preferred when trying to copy a HashableDict than __init__()
         """

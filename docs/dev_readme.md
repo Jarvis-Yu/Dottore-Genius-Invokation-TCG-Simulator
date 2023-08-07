@@ -1,53 +1,47 @@
 # Dev README
 
 - [Dev README](#dev-readme)
-  - [Run the Project Locally](#run-the-project-locally)
-    - [For unix based systems (MacOS, Linux...)](#for-unix-based-systems-macos-linux)
-    - [For Windows based systems (Powershell)](#for-windows-based-systems-powershell)
-  - [Where to Start Reading the Code](#where-to-start-reading-the-code)
-  - [QA](#qa)
+  - [Setup Environment](#setup-environment)
+    - [Setup Manually](#setup-manually)
+    - [Setup By Running Script](#setup-by-running-script)
+  - [Code Style](#code-style)
+  - [Relative Files](#relative-files)
 
-## Run the Project Locally
+## Setup Environment
 
-### For unix based systems (MacOS, Linux...)
+First make sure your Python version >= 3.10.
 
-1. Clone the project
-2. Make sure your Python version >= 3.10
-3. Set up the environment with `venv` or otherwise
-4. If you don't know how to setup `venv`, google it or run the following
-   commands under the project directory
+### Setup Manually
+
+Create a `venv`, activate it and install packages in `requirements.txt`.
+
+### Setup By Running Script
+
+Run the code below in Shell or Terminal.
 
 ```
 source ./scripts/sh/venv.sh
 ```
 
-5. With the environment set up, you may have a try with CLI by running:
+(If you use Powershell, then `./scripts/ps1/` contains corresponding `.ps1` scripts)
 
-```
-./scripts/sh/cli.sh
-```
+After `venv` is setup, you may run `./scripts/sh/cli.sh` and play a game to
+see if the project is running correctly.
+(or simply run `./scripts/sh/test.sh` to unittest the whole project)
 
-### For Windows based systems (Powershell)
+## Code Style
 
-Powershell scripts of the same name are in `./scripts/ps1/`,
-please refer to the guide above but execute the `.ps1` scripts instead.
+Generally follow autopep8
 
-## Where to Start Reading the Code
+- Line length limit is 100
+- Use `snake_case` for methods, functions or variables
+- Use `PascalCase` for class names
+- Use `ALL_CAPITAL` for constants or enums
+- Always type hint any functions/methods you wrote
+- Commits naming should briefly describe what is done in the commit
+  - e.g. `implements the card Starsigns` or `updates README on changes in root-level api`
+  - don't give empty commits or commits merely stating which files are changed
 
-I suggest you start reading the code from `dgisim/tests/test_game_state_machine.py`,
-which contains tests for the whole game flow.
+## Relative Files
 
-A read through other test files are also recommanded to get familiar with the state-machine design.
-
-If you have trouble understanding the repo, please don't hesitate to raise an issue asking for help.
-I may consider adding some design documentations to go over the game model structure of this project.
-
-## QA
-
-Do you want people to join you?
-
-- Well, collaborators are warmly welcomed. If you have the intention to join, please contact me.
-
-How to contact you?
-
-- I assume you can find my email somewhere ~~(hint: `git log`)~~
+- [**Design Doc**](state_machine_design.md)

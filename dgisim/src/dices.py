@@ -1,29 +1,40 @@
 from __future__ import annotations
-
 import random
 from collections import Counter
+from functools import lru_cache
+from typing import Any, Optional, Iterator, Iterable
+
+from typing_extensions import Self, override, TYPE_CHECKING
 from collections import defaultdict
 from functools import cache
 from heapq import heappop, heapify
 from typing import Any
 from typing import Optional, Iterator, Iterable
 
+from .helper.hashable_dict import HashableDict
+from .helper.quality_of_life import BIG_INT, case_val
+from .element import Element
 from typing_extensions import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .state.game_state import GameState
-
-__all__ = [
-    "AbstractDices",
-    "ActualDices",
-    "Dices",
-]
+    from .state.player_state import PlayerState
 
 from typing_extensions import Self
 
 from dgisim.src.element import Element
 from dgisim.src.helper.hashable_dict import HashableDict
 from dgisim.src.helper.quality_of_life import BIG_INT
+
+
+__all__ = [
+    "AbstractDices",
+    "ActualDices",
+    "Dices",
+    "ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY",
+    "ELEMENTS",
+    "NUMBER_OF_ELEMENTS",
+]
 
 # higher PRIORITY - should be spent first
 ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY: tuple[Element, ...] = (
@@ -84,6 +95,9 @@ class Dices:
     def is_even(self) -> bool:
         return self.num_dices() % 2 == 0
 
+    def is_empty(self) -> bool:
+        return not any(val > 0 for val in self._dices.values())
+
     def is_legal(self) -> bool:
         return all(map(lambda x: x >= 0, self._dices.values())) \
             and all(elem in self._LEGAL_ELEMS for elem in self._dices)
@@ -107,8 +121,9 @@ class Dices:
         num = min(self.num_dices(), num)
         if num == 0:
             return (self, type(self).from_empty())
-        picked_dices: dict[Element, int] = dict(Counter(random.sample(
-            list(self._dices.keys()), counts=self._dices.values(), k=num)))
+        picked_dices: dict[Element, int] = HashableDict(Counter(
+            random.sample(list(self._dices.keys()), counts=self._dices.values(), k=num)
+        ))
         return type(self)(self._dices - picked_dices), type(self)(picked_dices)
 
     def __contains__(self, elem: Element) -> bool:
@@ -126,10 +141,6 @@ class Dices:
 
     def __getitem__(self, index: Element) -> int:
         return self._dices.get(index, 0)
-
-    #
-    # def _normalized_dices(self):
-    # return {key: value for key, value in self._dices.items() if value != 0}
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Dices):
@@ -155,7 +166,7 @@ class Dices:
         )
 
     def to_dict(self) -> dict[Element, int]:
-        return dict(self._dices.items())
+        return self._dices.to_dict()
 
     def dict_str(self) -> dict[str, Any]:
         existing_dices = dict([
@@ -165,12 +176,18 @@ class Dices:
         ])
         return existing_dices
 
+    def __copy__(self) -> Self:  # pragma: no cover
+        return self
+
+    def __deepcopy__(self, _) -> Self:  # pragma: no cover
+        return self
+
     @classmethod
     def from_empty(cls) -> Self:
-        return cls(dict([
+        return cls(HashableDict((
             (elem, 0)
             for elem in cls._LEGAL_ELEMS
-        ]))
+        )))
 
 
 _PURE_ELEMS = frozenset({
@@ -199,11 +216,32 @@ class ActualDices(Dices):
         Element.GEO,
     })
 
+    # tested against the actual game in Genshin
+    _LEGAL_ELEMS_ORDERED: tuple[Element, ...] = (
+        Element.OMNI,
+        Element.CRYO,
+        Element.HYDRO,
+        Element.PYRO,
+        Element.ELECTRO,
+        Element.GEO,
+        Element.DENDRO,
+        Element.ANEMO,
+    )
+    # the bigger the i, the higher the priority
+    _LEGAL_ELEMS_ORDERED_DICT: dict[Element, int] = {
+        elem: i
+        for i, elem in enumerate(reversed(_LEGAL_ELEMS_ORDERED))
+    }
+    _LEGAL_ELEMS_ORDERED_DICT_REV: dict[int, Element] = {
+        i: elem
+        for elem, i in _LEGAL_ELEMS_ORDERED_DICT.items()
+    }
+
     def _satisfy(self, requirement: AbstractDices) -> bool:
         assert self.is_legal() and requirement.is_legal()
 
         # satisfy all pure elements first
-        pure_deducted = HashableDict((
+        pure_deducted: HashableDict[Element, int] = HashableDict((
             (elem, self[elem] - requirement[elem])
             for elem in _PURE_ELEMS
         ), frozen=False)
@@ -304,11 +342,13 @@ class ActualDices(Dices):
                 return NUMBER_OF_ELEMENTS + 2, -1  # OMNI has biggest tuple
             for i, set_ in enumerate(local_precedence, start=1):
                 if element in set_:
-                    return NUMBER_OF_ELEMENTS + 1 - i, ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY.index(  # to check it
-                        element)
+                    return NUMBER_OF_ELEMENTS + 1 - i, ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY.index(
+                        element
+                    )
             else:
                 return -1, ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY.index(
-                    element)  # to check it
+                    element
+                )
 
         def check_asserts():
             """
@@ -340,18 +380,18 @@ class ActualDices(Dices):
                 # -1, type_of_element
                 return number_of_dices, priority_local, priority_global
 
-            elements_how_many_omni_to_spent_if_fill_omni: list[tuple[Element, Optional[int]]] = \
-                [
-                    (element,
-                  self._how_much_omni_and_first_priority_to_spend(
-                      element_supply=supply[element],
-                      element_needed=need[element],
-                      omni_needed=need[Element.OMNI],
-                      element_prioritized=element in first_priority_elements,
-                      omni_supply=supply[Element.OMNI])
-                  )
-                 for element in _PURE_ELEMS
-                ]
+            elements_how_many_omni_to_spent_if_fill_omni: list[tuple[Element, Optional[int]]] = [
+                (
+                    element,
+                    self._how_much_omni_and_first_priority_to_spend(
+                        element_supply=supply[element],
+                        element_needed=need[element],
+                        omni_needed=need[Element.OMNI],
+                        element_prioritized=element in first_priority_elements,
+                        omni_supply=supply[Element.OMNI])
+                )
+                for element in _PURE_ELEMS
+            ]
 
             least_spend = min(
                 elements_how_many_omni_to_spent_if_fill_omni,
@@ -500,7 +540,7 @@ class ActualDices(Dices):
         if omni > 0:
             best_elem: Optional[Element] = None
             best_count = 0
-            for elem in list(_PURE_ELEMS) + [Element.OMNI]:
+            for elem in list(_PURE_ELEMS):
                 this_count = remaining.get(elem, 0)
                 if best_count > omni and this_count >= omni and this_count < best_count:
                     best_elem = elem
@@ -510,11 +550,13 @@ class ActualDices(Dices):
                     best_count = this_count
                 elif best_count == omni:
                     break
-            assert best_elem is not None
-            best_count = min(best_count, omni)
-            answer[best_elem] += best_count
-            remaining[best_elem] -= best_count
-            omni_required += omni - best_count
+            if best_elem is not None:
+                best_count = min(best_count, omni)
+                answer[best_elem] += best_count
+                remaining[best_elem] -= best_count
+                omni_required += omni - best_count
+            else:
+                omni_required += omni
         if any > 0:
             from operator import itemgetter
             sorted_elems = sorted(remaining.items(), key=itemgetter(1))
@@ -534,6 +576,50 @@ class ActualDices(Dices):
                 return None
             answer[Element.OMNI] += omni_required
         return ActualDices(answer)
+
+    def _init_ordered_dices(
+            self,
+            priority_elems: None | frozenset[Element]
+    ) -> HashableDict[Element, int]:
+        character_elems: frozenset[Element]
+        if priority_elems is None:
+            character_elems = frozenset()
+        else:
+            character_elems = priority_elems
+
+        dices: dict[Element, int] = {}
+        if self[Element.OMNI] > 0:
+            dices[Element.OMNI] = self[Element.OMNI]
+        # list[tuple[alive chars have elem, num of elem, priority of elem]]
+        sorted_categories: list[tuple[int, int, int]] = sorted(
+            (
+                (
+                    case_val(elem in character_elems, 1, 0),
+                    self[elem],
+                    self._LEGAL_ELEMS_ORDERED_DICT[elem],
+                )
+                for elem in self.elems()
+                if elem is not Element.OMNI and self[elem] > 0
+            ),
+            reverse=True
+        )
+        for _, _, priority in sorted_categories:
+            elem = self._LEGAL_ELEMS_ORDERED_DICT_REV[priority]
+            dices[elem] = self[elem]
+        return HashableDict.from_dict(dices)
+
+    def dices_ordered(self, player_state: None | PlayerState) -> dict[Element, int]:
+        return self.readonly_dices_ordered(player_state).to_dict()
+
+    def readonly_dices_ordered(self, player_state: None | PlayerState) -> HashableDict[Element, int]:
+        return self._init_ordered_dices(
+            None
+            if player_state is None
+            else frozenset(
+                char.element()
+                for char in player_state.get_characters().get_alive_characters()
+            )
+        )
 
     @classmethod
     def from_random(cls, size: int) -> ActualDices:
@@ -585,5 +671,3 @@ class AbstractDices(Dices):
             return None
         else:
             return new_dices
-
-

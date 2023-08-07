@@ -5,6 +5,9 @@ from ..helper.quality_of_life import dataclass_repr
 from ..state.enums import Pid
 from .enums import Zone
 
+if TYPE_CHECKING:
+    from ..summon.summon import Summon
+
 __all__ = [
     "DamageType",
     "StaticTarget",
@@ -15,7 +18,7 @@ __all__ = [
 class StaticTarget:
     pid: Pid
     zone: Zone
-    id: int
+    id: int | type["Summon"]
 
     def __repr__(self) -> str:
         return dataclass_repr(self)
@@ -34,6 +37,24 @@ class DamageType:
     status: bool = False  # any talent, equipmenet, character status, combat status.
     summon: bool = False
     no_boost: bool = False  # reaction secondary damage, Klee's burst status...
+
+    def from_character(self) -> bool:
+        return (
+            self.normal_attack
+            or self.elemental_skill
+            or self.elemental_burst
+            or self.charged_attack
+            or self.plunge_attack
+        )
+
+    def from_summon(self) -> bool:  # pragma: no cover
+        return self.summon
+
+    def from_status(self) -> bool:  # pragma: no cover
+        return self.status
+
+    def can_boost(self) -> bool:
+        return not self.no_boost
 
     def __repr__(self) -> str:
         cls_fields = fields(self)

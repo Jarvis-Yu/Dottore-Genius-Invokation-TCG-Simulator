@@ -69,6 +69,9 @@ class Summons:
     def __str__(self) -> str:  # pragma: no cover
         return f"[{', '.join(map(str, self._summons))}]"
 
+    def empty(self) -> bool:
+        return not bool(self._summons)
+
     def len(self) -> int:
         return len(self)
 
@@ -91,6 +94,6 @@ class Summons:
 
     def dict_str(self) -> dict:
         return dict(
-            (summon.__class__.__name__.removesuffix("Summon"), str(summon.usages))
+            (summon.__class__.__name__.removesuffix("Summon"), str(summon.content_repr()))
             for summon in self
         )

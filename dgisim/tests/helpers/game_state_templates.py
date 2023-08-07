@@ -37,7 +37,16 @@ BASE_GAME = GameState.from_default().factory().f_player1(
             Keqing.from_default(3),
         ), None)
     ).dices(
-        ActualDices({Element.OMNI: BIG_INT})
+        ActualDices({
+            Element.OMNI: BIG_INT,
+            Element.PYRO: BIG_INT,
+            Element.HYDRO: BIG_INT,
+            Element.ANEMO: BIG_INT,
+            Element.ELECTRO: BIG_INT,
+            Element.DENDRO: BIG_INT,
+            Element.CRYO: BIG_INT,
+            Element.GEO: BIG_INT,
+        })
     ).build()
 ).build()
 
@@ -58,7 +67,7 @@ OPPO_DEATH_WAIT = BASE_GAME.factory().f_phase(
     .f_characters(
         lambda cs: cs.factory()
         .active_character_id(1)
-        .f_character(1, lambda c: c.factory().hp(0).build())
+        .f_character(1, lambda c: c.factory().hp(0).alive(False).build())
         .build()
     )
     .phase(Act.PASSIVE_WAIT_PHASE)

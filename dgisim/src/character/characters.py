@@ -20,7 +20,7 @@ class Characters:
         return cls(characters, None)
 
     @classmethod
-    def from_list(cls, characters: Iterable[type[Character]]) -> Characters:
+    def from_iterable(cls, characters: Iterable[type[Character]]) -> Characters:
         return Characters(
             tuple(
                 char.from_default(i + 1)
@@ -44,13 +44,20 @@ class Characters:
         for i, character in enumerate(self._characters):
             if character.get_id() == self._active_character_id:
                 return self._characters[i:] + self._characters[:i]
-        return tuple()
+        return self._characters
 
     def get_none_active_characters(self) -> tuple[Character, ...]:
         return tuple(
             char
             for char in self._characters
             if char.get_id() != self.get_active_character_id()
+        )
+
+    def get_alive_characters(self) -> tuple[Character, ...]:
+        return tuple(
+            char
+            for char in self._characters
+            if char.alive()
         )
 
     def get_character(self, id: int) -> None | Character:

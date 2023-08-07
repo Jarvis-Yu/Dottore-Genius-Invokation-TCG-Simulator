@@ -4,6 +4,7 @@ from typing import Optional
 from dgisim.src.dices import *
 from dgisim.src.dices import ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY, NUMBER_OF_ELEMENTS, ELEMENTS
 from dgisim.src.element import *
+from dgisim.src.helper import just
 
 
 class TestDices(unittest.TestCase):
@@ -171,13 +172,17 @@ class TestDices(unittest.TestCase):
     def test_basically_satisfy_successes(self):
         requirement = AbstractDices({Element.OMNI: 3})
         payment = ActualDices({Element.CRYO: 3, Element.ANEMO: 1})
-        self.assertEqual(payment.basically_satisfy(
-            requirement), ActualDices({Element.CRYO: 3}))
+        self.assertEqual(payment.basically_satisfy(requirement), ActualDices({Element.CRYO: 3}))
 
         requirement = AbstractDices({Element.OMNI: 3})
         payment = ActualDices({Element.CRYO: 2, Element.OMNI: 2})
         self.assertEqual(payment.basically_satisfy(requirement),
                          ActualDices({Element.CRYO: 2, Element.OMNI: 1}))
+
+        requirement = AbstractDices({Element.OMNI: 3})
+        payment = ActualDices({Element.ANEMO: 1, Element.ELECTRO: 1,
+                              Element.PYRO: 1, Element.OMNI: 2})
+        self.assertEqual(just(payment.basically_satisfy(requirement))[Element.OMNI], 2)
 
     def test_basically_satisfy_failures(self):
         requirement = AbstractDices({Element.ANY: 8})
@@ -186,9 +191,24 @@ class TestDices(unittest.TestCase):
 
         requirement = AbstractDices({Element.OMNI: 4})
         payment = ActualDices({Element.GEO: 3, Element.ELECTRO: 2,
-                               Element.HYDRO: 1, Element.DENDRO: 3})
+                              Element.HYDRO: 1, Element.DENDRO: 3})
         self.assertIsNone(payment.basically_satisfy(requirement))
 
+    def test_ordered_actual_dices(self):
+        dices = ActualDices({
+            Element.HYDRO: 1,
+            Element.ELECTRO: 1,
+            Element.ANEMO: 1,
+            Element.GEO: 1,
+            Element.CRYO: 1,
+            Element.OMNI: 1,
+            Element.DENDRO: 1,
+            Element.PYRO: 1,
+        })
+        self.assertEqual(
+            tuple(dices.readonly_dices_ordered(None).keys()),
+            ActualDices._LEGAL_ELEMS_ORDERED,
+        )
     # # test_smart_selection template
     # # def test_smart_selection(self):
     # #     input_actual_dices: ActualDices = ActualDices()
@@ -239,13 +259,78 @@ class TestDices(unittest.TestCase):
                         game_state=None,
                         local_precedence_arg=input_precedence
                     )
-
                     if element_number >= any_number:
                         expected = ActualDices(dices={element: any_number})
                     else:
                         expected = None
 
                     self.assertEqual(actual, expected)
+
+    def test_ordered_actual_dices_with_diff_nums(self):
+        dices = ActualDices({
+            Element.HYDRO: 1,
+            Element.ELECTRO: 2,
+            Element.ANEMO: 1,
+            Element.GEO: 1,
+            Element.CRYO: 2,
+            Element.OMNI: 1,
+            Element.DENDRO: 2,
+            Element.PYRO: 1,
+        })
+        keys = tuple(dices.readonly_dices_ordered(None).keys())
+        expected_order = (
+            Element.OMNI,
+            Element.CRYO,
+            Element.ELECTRO,
+            Element.DENDRO,
+            Element.HYDRO,
+            Element.PYRO,
+            Element.GEO,
+            Element.ANEMO,
+        )
+        self.assertEqual(
+            keys,
+            expected_order,
+        )
+
+    def test_ordered_actual_dices_with_characters(self):
+        dices = ActualDices({
+            Element.HYDRO: 1,
+            Element.ELECTRO: 2,
+            Element.ANEMO: 1,
+            Element.GEO: 1,
+            Element.CRYO: 2,
+            Element.OMNI: 1,
+            Element.DENDRO: 2,
+            Element.PYRO: 1,
+        })
+        from dgisim.src.card.cards import Cards
+        from dgisim.src.character.character import AratakiItto, Klee, Keqing
+        from dgisim.src.character.characters import Characters
+        from dgisim.src.mode import DefaultMode
+        from dgisim.src.state.player_state import PlayerState
+        player_state = PlayerState.from_chars_cards(
+            DefaultMode(),
+            Characters.from_iterable(
+                [AratakiItto, Klee, Keqing]
+            ).factory().active_character_id(2).build(),
+            Cards({}),
+        )
+        keys = tuple(dices.readonly_dices_ordered(player_state).keys())
+        expected_order = (
+            Element.OMNI,
+            Element.ELECTRO,
+            Element.PYRO,
+            Element.GEO,
+            Element.CRYO,
+            Element.DENDRO,
+            Element.HYDRO,
+            Element.ANEMO,
+        )
+        self.assertEqual(
+            keys,
+            expected_order,
+        )
 
     def test_smart_selection_all_any(self):
         """test one die of every Element can fill ANY in proper order"""
@@ -447,9 +532,11 @@ class TestDices(unittest.TestCase):
                     # omni_supply_number = 2
                     # omni_need_number = 4
                     input_actual_dices: ActualDices = ActualDices(
-                        {element: element_supply_number, Element.OMNI: omni_supply_number, Element.CRYO: 2})
+                        {element: element_supply_number, Element.OMNI: omni_supply_number, other_element: 2}
+                    )
                     input_abstract_dices: AbstractDices = AbstractDices(
-                        {element: element_need_number})
+                        {element: element_need_number}
+                    )
                     input_precedence: list[set[Element]] = []
 
                     actual = input_actual_dices.smart_selection(
