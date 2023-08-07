@@ -20,7 +20,7 @@ from dgisim.tests.helpers.dummy_objects import *
 class TestStatus(unittest.TestCase):
 
     ############################## Vaporize ##############################
-    def testVaporize(self):
+    def test_vaporize(self):
         """
         Tests that dealing 1 Pyro damage to char with Hydro aura deals 3 damage, vice versa
         """
@@ -47,8 +47,36 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 7)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
 
+    def test_vaporize_no_dmg(self):
+        """
+        Tests that 0 damage vaporize reaction has no effect
+        """
+        # PYRO to HYDRO
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.HYDRO)
+        game_state = auto_step(
+            ApplyElementalAuraEffect(
+                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
+                element=Element.PYRO,
+            ).execute(game_state)
+        )
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 10)
+        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+
+        # HYDRO to PYRO
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
+        game_state = auto_step(
+            ApplyElementalAuraEffect(
+                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
+                element=Element.HYDRO,
+            ).execute(game_state)
+        )
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 10)
+        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+
     ############################## Melt ##############################
-    def testMelt(self):
+    def test_melt(self):
         """
         Tests that dealing 1 Pyro damage to char with Cryo aura deals 3 damage, vice versa
         """
@@ -78,8 +106,36 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 7)
         self.assertFalse(ac.get_elemental_aura().elem_auras())
 
+    def test_melt_no_dmg(self):
+        """
+        Tests that 0 damage melt reaction has no effect
+        """
+        # PYRO to CRYO
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.CRYO)
+        game_state = auto_step(
+            ApplyElementalAuraEffect(
+                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
+                element=Element.PYRO,
+            ).execute(game_state)
+        )
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 10)
+        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+
+        # CRYO to PYRO
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
+        game_state = auto_step(
+            ApplyElementalAuraEffect(
+                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
+                element=Element.CRYO,
+            ).execute(game_state)
+        )
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 10)
+        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+
     ############################## Overloaded ##############################
-    def testOverloadedBasics(self):
+    def test_overloaded_basics(self):
         """
         Tests that dealing 1 Electro damage to char with Pyro aura deals 3 damage, and force switch
         to next character, vice versa
@@ -122,7 +178,7 @@ class TestStatus(unittest.TestCase):
         )
         self.assertFalse(chars.just_get_character(1).get_elemental_aura().elem_auras())
 
-    def testOverloadedAdvanced(self):
+    def test_overloaded_advanced(self):
         """
         Tests that the Overloaded's force switch skips defeated characters and loops back to the
         first character when 'next' the last character
@@ -192,7 +248,7 @@ class TestStatus(unittest.TestCase):
         )
         self.assertFalse(chars.just_get_character(3).get_elemental_aura().elem_auras())
 
-    def testOverloadedDeathPriority(self):
+    def test_overloaded_death_priority(self):
         """
         Tests that Overloaded kill doesn't trigger opponent's Deathswap phase
         """
@@ -231,7 +287,7 @@ class TestStatus(unittest.TestCase):
         )
         self.assertTrue(game_state.get_effect_stack().is_not_empty())
 
-    def testOverloadedOffField(self):
+    def test_overloaded_off_field(self):
         """
         Tests that Overloaded to non-active characters doesn't trigger force switch
         """
@@ -305,8 +361,68 @@ class TestStatus(unittest.TestCase):
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_id(), 2)
 
+    def test_overload_no_dmg(self):
+        """
+        Test that overload with no damage still force swap to next character.
+        """
+        # ELECTRO to PYRO
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
+        game_state = auto_step(
+            ApplyElementalAuraEffect(
+                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
+                element=Element.ELECTRO,
+            ).execute(game_state)
+        )
+        p2_cs = game_state.get_player2().get_characters()
+        self.assertEqual(p2_cs.just_get_character(1).get_hp(), 10)
+        self.assertFalse(p2_cs.just_get_character(1).get_elemental_aura().has_aura())
+        self.assertEqual(p2_cs.get_active_character_id(), 2)
+
+        # PYRO to ELECTRO
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO)
+        game_state = auto_step(
+            ApplyElementalAuraEffect(
+                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
+                element=Element.PYRO,
+            ).execute(game_state)
+        )
+        p2_cs = game_state.get_player2().get_characters()
+        self.assertEqual(p2_cs.just_get_character(1).get_hp(), 10)
+        self.assertFalse(p2_cs.just_get_character(1).get_elemental_aura().has_aura())
+        self.assertEqual(p2_cs.get_active_character_id(), 2)
+
+    def test_overload_no_dmg_to_off_field(self):
+        """
+        Test that overload to off field with no damage doesn't force swap to next character.
+        """
+        # ELECTRO to PYRO
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO, char_id=2)
+        game_state = auto_step(
+            ApplyElementalAuraEffect(
+                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 2),
+                element=Element.ELECTRO,
+            ).execute(game_state)
+        )
+        p2_cs = game_state.get_player2().get_characters()
+        self.assertEqual(p2_cs.just_get_character(2).get_hp(), 10)
+        self.assertFalse(p2_cs.just_get_character(2).get_elemental_aura().has_aura())
+        self.assertEqual(p2_cs.get_active_character_id(), 1)
+
+        # PYRO to ELECTRO
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO, char_id=2)
+        game_state = auto_step(
+            ApplyElementalAuraEffect(
+                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 2),
+                element=Element.PYRO,
+            ).execute(game_state)
+        )
+        p2_cs = game_state.get_player2().get_characters()
+        self.assertEqual(p2_cs.just_get_character(2).get_hp(), 10)
+        self.assertFalse(p2_cs.just_get_character(2).get_elemental_aura().has_aura())
+        self.assertEqual(p2_cs.get_active_character_id(), 1)
+
     ############################## ElectroCharged ##############################
-    def testElectroCharged(self):
+    def test_electro_charged(self):
         """
         Tests that dealing 1 Hydro damage to char with Electro aura deals 2 damage, and 1 Piercing
         damage to off-field characters, vice versa
@@ -341,8 +457,36 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(chars.just_get_character(3).get_hp(), 9)
         self.assertFalse(chars.just_get_active_character().get_elemental_aura().elem_auras())
 
+    def test_electro_charged_no_dmg(self):
+        """
+        Tests that 0 damage electro charged reaction has no effect
+        """
+        # HYDRO to ELECTRO
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO)
+        game_state = auto_step(
+            ApplyElementalAuraEffect(
+                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
+                element=Element.HYDRO,
+            ).execute(game_state)
+        )
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 10)
+        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+
+        # ELECTRO to HYDRO
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.HYDRO)
+        game_state = auto_step(
+            ApplyElementalAuraEffect(
+                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
+                element=Element.ELECTRO,
+            ).execute(game_state)
+        )
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 10)
+        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+
     ############################## SuperConduct ##############################
-    def testSuperConduct(self):
+    def test_super_conduct(self):
         """
         Tests that dealing 1 Cryo damage to char with Electro aura deals 2 damage, and 1 Piercing
         damage to off-field characters, vice versa
@@ -377,8 +521,36 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(chars.just_get_character(3).get_hp(), 9)
         self.assertFalse(chars.just_get_active_character().get_elemental_aura().elem_auras())
 
+    def test_super_conduct_no_dmg(self):
+        """
+        Tests that 0 damage super conduct reaction has no effect
+        """
+        # CRYO to ELECTRO
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO)
+        game_state = auto_step(
+            ApplyElementalAuraEffect(
+                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
+                element=Element.CRYO,
+            ).execute(game_state)
+        )
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 10)
+        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+
+        # ELECTRO to CRYO
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.CRYO)
+        game_state = auto_step(
+            ApplyElementalAuraEffect(
+                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
+                element=Element.ELECTRO,
+            ).execute(game_state)
+        )
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 10)
+        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+
     ############################## Swirl ##############################
-    def testSwirl(self):
+    def test_swirl(self):
         """
         Tests that Swirl swirls all aurable elements except Dendro, damage value is also checked
         """
@@ -415,7 +587,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(chars.just_get_character(3).get_hp(), 10)
 
     @staticmethod
-    def swirlElem1ToElem2(elem1: Element, elem2: Element) -> GameState:
+    def swirl_elem1_to_elem2(elem1: Element, elem2: Element) -> GameState:
         game_state = oppo_aura_elem(ACTION_TEMPLATE, elem1)
         game_state = add_damage_effect(game_state, 1, Element.ANEMO)
         game_state = game_state.factory().f_player2(
@@ -435,12 +607,12 @@ class TestStatus(unittest.TestCase):
         ).build()
         return game_state
 
-    def testSwirledReaction(self):
+    def test_swirled_reaction(self):
         """
         Tests that Swirl's behaviour when secondary reactions are triggered
         """
         # Superconduct
-        game_state = self.swirlElem1ToElem2(Element.ELECTRO, Element.CRYO)
+        game_state = self.swirl_elem1_to_elem2(Element.ELECTRO, Element.CRYO)
 
         game_state = auto_step(game_state)
         chars = game_state.get_player2().get_characters()
@@ -452,7 +624,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(chars.just_get_character(3).get_hp(), 7)
 
         # Overloaded
-        game_state = self.swirlElem1ToElem2(Element.ELECTRO, Element.PYRO)
+        game_state = self.swirl_elem1_to_elem2(Element.ELECTRO, Element.PYRO)
 
         game_state = auto_step(game_state)
         chars = game_state.get_player2().get_characters()
@@ -465,7 +637,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(chars.just_get_character(3).get_hp(), 7)
 
         # Melt
-        game_state = self.swirlElem1ToElem2(Element.CRYO, Element.PYRO)
+        game_state = self.swirl_elem1_to_elem2(Element.CRYO, Element.PYRO)
 
         game_state = auto_step(game_state)
         chars = game_state.get_player2().get_characters()
@@ -476,8 +648,32 @@ class TestStatus(unittest.TestCase):
         self.assertFalse(chars.just_get_character(3).get_elemental_aura().elem_auras())
         self.assertEqual(chars.just_get_character(3).get_hp(), 7)
 
+    def test_swirl_no_dmg(self):
+        """
+        NOTE that in the actual game, this is undefined behaviour.
+
+        Tests that 0 damage swirl reaction has no effect
+        """
+        # ANEMO to all aurable elements
+        aurable_elems = (Element.PYRO, Element.HYDRO, Element.ELECTRO, Element.CRYO, Element.DENDRO)
+        for elem in aurable_elems:
+            with self.subTest(elem=elem):
+                game_state = oppo_aura_elem(ACTION_TEMPLATE, elem)
+                game_state = auto_step(
+                    ApplyElementalAuraEffect(
+                        target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
+                        element=Element.ANEMO,
+                    ).execute(game_state)
+                )
+                p2ac = game_state.get_player2().just_get_active_character()
+                self.assertEqual(p2ac.get_hp(), 10)
+                if elem is not Element.DENDRO:
+                    self.assertFalse(p2ac.get_elemental_aura().has_aura())
+                else:
+                    self.assertIn(Element.DENDRO, p2ac.get_elemental_aura())
+
     ############################## Frozen ##############################
-    def testFrozen(self):
+    def test_frozen(self):
         """
         Tests that dealing 1 Hydro damage to char with Cryo aura deals 2 damage, and give character
         FrozenStatus, vice versa.
@@ -536,8 +732,38 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(ac.get_hp(), 5)
         self.assertFalse(ac.get_character_statuses().contains(FrozenStatus))
 
+    def test_frozen_no_dmg(self):
+        """
+        Tests that frozen without damage still applies frozen status
+        """
+        # HYDRO to CRYO
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.CRYO)
+        game_state = auto_step(
+            ApplyElementalAuraEffect(
+                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
+                element=Element.HYDRO,
+            ).execute(game_state)
+        )
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 10)
+        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+        self.assertIn(FrozenStatus, p2ac.get_character_statuses())
+
+        # CRYO to HYDRO
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.HYDRO)
+        game_state = auto_step(
+            ApplyElementalAuraEffect(
+                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
+                element=Element.CRYO,
+            ).execute(game_state)
+        )
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 10)
+        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+        self.assertIn(FrozenStatus, p2ac.get_character_statuses())
+
     ############################## Quicken ##############################
-    def testQuicken(self):
+    def test_quicken(self):
         """
         Tests that dealing 1 Electro damage to char with Dendro aura deals 2 damage, and give character
         CatalyzingFieldStatus, vice versa.
@@ -576,7 +802,39 @@ class TestStatus(unittest.TestCase):
             2
         )
 
-    def testCatalyzingFieldStatus(self):
+    def test_quicken_no_dmg(self):
+        """
+        Tests that quicken without damage still generates catalyzing field status to the opponent
+        """
+        # ELECTRO to DENDRO
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.DENDRO)
+        game_state = auto_step(
+            ApplyElementalAuraEffect(
+                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
+                element=Element.ELECTRO,
+            ).execute(game_state)
+        )
+        p1 = game_state.get_player1()
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 10)
+        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+        self.assertIn(CatalyzingFieldStatus, p1.get_combat_statuses())
+
+        # DENDRO to ELECTRO
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO)
+        game_state = auto_step(
+            ApplyElementalAuraEffect(
+                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
+                element=Element.DENDRO,
+            ).execute(game_state)
+        )
+        p1 = game_state.get_player1()
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 10)
+        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+        self.assertIn(CatalyzingFieldStatus, p1.get_combat_statuses())
+
+    def test_catalyzing_field_status(self):
         """
         Tests that CatalyzingFieldStatus boosts damage.
         Tests that CatalyzingFieldStatus can be consumed to disappering.
@@ -657,7 +915,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(oc.get_hp(), 9)
 
     ############################## Bloom ##############################
-    def testBloom(self):
+    def test_bloom(self):
         """
         Tests that dealing 1 Hydro damage to char with Dendro aura deals 2 damage, and give character
         CatalyzingFieldStatus, vice versa.
@@ -696,7 +954,41 @@ class TestStatus(unittest.TestCase):
             1
         )
 
-    def testDendroCoreStatus(self):
+    def test_bloom_no_dmg(self):
+        """
+        Tests that bloom without damage still generates dendro core status to the opponent
+        """
+        # HYDRO to DENDRO
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.DENDRO)
+        game_state = auto_step(
+            ApplyElementalAuraEffect(
+                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
+                element=Element.HYDRO,
+            ).execute(game_state)
+        )
+        p1 = game_state.get_player1()
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 10)
+        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+        self.assertIn(DendroCoreStatus, p1.get_combat_statuses())
+        self.assertEqual(p1.get_combat_statuses().just_find(DendroCoreStatus).usages, 1)
+
+        # DENDRO to HYDRO
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.HYDRO)
+        game_state = auto_step(
+            ApplyElementalAuraEffect(
+                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
+                element=Element.DENDRO,
+            ).execute(game_state)
+        )
+        p1 = game_state.get_player1()
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 10)
+        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+        self.assertIn(DendroCoreStatus, p1.get_combat_statuses())
+        self.assertEqual(p1.get_combat_statuses().just_find(DendroCoreStatus).usages, 1)
+
+    def test_dendro_core_status(self):
         """
         Tests that DendroCoreStatus boosts damage.
         Tests that DendroCoreStatus can be consumed to disappering.
@@ -762,7 +1054,7 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(oc.get_hp(), 9)
 
     ############################## Crystallize ##############################
-    def testCrystallize(self):
+    def test_crystallize(self):
         """
         Tests that dealing 1 Geo damage to char with Pyro aura deals 2 damage, and give character
         CrystallizeStatus
@@ -810,7 +1102,38 @@ class TestStatus(unittest.TestCase):
             2
         )
 
-    def testCrystallizeStatus(self):
+    def test_crystallize_no_dmg(self):
+        """
+        NOTE that in the actual game, this is undefined behaviour.
+
+        Tests that 0 damage crystallize reaction has no effect
+        """
+        # GEO to all aurable elements
+        aurable_elems = (Element.PYRO, Element.HYDRO, Element.ELECTRO, Element.CRYO, Element.DENDRO)
+        for elem in aurable_elems:
+            with self.subTest(elem=elem):
+                game_state = oppo_aura_elem(ACTION_TEMPLATE, elem)
+                game_state = auto_step(
+                    ApplyElementalAuraEffect(
+                        target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
+                        element=Element.GEO,
+                    ).execute(game_state)
+                )
+                p1 = game_state.get_player1()
+                p2ac = game_state.get_player2().just_get_active_character()
+                self.assertEqual(p2ac.get_hp(), 10)
+                if elem is not Element.DENDRO:
+                    self.assertFalse(p2ac.get_elemental_aura().has_aura())
+                    self.assertIn(CrystallizeStatus, p1.get_combat_statuses())
+                    self.assertEqual(p1.get_combat_statuses().just_find(
+                        CrystallizeStatus).usages,
+                        1
+                    )
+                else:
+                    self.assertIn(Element.DENDRO, p2ac.get_elemental_aura())
+                    self.assertNotIn(CrystallizeStatus, p1.get_combat_statuses())
+
+    def test_crystallize_status(self):
         """
         tests that CrystallizeStatus does take dmg for characters
         """
@@ -892,7 +1215,7 @@ class TestStatus(unittest.TestCase):
         self.assertFalse(game_state.get_player2().get_combat_statuses().contains(CrystallizeStatus))
 
     ############################## Burning ##############################
-    def testBurning(self):
+    def test_burning(self):
         """
         Tests that dealing 1 Pyro damage to char with Dendro aura deals 2 damage, and adds Burning to
         Summons, vice versa
@@ -940,7 +1263,41 @@ class TestStatus(unittest.TestCase):
             2
         )
 
-    def testBurningFlameSummon(self):
+    def test_burning_no_dmg(self):
+        """
+        Tests that burning without damage still adds Burning Flame summon to opponent
+        """
+        # PYRO to DENDRO
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.DENDRO)
+        game_state = auto_step(
+            ApplyElementalAuraEffect(
+                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
+                element=Element.PYRO,
+            ).execute(game_state)
+        )
+        p1 = game_state.get_player1()
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 10)
+        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+        self.assertIn(BurningFlameSummon, p1.get_summons())
+        self.assertEqual(p1.get_summons().just_find(BurningFlameSummon).usages, 1)
+
+        # DENDRO to PYRO
+        game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
+        game_state = auto_step(
+            ApplyElementalAuraEffect(
+                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
+                element=Element.DENDRO,
+            ).execute(game_state)
+        )
+        p1 = game_state.get_player1()
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 10)
+        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+        self.assertIn(BurningFlameSummon, p1.get_summons())
+        self.assertEqual(p1.get_summons().just_find(BurningFlameSummon).usages, 1)
+
+    def test_burning_flame_summon(self):
         """
         Tests that burning attacks when at end round normally
         """
@@ -972,7 +1329,7 @@ class TestStatus(unittest.TestCase):
             1
         )
 
-    def testBurningFlameSummonTriggeringBurning(self):
+    def test_burning_flame_summon_triggering_burning(self):
         """
         tests the behaviour when the burning attack triggers reaction Burning
         """

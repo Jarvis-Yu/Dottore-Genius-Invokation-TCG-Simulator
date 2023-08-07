@@ -708,13 +708,14 @@ class ApplyElementalAuraEffect(DirectEffect):
         target_char = game_state.get_character_target(self.target)
         assert target_char is not None
         all_aura = target_char.get_elemental_aura()
-        if target_char.defeated() or self.element in all_aura:
+        if target_char.defeated() or (all_aura.aurable(self.element) and self.element in all_aura):
             return game_state
         reaction_detail = all_aura.consult_reaction(self.element)
         new_aura = all_aura
         effects: list[Effect] = []
         if reaction_detail is None:
-            new_aura = new_aura.add(self.element)
+            if new_aura.aurable(self.element):
+                new_aura = new_aura.add(self.element)
         else:
             new_aura = new_aura.remove(reaction_detail.first_elem)
             if reaction_detail.reaction_type is Reaction.BLOOM:
@@ -745,6 +746,16 @@ class ApplyElementalAuraEffect(DirectEffect):
                         status=stt.FrozenStatus,
                     )
                 )
+            elif reaction_detail.reaction_type is Reaction.OVERLOADED:
+                oppo_active_id = game_state \
+                    .get_player(self.target.pid) \
+                    .just_get_active_character() \
+                    .get_id()
+                assert self.target.zone is Zone.CHARACTERS
+                if self.target.id is oppo_active_id:
+                    effects.append(
+                        ForwardSwapCharacterEffect(self.target.pid)
+                    )
             elif reaction_detail.reaction_type is Reaction.QUICKEN:
                 effects.append(
                     AddCombatStatusEffect(
@@ -756,7 +767,6 @@ class ApplyElementalAuraEffect(DirectEffect):
                 assert reaction_detail.reaction_type in {
                     Reaction.VAPORIZE,
                     Reaction.MELT,
-                    Reaction.OVERLOADED,
                     Reaction.SUPERCONDUCT,
                     Reaction.ELECTRO_CHARGED,
                     Reaction.SWIRL,
