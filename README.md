@@ -106,6 +106,23 @@ You can find more examples of implementations of `PlayerAgent` in `dgisim/src/ag
 The `RandomAgent` in `agents.py` is implemented based on `ActionGenerator` mentioned above
 to make random but valid decision.
 
+Once you defined your own player agent, you can test it against the `RandomAgent`.
+
+```py
+# generates a random initial game state with random decks
+init_game_state = GameState.from_default()
+# forms a `game`; YourCustomAgent is Player 1, RandomAgnet is Player 2
+game_state_machine = GameStateMachine(init_game_state, YourCustomAgent(), RandomAgent())
+# runs the game and prints who wins
+game_state_machine.run()
+# gets full history of the game
+history: tuple[GameState, ...] = game_state_machine.get_history()
+# gets only history of game states that are right before a player action
+act_history: tuple[GameState, ...] = game_state_machine.get_action_history()
+# any GameState can be printed with nice formatting directly
+print(history[-1])
+```
+
 ## Features
 
 This simulator is modeled as a finite state machine, which means any intermediate state can be
