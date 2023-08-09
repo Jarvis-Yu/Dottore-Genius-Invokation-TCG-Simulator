@@ -62,13 +62,17 @@ __all__ = [
     # Weapon Card
     ## Bow ##
     "RavenBow",
+    "SacrificialBow",
     ## Catalyst ##
     "MagicGuide",
+    "SacrificialFragments",
     ## Claymore ##
+    "SacrificialGreatsword",
     "WhiteIronGreatsword",
     ## Polearm ##
     "WhiteTassel",
     ## Sword ##
+    "SacrificialSword",
     "TravelersHandySword",
 
     # Artifact Card
@@ -1013,6 +1017,12 @@ class RavenBow(WeaponEquipmentCard):
     WEAPON_TYPE = WeaponType.BOW
     WEAPON_STATUS = stt.RavenBowStatus
 
+
+class SacrificialBow(WeaponEquipmentCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    WEAPON_TYPE = WeaponType.BOW
+    WEAPON_STATUS = stt.SacrificialBowStatus
+
 #### Catalyst ####
 
 
@@ -1021,7 +1031,19 @@ class MagicGuide(WeaponEquipmentCard):
     WEAPON_TYPE = WeaponType.CATALYST
     WEAPON_STATUS = stt.MagicGuideStatus
 
+
+class SacrificialFragments(WeaponEquipmentCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    WEAPON_TYPE = WeaponType.CATALYST
+    WEAPON_STATUS = stt.SacrificialFragmentsStatus
+
 #### Claymore ####
+
+
+class SacrificialGreatsword(WeaponEquipmentCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    WEAPON_TYPE = WeaponType.CLAYMORE
+    WEAPON_STATUS = stt.SacrificialGreatswordStatus
 
 
 class WhiteIronGreatsword(WeaponEquipmentCard):
@@ -1038,6 +1060,12 @@ class WhiteTassel(WeaponEquipmentCard):
     WEAPON_STATUS = stt.WhiteTasselStatus
 
 #### Sword ####
+
+
+class SacrificialSword(WeaponEquipmentCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    WEAPON_TYPE = WeaponType.SWORD
+    WEAPON_STATUS = stt.SacrificialSwordStatus
 
 
 class TravelersHandySword(WeaponEquipmentCard):

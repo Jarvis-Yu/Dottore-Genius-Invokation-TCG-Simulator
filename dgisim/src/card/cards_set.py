@@ -20,13 +20,17 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ## Weapons ##
     ### Bow ###
     RavenBow,
+    SacrificialBow,
     ### Catalyst ###
     MagicGuide,
+    SacrificialFragments,
     ### Claymore ###
+    SacrificialGreatsword,
     WhiteIronGreatsword,
     ### Polearm ###
     WhiteTassel,
     ### Sword ###
+    SacrificialSword,
     TravelersHandySword,
     ## Artifact ##
     GamblersEarrings,

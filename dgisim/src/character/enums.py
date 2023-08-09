@@ -24,6 +24,15 @@ class CharacterSkill(Enum):
             return EventType.ELEMENTAL_BURST
         raise NotImplementedError
 
+    def is_normal_attack(self) -> bool:
+        return self is CharacterSkill.NORMAL_ATTACK
+
+    def is_elemental_skill(self) -> bool:
+        return self is CharacterSkill.ELEMENTAL_SKILL1 or self is CharacterSkill.ELEMENTAL_SKILL2
+
+    def is_elemental_burst(self) -> bool:
+        return self is CharacterSkill.ELEMENTAL_BURST
+
 class WeaponType(Enum):
     BOW = 0
     CATALYST = 1

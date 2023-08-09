@@ -64,13 +64,17 @@ __all__ = [
     ## Weapon ##
     ### bow ###
     "RavenBowStatus",
+    "SacrificialBowStatus",
     ### catalyst ###
     "MagicGuideStatus",
+    "SacrificialFragmentsStatus",
     ### claymore ###
+    "SacrificialGreatswordStatus",
     "WhiteIronGreatswordStatus",
     ### polearm ###
     "WhiteTasselStatus",
     ### sword ###
+    "SacrificialSwordStatus",
     "TravelersHandySwordStatus",
     ## Artifact ##
     "GamblersEarringsStatus",
@@ -814,11 +818,75 @@ class DeathThisRoundStatus(PlayerHiddenStatus):
 
 ########## Weapon Status ##########
 
+
+@dataclass(frozen=True, kw_only=True)
+class _SacrificialWeaponStatus(WeaponEquipmentStatus, _UsageStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    activated: bool = False
+    DICES_GAIN_NUM: ClassVar[int] = 1
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    @staticmethod
+    def _auto_destroy() -> bool:
+        return False
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if (
+                    self.usages > 0
+                    and information.skill_type.is_elemental_skill()
+                    and information.source == status_source
+            ):
+                return replace(self, activated=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION:
+            if self.activated:
+                assert self.usages > 0
+                equiper = game_state.get_character_target(source)
+                assert equiper is not None
+                return [
+                    eft.AddDiceEffect(
+                        pid=source.pid,
+                        dices=ActualDices({equiper.element(): self.DICES_GAIN_NUM}),
+                    )
+                ], replace(self, activated=False, usages=-1)
+        elif signal is TriggeringSignal.ROUND_END:
+            if self.usages < self.MAX_USAGES:
+                return [], replace(self, usages=self.MAX_USAGES)
+        return [], self
+
 #### Bow ####
 
 
 @dataclass(frozen=True, kw_only=True)
 class RavenBowStatus(WeaponEquipmentStatus):
+    WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.BOW
+
+
+@dataclass(frozen=True, kw_only=True)
+class SacrificialBowStatus(_SacrificialWeaponStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.BOW
 
 #### Catalyst ####
@@ -828,12 +896,23 @@ class RavenBowStatus(WeaponEquipmentStatus):
 class MagicGuideStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CATALYST
 
+
+@dataclass(frozen=True, kw_only=True)
+class SacrificialFragmentsStatus(_SacrificialWeaponStatus):
+    WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CATALYST
+
 #### Claymore ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class SacrificialGreatswordStatus(_SacrificialWeaponStatus):
+    WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CLAYMORE
 
 
 @dataclass(frozen=True, kw_only=True)
 class WhiteIronGreatswordStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CLAYMORE
+
 
 #### Polearm ####
 
@@ -846,8 +925,14 @@ class WhiteTasselStatus(WeaponEquipmentStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
+class SacrificialSwordStatus(_SacrificialWeaponStatus):
+    WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.SWORD
+
+
+@dataclass(frozen=True, kw_only=True)
 class TravelersHandySwordStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.SWORD
+
 
 ########## Artifact Status ##########
 
