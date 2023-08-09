@@ -1,6 +1,6 @@
 # Change Log
 
-## v0.2.dev4 (not released yet)
+## v0.3.dev0 (6 Aug 2023)
 
 ### Added
 

@@ -111,7 +111,7 @@ Once you defined your own player agent, you can test it against the `RandomAgent
 ```py
 # generates a random initial game state with random decks
 init_game_state = GameState.from_default()
-# forms a `game`; YourCustomAgent is Player 1, RandomAgnet is Player 2
+# forms a `game`; YourCustomAgent is Player 1, RandomAgent is Player 2
 game_state_machine = GameStateMachine(init_game_state, YourCustomAgent(), RandomAgent())
 # runs the game and prints who wins
 game_state_machine.run()
