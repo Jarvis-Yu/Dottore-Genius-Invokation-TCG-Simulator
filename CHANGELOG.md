@@ -1,5 +1,17 @@
 # Change Log
 
+## v0.3.dev1 (To be released later)
+
+### Added
+
+- New Cards:
+  - Equipment Card:
+    - Weapon Card:
+      - Sacrificial Bow
+      - Sacrificial Fragments
+      - Sacrificial Greatsword
+      - Sacrificial Sword
+
 ## v0.3.dev0 (6 Aug 2023)
 
 ### Added

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dgisim.src.action.action import *
 from dgisim.src.agents import *
+from dgisim.src.card.card import Card
 from dgisim.src.character.enums import CharacterSkill
 from dgisim.src.dices import ActualDices
 from dgisim.src.effect.effect import *
@@ -41,16 +42,20 @@ def step_skill(
         game_state: GameState,
         pid: Pid,
         skill: CharacterSkill,
+        dices: None | ActualDices = None,
         observe: bool = False,
 ) -> GameState:
     active_character = game_state.get_player(pid).just_get_active_character()
+    if dices is None:
+        dices_used = ActualDices({Element.OMNI: active_character.skill_cost(skill).num_dices()})
+    else:
+        dices_used = dices
     player_action = SkillAction(
         skill=skill,
-        instruction=DiceOnlyInstruction(
-            dices=ActualDices({Element.OMNI: active_character.skill_cost(skill).num_dices()})
-        )
+        instruction=DiceOnlyInstruction(dices=dices_used)
     )
     return step_action(game_state, pid, player_action, observe=observe)
+
 
 def step_swap(
         game_state: GameState,
@@ -180,4 +185,26 @@ def fill_dices_with_omni(game_state: GameState) -> GameState:
         lambda p: p.factory().dices(ActualDices({Element.OMNI: BIG_INT})).build()
     ).f_player2(
         lambda p: p.factory().dices(ActualDices({Element.OMNI: BIG_INT})).build()
+    ).build()
+
+
+def fill_energy_for_all(game_state: GameState) -> GameState:
+    return game_state.factory().f_player1(
+        lambda p1: p1.factory().f_characters(
+            lambda cs: cs.factory().f_characters(
+                lambda chars: tuple(
+                    char.factory().energy(char.get_max_energy()).build()
+                    for char in chars
+                )
+            ).build()
+        ).build()
+    ).f_player2(
+        lambda p2: p2.factory().f_characters(
+            lambda cs: cs.factory().f_characters(
+                lambda chars: tuple(
+                    char.factory().energy(char.get_max_energy()).build()
+                    for char in chars
+                )
+            ).build()
+        ).build()
     ).build()

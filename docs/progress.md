@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (10/51 implemented)](#character-1051-implemented)
-  - [Card (34/192 implemented)](#card-34192-implemented)
+  - [Card (38/192 implemented)](#card-38192-implemented)
 
 ## Character (10/51 implemented)
 
@@ -29,9 +29,9 @@ all I need now is to implement each card and character.
 - [ ] Geo:
   - [x] Arataki Itto
 
-## Card (34/192 implemented)
+## Card (38/192 implemented)
 
-- [ ] Equipment Card (15/103):
+- [ ] Equipment Card (19/103):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] ColdBlooded Strike
@@ -44,16 +44,20 @@ all I need now is to implement each card and character.
     - [x] Thundering Penance
   - [ ] Weapon Card:
     - [ ] Bow:
-      - [x] Raven Bow
       - [ ] Amos' Bow _<-- WIP_
+      - [x] Raven Bow
+      - [x] Sacrificial Bow
     - [ ] Catalyst:
-      - [x] Magic Guide
       - [ ] A Thousand Floating Dreams _<-- WIP_
+      - [x] Magic Guide
+      - [x] Sacrificial Fragments
     - [ ] Claymore:
+      - [x] Sacrificial Greatsword
       - [x] White Iron Greatsword
     - [ ] Polearm:
       - [x] White Tassel
     - [ ] Sword:
+      - [x] Sacrificial Sword
       - [x] Traveler's Handy Sword
   - [ ] Artifact Card:
     - [x] Gambler's Earrings
