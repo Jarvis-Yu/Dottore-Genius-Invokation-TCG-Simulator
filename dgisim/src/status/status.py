@@ -869,7 +869,7 @@ class _SacrificialWeaponStatus(WeaponEquipmentStatus, _UsageStatus):
                 return [
                     eft.AddDiceEffect(
                         pid=source.pid,
-                        dices=ActualDices({equiper.element(): self.DICES_GAIN_NUM}),
+                        dices=ActualDices({equiper.ELEMENT: self.DICES_GAIN_NUM}),
                     )
                 ], replace(self, activated=False, usages=-1)
         elif signal is TriggeringSignal.ROUND_END:

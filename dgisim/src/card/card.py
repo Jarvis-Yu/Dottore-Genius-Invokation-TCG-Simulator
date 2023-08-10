@@ -23,7 +23,7 @@ from ..status import status as stt
 from ..summon import summon as sm
 from ..support import support as sp
 
-from ..character.enums import CharacterSkill, WeaponType
+from ..character.enums import CharacterSkill, Faction, WeaponType
 from ..dices import AbstractDices, ActualDices
 from ..effect.enums import Zone
 from ..effect.structs import StaticTarget
@@ -95,6 +95,7 @@ __all__ = [
     "LeaveItToMe",
     "QuickKnit",
     "Starsigns",
+    "WindAndFreedom",
 
     # Support Card
     ## Companion ##
@@ -318,6 +319,19 @@ class _UsableFuncs:
 
 
 class _DiceOnlyChoiceProvider(Card):
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        if not isinstance(instruction, act.DiceOnlyInstruction):  # pragma: no cover
+            return False
+
+        return cls.loosely_usable(game_state, pid)
+
     @classmethod
     def _choices_helper(
             cls,
@@ -701,7 +715,7 @@ class WeaponEquipmentCard(EquipmentCard, _CharTargetChoiceProvider):
     @override
     @classmethod
     def _valid_char(cls, char: chr.Character) -> bool:
-        return char.weapon_type() is cls.WEAPON_TYPE
+        return char.WEAPON_TYPE is cls.WEAPON_TYPE
 
     @override
     @classmethod
@@ -1490,20 +1504,6 @@ class Starsigns(EventCard, _DiceOnlyChoiceProvider):
 
     @override
     @classmethod
-    def _valid_instruction(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction
-    ) -> bool:
-        """ Check target is active character and .loosely_usable() """
-        if not isinstance(instruction, act.DiceOnlyInstruction):  # pragma: no cover
-            return False
-
-        return cls.loosely_usable(game_state, pid)
-
-    @override
-    @classmethod
     def effects(
             cls,
             game_state: gs.GameState,
@@ -1520,6 +1520,29 @@ class Starsigns(EventCard, _DiceOnlyChoiceProvider):
                 1
             ),
         )
+
+
+class WindAndFreedom(EventCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDices({Element.OMNI: 1})
+
+    @override
+    @classmethod
+    def valid_in_deck(cls, deck: Deck) -> bool:
+        return 2 <= sum(
+            1
+            for char in deck.chars
+            if char.of_faction(Faction.MONDSTADT)
+        )
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        raise NotImplementedError
 
 # >>>>>>>>>>>>>>>>>>>> Event Cards >>>>>>>>>>>>>>>>>>>>
 

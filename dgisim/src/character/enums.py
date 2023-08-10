@@ -4,6 +4,8 @@ from ..event import EventType
 
 __all__ = [
     "CharacterSkill",
+    "Faction",
+    "WeaponType",
 ]
 
 

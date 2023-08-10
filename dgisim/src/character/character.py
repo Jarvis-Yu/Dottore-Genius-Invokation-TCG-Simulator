@@ -20,7 +20,7 @@ from ..effect.structs import StaticTarget, DamageType
 from ..element import *
 from ..helper.quality_of_life import case_val
 from ..state.enums import Pid
-from .enums import CharacterSkill, WeaponType
+from .enums import CharacterSkill, Faction, WeaponType
 
 if TYPE_CHECKING:
     from ..state.game_state import GameState
@@ -47,6 +47,7 @@ class Character:
     _ELEMENT = Element.ANY
     _WEAPON_TYPE: WeaponType
     _TALENT_STATUS: None | type[stt.TalentEquipmentStatus]
+    _FACTIONS: frozenset[Faction]
 
     def __init__(
         self,
@@ -115,12 +116,20 @@ class Character:
     def factory(self) -> CharacterFactory:
         return CharacterFactory(self, type(self))
 
-    @classmethod
-    def element(cls) -> Element:
-        return cls._ELEMENT
+    @property
+    def FACTIONS(cls) -> frozenset[Faction]:
+        return cls._FACTIONS
 
     @classmethod
-    def weapon_type(cls) -> WeaponType:
+    def of_faction(cls, faction: Faction) -> bool:
+        return faction in cls._FACTIONS
+
+    @property
+    def ELEMENT(cls) -> Element:
+        return cls._ELEMENT
+
+    @property
+    def WEAPON_TYPE(cls) -> WeaponType:
         return cls._WEAPON_TYPE
 
     @classmethod
@@ -439,6 +448,7 @@ class AratakiItto(Character):
     _ELEMENT = Element.GEO
     _WEAPON_TYPE = WeaponType.CLAYMORE
     _TALENT_STATUS = stt.AratakiIchibanStatus
+    _FACTIONS = frozenset((Faction.INAZUMA,))
 
     @override
     @classmethod
@@ -527,6 +537,7 @@ class ElectroHypostasis(Character):
     _ELEMENT = Element.ELECTRO
     _WEAPON_TYPE = WeaponType.NONE
     _TALENT_STATUS = None
+    _FACTIONS = frozenset((Faction.MONSTER,))
 
     @override
     @classmethod
@@ -611,6 +622,7 @@ class KaedeharaKazuha(Character):
     _ELEMENT = Element.ANEMO
     _WEAPON_TYPE = WeaponType.SWORD
     _TALENT_STATUS = stt.PoeticsOfFuubutsuStatus
+    _FACTIONS = frozenset((Faction.INAZUMA,))
 
     @override
     @classmethod
@@ -770,6 +782,7 @@ class Kaeya(Character):
     _ELEMENT = Element.CRYO
     _WEAPON_TYPE = WeaponType.SWORD
     _TALENT_STATUS = stt.ColdBloodedStrikeStatus
+    _FACTIONS = frozenset((Faction.MONDSTADT,))
 
     @override
     @classmethod
@@ -848,6 +861,7 @@ class Keqing(Character):
     _ELEMENT = Element.ELECTRO
     _WEAPON_TYPE = WeaponType.SWORD
     _TALENT_STATUS = stt.ThunderingPenanceStatus
+    _FACTIONS = frozenset((Faction.LIYUE,))
 
     # consts
     BASE_ELECTRO_INFUSION_DURATION: int = 2
@@ -987,6 +1001,7 @@ class Klee(Character):
     _ELEMENT = Element.PYRO
     _WEAPON_TYPE = WeaponType.CATALYST
     _TALENT_STATUS = stt.PoundingSurpriseStatus
+    _FACTIONS = frozenset((Faction.MONDSTADT,))
 
     @override
     @classmethod
@@ -1068,6 +1083,7 @@ class Mona(Character):
     _ELEMENT = Element.HYDRO
     _WEAPON_TYPE = WeaponType.CATALYST
     _TALENT_STATUS = stt.ProphecyOfSubmersionStatus
+    _FACTIONS = frozenset((Faction.MONDSTADT,))
 
     @override
     @classmethod
@@ -1152,6 +1168,7 @@ class RhodeiaOfLoch(Character):
     _ELEMENT = Element.HYDRO
     _WEAPON_TYPE = WeaponType.NONE
     _TALENT_STATUS = stt.StreamingSurgeStatus
+    _FACTIONS = frozenset((Faction.MONSTER,))
 
     # consts
     _SUMMONS = (
@@ -1299,6 +1316,7 @@ class Tighnari(Character):
     _ELEMENT = Element.DENDRO
     _WEAPON_TYPE = WeaponType.BOW
     _TALENT_STATUS = stt.KeenSightStatus
+    _FACTIONS = frozenset((Faction.SUMERU,))
 
     @override
     @classmethod
@@ -1376,6 +1394,7 @@ class Xingqiu(Character):
     _ELEMENT = Element.HYDRO
     _WEAPON_TYPE = WeaponType.SWORD
     _TALENT_STATUS = stt.TheScentRemainedStatus
+    _FACTIONS = frozenset((Faction.LIYUE,))
 
     @override
     @classmethod

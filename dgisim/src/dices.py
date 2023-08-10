@@ -353,7 +353,7 @@ class ActualDices(Dices):
             None
             if player_state is None
             else frozenset(
-                char.element()
+                char.ELEMENT
                 for char in player_state.get_characters().get_alive_characters()
             )
         )

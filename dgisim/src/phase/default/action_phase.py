@@ -316,7 +316,7 @@ class ActionPhase(ph.Phase):
         dices = player.get_dices()
         active_character = player.get_active_character()
         assert active_character is not None
-        active_character_elem = active_character.element()
+        active_character_elem = active_character.ELEMENT
         if action.card not in cards \
                 or dices[action.dice_elem] == 0 \
                 or action.dice_elem is active_character_elem \

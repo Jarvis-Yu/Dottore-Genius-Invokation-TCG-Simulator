@@ -34,7 +34,7 @@ all I need now is to implement each card and character.
 - [ ] Equipment Card (19/103):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
-    - [x] ColdBlooded Strike
+    - [x] Cold-Blooded Strike
     - [x] Keen Sight
     - [x] Poetics of Fuubutsu
     - [x] Pounding Surprise
