@@ -2,7 +2,7 @@
 This file contains different implementations of PlayerAgents.
 """
 import random
-from typing import Any, Callable, Iterable, Optional, TYPE_CHECKING, TypeVar
+from typing import Any, Callable, Iterable, Optional, TYPE_CHECKING, TypeVar, cast
 
 from .action.action import *
 from .action.enums import ActionType
@@ -63,8 +63,24 @@ class LazyAgent(PlayerAgent):
         elif isinstance(curr_phase, mode.roll_phase):
             return DicesSelectAction(selected_dices=ActualDices({}))
 
-        elif isinstance(curr_phase, mode.action_phase):
-            return EndRoundAction()
+        elif isinstance(curr_phase, mode.action_phase)  \
+                or isinstance(curr_phase, mode.end_phase):
+            action_generator = game_state.action_generator(pid)
+            assert action_generator is not None
+            action_types = action_generator.choices()
+            assert isinstance(action_types, tuple)
+            if ActionType.END_ROUND in action_types:
+                return EndRoundAction()
+            assert ActionType.SWAP_CHARACTER in action_types and game_state.death_swapping()
+            choices = action_types
+            while True:
+                action_generator = action_generator.choose(random.choice(choices))
+                assert action_generator is not None
+                if action_generator.filled():
+                    break
+                else:
+                    choices = cast(tuple, action_generator.choices())
+            return action_generator.generate_action()
 
         else:  # pragma: no cover
             raise Exception("No Action Defined")

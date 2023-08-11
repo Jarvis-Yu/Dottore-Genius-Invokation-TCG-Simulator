@@ -27,6 +27,7 @@ class PlayerState:
     def __init__(
         self,
         phase: Act,
+        consec_action: bool,
         characters: Characters,
         hidden_statuses: sts.Statuses,
         combat_statuses: sts.Statuses,
@@ -42,6 +43,7 @@ class PlayerState:
     ):
         # REMINDER: don't forget to update factory when adding new fields
         self._phase = phase
+        self._consec_action = consec_action
         self._card_redraw_chances = card_redraw_chances
         self._dice_reroll_chances = dice_reroll_chances
         self._characters = characters
@@ -60,6 +62,9 @@ class PlayerState:
 
     def get_phase(self) -> Act:
         return self._phase
+
+    def get_consec_action(self) -> bool:
+        return self._consec_action
 
     def get_card_redraw_chances(self) -> int:
         return self._card_redraw_chances
@@ -103,16 +108,16 @@ class PlayerState:
     def just_get_active_character(self) -> chr.Character:
         return self._characters.just_get_active_character()
 
-    def is_action_phase(self) -> bool:
+    def in_action_phase(self) -> bool:
         return self._phase is Act.ACTION_PHASE
 
-    def is_passive_wait_phase(self) -> bool:
+    def in_passive_wait_phase(self) -> bool:
         return self._phase is Act.PASSIVE_WAIT_PHASE
 
-    def is_active_wait_phase(self) -> bool:
+    def in_active_wait_phase(self) -> bool:
         return self._phase is Act.ACTIVE_WAIT_PHASE
 
-    def is_end_phase(self) -> bool:
+    def in_end_phase(self) -> bool:
         return self._phase is Act.END_PHASE
 
     def is_mine(self, object: chr.Character | sp.Support) -> bool:
@@ -136,14 +141,21 @@ class PlayerState:
 
     @classmethod
     def example_player(cls, mode: Mode) -> Self:
-        from ..status.status import DeathThisRoundStatus, PlungeAttackStatus
+        from ..deck import FrozenDeck
+        from ..helper.hashable_dict import HashableDict
         cards = mode.all_cards()
         chars = mode.all_chars()
         import random
-        selected_cards = random.sample(list(cards), k=15)
         selected_chars = random.sample(list(chars), k=3)
+        char_deck = FrozenDeck(chars=tuple(selected_chars), cards=HashableDict())
+        selected_cards = random.sample(list(
+            card
+            for card in cards
+            if card.valid_in_deck(char_deck)
+        ), k=15)
         return cls(
             phase=Act.PASSIVE_WAIT_PHASE,
+            consec_action=False,
             card_redraw_chances=0,
             dice_reroll_chances=0,
             characters=Characters.from_default(
@@ -164,6 +176,7 @@ class PlayerState:
     def from_chars_cards(cls, mode: Mode, characters: Characters, cards: Cards) -> Self:
         return cls(
             phase=Act.PASSIVE_WAIT_PHASE,
+            consec_action=False,
             card_redraw_chances=0,
             dice_reroll_chances=0,
             characters=characters,
@@ -182,6 +195,7 @@ class PlayerState:
     def from_deck(cls, mode: Mode, deck: Deck) -> Self:
         return cls(
             phase=Act.PASSIVE_WAIT_PHASE,
+            consec_action=False,
             card_redraw_chances=0,
             dice_reroll_chances=0,
             characters=Characters.from_iterable(deck.chars),
@@ -199,6 +213,7 @@ class PlayerState:
     def _all_unique_data(self) -> tuple:
         return (
             self._phase,
+            self._consec_action,
             self._card_redraw_chances,
             self._dice_reroll_chances,
             self._characters,
@@ -224,6 +239,7 @@ class PlayerState:
     def dict_str(self) -> dict[str, Union[dict, str]]:
         return {
             "Phase": self._phase.value,
+            "Consecutive Action": str(self._consec_action),
             "Card/Dice Redraw Chances": f"{self._card_redraw_chances}/{self._dice_reroll_chances}",
             "Characters": self._characters.dict_str(),
             "Hidden Statuses": str(self._hidden_statuses),
@@ -241,6 +257,7 @@ class PlayerState:
 class PlayerStateFactory:
     def __init__(self, player_state: PlayerState) -> None:
         self._phase = player_state.get_phase()
+        self._consec_action = player_state.get_consec_action()
         self._card_redraw_chances = player_state.get_card_redraw_chances()
         self._dice_reroll_chances = player_state.get_dice_reroll_chances()
         self._characters = player_state.get_characters()
@@ -257,6 +274,13 @@ class PlayerStateFactory:
     def phase(self, phase: Act) -> PlayerStateFactory:
         self._phase = phase
         return self
+
+    def consec_action(self, consec_action: bool) -> PlayerStateFactory:
+        self._consec_action = consec_action
+        return self
+
+    def f_consec_action(self, f: Callable[[bool], bool]) -> PlayerStateFactory:
+        return self.consec_action(f(self._consec_action))
 
     def card_redraw_chances(self, chances: int) -> PlayerStateFactory:
         self._card_redraw_chances = chances
@@ -346,6 +370,7 @@ class PlayerStateFactory:
     def build(self) -> PlayerState:
         return PlayerState(
             phase=self._phase,
+            consec_action=self._consec_action,
             card_redraw_chances=self._card_redraw_chances,
             dice_reroll_chances=self._dice_reroll_chances,
             characters=self._characters,

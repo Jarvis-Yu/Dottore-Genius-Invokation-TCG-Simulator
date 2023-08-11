@@ -74,6 +74,7 @@ __all__ = [
     "DefeatedCheckerEffect",
 
     # Direct Effect
+    "ConsecutiveActionEffect",
     "SwapCharacterEffect",
     "ForwardSwapCharacterEffect",
     "ForwardSwapCharacterCheckEffect",
@@ -423,7 +424,12 @@ class TurnEndEffect(PhaseEffect):
         player = game_state.get_player(active_player_id)
         other_player = game_state.get_other_player(active_player_id)
         assert player.get_phase() is Act.ACTION_PHASE
-        if other_player.get_phase() is not Act.END_PHASE:
+        if player.get_consec_action():
+            game_state = game_state.factory().f_player(
+                active_player_id,
+                lambda p: p.factory().consec_action(False).build()
+            ).build()
+        elif other_player.get_phase() is not Act.END_PHASE:
             game_state = game_state.factory().active_player_id(
                 active_player_id.other()
             ).player(
@@ -585,6 +591,17 @@ class DefeatedCheckerEffect(CheckerEffect):
         return game_state
 
 ############################## Direct Effect ##############################
+
+
+@dataclass(frozen=True, repr=False)
+class ConsecutiveActionEffect(DirectEffect):
+    target_pid: Pid
+
+    def execute(self, game_state: GameState) -> GameState:
+        return game_state.factory().f_player(
+            self.target_pid,
+            lambda p: p.factory().consec_action(True).build()
+        ).build()
 
 
 @dataclass(frozen=True, repr=False)

@@ -87,6 +87,7 @@ __all__ = [
     "FrozenStatus",
     "LeaveItToMeStatus",
     "ReviveOnCooldown",
+    "WindAndFreedomStatus",
 
     # character status
     "JueyunGuobaStatus",
@@ -1168,7 +1169,7 @@ class LeaveItToMeStatus(CombatStatus):
         return super()._preprocess(game_state, status_source, item, signal)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ReviveOnCooldown(CombatStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
@@ -1181,6 +1182,46 @@ class ReviveOnCooldown(CombatStatus):
         if signal is TriggeringSignal.ROUND_END:
             return [], None
         return [], self  # pragma: no cover
+
+
+@dataclass(frozen=True, kw_only=True)
+class WindAndFreedomStatus(CombatStatus):
+    activated: bool = False
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.DEATH_EVENT,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.CHARACTER_DEATH:
+            assert isinstance(information, CharacterDeathIEvent)
+            if information.target.pid is status_source.pid.other() \
+                    and game_state.get_player(status_source.pid).in_action_phase() \
+                    and not self.activated:
+                return replace(self, activated=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        if signal is TriggeringSignal.DEATH_EVENT:
+            if self.activated:
+                return [eft.ConsecutiveActionEffect(target_pid=source.pid)], None
+        elif signal is TriggeringSignal.ROUND_END:
+            return [], None
+        return [], self
+
 
 ############################## Character Status ##############################
 

@@ -46,11 +46,11 @@ class StartingHandSelectPhase(ph.Phase):
     def step(self, game_state: GameState) -> GameState:
         p1 = game_state.get_player1()
         p2 = game_state.get_player2()
-        if p1.is_passive_wait_phase() and p2.is_passive_wait_phase():
+        if p1.in_passive_wait_phase() and p2.in_passive_wait_phase():
             return self._activate(game_state)
         elif game_state.get_effect_stack().is_not_empty():
             return self._execute_effect(game_state)
-        elif p1.is_end_phase() and p2.is_end_phase():
+        elif p1.in_end_phase() and p2.in_end_phase():
             return self._to_roll_phase(game_state)
         else:  # pragma: no cover
             raise Exception("Unknown Game State to process")

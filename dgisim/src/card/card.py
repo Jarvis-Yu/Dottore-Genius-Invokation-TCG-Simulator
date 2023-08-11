@@ -1542,7 +1542,12 @@ class WindAndFreedom(EventCard, _DiceOnlyChoiceProvider):
             pid: Pid,
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
-        raise NotImplementedError
+        return (
+            eft.AddCombatStatusEffect(
+                target_pid=pid,
+                status=stt.WindAndFreedomStatus,
+            ),
+        )
 
 # >>>>>>>>>>>>>>>>>>>> Event Cards >>>>>>>>>>>>>>>>>>>>
 

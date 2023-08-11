@@ -11,6 +11,8 @@
       - Sacrificial Fragments
       - Sacrificial Greatsword
       - Sacrificial Sword
+  - Event Card:
+    - Wind and Freedom
 
 ## v0.3.dev0 (6 Aug 2023)
 
