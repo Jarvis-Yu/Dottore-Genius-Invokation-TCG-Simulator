@@ -51,6 +51,7 @@ __all__ = [
 
     # Triggerrable Effect
     "AllStatusTriggererEffect",
+    "PlayerStatusTriggererEffect",
     "PersonalStatusTriggerEffect",
     "TriggerStatusEffect",
     "TriggerHiddenStatusEffect",
@@ -176,6 +177,24 @@ class AllStatusTriggererEffect(TriggerrbleEffect):
         effects = StatusProcessing.trigger_all_statuses_effects(game_state, self.pid, self.signal)
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class PlayerStatusTriggererEffect(TriggerrbleEffect):
+    pid: Pid
+    self_signal: TriggeringSignal
+    other_signal: TriggeringSignal
+
+    def execute(self, game_state: GameState) -> GameState:
+        self_effects = StatusProcessing.trigger_player_statuses_effects(
+            game_state, self.pid, self.self_signal
+        )
+        oppo_effects = StatusProcessing.trigger_player_statuses_effects(
+            game_state, self.pid.other(), self.other_signal
+        )
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_many_fl(self_effects + oppo_effects)
         ).build()
 
 

@@ -32,8 +32,10 @@ class TriggeringSignal(Enum):
     ROUND_START = 8
     PRE_ACTION = 9
     ACT_PRE_SKILL = 10  # trigger prepare skill
-    END_ROUND_CHECK_OUT = 11  # summons etc.
-    ROUND_END = 12  # remove frozen etc.
+    SELF_DECLARE_END_ROUND = 11
+    OPPO_DECLARE_END_ROUND = 12
+    END_ROUND_CHECK_OUT = 13  # summons etc.
+    ROUND_END = 14  # remove frozen etc.
 
     @classmethod
     def swap_event(cls, pid: Pid) -> TriggeringSignal:

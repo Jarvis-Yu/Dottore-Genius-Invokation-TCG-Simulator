@@ -44,6 +44,7 @@ __all__ = [
     "OceanicMimicRaptorSummon",
     "OceanicMimicSquirrelSummon",
     "ReflectionSummon",
+    "SesshouSakura",
     "UshiSummon",
 ]
 
@@ -60,16 +61,17 @@ class Summon(stt.Status):
 
 
 @dataclass(frozen=True, kw_only=True)
-class _DestroyOnNumSummon(Summon):
-    @override
-    def _post_update(
-            self,
-            new_self: Optional[_DestroyOnNumSummon]
-    ) -> Optional[_DestroyOnNumSummon]:
-        """ remove the status if usages <= 0 """
-        if new_self is not None and new_self.usages <= 0:
-            new_self = None
-        return super()._post_update(new_self)
+class _DestroyOnNumSummon(Summon, stt._UsageStatus):
+    pass
+    # @override
+    # def _post_update(
+    #         self,
+    #         new_self: Optional[_DestroyOnNumSummon]
+    # ) -> Optional[_DestroyOnNumSummon]:
+    #     """ remove the status if usages <= 0 """
+    #     if new_self is not None and new_self.usages <= 0:
+    #         new_self = None
+    #     return super()._post_update(new_self)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -126,9 +128,9 @@ class _DmgPerRoundSummon(_DestroyOnNumSummon):
             return es, self
         return es, replace(self, usages=d_usages)
 
-    def _update(self, other: Self) -> Optional[Self]:
-        new_usages = min(max(self.usages, self.MAX_USAGES), self.usages + other.usages)
-        return replace(other, usages=new_usages)
+    # def _update(self, other: Self) -> Optional[Self]:
+    #     new_usages = min(max(self.usages, self.MAX_USAGES), self.usages + other.usages)
+    #     return replace(other, usages=new_usages)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -410,6 +412,55 @@ class ReflectionSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
             return es, None
 
         return es, self
+
+
+@dataclass(frozen=True, kw_only=True)
+class SesshouSakura(_DestroyOnNumSummon):
+    usages: int = 3
+    MAX_USAGES: ClassVar[int] = 6
+    DMG: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.ELECTRO
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+        TriggeringSignal.SELF_DECLARE_END_ROUND,
+    ))
+
+    @override
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        es: list[eft.Effect] = []
+        d_usages = 0
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            d_usages = -1
+            es.append(
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=self.ELEMENT,
+                    damage=self.DMG,
+                    damage_type=DamageType(summon=True),
+                )
+            )
+        elif signal is TriggeringSignal.SELF_DECLARE_END_ROUND:
+            if self.usages >= 4:
+                d_usages = -1
+                es.append(
+                    eft.ReferredDamageEffect(
+                        source=source,
+                        target=DynamicCharacterTarget.OPPO_ACTIVE,
+                        element=self.ELEMENT,
+                        damage=self.DMG,
+                        damage_type=DamageType(summon=True),
+                    )
+                )
+        if d_usages == 0:
+            return es, self
+        return es, replace(self, usages=d_usages)
+
 
 @dataclass(frozen=True, kw_only=True)
 class UshiSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):

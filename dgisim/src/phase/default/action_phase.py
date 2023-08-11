@@ -164,10 +164,21 @@ class ActionPhase(ph.Phase):
         assert active_player_id == pid
         active_player = game_state.get_player(active_player_id)
         other_player = game_state.get_other_player(active_player_id)
+        effects: list[Effect] = [
+            PlayerStatusTriggererEffect(
+                pid=active_player_id,
+                self_signal=TriggeringSignal.SELF_DECLARE_END_ROUND,
+                other_signal=TriggeringSignal.OPPO_DECLARE_END_ROUND,
+            )
+        ]
         if other_player.get_phase() is Act.END_PHASE:
             other_player_new_phase = Act.END_PHASE
         elif other_player.get_phase() is Act.PASSIVE_WAIT_PHASE:
             other_player_new_phase = Act.ACTION_PHASE
+            effects.append(AllStatusTriggererEffect(
+                active_player_id.other(),
+                TriggeringSignal.PRE_ACTION,
+            ))
         else:  # pragma: no cover
             print(f"ERROR pid={pid}\n {game_state}")
             raise Exception(f"Unknown Game State to process {other_player.get_phase()}")
@@ -183,6 +194,8 @@ class ActionPhase(ph.Phase):
             other_player.factory().phase(
                 other_player_new_phase
             ).build()
+        ).f_effect_stack(
+            lambda es: es.push_many_fl(effects)
         ).build()
 
     def _handle_skill_action(

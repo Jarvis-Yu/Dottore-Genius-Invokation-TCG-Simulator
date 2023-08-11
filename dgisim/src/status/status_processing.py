@@ -167,6 +167,42 @@ class StatusProcessing:
         return effects
 
     @staticmethod
+    def trigger_player_statuses_effects(
+            game_state: GameState, pid: Pid, signal: TriggeringSignal
+    ) -> list[eft.Effect]:
+        """
+        Takes the current game_state, trigger all statuses in order of player pid
+        Returns the triggering effects in order (first to last)
+        """
+        effects: list[eft.Effect] = []
+
+        def f(game_state: GameState, status: stt.Status, target: StaticTarget) -> GameState:
+            nonlocal effects
+            if signal not in status.REACTABLE_SIGNALS:
+                return game_state
+
+            if isinstance(status, stt.PersonalStatus):
+                effects.append(eft.TriggerStatusEffect(target, type(status), signal))
+
+            elif isinstance(status, stt.PlayerHiddenStatus):
+                effects.append(eft.TriggerHiddenStatusEffect(target.pid, type(status), signal))
+
+            elif isinstance(status, stt.CombatStatus):
+                effects.append(eft.TriggerCombatStatusEffect(target.pid, type(status), signal))
+
+            elif isinstance(status, sm.Summon):
+                effects.append(eft.TriggerSummonEffect(target.pid, type(status), signal))
+
+            elif isinstance(status, sp.Support):
+                effects.append(eft.TriggerSupportEffect(
+                    target.pid, type(status), status.sid, signal))
+
+            return game_state
+
+        StatusProcessing.loop_one_player_all_statuses(game_state, pid, f)
+        return effects
+
+    @staticmethod
     def trigger_personal_statuses_effect(
             game_state: GameState, target: StaticTarget, signal: TriggeringSignal
     ) -> list[eft.Effect]:

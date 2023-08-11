@@ -17,6 +17,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     RhodeiaOfLoch,
     Tighnari,
     Xingqiu,
+    YaeMiko,
 ]
 
 _DEFAULT_CHARACTER_FSET = None

@@ -142,6 +142,8 @@ __all__ = [
     "RainSwordStatus",
     "RainbowBladeworkStatus",
     "TheScentRemainedStatus",
+    ## Yae Miko ##
+    "TenkoThunderboltsStatus",
 ]
 
 
@@ -2373,3 +2375,31 @@ class RainbowBladeworkStatus(CombatStatus, _UsageStatus):
 @dataclass(frozen=True, kw_only=True)
 class TheScentRemainedStatus(TalentEquipmentStatus):
     pass
+
+#### Yae Miko ####
+
+@dataclass(frozen=True, kw_only=True)
+class TenkoThunderboltsStatus(CombatStatus):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.PRE_ACTION,
+    ))
+
+    @override
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        if signal is TriggeringSignal.PRE_ACTION:
+            if game_state.get_active_player_id() is source.pid:
+                return [
+                    eft.ReferredDamageEffect(
+                        source=source,
+                        target=DynamicCharacterTarget.OPPO_ACTIVE,
+                        element=Element.ELECTRO,
+                        damage=3,
+                        damage_type=DamageType(status=True),
+                    ),
+                ], None
+        return [], self

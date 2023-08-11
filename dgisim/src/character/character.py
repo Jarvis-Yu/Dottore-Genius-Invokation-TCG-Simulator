@@ -40,6 +40,7 @@ __all__ = [
     "RhodeiaOfLoch",
     "Tighnari",
     "Xingqiu",
+    "YaeMiko",
 ]
 
 
@@ -1445,3 +1446,64 @@ class YaeMiko(Character):
     _ELEMENTAL_BURST_COST = AbstractDices({
         Element.ELECTRO: 3,
     })
+
+    # constants
+    _SUMMON_TYPE = sm.SesshouSakura
+
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.ELECTRO,
+            damage=1,
+        )
+
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=sm.SesshouSakura,
+            ),
+        )
+
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        effects: tuple[eft.Effect, ...] = (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.get_max_energy(),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.ELECTRO,
+                damage=4,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+        )
+        if game_state.get_player(source.pid).get_summons().find(self._SUMMON_TYPE) is not None:
+            effects += (
+                eft.AddCombatStatusEffect(
+                    target_pid=source.pid,
+                    status=stt.TenkoThunderboltsStatus,
+                ),
+                eft.RemoveSummonEffect(
+                    target_pid=source.pid,
+                    summon=self._SUMMON_TYPE,
+                )
+            )
+        return effects
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=2,
+            hiddens=stts.Statuses(()),
+            equipments=stts.EquipmentStatuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
