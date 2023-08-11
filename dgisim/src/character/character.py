@@ -49,6 +49,11 @@ class Character:
     _TALENT_STATUS: None | type[stt.TalentEquipmentStatus]
     _FACTIONS: frozenset[Faction]
 
+    _NORMAL_ATTACK_COST: None | AbstractDices = None
+    _ELEMENTAL_SKILL1_COST: None | AbstractDices = None
+    _ELEMENTAL_SKILL2_COST: None | AbstractDices = None
+    _ELEMENTAL_BURST_COST: None | AbstractDices = None
+
     def __init__(
         self,
         id: int,
@@ -153,7 +158,15 @@ class Character:
 
     @classmethod
     def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
-        raise NotImplementedError(f"{skill_type}'s cost is not defined for {cls.__name__}")
+        if skill_type is CharacterSkill.NORMAL_ATTACK and cls._NORMAL_ATTACK_COST is not None:
+            return cls._NORMAL_ATTACK_COST
+        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1 and cls._ELEMENTAL_SKILL1_COST is not None:
+            return cls._ELEMENTAL_SKILL1_COST
+        elif skill_type is CharacterSkill.ELEMENTAL_SKILL2 and cls._ELEMENTAL_SKILL2_COST is not None:
+            return cls._ELEMENTAL_SKILL2_COST
+        elif skill_type is CharacterSkill.ELEMENTAL_BURST and cls._ELEMENTAL_BURST_COST is not None:
+            return cls._ELEMENTAL_BURST_COST
+        raise NotImplementedError(f"{skill_type} cost for {cls.__name__} not defined")
 
     def skill(self, game_state: GameState, source: StaticTarget, skill_type: CharacterSkill) -> tuple[eft.Effect, ...]:
         """
@@ -450,23 +463,16 @@ class AratakiItto(Character):
     _TALENT_STATUS = stt.AratakiIchibanStatus
     _FACTIONS = frozenset((Faction.INAZUMA,))
 
-    @override
-    @classmethod
-    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
-        if skill_type is CharacterSkill.NORMAL_ATTACK:
-            return AbstractDices({
-                Element.GEO: 1,
-                Element.ANY: 2,
-            })
-        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
-            return AbstractDices({
-                Element.GEO: 3,
-            })
-        elif skill_type is CharacterSkill.ELEMENTAL_BURST:
-            return AbstractDices({
-                Element.GEO: 3,
-            })
-        raise Exception("Not Reached!")
+    _NORMAL_ATTACK_COST = AbstractDices({
+        Element.GEO: 1,
+        Element.ANY: 2,
+    })
+    _ELEMENTAL_SKILL1_COST = AbstractDices({
+        Element.GEO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDices({
+        Element.GEO: 3,
+    })
 
     @override
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
@@ -539,23 +545,16 @@ class ElectroHypostasis(Character):
     _TALENT_STATUS = None
     _FACTIONS = frozenset((Faction.MONSTER,))
 
-    @override
-    @classmethod
-    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
-        if skill_type is CharacterSkill.NORMAL_ATTACK:
-            return AbstractDices({
-                Element.ELECTRO: 1,
-                Element.ANY: 2,
-            })
-        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
-            return AbstractDices({
-                Element.ELECTRO: 5,
-            })
-        elif skill_type is CharacterSkill.ELEMENTAL_BURST:
-            return AbstractDices({
-                Element.ELECTRO: 3,
-            })
-        raise Exception("Not Reached!")
+    _NORMAL_ATTACK_COST = AbstractDices({
+        Element.ELECTRO: 1,
+        Element.ANY: 2,
+    })
+    _ELEMENTAL_SKILL1_COST = AbstractDices({
+        Element.ELECTRO: 5,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDices({
+        Element.ELECTRO: 3,
+    })
 
     @override
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
@@ -624,23 +623,16 @@ class KaedeharaKazuha(Character):
     _TALENT_STATUS = stt.PoeticsOfFuubutsuStatus
     _FACTIONS = frozenset((Faction.INAZUMA,))
 
-    @override
-    @classmethod
-    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
-        if skill_type is CharacterSkill.NORMAL_ATTACK:
-            return AbstractDices({
-                Element.ANEMO: 1,
-                Element.ANY: 2,
-            })
-        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
-            return AbstractDices({
-                Element.ANEMO: 3,
-            })
-        elif skill_type is CharacterSkill.ELEMENTAL_BURST:
-            return AbstractDices({
-                Element.ANEMO: 3,
-            })
-        raise Exception("Not Reached!")
+    _NORMAL_ATTACK_COST = AbstractDices({
+        Element.ANEMO: 1,
+        Element.ANY: 2,
+    })
+    _ELEMENTAL_SKILL1_COST = AbstractDices({
+        Element.ANEMO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDices({
+        Element.ANEMO: 3,
+    })
 
     @override
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
@@ -784,23 +776,16 @@ class Kaeya(Character):
     _TALENT_STATUS = stt.ColdBloodedStrikeStatus
     _FACTIONS = frozenset((Faction.MONDSTADT,))
 
-    @override
-    @classmethod
-    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
-        if skill_type is CharacterSkill.NORMAL_ATTACK:
-            return AbstractDices({
-                Element.CRYO: 1,
-                Element.ANY: 2,
-            })
-        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
-            return AbstractDices({
-                Element.CRYO: 3,
-            })
-        elif skill_type is CharacterSkill.ELEMENTAL_BURST:
-            return AbstractDices({
-                Element.CRYO: 4,
-            })
-        raise Exception("Not Reached!")
+    _NORMAL_ATTACK_COST = AbstractDices({
+        Element.CRYO: 1,
+        Element.ANY: 2,
+    })
+    _ELEMENTAL_SKILL1_COST = AbstractDices({
+        Element.CRYO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDices({
+        Element.CRYO: 4,
+    })
 
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
@@ -863,26 +848,19 @@ class Keqing(Character):
     _TALENT_STATUS = stt.ThunderingPenanceStatus
     _FACTIONS = frozenset((Faction.LIYUE,))
 
+    _NORMAL_ATTACK_COST = AbstractDices({
+        Element.ELECTRO: 1,
+        Element.ANY: 2,
+    })
+    _ELEMENTAL_SKILL1_COST = AbstractDices({
+        Element.ELECTRO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDices({
+        Element.ELECTRO: 4,
+    })
+
     # consts
     BASE_ELECTRO_INFUSION_DURATION: int = 2
-
-    @override
-    @classmethod
-    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
-        if skill_type is CharacterSkill.NORMAL_ATTACK:
-            return AbstractDices({
-                Element.ELECTRO: 1,
-                Element.ANY: 2,
-            })
-        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
-            return AbstractDices({
-                Element.ELECTRO: 3,
-            })
-        elif skill_type is CharacterSkill.ELEMENTAL_BURST:
-            return AbstractDices({
-                Element.ELECTRO: 4,
-            })
-        raise Exception("Not Reached!")
 
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
@@ -1003,23 +981,16 @@ class Klee(Character):
     _TALENT_STATUS = stt.PoundingSurpriseStatus
     _FACTIONS = frozenset((Faction.MONDSTADT,))
 
-    @override
-    @classmethod
-    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
-        if skill_type is CharacterSkill.NORMAL_ATTACK:
-            return AbstractDices({
-                Element.PYRO: 1,
-                Element.ANY: 2,
-            })
-        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
-            return AbstractDices({
-                Element.PYRO: 3,
-            })
-        elif skill_type is CharacterSkill.ELEMENTAL_BURST:
-            return AbstractDices({
-                Element.PYRO: 3,
-            })
-        raise Exception("Not Reached!")
+    _NORMAL_ATTACK_COST = AbstractDices({
+        Element.PYRO: 1,
+        Element.ANY: 2,
+    })
+    _ELEMENTAL_SKILL1_COST = AbstractDices({
+        Element.PYRO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDices({
+        Element.PYRO: 3,
+    })
 
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
@@ -1085,23 +1056,16 @@ class Mona(Character):
     _TALENT_STATUS = stt.ProphecyOfSubmersionStatus
     _FACTIONS = frozenset((Faction.MONDSTADT,))
 
-    @override
-    @classmethod
-    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
-        if skill_type is CharacterSkill.NORMAL_ATTACK:
-            return AbstractDices({
-                Element.HYDRO: 1,
-                Element.ANY: 2,
-            })
-        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
-            return AbstractDices({
-                Element.HYDRO: 3,
-            })
-        elif skill_type is CharacterSkill.ELEMENTAL_BURST:
-            return AbstractDices({
-                Element.HYDRO: 3,
-            })
-        raise Exception("Not Reached!")
+    _NORMAL_ATTACK_COST = AbstractDices({
+        Element.HYDRO: 1,
+        Element.ANY: 2,
+    })
+    _ELEMENTAL_SKILL1_COST = AbstractDices({
+        Element.HYDRO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDices({
+        Element.HYDRO: 3,
+    })
 
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
@@ -1170,34 +1134,26 @@ class RhodeiaOfLoch(Character):
     _TALENT_STATUS = stt.StreamingSurgeStatus
     _FACTIONS = frozenset((Faction.MONSTER,))
 
+    _NORMAL_ATTACK_COST = AbstractDices({
+        Element.HYDRO: 1,
+        Element.ANY: 2,
+    })
+    _ELEMENTAL_SKILL1_COST = AbstractDices({
+        Element.HYDRO: 3,
+    })
+    _ELEMENTAL_SKILL2_COST = AbstractDices({
+        Element.HYDRO: 5,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDices({
+        Element.HYDRO: 3,
+    })
+
     # consts
     _SUMMONS = (
         sm.OceanicMimicSquirrelSummon,
         sm.OceanicMimicRaptorSummon,
         sm.OceanicMimicFrogSummon,
     )
-
-    @override
-    @classmethod
-    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
-        if skill_type is CharacterSkill.NORMAL_ATTACK:
-            return AbstractDices({
-                Element.HYDRO: 1,
-                Element.ANY: 2,
-            })
-        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
-            return AbstractDices({
-                Element.HYDRO: 3,
-            })
-        elif skill_type is CharacterSkill.ELEMENTAL_SKILL2:
-            return AbstractDices({
-                Element.HYDRO: 5,
-            })
-        elif skill_type is CharacterSkill.ELEMENTAL_BURST:
-            return AbstractDices({
-                Element.HYDRO: 3,
-            })
-        raise Exception("Not Reached!")
 
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
@@ -1318,16 +1274,16 @@ class Tighnari(Character):
     _TALENT_STATUS = stt.KeenSightStatus
     _FACTIONS = frozenset((Faction.SUMERU,))
 
-    @override
-    @classmethod
-    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
-        if skill_type is CharacterSkill.NORMAL_ATTACK:
-            return AbstractDices({Element.DENDRO: 1, Element.ANY: 2})
-        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
-            return AbstractDices({Element.DENDRO: 3})
-        elif skill_type is CharacterSkill.ELEMENTAL_BURST:
-            return AbstractDices({Element.DENDRO: 3})
-        raise Exception("Not Reached!")
+    _NORMAL_ATTACK_COST = AbstractDices({
+        Element.DENDRO: 1,
+        Element.ANY: 2,
+    })
+    _ELEMENTAL_SKILL1_COST = AbstractDices({
+        Element.DENDRO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDices({
+        Element.DENDRO: 3,
+    })
 
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
@@ -1396,23 +1352,16 @@ class Xingqiu(Character):
     _TALENT_STATUS = stt.TheScentRemainedStatus
     _FACTIONS = frozenset((Faction.LIYUE,))
 
-    @override
-    @classmethod
-    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
-        if skill_type is CharacterSkill.NORMAL_ATTACK:
-            return AbstractDices({
-                Element.HYDRO: 1,
-                Element.ANY: 2,
-            })
-        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
-            return AbstractDices({
-                Element.HYDRO: 3,
-            })
-        elif skill_type is CharacterSkill.ELEMENTAL_BURST:
-            return AbstractDices({
-                Element.HYDRO: 3,
-            })
-        raise Exception("Not Reached!")
+    _NORMAL_ATTACK_COST = AbstractDices({
+        Element.HYDRO: 1,
+        Element.ANY: 2,
+    })
+    _ELEMENTAL_SKILL1_COST = AbstractDices({
+        Element.HYDRO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDices({
+        Element.HYDRO: 3,
+    })
 
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
@@ -1478,3 +1427,21 @@ class Xingqiu(Character):
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
+
+
+class YaeMiko(Character):
+    _ELEMENT = Element.ELECTRO
+    _WEAPON_TYPE = WeaponType.CATALYST
+    _TALENT_STATUS = None
+    _FACTIONS = frozenset((Faction.INAZUMA,))
+
+    _NORMAL_ATTACK_COST = AbstractDices({
+        Element.ELECTRO: 1,
+        Element.ANY: 2,
+    })
+    _ELEMENTAL_SKILL1_COST = AbstractDices({
+        Element.ELECTRO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDices({
+        Element.ELECTRO: 3,
+    })
