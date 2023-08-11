@@ -1433,7 +1433,7 @@ class Xingqiu(Character):
 class YaeMiko(Character):
     _ELEMENT = Element.ELECTRO
     _WEAPON_TYPE = WeaponType.CATALYST
-    _TALENT_STATUS = None
+    _TALENT_STATUS = stt.TheShrinesSacredShadeStatus
     _FACTIONS = frozenset((Faction.INAZUMA,))
 
     _NORMAL_ATTACK_COST = AbstractDices({
@@ -1467,7 +1467,7 @@ class YaeMiko(Character):
         )
 
     def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
-        effects: tuple[eft.Effect, ...] = (
+        effects: list[eft.Effect] = [
             eft.EnergyDrainEffect(
                 target=source,
                 drain=self.get_max_energy(),
@@ -1479,8 +1479,15 @@ class YaeMiko(Character):
                 damage=4,
                 damage_type=DamageType(elemental_burst=True),
             ),
-        )
+        ]
         if game_state.get_player(source.pid).get_summons().find(self._SUMMON_TYPE) is not None:
+            if self.talent_equiped():
+                effects.append(
+                    eft.AddCharacterStatusEffect(
+                        target=source,
+                        status=stt.RiteOfDispatchStatus,
+                    )
+                )
             effects += (
                 eft.AddCombatStatusEffect(
                     target_pid=source.pid,
@@ -1491,7 +1498,7 @@ class YaeMiko(Character):
                     summon=self._SUMMON_TYPE,
                 )
             )
-        return effects
+        return tuple(effects)
 
     @classmethod
     def from_default(cls, id: int = -1) -> Self:

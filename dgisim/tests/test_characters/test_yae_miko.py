@@ -11,8 +11,8 @@ class TestYaeMiko(unittest.TestCase):
             ).character(
                 YaeMiko.from_default(2)
             ).build()
-            # ).f_hand_cards(
-            #     lambda hcs: hcs.add(TheScentRemained)
+            ).f_hand_cards(
+                lambda hcs: hcs.add(TheShrinesSacredShade)
         ).build()
     ).build()
     assert type(BASE_GAME.get_player1().just_get_active_character()) is YaeMiko
@@ -170,3 +170,60 @@ class TestYaeMiko(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 9)
         self.assertIn(Element.ELECTRO, p2ac.get_elemental_aura())
         self.assertNotIn(SesshouSakura, p1.get_summons())
+
+    def test_talent_card(self):
+        a1, a2 = PuppetAgent(), LazyAgent()
+        base_state = fill_energy_for_all(self.BASE_GAME)
+
+        # test burst generates no character status if no Sesshou Sakura destroyed
+        gsm = GameStateMachine(base_state, a1, a2)
+        a1.inject_action(CardAction(
+            card=TheShrinesSacredShade,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+        ))
+        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 10)
+
+        gsm.player_step(); gsm.auto_step()  # p1 burst
+        p1ac = gsm.get_game_state().get_player1().just_get_active_character()
+        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 6)
+        self.assertNotIn(RiteOfDispatchStatus, p1ac.get_character_statuses())
+
+        # test burst generates Rite of Dispatch character status if Sesshou Sakura destroyed
+        game_state = AddSummonEffect(Pid.P1, SesshouSakura).execute(base_state)
+        gsm = GameStateMachine(game_state, a1, a2)
+        a1.inject_action(CardAction(
+            card=TheShrinesSacredShade,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+        ))
+        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 10)
+
+        gsm.player_step(); gsm.auto_step()  # p1 burst
+        p1ac = gsm.get_game_state().get_player1().just_get_active_character()
+        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 6)
+        self.assertIn(RiteOfDispatchStatus, p1ac.get_character_statuses())
+
+        gsm.player_step(); gsm.auto_step()  # p2 end round
+        post_burst_state = gsm.get_game_state()
+
+        # then next skill has cost deduction
+        game_state = step_action(post_burst_state, Pid.P1, SkillAction(
+            skill=CharacterSkill.ELEMENTAL_SKILL1,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
+        ))
+        p1ac = game_state.get_player1().just_get_active_character()
+        self.assertNotIn(RiteOfDispatchStatus, p1ac.get_character_statuses())
+        game_state = step_action(game_state, Pid.P1, SkillAction(
+            skill=CharacterSkill.ELEMENTAL_SKILL1,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+        ))
+
+        # status disappear the next round
+        gsm = GameStateMachine(post_burst_state, LazyAgent(), LazyAgent())
+        gsm.step_until_next_phase()
+        gsm.step_until_phase(game_state.get_mode().action_phase)
+        p1ac = game_state.get_player1().just_get_active_character()
+        self.assertNotIn(RiteOfDispatchStatus, p1ac.get_character_statuses())

@@ -143,7 +143,9 @@ __all__ = [
     "RainbowBladeworkStatus",
     "TheScentRemainedStatus",
     ## Yae Miko ##
+    "RiteOfDispatchStatus",
     "TenkoThunderboltsStatus",
+    "TheShrinesSacredShadeStatus",
 ]
 
 
@@ -2378,6 +2380,52 @@ class TheScentRemainedStatus(TalentEquipmentStatus):
 
 #### Yae Miko ####
 
+
+@dataclass(frozen=True, kw_only=True)
+class RiteOfDispatchStatus(CharacterStatus):
+    COST_DEDUCTION: ClassVar[int] = 2
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        """
+        The assumption here is the equiper only pay elemental skill with electro or omni dices
+        """
+        if signal is Preprocessables.SKILL:
+            assert isinstance(item, ActionPEvent)
+            if (
+                    status_source == item.source
+                    and item.event_type is EventType.ELEMENTAL_SKILL1
+                    and item.dices_cost.num_dices() > 0
+            ):
+                item = replace(
+                    item,
+                    dices_cost=(item.dices_cost - {Element.ELECTRO: self.COST_DEDUCTION}).validify()
+                )
+                return item, None
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], None
+        return [], self
+
+
 @dataclass(frozen=True, kw_only=True)
 class TenkoThunderboltsStatus(CombatStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
@@ -2403,3 +2451,8 @@ class TenkoThunderboltsStatus(CombatStatus):
                     ),
                 ], None
         return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class TheShrinesSacredShadeStatus(TalentEquipmentStatus):
+    pass

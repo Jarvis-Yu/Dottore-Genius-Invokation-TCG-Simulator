@@ -126,6 +126,8 @@ __all__ = [
     "KeenSight",
     ## Xingqiu ##
     "TheScentRemained",
+    ## Yae Miko ##
+    "TheShrinesSacredShade",
 ]
 
 ############################## base ##############################
@@ -1761,3 +1763,11 @@ class TheScentRemained(_TalentEquipmentSkillCard):
     _CHARACTER = chr.Xingqiu
     _EQUIPMENT_STATUS = stt.TheScentRemainedStatus
     _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+
+#### Yae Miko ####
+
+class TheShrinesSacredShade(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDices({Element.ELECTRO: 3})
+    _CHARACTER = chr.YaeMiko
+    _EQUIPMENT_STATUS = stt.TheShrinesSacredShadeStatus
+    _SKILL = CharacterSkill.ELEMENTAL_BURST
