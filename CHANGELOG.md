@@ -4,8 +4,12 @@
 
 ### Added
 
+- New Characters:
+  - Yae Miko
 - New Cards:
   - Equipment Card:
+    - Talent Equipment Card:
+      - The Shrine's Sacred Shade
     - Weapon Card:
       - Sacrificial Bow
       - Sacrificial Fragments
