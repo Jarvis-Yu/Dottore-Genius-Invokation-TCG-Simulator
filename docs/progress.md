@@ -4,13 +4,13 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (11/51 implemented)](#character-1151-implemented)
-  - [Card (40/192 implemented)](#card-40192-implemented)
+  - [Character (12/51 implemented)](#character-1251-implemented)
+  - [Card (41/192 implemented)](#card-41192-implemented)
 
-## Character (11/51 implemented)
+## Character (12/51 implemented)
 
 - [ ] Pyro:
-  - [ ] Bennett _<-- WIP_
+  - [x] Bennett
   - [x] Klee
 - [ ] Hydro:
   - [x] Mona
@@ -29,12 +29,13 @@ all I need now is to implement each card and character.
 - [ ] Geo:
   - [x] Arataki Itto
 
-## Card (40/192 implemented)
+## Card (41/192 implemented)
 
-- [ ] Equipment Card (20/103):
+- [ ] Equipment Card (21/103):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] Cold-Blooded Strike
+    - [x] Grand Expectation
     - [x] Keen Sight
     - [x] Poetics of Fuubutsu
     - [x] Pounding Surprise

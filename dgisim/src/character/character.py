@@ -31,6 +31,7 @@ __all__ = [
 
     # concretes
     "AratakiItto",
+    "Bennett",
     "ElectroHypostasis",
     "KaedeharaKazuha",
     "Kaeya",
@@ -533,6 +534,94 @@ class AratakiItto(Character):
             max_hp=10,
             energy=0,
             max_energy=3,
+            hiddens=stts.Statuses(()),
+            equipments=stts.EquipmentStatuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
+class Bennett(Character):
+    # basic info
+    _ELEMENT = Element.PYRO
+    _WEAPON_TYPE = WeaponType.SWORD
+    _TALENT_STATUS = stt.GrandExpectationStatus
+    _FACTIONS = frozenset((Faction.MONDSTADT,))
+
+    _NORMAL_ATTACK_COST = AbstractDices({
+        Element.PYRO: 1,
+        Element.ANY: 2,
+    })
+    _ELEMENTAL_SKILL1_COST = AbstractDices({
+        Element.PYRO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDices({
+        Element.PYRO: 4,
+    })
+
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        )
+
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.PYRO,
+                damage=3,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+        )
+
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        effects: list[eft.Effect] = [
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.get_max_energy(),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.PYRO,
+                damage=2,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+        ]
+        this_player = game_state.get_player(source.pid)
+        talent_equiped = self.talent_equiped()
+        if stt.InspirationFieldStatus in this_player.get_combat_statuses() and talent_equiped:
+            effects.append(
+                eft.RemoveCombatStatusEffect(
+                    target_pid=source.pid,
+                    status=stt.InspirationFieldStatus,
+                )
+            )
+        effects.append(
+            eft.AddCombatStatusEffect(
+                target_pid=source.pid,
+                status=(
+                    stt.InspirationFieldStatus
+                    if not talent_equiped
+                    else stt.InspirationFieldEnhancedStatus
+                )
+            )
+        )
+        return tuple(effects)
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=2,
             hiddens=stts.Statuses(()),
             equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),

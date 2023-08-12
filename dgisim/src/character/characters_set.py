@@ -8,6 +8,7 @@ __all__ = [
 
 _DEFAULT_CHARACTERS: list[type[Character]] = [
     AratakiItto,
+    Bennett,
     ElectroHypostasis,
     KaedeharaKazuha,
     Keqing,

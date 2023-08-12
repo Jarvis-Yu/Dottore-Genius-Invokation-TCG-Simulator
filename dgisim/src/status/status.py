@@ -102,6 +102,10 @@ __all__ = [
     "AratakiIchibanStatus",
     "RagingOniKing",
     "SuperlativeSuperstrengthStatus",
+    ## Bennett ##
+    "GrandExpectationStatus",
+    "InspirationFieldStatus",
+    "InspirationFieldEnhancedStatus",
     ## Electro Hypostasis ##
     "ElectroCrystalCoreHiddenStatus",
     "ElectroCrystalCoreStatus",
@@ -1560,6 +1564,109 @@ class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
                 return item, self
         return item, self
 
+
+#### Bennett ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class GrandExpectationStatus(TalentEquipmentStatus):
+    pass
+
+
+@dataclass(frozen=True, kw_only=True)
+class _InspirationFieldStatus(CombatStatus, _UsageStatus):
+    usages: int = 2  # duration
+    MAX_USAGES: ClassVar[int] = 2
+    activated: bool = False
+    DMG_BOOST: ClassVar[int] = 2
+    BOOST_LOCK: ClassVar[bool]
+    HP_CAP: ClassVar[int] = 7
+    RECOVERY: ClassVar[int] = 2
+
+    REACTABLE_SIGNALS = frozenset({
+        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.ROUND_END,
+    })
+
+    def _boostable(self, char: Character) -> bool:
+        return not self.BOOST_LOCK or char.get_hp() >= self.HP_CAP
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if self.activated:
+                return self
+            active_char_id = game_state.get_player(
+                status_source.pid
+            ).just_get_active_character().get_id()
+            if information.source == StaticTarget(status_source.pid, Zone.CHARACTERS, active_char_id):
+                return replace(self, activated=True)
+        return self
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            active_char = game_state.get_player(status_source.pid).just_get_active_character()
+            active_char_source = StaticTarget(
+                status_source.pid,
+                Zone.CHARACTERS,
+                active_char.get_id(),
+            )
+            if not (
+                    item.dmg.source == active_char_source
+                    and item.dmg.damage_type.from_character()
+                    and self._boostable(active_char)
+            ):
+                return item, self
+            return replace(item, dmg=replace(
+                item.dmg, damage=item.dmg.damage + self.DMG_BOOST
+            )), self
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION:
+            if not self.activated:
+                return [], self
+            active_char = game_state.get_player(source.pid).just_get_active_character()
+            if active_char.get_hp() >= self.HP_CAP:
+                return [], replace(self, usages=0, activated=False)
+            return [
+                eft.RecoverHPEffect(
+                    target=StaticTarget(source.pid, Zone.CHARACTERS, active_char.get_id()),
+                    recovery=self.RECOVERY,
+                )
+            ], replace(self, usages=0, activated=False)
+        if signal is TriggeringSignal.ROUND_END:
+            return [], replace(self, usages=-1)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class InspirationFieldStatus(_InspirationFieldStatus):
+    BOOST_LOCK: ClassVar[bool] = True
+
+
+@dataclass(frozen=True, kw_only=True)
+class InspirationFieldEnhancedStatus(_InspirationFieldStatus):
+    BOOST_LOCK: ClassVar[bool] = False
+
 #### Electro Hypostasis ####
 
 
@@ -1728,7 +1835,7 @@ class MidareRanzanStatus(CharacterStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if isinstance(item, DmgPEvent):
             dmg = item.dmg
             if status_source != dmg.source:

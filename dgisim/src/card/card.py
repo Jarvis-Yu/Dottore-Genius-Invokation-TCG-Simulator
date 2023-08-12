@@ -107,6 +107,8 @@ __all__ = [
     # Character Specific
     ## Arataki Itto ##
     "AratakiIchiban",
+    ## Bennett ##
+    "GrandExpectation",
     ## Electro Hypostasis ##
     "AbsorbingPrism",
     ## Kaedehara Kazuha ##
@@ -1598,6 +1600,15 @@ class AratakiIchiban(_TalentEquipmentSkillCard):
     _EQUIPMENT_STATUS = stt.AratakiIchibanStatus
     _SKILL = CharacterSkill.NORMAL_ATTACK
 
+#### Bennett ####
+
+
+class GrandExpectation(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDices({Element.PYRO: 4})
+    _CHARACTER = chr.Bennett
+    _EQUIPMENT_STATUS = stt.GrandExpectationStatus
+    _SKILL = CharacterSkill.ELEMENTAL_BURST
+
 #### Electro Hypostasis ####
 
 
@@ -1765,6 +1776,7 @@ class TheScentRemained(_TalentEquipmentSkillCard):
     _SKILL = CharacterSkill.ELEMENTAL_SKILL1
 
 #### Yae Miko ####
+
 
 class TheShrinesSacredShade(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.ELECTRO: 3})

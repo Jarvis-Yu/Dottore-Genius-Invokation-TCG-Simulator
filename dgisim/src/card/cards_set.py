@@ -10,6 +10,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     AbsorbingPrism,
     AratakiIchiban,
     ColdBloodedStrike,
+    GrandExpectation,
     KeenSight,
     PoeticsOfFuubutsu,
     PoundingSurprise,

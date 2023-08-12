@@ -5,10 +5,12 @@
 ### Added
 
 - New Characters:
+  - Bennett
   - Yae Miko
 - New Cards:
   - Equipment Card:
     - Talent Equipment Card:
+      - Grand Expectation
       - The Shrine's Sacred Shade
     - Weapon Card:
       - Sacrificial Bow
