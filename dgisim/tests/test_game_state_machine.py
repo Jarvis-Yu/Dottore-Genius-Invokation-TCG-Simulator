@@ -173,6 +173,8 @@ class TestGameStateMachine(unittest.TestCase):
         prev_progress = ""
         times: list[float] = []
         num_transitions = 0
+        num_actions = 0
+        num_games = 0
         for i in range(repeats):
             if show_progress:
                 print(end='\b' * len(prev_progress))
@@ -198,6 +200,8 @@ class TestGameStateMachine(unittest.TestCase):
                 end = time.time()
                 times.append(end - start)
                 num_transitions += len(state_machine.get_history())
+                num_actions += len(state_machine.get_action_history())
+                num_games += 1
                 wins[state_machine.get_winner()] += 1
             except Exception:
                 all_state = state_machine.get_history()
@@ -214,4 +218,6 @@ class TestGameStateMachine(unittest.TestCase):
         average_time_in_ms = sum(times) / len(times) * 1000
         average_state_time_in_μs = average_time_in_ms / (num_transitions / len(times)) * 1000
         print(end=f"[[A random game takes {round(average_time_in_ms, 1)} ms on average, "
-              + f"{round(average_state_time_in_μs)} μs per state]]")
+              + f"{round(average_state_time_in_μs)} μs per state, "
+              + f"with {round(num_transitions/num_games, 1)} game states, "
+              + f"and {round(num_actions/num_games, 1)} decisions to make]]")

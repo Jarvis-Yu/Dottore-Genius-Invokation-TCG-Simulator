@@ -339,8 +339,14 @@ class Status:
         for effect in es:
             has_damage = has_damage or isinstance(effect, eft.ReferredDamageEffect) \
                 or isinstance(effect, eft.SpecificDamageEffect)
-            has_swap = has_swap or isinstance(effect, eft.SwapCharacterEffect)  \
+            has_swap = has_swap or (
+                isinstance(effect, eft.SwapCharacterEffect)
                 or isinstance(effect, eft.ForwardSwapCharacterEffect)
+                or isinstance(effect, eft.ApplyElementalAuraEffect) and effect.element in (
+                    Element.ELECTRO,
+                    Element.PYRO,
+                )
+            )
         if has_damage:
             es.append(eft.AliveMarkCheckerEffect())
             es.append(eft.DefeatedCheckerEffect())
