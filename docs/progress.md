@@ -18,16 +18,20 @@ all I need now is to implement each card and character.
   - [x] Xingqiu
 - [ ] Anemo:
   - [x] Kaedehara Kazuha
+  - [ ] Venti  _<-- WIP_
 - [ ] Electro:
   - [x] Electro Hypostasis
   - [x] Keqing
   - [x] Yae Miko
 - [ ] Dendro:
+  - [ ] Nahida  _<-- WIP_
   - [x] Tighnari
 - [ ] Cryo:
   - [x] Kaeya
+  - [ ] Shenhe  _<-- WIP_
 - [ ] Geo:
   - [x] Arataki Itto
+  - [ ] Noelle  _<-- WIP_
 
 ## Card (41/192 implemented)
 
