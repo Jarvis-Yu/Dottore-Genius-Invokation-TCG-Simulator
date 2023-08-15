@@ -122,6 +122,8 @@ __all__ = [
     "PoundingSurprise",
     ## Mona ##
     "ProphecyOfSubmersion",
+    ## Nahida ##
+    "TheSeedOfStoredKnowledge",
     ## Rhodeia of Loch ##
     "StreamingSurge",
     ## Tighnari ##
@@ -1747,6 +1749,16 @@ class ProphecyOfSubmersion(_TalentEquipmentSkillCard):
     _CHARACTER = chr.Mona
     _EQUIPMENT_STATUS = stt.ProphecyOfSubmersionStatus
     _SKILL = CharacterSkill.ELEMENTAL_BURST
+
+#### Nahida ####
+
+
+class TheSeedOfStoredKnowledge(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDices({Element.DENDRO: 3})
+    _CHARACTER = chr.Nahida
+    _EQUIPMENT_STATUS = stt.TheSeedOfStoredKnowledgeStatus
+    _SKILL = CharacterSkill.ELEMENTAL_BURST
+
 
 #### Rhodeia of Loch ####
 

@@ -17,6 +17,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ProphecyOfSubmersion,
     StreamingSurge,
     TheScentRemained,
+    TheSeedOfStoredKnowledge,
     TheShrinesSacredShade,
     ThunderingPenance,
     ## Weapons ##

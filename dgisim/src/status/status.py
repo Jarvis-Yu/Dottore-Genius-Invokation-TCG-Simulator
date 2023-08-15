@@ -140,7 +140,7 @@ __all__ = [
     "ProphecyOfSubmersionStatus",
     ## Nahida ##
     "SeedOfSkandhaStatus",
-    "ShineOfMayaStatus",
+    "ShrineOfMayaStatus",
     "TheSeedOfStoredKnowledgeStatus",
     ## Rhodeia of Loch ##
     "StreamingSurgeStatus",
@@ -2321,10 +2321,22 @@ class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
         if signal is TriggeringSignal.POST_REACTION:
             if self.activated_usages == 0:
                 return [], self
+            dmg_element: Element
+            oppo_player = game_state.get_player(source.pid.other())
+            oppo_chars = oppo_player.get_characters()
+            from ..character.character import Nahida
+            if (
+                    any(char.talent_equiped() for char in oppo_chars if isinstance(char, Nahida))
+                    and ShrineOfMayaStatus in oppo_player.get_combat_statuses()
+                    and any(char.ELEMENT is Element.PYRO for char in oppo_chars)
+            ):
+                dmg_element = Element.DENDRO
+            else:
+                dmg_element = Element.PIERCING
             return [eft.SpecificDamageEffect(
                 source=source,
                 target=source,
-                element=Element.PIERCING,
+                element=dmg_element,
                 damage=1,
                 damage_type=DamageType(status=True, no_boost=True),
             )], replace(self, usages=-1, activated_usages=-1)
@@ -2374,7 +2386,7 @@ class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class ShineOfMayaStatus(CombatStatus, _UsageStatus):
+class ShrineOfMayaStatus(CombatStatus, _UsageStatus):
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2
     DAMAGE_BOOST: ClassVar[int] = 1

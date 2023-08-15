@@ -3,6 +3,7 @@ This file contains the base class Character for all characters,
 and implementation of all characters. (in alphabetic order)
 """
 from __future__ import annotations
+from dataclasses import replace
 from typing import Callable, Optional, TYPE_CHECKING, Union
 from typing_extensions import override, Self
 from functools import lru_cache
@@ -1314,23 +1315,49 @@ class Nahida(Character):
         return self._elemental_skill_template(game_state, source, SKILL_DMG)
 
     def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
-        effects: list[eft.Effect] = [
-            eft.EnergyDrainEffect(
-                target=source,
-                drain=self.get_max_energy(),
-            ),
-            eft.ReferredDamageEffect(
-                source=source,
-                target=DynamicCharacterTarget.OPPO_ACTIVE,
-                element=self.ELEMENT,
-                damage=4,
-                damage_type=DamageType(elemental_burst=True),
-            ),
-        ]
-        if not self.talent_equiped():
+        effects: list[eft.Effect] = [eft.EnergyDrainEffect(
+            target=source,
+            drain=self.get_max_energy(),
+        )]
+        if (
+                self.talent_equiped()
+                and any(
+                    char.ELEMENT is Element.ELECTRO
+                    for char in game_state.get_player(source.pid).get_characters()
+                )
+        ):
+            # talent card effect for electro
+            for char in game_state.get_player(source.pid.other()).get_characters():
+                original_status = char.get_character_statuses().find(stt.SeedOfSkandhaStatus)
+                if original_status is not None:
+                    assert isinstance(original_status, stt.SeedOfSkandhaStatus)
+                    effects.append(eft.OverrideCharacterStatusEffect(
+                        target=StaticTarget(source.pid.other(), Zone.CHARACTERS, char.get_id()),
+                        status=replace(original_status, usages=original_status.usages+1),
+                    ))
+        effects.append(eft.ReferredDamageEffect(
+            source=source,
+            target=DynamicCharacterTarget.OPPO_ACTIVE,
+            element=self.ELEMENT,
+            damage=4,
+            damage_type=DamageType(elemental_burst=True),
+        ))
+        if (
+                self.talent_equiped()
+                and any(
+                    char.ELEMENT is Element.HYDRO
+                    for char in game_state.get_player(source.pid).get_characters()
+                )
+        ):
+            # talent card effect for hydro
+            effects.append(eft.UpdateCombatStatusEffect(
+                target_pid=source.pid,
+                status=stt.ShrineOfMayaStatus(usages=3),
+            ))
+        else:
             effects.append(eft.AddCombatStatusEffect(
                 target_pid=source.pid,
-                status=stt.ShineOfMayaStatus,
+                status=stt.ShrineOfMayaStatus,
             ))
         return tuple(effects)
 

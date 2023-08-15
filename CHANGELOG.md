@@ -6,11 +6,13 @@
 
 - New Characters:
   - Bennett
+  - Nahida
   - Yae Miko
 - New Cards:
   - Equipment Card:
     - Talent Equipment Card:
       - Grand Expectation
+      - The Seed of Stored Knowledge
       - The Shrine's Sacred Shade
     - Weapon Card:
       - Sacrificial Bow
