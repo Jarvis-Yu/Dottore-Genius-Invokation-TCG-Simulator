@@ -46,6 +46,12 @@ class Characters:
                 return self._characters[i:] + self._characters[:i]
         return self._characters
 
+    def get_character_ordered_from_id(self, char_id: int) -> tuple[Character, ...]:
+        for i, character in enumerate(self._characters):
+            if character.get_id() == char_id:
+                return self._characters[i:] + self._characters[:i]
+        raise Exception("Not Reached! Invalid char_id {char_id} not found in {self}")
+
     def get_none_active_characters(self) -> tuple[Character, ...]:
         return tuple(
             char

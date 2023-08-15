@@ -38,6 +38,7 @@ __all__ = [
     "Keqing",
     "Klee",
     "Mona",
+    "Nahida",
     "RhodeiaOfLoch",
     "Tighnari",
     "Xingqiu",
@@ -214,6 +215,10 @@ class Character:
                     zone=Zone.CHARACTERS,
                     id=game_state.get_other_player(source.pid).just_get_active_character().get_id()
                 )
+            ),
+            eft.AllStatusTriggererEffect(
+                pid=source.pid,
+                signal=TriggeringSignal.POST_REACTION,
             ),
             eft.AllStatusTriggererEffect(
                 pid=source.pid,
@@ -1120,7 +1125,7 @@ class Klee(Character):
             ),
             eft.AddCombatStatusEffect(
                 target_pid=source.pid.other(),
-                status=stt.SparksnSplash,
+                status=stt.SparksnSplashStatus,
             ),
         )
 
@@ -1211,6 +1216,134 @@ class Mona(Character):
             hiddens=stts.Statuses((
                 stt.IllusoryTorrentStatus(),
             )),
+            equipments=stts.EquipmentStatuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
+class Nahida(Character):
+    _ELEMENT = Element.DENDRO
+    _WEAPON_TYPE = WeaponType.CATALYST
+    _TALENT_STATUS = stt.TheSeedOfStoredKnowledgeStatus
+    _FACTIONS = frozenset((Faction.SUMERU,))
+
+    _NORMAL_ATTACK_COST = AbstractDices({
+        Element.DENDRO: 1,
+        Element.ANY: 2,
+    })
+    _ELEMENTAL_SKILL1_COST = AbstractDices({
+        Element.DENDRO: 3,
+    })
+    _ELEMENTAL_SKILL2_COST = AbstractDices({
+        Element.DENDRO: 5,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDices({
+        Element.DENDRO: 3,
+    })
+
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.DENDRO,
+            damage=1,
+        )
+
+    def _elemental_skill_template(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            dmg_amount: int,
+            single_target: bool = False
+    ) -> tuple[eft.Effect, ...]:
+        oppo_pid = source.pid.other()
+        oppo_active_character = game_state.get_player(oppo_pid).just_get_active_character()
+        has_reaction = \
+            oppo_active_character.get_elemental_aura().consult_reaction(self.ELEMENT) is not None
+        effects: list[eft.Effect] = [
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=self.ELEMENT,
+                damage=dmg_amount,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+        ]
+        char_ids = (
+            (oppo_active_character.get_id(),)
+            if single_target
+            else tuple(
+                char.get_id()
+                for char in game_state.get_player(
+                    oppo_pid
+                ).get_characters().get_character_in_activity_order()
+            )
+        )
+        for id in char_ids:
+            effects.append(eft.UpdateCharacterStatusEffect(
+                target=StaticTarget(oppo_pid, Zone.CHARACTERS, id),
+                status=stt.SeedOfSkandhaStatus(activated_usages=(
+                    1
+                    if (
+                        id == oppo_active_character.get_id()
+                        and has_reaction
+                        and oppo_active_character.get_character_statuses().find(
+                            stt.SeedOfSkandhaStatus
+                        ) is None
+                    )
+                    else 0
+                )),
+            ))
+        return tuple(effects)
+
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        oppo_active_character = game_state.get_player(
+            source.pid.other()
+        ).just_get_active_character()
+        SKILL_DMG = 2
+        return self._elemental_skill_template(
+            game_state,
+            source,
+            dmg_amount=SKILL_DMG,
+            single_target=stt.SeedOfSkandhaStatus not in oppo_active_character.get_character_statuses(),
+        )
+
+    def _elemental_skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        SKILL_DMG = 3
+        return self._elemental_skill_template(game_state, source, SKILL_DMG)
+
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        effects: list[eft.Effect] = [
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.get_max_energy(),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=self.ELEMENT,
+                damage=4,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+        ]
+        if not self.talent_equiped():
+            effects.append(eft.AddCombatStatusEffect(
+                target_pid=source.pid,
+                status=stt.ShineOfMayaStatus,
+            ))
+        return tuple(effects)
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=2,
+            hiddens=stts.Statuses(()),
             equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),

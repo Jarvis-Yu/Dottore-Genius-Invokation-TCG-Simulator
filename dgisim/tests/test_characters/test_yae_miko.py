@@ -11,8 +11,8 @@ class TestYaeMiko(unittest.TestCase):
             ).character(
                 YaeMiko.from_default(2)
             ).build()
-            ).f_hand_cards(
-                lambda hcs: hcs.add(TheShrinesSacredShade)
+        ).f_hand_cards(
+            lambda hcs: hcs.add(TheShrinesSacredShade)
         ).build()
     ).build()
     assert type(BASE_GAME.get_player1().just_get_active_character()) is YaeMiko
@@ -184,7 +184,8 @@ class TestYaeMiko(unittest.TestCase):
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
 
-        gsm.player_step(); gsm.auto_step()  # p1 burst
+        gsm.player_step()
+        gsm.auto_step()  # p1 burst
         p1ac = gsm.get_game_state().get_player1().just_get_active_character()
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 6)
@@ -200,13 +201,15 @@ class TestYaeMiko(unittest.TestCase):
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
 
-        gsm.player_step(); gsm.auto_step()  # p1 burst
+        gsm.player_step()
+        gsm.auto_step()  # p1 burst
         p1ac = gsm.get_game_state().get_player1().just_get_active_character()
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 6)
         self.assertIn(RiteOfDispatchStatus, p1ac.get_character_statuses())
 
-        gsm.player_step(); gsm.auto_step()  # p2 end round
+        gsm.player_step()
+        gsm.auto_step()  # p2 end round
         post_burst_state = gsm.get_game_state()
 
         # then next skill has cost deduction

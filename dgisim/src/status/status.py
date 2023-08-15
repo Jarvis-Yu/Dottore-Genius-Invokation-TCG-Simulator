@@ -22,6 +22,7 @@ from ..effect import effect as eft
 
 from ..character.enums import CharacterSkill, WeaponType
 from ..dices import ActualDices
+from ..effect.effects_template import standard_post_effects
 from ..effect.enums import Zone, TriggeringSignal, DynamicCharacterTarget
 from ..effect.structs import StaticTarget, DamageType
 from ..element import Element, Reaction
@@ -132,11 +133,15 @@ __all__ = [
     ## Klee ##
     "ExplosiveSparkStatus",
     "PoundingSurpriseStatus",
-    "SparksnSplash",
+    "SparksnSplashStatus",
     ## Mona ##
     "IllusoryBubbleStatus",
     "IllusoryTorrentStatus",
     "ProphecyOfSubmersionStatus",
+    ## Nahida ##
+    "SeedOfSkandhaStatus",
+    "ShineOfMayaStatus",
+    "TheSeedOfStoredKnowledgeStatus",
     ## Rhodeia of Loch ##
     "StreamingSurgeStatus",
     ## Tighnari ##
@@ -258,7 +263,11 @@ class Status:
         return self
 
     def react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal,
+            silent: bool = False,  # ignore post checkers if True
     ) -> list[eft.Effect]:
         es, new_status = self._react_to_signal(game_state, source, signal)
         es, new_status = self._post_react_to_signal(game_state, es, new_status, source, signal)
@@ -338,6 +347,9 @@ class Status:
 
         es = self._post_update_react_to_signal(game_state, es, source, signal)
 
+        if silent:
+            return es
+
         has_damage = False
         has_swap = False
         for effect in es:
@@ -351,35 +363,7 @@ class Status:
                     Element.PYRO,
                 )
             )
-        if has_damage:
-            es.append(eft.AliveMarkCheckerEffect())
-            es.append(eft.DefeatedCheckerEffect())
-            es.append(eft.AllStatusTriggererEffect(
-                pid=source.pid,
-                signal=TriggeringSignal.POST_DMG,
-            ))
-        if has_swap or has_damage:
-            es.append(
-                eft.SwapCharacterCheckerEffect(
-                    my_active=StaticTarget(
-                        pid=source.pid,
-                        zone=Zone.CHARACTERS,
-                        id=game_state.get_player(source.pid).just_get_active_character().get_id(),
-                    ),
-                    oppo_active=StaticTarget(
-                        pid=source.pid.other(),
-                        zone=Zone.CHARACTERS,
-                        id=game_state.get_player(
-                            source.pid.other()).just_get_active_character().get_id(),
-                    ),
-                )
-            )
-        if has_damage:
-            es.append(eft.AllStatusTriggererEffect(
-                pid=source.pid,
-                signal=TriggeringSignal.DEATH_EVENT,
-            ))
-            es.append(eft.DeathCheckCheckerEffect())
+        es += standard_post_effects(game_state, source.pid, has_damage, has_swap)
 
         return es
 
@@ -1244,7 +1228,7 @@ class WindAndFreedomStatus(CombatStatus):
 class JueyunGuobaStatus(CharacterStatus, _UsageStatus):
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 1
-    damage_boost: ClassVar[int] = 1
+    DAMAGE_BOOST: ClassVar[int] = 1
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
     ))
@@ -1261,7 +1245,7 @@ class JueyunGuobaStatus(CharacterStatus, _UsageStatus):
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
             if dmg.source == status_source and dmg.damage_type.normal_attack:
-                dmg = replace(dmg, damage=dmg.damage + JueyunGuobaStatus.damage_boost)
+                dmg = replace(dmg, damage=dmg.damage + JueyunGuobaStatus.DAMAGE_BOOST)
                 return DmgPEvent(dmg=dmg), replace(self, usages=self.usages - 1)
         return super()._preprocess(game_state, status_source, item, signal)
 
@@ -2149,7 +2133,7 @@ class PoundingSurpriseStatus(TalentEquipmentStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class SparksnSplash(CombatStatus, _UsageStatus):
+class SparksnSplashStatus(CombatStatus, _UsageStatus):
     usages: int = 2
     activated: bool = False
     MAX_USAGES: ClassVar[int] = 2
@@ -2295,6 +2279,142 @@ class ProphecyOfSubmersionStatus(TalentEquipmentStatus):
                 return DmgPEvent(dmg=dmg), self
         return super()._preprocess(game_state, status_source, item, signal)
 
+#### Nahida ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    activated_usages: int = 0
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_REACTION,
+    ))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.DMG_DELT:
+            assert isinstance(information, DmgIEvent)
+            if (
+                    self.usages == 0
+                    or information.dmg.reaction is None
+                    or information.dmg.target != status_source
+            ):
+                return self
+            char_target = game_state.get_character_target(information.dmg.target)
+            assert char_target is not None
+            if type(self) in char_target.get_character_statuses():
+                return replace(self, activated_usages=self.activated_usages + 1)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.POST_REACTION:
+            if self.activated_usages == 0:
+                return [], self
+            return [eft.SpecificDamageEffect(
+                source=source,
+                target=source,
+                element=Element.PIERCING,
+                damage=1,
+                damage_type=DamageType(status=True, no_boost=True),
+            )], replace(self, usages=-1, activated_usages=-1)
+        return [], self
+
+    @override
+    def _post_update_react_to_signal(
+            self,
+            game_state: GameState,
+            effects: list[eft.Effect],
+            source: StaticTarget,
+            signal: TriggeringSignal,
+    ) -> list[eft.Effect]:
+        if signal is TriggeringSignal.POST_REACTION:
+            if self.activated_usages == 0:
+                return effects
+            characters = game_state.get_player(source.pid).get_characters()
+            assert isinstance(source.id, int)
+            ordered_chars = characters.get_character_ordered_from_id(source.id)
+            for char in ordered_chars[1:]:
+                status = char.get_character_statuses().find(type(self))
+                if status is not None:
+                    assert isinstance(status, type(self))
+                    char_source = replace(source, id=char.get_id())
+                    effects += (
+                        eft.SpecificDamageEffect(
+                            source=char_source,
+                            target=char_source,
+                            element=Element.PIERCING,
+                            damage=1,
+                            damage_type=DamageType(status=True, no_boost=True),
+                        ),
+                        eft.UpdateCharacterStatusEffect(
+                            target=char_source,
+                            status=replace(status, usages=-1),
+                        )
+                    )
+            return effects
+        return effects
+
+    @override
+    def _update(self, other: Self) -> None | Self:
+        new_self = super()._update(other)
+        if new_self is None:
+            return None
+        return replace(new_self, activated_usages=self.activated_usages + other.activated_usages)
+
+
+@dataclass(frozen=True, kw_only=True)
+class ShineOfMayaStatus(CombatStatus, _UsageStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DAMAGE_BOOST: ClassVar[int] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            if not (
+                    dmg.source.pid is status_source.pid
+                    and dmg.damage_type.from_character()
+                    and dmg.reaction is not None
+            ):
+                return item, self
+            dmg = replace(dmg, damage=dmg.damage + self.DAMAGE_BOOST)
+            return DmgPEvent(dmg=dmg), self
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], replace(self, usages=-1)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class TheSeedOfStoredKnowledgeStatus(TalentEquipmentStatus):
+    pass
 
 #### Rhodeia of Loch ####
 

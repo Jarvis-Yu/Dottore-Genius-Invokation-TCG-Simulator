@@ -15,6 +15,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     Kaeya,
     Klee,
     Mona,
+    Nahida,
     RhodeiaOfLoch,
     Tighnari,
     Xingqiu,

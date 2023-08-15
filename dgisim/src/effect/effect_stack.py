@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Iterable, TYPE_CHECKING
+from typing import Iterable, Sequence, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .effect import Effect
@@ -30,7 +30,7 @@ class EffectStack:
     def push_one(self, effect: Effect) -> EffectStack:
         return EffectStack(self._effects + (effect, ))
 
-    def push_many_lf(self, effects: Iterable[Effect]) -> EffectStack:
+    def push_many_lf(self, effects: Sequence[Effect]) -> EffectStack:
         """
         lf means the effects passed in are executed from the last to the first
         """
@@ -39,7 +39,7 @@ class EffectStack:
             return self
         return EffectStack(self._effects + effects)
 
-    def push_many_fl(self, effects: Iterable[Effect]) -> EffectStack:
+    def push_many_fl(self, effects: Sequence[Effect]) -> EffectStack:
         """
         fl means the effects passed in are executed from the first to the last
         """

@@ -120,7 +120,7 @@ class TestKlee(unittest.TestCase):
         p2ac = p2.just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 7)
         self.assertTrue(p2ac.get_elemental_aura().contains(Element.PYRO))
-        self.assertEqual(p2.get_combat_statuses().just_find(SparksnSplash).usages, 2)
+        self.assertEqual(p2.get_combat_statuses().just_find(SparksnSplashStatus).usages, 2)
         self.assertEqual(
             gsm.get_game_state().get_player1().just_get_active_character().get_energy(),
             0
@@ -141,7 +141,7 @@ class TestKlee(unittest.TestCase):
         p2ac = p2.just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 5)
         self.assertTrue(p2ac.get_elemental_aura().contains(Element.PYRO))
-        self.assertEqual(p2.get_combat_statuses().just_find(SparksnSplash).usages, 1)
+        self.assertEqual(p2.get_combat_statuses().just_find(SparksnSplashStatus).usages, 1)
 
         # p1 end
         a1.inject_action(EndRoundAction())
@@ -160,7 +160,7 @@ class TestKlee(unittest.TestCase):
         p2ac = p2.just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
         self.assertNotIn(Element.PYRO, p2ac.get_elemental_aura())
-        self.assertEqual(p2.get_combat_statuses().just_find(SparksnSplash).usages, 1)
+        self.assertEqual(p2.get_combat_statuses().just_find(SparksnSplashStatus).usages, 1)
 
         # p2 skill again
         a2.inject_action(
@@ -175,7 +175,7 @@ class TestKlee(unittest.TestCase):
         p2ac = p2.just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 8)
         self.assertIn(Element.PYRO, p2ac.get_elemental_aura())
-        self.assertNotIn(SparksnSplash, p2.get_combat_statuses())
+        self.assertNotIn(SparksnSplashStatus, p2.get_combat_statuses())
 
     def test_talent_card(self):
         a1, a2 = PuppetAgent(), PuppetAgent()

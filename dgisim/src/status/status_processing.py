@@ -133,12 +133,12 @@ class StatusProcessing:
     @staticmethod
     def trigger_all_statuses_effects(
             game_state: GameState, pid: Pid, signal: TriggeringSignal
-    ) -> list[eft.Effect]:
+    ) -> list[eft.TriggerrbleEffect]:
         """
         Takes the current game_state, trigger all statuses in order of player pid
         Returns the triggering effects in order (first to last)
         """
-        effects: list[eft.Effect] = []
+        effects: list[eft.TriggerrbleEffect] = []
 
         def f(game_state: GameState, status: stt.Status, target: StaticTarget) -> GameState:
             nonlocal effects

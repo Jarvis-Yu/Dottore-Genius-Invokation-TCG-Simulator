@@ -1,6 +1,6 @@
 from __future__ import annotations
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import ClassVar, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..state.enums import Pid
@@ -27,15 +27,16 @@ class TriggeringSignal(Enum):
     TRIGGER_REVIVAL = 3
     SWAP_EVENT_1 = 4  # P1's swap
     SWAP_EVENT_2 = 5  # P2's swap
-    POST_DMG = 6  # triggering after each summon effect
-    GAME_START = 7  # on triggered once at the start of the first round
-    ROUND_START = 8
-    PRE_ACTION = 9
-    ACT_PRE_SKILL = 10  # trigger prepare skill
-    SELF_DECLARE_END_ROUND = 11
-    OPPO_DECLARE_END_ROUND = 12
-    END_ROUND_CHECK_OUT = 13  # summons etc.
-    ROUND_END = 14  # remove frozen etc.
+    POST_REACTION = 6
+    POST_DMG = 7  # triggering after each summon effect
+    GAME_START = 8  # on triggered once at the start of the first round
+    ROUND_START = 9
+    PRE_ACTION = 10
+    ACT_PRE_SKILL = 11  # trigger prepare skill
+    SELF_DECLARE_END_ROUND = 12
+    OPPO_DECLARE_END_ROUND = 13
+    END_ROUND_CHECK_OUT = 14  # summons etc.
+    ROUND_END = 15  # remove frozen etc.
 
     @classmethod
     def swap_event(cls, pid: Pid) -> TriggeringSignal:

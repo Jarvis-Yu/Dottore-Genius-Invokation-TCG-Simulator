@@ -11,8 +11,9 @@ ordered alphabetically.
 - concrete classes, the implementation of effects that are actually in the game
 """
 from __future__ import annotations
+from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass, field, replace
-from typing import cast, FrozenSet, Iterable, Optional, TYPE_CHECKING, Union
+from typing import cast, FrozenSet, Iterable, Optional, Sequence, TYPE_CHECKING, Union
 
 from typing_extensions import override
 
@@ -138,8 +139,10 @@ class Effect:
 
 ############################## type ##############################
 @dataclass(frozen=True, repr=False)
-class TriggerrbleEffect(Effect):
-    pass
+class TriggerrbleEffect(ABC, Effect):
+    @abstractmethod
+    def new_effects(self, game_state: GameState) -> Sequence[Effect]:
+        pass
 
 
 @dataclass(frozen=True, repr=False)
@@ -173,6 +176,10 @@ class AllStatusTriggererEffect(TriggerrbleEffect):
     pid: Pid
     signal: TriggeringSignal
 
+    @override
+    def new_effects(self, game_state: GameState) -> Sequence[Effect]:
+        raise Exception("Not Reached")
+
     def execute(self, game_state: GameState) -> GameState:
         effects = StatusProcessing.trigger_all_statuses_effects(game_state, self.pid, self.signal)
         return game_state.factory().f_effect_stack(
@@ -186,15 +193,22 @@ class PlayerStatusTriggererEffect(TriggerrbleEffect):
     self_signal: TriggeringSignal
     other_signal: TriggeringSignal
 
-    def execute(self, game_state: GameState) -> GameState:
+    @override
+    def new_effects(self, game_state: GameState) -> Sequence[Effect]:
         self_effects = StatusProcessing.trigger_player_statuses_effects(
             game_state, self.pid, self.self_signal
         )
         oppo_effects = StatusProcessing.trigger_player_statuses_effects(
             game_state, self.pid.other(), self.other_signal
         )
+        return self_effects + oppo_effects
+
+    def execute(self, game_state: GameState) -> GameState:
+        effects = self.new_effects(game_state)
+        if not effects:
+            return game_state
         return game_state.factory().f_effect_stack(
-            lambda es: es.push_many_fl(self_effects + oppo_effects)
+            lambda es: es.push_many_fl(effects)
         ).build()
 
 
@@ -203,12 +217,18 @@ class PersonalStatusTriggerEffect(TriggerrbleEffect):
     target: StaticTarget
     signal: TriggeringSignal
 
-    def execute(self, game_state: GameState) -> GameState:
-        effects = StatusProcessing.trigger_personal_statuses_effect(
+    @override
+    def new_effects(self, game_state: GameState) -> Sequence[Effect]:
+        return StatusProcessing.trigger_personal_statuses_effect(
             game_state,
             self.target,
             self.signal
         )
+
+    def execute(self, game_state: GameState) -> GameState:
+        effects = self.new_effects(game_state)
+        if not effects:
+            return game_state
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
@@ -220,11 +240,12 @@ class TriggerStatusEffect(TriggerrbleEffect):
     status: type[stt.PersonalStatus]
     signal: TriggeringSignal
 
-    def execute(self, game_state: GameState) -> GameState:
+    @override
+    def new_effects(self, game_state: GameState) -> Sequence[Effect]:
         character = game_state.get_target(self.target)
         if not isinstance(character, chr.Character):  # pragma: no cover
-            return game_state
-        effects: Iterable[Effect] = []
+            return []
+        effects: list[Effect] = []
 
         statuses: Statuses
         if issubclass(self.status, stt.HiddenStatus):
@@ -237,8 +258,14 @@ class TriggerStatusEffect(TriggerrbleEffect):
             raise Exception("Unexpected Status Type to Trigger", self.status)
         status = statuses.find(self.status)
         if status is None:
-            return game_state
+            return []
         effects = status.react_to_signal(game_state, self.target, self.signal)
+        return effects
+
+    def execute(self, game_state: GameState) -> GameState:
+        effects = self.new_effects(game_state)
+        if not effects:
+            return game_state
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
@@ -250,13 +277,13 @@ class TriggerHiddenStatusEffect(TriggerrbleEffect):
     status: type[stt.PlayerHiddenStatus]
     signal: TriggeringSignal
 
-    def execute(self, game_state: GameState) -> GameState:
-        effects: Iterable[Effect] = []
+    @override
+    def new_effects(self, game_state: GameState) -> Sequence[Effect]:
         statuses = game_state.get_player(self.target_pid).get_hidden_statuses()
         status = statuses.find(self.status)
         if status is None:
-            return game_state
-        effects = status.react_to_signal(
+            return []
+        return status.react_to_signal(
             game_state,
             StaticTarget(
                 pid=self.target_pid,
@@ -265,6 +292,11 @@ class TriggerHiddenStatusEffect(TriggerrbleEffect):
             ),
             self.signal,
         )
+
+    def execute(self, game_state: GameState) -> GameState:
+        effects = self.new_effects(game_state)
+        if not effects:
+            return game_state
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
@@ -276,13 +308,13 @@ class TriggerCombatStatusEffect(TriggerrbleEffect):
     status: type[stt.CombatStatus]
     signal: TriggeringSignal
 
-    def execute(self, game_state: GameState) -> GameState:
-        effects: Iterable[Effect] = []
+    @override
+    def new_effects(self, game_state: GameState) -> Sequence[Effect]:
         statuses = game_state.get_player(self.target_pid).get_combat_statuses()
         status = statuses.find(self.status)
         if status is None:
-            return game_state
-        effects = status.react_to_signal(
+            return []
+        return status.react_to_signal(
             game_state,
             StaticTarget(
                 pid=self.target_pid,
@@ -291,6 +323,11 @@ class TriggerCombatStatusEffect(TriggerrbleEffect):
             ),
             self.signal,
         )
+
+    def execute(self, game_state: GameState) -> GameState:
+        effects = self.new_effects(game_state)
+        if not effects:
+            return game_state
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
@@ -302,13 +339,13 @@ class TriggerSummonEffect(TriggerrbleEffect):
     summon: type[sm.Summon]
     signal: TriggeringSignal
 
-    def execute(self, game_state: GameState) -> GameState:
-        effects: Iterable[Effect] = []
+    @override
+    def new_effects(self, game_state: GameState) -> Sequence[Effect]:
         summons = game_state.get_player(self.target_pid).get_summons()
         summon = summons.find(self.summon)
         if summon is None:
-            return game_state
-        effects = summon.react_to_signal(
+            return []
+        return summon.react_to_signal(
             game_state,
             StaticTarget(
                 pid=self.target_pid,
@@ -317,6 +354,11 @@ class TriggerSummonEffect(TriggerrbleEffect):
             ),
             self.signal,
         )
+
+    def execute(self, game_state: GameState) -> GameState:
+        effects = self.new_effects(game_state)
+        if not effects:
+            return game_state
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
@@ -329,13 +371,13 @@ class TriggerSupportEffect(TriggerrbleEffect):
     sid: int
     signal: TriggeringSignal
 
-    def execute(self, game_state: GameState) -> GameState:
-        effects: Iterable[Effect] = []
+    @override
+    def new_effects(self, game_state: GameState) -> Sequence[Effect]:
         supports = game_state.get_player(self.target_pid).get_supports()
         support = supports.find(self.support_type, self.sid)
         if support is None:
-            return game_state
-        effects = support.react_to_signal(
+            return []
+        return support.react_to_signal(
             game_state,
             StaticTarget(
                 pid=self.target_pid,
@@ -344,6 +386,11 @@ class TriggerSupportEffect(TriggerrbleEffect):
             ),
             self.signal,
         )
+
+    def execute(self, game_state: GameState) -> GameState:
+        effects = self.new_effects(game_state)
+        if not effects:
+            return game_state
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
