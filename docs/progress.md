@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (13/51 implemented)](#character-1351-implemented)
+  - [Character (14/51 implemented)](#character-1451-implemented)
   - [Card (42/192 implemented)](#card-42192-implemented)
 
-## Character (13/51 implemented)
+## Character (14/51 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -31,7 +31,7 @@ all I need now is to implement each card and character.
   - [ ] Shenhe  _<-- WIP_
 - [ ] Geo:
   - [x] Arataki Itto
-  - [ ] Noelle  _<-- WIP_
+  - [x] Noelle
 
 ## Card (42/192 implemented)
 

@@ -7,6 +7,7 @@
 - New Characters:
   - Bennett
   - Nahida
+  - Noelle
   - Yae Miko
 - New Cards:
   - Equipment Card:

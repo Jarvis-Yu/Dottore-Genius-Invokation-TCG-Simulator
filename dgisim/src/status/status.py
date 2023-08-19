@@ -34,6 +34,7 @@ from .enums import Preprocessables, Informables
 if TYPE_CHECKING:
     from ..card.card import Card
     from ..character.character import Character
+    from ..state.enums import Pid
     from ..state.game_state import GameState
 
 __all__ = [
@@ -142,6 +143,10 @@ __all__ = [
     "SeedOfSkandhaStatus",
     "ShrineOfMayaStatus",
     "TheSeedOfStoredKnowledgeStatus",
+    ## Noelle ##
+    "FullPlateStatus",
+    "IGotYourBackStatus",
+    "SweepingTimeStatus",
     ## Rhodeia of Loch ##
     "StreamingSurgeStatus",
     ## Tighnari ##
@@ -497,7 +502,21 @@ class CombatStatus(Status):
     """
     Basic status, status shared across the team
     """
-    pass
+
+    def _target_is_self_active(
+            self,
+            game_state: GameState,
+            self_pid: Pid,
+            target: StaticTarget
+    ) -> bool:
+        active_char = game_state.get_player(self_pid).get_active_character()
+        if active_char is None:
+            return False
+        return StaticTarget(
+            pid=self_pid,
+            zone=Zone.CHARACTERS,
+            id=active_char.get_id(),
+        ) == target
 
 
 ############################## template ##############################
@@ -632,7 +651,6 @@ class StackedShieldStatus(_ShieldStatus, _UsageStatus):
             item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, Optional[Self]]:
-        cls = type(self)
         if signal is Preprocessables.DMG_AMOUNT_MINUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
@@ -640,8 +658,8 @@ class StackedShieldStatus(_ShieldStatus, _UsageStatus):
             if dmg.damage > 0 and self.usages > 0 \
                     and dmg.element != Element.PIERCING \
                     and self._is_target(game_state, status_source, dmg):
-                usages_consumed = min(ceil(dmg.damage / cls.SHIELD_AMOUNT), self.usages)
-                new_dmg_amount = max(0, dmg.damage - usages_consumed * cls.SHIELD_AMOUNT)
+                usages_consumed = min(ceil(dmg.damage / self.SHIELD_AMOUNT), self.usages)
+                new_dmg_amount = max(0, dmg.damage - usages_consumed * self.SHIELD_AMOUNT)
                 new_dmg = replace(dmg, damage=new_dmg_amount)
                 new_item = DmgPEvent(dmg=new_dmg)
                 new_usages = self.usages - usages_consumed
@@ -1059,11 +1077,6 @@ class ChangingShiftsStatus(CombatStatus):
 class CrystallizeStatus(CombatStatus, StackedShieldStatus):
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 2
-
-    @override
-    def _update(self, other: CrystallizeStatus) -> Optional[CrystallizeStatus]:
-        new_stacks = min(just(type(self).MAX_USAGES, BIG_INT), self.usages + other.usages)
-        return type(self)(usages=new_stacks)
 
 
 @dataclass(frozen=True)
@@ -2427,6 +2440,83 @@ class ShrineOfMayaStatus(CombatStatus, _UsageStatus):
 @dataclass(frozen=True, kw_only=True)
 class TheSeedOfStoredKnowledgeStatus(TalentEquipmentStatus):
     pass
+
+
+#### Noelle ####
+
+@dataclass(frozen=True, kw_only=True)
+class FullPlateStatus(CombatStatus, StackedShieldStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_MUL:
+            assert isinstance(item, DmgPEvent)
+            if (
+                    item.dmg.element is Element.PHYSICAL
+                    and self._target_is_self_active(game_state, status_source.pid, item.dmg.target)
+            ):
+                from math import ceil
+                return replace(item, dmg=replace(item.dmg, damage=ceil(item.dmg.damage / 2))), self
+        return super()._preprocess(game_state, status_source, item, signal)
+
+
+@dataclass(frozen=True, kw_only=True)
+class IGotYourBackStatus(TalentEquipmentStatus):
+    pass
+
+
+@dataclass(frozen=True, kw_only=True)
+class SweepingTimeStatus(CharacterStatus, _InfusionStatus):
+    usages: int = 2  # duration
+    ELEMENT: ClassVar[Element] = Element.GEO
+    damage_boost: int = 2
+    dice_reduction_usages: int = 1
+    DICE_REDUCTION: ClassVar[int] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+        if signal is Preprocessables.SKILL:
+            assert isinstance(item, ActionPEvent)
+            if (
+                    self.dice_reduction_usages > 0
+                    and status_source == item.source
+                    and item.event_type is EventType.NORMAL_ATTACK
+                    and item.dices_cost[Element.GEO] >= self.DICE_REDUCTION
+            ):
+                item = replace(
+                    item,
+                    dices_cost=(item.dices_cost - {Element.GEO: self.DICE_REDUCTION}).validify()
+                )
+                return item, replace(self, dice_reduction_usages=self.dice_reduction_usages - 1)
+        return super()._preprocess(game_state, status_source, item, signal)
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], replace(self, usages=-1, dice_reduction_usages=1)
+        return [], self
+
+    def __str__(self) -> str:
+        return super().__str__() + f"({self.dice_reduction_usages})"
 
 #### Rhodeia of Loch ####
 

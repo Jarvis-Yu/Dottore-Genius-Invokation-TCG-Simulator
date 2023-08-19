@@ -40,6 +40,7 @@ __all__ = [
     "Klee",
     "Mona",
     "Nahida",
+    "Noelle",
     "RhodeiaOfLoch",
     "Tighnari",
     "Xingqiu",
@@ -1333,7 +1334,7 @@ class Nahida(Character):
                     assert isinstance(original_status, stt.SeedOfSkandhaStatus)
                     effects.append(eft.OverrideCharacterStatusEffect(
                         target=StaticTarget(source.pid.other(), Zone.CHARACTERS, char.get_id()),
-                        status=replace(original_status, usages=original_status.usages+1),
+                        status=replace(original_status, usages=original_status.usages + 1),
                     ))
         effects.append(eft.ReferredDamageEffect(
             source=source,
@@ -1360,6 +1361,84 @@ class Nahida(Character):
                 status=stt.ShrineOfMayaStatus,
             ))
         return tuple(effects)
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=2,
+            hiddens=stts.Statuses(()),
+            equipments=stts.EquipmentStatuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
+class Noelle(Character):
+    _ELEMENT = Element.GEO
+    _WEAPON_TYPE = WeaponType.CLAYMORE
+    # _TALENT_STATUS = stt.TheSeedOfStoredKnowledgeStatus
+    _FACTIONS = frozenset((Faction.MONDSTADT,))
+
+    _NORMAL_ATTACK_COST = AbstractDices({
+        Element.GEO: 1,
+        Element.ANY: 2,
+    })
+    _ELEMENTAL_SKILL1_COST = AbstractDices({
+        Element.GEO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDices({
+        Element.GEO: 4,
+    })
+
+    @override
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        )
+
+    @override
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.GEO,
+                damage=1,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+            eft.AddCombatStatusEffect(
+                target_pid=source.pid,
+                status=stt.FullPlateStatus,
+            ),
+        )
+
+    @override
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.get_max_energy(),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.GEO,
+                damage=4,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            eft.AddCharacterStatusEffect(
+                target=source,
+                status=stt.SweepingTimeStatus,
+            ),
+        )
 
     @classmethod
     def from_default(cls, id: int = -1) -> Self:
