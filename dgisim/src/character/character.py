@@ -1381,7 +1381,7 @@ class Nahida(Character):
 class Noelle(Character):
     _ELEMENT = Element.GEO
     _WEAPON_TYPE = WeaponType.CLAYMORE
-    # _TALENT_STATUS = stt.TheSeedOfStoredKnowledgeStatus
+    _TALENT_STATUS = stt.IGotYourBackStatus
     _FACTIONS = frozenset((Faction.MONDSTADT,))
 
     _NORMAL_ATTACK_COST = AbstractDices({

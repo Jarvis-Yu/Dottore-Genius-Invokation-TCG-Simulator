@@ -13,6 +13,7 @@
   - Equipment Card:
     - Talent Equipment Card:
       - Grand Expectation
+      - I Got Your Back
       - The Seed of Stored Knowledge
       - The Shrine's Sacred Shade
     - Weapon Card:

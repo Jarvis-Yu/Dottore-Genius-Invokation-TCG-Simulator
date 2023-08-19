@@ -2448,6 +2448,13 @@ class TheSeedOfStoredKnowledgeStatus(TalentEquipmentStatus):
 class FullPlateStatus(CombatStatus, StackedShieldStatus):
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2
+    heal_usages: int = 1
+    MAX_HEAL_USAGES: ClassVar[int] = 1
+    HEAL_AMOUNT: ClassVar[int] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.ROUND_END,
+    ))
 
     @override
     def _preprocess(
@@ -2466,6 +2473,30 @@ class FullPlateStatus(CombatStatus, StackedShieldStatus):
                 from math import ceil
                 return replace(item, dmg=replace(item.dmg, damage=ceil(item.dmg.damage / 2))), self
         return super()._preprocess(game_state, status_source, item, signal)
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION:
+            if self.heal_usages <= 0:
+                return [], self
+            this_player = game_state.get_player(source.pid)
+            char_self = this_player.just_get_active_character()
+            if not char_self.talent_equiped():
+                return [], self
+            effects: list[eft.Effect] = []
+            for char in this_player.get_characters().get_character_in_activity_order():
+                if char.alive():
+                    effects.append(eft.RecoverHPEffect(
+                        target=StaticTarget(source.pid, Zone.CHARACTERS, char.get_id()),
+                        recovery=self.HEAL_AMOUNT,
+                    ))
+            return effects, replace(self, usages=0, heal_usages=self.heal_usages-1)
+        elif signal is TriggeringSignal.ROUND_END:
+            if self.heal_usages < self.MAX_HEAL_USAGES:
+                return [], replace(self, heal_usages=self.MAX_HEAL_USAGES)
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)

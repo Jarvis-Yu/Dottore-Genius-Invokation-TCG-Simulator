@@ -124,6 +124,8 @@ __all__ = [
     "ProphecyOfSubmersion",
     ## Nahida ##
     "TheSeedOfStoredKnowledge",
+    ## Noelle ##
+    "IGotYourBack",
     ## Rhodeia of Loch ##
     "StreamingSurge",
     ## Tighnari ##
@@ -1758,6 +1760,15 @@ class TheSeedOfStoredKnowledge(_TalentEquipmentSkillCard):
     _CHARACTER = chr.Nahida
     _EQUIPMENT_STATUS = stt.TheSeedOfStoredKnowledgeStatus
     _SKILL = CharacterSkill.ELEMENTAL_BURST
+
+#### Noelle ####
+
+
+class IGotYourBack(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDices({Element.GEO: 3})
+    _CHARACTER = chr.Noelle
+    _EQUIPMENT_STATUS = stt.IGotYourBackStatus
+    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
 
 
 #### Rhodeia of Loch ####

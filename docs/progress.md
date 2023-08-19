@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (14/51 implemented)](#character-1451-implemented)
-  - [Card (42/192 implemented)](#card-42192-implemented)
+  - [Card (43/192 implemented)](#card-43192-implemented)
 
 ## Character (14/51 implemented)
 
@@ -33,13 +33,14 @@ all I need now is to implement each card and character.
   - [x] Arataki Itto
   - [x] Noelle
 
-## Card (42/192 implemented)
+## Card (43/192 implemented)
 
-- [ ] Equipment Card (22/103):
+- [ ] Equipment Card (23/103):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] Cold-Blooded Strike
     - [x] Grand Expectation
+    - [x] I Got Your Back
     - [x] Keen Sight
     - [x] Poetics of Fuubutsu
     - [x] Pounding Surprise

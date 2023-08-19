@@ -11,6 +11,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     AratakiIchiban,
     ColdBloodedStrike,
     GrandExpectation,
+    IGotYourBack,
     KeenSight,
     PoeticsOfFuubutsu,
     PoundingSurprise,

@@ -11,8 +11,8 @@ class TestNoelle(unittest.TestCase):
             ).character(
                 Noelle.from_default(2)
             ).build()
-            # ).f_hand_cards(
-            #     lambda hcs: hcs.add(TheSeedOfStoredKnowledge)
+        ).f_hand_cards(
+            lambda hcs: hcs.add(IGotYourBack)
         ).build()
     ).build()
     assert type(BASE_GAME.get_player1().just_get_active_character()) is Noelle
@@ -153,3 +153,55 @@ class TestNoelle(unittest.TestCase):
         p1ac_character_statuses = \
             game_state.get_player1().just_get_active_character().get_character_statuses()
         self.assertNotIn(SweepingTimeStatus, p1ac_character_statuses)
+
+    def test_talent_card(self):
+        game_state = self.BASE_GAME.factory().f_player1(
+            lambda p1: p1.factory().f_characters(
+                lambda cs: cs.factory().f_characters(
+                    lambda chars: tuple(
+                        char.factory().hp(5).build()
+                        for char in chars
+                    )
+                ).build()
+            ).build()
+        ).build()
+        game_state = step_action(game_state, Pid.P1, CardAction(
+            card=IGotYourBack,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+        ))
+        game_state = step_action(game_state, Pid.P2, EndRoundAction())
+        # first normal attack heals with shield on
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        p1_cs = game_state.get_player1().get_characters()
+        for char in p1_cs:
+            self.assertEqual(char.get_hp(), 6)
+
+        # second normal attack doesn't heal
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        p1_cs = game_state.get_player1().get_characters()
+        for char in p1_cs:
+            self.assertEqual(char.get_hp(), 6)
+
+        # healing is back the next round
+        game_state = next_round(game_state)
+        game_state = step_action(game_state, Pid.P2, EndRoundAction())
+        game_state = fill_dices_with_omni(game_state)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        p1_cs = game_state.get_player1().get_characters()
+        for char in p1_cs:
+            self.assertEqual(char.get_hp(), 7)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        p1_cs = game_state.get_player1().get_characters()
+        for char in p1_cs:
+            self.assertEqual(char.get_hp(), 7)
+
+        # healing doesn't work without the shield
+        game_state = next_round(game_state)
+        game_state = step_action(game_state, Pid.P2, EndRoundAction())
+        game_state = fill_dices_with_omni(game_state)
+        game_state = auto_step(add_damage_effect(game_state, 2, Element.ELECTRO, Pid.P1, char_id=2))
+        game_state = kill_character(game_state, character_id=1, hp=10)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        p1_cs = game_state.get_player1().get_characters()
+        for char in p1_cs:
+            self.assertEqual(char.get_hp(), 7)
