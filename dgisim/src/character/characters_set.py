@@ -19,6 +19,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     Noelle,
     RhodeiaOfLoch,
     Tighnari,
+    Venti,
     Xingqiu,
     YaeMiko,
 ]

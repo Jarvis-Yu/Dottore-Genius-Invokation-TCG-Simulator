@@ -209,9 +209,9 @@ def fill_energy_for_all(game_state: GameState) -> GameState:
         ).build()
     ).build()
 
-def next_round(game_state: GameState) -> GameState:
+def next_round(game_state: GameState, observe: bool = False) -> GameState:
     gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
-    gsm.step_until_phase(game_state.get_mode().end_phase)
-    gsm.step_until_phase(game_state.get_mode().action_phase)
-    gsm.auto_step()
+    gsm.step_until_phase(game_state.get_mode().end_phase, observe=observe)
+    gsm.step_until_phase(game_state.get_mode().action_phase, observe=observe)
+    gsm.auto_step(observe=observe)
     return gsm.get_game_state()

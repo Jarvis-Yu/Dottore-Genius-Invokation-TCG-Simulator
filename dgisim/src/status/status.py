@@ -153,6 +153,8 @@ __all__ = [
     ## Tighnari ##
     "KeenSightStatus",
     "VijnanaSuffusionStatus",
+    ## Venti ##
+    "StormzoneStatus",
     ## Xingqiu ##
     "RainSwordStatus",
     "RainbowBladeworkStatus",
@@ -1161,6 +1163,7 @@ class FrozenStatus(CharacterStatus):
         if signal is TriggeringSignal.ROUND_END:
             return [], None
         return [], self  # pragma: no cover
+
 
 @dataclass(frozen=True, kw_only=True)
 class IHaventLostYetOnCooldownStatus(CombatStatus):
@@ -2507,7 +2510,7 @@ class FullPlateStatus(CombatStatus, StackedShieldStatus):
                         target=StaticTarget(source.pid, Zone.CHARACTERS, char.get_id()),
                         recovery=self.HEAL_AMOUNT,
                     ))
-            return effects, replace(self, usages=0, heal_usages=self.heal_usages-1)
+            return effects, replace(self, usages=0, heal_usages=self.heal_usages - 1)
         elif signal is TriggeringSignal.ROUND_END:
             if self.heal_usages < self.MAX_HEAL_USAGES:
                 return [], replace(self, heal_usages=self.MAX_HEAL_USAGES)
@@ -2690,8 +2693,35 @@ class VijnanaSuffusionStatus(CharacterStatus, _UsageStatus):
     def __str__(self) -> str:
         return super().__str__() + f"({self.usages}{case_val(self.activated, '*', '')})"
 
+#### Venti ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class StormzoneStatus(CombatStatus, _UsageStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+
+    COST_DEDUCTION: ClassVar[int] = 1
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+        if signal is Preprocessables.SWAP:
+            assert isinstance(item, ActionPEvent) and item.event_type is EventType.SWAP
+            if item.source.pid is status_source.pid \
+                    and item.dices_cost.num_dices() >= self.COST_DEDUCTION:
+                assert item.dices_cost.num_dices() == item.dices_cost[Element.ANY]
+                new_cost = (item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
+                return replace(item, dices_cost=new_cost), replace(self, usages=self.usages - 1)
+        return super()._preprocess(game_state, status_source, item, signal)
 
 #### Xingqiu ####
+
 
 @dataclass(frozen=True, kw_only=True)
 class RainSwordStatus(CombatStatus, FixedShieldStatus):

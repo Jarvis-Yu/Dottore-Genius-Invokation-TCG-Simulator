@@ -78,6 +78,7 @@ __all__ = [
     # Direct Effect
     "ConsecutiveActionEffect",
     "SwapCharacterEffect",
+    "BackwardSwapCharacterEffect",
     "ForwardSwapCharacterEffect",
     "ForwardSwapCharacterCheckEffect",
     "ApplyElementalAuraEffect",
@@ -699,6 +700,39 @@ class SwapCharacterEffect(DirectEffect):
 
 
 @dataclass(frozen=True, repr=False)
+class BackwardSwapCharacterEffect(DirectEffect):
+    """
+    Swap the to the next active character.
+
+    This effect doesn't auto-add swap checker.
+    """
+    target_player: Pid
+
+    def execute(self, game_state: GameState) -> GameState:
+        characters = game_state.get_player(self.target_player).get_characters()
+        # oredered chars without active character
+        ordered_chars = characters.get_character_in_activity_order()[:0:-1]
+        next_char: Optional[chr.Character] = next(
+            (
+                char
+                for char in ordered_chars
+                if char.alive()
+            ),
+            None
+        )
+        if next_char is None:
+            return game_state
+        return game_state.factory().f_player(
+            self.target_player,
+            lambda p: p.factory().f_characters(
+                lambda cs: cs.factory().active_character_id(
+                    next_char.get_id()  # type: ignore
+                ).build()
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
 class ForwardSwapCharacterEffect(DirectEffect):
     """
     Swap the to the next active character.
@@ -709,11 +743,12 @@ class ForwardSwapCharacterEffect(DirectEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         characters = game_state.get_player(self.target_player).get_characters()
-        ordered_chars = characters.get_character_in_activity_order()
+        # oredered chars without active character
+        ordered_chars = characters.get_character_in_activity_order()[1:]
         next_char: Optional[chr.Character] = next(
             (
                 char
-                for char in ordered_chars[1:]
+                for char in ordered_chars
                 if char.alive()
             ),
             None

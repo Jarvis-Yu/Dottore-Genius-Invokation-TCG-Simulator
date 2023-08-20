@@ -45,6 +45,7 @@ __all__ = [
     "OceanicMimicSquirrelSummon",
     "ReflectionSummon",
     "SesshouSakura",
+    "StormEyeSummon",
     "UshiSummon",
 ]
 
@@ -460,6 +461,38 @@ class SesshouSakura(_DestroyOnNumSummon):
         if d_usages == 0:
             return es, self
         return es, replace(self, usages=d_usages)
+
+
+@dataclass(frozen=True, kw_only=True)
+class StormEyeSummon(_ConvertableAnemoSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 2
+
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        es, new_self = super()._react_to_signal(game_state, source, signal)
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            oppo_active_char_id = game_state.get_player(
+                source.pid.other()
+            ).just_get_active_character().get_id()
+            self_active_char_id = game_state.get_player(
+                source.pid
+            ).just_get_active_character().get_id()
+            id_diff = self_active_char_id - oppo_active_char_id
+            if id_diff < 0:
+                es.append(eft.BackwardSwapCharacterEffect(
+                    target_player=source.pid.other(),
+                ))
+            elif id_diff > 0:
+                es.append(eft.ForwardSwapCharacterEffect(
+                    target_player=source.pid.other(),
+                ))
+        return es, new_self
 
 
 @dataclass(frozen=True, kw_only=True)
