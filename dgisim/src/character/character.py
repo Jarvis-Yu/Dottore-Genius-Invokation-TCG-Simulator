@@ -386,6 +386,12 @@ class Character:
     def __hash__(self) -> int:
         return hash(self._all_unique_data())
 
+    def __copy__(self) -> Self:
+        return self
+
+    def __deepcopy__(self, _) -> Self:
+        return self
+
     def dict_str(self) -> Union[dict, str]:
         return {
             "id": str(self._id),

@@ -167,7 +167,8 @@ class PlayerState:
             supports=Supports((), mode.supports_limit()),
             dices=ActualDices({}),
             hand_cards=Cards({}),
-            deck_cards=Cards(dict([(card, mode.deck_card_limit_per_kind()) for card in selected_cards])),
+            deck_cards=Cards(dict([(card, mode.deck_card_limit_per_kind())
+                             for card in selected_cards])),
             publicly_used_cards=Cards({}),
             publicly_gained_cards=Cards({}),
         )
@@ -235,6 +236,12 @@ class PlayerState:
 
     def __hash__(self) -> int:
         return hash(self._all_unique_data())
+
+    def __copy__(self) -> Self:
+        return self
+
+    def __deepcopy__(self, _) -> Self:
+        return self
 
     def dict_str(self) -> dict[str, Union[dict, str]]:
         return {
