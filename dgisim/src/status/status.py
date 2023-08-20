@@ -154,7 +154,9 @@ __all__ = [
     "KeenSightStatus",
     "VijnanaSuffusionStatus",
     ## Venti ##
+    "EmbraceOfWindsStatus",
     "StormzoneStatus",
+    "WindsOfHarmonyStatus",
     ## Xingqiu ##
     "RainSwordStatus",
     "RainbowBladeworkStatus",
@@ -2697,11 +2699,20 @@ class VijnanaSuffusionStatus(CharacterStatus, _UsageStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
+class EmbraceOfWindsStatus(TalentEquipmentStatus):
+    pass
+
+
+@dataclass(frozen=True, kw_only=True)
 class StormzoneStatus(CombatStatus, _UsageStatus):
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2
-
+    triggered: bool = False
     COST_DEDUCTION: ClassVar[int] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.SWAP_EVENT_1,
+        TriggeringSignal.SWAP_EVENT_2,
+    ))
 
     @override
     def _preprocess(
@@ -2716,9 +2727,66 @@ class StormzoneStatus(CombatStatus, _UsageStatus):
             if item.source.pid is status_source.pid \
                     and item.dices_cost.num_dices() >= self.COST_DEDUCTION:
                 assert item.dices_cost.num_dices() == item.dices_cost[Element.ANY]
+                assert not self.triggered
                 new_cost = (item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
-                return replace(item, dices_cost=new_cost), replace(self, usages=self.usages - 1)
+                return replace(item, dices_cost=new_cost), replace(self, triggered=True)
         return super()._preprocess(game_state, status_source, item, signal)
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if self.triggered and self._is_swapping_source(source, signal):
+            from ..character.character import Venti
+            has_talent = any(
+                char.talent_equiped()
+                for char in game_state.get_player(source.pid).get_characters()
+                if isinstance(char, Venti)
+            )
+            effects: list[eft.Effect] = []
+            if has_talent:
+                effects.append(eft.AddCombatStatusEffect(
+                    target_pid=source.pid,
+                    status=WindsOfHarmonyStatus,
+                ))
+            return effects, replace(self, usages=-1, triggered=False)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class WindsOfHarmonyStatus(CombatStatus):
+    COST_DEDUCTION: ClassVar[int] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+        if signal is Preprocessables.SKILL:
+            assert isinstance(item, ActionPEvent)
+            if status_source.pid is item.source.pid \
+                    and item.event_type is EventType.NORMAL_ATTACK \
+                    and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION:
+                item = replace(
+                    item,
+                    dices_cost=(item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
+                )
+                return item, None
+        return super()._preprocess(game_state, status_source, item, signal)
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], None
+        return [], self
 
 #### Xingqiu ####
 

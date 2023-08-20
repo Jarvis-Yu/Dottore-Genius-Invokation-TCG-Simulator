@@ -130,6 +130,8 @@ __all__ = [
     "StreamingSurge",
     ## Tighnari ##
     "KeenSight",
+    ## Venti ##
+    "EmbraceOfWinds",
     ## Xingqiu ##
     "TheScentRemained",
     ## Yae Miko ##
@@ -1796,6 +1798,15 @@ class KeenSight(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.DENDRO: 4})
     _CHARACTER = chr.Tighnari
     _EQUIPMENT_STATUS = stt.KeenSightStatus
+    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+
+
+#### Venti ####
+
+class EmbraceOfWinds(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDices({Element.ANEMO: 3})
+    _CHARACTER = chr.Venti
+    _EQUIPMENT_STATUS = stt.EmbraceOfWindsStatus
     _SKILL = CharacterSkill.ELEMENTAL_SKILL1
 
 #### Xingqiu ####

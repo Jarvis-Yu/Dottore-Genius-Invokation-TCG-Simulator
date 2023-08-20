@@ -8,10 +8,12 @@
   - Bennett
   - Nahida
   - Noelle
+  - Venti
   - Yae Miko
 - New Cards:
   - Equipment Card:
     - Talent Equipment Card:
+      - Embrace of Winds
       - Grand Expectation
       - I Got Your Back
       - The Seed of Stored Knowledge

@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (14/51 implemented)](#character-1451-implemented)
-  - [Card (43/192 implemented)](#card-43192-implemented)
+  - [Character (15/51 implemented)](#character-1551-implemented)
+  - [Card (44/192 implemented)](#card-44192-implemented)
 
-## Character (14/51 implemented)
+## Character (15/51 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -18,7 +18,7 @@ all I need now is to implement each card and character.
   - [x] Xingqiu
 - [ ] Anemo:
   - [x] Kaedehara Kazuha
-  - [ ] Venti  _<-- WIP_
+  - [x] Venti
 - [ ] Electro:
   - [x] Electro Hypostasis
   - [x] Keqing
@@ -33,12 +33,13 @@ all I need now is to implement each card and character.
   - [x] Arataki Itto
   - [x] Noelle
 
-## Card (43/192 implemented)
+## Card (44/192 implemented)
 
-- [ ] Equipment Card (23/103):
+- [ ] Equipment Card (24/103):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] Cold-Blooded Strike
+    - [x] Embrace of Winds
     - [x] Grand Expectation
     - [x] I Got Your Back
     - [x] Keen Sight

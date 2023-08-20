@@ -3,7 +3,7 @@ import unittest
 from dgisim.tests.test_characters.common_imports import *
 
 
-class TestNoelle(unittest.TestCase):
+class TestVenti(unittest.TestCase):
     BASE_GAME = ACTION_TEMPLATE.factory().f_player1(
         lambda p: p.factory().f_characters(
             lambda cs: cs.factory().active_character_id(
@@ -11,8 +11,8 @@ class TestNoelle(unittest.TestCase):
             ).character(
                 Venti.from_default(2)
             ).build()
-        # ).f_hand_cards(
-        #     lambda hcs: hcs.add(IGotYourBack)
+        ).f_hand_cards(
+            lambda hcs: hcs.add(EmbraceOfWinds)
         ).build()
     ).build()
     assert type(BASE_GAME.get_player1().just_get_active_character()) is Venti
@@ -27,7 +27,7 @@ class TestNoelle(unittest.TestCase):
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 8)
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
-    
+
     def test_elemental_skill1(self):
         game_state = oppo_aura_elem(self.BASE_GAME, Element.HYDRO)
         game_state = step_skill(
@@ -118,3 +118,34 @@ class TestNoelle(unittest.TestCase):
         p2ac = p2cs.just_get_active_character()
         self.assertEqual(p2cs.just_get_character(1).get_hp(), 6)
         self.assertEqual(p2ac.get_id(), 3)
+
+    def test_talent_card(self):
+        game_state = step_action(self.BASE_GAME, Pid.P1, CardAction(
+            card=EmbraceOfWinds,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.ANEMO: 3}))
+        ))
+        game_state = step_action(game_state, Pid.P2, EndRoundAction())
+        game_state = step_swap(game_state, Pid.P1, char_id=1, cost=0)
+        self.assertIn(WindsOfHarmonyStatus, game_state.get_player1().get_combat_statuses())
+
+    def test_winds_of_harmony_status(self):
+        base_state = AddCombatStatusEffect(Pid.P1, WindsOfHarmonyStatus).execute(self.BASE_GAME)
+        
+        # normal attacks gets correctly reduced cost
+        self.assertRaises(Exception, lambda: step_skill(
+            base_state,
+            Pid.P1,
+            CharacterSkill.NORMAL_ATTACK,
+            dices=ActualDices({Element.GEO: 2}),
+        ))
+        game_state = step_skill(
+            base_state,
+            Pid.P1,
+            CharacterSkill.NORMAL_ATTACK,
+            dices=ActualDices({Element.OMNI: 1, Element.GEO: 1}),
+        )
+        self.assertNotIn(WindsOfHarmonyStatus, game_state.get_player1().get_combat_statuses())
+
+        # disappears next round
+        game_state = next_round(base_state)
+        self.assertNotIn(WindsOfHarmonyStatus, game_state.get_player1().get_combat_statuses())

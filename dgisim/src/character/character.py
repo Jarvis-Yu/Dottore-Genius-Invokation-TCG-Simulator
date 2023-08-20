@@ -1679,8 +1679,7 @@ class Tighnari(Character):
 class Venti(Character):
     _ELEMENT = Element.ANEMO
     _WEAPON_TYPE = WeaponType.BOW
-    _TALENT_STATUS = None
-    # _TALENT_STATUS = stt.GrandExpectationStatus
+    _TALENT_STATUS = stt.EmbraceOfWindsStatus
     _FACTIONS = frozenset((Faction.MONDSTADT,))
 
     _NORMAL_ATTACK_COST = AbstractDices({
