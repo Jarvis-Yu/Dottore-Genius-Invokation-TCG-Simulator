@@ -37,7 +37,7 @@ class TestTeyvatFriedEgg(unittest.TestCase):
         p1c1 = game_state.get_player1().get_characters().just_get_character(1)
         self.assertTrue(p1c1.alive())
         self.assertEqual(p1c1.get_hp(), 3)
-        self.assertIn(ReviveOnCooldown, game_state.get_player1().get_combat_statuses())
+        self.assertIn(ReviveOnCooldownStatus, game_state.get_player1().get_combat_statuses())
 
         # check cannot use twice per round
         game_state = kill_character(game_state, character_id=1, pid=Pid.P1, hp=0)
@@ -66,7 +66,7 @@ class TestTeyvatFriedEgg(unittest.TestCase):
         p1c1 = game_state.get_player1().get_characters().just_get_character(1)
         self.assertTrue(p1c1.alive())
         self.assertEqual(p1c1.get_hp(), 3)
-        self.assertIn(ReviveOnCooldown, game_state.get_player1().get_combat_statuses())
+        self.assertIn(ReviveOnCooldownStatus, game_state.get_player1().get_combat_statuses())
 
     def test_revival_resets_character_statuses(self):
         base_game = kill_character(self.BASE_GAME, character_id=1, pid=Pid.P1, hp=1)

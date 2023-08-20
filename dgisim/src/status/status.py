@@ -88,7 +88,8 @@ __all__ = [
     "DendroCoreStatus",
     "FrozenStatus",
     "LeaveItToMeStatus",
-    "ReviveOnCooldown",
+    "IHaventLostYetOnCooldownStatus",
+    "ReviveOnCooldownStatus",
     "WindAndFreedomStatus",
 
     # character status
@@ -1161,6 +1162,20 @@ class FrozenStatus(CharacterStatus):
             return [], None
         return [], self  # pragma: no cover
 
+@dataclass(frozen=True, kw_only=True)
+class IHaventLostYetOnCooldownStatus(CombatStatus):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], None
+        return [], self  # pragma: no cover
+
 
 @dataclass(frozen=True)
 class LeaveItToMeStatus(CombatStatus):
@@ -1181,7 +1196,7 @@ class LeaveItToMeStatus(CombatStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class ReviveOnCooldown(CombatStatus):
+class ReviveOnCooldownStatus(CombatStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
     ))

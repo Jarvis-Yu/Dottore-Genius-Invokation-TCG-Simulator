@@ -61,3 +61,6 @@ class TestIHaventLostYet(unittest.TestCase):
             game_state.get_player2().get_dices()[Element.OMNI],
             p2_old_dices[Element.OMNI] + 1,
         )
+
+        # test only one can be used per round
+        self.assertFalse(IHaventLostYet.loosely_usable(game_state, Pid.P2))

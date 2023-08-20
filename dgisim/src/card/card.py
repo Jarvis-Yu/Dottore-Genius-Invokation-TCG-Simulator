@@ -1217,7 +1217,7 @@ class TeyvatFriedEgg(FoodCard, _CharTargetChoiceProvider):
 
     @classmethod
     def revive_on_cooldown(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        return stt.ReviveOnCooldown in game_state.get_player(pid).get_combat_statuses()
+        return stt.ReviveOnCooldownStatus in game_state.get_player(pid).get_combat_statuses()
 
     @override
     @classmethod
@@ -1268,7 +1268,7 @@ class TeyvatFriedEgg(FoodCard, _CharTargetChoiceProvider):
             ),
             eft.AddCombatStatusEffect(
                 instruction.target.pid,
-                stt.ReviveOnCooldown,
+                stt.ReviveOnCooldownStatus,
             )
         )
 
@@ -1383,9 +1383,14 @@ class IHaventLostYet(EventCard, _DiceOnlyChoiceProvider):
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         return (
-            game_state.get_player(pid)
-            .get_hidden_statuses()
-            .just_find(stt.DeathThisRoundStatus).activated
+            (
+                game_state.get_player(pid)
+                .get_hidden_statuses()
+                .just_find(stt.DeathThisRoundStatus).activated
+            ) and (
+                stt.IHaventLostYetOnCooldownStatus not in
+                game_state.get_player(pid).get_combat_statuses()
+            )
         )
 
     @override
@@ -1422,6 +1427,10 @@ class IHaventLostYet(EventCard, _DiceOnlyChoiceProvider):
             eft.EnergyRechargeEffect(
                 target=target,
                 recharge=1,
+            ),
+            eft.AddCombatStatusEffect(
+                target_pid=target.pid,
+                status=stt.IHaventLostYetOnCooldownStatus,
             ),
         )
 
