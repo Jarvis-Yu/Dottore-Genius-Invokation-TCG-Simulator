@@ -497,8 +497,35 @@ class StormEyeSummon(_ConvertableAnemoSummon):
 
 
 @dataclass(frozen=True, kw_only=True)
-class TalismanSpiritSummon(_DestroyOnNumSummon):
-    ...
+class TalismanSpiritSummon(_DmgPerRoundSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.CRYO
+    DMG_BOOST: ClassVar[int] = 1
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            if not (
+                    dmg.target.pid is status_source.pid.other()
+                    and (
+                        dmg.element is Element.CRYO
+                        or dmg.element is Element.PHYSICAL
+                    )
+            ):
+                return item, self
+            dmg = replace(dmg, damage=dmg.damage + self.DMG_BOOST)
+            return DmgPEvent(dmg=dmg), self
+        return super()._preprocess(game_state, status_source, item, signal)
 
 
 @dataclass(frozen=True, kw_only=True)

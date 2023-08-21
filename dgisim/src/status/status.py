@@ -1547,7 +1547,6 @@ class RagingOniKing(CharacterStatus, _InfusionStatus):
         return [], self
 
 
-
 @dataclass(frozen=True, kw_only=True)
 class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
     usages: int = 1
@@ -2612,6 +2611,12 @@ class IcyQuillStatus(CombatStatus, _UsageStatus):
     usages: int = 3
     MAX_USAGES: ClassVar[int] = 3
     DMG_BOOST: ClassVar[int] = 1
+    normal_attack_deduction_usages: int = 1
+    DEFAULT_NORMAL_ATTACK_DEDUCTION_USAGES: ClassVar[int] = 1
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
 
     @override
     def _preprocess(
@@ -2622,8 +2627,49 @@ class IcyQuillStatus(CombatStatus, _UsageStatus):
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, Optional[Self]]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
-            ...
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            if not (
+                    dmg.source.pid is status_source.pid
+                    and dmg.element is Element.CRYO
+                    and dmg.damage_type.from_character()
+            ):
+                return item, self
+            dmg = replace(dmg, damage=dmg.damage + self.DMG_BOOST)
+            from ..character.character import Shenhe
+            new_self = self
+            if (
+                self.normal_attack_deduction_usages > 0
+                and any(
+                    char.talent_equiped()
+                    for char in game_state.get_player(status_source.pid).get_characters()
+                    if isinstance(char, Shenhe)
+                )
+                and dmg.damage_type.direct_normal_attack()
+            ):
+                # if talent equipped and triggered
+                d_usages = 0
+                new_self = replace(
+                    new_self,
+                    normal_attack_deduction_usages=self.normal_attack_deduction_usages - 1,
+                )
+            else:
+                new_self = replace(new_self, usages=self.usages - 1)
+            return DmgPEvent(dmg=dmg), new_self
         return super()._preprocess(game_state, status_source, item, signal)
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        if signal is TriggeringSignal.ROUND_END:
+            if self.normal_attack_deduction_usages < self.DEFAULT_NORMAL_ATTACK_DEDUCTION_USAGES:
+                return [], replace(
+                    self,
+                    usages=0,
+                    normal_attack_deduction_usages=self.DEFAULT_NORMAL_ATTACK_DEDUCTION_USAGES,
+                )
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)

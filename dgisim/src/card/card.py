@@ -128,6 +128,8 @@ __all__ = [
     "IGotYourBack",
     ## Rhodeia of Loch ##
     "StreamingSurge",
+    ## Shenhe ##
+    "MysticalAbandon",
     ## Tighnari ##
     "KeenSight",
     ## Venti ##
@@ -1790,6 +1792,16 @@ class StreamingSurge(_TalentEquipmentSkillCard):
     _CHARACTER = chr.RhodeiaOfLoch
     _EQUIPMENT_STATUS = stt.StreamingSurgeStatus
     _SKILL = CharacterSkill.ELEMENTAL_BURST
+
+
+#### Shenhe ####
+
+class MysticalAbandon(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDices({Element.CRYO: 3})
+    _CHARACTER = chr.Shenhe
+    _EQUIPMENT_STATUS = stt.MysticalAbandonStatus
+    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+
 
 #### Tighnari ####
 
