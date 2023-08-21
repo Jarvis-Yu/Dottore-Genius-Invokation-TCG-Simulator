@@ -272,6 +272,21 @@ class TestMona(unittest.TestCase):
             game_state.get_player1().just_get_active_character().get_equipment_statuses(),
         )
 
+        # test summon's swirled reaction can also benefit from this
+        game_state = AddSummonEffect(Pid.P1, AutumnWhirlwindSummon).execute(base_game)
+        game_state = oppo_aura_elem(game_state, Element.PYRO)
+        game_state = oppo_aura_elem(game_state, Element.HYDRO, char_id=2)
+        game_state = oppo_aura_elem(game_state, Element.HYDRO, char_id=3)
+        game_state = next_round(game_state)
+        p2cs = game_state.get_player2().get_characters()
+        self.assertEqual(p2cs.just_get_character(1).get_hp(), 9)
+        self.assertEqual(p2cs.just_get_character(2).get_hp(), 5)
+        self.assertEqual(p2cs.just_get_character(3).get_hp(), 5)
+        self.assertIn(
+            ProphecyOfSubmersionStatus,
+            game_state.get_player1().just_get_active_character().get_equipment_statuses(),
+        )
+
         # test none hydro reaction doesn't benefit from this
         game_state = AddSummonEffect(Pid.P1, BurningFlameSummon).execute(base_game)
         game_state = oppo_aura_elem(game_state, Element.CRYO)

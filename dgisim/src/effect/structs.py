@@ -40,6 +40,9 @@ class DamageType:
     no_boost: bool = False  # reaction secondary damage, Klee's burst status...
 
     def directly_from_character(self) -> bool:
+        return self.from_character() and not self.reaction
+
+    def from_character(self) -> bool:
         return (
             self.normal_attack
             or self.elemental_skill
