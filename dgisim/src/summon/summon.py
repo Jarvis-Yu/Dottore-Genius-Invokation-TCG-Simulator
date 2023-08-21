@@ -46,6 +46,7 @@ __all__ = [
     "ReflectionSummon",
     "SesshouSakura",
     "StormEyeSummon",
+    "TalismanSpiritSummon",
     "UshiSummon",
 ]
 
@@ -165,8 +166,8 @@ class _ConvertableAnemoSummon(_DestroyOnNumSummon):
                     self._convertable()
                     and damage.source.pid is status_source.pid
                     and (
-                        damage.damage_type.from_character()
-                        or damage.damage_type.from_summon()
+                        damage.damage_type.directly_from_character()
+                        or damage.damage_type.directly_from_summon()
                     )
                     and damage.reaction is not None
                     and damage.reaction.reaction_type is Reaction.SWIRL
@@ -493,6 +494,11 @@ class StormEyeSummon(_ConvertableAnemoSummon):
                     target_player=source.pid.other(),
                 ))
         return es, new_self
+
+
+@dataclass(frozen=True, kw_only=True)
+class TalismanSpiritSummon(_DestroyOnNumSummon):
+    ...
 
 
 @dataclass(frozen=True, kw_only=True)

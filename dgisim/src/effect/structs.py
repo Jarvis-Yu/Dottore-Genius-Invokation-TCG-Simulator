@@ -36,9 +36,10 @@ class DamageType:
     elemental_burst: bool = False
     status: bool = False  # any talent, equipmenet, character status, combat status.
     summon: bool = False
+    reaction: bool = False
     no_boost: bool = False  # reaction secondary damage, Klee's burst status...
 
-    def from_character(self) -> bool:
+    def directly_from_character(self) -> bool:
         return (
             self.normal_attack
             or self.elemental_skill
@@ -47,11 +48,26 @@ class DamageType:
             or self.plunge_attack
         )
 
-    def from_summon(self) -> bool:  # pragma: no cover
-        return self.summon
+    def direct_normal_attack(self) -> bool:
+        return self.normal_attack and not self.reaction
 
-    def from_status(self) -> bool:  # pragma: no cover
-        return self.status
+    def direct_charged_attack(self) -> bool:
+        return self.charged_attack and not self.reaction
+
+    def direct_plunge_attack(self) -> bool:
+        return self.plunge_attack and not self.reaction
+
+    def direct_elemental_skill(self) -> bool:
+        return self.elemental_skill and not self.reaction
+
+    def direct_elemental_burst(self) -> bool:
+        return self.elemental_burst and not self.reaction
+
+    def directly_from_summon(self) -> bool:  # pragma: no cover
+        return self.summon and not self.reaction
+
+    def directly_from_status(self) -> bool:  # pragma: no cover
+        return self.status and not self.reaction
 
     def can_boost(self) -> bool:
         return not self.no_boost

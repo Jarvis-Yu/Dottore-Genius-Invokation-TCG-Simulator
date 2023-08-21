@@ -1043,7 +1043,7 @@ class SpecificDamageEffect(DirectEffect):
                     target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                     element=Element.PIERCING,
                     damage=1,
-                    damage_type=DamageType(no_boost=True),
+                    damage_type=replace(self.damage_type, reaction=True),
                 )
             )
 
@@ -1055,7 +1055,7 @@ class SpecificDamageEffect(DirectEffect):
                     target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                     element=reaction.first_elem,
                     damage=1,
-                    damage_type=DamageType(no_boost=True),
+                    damage_type=replace(self.damage_type, reaction=True),
                 )
             )
 

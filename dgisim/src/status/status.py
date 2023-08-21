@@ -150,6 +150,9 @@ __all__ = [
     "SweepingTimeStatus",
     ## Rhodeia of Loch ##
     "StreamingSurgeStatus",
+    ## Shenhe ##
+    "IcyQuillStatus",
+    "MysticalAbandonStatus",
     ## Tighnari ##
     "KeenSightStatus",
     "VijnanaSuffusionStatus",
@@ -477,11 +480,7 @@ class WeaponEquipmentStatus(EquipmentStatus):
             dmg = item.dmg
             if (
                 dmg.source == status_source
-                and (
-                    dmg.damage_type.normal_attack
-                    or dmg.damage_type.elemental_skill
-                    or dmg.damage_type.elemental_burst
-                )
+                and dmg.damage_type.directly_from_character()
                 and dmg.element is not Element.PIERCING
             ):
                 new_damage = replace(dmg, damage=dmg.damage + self.BASE_DAMAGE_BOOST)
@@ -741,7 +740,11 @@ class _InfusionStatus(_UsageStatus):
             status_source: StaticTarget,
             item: eft.SpecificDamageEffect,
     ) -> bool:
-        return item.element is self.ELEMENT and status_source == item.source
+        return (
+            item.element is self.ELEMENT
+            and status_source == item.source
+            and item.damage_type.directly_from_character()
+        )
 
     @override
     def _react_to_signal(
@@ -1039,7 +1042,7 @@ class CatalyzingFieldStatus(CombatStatus):
             dmg = item.dmg
             assert self.usages >= 1
             elem_can_boost = dmg.element is Element.ELECTRO or dmg.element is Element.DENDRO
-            legal_to_boost = status_source.pid is dmg.source.pid
+            legal_to_boost = status_source.pid is dmg.source.pid and dmg.damage_type.can_boost()
             target_is_active = dmg.target.id == game_state.get_player(
                 dmg.target.pid
             ).just_get_active_character().get_id()
@@ -1109,7 +1112,7 @@ class DendroCoreStatus(CombatStatus):
             dmg = item.dmg
             assert self.usages >= 1
             elem_can_boost = dmg.element is Element.ELECTRO or dmg.element is Element.PYRO
-            legal_to_boost = status_source.pid is dmg.source.pid
+            legal_to_boost = status_source.pid is dmg.source.pid and dmg.damage_type.can_boost()
             target_is_active = dmg.target.id == game_state.get_player(
                 dmg.target.pid
             ).just_get_active_character().get_id()
@@ -1277,7 +1280,7 @@ class JueyunGuobaStatus(CharacterStatus, _UsageStatus):
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
-            if dmg.source == status_source and dmg.damage_type.normal_attack:
+            if dmg.source == status_source and dmg.damage_type.direct_normal_attack():
                 dmg = replace(dmg, damage=dmg.damage + JueyunGuobaStatus.DAMAGE_BOOST)
                 return DmgPEvent(dmg=dmg), replace(self, usages=self.usages - 1)
         return super()._preprocess(game_state, status_source, item, signal)
@@ -1500,6 +1503,18 @@ class RagingOniKing(CharacterStatus, _InfusionStatus):
     ))
 
     @override
+    def _dmg_boost_condition(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: eft.SpecificDamageEffect,
+    ) -> bool:
+        return (
+            super()._dmg_boost_condition(game_state, status_source, item)
+            and item.damage_type.direct_normal_attack()
+        )
+
+    @override
     def _inform(
             self,
             game_state: GameState,
@@ -1532,6 +1547,7 @@ class RagingOniKing(CharacterStatus, _InfusionStatus):
         return [], self
 
 
+
 @dataclass(frozen=True, kw_only=True)
 class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
     usages: int = 1
@@ -1553,7 +1569,7 @@ class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
             dmg = item.dmg
             if status_source != dmg.source:
                 return item, self
-            if dmg.damage_type.charged_attack:
+            if dmg.damage_type.direct_charged_attack():
                 character = game_state.get_character_target(status_source)
                 assert character is not None, f"source {status_source} in {game_state}"
                 dmg_boost = self.DAMAGE_BOOST
@@ -1645,7 +1661,7 @@ class _InspirationFieldStatus(CombatStatus, _UsageStatus):
             )
             if not (
                     item.dmg.source == active_char_source
-                    and item.dmg.damage_type.from_character()
+                    and item.dmg.damage_type.directly_from_character()
                     and self._boostable(active_char)
             ):
                 return item, self
@@ -1859,11 +1875,11 @@ class MidareRanzanStatus(CharacterStatus):
                 return item, self
 
             if signal is Preprocessables.DMG_ELEMENT:
-                if dmg.damage_type.plunge_attack:
+                if dmg.damage_type.direct_plunge_attack():
                     new_item = DmgPEvent(dmg=replace(dmg, element=self._ELEMENT))
                     return new_item, self
             elif signal is Preprocessables.DMG_AMOUNT_PLUS:
-                if dmg.damage_type.plunge_attack:
+                if dmg.damage_type.direct_plunge_attack():
                     new_item = DmgPEvent(dmg=replace(dmg, damage=dmg.damage + self._DMG_BOOST))
                     return new_item, None
         return item, self
@@ -1939,8 +1955,8 @@ class _PoeticsOfFuubutsuElementStatus(CombatStatus, _UsageStatus):
             if (
                     status_source.pid != dmg.source.pid
                     or not (
-                        dmg.damage_type.from_character()
-                        or dmg.damage_type.from_summon()
+                        dmg.damage_type.directly_from_character()
+                        or dmg.damage_type.directly_from_summon()
                     )
                     or dmg.element is not self._ELEM
             ):
@@ -2130,7 +2146,7 @@ class ExplosiveSparkStatus(CharacterStatus, _UsageStatus):
             dmg = item.dmg
             if status_source != dmg.source:
                 return item, self
-            if dmg.damage_type.charged_attack:
+            if dmg.damage_type.direct_charged_attack():
                 new_item = DmgPEvent(dmg=replace(dmg, damage=dmg.damage + self.DAMAGE_BOOST))
                 new_self = replace(self, usages=self.usages - 1)
                 return new_item, new_self
@@ -2237,7 +2253,7 @@ class IllusoryBubbleStatus(CombatStatus):
             assert isinstance(item, DmgPEvent)
             if (
                     item.dmg.source.pid is status_source.pid
-                    and item.dmg.damage_type.from_character()
+                    and item.dmg.damage_type.directly_from_character()
             ):
                 return replace(item, dmg=replace(item.dmg, damage=item.dmg.damage * 2)), None
         return super()._preprocess(game_state, status_source, item, signal)
@@ -2440,7 +2456,7 @@ class ShrineOfMayaStatus(CombatStatus, _UsageStatus):
             dmg = item.dmg
             if not (
                     dmg.source.pid is status_source.pid
-                    and dmg.damage_type.from_character()
+                    and dmg.damage_type.directly_from_character()
                     and dmg.reaction is not None
             ):
                 return item, self
@@ -2536,6 +2552,18 @@ class SweepingTimeStatus(CharacterStatus, _InfusionStatus):
     ))
 
     @override
+    def _dmg_boost_condition(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: eft.SpecificDamageEffect,
+    ) -> bool:
+        return (
+            super()._dmg_boost_condition(game_state, status_source, item)
+            and item.damage_type.direct_normal_attack()
+        )
+
+    @override
     def _preprocess(
             self,
             game_state: GameState,
@@ -2575,6 +2603,33 @@ class SweepingTimeStatus(CharacterStatus, _InfusionStatus):
 @dataclass(frozen=True, kw_only=True)
 class StreamingSurgeStatus(TalentEquipmentStatus):
     pass
+
+#### Shenhe ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class IcyQuillStatus(CombatStatus, _UsageStatus):
+    usages: int = 3
+    MAX_USAGES: ClassVar[int] = 3
+    DMG_BOOST: ClassVar[int] = 1
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            ...
+        return super()._preprocess(game_state, status_source, item, signal)
+
+
+@dataclass(frozen=True, kw_only=True)
+class MysticalAbandonStatus(TalentEquipmentStatus):
+    pass
+
 
 #### Tighnari ####
 
@@ -2634,7 +2689,7 @@ class VijnanaSuffusionStatus(CharacterStatus, _UsageStatus):
                 or self.usages == 0
                 or not isinstance(information, DmgIEvent)
                 or status_source != information.dmg.source
-                or not information.dmg.damage_type.charged_attack
+                or not information.dmg.damage_type.direct_charged_attack()
         ):
             return self
 
@@ -2654,7 +2709,7 @@ class VijnanaSuffusionStatus(CharacterStatus, _UsageStatus):
             dmg = item.dmg
             if status_source != dmg.source:
                 return item, self
-            if dmg.damage_type.charged_attack:
+            if dmg.damage_type.direct_charged_attack():
                 new_item = DmgPEvent(dmg=replace(dmg, element=Element.DENDRO))
         if new_item is not None:
             return new_item, self
