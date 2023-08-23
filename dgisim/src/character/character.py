@@ -128,7 +128,7 @@ class Character:
     def factory(self) -> CharacterFactory:
         return CharacterFactory(self, type(self))
 
-    @property
+    @classmethod
     def FACTIONS(cls) -> frozenset[Faction]:
         return cls._FACTIONS
 
@@ -136,11 +136,11 @@ class Character:
     def of_faction(cls, faction: Faction) -> bool:
         return faction in cls._FACTIONS
 
-    @property
+    @classmethod
     def ELEMENT(cls) -> Element:
         return cls._ELEMENT
 
-    @property
+    @classmethod
     def WEAPON_TYPE(cls) -> WeaponType:
         return cls._WEAPON_TYPE
 
@@ -1270,12 +1270,12 @@ class Nahida(Character):
         oppo_pid = source.pid.other()
         oppo_active_character = game_state.get_player(oppo_pid).just_get_active_character()
         has_reaction = \
-            oppo_active_character.get_elemental_aura().consult_reaction(self.ELEMENT) is not None
+            oppo_active_character.get_elemental_aura().consult_reaction(self.ELEMENT()) is not None
         effects: list[eft.Effect] = [
             eft.ReferredDamageEffect(
                 source=source,
                 target=DynamicCharacterTarget.OPPO_ACTIVE,
-                element=self.ELEMENT,
+                element=self.ELEMENT(),
                 damage=dmg_amount,
                 damage_type=DamageType(elemental_skill=True),
             ),
@@ -1331,7 +1331,7 @@ class Nahida(Character):
         if (
                 self.talent_equiped()
                 and any(
-                    char.ELEMENT is Element.ELECTRO
+                    char.ELEMENT() is Element.ELECTRO
                     for char in game_state.get_player(source.pid).get_characters()
                 )
         ):
@@ -1347,14 +1347,14 @@ class Nahida(Character):
         effects.append(eft.ReferredDamageEffect(
             source=source,
             target=DynamicCharacterTarget.OPPO_ACTIVE,
-            element=self.ELEMENT,
+            element=self.ELEMENT(),
             damage=4,
             damage_type=DamageType(elemental_burst=True),
         ))
         if (
                 self.talent_equiped()
                 and any(
-                    char.ELEMENT is Element.HYDRO
+                    char.ELEMENT() is Element.HYDRO
                     for char in game_state.get_player(source.pid).get_characters()
                 )
         ):

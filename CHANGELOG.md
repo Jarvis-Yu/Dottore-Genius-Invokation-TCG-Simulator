@@ -47,6 +47,7 @@
     - Knights of Favonius Library
     - Vanarana
   - Event Card:
+    - Elemental Resonance: Enduring Rock
     - I Haven't Lost Yet!
     - Food Card:
       - Teyvat Fried Egg

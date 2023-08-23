@@ -91,6 +91,7 @@ __all__ = [
     ## Other ##
     "CalxsArts",
     "ChangingShifts",
+    "ElementalResonanceEnduringRock",
     "IHaventLostYet",
     "LeaveItToMe",
     "QuickKnit",
@@ -727,7 +728,7 @@ class WeaponEquipmentCard(EquipmentCard, _CharTargetChoiceProvider):
     @override
     @classmethod
     def _valid_char(cls, char: chr.Character) -> bool:
-        return char.WEAPON_TYPE is cls.WEAPON_TYPE
+        return char.WEAPON_TYPE() is cls.WEAPON_TYPE
 
     @override
     @classmethod
@@ -1380,6 +1381,34 @@ class ChangingShifts(EventCard, _DiceOnlyChoiceProvider):
         )
 
 
+class ElementalResonanceEnduringRock(EventCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDices({Element.GEO: 1})
+
+    @override
+    @classmethod
+    def valid_in_deck(cls, deck: Deck) -> bool:
+        return 2 <= sum(
+            1
+            for char in deck.chars
+            if char.ELEMENT() is Element.GEO
+        )
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddCombatStatusEffect(
+                target_pid=pid,
+                status=stt.ElementalResonanceEnduringRockStatus,
+            ),
+        )
+
+
 class IHaventLostYet(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({})
 
@@ -1395,19 +1424,6 @@ class IHaventLostYet(EventCard, _DiceOnlyChoiceProvider):
                 stt.IHaventLostYetOnCooldownStatus not in
                 game_state.get_player(pid).get_combat_statuses()
             )
-        )
-
-    @override
-    @classmethod
-    def _valid_instruction(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction
-    ) -> bool:
-        return (
-            isinstance(instruction, act.DiceOnlyInstruction)
-            and cls.loosely_usable(game_state, pid)
         )
 
     @override

@@ -121,7 +121,7 @@ class Characters:
 
     def all_elems(self) -> set[Element]:
         return set(
-            char.ELEMENT
+            char.ELEMENT()
             for char in self._characters
         )
 

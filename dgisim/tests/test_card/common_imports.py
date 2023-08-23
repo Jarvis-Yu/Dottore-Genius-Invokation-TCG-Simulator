@@ -3,6 +3,7 @@ from dgisim.src.character.enums import CharacterSkill
 from dgisim.src.agents import *
 from dgisim.src.card.card import *
 from dgisim.src.card.cards import *
+from dgisim.src.deck import FrozenDeck, MutableDeck
 from dgisim.src.game_state_machine import GameStateMachine
 from dgisim.src.state.enums import Pid
 from dgisim.src.status.status import *

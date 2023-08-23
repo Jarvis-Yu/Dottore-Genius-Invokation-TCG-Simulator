@@ -205,7 +205,7 @@ class ElemTuningActGenGenerator(ABC):
             return tuple(
                 elem
                 for elem in game_state.get_player(pid).get_dices()
-                if elem is not Element.OMNI and elem is not active_character.ELEMENT
+                if elem is not Element.OMNI and elem is not active_character.ELEMENT()
             )
 
         raise Exception(  # pragma: no cover

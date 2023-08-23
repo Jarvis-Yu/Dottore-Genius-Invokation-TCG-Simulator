@@ -86,13 +86,14 @@ __all__ = [
     "ChangingShiftsStatus",
     "CrystallizeStatus",
     "DendroCoreStatus",
-    "FrozenStatus",
+    "ElementalResonanceEnduringRockStatus",
     "LeaveItToMeStatus",
     "IHaventLostYetOnCooldownStatus",
     "ReviveOnCooldownStatus",
     "WindAndFreedomStatus",
 
     # character status
+    "FrozenStatus",
     "JueyunGuobaStatus",
     "LotusFlowerCrispStatus",
     "MintyMeatRollsStatus",
@@ -744,7 +745,6 @@ class _InfusionStatus(_UsageStatus):
             and item.damage_type.direct_normal_attack() \
             and self._target_is_self_active(game_state, status_source, item.source)
 
-
     def _dmg_boost_condition(
             self,
             game_state: GameState,
@@ -905,7 +905,7 @@ class _SacrificialWeaponStatus(WeaponEquipmentStatus, _UsageStatus):
                 return [
                     eft.AddDiceEffect(
                         pid=source.pid,
-                        dices=ActualDices({equiper.ELEMENT: self.DICES_GAIN_NUM}),
+                        dices=ActualDices({equiper.ELEMENT(): self.DICES_GAIN_NUM}),
                     )
                 ], replace(self, activated=False, usages=-1)
         elif signal is TriggeringSignal.ROUND_END:
@@ -1145,42 +1145,6 @@ class DendroCoreStatus(CombatStatus):
         return super().__str__() + f"({self.usages})"  # pragma: no cover
 
 
-@dataclass(frozen=True)
-class FrozenStatus(CharacterStatus):
-    damage_boost: ClassVar[int] = 2
-    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.ROUND_END,
-    ))
-
-    @override
-    def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: PreprocessableEvent,
-            signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
-        if signal is Preprocessables.DMG_AMOUNT_PLUS:
-            assert isinstance(item, DmgPEvent)
-            dmg = item.dmg
-            can_reaction = dmg.element is Element.PYRO or dmg.element is Element.PHYSICAL
-            is_damage_target = dmg.target == status_source
-            if is_damage_target and can_reaction:
-                return (
-                    DmgPEvent(dmg=replace(dmg, damage=dmg.damage + FrozenStatus.damage_boost)),
-                    None
-                )
-        return super()._preprocess(game_state, status_source, item, signal)
-
-    @override
-    def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[FrozenStatus]]:
-        if signal is TriggeringSignal.ROUND_END:
-            return [], None
-        return [], self  # pragma: no cover
-
-
 @dataclass(frozen=True, kw_only=True)
 class IHaventLostYetOnCooldownStatus(CombatStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
@@ -1194,6 +1158,61 @@ class IHaventLostYetOnCooldownStatus(CombatStatus):
         if signal is TriggeringSignal.ROUND_END:
             return [], None
         return [], self  # pragma: no cover
+
+
+@dataclass(frozen=True, kw_only=True)
+class ElementalResonanceEnduringRockStatus(CombatStatus):
+    activated: bool = False
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.DMG_DELT:
+            assert isinstance(information, DmgIEvent)
+            if (
+                    not self.activated
+                    and information.dmg.element is Element.GEO
+                    and information.dmg.source.pid is status_source.pid
+                    and information.dmg.damage_type.directly_from_character()
+            ):
+                return replace(self, activated=True)
+                ...
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION:
+            if not self.activated:
+                return [], self
+            combat_statuses = game_state.get_player(source.pid).get_combat_statuses()
+            stacked_shield_status = next((
+                status
+                for status in combat_statuses
+                if isinstance(status, StackedShieldStatus)
+            ), None)
+            if stacked_shield_status is None:
+                return [], replace(self, activated=False)
+            assert isinstance(stacked_shield_status, CombatStatus)
+            return [
+                eft.OverrideCombatStatusEffect(
+                    target_pid=source.pid,
+                    status=replace(stacked_shield_status, usages=stacked_shield_status.usages + 3)
+                )
+            ], None
+        elif signal is TriggeringSignal.ROUND_END:
+            return [], None
+        return [], self
 
 
 @dataclass(frozen=True)
@@ -1269,6 +1288,41 @@ class WindAndFreedomStatus(CombatStatus):
 
 
 ############################## Character Status ##############################
+
+@dataclass(frozen=True)
+class FrozenStatus(CharacterStatus):
+    damage_boost: ClassVar[int] = 2
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            can_reaction = dmg.element is Element.PYRO or dmg.element is Element.PHYSICAL
+            is_damage_target = dmg.target == status_source
+            if is_damage_target and can_reaction:
+                return (
+                    DmgPEvent(dmg=replace(dmg, damage=dmg.damage + FrozenStatus.damage_boost)),
+                    None
+                )
+        return super()._preprocess(game_state, status_source, item, signal)
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[FrozenStatus]]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], None
+        return [], self  # pragma: no cover
 
 
 @dataclass(frozen=True)
@@ -1711,6 +1765,7 @@ class InspirationFieldEnhancedStatus(_InspirationFieldStatus):
     BOOST_LOCK: ClassVar[bool] = False
 
 #### Chongyun ####
+
 
 @dataclass(frozen=True, kw_only=True)
 class ChonghuasFrostFieldStatus(CombatStatus, _InfusionStatus):
@@ -2396,7 +2451,7 @@ class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
             if (
                     any(char.talent_equiped() for char in oppo_chars if isinstance(char, Nahida))
                     and ShrineOfMayaStatus in oppo_player.get_combat_statuses()
-                    and any(char.ELEMENT is Element.PYRO for char in oppo_chars)
+                    and any(char.ELEMENT() is Element.PYRO for char in oppo_chars)
             ):
                 dmg_element = Element.DENDRO
             else:

@@ -44,6 +44,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     # Event Card
     CalxsArts,
     ChangingShifts,
+    ElementalResonanceEnduringRock,
     IHaventLostYet,
     LeaveItToMe,
     QuickKnit,
