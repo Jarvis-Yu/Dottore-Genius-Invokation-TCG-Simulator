@@ -96,6 +96,20 @@ all I need now is to implement each card and character.
   - [ ] Other Card:
     - [x] Calxs Arts
     - [x] Changing Shifts
+    - [ ] Elemental Resonance: Enduring Rock _<-- WIP_
+    - [ ] Elemental Resonance: Fervent Flames _<-- WIP_
+    - [ ] Elemental Resonance: High Voltage _<-- WIP_
+    - [ ] Elemental Resonance: Impetuous Winds _<-- WIP_
+    - [ ] Elemental Resonance: Shattering Ice _<-- WIP_
+    - [ ] Elemental Resonance: Soothing Water _<-- WIP_
+    - [ ] Elemental Resonance: Sprawling Greenery _<-- WIP_
+    - [ ] Elemental Resonance: Woven Flames _<-- WIP_
+    - [ ] Elemental Resonance: Woven Ice _<-- WIP_
+    - [ ] Elemental Resonance: Woven Stone _<-- WIP_
+    - [ ] Elemental Resonance: Woven Thunder _<-- WIP_
+    - [ ] Elemental Resonance: Woven Waters _<-- WIP_
+    - [ ] Elemental Resonance: Woven Weeds _<-- WIP_
+    - [ ] Elemental Resonance: Woven Winds _<-- WIP_
     - [x] I Haven't Lost Yet!
     - [x] Leave It to Me!
     - [x] Quick Knit
