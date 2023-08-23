@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (16/51 implemented)](#character-1651-implemented)
-  - [Card (45/192 implemented)](#card-45192-implemented)
+  - [Character (16/54 implemented)](#character-1654-implemented)
+  - [Card (45/200 implemented)](#card-45200-implemented)
 
-## Character (16/51 implemented)
+## Character (16/54 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -33,9 +33,9 @@ all I need now is to implement each card and character.
   - [x] Arataki Itto
   - [x] Noelle
 
-## Card (45/192 implemented)
+## Card (45/200 implemented)
 
-- [ ] Equipment Card (25/103):
+- [ ] Equipment Card (25/107):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] Cold-Blooded Strike
@@ -71,7 +71,7 @@ all I need now is to implement each card and character.
       - [x] Traveler's Handy Sword
   - [ ] Artifact Card:
     - [x] Gambler's Earrings
-- [ ] Support Card (3/34):
+- [ ] Support Card (3/36):
   - [ ] Companion Card:
     - [ ] Liben _<-- WIP_
     - [x] Xudong
@@ -80,7 +80,7 @@ all I need now is to implement each card and character.
   - [ ] Location Card:
     - [x] Knights of Favonius Library
     - [x] Vanarana
-- [ ] Event Card (17/55):
+- [ ] Event Card (17/57):
   - [ ] Talent Card:
     - [x] Absorbing Prism
     - [x] Lightning Stiletto
