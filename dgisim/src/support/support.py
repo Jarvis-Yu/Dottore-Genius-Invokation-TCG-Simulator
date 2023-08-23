@@ -22,7 +22,7 @@ from ..effect import effect as eft
 from ..event import *
 from ..status import status as stt
 
-from ..effect.enums import TriggeringSignal
+from ..effect.enums import TriggeringSignal, Zone
 from ..element import Element
 from ..helper.quality_of_life import BIG_INT
 from ..status.enums import Preprocessables
@@ -48,6 +48,22 @@ __all__ = [
 @dataclass(frozen=True, kw_only=True)
 class Support(stt.Status):
     sid: int
+
+    @override
+    def _target_is_self_active(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            target: StaticTarget
+    ) -> bool:
+        active_char = game_state.get_player(status_source.pid).get_active_character()
+        if active_char is None:
+            return False
+        return StaticTarget(
+            pid=status_source.pid,
+            zone=Zone.CHARACTERS,
+            id=active_char.get_id(),
+        ) == target
 
     def __str__(self) -> str:  # pragma: no cover
         return self.__class__.__name__.removesuffix("Support") \

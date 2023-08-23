@@ -167,8 +167,14 @@ class GamePrinter:
             0,
             GamePrinter._insert_characters(player["Characters"]),
         )
-        board.insert_at_nextline(0, GamePrinter._pair(player, "Hidden Statuses"))
-        board.insert_at_nextline(0, GamePrinter._pair(player, "Combat Statuses"))
+        board.insert_board_at_nextline(
+            0,
+            GamePrinter._insert_str_list("Hidden Statuses", player["Hidden Statuses"])
+        )
+        board.insert_board_at_nextline(
+            0,
+            GamePrinter._insert_str_list("Combat Statuses", player["Combat Statuses"])
+        )
         board.insert_board_at_nextline(
             0,
             GamePrinter._insert_str_str_dict("Summons", player["Summons"])

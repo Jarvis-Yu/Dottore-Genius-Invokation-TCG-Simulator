@@ -84,7 +84,7 @@ class Statuses:
     def __str__(self) -> str:
         return '[' + ', '.join(map(str, self._statuses)) + ']'
 
-    def dict_str(self) -> list:
+    def dict_str(self) -> list[str]:
         return [
             str(status)
             for status in self._statuses

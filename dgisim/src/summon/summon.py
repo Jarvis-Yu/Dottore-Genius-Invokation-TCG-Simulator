@@ -45,6 +45,8 @@ __all__ = [
     "OceanicMimicSquirrelSummon",
     "ReflectionSummon",
     "SesshouSakura",
+    "ShadowswordGallopingFrostSummon",
+    "ShadowswordLoneGaleSummon",
     "StormEyeSummon",
     "TalismanSpiritSummon",
     "UshiSummon",
@@ -54,6 +56,22 @@ __all__ = [
 @dataclass(frozen=True, kw_only=True)
 class Summon(stt.Status):
     usages: int = -1
+
+    @override
+    def _target_is_self_active(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            target: StaticTarget
+    ) -> bool:
+        active_char = game_state.get_player(status_source.pid).get_active_character()
+        if active_char is None:
+            return False
+        return StaticTarget(
+            pid=status_source.pid,
+            zone=Zone.CHARACTERS,
+            id=active_char.get_id(),
+        ) == target
 
     def __str__(self) -> str:  # pragma: no cover
         return self.__class__.__name__.removesuffix("Summon") + f"({self.usages})"
@@ -463,6 +481,25 @@ class SesshouSakura(_DestroyOnNumSummon):
             return es, self
         return es, replace(self, usages=d_usages)
 
+
+@dataclass(frozen=True, kw_only=True)
+class ShadowswordGallopingFrostSummon(_DmgPerRoundSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.CRYO
+
+    # TODO: trigger on burst
+
+
+@dataclass(frozen=True, kw_only=True)
+class ShadowswordLoneGaleSummon(_DmgPerRoundSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.ANEMO
+
+    # TODO: trigger on burst
 
 @dataclass(frozen=True, kw_only=True)
 class StormEyeSummon(_ConvertableAnemoSummon):

@@ -148,8 +148,8 @@ generate valid player actions.
 Currently a full game can be played with any combination of the characters and cards implemented.
 
 - [x] Implement all game phases (Action Phase, End Phase...)
-- [ ] Implement all cards (44/192 implemented) ([details](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/progress.md))
-- [ ] Implement all characters with their talent cards (15/51 implemented) ([details](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/progress.md))
+- [ ] Implement all cards (45/192 implemented) ([details](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/progress.md))
+- [ ] Implement all characters with their talent cards (16/51 implemented) ([details](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/progress.md))
 - [x] Implement all reactions
 - [x] Implement death handling
 - [x] Implement all game logics to support the implemented cards and characters

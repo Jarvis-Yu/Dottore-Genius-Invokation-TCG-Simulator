@@ -14,6 +14,7 @@ from dgisim.src.helper.level_print import GamePrinter
 from dgisim.src.helper.quality_of_life import *
 from dgisim.src.state.enums import Pid
 from dgisim.src.state.game_state import GameState
+from dgisim.src.state.player_state import PlayerState
 
 
 def auto_step(game_state: GameState, observe: bool = False) -> GameState:
@@ -208,6 +209,22 @@ def fill_energy_for_all(game_state: GameState) -> GameState:
             ).build()
         ).build()
     ).build()
+
+
+def heal_for_all(game_state: GameState) -> GameState:
+    """ only heals the alive characters """
+    def heal_player(player: PlayerState) -> PlayerState:
+        return player.factory().f_characters(
+            lambda cs: cs.factory().f_characters(
+                lambda chars: tuple(
+                    char.factory().hp(char.get_max_hp() if char.alive() else 0).build()
+                    for char in chars
+                )
+            ).build()
+        ).build()
+
+    return game_state.factory().f_player1(heal_player).f_player2(heal_player).build()
+
 
 def next_round(game_state: GameState, observe: bool = False) -> GameState:
     gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())

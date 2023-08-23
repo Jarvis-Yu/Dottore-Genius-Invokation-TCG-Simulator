@@ -109,6 +109,8 @@ __all__ = [
     "GrandExpectationStatus",
     "InspirationFieldStatus",
     "InspirationFieldEnhancedStatus",
+    ## Chongyun ##
+    "ChonghuasFrostFieldStatus",
     ## Electro Hypostasis ##
     "ElectroCrystalCoreHiddenStatus",
     "ElectroCrystalCoreStatus",
@@ -426,6 +428,14 @@ class Status:
     def _update(self, other: Self) -> Optional[Self]:
         return other
 
+    def _target_is_self_active(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            target: StaticTarget,
+    ):
+        return status_source == target
+
     def __str__(self) -> str:
         return self.__class__.__name__.removesuffix("Status")  # pragma: no cover
 
@@ -507,17 +517,18 @@ class CombatStatus(Status):
     Basic status, status shared across the team
     """
 
+    @override
     def _target_is_self_active(
             self,
             game_state: GameState,
-            self_pid: Pid,
-            target: StaticTarget
+            status_source: StaticTarget,
+            target: StaticTarget,
     ) -> bool:
-        active_char = game_state.get_player(self_pid).get_active_character()
+        active_char = game_state.get_player(status_source.pid).get_active_character()
         if active_char is None:
             return False
         return StaticTarget(
-            pid=self_pid,
+            pid=status_source.pid,
             zone=Zone.CHARACTERS,
             id=active_char.get_id(),
         ) == target
@@ -730,8 +741,8 @@ class _InfusionStatus(_UsageStatus):
             item: eft.SpecificDamageEffect,
     ) -> bool:
         return item.element is Element.PHYSICAL \
-            and item.damage_type.normal_attack \
-            and status_source == item.source \
+            and item.damage_type.direct_normal_attack() \
+            and self._target_is_self_active(game_state, status_source, item.source)
 
 
     def _dmg_boost_condition(
@@ -742,8 +753,8 @@ class _InfusionStatus(_UsageStatus):
     ) -> bool:
         return (
             item.element is self.ELEMENT
-            and status_source == item.source
             and item.damage_type.directly_from_character()
+            and self._target_is_self_active(game_state, status_source, item.source)
         )
 
     @override
@@ -1699,6 +1710,15 @@ class InspirationFieldStatus(_InspirationFieldStatus):
 class InspirationFieldEnhancedStatus(_InspirationFieldStatus):
     BOOST_LOCK: ClassVar[bool] = False
 
+#### Chongyun ####
+
+@dataclass(frozen=True, kw_only=True)
+class ChonghuasFrostFieldStatus(CombatStatus, _InfusionStatus):
+    ELEMENT: ClassVar[Element] = Element.CRYO
+
+    # TODO: other effects'll be implemented when Chongyun is implemented
+
+
 #### Electro Hypostasis ####
 
 
@@ -2503,7 +2523,7 @@ class FullPlateStatus(CombatStatus, StackedShieldStatus):
             assert isinstance(item, DmgPEvent)
             if (
                     item.dmg.element is Element.PHYSICAL
-                    and self._target_is_self_active(game_state, status_source.pid, item.dmg.target)
+                    and self._target_is_self_active(game_state, status_source, item.dmg.target)
             ):
                 from math import ceil
                 return replace(item, dmg=replace(item.dmg, damage=ceil(item.dmg.damage / 2))), self

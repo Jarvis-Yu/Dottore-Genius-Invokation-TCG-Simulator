@@ -243,14 +243,14 @@ class PlayerState:
     def __deepcopy__(self, _) -> Self:
         return self
 
-    def dict_str(self) -> dict[str, Union[dict, str]]:
+    def dict_str(self) -> dict[str, Union[dict, str, list[str]]]:
         return {
             "Phase": self._phase.value,
             "Consecutive Action": str(self._consec_action),
             "Card/Dice Redraw Chances": f"{self._card_redraw_chances}/{self._dice_reroll_chances}",
             "Characters": self._characters.dict_str(),
-            "Hidden Statuses": str(self._hidden_statuses),
-            "Combat Statuses": str(self._combat_statuses),
+            "Hidden Statuses": self._hidden_statuses.dict_str(),
+            "Combat Statuses": self._combat_statuses.dict_str(),
             "Summons": self._summons.dict_str(),
             "Supports": self._supports.dict_str(),
             "Dices": self._dices.dict_str(),

@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (15/51 implemented)](#character-1551-implemented)
-  - [Card (44/192 implemented)](#card-44192-implemented)
+  - [Character (16/51 implemented)](#character-1651-implemented)
+  - [Card (45/192 implemented)](#card-45192-implemented)
 
-## Character (15/51 implemented)
+## Character (16/51 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -28,14 +28,14 @@ all I need now is to implement each card and character.
   - [x] Tighnari
 - [ ] Cryo:
   - [x] Kaeya
-  - [ ] Shenhe  _<-- WIP_
+  - [x] Shenhe
 - [ ] Geo:
   - [x] Arataki Itto
   - [x] Noelle
 
-## Card (44/192 implemented)
+## Card (45/192 implemented)
 
-- [ ] Equipment Card (24/103):
+- [ ] Equipment Card (25/103):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] Cold-Blooded Strike
@@ -43,6 +43,7 @@ all I need now is to implement each card and character.
     - [x] Grand Expectation
     - [x] I Got Your Back
     - [x] Keen Sight
+    - [x] Mystical Abandon
     - [x] Poetics of Fuubutsu
     - [x] Pounding Surprise
     - [x] Prophecy of Submersion

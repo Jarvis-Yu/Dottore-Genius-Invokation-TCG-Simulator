@@ -8,6 +8,7 @@
   - Bennett
   - Nahida
   - Noelle
+  - Shenhe
   - Venti
   - Yae Miko
 - New Cards:
@@ -16,6 +17,7 @@
       - Embrace of Winds
       - Grand Expectation
       - I Got Your Back
+      - Mystical Abandon
       - The Seed of Stored Knowledge
       - The Shrine's Sacred Shade
     - Weapon Card:
