@@ -150,10 +150,10 @@ Currently a full game can be played with any combination of the characters and c
 - [x] Implement all game phases (Action Phase, End Phase...)
 - [ ] Implement all cards (48/200 implemented) ([details](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/progress.md))
 - [ ] Implement all characters with their talent cards (16/54 implemented) ([details](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/progress.md))
-- [x] Implement all reactions
-- [x] Implement death handling
+- [x] Implement all reactions, death handling, revival handling etc.
 - [x] Implement all game logics to support the implemented cards and characters
 - [x] Implement interactive CLI for better debugging experience
+- [x] Ensure 99% unittest coverage checking behaviour of characters and cards
 - [x] Implement lazy player agent for minimal testing purposes
 - [x] Implement random player agent for testing purposes
 - [x] Implement player action validity checker

@@ -26,6 +26,9 @@
       - Sacrificial Greatsword
       - Sacrificial Sword
   - Event Card:
+    - Elemental Resonance: Enduring Rock
+    - Elemental Resonance: Fervent Flames
+    - Elemental Resonance: High Voltage
     - Wind and Freedom
 
 ## v0.3.dev0 (6 Aug 2023)
@@ -47,9 +50,6 @@
     - Knights of Favonius Library
     - Vanarana
   - Event Card:
-    - Elemental Resonance: Enduring Rock
-    - Elemental Resonance: Fervent Flames
-    - Elemental Resonance: High Voltage
     - I Haven't Lost Yet!
     - Food Card:
       - Teyvat Fried Egg
