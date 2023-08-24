@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (16/54 implemented)](#character-1654-implemented)
-  - [Card (47/200 implemented)](#card-47200-implemented)
+  - [Card (48/200 implemented)](#card-48200-implemented)
 
 ## Character (16/54 implemented)
 
@@ -33,7 +33,7 @@ all I need now is to implement each card and character.
   - [x] Arataki Itto
   - [x] Noelle
 
-## Card (47/200 implemented)
+## Card (48/200 implemented)
 
 - [ ] Equipment Card (25/107):
   - [ ] Talent Card:
@@ -80,7 +80,7 @@ all I need now is to implement each card and character.
   - [ ] Location Card:
     - [x] Knights of Favonius Library
     - [x] Vanarana
-- [ ] Event Card (19/57):
+- [ ] Event Card (20/57):
   - [ ] Talent Card:
     - [x] Absorbing Prism
     - [x] Lightning Stiletto
@@ -98,7 +98,7 @@ all I need now is to implement each card and character.
     - [x] Changing Shifts
     - [x] Elemental Resonance: Enduring Rock
     - [x] Elemental Resonance: Fervent Flames
-    - [ ] Elemental Resonance: High Voltage _<-- WIP_
+    - [x] Elemental Resonance: High Voltage
     - [ ] Elemental Resonance: Impetuous Winds _<-- WIP_
     - [ ] Elemental Resonance: Shattering Ice _<-- WIP_
     - [ ] Elemental Resonance: Soothing Water _<-- WIP_

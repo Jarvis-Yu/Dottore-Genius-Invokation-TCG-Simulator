@@ -93,6 +93,7 @@ __all__ = [
     "ChangingShifts",
     "ElementalResonanceEnduringRock",
     "ElementalResonanceFerventFlames",
+    "ElementalResonanceHighVoltage",
     "IHaventLostYet",
     "LeaveItToMe",
     "QuickKnit",
@@ -1394,6 +1395,7 @@ class _ElementalResonanceCard(EventCard, _DiceOnlyChoiceProvider):
             if char.ELEMENT() is cls._ELEMENT
         )
 
+
 class ElementalResonanceEnduringRock(_ElementalResonanceCard):
     _DICE_COST = AbstractDices({Element.GEO: 1})
     _ELEMENT = Element.GEO
@@ -1413,6 +1415,7 @@ class ElementalResonanceEnduringRock(_ElementalResonanceCard):
             ),
         )
 
+
 class ElementalResonanceFerventFlames(_ElementalResonanceCard):
     _DICE_COST = AbstractDices({Element.PYRO: 1})
     _ELEMENT = Element.PYRO
@@ -1431,6 +1434,43 @@ class ElementalResonanceFerventFlames(_ElementalResonanceCard):
                 status=stt.ElementalResonanceFerventFlamesStatus,
             ),
         )
+
+
+class ElementalResonanceHighVoltage(_ElementalResonanceCard):
+    _DICE_COST = AbstractDices({Element.ELECTRO: 1})
+    _ELEMENT = Element.ELECTRO
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        """ Check active character doesn't have full energy """
+        characters = game_state.get_player(pid).get_characters().get_character_in_activity_order()
+        if not any(char.get_energy() < char.get_max_energy() for char in characters):
+            return False
+        return super()._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        characters = \
+            game_state.get_player(pid).get_characters().get_alive_character_in_activity_order()
+        char_id = next(
+            char.get_id()
+            for char in characters
+            if char.get_energy() < char.get_max_energy()
+        )
+        return (
+            eft.EnergyRechargeEffect(
+                StaticTarget.from_char_id(pid, char_id),
+                1
+            ),
+        )
+
 
 class IHaventLostYet(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({})
@@ -1572,11 +1612,7 @@ class Starsigns(EventCard, _DiceOnlyChoiceProvider):
     ) -> tuple[eft.Effect, ...]:
         return (
             eft.EnergyRechargeEffect(
-                StaticTarget(
-                    pid=pid,
-                    zone=Zone.CHARACTERS,
-                    id=game_state.get_player(pid).just_get_active_character().get_id(),
-                ),
+                StaticTarget.from_player_active(game_state, pid),
                 1
             ),
         )

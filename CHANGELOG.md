@@ -49,6 +49,7 @@
   - Event Card:
     - Elemental Resonance: Enduring Rock
     - Elemental Resonance: Fervent Flames
+    - Elemental Resonance: High Voltage
     - I Haven't Lost Yet!
     - Food Card:
       - Teyvat Fried Egg

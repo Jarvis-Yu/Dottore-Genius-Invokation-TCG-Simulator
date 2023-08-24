@@ -1,11 +1,14 @@
 from dataclasses import dataclass, fields
 from typing import TYPE_CHECKING
 
+from typing_extensions import Self
+
 from ..helper.quality_of_life import dataclass_repr
 from ..state.enums import Pid
 from .enums import Zone
 
 if TYPE_CHECKING:
+    from ..state.game_state import GameState
     from ..summon.summon import Summon
 
 __all__ = [
@@ -23,8 +26,17 @@ class StaticTarget:
     def __repr__(self) -> str:
         return dataclass_repr(self)
 
-# TODO: postpone this until further tests are done
-#       needs to investigate how Klee's burst and Mona's or Sucrose's Talent co-work
+    @classmethod
+    def from_player_active(cls, game_state: "GameState", pid: Pid) -> Self:
+        return cls(
+            pid,
+            Zone.CHARACTERS,
+            game_state.get_player(pid).just_get_active_character().get_id()
+        )
+
+    @classmethod
+    def from_char_id(cls, pid: Pid, char_id: int) -> Self:
+        return cls(pid, Zone.CHARACTERS, char_id)
 
 
 @dataclass(frozen=True, kw_only=True, repr=False)

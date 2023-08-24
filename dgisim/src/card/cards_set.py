@@ -46,6 +46,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ChangingShifts,
     ElementalResonanceEnduringRock,
     ElementalResonanceFerventFlames,
+    ElementalResonanceHighVoltage,
     IHaventLostYet,
     LeaveItToMe,
     QuickKnit,

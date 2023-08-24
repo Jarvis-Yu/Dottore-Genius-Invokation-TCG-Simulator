@@ -46,6 +46,12 @@ class Characters:
                 return self._characters[i:] + self._characters[:i]
         return self._characters
 
+    def get_alive_character_in_activity_order(self) -> tuple[Character, ...]:
+        for i, character in enumerate(self._characters):
+            if character.get_id() == self._active_character_id and character.alive():
+                return self._characters[i:] + self._characters[:i]
+        return self._characters
+
     def get_character_ordered_from_id(self, char_id: int) -> tuple[Character, ...]:
         for i, character in enumerate(self._characters):
             if character.get_id() == char_id:
