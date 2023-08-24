@@ -92,6 +92,7 @@ __all__ = [
     "CalxsArts",
     "ChangingShifts",
     "ElementalResonanceEnduringRock",
+    "ElementalResonanceFerventFlames",
     "IHaventLostYet",
     "LeaveItToMe",
     "QuickKnit",
@@ -1381,8 +1382,8 @@ class ChangingShifts(EventCard, _DiceOnlyChoiceProvider):
         )
 
 
-class ElementalResonanceEnduringRock(EventCard, _DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDices({Element.GEO: 1})
+class _ElementalResonanceCard(EventCard, _DiceOnlyChoiceProvider):
+    _ELEMENT: Element
 
     @override
     @classmethod
@@ -1390,8 +1391,12 @@ class ElementalResonanceEnduringRock(EventCard, _DiceOnlyChoiceProvider):
         return 2 <= sum(
             1
             for char in deck.chars
-            if char.ELEMENT() is Element.GEO
+            if char.ELEMENT() is cls._ELEMENT
         )
+
+class ElementalResonanceEnduringRock(_ElementalResonanceCard):
+    _DICE_COST = AbstractDices({Element.GEO: 1})
+    _ELEMENT = Element.GEO
 
     @override
     @classmethod
@@ -1408,6 +1413,24 @@ class ElementalResonanceEnduringRock(EventCard, _DiceOnlyChoiceProvider):
             ),
         )
 
+class ElementalResonanceFerventFlames(_ElementalResonanceCard):
+    _DICE_COST = AbstractDices({Element.PYRO: 1})
+    _ELEMENT = Element.PYRO
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddCombatStatusEffect(
+                target_pid=pid,
+                status=stt.ElementalResonanceFerventFlamesStatus,
+            ),
+        )
 
 class IHaventLostYet(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({})

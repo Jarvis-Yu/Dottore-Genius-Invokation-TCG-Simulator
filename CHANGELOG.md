@@ -48,6 +48,7 @@
     - Vanarana
   - Event Card:
     - Elemental Resonance: Enduring Rock
+    - Elemental Resonance: Fervent Flames
     - I Haven't Lost Yet!
     - Food Card:
       - Teyvat Fried Egg

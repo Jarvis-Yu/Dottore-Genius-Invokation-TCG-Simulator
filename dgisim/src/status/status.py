@@ -87,6 +87,7 @@ __all__ = [
     "CrystallizeStatus",
     "DendroCoreStatus",
     "ElementalResonanceEnduringRockStatus",
+    "ElementalResonanceFerventFlamesStatus",
     "LeaveItToMeStatus",
     "IHaventLostYetOnCooldownStatus",
     "ReviveOnCooldownStatus",
@@ -1211,6 +1212,41 @@ class ElementalResonanceEnduringRockStatus(CombatStatus):
                 )
             ], None
         elif signal is TriggeringSignal.ROUND_END:
+            return [], None
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class ElementalResonanceFerventFlamesStatus(CombatStatus):
+    DMG_BOOST: ClassVar[int] = 3
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            if (
+                    dmg.reaction is not None
+                    and dmg.damage_type.directly_from_character()
+                    and self._target_is_self_active(game_state, status_source, dmg.source)
+            ):
+                return replace(item, dmg=replace(dmg, damage=dmg.damage + self.DMG_BOOST)), None
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
             return [], None
         return [], self
 
