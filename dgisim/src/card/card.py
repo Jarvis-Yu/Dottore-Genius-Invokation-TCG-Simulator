@@ -94,6 +94,7 @@ __all__ = [
     "ElementalResonanceEnduringRock",
     "ElementalResonanceFerventFlames",
     "ElementalResonanceHighVoltage",
+    "ElementalResonanceImpetuousWinds",
     "IHaventLostYet",
     "LeaveItToMe",
     "QuickKnit",
@@ -406,8 +407,27 @@ class _DiceOnlyChoiceProvider(Card):
 
 
 class _CharTargetChoiceProvider(Card):
+    @override
     @classmethod
-    def _valid_char(cls, char: chr.Character) -> bool:  # pragma: no cover
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        if not isinstance(instruction, act.StaticTargetInstruction) \
+                or pid is not instruction.target.pid:
+            return False  # pragma: no cover
+        char = game_state.get_character_target(instruction.target)
+        if char is None:  # pragma: no cover
+            return False
+        return (
+            cls._valid_char(game_state, pid, char)
+            and super()._valid_instruction(game_state, pid, instruction)
+        )
+
+    @classmethod
+    def _valid_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:  # pragma: no cover
         return not char.defeated()
 
     @classmethod
@@ -424,7 +444,7 @@ class _CharTargetChoiceProvider(Card):
         assert type(instruction) is act.StaticTargetInstruction
         if instruction.target is None:
             chars = game_state.get_player(pid).get_characters()
-            chars = [char for char in chars if cls._valid_char(char)]
+            chars = [char for char in chars if cls._valid_char(game_state, pid, char)]
             return tuple(
                 StaticTarget(
                     pid=pid,
@@ -724,29 +744,13 @@ class WeaponEquipmentCard(EquipmentCard, _CharTargetChoiceProvider):
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         chars = game_state.get_player(pid).get_characters().get_alive_characters()
-        return any(cls._valid_char(char) for char in chars) \
+        return any(cls._valid_char(game_state, pid, char) for char in chars) \
             and super()._loosely_usable(game_state, pid)
 
     @override
     @classmethod
-    def _valid_char(cls, char: chr.Character) -> bool:
+    def _valid_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:
         return char.WEAPON_TYPE() is cls.WEAPON_TYPE
-
-    @override
-    @classmethod
-    def _valid_instruction(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction
-    ) -> bool:
-        if not isinstance(instruction, act.StaticTargetInstruction) \
-                or pid is not instruction.target.pid:
-            return False  # pragma: no cover
-        char = game_state.get_target(instruction.target)
-        if not isinstance(char, chr.Character):  # pragma: no cover
-            return False
-        return cls._valid_char(char) and super()._valid_instruction(game_state, pid, instruction)
 
     @override
     @classmethod
@@ -772,24 +776,8 @@ class ArtifactEquipmentCard(EquipmentCard, _CharTargetChoiceProvider):
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         chars = game_state.get_player(pid).get_characters().get_alive_characters()
-        return any(cls._valid_char(char) for char in chars) \
+        return any(cls._valid_char(game_state, pid, char) for char in chars) \
             and super()._loosely_usable(game_state, pid)
-
-    @override
-    @classmethod
-    def _valid_instruction(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction
-    ) -> bool:
-        if not isinstance(instruction, act.StaticTargetInstruction) \
-                or pid is not instruction.target.pid:
-            return False  # pragma: no cover
-        char = game_state.get_target(instruction.target)
-        if not isinstance(char, chr.Character):  # pragma: no cover
-            return False
-        return cls._valid_char(char) and super()._valid_instruction(game_state, pid, instruction)
 
     @override
     @classmethod
@@ -965,7 +953,7 @@ class FoodCard(EventCard):
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         characters = game_state.get_player(pid).get_characters()
-        if all(not cls._valid_char(char) for char in characters):
+        if all(not cls._valid_char(game_state, pid, char) for char in characters):
             return False
         return super()._loosely_usable(game_state, pid)
 
@@ -989,7 +977,7 @@ class FoodCard(EventCard):
         )
 
     @classmethod
-    def _valid_char(cls, char: chr.Character) -> bool:
+    def _valid_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:
         return not char.satiated() and not char.defeated()
 
     @override
@@ -1032,9 +1020,9 @@ class _DirectHealCard(FoodCard):
 
     @override
     @classmethod
-    def _valid_char(cls, char: chr.Character) -> bool:
+    def _valid_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:
         return char.get_hp() < char.get_max_hp() \
-            and super()._valid_char(char)
+            and super()._valid_char(game_state, pid, char)
 
 # <<<<<<<<<<<<<<<<<<<< Equipment Cards <<<<<<<<<<<<<<<<<<<<
 ########## Weapon Card ##########
@@ -1191,8 +1179,8 @@ class MushroomPizza(FoodCard, _CharTargetChoiceProvider):
 
     @override
     @classmethod
-    def _valid_char(cls, char: chr.Character) -> bool:
-        return _DirectHealCard._valid_char(char)
+    def _valid_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:
+        return _DirectHealCard._valid_char(game_state, pid, char)
 
 
 class NorthernSmokedChicken(FoodCard, _CharTargetChoiceProvider):
@@ -1256,7 +1244,7 @@ class TeyvatFriedEgg(FoodCard, _CharTargetChoiceProvider):
 
     @override
     @classmethod
-    def _valid_char(cls, char: chr.Character) -> bool:
+    def _valid_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:
         return not char.satiated() and char.defeated()
 
     @override
@@ -1383,7 +1371,7 @@ class ChangingShifts(EventCard, _DiceOnlyChoiceProvider):
         )
 
 
-class _ElementalResonanceCard(EventCard, _DiceOnlyChoiceProvider):
+class _ElementalResonanceCard(EventCard):
     _ELEMENT: Element
 
     @override
@@ -1396,7 +1384,7 @@ class _ElementalResonanceCard(EventCard, _DiceOnlyChoiceProvider):
         )
 
 
-class ElementalResonanceEnduringRock(_ElementalResonanceCard):
+class ElementalResonanceEnduringRock(_ElementalResonanceCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.GEO: 1})
     _ELEMENT = Element.GEO
 
@@ -1416,7 +1404,7 @@ class ElementalResonanceEnduringRock(_ElementalResonanceCard):
         )
 
 
-class ElementalResonanceFerventFlames(_ElementalResonanceCard):
+class ElementalResonanceFerventFlames(_ElementalResonanceCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.PYRO: 1})
     _ELEMENT = Element.PYRO
 
@@ -1436,7 +1424,7 @@ class ElementalResonanceFerventFlames(_ElementalResonanceCard):
         )
 
 
-class ElementalResonanceHighVoltage(_ElementalResonanceCard):
+class ElementalResonanceHighVoltage(_ElementalResonanceCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.ELECTRO: 1})
     _ELEMENT = Element.ELECTRO
 
@@ -1469,6 +1457,39 @@ class ElementalResonanceHighVoltage(_ElementalResonanceCard):
                 StaticTarget.from_char_id(pid, char_id),
                 1
             ),
+        )
+
+
+class ElementalResonanceImpetuousWinds(_ElementalResonanceCard, _CharTargetChoiceProvider):
+    _DICE_COST = AbstractDices({Element.ANEMO: 1})
+    _ELEMENT = Element.ANEMO
+
+    @override
+    @classmethod
+    def _valid_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:
+        return (
+            char.alive()
+            and char.get_id() != game_state.get_player(pid).just_get_active_character().get_id()
+        )
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        cs = game_state.get_player(pid).get_characters()
+        return any(char.alive() for char in cs.get_none_active_characters())
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.StaticTargetInstruction)
+        return (
+            eft.SwapCharacterEffect(target=instruction.target),
+            eft.AddDiceEffect(pid=pid, element=Element.OMNI, num=1),
         )
 
 
@@ -1505,7 +1526,8 @@ class IHaventLostYet(EventCard, _DiceOnlyChoiceProvider):
         return (
             eft.AddDiceEffect(
                 pid=pid,
-                dices=ActualDices({Element.OMNI: 1}),
+                element=Element.OMNI,
+                num=1,
             ),
             eft.EnergyRechargeEffect(
                 target=target,
@@ -1764,9 +1786,9 @@ class LightningStiletto(TalentEventCard, _CombatActionCard, _CharTargetChoicePro
 
     @override
     @classmethod
-    def _valid_char(cls, char: chr.Character) -> bool:
+    def _valid_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:
         return isinstance(char, chr.Keqing) \
-            and super()._valid_char(char)
+            and super()._valid_char(game_state, pid, char)
 
     @override
     @classmethod

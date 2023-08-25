@@ -24,6 +24,7 @@ from ..summon import summon as sm
 from ..support import support as sp
 
 from ..character.enums import CharacterSkill
+from ..dices import ActualDices
 from ..element import Element, Reaction, ReactionDetail
 from ..event import *
 from ..helper.quality_of_life import just, case_val
@@ -1340,14 +1341,17 @@ class PublicRemoveAllCardEffect(DirectEffect):
 @dataclass(frozen=True, repr=False)
 class AddDiceEffect(DirectEffect):
     pid: Pid
-    dices: ActualDices
+    element: Element
+    num: int
 
     def execute(self, game_state: GameState) -> GameState:
         pid = self.pid
-        dices = self.dices
-        new_dices = game_state.get_player(pid).get_dices() + dices
-        if not new_dices.is_legal():
-            raise Exception("Not enough dices for this effect")
+        curr_dices = game_state.get_player(pid).get_dices()
+        addable_num = min(self.num, game_state.get_mode().dice_limit() - curr_dices.num_dices())
+        if addable_num <= 0:
+            return game_state
+        dices = ActualDices({self.element: addable_num})
+        new_dices = curr_dices + dices
         return game_state.factory().f_player(
             pid,
             lambda p: p.factory().dices(new_dices).build()

@@ -29,6 +29,7 @@
     - Elemental Resonance: Enduring Rock
     - Elemental Resonance: Fervent Flames
     - Elemental Resonance: High Voltage
+    - Elemental Resonance: Impetuous Winds
     - Wind and Freedom
 
 ## v0.3.dev0 (6 Aug 2023)

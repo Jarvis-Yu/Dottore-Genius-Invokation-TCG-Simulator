@@ -6,11 +6,18 @@ from dgisim.src.dices import *
 from dgisim.src.effect.effect import *
 from dgisim.src.element import Element
 from dgisim.src.helper.quality_of_life import BIG_INT
+from dgisim.src.mode import DefaultMode
 from dgisim.src.state.enums import Pid, Act
 from dgisim.src.state.game_state import GameState
 
 
-BASE_GAME = GameState.from_default().factory().f_player1(
+class _TestMode(DefaultMode):
+    _DICE_LIMIT = 1 << 100
+
+
+BASE_GAME = GameState.from_default().factory().mode(
+    _TestMode()
+).f_player1(
     lambda p: p.factory().characters(
         Characters((
             RhodeiaOfLoch.from_default(1),

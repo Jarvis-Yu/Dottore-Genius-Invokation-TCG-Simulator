@@ -18,13 +18,13 @@ class RollPhase(DefaultRollPhase):
         return game_state.factory().f_player1(
             lambda p1: p1.factory()
             .phase(Act.ACTION_PHASE)
-            .dice_reroll_chances(game_state.get_mode().dice_reroll_chances())
+            .dice_reroll_chances(0)
             .dices(ActualDices.from_all(RollPhase._NUM_DICES, Element.OMNI))
             .build()
         ).f_player2(
             lambda p2: p2.factory()
             .phase(Act.ACTION_PHASE)
-            .dice_reroll_chances(game_state.get_mode().dice_reroll_chances())
+            .dice_reroll_chances(0)
             .dices(ActualDices.from_all(RollPhase._NUM_DICES, Element.OMNI))
             .build()
         ).build()

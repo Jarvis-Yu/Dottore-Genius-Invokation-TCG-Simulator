@@ -906,7 +906,8 @@ class _SacrificialWeaponStatus(WeaponEquipmentStatus, _UsageStatus):
                 return [
                     eft.AddDiceEffect(
                         pid=source.pid,
-                        dices=ActualDices({equiper.ELEMENT(): self.DICES_GAIN_NUM}),
+                        element=equiper.ELEMENT(),
+                        num=self.DICES_GAIN_NUM,
                     )
                 ], replace(self, activated=False, usages=-1)
         elif signal is TriggeringSignal.ROUND_END:
@@ -1021,7 +1022,7 @@ class GamblersEarringsStatus(ArtifactEquipmentStatus):
                     return [], replace(self, informed_num=0)
                 additions = self.informed_num * self.NUM_DICES_PER_TRIGGER
                 return [
-                    eft.AddDiceEffect(pid=source.pid, dices=ActualDices({Element.OMNI: additions}))
+                    eft.AddDiceEffect(pid=source.pid, element=Element.OMNI, num=additions)
                 ], replace(
                     self,
                     triggered_num=self.triggered_num + self.informed_num,

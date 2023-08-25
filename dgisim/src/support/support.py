@@ -177,12 +177,14 @@ class VanaranaSupport(Support):
         elif signal is TriggeringSignal.ROUND_START:
             if self.saved_dices.is_empty():
                 return [], self
-            return [
-                eft.AddDiceEffect(
+            effects: list[eft.Effect] = []
+            for elem in self.saved_dices:
+                effects.append(eft.AddDiceEffect(
                     pid=source.pid,
-                    dices=self.saved_dices,
-                )
-            ], type(self)(sid=self.sid)
+                    element=elem,
+                    num=self.saved_dices[elem],
+                ))
+            return effects, type(self)(sid=self.sid)
 
         return [], self
 

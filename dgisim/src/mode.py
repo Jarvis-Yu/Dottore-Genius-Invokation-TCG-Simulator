@@ -37,6 +37,7 @@ class Mode(ABC):
     _DECK_CARD_LIMIT_PER_KIND = 2
     _DECK_CHARS_REQUIREMENT = 3
     _DECK_CHAR_LIMIT_PER_KIND = 1
+    _DICE_LIMIT = 16
     _DICE_REROLL_CHANCES = 1
     _HAND_CARD_LIMIT = 10
     _MAX_CARDS_PER_KIND = 2
@@ -84,6 +85,9 @@ class Mode(ABC):
             and all(card in self.all_cards() for card in deck.cards)
             and all(card.valid_in_deck(deck) for card in deck.cards)
         )
+
+    def dice_limit(self) -> int:
+        return self._DICE_LIMIT
 
     def dice_reroll_chances(self) -> int:
         return self._DICE_REROLL_CHANCES
