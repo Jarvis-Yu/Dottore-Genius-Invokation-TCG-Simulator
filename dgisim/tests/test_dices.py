@@ -2,7 +2,6 @@ import unittest
 from typing import Optional
 
 from dgisim.src.dices import *
-from dgisim.src.dices import ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY, NUMBER_OF_ELEMENTS, ELEMENTS
 from dgisim.src.element import *
 from dgisim.src.helper import just
 
@@ -209,62 +208,6 @@ class TestDices(unittest.TestCase):
             tuple(dices.readonly_dices_ordered(None).keys()),
             ActualDices._LEGAL_ELEMS_ORDERED,
         )
-    # # test_smart_selection template
-    # # def test_smart_selection(self):
-    # #     input_actual_dices: ActualDices = ActualDices()
-    # #     input_abstract_dices: AbstractDices = AbstractDices()
-    # #     input_precedence: List[set[Element]] = []
-    # #     #
-    # #     # self.assertEqual()
-    #
-    # def test_smart_selection_omni(self, k: int, n: int):
-    def test_smart_selection_omni(
-            self, element: Element = Element.GEO):
-        """test if element can fill OMNI"""
-        for omni_number in (2, 3, 5):
-            for element_number in (2, 3, 5):
-                with self.subTest(omni_number=omni_number, element_number=element_number):
-                    input_actual_dices: ActualDices = ActualDices(dices={element: element_number})
-                    input_abstract_dices: AbstractDices = AbstractDices(
-                        dices={Element.OMNI: omni_number}
-                    )
-                    input_precedence: list[set[Element]] = []
-
-                    actual = input_actual_dices.smart_selection(
-                        requirement=input_abstract_dices,
-                        game_state=None,
-                        local_precedence_arg=input_precedence
-                    )
-
-                    if element_number >= omni_number:
-                        expected = ActualDices(dices={element: omni_number})
-                    else:
-                        expected = None
-                    self.assertEqual(actual, expected)
-
-    def test_smart_selection_any(self):
-        """test one Element can fill ANY"""
-        element: Element = Element.GEO
-        for any_number in (2, 3, 5):
-            for element_number in (2, 3, 5):
-                with self.subTest(any_number=any_number, element_number=element_number):
-                    input_actual_dices: ActualDices = ActualDices(dices={element: element_number})
-                    input_abstract_dices: AbstractDices = AbstractDices(
-                        dices={Element.ANY: any_number}
-                    )
-                    input_precedence: list[set[Element]] = []
-
-                    actual = input_actual_dices.smart_selection(
-                        requirement=input_abstract_dices,
-                        game_state=None,
-                        local_precedence_arg=input_precedence
-                    )
-                    if element_number >= any_number:
-                        expected = ActualDices(dices={element: any_number})
-                    else:
-                        expected = None
-
-                    self.assertEqual(actual, expected)
 
     def test_ordered_actual_dices_with_diff_nums(self):
         dices = ActualDices({
@@ -332,27 +275,85 @@ class TestDices(unittest.TestCase):
             expected_order,
         )
 
+    # test_smart_selection template
+    # def test_smart_selection(self):
+    #     input_actual_dices: ActualDices = ActualDices()
+    #     input_abstract_dices: AbstractDices = AbstractDices()
+    #     input_precedence: List[set[Element]] = []
+    #
+    #     self.assertEqual()
+    #
+    # def test_smart_selection_TEMPLATE(self, k: int, n: int):
+
+    def test_smart_selection_omni(
+            self, element: Element = Element.GEO):
+        """test if element can fill OMNI"""
+        for omni_number in (2, 3, 5):
+            for element_number in (2, 3, 5):
+                with self.subTest(omni_number=omni_number, element_number=element_number):
+                    input_actual_dices: ActualDices = ActualDices(dices={element: element_number})
+                    input_abstract_dices: AbstractDices = AbstractDices(
+                        dices={Element.OMNI: omni_number}
+                    )
+                    input_precedence: list[set[Element]] = []
+
+                    actual = input_actual_dices.smart_selection(
+                        requirement=input_abstract_dices,
+                        game_state=None,
+                        local_precedence_arg=input_precedence
+                    )
+
+                    if element_number >= omni_number:
+                        expected = ActualDices(dices={element: omni_number})
+                    else:
+                        expected = None
+                    self.assertEqual(actual, expected)
+
+    def test_smart_selection_any(self):
+        """test one Element can fill ANY"""
+        element: Element = Element.GEO
+        for any_number in (2, 3, 5):
+            for element_number in (2, 3, 5):
+                with self.subTest(any_number=any_number, element_number=element_number):
+                    input_actual_dices: ActualDices = ActualDices(dices={element: element_number})
+                    input_abstract_dices: AbstractDices = AbstractDices(
+                        dices={Element.ANY: any_number}
+                    )
+                    input_precedence: list[set[Element]] = []
+
+                    actual = input_actual_dices.smart_selection(
+                        requirement=input_abstract_dices,
+                        game_state=None,
+                        local_precedence_arg=input_precedence
+                    )
+                    if element_number >= any_number:
+                        expected = ActualDices(dices={element: any_number})
+                    else:
+                        expected = None
+
+                    self.assertEqual(actual, expected)
+
     def test_smart_selection_all_any(self):
         """test one die of every Element can fill ANY in proper order"""
-        for number_of_any in range(1, len(ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY) + 1):
+        for number_of_any in range(1, len(Dices._ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY) + 1):
             with self.subTest(number_of_any=number_of_any):
                 input_actual_dices: ActualDices = ActualDices(
-                    dices={el: 1 for el in ELEMENTS}
+                    dices={el: 1 for el in Dices._ELEMENTS}
                 )
                 input_abstract_dices: AbstractDices = AbstractDices(
                     dices={Element.ANY: number_of_any}
                 )
                 input_precedence: list[set[Element]] = [
-                    {el} for el in ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY
+                    {el} for el in Dices._ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY
                 ]
 
                 actual: Optional[ActualDices] = input_actual_dices.smart_selection(
                     requirement=input_abstract_dices, game_state=None, local_precedence_arg=input_precedence
                 )
 
-                if NUMBER_OF_ELEMENTS >= number_of_any:
+                if Dices._NUMBER_OF_ELEMENTS >= number_of_any:
                     expected: Optional[ActualDices] = ActualDices(
-                        {el: 1 for el in ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY[-number_of_any:]}
+                        {el: 1 for el in Dices._ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY[-number_of_any:]}
                     )
                 else:
                     expected = None
@@ -362,7 +363,7 @@ class TestDices(unittest.TestCase):
     def test_smart_selection_all_any_plus_one_omni_actual(self):
         """test one die of every element from a to b, b-a+1 ANY
         a<b"""
-        elements_and_omni = [Element.OMNI] + list(ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY)
+        elements_and_omni = [Element.OMNI] + list(Dices._ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY)
         for a in range(len(elements_and_omni)):
             for b in range(a + 1, len(elements_and_omni)):
                 # need = supply, need < supply, need > supply
@@ -375,7 +376,7 @@ class TestDices(unittest.TestCase):
                             dices={Element.ANY: any_need_number}
                         )
                         input_precedence: list[set[Element]] = [
-                            {el} for el in ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY
+                            {el} for el in Dices._ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY
                         ]
 
                         actual: Optional[ActualDices] = input_actual_dices.smart_selection(
@@ -489,7 +490,7 @@ class TestDices(unittest.TestCase):
     def test_smart_selection_something_supply_empty_need(self):
         """test empty need with non-empty supply"""
         input_actual_dices: ActualDices = ActualDices(
-            {el: 1 for el in list(ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY) + [Element.OMNI]})
+            {el: 1 for el in list(Dices._ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY) + [Element.OMNI]})
         input_abstract_dices: AbstractDices = AbstractDices({})
         input_precedence: list[set[Element]] = []
 
@@ -585,7 +586,7 @@ class TestDices(unittest.TestCase):
         """test for code coverage.
         supply: 2 of every elements
         need: 5 omni"""
-        elements_and_omni = [Element.OMNI] + list(ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY)
+        elements_and_omni = [Element.OMNI] + list(Dices._ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY)
         input_actual_dices: ActualDices = ActualDices(
             dices={el: 2 for el in elements_and_omni}
         )
@@ -593,7 +594,7 @@ class TestDices(unittest.TestCase):
             dices={Element.OMNI: 5}
         )
         input_precedence: list[set[Element]] = [
-            {el} for el in ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY
+            {el} for el in Dices._ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY
         ]
 
         actual: Optional[ActualDices] = input_actual_dices.smart_selection(

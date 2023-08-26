@@ -3,71 +3,60 @@ import random
 from collections import Counter
 from functools import lru_cache
 from typing import Any, Optional, Iterator, Iterable
-
 from typing_extensions import Self, override, TYPE_CHECKING
 from collections import defaultdict
 from functools import cache
 from heapq import heappop, heapify
-from typing import Any
-from typing import Optional, Iterator, Iterable
 
-from .helper.hashable_dict import HashableDict
-from .helper.quality_of_life import BIG_INT, case_val
-from .element import Element
-from typing_extensions import TYPE_CHECKING
+from typing_extensions import TYPE_CHECKING, Self
 
 if TYPE_CHECKING:
     from .state.game_state import GameState
     from .state.player_state import PlayerState
 
-from typing_extensions import Self
-
 from dgisim.src.element import Element
 from dgisim.src.helper.hashable_dict import HashableDict
-from dgisim.src.helper.quality_of_life import BIG_INT
-
+from dgisim.src.helper.quality_of_life import BIG_INT, case_val
 
 __all__ = [
     "AbstractDices",
     "ActualDices",
     "Dices",
-    "ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY",
-    "ELEMENTS",
-    "NUMBER_OF_ELEMENTS",
 ]
-
-# higher PRIORITY - should be spent first
-ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY: tuple[Element, ...] = (
-    Element.PYRO,
-    Element.HYDRO,
-    Element.ANEMO,
-    Element.ELECTRO,
-    Element.DENDRO,
-    Element.CRYO,
-    Element.GEO,
-)
-
-ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY: tuple[Element, ...] = tuple(
-    list(ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY) + [Element.OMNI]
-)
-
-ELEMENTS_AND_OMNI = ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY
-
-ELEMENTS = ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY
-
-NUMBER_OF_ELEMENTS: int = len(ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY)
-
-ELEMENTS_BY_INCREASING_GLOBAL_PRIORITY: tuple[Element, ...] \
-    = ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY[::-1]
-
-ELEMENTS_AND_OMNI_BY_INCREASING_GLOBAL_PRIORITY = \
-    ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY[::-1]
 
 
 class Dices:
     """
     Base class for dices
     """
+
+    # higher PRIORITY - should be spent first
+    _ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY: tuple[Element, ...] = (
+        Element.PYRO,
+        Element.HYDRO,
+        Element.ANEMO,
+        Element.ELECTRO,
+        Element.DENDRO,
+        Element.CRYO,
+        Element.GEO,
+    )
+
+    _ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY: tuple[Element, ...] = tuple(
+        list(_ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY) + [Element.OMNI]
+    )
+
+    _ELEMENTS_AND_OMNI = _ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY
+
+    _ELEMENTS = _ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY
+
+    _NUMBER_OF_ELEMENTS: int = len(_ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY)
+
+    _ELEMENTS_BY_INCREASING_GLOBAL_PRIORITY: tuple[Element, ...] \
+        = _ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY[::-1]
+
+    _ELEMENTS_AND_OMNI_BY_INCREASING_GLOBAL_PRIORITY = \
+        _ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY[::-1]
+
     _LEGAL_ELEMS = frozenset(elem for elem in Element)
 
     def __init__(self, dices: dict[Element, int]) -> None:
@@ -311,6 +300,8 @@ class ActualDices(Dices):
             game_state: Optional[GameState] = None,
             local_precedence_arg: Optional[list[set[Element]]] = None,
     ) -> Optional[ActualDices]:
+        """trying to feel requirement with self._dices"""
+
         # result in dict format
         result_dct: dict[Element, int] = defaultdict(int)
 
@@ -329,7 +320,7 @@ class ActualDices(Dices):
         local_precedence_reversed: list[set[Element]] = local_precedence[::-1]
         assert local_precedence is not None
         assert local_precedence_reversed is not None
-        assert len(local_precedence) <= NUMBER_OF_ELEMENTS + 2
+        assert len(local_precedence) <= self._NUMBER_OF_ELEMENTS + 2
 
         # list of first priority elements
         first_priority_elements = ([] if local_precedence == [] else local_precedence[0])
@@ -339,14 +330,15 @@ class ActualDices(Dices):
             nonlocal local_precedence
             """get priority by element, lower tuple is bigger priority and should be spent first"""
             if element == Element.OMNI:
-                return NUMBER_OF_ELEMENTS + 2, -1  # OMNI has biggest tuple
+                return self._NUMBER_OF_ELEMENTS + 2, -1  # OMNI has biggest tuple
             for i, set_ in enumerate(local_precedence, start=1):
                 if element in set_:
-                    return NUMBER_OF_ELEMENTS + 1 - i, ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY.index(
+                    return (self._NUMBER_OF_ELEMENTS + 1 - i,
+                            self._ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY.index(
                         element
-                    )
+                    ))
             else:
-                return -1, ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY.index(
+                return -1, self._ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY.index(
                     element
                 )
 
@@ -455,7 +447,7 @@ class ActualDices(Dices):
 
         global ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY
 
-        for el in ELEMENTS:
+        for el in self._ELEMENTS:
             # 2.1 fill element with itself
             number_of_el = min(need[el], supply[el])
 
@@ -483,7 +475,7 @@ class ActualDices(Dices):
         #     return -tpl[0], -tpl[1]
 
         elements_by_precedence: list[tuple[tuple[int, int], Element]] = [
-            (get_local_priority(element), element) for element in ELEMENTS_AND_OMNI
+            (get_local_priority(element), element) for element in self._ELEMENTS_AND_OMNI
         ]
         heapify(elements_by_precedence)
 
