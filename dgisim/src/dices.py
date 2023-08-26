@@ -415,7 +415,6 @@ class ActualDices(Dices):
                 if precedence == min_precedence:
                     min_precedence_omni_potential_fillers.append(elmnt)
 
-            # exTODO: selection of best filler for OMNI - now just first
             filler_element: Element = min(
                 min_precedence_omni_potential_fillers,
                 key=get_local_priority
@@ -469,10 +468,7 @@ class ActualDices(Dices):
             else:
                 return None
 
-        # 3nd step - fill ANY with all avaiable elements
-
-        # def neg_tuple(tpl: tuple[int, int]):
-        #     return -tpl[0], -tpl[1]
+        # 3rd step - fill ANY with all avaiable elements
 
         elements_by_precedence: list[tuple[tuple[int, int], Element]] = [
             (get_local_priority(element), element) for element in self._ELEMENTS_AND_OMNI
