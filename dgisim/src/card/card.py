@@ -97,6 +97,14 @@ __all__ = [
     "ElementalResonanceImpetuousWinds",
     "ElementalResonanceShatteringIce",
     "ElementalResonanceSoothingWater",
+    "ElementalResonanceSprawlingGreenery",
+    "ElementalResonanceWovenFlames",
+    "ElementalResonanceWovenIce",
+    "ElementalResonanceWovenStone",
+    "ElementalResonanceWovenThunder",
+    "ElementalResonanceWovenWaters",
+    "ElementalResonanceWovenWeeds",
+    "ElementalResonanceWovenWinds",
     "IHaventLostYet",
     "LeaveItToMe",
     "QuickKnit",
@@ -1548,6 +1556,100 @@ class ElementalResonanceSoothingWater(_ElementalResonanceCard, _DiceOnlyChoicePr
                 recovery=cls._SUB_RECOVERY,
             ))
         return tuple(effects)
+
+
+class ElementalResonanceSprawlingGreenery(_ElementalResonanceCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDices({Element.DENDRO: 1})
+    _ELEMENT = Element.DENDRO
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        effects: list[eft.Effect] = [eft.AddCombatStatusEffect(
+            target_pid=pid,
+            status=stt.ElementalResonanceSprawlingGreeneryStatus,
+        )]
+
+        this_player = game_state.get_player(pid)
+        burning_flame_summon = this_player.get_summons().find(sm.BurningFlameSummon)
+        if burning_flame_summon is not None:
+            effects.append(eft.OverrideSummonEffect(
+                target_pid=pid,
+                summon=replace(burning_flame_summon, usages=burning_flame_summon.usages + 1),
+            ))
+
+        combat_statuses = this_player.get_combat_statuses()
+        catalyzing_field_status = combat_statuses.find(stt.CatalyzingFieldStatus)
+        if catalyzing_field_status is not None:
+            assert isinstance(catalyzing_field_status, stt.CatalyzingFieldStatus)
+            effects.append(eft.OverrideCombatStatusEffect(
+                target_pid=pid,
+                status=replace(catalyzing_field_status, usages=catalyzing_field_status.usages + 1),
+            ))
+
+        dendro_core_status = combat_statuses.find(stt.DendroCoreStatus)
+        if dendro_core_status is not None:
+            assert isinstance(dendro_core_status, stt.DendroCoreStatus)
+            effects.append(eft.OverrideCombatStatusEffect(
+                target_pid=pid,
+                status=replace(dendro_core_status, usages=dendro_core_status.usages + 1),
+            ))
+
+        return tuple(effects)
+
+
+class _ElementalResonanceDie(_ElementalResonanceCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDices({})
+    _DICES_NUM = 1
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddDiceEffect(
+                pid=pid,
+                element=cls._ELEMENT,
+                num=cls._DICES_NUM,
+            ),
+        )
+
+
+class ElementalResonanceWovenFlames(_ElementalResonanceDie):
+    _ELEMENT = Element.PYRO
+
+
+class ElementalResonanceWovenIce(_ElementalResonanceDie):
+    _ELEMENT = Element.CRYO
+
+
+class ElementalResonanceWovenStone(_ElementalResonanceDie):
+    _ELEMENT = Element.GEO
+
+
+class ElementalResonanceWovenThunder(_ElementalResonanceDie):
+    _ELEMENT = Element.ELECTRO
+
+
+class ElementalResonanceWovenWaters(_ElementalResonanceDie):
+    _ELEMENT = Element.HYDRO
+
+
+class ElementalResonanceWovenWeeds(_ElementalResonanceDie):
+    _ELEMENT = Element.DENDRO
+
+
+class ElementalResonanceWovenWinds(_ElementalResonanceDie):
+    _ELEMENT = Element.ANEMO
 
 
 class IHaventLostYet(EventCard, _DiceOnlyChoiceProvider):

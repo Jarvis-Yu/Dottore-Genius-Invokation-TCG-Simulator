@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (16/54 implemented)](#character-1654-implemented)
-  - [Card (51/200 implemented)](#card-51200-implemented)
+  - [Card (59/200 implemented)](#card-59200-implemented)
 
 ## Character (16/54 implemented)
 
@@ -33,7 +33,7 @@ all I need now is to implement each card and character.
   - [x] Arataki Itto
   - [x] Noelle
 
-## Card (51/200 implemented)
+## Card (59/200 implemented)
 
 - [ ] Equipment Card (25/107):
   - [ ] Talent Card:
@@ -80,7 +80,7 @@ all I need now is to implement each card and character.
   - [ ] Location Card:
     - [x] Knights of Favonius Library
     - [x] Vanarana
-- [ ] Event Card (23/57):
+- [ ] Event Card (31/57):
   - [ ] Talent Card:
     - [x] Absorbing Prism
     - [x] Lightning Stiletto
@@ -102,14 +102,14 @@ all I need now is to implement each card and character.
     - [x] Elemental Resonance: Impetuous Winds
     - [x] Elemental Resonance: Shattering Ice
     - [x] Elemental Resonance: Soothing Water
-    - [ ] Elemental Resonance: Sprawling Greenery _<-- WIP_
-    - [ ] Elemental Resonance: Woven Flames _<-- WIP_
-    - [ ] Elemental Resonance: Woven Ice _<-- WIP_
-    - [ ] Elemental Resonance: Woven Stone _<-- WIP_
-    - [ ] Elemental Resonance: Woven Thunder _<-- WIP_
-    - [ ] Elemental Resonance: Woven Waters _<-- WIP_
-    - [ ] Elemental Resonance: Woven Weeds _<-- WIP_
-    - [ ] Elemental Resonance: Woven Winds _<-- WIP_
+    - [x] Elemental Resonance: Sprawling Greenery
+    - [x] Elemental Resonance: Woven Flames
+    - [x] Elemental Resonance: Woven Ice
+    - [x] Elemental Resonance: Woven Stone
+    - [x] Elemental Resonance: Woven Thunder
+    - [x] Elemental Resonance: Woven Waters
+    - [x] Elemental Resonance: Woven Weeds
+    - [x] Elemental Resonance: Woven Winds
     - [x] I Haven't Lost Yet!
     - [x] Leave It to Me!
     - [x] Quick Knit

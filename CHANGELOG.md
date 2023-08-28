@@ -32,6 +32,14 @@
     - Elemental Resonance: Impetuous Winds
     - Elemental Resonance: Shattering Ice
     - Elemental Resonance: Soothing Water
+    - Elemental Resonance: Sprawling Greenery
+    - Elemental Resonance: Woven Flames
+    - Elemental Resonance: Woven Ice
+    - Elemental Resonance: Woven Stone
+    - Elemental Resonance: Woven Thunder
+    - Elemental Resonance: Woven Waters
+    - Elemental Resonance: Woven Weeds
+    - Elemental Resonance: Woven Winds
     - Wind and Freedom
 
 ## v0.3.dev0 (6 Aug 2023)

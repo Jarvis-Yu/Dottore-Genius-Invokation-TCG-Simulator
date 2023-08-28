@@ -89,6 +89,7 @@ __all__ = [
     "ElementalResonanceEnduringRockStatus",
     "ElementalResonanceFerventFlamesStatus",
     "ElementalResonanceShatteringIceStatus",
+    "ElementalResonanceSprawlingGreeneryStatus",
     "LeaveItToMeStatus",
     "IHaventLostYetOnCooldownStatus",
     "ReviveOnCooldownStatus",
@@ -1252,6 +1253,7 @@ class ElementalResonanceFerventFlamesStatus(CombatStatus):
             return [], None
         return [], self
 
+
 @dataclass(frozen=True, kw_only=True)
 class ElementalResonanceShatteringIceStatus(CombatStatus):
     DMG_BOOST: ClassVar[int] = 2
@@ -1284,6 +1286,43 @@ class ElementalResonanceShatteringIceStatus(CombatStatus):
         if signal is TriggeringSignal.ROUND_END:
             return [], None
         return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class ElementalResonanceSprawlingGreeneryStatus(CombatStatus):
+    DMG_BOOST: ClassVar[int] = 2
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+        # TODO
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            if (
+                    dmg.source.pid is status_source.pid
+                    and dmg.reaction is not None
+                    and dmg.damage_type.can_boost()
+            ):
+                return replace(item, dmg=replace(dmg, damage=dmg.damage + self.DMG_BOOST)), None
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], None
+        return [], self
+
 
 @dataclass(frozen=True)
 class LeaveItToMeStatus(CombatStatus):
