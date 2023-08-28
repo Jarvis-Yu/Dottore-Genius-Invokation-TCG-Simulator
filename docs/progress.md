@@ -11,26 +11,38 @@ all I need now is to implement each card and character.
 
 - [ ] Pyro:
   - [x] Bennett
+  - [ ] Fatui Pyro Agent _<-- WIP_
   - [x] Klee
+  - [ ] Yoimiya _<-- WIP_
 - [ ] Hydro:
   - [x] Mona
   - [x] Rhodeia of Loch
+  - [ ] Sangonomiya Kokomi _<-- WIP_
   - [x] Xingqiu
 - [ ] Anemo:
+  - [ ] Jean _<-- WIP_
   - [x] Kaedehara Kazuha
+  - [ ] MaguuKenki _<-- WIP_
   - [x] Venti
 - [ ] Electro:
   - [x] Electro Hypostasis
+  - [ ] Fischl _<-- WIP_
   - [x] Keqing
   - [x] Yae Miko
 - [ ] Dendro:
+  - [ ] Collei _<-- WIP_
+  - [ ] Jadeplume Terrorshroom _<-- WIP_
   - [x] Nahida
   - [x] Tighnari
 - [ ] Cryo:
   - [x] Kaeya
+  - [ ] Ganyu _<-- WIP_
+  - [ ] Qiqi _<-- WIP_
   - [x] Shenhe
 - [ ] Geo:
+  - [ ] Albedo _<-- WIP_
   - [x] Arataki Itto
+  - [ ] Ningguang _<-- WIP_
   - [x] Noelle
 
 ## Card (59/200 implemented)
@@ -55,30 +67,43 @@ all I need now is to implement each card and character.
   - [ ] Weapon Card:
     - [ ] Bow:
       - [ ] Amos' Bow _<-- WIP_
+      - [ ] King's Squire _<-- WIP_
       - [x] Raven Bow
       - [x] Sacrificial Bow
     - [ ] Catalyst:
       - [ ] A Thousand Floating Dreams _<-- WIP_
+      - [ ] Fruit of Fulfillment _<-- WIP_
       - [x] Magic Guide
       - [x] Sacrificial Fragments
     - [ ] Claymore:
       - [x] Sacrificial Greatsword
+      - [ ] The Bell _<-- WIP_
       - [x] White Iron Greatsword
+      - [ ] Wolf's Gravestone _<-- WIP_
     - [ ] Polearm:
+      - [ ] Lithic Spear _<-- WIP_
+      - [ ] Vortex Vanquisher _<-- WIP_
       - [x] White Tassel
     - [ ] Sword:
+      - [ ] Aquila Favonia _<-- WIP_
       - [x] Sacrificial Sword
       - [x] Traveler's Handy Sword
   - [ ] Artifact Card:
     - [x] Gambler's Earrings
 - [ ] Support Card (3/36):
   - [ ] Companion Card:
+    - [ ] Chang the Ninth _<-- WIP_
     - [ ] Liben _<-- WIP_
+    - [ ] Paimon _<-- WIP_
     - [x] Xudong
   - [ ] Item Card:
+    - [ ] NRE _<-- WIP_
     - [ ] Parametric Transformer _<-- WIP_
   - [ ] Location Card:
     - [x] Knights of Favonius Library
+    - [ ] Liyue Harbor Wharf _<-- WIP_
+    - [ ] Sumeru City _<-- WIP_
+    - [ ] Tenshukaku _<-- WIP_
     - [x] Vanarana
 - [ ] Event Card (31/57):
   - [ ] Talent Card:
@@ -92,6 +117,7 @@ all I need now is to implement each card and character.
     - [x] Mushroom Pizza
     - [x] Nothern Smoked Chicken
     - [x] Sweet Madame
+    - [ ] Tendoori Roast Chicken _<-- WIP_
     - [x] Teyvat Fried Egg
   - [ ] Other Card:
     - [x] Calxs Arts
@@ -115,4 +141,6 @@ all I need now is to implement each card and character.
     - [x] Quick Knit
     - [ ] Send Off _<-- WIP_
     - [x] Starsigns
+    - [ ] The Bestest Travel Companion! _<-- WIP_
     - [x] Wind and Freedom
+    - [ ] Where Is the Unseen Razor? _<-- WIP_
