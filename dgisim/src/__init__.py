@@ -19,6 +19,7 @@ from .support.supports import Supports
 
 # module files
 from .cli import CLISession
+from .deck import Deck, FrozenDeck, MutableDeck
 from .dices import AbstractDices, ActualDices, Dices
 from .element import Element
 from .game_state_machine import GameStateMachine
@@ -35,14 +36,17 @@ __all__ = [
     "Character",
     "CharacterSkill",
     "Characters",
+    "Deck",
     "DefaultMode",
     "Dices",
     "Effect",
     "EffectStack",
     "Element",
+    "FrozenDeck",
     "GameState",
     "GameStateMachine",
     "Mode",
+    "MutableDeck",
     "Pid",
     "Phase",
     "PlayerAgent",
