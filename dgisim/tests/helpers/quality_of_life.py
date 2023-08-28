@@ -232,3 +232,12 @@ def next_round(game_state: GameState, observe: bool = False) -> GameState:
     gsm.step_until_phase(game_state.get_mode().action_phase, observe=observe)
     gsm.auto_step(observe=observe)
     return gsm.get_game_state()
+
+
+def slient_fast_swap(game_state: GameState, pid: Pid, char_id: int) -> GameState:
+    return game_state.factory().f_player(
+        pid,
+        lambda p: p.factory().f_characters(
+            lambda cs: cs.factory().active_character_id(char_id).build()
+        ).build()
+    ).build()

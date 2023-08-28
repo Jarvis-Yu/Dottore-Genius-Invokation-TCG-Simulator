@@ -69,3 +69,14 @@ class TestElementalResonanceHighVoltage(unittest.TestCase):
         self.assertEqual(p1c3.get_energy(), p1c3.get_max_energy())
 
         self.assertFalse(ElementalResonanceHighVoltage.strictly_usable(game_state, Pid.P1))
+
+        game_state = game_state.factory().f_player1(
+            lambda p1: p1.factory().f_characters(
+                lambda cs: cs.factory().f_character(
+                    1,
+                    lambda c: c.factory().hp(0).alive(False).build()
+                ).build()
+            ).build()
+        ).build()
+
+        self.assertFalse(ElementalResonanceHighVoltage.strictly_usable(game_state, Pid.P1))

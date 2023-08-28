@@ -95,6 +95,7 @@ __all__ = [
     "ElementalResonanceFerventFlames",
     "ElementalResonanceHighVoltage",
     "ElementalResonanceImpetuousWinds",
+    "ElementalResonanceShatteringIce",
     "IHaventLostYet",
     "LeaveItToMe",
     "QuickKnit",
@@ -1432,7 +1433,7 @@ class ElementalResonanceHighVoltage(_ElementalResonanceCard, _DiceOnlyChoiceProv
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         """ Check active character doesn't have full energy """
-        characters = game_state.get_player(pid).get_characters().get_character_in_activity_order()
+        characters = game_state.get_player(pid).get_characters().get_alive_character_in_activity_order()
         if not any(char.get_energy() < char.get_max_energy() for char in characters):
             return False
         return super()._loosely_usable(game_state, pid)
@@ -1490,6 +1491,26 @@ class ElementalResonanceImpetuousWinds(_ElementalResonanceCard, _CharTargetChoic
         return (
             eft.SwapCharacterEffect(target=instruction.target),
             eft.AddDiceEffect(pid=pid, element=Element.OMNI, num=1),
+        )
+
+
+class ElementalResonanceShatteringIce(_ElementalResonanceCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDices({Element.CRYO: 1})
+    _ELEMENT = Element.CRYO
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddCombatStatusEffect(
+                target_pid=pid,
+                status=stt.ElementalResonanceShatteringIceStatus,
+            ),
         )
 
 
