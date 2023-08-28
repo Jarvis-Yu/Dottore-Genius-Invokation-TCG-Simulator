@@ -1239,6 +1239,8 @@ class RecoverHPEffect(DirectEffect):
         character = game_state.get_target(self.target)
         if not isinstance(character, chr.Character):  # pragma: no cover
             return game_state
+        if character.defeated():
+            return game_state
         hp = min(character.get_hp() + self.recovery, character.get_max_hp())
         if hp == character.get_hp():
             return game_state

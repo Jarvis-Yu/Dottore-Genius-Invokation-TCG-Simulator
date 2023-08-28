@@ -31,6 +31,7 @@
     - Elemental Resonance: High Voltage
     - Elemental Resonance: Impetuous Winds
     - Elemental Resonance: Shattering Ice
+    - Elemental Resonance: Soothing Water
     - Wind and Freedom
 
 ## v0.3.dev0 (6 Aug 2023)

@@ -96,6 +96,7 @@ __all__ = [
     "ElementalResonanceHighVoltage",
     "ElementalResonanceImpetuousWinds",
     "ElementalResonanceShatteringIce",
+    "ElementalResonanceSoothingWater",
     "IHaventLostYet",
     "LeaveItToMe",
     "QuickKnit",
@@ -1433,7 +1434,8 @@ class ElementalResonanceHighVoltage(_ElementalResonanceCard, _DiceOnlyChoiceProv
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         """ Check active character doesn't have full energy """
-        characters = game_state.get_player(pid).get_characters().get_alive_character_in_activity_order()
+        characters = game_state.get_player(
+            pid).get_characters().get_alive_character_in_activity_order()
         if not any(char.get_energy() < char.get_max_energy() for char in characters):
             return False
         return super()._loosely_usable(game_state, pid)
@@ -1512,6 +1514,40 @@ class ElementalResonanceShatteringIce(_ElementalResonanceCard, _DiceOnlyChoicePr
                 status=stt.ElementalResonanceShatteringIceStatus,
             ),
         )
+
+
+class ElementalResonanceSoothingWater(_ElementalResonanceCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDices({Element.HYDRO: 1})
+    _ELEMENT = Element.HYDRO
+
+    _MAIN_RECOVERY = 2
+    _SUB_RECOVERY = 1
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        chars = game_state.get_player(pid).get_characters()
+        return any(char.get_hp() < char.get_max_hp() for char in chars)
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        chars = game_state.get_player(pid).get_characters().get_alive_character_in_activity_order()
+        effects: list[eft.Effect] = [eft.RecoverHPEffect(
+            target=StaticTarget.from_char_id(pid, chars[0].get_id()),
+            recovery=cls._MAIN_RECOVERY,
+        )]
+        for char in chars[1:]:
+            effects.append(eft.RecoverHPEffect(
+                target=StaticTarget.from_char_id(pid, char.get_id()),
+                recovery=cls._SUB_RECOVERY,
+            ))
+        return tuple(effects)
 
 
 class IHaventLostYet(EventCard, _DiceOnlyChoiceProvider):
