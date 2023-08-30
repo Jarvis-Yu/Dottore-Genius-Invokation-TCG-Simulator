@@ -120,6 +120,10 @@ __all__ = [
     "ElectroCrystalCoreStatus",
     "RockPaperScissorsComboPaperStatus",
     "RockPaperScissorsComboScissorsStatus",
+    ## Fatui Pyro Agent ##
+    "PaidInFullStatus",
+    "StealthMasterStatus",
+    "StealthStatus",
     ## Kaedehara Kazuha ##
     "MidareRanzanStatus",
     "MidareRanzanCryoStatus",
@@ -634,8 +638,7 @@ class FixedShieldStatus(_ShieldStatus, _UsageStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
-        cls = type(self)
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_MINUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
@@ -643,7 +646,7 @@ class FixedShieldStatus(_ShieldStatus, _UsageStatus):
                     and dmg.element != Element.PIERCING \
                     and self._is_target(game_state, status_source, dmg) \
                     and self._triggering_condition(dmg):
-                new_dmg_amount = max(0, dmg.damage - cls.SHIELD_AMOUNT)
+                new_dmg_amount = max(0, dmg.damage - self.SHIELD_AMOUNT)
                 new_dmg = replace(dmg, damage=new_dmg_amount)
                 new_item = DmgPEvent(dmg=new_dmg)
                 new_usages = self.usages - 1
@@ -2014,6 +2017,72 @@ class RockPaperScissorsComboScissorsStatus(CharacterStatus, PrepareSkillStatus):
         elif self._is_swapping_source(source, signal):
             return [], None
         return [], self
+
+
+#### Fatui Pyro Agent ####
+
+@dataclass(frozen=True, kw_only=True)
+class PaidInFullStatus(TalentEquipmentStatus):
+    pass
+
+
+@dataclass(frozen=True, kw_only=True)
+class StealthMasterStatus(HiddenStatus):
+    REACTABLE_SIGNALS = frozenset({
+        TriggeringSignal.GAME_START,
+    })
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.GAME_START:
+            return [
+                eft.AddCharacterStatusEffect(
+                    target=source,
+                    status=StealthStatus,
+                )
+            ], None
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class StealthStatus(CharacterStatus, FixedShieldStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    SHIELD_AMOUNT: ClassVar[int] = 1
+    DAMAGE_BOOST: ClassVar[int] = 1
+    INFUSION_ELEMENT: ClassVar[Element] = Element.PYRO
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            if dmg.source == status_source and dmg.damage_type.directly_from_character():
+                return item.delta_damage(self.DAMAGE_BOOST), replace(self, usages=self.usages - 1)
+        elif signal is Preprocessables.DMG_ELEMENT:
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            if not (
+                    dmg.source == status_source
+                    and dmg.element is Element.PHYSICAL
+                    and dmg.damage_type.directly_from_character()
+            ):
+                return item, self
+            char = game_state.get_character_target(status_source)
+            assert char is not None
+            if not char.talent_equiped():
+                return item, self
+            return item.convert_element(self.INFUSION_ELEMENT), self
+
+        return super()._preprocess(game_state, status_source, item, signal)
 
 #### Kaedehara Kazuha ####
 

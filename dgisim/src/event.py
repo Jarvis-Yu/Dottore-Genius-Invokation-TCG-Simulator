@@ -3,15 +3,18 @@ The definition of an *Event* in this project is, something that can be
 preprocessed by statuses according to the description of each status.
 """
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from enum import Enum
 from typing import TYPE_CHECKING
+
+from typing_extensions import Self
 
 if TYPE_CHECKING:
     from .card.card import Card
     from .character.enums import CharacterSkill
     from .effect.effect import SpecificDamageEffect
     from .effect.structs import StaticTarget
+    from .element import Element
     from .dices import AbstractDices
     from .state.enums import Pid
 
@@ -91,6 +94,13 @@ class CardPEvent(PreprocessableEvent):
 @dataclass(frozen=True, kw_only=True)
 class DmgPEvent(PreprocessableEvent):
     dmg: SpecificDamageEffect
+
+    def delta_damage(self, d_damage: int) -> Self:
+        new_damage = max(0, self.dmg.damage + d_damage)
+        return replace(self, dmg=replace(self.dmg, damage=new_damage))
+
+    def convert_element(self, element: Element) -> Self:
+        return replace(self, dmg=replace(self.dmg, element=element))
 
 
 @dataclass(frozen=True, kw_only=True)

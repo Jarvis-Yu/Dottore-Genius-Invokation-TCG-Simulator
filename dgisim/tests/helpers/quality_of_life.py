@@ -3,6 +3,7 @@ from __future__ import annotations
 from dgisim.src.action.action import *
 from dgisim.src.agents import *
 from dgisim.src.card.card import Card
+from dgisim.src.character.character import Character
 from dgisim.src.character.enums import CharacterSkill
 from dgisim.src.dices import ActualDices
 from dgisim.src.effect.effect import *
@@ -241,3 +242,62 @@ def slient_fast_swap(game_state: GameState, pid: Pid, char_id: int) -> GameState
             lambda cs: cs.factory().active_character_id(char_id).build()
         ).build()
     ).build()
+
+
+def replace_character(
+        game_state: GameState,
+        pid: Pid,
+        char: type[Character],
+        char_id: int,
+) -> GameState:
+    character_instance = char.from_default(char_id).factory().hp(0).alive(False).build()
+    game_state = game_state.factory().f_player(
+        pid,
+        lambda p: p.factory().f_characters(
+            lambda cs: cs.factory().character(
+                character_instance
+            ).build()
+        ).build()
+    ).build()
+    game_state = ReviveRecoverHPEffect(
+        target=StaticTarget.from_char_id(pid, char_id),
+        recovery=character_instance.get_max_hp(),
+    ).execute(game_state)
+    return auto_step(game_state)
+
+
+def replace_character_make_active_add_card(
+        game_state: GameState,
+        pid: Pid,
+        char: type[Character],
+        char_id: int,
+        card: type[Card],
+) -> GameState:
+    return replace_character(game_state, pid, char, char_id).factory().f_player(
+        pid,
+        lambda p: p.factory().f_characters(
+            lambda cs: cs.factory().active_character_id(
+                char_id
+            ).build()
+        ).f_hand_cards(
+            lambda hcs: hcs.add(card)
+        ).build()
+    ).build()
+
+
+def apply_elemental_aura(
+        game_state: GameState,
+        element: Element,
+        pid: Pid,
+        char_id: None | int = None,
+) -> GameState:
+    if char_id is None:
+        target = StaticTarget.from_player_active(game_state, pid)
+    else:
+        target = StaticTarget.from_char_id(pid, char_id)
+    return auto_step(
+        ApplyElementalAuraEffect(
+            target=target,
+            element=element,
+        ).execute(game_state)
+    )

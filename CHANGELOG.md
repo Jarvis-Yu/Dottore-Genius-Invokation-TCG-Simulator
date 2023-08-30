@@ -2,6 +2,15 @@
 
 ## v0.3.2 (To be released)
 
+### Added
+
+- New Characters:
+  - Fatui Pyro Agent
+- New Cards:
+  - Equipment Card:
+    - Talent Equipment Card:
+      - Paid in Full
+
 ## v0.3.1 (28 Aug 2023)
 
 ### Added

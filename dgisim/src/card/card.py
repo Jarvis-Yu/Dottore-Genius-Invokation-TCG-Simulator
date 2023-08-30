@@ -123,6 +123,8 @@ __all__ = [
     "AratakiIchiban",
     ## Bennett ##
     "GrandExpectation",
+    ## Fatui Pyro Agent ##
+    "PaidInFull",
     ## Electro Hypostasis ##
     "AbsorbingPrism",
     ## Kaedehara Kazuha ##
@@ -1881,6 +1883,16 @@ class GrandExpectation(_TalentEquipmentSkillCard):
     _CHARACTER = chr.Bennett
     _EQUIPMENT_STATUS = stt.GrandExpectationStatus
     _SKILL = CharacterSkill.ELEMENTAL_BURST
+
+#### Fatui Pyro Agent ####
+
+
+class PaidInFull(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDices({Element.PYRO: 3})
+    _CHARACTER = chr.FatuiPyroAgent
+    _EQUIPMENT_STATUS = stt.PaidInFullStatus
+    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+
 
 #### Electro Hypostasis ####
 

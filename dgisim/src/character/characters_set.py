@@ -10,6 +10,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     AratakiItto,
     Bennett,
     ElectroHypostasis,
+    FatuiPyroAgent,
     KaedeharaKazuha,
     Keqing,
     Kaeya,

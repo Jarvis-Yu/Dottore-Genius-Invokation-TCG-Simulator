@@ -4,14 +4,14 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (16/54 implemented)](#character-1654-implemented)
-  - [Card (59/200 implemented)](#card-59200-implemented)
+  - [Character (17/54 implemented)](#character-1754-implemented)
+  - [Card (60/200 implemented)](#card-60200-implemented)
 
-## Character (16/54 implemented)
+## Character (17/54 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
-  - [ ] Fatui Pyro Agent _<-- WIP_
+  - [x] Fatui Pyro Agent
   - [x] Klee
   - [ ] Yoimiya _<-- WIP_
 - [ ] Hydro:
@@ -45,9 +45,9 @@ all I need now is to implement each card and character.
   - [ ] Ningguang _<-- WIP_
   - [x] Noelle
 
-## Card (59/200 implemented)
+## Card (60/200 implemented)
 
-- [ ] Equipment Card (25/107):
+- [ ] Equipment Card (26/107):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] Cold-Blooded Strike
@@ -56,6 +56,7 @@ all I need now is to implement each card and character.
     - [x] I Got Your Back
     - [x] Keen Sight
     - [x] Mystical Abandon
+    - [x] Paid in Full
     - [x] Poetics of Fuubutsu
     - [x] Pounding Surprise
     - [x] Prophecy of Submersion
@@ -89,7 +90,9 @@ all I need now is to implement each card and character.
       - [x] Sacrificial Sword
       - [x] Traveler's Handy Sword
   - [ ] Artifact Card:
-    - [x] Gambler's Earrings
+    - [x] Gambler's Earringsv
+    - [ ] Instructor's Cap _<-- WIP_
+    - [ ] Tenacity of the Millelith _<-- WIP_
 - [ ] Support Card (3/36):
   - [ ] Companion Card:
     - [ ] Chang the Ninth _<-- WIP_
