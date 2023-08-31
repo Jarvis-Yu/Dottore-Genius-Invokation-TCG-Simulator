@@ -107,7 +107,7 @@ __all__ = [
     # character specific status
     ## Arataki Itto ##
     "AratakiIchibanStatus",
-    "RagingOniKing",
+    "RagingOniKingStatus",
     "SuperlativeSuperstrengthStatus",
     ## Bennett ##
     "GrandExpectationStatus",
@@ -1668,7 +1668,7 @@ class AratakiIchibanStatus(TalentEquipmentStatus, _UsageStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class RagingOniKing(CharacterStatus, _InfusionStatus):
+class RagingOniKingStatus(CharacterStatus, _InfusionStatus):
     usages: int = 2  # duration
     ELEMENT: ClassVar[Element] = Element.GEO
     damage_boost: int = 2

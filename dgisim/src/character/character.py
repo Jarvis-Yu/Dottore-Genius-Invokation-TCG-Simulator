@@ -537,7 +537,7 @@ class AratakiItto(Character):
             ),
             eft.AddCharacterStatusEffect(
                 target=source,
-                status=stt.RagingOniKing,
+                status=stt.RagingOniKingStatus,
             ),
         )
 

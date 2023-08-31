@@ -96,7 +96,7 @@ class TestAratakiItto(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 4)
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
         self.assertEqual(
-            p1ac.get_character_statuses().just_find(RagingOniKing).usages,
+            p1ac.get_character_statuses().just_find(RagingOniKingStatus).usages,
             2
         )
 
@@ -267,7 +267,7 @@ class TestAratakiItto(unittest.TestCase):
             lambda p1: p1.factory().f_characters(
                 lambda cs: cs.factory().f_active_character(
                     lambda ac: ac.factory().f_character_statuses(
-                        lambda csts: csts.update_status(RagingOniKing())
+                        lambda csts: csts.update_status(RagingOniKingStatus())
                     ).build()
                 ).build()
             ).build()
@@ -293,9 +293,9 @@ class TestAratakiItto(unittest.TestCase):
             p1ac.get_character_statuses().just_find(SuperlativeSuperstrengthStatus).usages,
             1
         )
-        self.assertIn(RagingOniKing, p1ac.get_character_statuses())
+        self.assertIn(RagingOniKingStatus, p1ac.get_character_statuses())
         self.assertEqual(
-            p1ac.get_character_statuses().just_find(RagingOniKing).usages,
+            p1ac.get_character_statuses().just_find(RagingOniKingStatus).usages,
             2
         )
 
@@ -311,9 +311,9 @@ class TestAratakiItto(unittest.TestCase):
         p1ac = game_state.get_player1().just_get_active_character()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 1)
-        self.assertIn(RagingOniKing, p1ac.get_character_statuses())
+        self.assertIn(RagingOniKingStatus, p1ac.get_character_statuses())
         self.assertEqual(
-            p1ac.get_character_statuses().just_find(RagingOniKing).usages,
+            p1ac.get_character_statuses().just_find(RagingOniKingStatus).usages,
             2
         )
 
@@ -323,9 +323,9 @@ class TestAratakiItto(unittest.TestCase):
         gsm.step_until_phase(game_state.get_mode().action_phase())
 
         p1ac = gsm.get_game_state().get_player1().just_get_active_character()
-        self.assertIn(RagingOniKing, p1ac.get_character_statuses())
+        self.assertIn(RagingOniKingStatus, p1ac.get_character_statuses())
         self.assertEqual(
-            p1ac.get_character_statuses().just_find(RagingOniKing).usages,
+            p1ac.get_character_statuses().just_find(RagingOniKingStatus).usages,
             1
         )
 
@@ -333,7 +333,7 @@ class TestAratakiItto(unittest.TestCase):
         gsm.step_until_phase(game_state.get_mode().action_phase())
 
         p1ac = gsm.get_game_state().get_player1().just_get_active_character()
-        self.assertNotIn(RagingOniKing, p1ac.get_character_statuses())
+        self.assertNotIn(RagingOniKingStatus, p1ac.get_character_statuses())
 
     def test_talent_card(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
