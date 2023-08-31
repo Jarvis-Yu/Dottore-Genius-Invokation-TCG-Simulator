@@ -58,7 +58,7 @@ for showcase and explanations of the CLI.
 
 A player agent controls all actions of a player in a game.
 
-To implement a player agent, all you need to do is to inherit the abstact class
+To implement a player agent, all you need to do is to inherit the abstract class
 `PlayerAgent` and implement the method `choose_action()`.
 
 A simple example is shown below, the agent implemented choose 3 random cards to
