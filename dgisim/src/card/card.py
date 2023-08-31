@@ -154,6 +154,8 @@ __all__ = [
     "TheScentRemained",
     ## Yae Miko ##
     "TheShrinesSacredShade",
+    ## Yoimiya ##
+    "NaganoharaMeteorSwarm",
 ]
 
 ############################## base ##############################
@@ -2107,3 +2109,12 @@ class TheShrinesSacredShade(_TalentEquipmentSkillCard):
     _CHARACTER = chr.YaeMiko
     _EQUIPMENT_STATUS = stt.TheShrinesSacredShadeStatus
     _SKILL = CharacterSkill.ELEMENTAL_BURST
+
+
+#### Yoimiya ####
+
+class NaganoharaMeteorSwarm(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDices({Element.PYRO: 2})
+    _CHARACTER = chr.Yoimiya
+    _EQUIPMENT_STATUS = stt.NaganoharaMeteorSwarmStatus
+    _SKILL = CharacterSkill.ELEMENTAL_SKILL1

@@ -15,6 +15,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     IGotYourBack,
     KeenSight,
     MysticalAbandon,
+    NaganoharaMeteorSwarm,
     PaidInFull,
     PoeticsOfFuubutsu,
     PoundingSurprise,

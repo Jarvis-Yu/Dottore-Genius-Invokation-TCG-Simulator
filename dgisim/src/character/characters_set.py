@@ -24,6 +24,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     Venti,
     Xingqiu,
     YaeMiko,
+    Yoimiya,
 ]
 
 _DEFAULT_CHARACTER_FSET = None

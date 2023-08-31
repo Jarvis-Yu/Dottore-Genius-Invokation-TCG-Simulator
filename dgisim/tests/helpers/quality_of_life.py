@@ -301,3 +301,9 @@ def apply_elemental_aura(
             element=element,
         ).execute(game_state)
     )
+
+
+def skip_action_round(game_state: GameState, pid: Pid) -> GameState:
+    """ pid is the player that is skipped """
+    assert pid is game_state.waiting_for()
+    return auto_step(TurnEndEffect().execute(game_state))

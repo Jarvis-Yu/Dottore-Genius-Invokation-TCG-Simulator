@@ -52,7 +52,7 @@ __all__ = [
     "CharacterStatus",  # statues that belongs to one character only
     "CombatStatus",  # statues that buffs the active character
 
-    # templates
+    # templates & types
     "StackedShieldStatus",
     "FixedShieldStatus",
     "PrepareSkillStatus",
@@ -178,6 +178,10 @@ __all__ = [
     "RiteOfDispatchStatus",
     "TenkoThunderboltsStatus",
     "TheShrinesSacredShadeStatus",
+    ## Yoimiya ##
+    "AurousBlazeStatus",
+    "NaganoharaMeteorSwarmStatus",
+    "NiwabiEnshouStatus",
 ]
 
 
@@ -2317,7 +2321,7 @@ class ColdBloodedStrikeStatus(TalentEquipmentStatus):
             game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[ColdBloodedStrikeStatus]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         es: list[eft.Effect] = []
         new_self = self
 
@@ -2332,7 +2336,7 @@ class ColdBloodedStrikeStatus(TalentEquipmentStatus):
             new_self = replace(new_self, usages=self.usages - 1, activated=False)
 
         elif signal is TriggeringSignal.ROUND_END:
-            new_self = ColdBloodedStrikeStatus(usages=1, activated=False)
+            new_self = type(self)(usages=1, activated=False)
 
         return es, new_self
 
@@ -3289,3 +3293,135 @@ class TenkoThunderboltsStatus(CombatStatus):
 @dataclass(frozen=True, kw_only=True)
 class TheShrinesSacredShadeStatus(TalentEquipmentStatus):
     pass
+
+
+#### Yoimiya ####
+
+@dataclass(frozen=True, kw_only=True)
+class AurousBlazeStatus(CombatStatus, _UsageStatus):
+    usages: int = 2  # duration
+    MAX_USAGES: ClassVar[int] = 2
+    activated: bool = False
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if self.activated:
+            return self
+
+        if info_type is Informables.SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if status_source.pid is not information.source.pid:
+                return self
+            source_char = game_state.get_character_target(information.source)
+            assert source_char is not None
+            from ..character.character import Yoimiya
+            if isinstance(source_char, Yoimiya):
+                return self
+            return replace(self, activated=True)
+
+        return self
+
+    @override
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+            assert self.usages >= 1
+            return [eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.PYRO,
+                damage=1,
+                damage_type=DamageType(status=True),
+            )], replace(self, usages=0, activated=False)
+
+        elif signal is TriggeringSignal.ROUND_END:
+            return [], replace(self, usages=-1)
+
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class NaganoharaMeteorSwarmStatus(TalentEquipmentStatus):
+    pass
+
+
+@dataclass(frozen=True, kw_only=True)
+class NiwabiEnshouStatus(CharacterStatus, _UsageStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    activated: bool = False
+    DAMAGE_BOOST: ClassVar[int] = 1
+    INFUSION_ELEMENT: ClassVar[Element] = Element.PYRO
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            if dmg.source == status_source and dmg.damage_type.direct_normal_attack():
+                return item.delta_damage(self.DAMAGE_BOOST), (
+                    self
+                    if self.activated
+                    else replace(self, activated=True)
+                )
+        elif signal is Preprocessables.DMG_ELEMENT:
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            if not (
+                    dmg.source == status_source
+                    and dmg.element is Element.PHYSICAL
+                    and dmg.damage_type.directly_from_character()
+            ):
+                return item, self
+            return item.convert_element(self.INFUSION_ELEMENT), (
+                self
+                if self.activated
+                else replace(self, activated=True)
+            )
+
+        return super()._preprocess(game_state, status_source, item, signal)
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION:
+            if self.activated:
+                this_char = game_state.get_character_target(source)
+                assert this_char is not None
+                return (
+                    []
+                    if not this_char.talent_equiped()
+                    else [eft.ReferredDamageEffect(
+                        source=source,
+                        target=DynamicCharacterTarget.OPPO_ACTIVE,
+                        element=Element.PYRO,
+                        damage=1,
+                        damage_type=DamageType(status=True),
+                    )]
+                ), replace(self, usages=-1, activated=False)
+        return [], self

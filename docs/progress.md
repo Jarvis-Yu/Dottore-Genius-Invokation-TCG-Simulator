@@ -4,16 +4,16 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (17/54 implemented)](#character-1754-implemented)
-  - [Card (60/200 implemented)](#card-60200-implemented)
+  - [Character (18/54 implemented)](#character-1854-implemented)
+  - [Card (61/200 implemented)](#card-61200-implemented)
 
-## Character (17/54 implemented)
+## Character (18/54 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
   - [x] Fatui Pyro Agent
   - [x] Klee
-  - [ ] Yoimiya _<-- WIP_
+  - [x] Yoimiya
 - [ ] Hydro:
   - [x] Mona
   - [x] Rhodeia of Loch
@@ -45,9 +45,9 @@ all I need now is to implement each card and character.
   - [ ] Ningguang _<-- WIP_
   - [x] Noelle
 
-## Card (60/200 implemented)
+## Card (61/200 implemented)
 
-- [ ] Equipment Card (26/107):
+- [ ] Equipment Card (27/107):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] Cold-Blooded Strike
@@ -56,6 +56,7 @@ all I need now is to implement each card and character.
     - [x] I Got Your Back
     - [x] Keen Sight
     - [x] Mystical Abandon
+    - [x] Naganohara Meteor Swarm
     - [x] Paid in Full
     - [x] Poetics of Fuubutsu
     - [x] Pounding Surprise
