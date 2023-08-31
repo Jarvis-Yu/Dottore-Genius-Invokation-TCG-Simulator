@@ -91,7 +91,7 @@ all I need now is to implement each card and character.
       - [x] Sacrificial Sword
       - [x] Traveler's Handy Sword
   - [ ] Artifact Card:
-    - [x] Gambler's Earringsv
+    - [x] Gambler's Earrings
     - [ ] Instructor's Cap _<-- WIP_
     - [ ] Tenacity of the Millelith _<-- WIP_
 - [ ] Support Card (3/36):
