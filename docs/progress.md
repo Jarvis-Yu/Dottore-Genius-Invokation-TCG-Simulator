@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (18/54 implemented)](#character-1854-implemented)
-  - [Card (61/200 implemented)](#card-61200-implemented)
+  - [Character (19/54 implemented)](#character-1954-implemented)
+  - [Card (62/200 implemented)](#card-62200-implemented)
 
-## Character (18/54 implemented)
+## Character (19/54 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -17,7 +17,7 @@ all I need now is to implement each card and character.
 - [ ] Hydro:
   - [x] Mona
   - [x] Rhodeia of Loch
-  - [ ] Sangonomiya Kokomi _<-- WIP_
+  - [x] Sangonomiya Kokomi
   - [x] Xingqiu
 - [ ] Anemo:
   - [ ] Jean _<-- WIP_
@@ -45,9 +45,9 @@ all I need now is to implement each card and character.
   - [ ] Ningguang _<-- WIP_
   - [x] Noelle
 
-## Card (61/200 implemented)
+## Card (62/200 implemented)
 
-- [ ] Equipment Card (27/107):
+- [ ] Equipment Card (28/107):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] Cold-Blooded Strike
@@ -62,6 +62,7 @@ all I need now is to implement each card and character.
     - [x] Pounding Surprise
     - [x] Prophecy of Submersion
     - [x] Streaming Surge
+    - [x] Tamakushi Casket
     - [x] The Scent Remained
     - [x] The Seed of Stored Knowledge
     - [x] The Shrine's Sacred Shade

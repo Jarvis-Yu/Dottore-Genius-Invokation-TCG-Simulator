@@ -3,7 +3,7 @@ import unittest
 from dgisim.tests.test_characters.common_imports import *
 
 
-class TestFatuiPyroAgent(unittest.TestCase):
+class TestYoimiya(unittest.TestCase):
     BASE_GAME = replace_character_make_active_add_card(
         ACTION_TEMPLATE,
         Pid.P1,

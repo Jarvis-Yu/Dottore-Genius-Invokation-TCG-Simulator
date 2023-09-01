@@ -1,4 +1,8 @@
 from __future__ import annotations
+from dataclasses import dataclass
+from typing import ClassVar
+
+from typing_extensions import Self
 
 from dgisim.src.action.action import *
 from dgisim.src.agents import *
@@ -7,7 +11,7 @@ from dgisim.src.character.character import Character
 from dgisim.src.character.enums import CharacterSkill
 from dgisim.src.dices import ActualDices
 from dgisim.src.effect.effect import *
-from dgisim.src.effect.enums import DynamicCharacterTarget, Zone
+from dgisim.src.effect.enums import DynamicCharacterTarget, TriggeringSignal, Zone
 from dgisim.src.effect.structs import DamageType, StaticTarget
 from dgisim.src.element import *
 from dgisim.src.game_state_machine import GameStateMachine
@@ -16,6 +20,7 @@ from dgisim.src.helper.quality_of_life import *
 from dgisim.src.state.enums import Pid
 from dgisim.src.state.game_state import GameState
 from dgisim.src.state.player_state import PlayerState
+from dgisim.src.status.status import *
 
 
 def auto_step(game_state: GameState, observe: bool = False) -> GameState:
@@ -303,7 +308,69 @@ def apply_elemental_aura(
     )
 
 
+@dataclass(frozen=True, kw_only=True)
+class TempTestStatus(CharacterStatus):
+    dmg: int
+    elem: Element
+    target: StaticTarget
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.GAME_START,
+    ))
+
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[Effect], None | Self]:
+        if signal is TriggeringSignal.GAME_START:
+            return [
+                SpecificDamageEffect(
+                    source=source,
+                    target=source,
+                    element=self.elem,
+                    damage=self.dmg,
+                    damage_type=DamageType(status=True, no_boost=True),
+                )
+            ], None
+        return [], self
+
+
+def simulate_status_dmg(
+        game_state: GameState,
+        dmg_amount: int,
+        element: Element = Element.PIERCING,
+        pid: Pid = Pid.P2,
+        char_id: None | int = None,
+        observe: bool = False,
+) -> GameState:
+    target = (
+        StaticTarget.from_player_active(game_state, pid)
+        if char_id is None
+        else StaticTarget.from_char_id(pid, char_id)
+    )
+    game_state = UpdateCharacterStatusEffect(
+        target=target,
+        status=TempTestStatus(
+            dmg=dmg_amount,
+            elem=element,
+            target=target,
+        ),
+    ).execute(game_state)
+    game_state = game_state.factory().f_effect_stack(
+        lambda es: es.push_one(TriggerStatusEffect(
+            target=target,
+            status=TempTestStatus,
+            signal=TriggeringSignal.GAME_START,
+        ))
+    ).build()
+    return auto_step(game_state, observe=observe)
+
+
 def skip_action_round(game_state: GameState, pid: Pid) -> GameState:
     """ pid is the player that is skipped """
     assert pid is game_state.waiting_for()
     return auto_step(TurnEndEffect().execute(game_state))
+
+def skip_action_round_until(game_state: GameState, pid: Pid) -> GameState:
+    """ pid is the player that is skipped """
+    while pid is not game_state.waiting_for():
+        game_state = skip_action_round(game_state, just(game_state.waiting_for()))
+    return game_state

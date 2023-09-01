@@ -43,6 +43,7 @@ __all__ = [
     "Nahida",
     "Noelle",
     "RhodeiaOfLoch",
+    "SangonomiyaKokomi",
     "Shenhe",
     "Tighnari",
     "Venti",
@@ -1681,6 +1682,90 @@ class RhodeiaOfLoch(Character):
         )
 
 
+class SangonomiyaKokomi(Character):
+    _ELEMENT = Element.HYDRO
+    _WEAPON_TYPE = WeaponType.CATALYST
+    _TALENT_STATUS = stt.TamakushiCasketStatus
+    _FACTIONS = frozenset((Faction.INAZUMA,))
+
+    _NORMAL_ATTACK_COST = AbstractDices({
+        Element.HYDRO: 1,
+        Element.ANY: 2,
+    })
+    _ELEMENTAL_SKILL1_COST = AbstractDices({
+        Element.HYDRO: 1,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDices({
+        Element.HYDRO: 3,
+    })
+
+    @override
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.HYDRO,
+            damage=1,
+        )
+
+    @override
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.ApplyElementalAuraEffect(
+                target=source,
+                element=Element.HYDRO,
+            ),
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=sm.BakeKurageSummon,
+            ),
+        )
+
+    @override
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        effects: list[eft.Effect] = [
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.get_max_energy(),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.HYDRO,
+                damage=2,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+        ]
+        self_characters = game_state.get_player(source.pid).get_characters()
+        for character in self_characters.get_alive_character_in_activity_order():
+            effects.append(eft.RecoverHPEffect(
+                target=StaticTarget.from_char_id(source.pid, character.get_id()),
+                recovery=1,
+            ))
+        effects.append(
+            eft.AddCharacterStatusEffect(
+                target=source,
+                status=stt.CeremonialGarmentStatus,
+            ),
+        )
+        return tuple(effects)
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=2,
+            hiddens=stts.Statuses(()),
+            equipments=stts.EquipmentStatuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
 class Shenhe(Character):
     _ELEMENT = Element.CRYO
     _WEAPON_TYPE = WeaponType.POLEARM
@@ -2082,6 +2167,7 @@ class YaeMiko(Character):
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
+
 
 class Yoimiya(Character):
     _ELEMENT = Element.PYRO

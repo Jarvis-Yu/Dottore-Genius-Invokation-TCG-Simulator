@@ -144,6 +144,8 @@ __all__ = [
     "IGotYourBack",
     ## Rhodeia of Loch ##
     "StreamingSurge",
+    ## Sangonomiya Kokomi ##
+    "TamakushiCasket",
     ## Shenhe ##
     "MysticalAbandon",
     ## Tighnari ##
@@ -2062,6 +2064,14 @@ class StreamingSurge(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.HYDRO: 4})
     _CHARACTER = chr.RhodeiaOfLoch
     _EQUIPMENT_STATUS = stt.StreamingSurgeStatus
+    _SKILL = CharacterSkill.ELEMENTAL_BURST
+
+
+#### Sangonomiya Kokomi ####
+class TamakushiCasket(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDices({Element.HYDRO: 3})
+    _CHARACTER = chr.SangonomiyaKokomi
+    _EQUIPMENT_STATUS = stt.TamakushiCasketStatus
     _SKILL = CharacterSkill.ELEMENTAL_BURST
 
 

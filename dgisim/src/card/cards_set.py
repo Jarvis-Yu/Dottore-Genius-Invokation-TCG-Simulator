@@ -21,6 +21,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     PoundingSurprise,
     ProphecyOfSubmersion,
     StreamingSurge,
+    TamakushiCasket,
     TheScentRemained,
     TheSeedOfStoredKnowledge,
     TheShrinesSacredShade,

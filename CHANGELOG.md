@@ -6,12 +6,14 @@
 
 - New Characters:
   - Fatui Pyro Agent
+  - Sangonomiya Kokomi
   - Yoimiya
 - New Cards:
   - Equipment Card:
     - Talent Equipment Card:
       - Naganohara Meteor Swarm
       - Paid in Full
+      - Tamakushi Casket
 
 ## v0.3.1 (28 Aug 2023)
 

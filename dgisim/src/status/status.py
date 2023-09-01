@@ -160,6 +160,9 @@ __all__ = [
     "SweepingTimeStatus",
     ## Rhodeia of Loch ##
     "StreamingSurgeStatus",
+    ## Sangonomiya Kokomi ##
+    "CeremonialGarmentStatus",
+    "TamakushiCasketStatus",
     ## Shenhe ##
     "IcyQuillStatus",
     "MysticalAbandonStatus",
@@ -728,7 +731,7 @@ class _InfusionStatus(_UsageStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         new_item: Optional[DmgPEvent] = None
         if isinstance(item, DmgPEvent):
             dmg = item.dmg
@@ -770,7 +773,7 @@ class _InfusionStatus(_UsageStatus):
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         d_usages = 0
         if signal is TriggeringSignal.ROUND_END:
             d_usages = -1
@@ -1678,6 +1681,7 @@ class RagingOniKingStatus(CharacterStatus, _InfusionStatus):
     damage_boost: int = 2
     status_gaining_usages: int = 1
     status_gaining_available: bool = False
+
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.COMBAT_ACTION,
         TriggeringSignal.ROUND_END,
@@ -2859,6 +2863,62 @@ class SweepingTimeStatus(CharacterStatus, _InfusionStatus):
 @dataclass(frozen=True, kw_only=True)
 class StreamingSurgeStatus(TalentEquipmentStatus):
     pass
+
+
+#### Sangonomiya Kokomi ####
+
+@dataclass(frozen=True, kw_only=True)
+class CeremonialGarmentStatus(CharacterStatus, _UsageStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DAMAGE_BOOST: ClassVar[int] = 1
+    activated: bool = False
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            if (
+                    dmg.source == status_source
+                    and dmg.damage_type.direct_normal_attack()
+            ):
+                return item.delta_damage(self.DAMAGE_BOOST), replace(self, activated=True)
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+            self_chars = game_state.get_player(source.pid).get_characters()
+            return [
+                eft.RecoverHPEffect(
+                    target=StaticTarget.from_char_id(source.pid, char.get_id()),
+                    recovery=1,
+                )
+                for char in self_chars.get_alive_character_in_activity_order()
+            ], replace(self, usages=0, activated=False)
+        elif signal is TriggeringSignal.ROUND_END:
+            return [], replace(self, usages=-1)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class TamakushiCasketStatus(TalentEquipmentStatus):
+    pass
+
 
 #### Shenhe ####
 

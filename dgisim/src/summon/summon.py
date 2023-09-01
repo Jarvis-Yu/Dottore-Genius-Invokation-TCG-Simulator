@@ -37,6 +37,7 @@ __all__ = [
 
     # concrete implementations
     "AutumnWhirlwindSummon",
+    "BakeKurageSummon",
     "BurningFlameSummon",
     "ChainsOfWardingThunderSummon",
     "ClusterbloomArrowSummon",
@@ -83,15 +84,6 @@ class Summon(stt.Status):
 @dataclass(frozen=True, kw_only=True)
 class _DestroyOnNumSummon(Summon, stt._UsageStatus):
     pass
-    # @override
-    # def _post_update(
-    #         self,
-    #         new_self: Optional[_DestroyOnNumSummon]
-    # ) -> Optional[_DestroyOnNumSummon]:
-    #     """ remove the status if usages <= 0 """
-    #     if new_self is not None and new_self.usages <= 0:
-    #         new_self = None
-    #     return super()._post_update(new_self)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -147,10 +139,6 @@ class _DmgPerRoundSummon(_DestroyOnNumSummon):
         if d_usages == 0:
             return es, self
         return es, replace(self, usages=d_usages)
-
-    # def _update(self, other: Self) -> Optional[Self]:
-    #     new_usages = min(max(self.usages, self.MAX_USAGES), self.usages + other.usages)
-    #     return replace(other, usages=new_usages)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -269,6 +257,81 @@ class AutumnWhirlwindSummon(_ConvertableAnemoSummon):
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2
     DMG: ClassVar[int] = 1
+
+
+@dataclass(frozen=True, kw_only=True)
+class BakeKurageSummon(_DestoryOnEndNumSummon, stt._UsageStatus):
+    usages: int = 2
+    activated: bool = False
+    MAX_USAGES: ClassVar[int] = 2
+    BASE_DMG: ClassVar[int] = 1
+    ADDITIONAL_DMG_BOOST: ClassVar[int] = 1
+    HEAL_AMOUNT: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.HYDRO
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    ))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if not (
+                    information.source.pid is status_source.pid
+                    and information.skill_type is CharacterSkill.ELEMENTAL_BURST
+                    and not self.activated
+            ):
+                return self
+            char = game_state.get_character_target(information.source)
+            from ..character.character import SangonomiyaKokomi
+            if isinstance(char, SangonomiyaKokomi) and char.talent_equiped():
+                return replace(self, activated=True)
+        return self
+
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+            return [], replace(self, usages=self.MAX_USAGES, activated=False)
+        elif signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            self_chars = game_state.get_player(source.pid).get_characters()
+            activate_additional_dmg_boost = any(
+                (
+                    stt.CeremonialGarmentStatus in char.get_character_statuses()
+                    and char.talent_equiped()
+                )
+                for char in self_chars
+            )
+            return [
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=self.ELEMENT,
+                    damage=self.BASE_DMG + (
+                        self.ADDITIONAL_DMG_BOOST
+                        if activate_additional_dmg_boost
+                        else 0
+                    ),
+                    damage_type=DamageType(summon=True),
+                ),
+                eft.RecoverHPEffect(
+                    target=StaticTarget.from_char_id(
+                        source.pid, self_chars.just_get_active_character_id()
+                    ),
+                    recovery=self.HEAL_AMOUNT,
+                ),
+            ], replace(self, usages=-1)
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -500,6 +563,7 @@ class ShadowswordLoneGaleSummon(_DmgPerRoundSummon):
     ELEMENT: ClassVar[Element] = Element.ANEMO
 
     # TODO: trigger on burst
+
 
 @dataclass(frozen=True, kw_only=True)
 class StormEyeSummon(_ConvertableAnemoSummon):

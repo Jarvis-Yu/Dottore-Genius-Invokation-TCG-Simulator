@@ -19,6 +19,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     Nahida,
     Noelle,
     RhodeiaOfLoch,
+    SangonomiyaKokomi,
     Shenhe,
     Tighnari,
     Venti,
