@@ -389,7 +389,7 @@ class ActualDices(Dices):
             )[1]  # type: ignore
             least_spend_omni_elements: list[Element] = []
             if least_spend == BIG_INT:
-                # Cant feed OMNI requirement
+                # Cant fill OMNI requirement
                 return None
 
             for elem, omni_to_spent in elem_cost_mapping:
@@ -436,16 +436,16 @@ class ActualDices(Dices):
             check_asserts()
 
             # 2.2 fill Element with OMNI if needed
-            if need[el] <= supply[Element.OMNI]:
-                number_of_omni = need[el]
-
-                result_dct[Element.OMNI] += number_of_omni
-                need[el] -= number_of_omni
-                supply[Element.OMNI] -= number_of_omni
-
-                check_asserts()
-            else:
+            if need[el] > supply[Element.OMNI]:
                 return None
+
+            number_of_omni = need[el]
+
+            result_dct[Element.OMNI] += number_of_omni
+            need[el] -= number_of_omni
+            supply[Element.OMNI] -= number_of_omni
+
+            check_asserts()
 
         # 3rd step - fill ANY with all avaiable elements
 
