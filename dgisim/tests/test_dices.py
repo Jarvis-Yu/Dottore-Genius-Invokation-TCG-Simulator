@@ -610,3 +610,16 @@ class TestDices(unittest.TestCase):
 
         expected = None
         self.assertEqual(actual, expected)
+
+    def test_lesser_omni_spent_when_two_first_priority_elems_present(self):
+        """
+        Test if the better less-omni-costing plan is chosen when there are two first priority
+        elements present with different numbers.
+        """
+        for n1, n2 in ((1, 2), (2, 1)):
+            with self.subTest(n1=n1, n2=n2):
+                requirement = AbstractDices({Element.OMNI: 3})
+                dices = ActualDices({Element.OMNI: 2, Element.CRYO: n1, Element.ANEMO: n2})
+                selected_dices = dices.smart_selection(requirement, None,
+                                                       local_precedence_arg=[{Element.CRYO, Element.ANEMO}])
+                self.assertEqual(selected_dices[Element.OMNI], 1)  # type: ignore

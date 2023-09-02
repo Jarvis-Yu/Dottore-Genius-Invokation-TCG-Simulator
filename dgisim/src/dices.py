@@ -197,23 +197,13 @@ class ActualDices(Dices):
         for elem, i in _LEGAL_ELEMS_ORDERED_DICT.items()
     }
 
-    # higher PRIORITY - should be spent first
-    # _ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY: tuple[Element, ...] = (
-    #     Element.PYRO,
-    #     Element.HYDRO,
-    #     Element.ANEMO,
-    #     Element.ELECTRO,
-    #     Element.DENDRO,
-    #     Element.CRYO,
-    #     Element.GEO,
-    # )
-    _ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY: tuple[Element, ...] = _LEGAL_ELEMS_ORDERED[1:][::-1]
     # probably correct priorities
+    _ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY: tuple[Element, ...] = _LEGAL_ELEMS_ORDERED[:0:-1]
 
     _ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY: tuple[Element, ...] = \
         _ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY + (Element.OMNI,)
 
-    # priority .index by element
+    # Dict[element, global_priority]
     _ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY_DCT: dict[Element, int] = {
         elem: i
         for i, elem in enumerate(_ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY)
@@ -273,25 +263,31 @@ class ActualDices(Dices):
         return self._satisfy(requirement)
 
     @staticmethod
-    def _how_much_omni_and_first_priority_to_spend(*,
-                                                   omni_supply: int,
-                                                   omni_needed: int,
-                                                   element_supply: int,
-                                                   element_needed: int,
-                                                   element_prioritized: bool
-                                                   ) -> int:
+    def _omni_filler_priority(*,
+                              omni_supply: int,
+                              omni_needed: int,
+                              element_supply: int,
+                              element_needed: int,
+                              element_prioritized: bool
+                              ) -> tuple[int, int]:
         """
-        how many OMNI (+ first priority elements if it so) spend if we select this ELEMENT as OMNI filler.
+        return
+        Tuple[
+            how many OMNI (+ first priority elements if it so) spend if we select this ELEMENT as OMNI filler,
+            how many OMNI spent
+        ]
+
         return BIG_INT if no possibility
         """
         if element_supply + omni_supply >= element_needed + omni_needed:
             if element_prioritized:
-                return element_needed + omni_needed
+                return element_needed + omni_needed, element_needed + omni_needed - element_supply
             else:
-                return max((element_needed + omni_needed) - element_supply, 0)
+                omni = max((element_needed + omni_needed) - element_supply, 0)
+                return omni, omni  # don't spend element_needed, so engaged 0 elements of element_supply
         else:
             # return None
-            return BIG_INT
+            return BIG_INT, BIG_INT
 
     def smart_selection(
             self,
@@ -357,51 +353,60 @@ class ActualDices(Dices):
         # 1st step - fill OMNI requirement
         if requirement[Element.OMNI] > 0:
             @cache
-            def comparision(x: tuple[Element, int]) -> tuple[int, int, int]:
-                """ to sort by ascedence of least_spend """
+            def comparision_of_omni_priorities(x: tuple[Element, tuple[int, int]]) -> tuple[int, int, int, int]:
+                """ to sort by ascedence of least_spend omni+1st priority, then omni"""
                 type_of_element: Element = x[0]
-                number_of_dices: int = x[1]
+
+                order = x[1]
+                number_of_regular_dices: int = order[0]
+                number_of_omni: int = order[1]
                 priority_local, priority_global = get_local_priority(
                     type_of_element
                 )  # lower - should be spent first
                 # return number_of_dices if number_of_dices is not None else
                 # -1, type_of_element
-                return number_of_dices, priority_local, priority_global
+                return number_of_regular_dices, priority_local, number_of_omni, priority_global
 
             # find the elements to fill the OMNI requirement that costs
             # the least (first_priority_elements number + OMNI elements number)
-            elem_cost_mapping: list[tuple[Element, Optional[int]]] = [
+            elem_cost_mapping: list[tuple[Element, Optional[tuple[int, int]]]] = [
                 (
                     element,
-                    self._how_much_omni_and_first_priority_to_spend(
+                    self._omni_filler_priority(
                         element_supply=supply[element],
                         element_needed=need[element],
                         omni_needed=need[Element.OMNI],
                         element_prioritized=element in first_priority_elements,
-                        omni_supply=supply[Element.OMNI])
+                        omni_supply=supply[Element.OMNI]
+                    )
                 )
                 for element in _PURE_ELEMS
+                if supply[element] + supply[Element.OMNI] >= need[element] + need[Element.OMNI]
             ]
 
-            least_spend = min(
-                elem_cost_mapping,
-                key=comparision
-            )[1]  # type: ignore
-            least_spend_omni_elements: list[Element] = []
-            if least_spend == BIG_INT:
+            if not elem_cost_mapping:
                 # Cant fill OMNI requirement
                 return None
 
-            for elem, omni_to_spent in elem_cost_mapping:
-                if omni_to_spent == least_spend:
-                    least_spend_omni_elements.append(elem)
+            # at first - find min priority
+            least_spend = min(
+                elem_cost_mapping,
+                key=comparision_of_omni_priorities
+            )[1]  # type: ignore
 
-            assert least_spend_omni_elements, "Unknown error"
+            # at second - find all with this priority
+            best_omni_fillers: list[Element] = [
+                elem
+                for elem, omni_to_spent in elem_cost_mapping
+                if omni_to_spent == least_spend
+            ]
+
+            assert best_omni_fillers, "Unknown error"
 
             # get list of least-omni-spending candidates
             filler_element: Element = min([
                 (get_local_priority(elem), elem)
-                for elem in least_spend_omni_elements
+                for elem in best_omni_fillers
             ])[1]
 
             # filler_element: Element = min_precedence_omni_potential_fillers[0]  # incorrect
@@ -420,10 +425,8 @@ class ActualDices(Dices):
             assert supply[filler_element] >= 0, "supply <0"
             assert supply[Element.OMNI] >= 0, "supply <0"
 
-        # 2nd step - fill the Elements except ANY and OMNI needs with Elements
-        # and OMNI
-
-        global ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY
+        # 2nd step - fill the pure Elements
+        # with pure Elements and OMNI
 
         for el in self._ELEMENTS:
             # 2.1 fill element with itself
