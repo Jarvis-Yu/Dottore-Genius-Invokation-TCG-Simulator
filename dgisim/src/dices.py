@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import random
 from _operator import itemgetter
 from collections import Counter, defaultdict
 from functools import cache, lru_cache
 from heapq import heappop, heapify
-import random
 from typing import Any, Iterable, Iterator, Optional
 from typing_extensions import override, Self, TYPE_CHECKING
 
