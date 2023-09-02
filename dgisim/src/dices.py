@@ -455,13 +455,13 @@ class ActualDices(Dices):
         heapify(elements_by_precedence)
 
         while need[Element.ANY] > 0 and elements_by_precedence:
-            precedence, elmnt = heappop(elements_by_precedence)
+            precedence, elem = heappop(elements_by_precedence)
 
-            number_of_spent_element = min(need[Element.ANY], supply[elmnt])
+            number_of_spent_element = min(need[Element.ANY], supply[elem])
 
-            result_dct[elmnt] += number_of_spent_element
+            result_dct[elem] += number_of_spent_element
             need[Element.ANY] -= number_of_spent_element
-            supply[elmnt] -= number_of_spent_element
+            supply[elem] -= number_of_spent_element
 
             check_asserts()
 
