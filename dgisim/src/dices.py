@@ -305,7 +305,7 @@ class ActualDices(Dices):
         result_dct: dict[Element, int] = defaultdict(int)
 
         # optimisation check - if required dices > avaiable dices, break
-        if sum(requirement._dices.values()) > self.num_dices():
+        if requirement.num_dices() > self.num_dices():
             return None
 
         supply: dict[Element, int] = defaultdict(int)
