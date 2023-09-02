@@ -225,13 +225,6 @@ class ActualDices(Dices):
 
     _NUMBER_OF_ELEMENTS: int = len(_ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY)
 
-    # to delete
-    # _ELEMENTS_BY_INCREASING_GLOBAL_PRIORITY: tuple[Element, ...] \
-    #     = _ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY[::-1]
-    #
-    # _ELEMENTS_AND_OMNI_BY_INCREASING_GLOBAL_PRIORITY = \
-    #     _ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY[::-1]
-
     def _satisfy(self, requirement: AbstractDices) -> bool:
         assert self.is_legal() and requirement.is_legal()
 
@@ -306,7 +299,7 @@ class ActualDices(Dices):
             game_state: Optional[GameState] = None,
             local_precedence_arg: Optional[list[set[Element]]] = None,
     ) -> Optional[ActualDices]:
-        """trying to fill requirement with self._dices"""
+        """ trying to fill requirement with self._dices """
 
         # result in dict format
         result_dct: dict[Element, int] = defaultdict(int)
@@ -333,7 +326,7 @@ class ActualDices(Dices):
 
         @cache
         def get_local_priority(element: Element) -> tuple[int, int]:
-            """get priority by element, lower tuple is bigger priority and should be spent first"""
+            """ get priority by element, lower tuple is bigger priority and should be spent first """
             nonlocal local_precedence
             if element == Element.OMNI:
                 return self._NUMBER_OF_ELEMENTS + 2, -1  # OMNI has biggest tuple
@@ -365,7 +358,7 @@ class ActualDices(Dices):
         if requirement[Element.OMNI] > 0:
             @cache
             def comparision(x: tuple[Element, int]) -> tuple[int, int, int]:
-                """to sort by ascedence of least_spend"""
+                """ to sort by ascedence of least_spend """
                 type_of_element: Element = x[0]
                 number_of_dices: int = x[1]
                 priority_local, priority_global = get_local_priority(
@@ -405,25 +398,6 @@ class ActualDices(Dices):
 
             assert least_spend_omni_elements, "Unknown error"
 
-            # to remove
-            # precedence_of_least_spend_omni: list[tuple[Element, tuple[int, int]]] = [
-            #     (element, get_local_priority(element)) for element in least_spend_omni_elements
-            # ]
-            #
-            # # get list of least-omni-spending candidates
-            # min_precedence_omni_potential_fillers: list[Element] = []
-            # min_precedence: tuple[int, int] = min(
-            #     precedence_of_least_spend_omni, key=itemgetter(1) # key=lambda x: x[1]
-            # )[1]
-            # for elmnt, precedence in precedence_of_least_spend_omni:
-            #     if precedence == min_precedence:
-            #         min_precedence_omni_potential_fillers.append(elmnt)
-            #
-            # filler_element: Element = min(
-            #     min_precedence_omni_potential_fillers,
-            #     key=get_local_priority
-            # )
-
             # get list of least-omni-spending candidates
             filler_element: Element = min([
                 (get_local_priority(elem), elem)
@@ -431,16 +405,6 @@ class ActualDices(Dices):
             ])[1]
 
             # filler_element: Element = min_precedence_omni_potential_fillers[0]  # incorrect
-
-            # to delete
-            # how many omni and how many filler (we already know Element which
-            # is filler_element)
-            # if supply[filler_element] >= need[Element.OMNI]:
-            #     filler_element_count = need[Element.OMNI]
-            #     filler_omni_count = 0
-            # else:
-            #     filler_element_count = supply[filler_element]
-            #     filler_omni_count = need[Element.OMNI] - filler_element_count
 
             filler_element_count = min(need[Element.OMNI], supply[filler_element])
             filler_omni_count = need[Element.OMNI] - filler_element_count
