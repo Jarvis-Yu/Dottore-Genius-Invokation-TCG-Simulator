@@ -130,6 +130,10 @@ __all__ = [
     "StealthStatus",
     ## Fischl ##
     "StellarPredatorStatus",
+    ## Ganyu ##
+    "GanyuTalentStatus",
+    "IceLotusStatus",
+    "UndividedHeartStatus",
     ## Jadeplume Terrorshroom ##
     "ProliferatingSporesStatus",
     "RadicalVitalityHiddenStatus",
@@ -2213,6 +2217,43 @@ class StealthStatus(CharacterStatus, FixedShieldStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class StellarPredatorStatus(TalentEquipmentStatus):
+    pass
+
+
+#### Ganyu ####
+
+@dataclass(frozen=True, kw_only=True)
+class GanyuTalentStatus(HiddenStatus):
+    elemental_skill2ed: bool = False
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if information.is_skill_from_character(
+                    game_state,
+                    status_source.pid,
+                    CharacterSkill.ELEMENTAL_SKILL2,
+            ):
+                return replace(self, elemental_skill2ed=True)
+        return self
+
+
+@dataclass(frozen=True, kw_only=True)
+class IceLotusStatus(CombatStatus, FixedShieldStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    SHIELD_AMOUNT: ClassVar[int] = 1
+
+
+@dataclass(frozen=True, kw_only=True)
+class UndividedHeartStatus(TalentEquipmentStatus):
     pass
 
 

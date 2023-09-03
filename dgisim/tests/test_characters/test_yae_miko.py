@@ -63,22 +63,22 @@ class TestYaeMiko(unittest.TestCase):
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
-        self.assertIn(SesshouSakura, p1.get_summons())
-        self.assertEqual(p1.get_summons().just_find(SesshouSakura).usages, 3)
+        self.assertIn(SesshouSakuraSummon, p1.get_summons())
+        self.assertEqual(p1.get_summons().just_find(SesshouSakuraSummon).usages, 3)
 
         # second skill increases usage to 6
         gsm.player_step()
         gsm.auto_step()  # p1 skill
         p1 = gsm.get_game_state().get_player1()
-        self.assertIn(SesshouSakura, p1.get_summons())
-        self.assertEqual(p1.get_summons().just_find(SesshouSakura).usages, 6)
+        self.assertIn(SesshouSakuraSummon, p1.get_summons())
+        self.assertEqual(p1.get_summons().just_find(SesshouSakuraSummon).usages, 6)
 
         # summon usages cap at 6
         gsm.player_step()
         gsm.auto_step()  # p1 skill
         p1 = gsm.get_game_state().get_player1()
-        self.assertIn(SesshouSakura, p1.get_summons())
-        self.assertEqual(p1.get_summons().just_find(SesshouSakura).usages, 6)
+        self.assertIn(SesshouSakuraSummon, p1.get_summons())
+        self.assertEqual(p1.get_summons().just_find(SesshouSakuraSummon).usages, 6)
 
     def test_elemental_burst(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -103,12 +103,12 @@ class TestYaeMiko(unittest.TestCase):
 
         # burst with Sesshou Sakura
         game_state = AddSummonEffect(
-            target_pid=Pid.P1, summon=SesshouSakura
+            target_pid=Pid.P1, summon=SesshouSakuraSummon
         ).execute(base_game_state)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_BURST)
         p1 = game_state.get_player1()
         self.assertIn(TenkoThunderboltsStatus, p1.get_combat_statuses())
-        self.assertNotIn(SesshouSakura, p1.get_summons())
+        self.assertNotIn(SesshouSakuraSummon, p1.get_summons())
         post_burst_state = game_state
 
         with self.subTest(condition="oppo end round"):
@@ -118,7 +118,7 @@ class TestYaeMiko(unittest.TestCase):
             self.assertIn(Element.ELECTRO, p2ac.get_elemental_aura())
             p1 = game_state.get_player1()
             self.assertNotIn(TenkoThunderboltsStatus, p1.get_combat_statuses())
-            self.assertNotIn(SesshouSakura, p1.get_summons())
+            self.assertNotIn(SesshouSakuraSummon, p1.get_summons())
 
         with self.subTest(condition="oppo take action"):
             game_state = step_skill(post_burst_state, Pid.P2, CharacterSkill.NORMAL_ATTACK)
@@ -127,49 +127,49 @@ class TestYaeMiko(unittest.TestCase):
             self.assertIn(Element.ELECTRO, p2ac.get_elemental_aura())
             p1 = game_state.get_player1()
             self.assertNotIn(TenkoThunderboltsStatus, p1.get_combat_statuses())
-            self.assertNotIn(SesshouSakura, p1.get_summons())
+            self.assertNotIn(SesshouSakuraSummon, p1.get_summons())
 
     def test_sesshou_sakura_summon(self):
         # p1 has the summon with usages <= 3 and ends the round
-        base_game = OverrideSummonEffect(Pid.P1, SesshouSakura(usages=3)).execute(self.BASE_GAME)
+        base_game = OverrideSummonEffect(Pid.P1, SesshouSakuraSummon(usages=3)).execute(self.BASE_GAME)
         game_state = step_action(base_game, Pid.P1, EndRoundAction())
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
         self.assertNotIn(Element.ELECTRO, p2ac.get_elemental_aura())
-        self.assertIn(SesshouSakura, p1.get_summons())
-        self.assertEqual(p1.get_summons().just_find(SesshouSakura).usages, 3)
+        self.assertIn(SesshouSakuraSummon, p1.get_summons())
+        self.assertEqual(p1.get_summons().just_find(SesshouSakuraSummon).usages, 3)
 
         # p1 has the summon with usages >= 4 and ends the round
-        base_game = OverrideSummonEffect(Pid.P1, SesshouSakura(usages=4)).execute(self.BASE_GAME)
+        base_game = OverrideSummonEffect(Pid.P1, SesshouSakuraSummon(usages=4)).execute(self.BASE_GAME)
         game_state = step_action(base_game, Pid.P1, EndRoundAction())
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 9)
         self.assertIn(Element.ELECTRO, p2ac.get_elemental_aura())
-        self.assertIn(SesshouSakura, p1.get_summons())
-        self.assertEqual(p1.get_summons().just_find(SesshouSakura).usages, 3)
+        self.assertIn(SesshouSakuraSummon, p1.get_summons())
+        self.assertEqual(p1.get_summons().just_find(SesshouSakuraSummon).usages, 3)
 
         # test that normal end round attack is working
-        base_game = OverrideSummonEffect(Pid.P1, SesshouSakura(usages=3)).execute(self.BASE_GAME)
+        base_game = OverrideSummonEffect(Pid.P1, SesshouSakuraSummon(usages=3)).execute(self.BASE_GAME)
         game_state = step_action(base_game, Pid.P1, EndRoundAction())
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 9)
         self.assertIn(Element.ELECTRO, p2ac.get_elemental_aura())
-        self.assertIn(SesshouSakura, p1.get_summons())
-        self.assertEqual(p1.get_summons().just_find(SesshouSakura).usages, 2)
+        self.assertIn(SesshouSakuraSummon, p1.get_summons())
+        self.assertEqual(p1.get_summons().just_find(SesshouSakuraSummon).usages, 2)
 
         # test summon disappears on last attack
-        base_game = OverrideSummonEffect(Pid.P1, SesshouSakura(usages=1)).execute(self.BASE_GAME)
+        base_game = OverrideSummonEffect(Pid.P1, SesshouSakuraSummon(usages=1)).execute(self.BASE_GAME)
         game_state = step_action(base_game, Pid.P1, EndRoundAction())
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 9)
         self.assertIn(Element.ELECTRO, p2ac.get_elemental_aura())
-        self.assertNotIn(SesshouSakura, p1.get_summons())
+        self.assertNotIn(SesshouSakuraSummon, p1.get_summons())
 
     def test_talent_card(self):
         a1, a2 = PuppetAgent(), LazyAgent()
@@ -192,7 +192,7 @@ class TestYaeMiko(unittest.TestCase):
         self.assertNotIn(RiteOfDispatchStatus, p1ac.get_character_statuses())
 
         # test burst generates Rite of Dispatch character status if Sesshou Sakura destroyed
-        game_state = AddSummonEffect(Pid.P1, SesshouSakura).execute(base_state)
+        game_state = AddSummonEffect(Pid.P1, SesshouSakuraSummon).execute(base_state)
         gsm = GameStateMachine(game_state, a1, a2)
         a1.inject_action(CardAction(
             card=TheShrinesSacredShade,

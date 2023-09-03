@@ -1151,7 +1151,7 @@ class ReferredDamageEffect(DirectEffect):
                 assert self.target_ref.zone is Zone.CHARACTERS
                 avoided_id = cast(int, self.target_ref.id)
             for char in opponenet_characters.get_characters():
-                if char.get_id() != avoided_id:
+                if char.get_id() != avoided_id and char.alive():
                     targets.append(char)
         elif self.target is DynamicCharacterTarget.SELF_SELF:
             targets.append(

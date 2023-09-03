@@ -131,6 +131,8 @@ __all__ = [
     "PaidInFull",
     ## Fischl ##
     "StellarPredator",
+    ## Ganyu ##
+    "UndividedHeart",
     ## Jadeplume Terrorshroom ##
     "ProliferatingSpores",
     ## Jean ##
@@ -1956,6 +1958,15 @@ class StellarPredator(_TalentEquipmentSkillCard):
     _CHARACTER = chr.Fischl
     _EQUIPMENT_STATUS = stt.StellarPredatorStatus
     _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+
+
+#### Ganyu ####
+
+class UndividedHeart(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDices({Element.CRYO: 5})
+    _CHARACTER = chr.Ganyu
+    _EQUIPMENT_STATUS = stt.UndividedHeartStatus
+    _SKILL = CharacterSkill.ELEMENTAL_SKILL2
 
 
 #### Jadeplume Terrorshroom ####

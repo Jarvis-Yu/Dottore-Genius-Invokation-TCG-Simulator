@@ -48,7 +48,8 @@ __all__ = [
     "OceanicMimicSquirrelSummon",
     "OzSummon",
     "ReflectionSummon",
-    "SesshouSakura",
+    "SacredCryoPearlSummon",
+    "SesshouSakuraSummon",
     "ShadowswordGallopingFrostSummon",
     "ShadowswordLoneGaleSummon",
     "StormEyeSummon",
@@ -142,6 +143,32 @@ class _DmgPerRoundSummon(_DestroyOnNumSummon):
         if d_usages == 0:
             return es, self
         return es, replace(self, usages=d_usages)
+
+
+@dataclass(frozen=True, kw_only=True)
+class _TeamDmgPerRoundSummon(_DmgPerRoundSummon):
+    OFF_FIELD_ELEM: ClassVar[Element] = Element.PIERCING
+    OFF_FIELD_DMG: ClassVar[int]
+
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        es: list[eft.Effect] = []
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            es.append(
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_OFF_FIELD,
+                    element=self.OFF_FIELD_ELEM,
+                    damage=self.OFF_FIELD_DMG,
+                    damage_type=DamageType(summon=True),
+                )
+            )
+        super_es, new_self = super()._react_to_signal(game_state, source, signal)
+        return es + super_es, new_self
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -624,7 +651,17 @@ class ReflectionSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class SesshouSakura(_DestroyOnNumSummon):
+class SacredCryoPearlSummon(_TeamDmgPerRoundSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.CRYO
+    OFF_FIELD_ELEM: ClassVar[Element] = Element.PIERCING
+    OFF_FIELD_DMG: ClassVar[int] = 1
+
+
+@dataclass(frozen=True, kw_only=True)
+class SesshouSakuraSummon(_DestroyOnNumSummon):
     usages: int = 3
     MAX_USAGES: ClassVar[int] = 6
     DMG: ClassVar[int] = 1

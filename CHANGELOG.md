@@ -8,6 +8,7 @@
   - Collei
   - Fatui Pyro Agent
   - Fischl
+  - Ganyu
   - Jadeplume Terrorshroom
   - Jean
   - Maguu Kenki
@@ -24,6 +25,7 @@
       - Stellar Predator
       - Tamakushi Casket
       - Transcendent Automaton
+      - Undivided Heart
 
 ## v0.3.1 (28 Aug 2023)
 

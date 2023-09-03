@@ -30,6 +30,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     TheShrinesSacredShade,
     ThunderingPenance,
     TranscendentAutomaton,
+    UndividedHeart,
     ## Weapons ##
     ### Bow ###
     RavenBow,

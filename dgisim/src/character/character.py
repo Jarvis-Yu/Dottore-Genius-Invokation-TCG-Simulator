@@ -37,6 +37,7 @@ __all__ = [
     "ElectroHypostasis",
     "Fischl",
     "FatuiPyroAgent",
+    "Ganyu",
     "JadeplumeTerrorshroom",
     "Jean",
     "KaedeharaKazuha",
@@ -976,6 +977,120 @@ class Fischl(Character):
             statuses=stts.Statuses(()),
             hiddens=stts.Statuses(()),
             equipments=stts.EquipmentStatuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
+class Ganyu(Character):
+    _ELEMENT = Element.CRYO
+    _WEAPON_TYPE = WeaponType.BOW
+    _TALENT_STATUS = stt.UndividedHeartStatus
+    _FACTIONS = frozenset((Faction.LIYUE,))
+
+    _NORMAL_ATTACK_COST = AbstractDices({
+        Element.CRYO: 1,
+        Element.ANY: 2,
+    })
+    _ELEMENTAL_SKILL1_COST = AbstractDices({
+        Element.CRYO: 3,
+    })
+    _ELEMENTAL_SKILL2_COST = AbstractDices({
+        Element.CRYO: 5,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDices({
+        Element.CRYO: 3,
+    })
+
+    @override
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        )
+
+    @override
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.CRYO,
+                damage=1,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+            eft.AddCombatStatusEffect(
+                target_pid=source.pid,
+                status=stt.IceLotusStatus,
+            ),
+        )
+
+    @override
+    def _elemental_skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        piercing_dmg = 2
+        if self.talent_equiped():
+            talent_status = self.get_hidden_statuses().find(stt.GanyuTalentStatus)
+            assert isinstance(talent_status, stt.GanyuTalentStatus)
+            if talent_status.elemental_skill2ed:
+                piercing_dmg = 3
+
+        return (
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_OFF_FIELD,
+                element=Element.PIERCING,
+                damage=piercing_dmg,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.CRYO,
+                damage=2,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+        )
+
+    @override
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.get_max_energy(),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_OFF_FIELD,
+                element=Element.PIERCING,
+                damage=1,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.CRYO,
+                damage=2,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=sm.SacredCryoPearlSummon,
+            )
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=3,
+            hiddens=stts.Statuses((stt.GanyuTalentStatus(),)),
+            equipments=stts.EquipmentStatuses(()),
+            statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
 
@@ -2526,7 +2641,7 @@ class YaeMiko(Character):
     })
 
     # constants
-    _SUMMON_TYPE = sm.SesshouSakura
+    _SUMMON_TYPE = sm.SesshouSakuraSummon
 
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
@@ -2540,7 +2655,7 @@ class YaeMiko(Character):
         return (
             eft.AddSummonEffect(
                 target_pid=source.pid,
-                summon=sm.SesshouSakura,
+                summon=sm.SesshouSakuraSummon,
             ),
         )
 

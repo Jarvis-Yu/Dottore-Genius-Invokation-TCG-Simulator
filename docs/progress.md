@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (24/54 implemented)](#character-2454-implemented)
-  - [Card (67/200 implemented)](#card-67200-implemented)
+  - [Character (25/54 implemented)](#character-2554-implemented)
+  - [Card (68/200 implemented)](#card-68200-implemented)
 
-## Character (24/54 implemented)
+## Character (25/54 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -36,7 +36,7 @@ all I need now is to implement each card and character.
   - [x] Tighnari
 - [ ] Cryo:
   - [x] Kaeya
-  - [ ] Ganyu _<-- WIP_
+  - [x] Ganyu
   - [ ] Qiqi _<-- WIP_
   - [x] Shenhe
 - [ ] Geo:
@@ -45,9 +45,9 @@ all I need now is to implement each card and character.
   - [ ] Ningguang _<-- WIP_
   - [x] Noelle
 
-## Card (67/200 implemented)
+## Card (68/200 implemented)
 
-- [ ] Equipment Card (33/107):
+- [ ] Equipment Card (34/107):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] Cold-Blooded Strike
@@ -72,6 +72,7 @@ all I need now is to implement each card and character.
     - [x] The Shrine's Sacred Shade
     - [x] Thundering Penance
     - [x] Transcendent Automaton
+    - [x] Undivided Heart
   - [ ] Weapon Card:
     - [ ] Bow:
       - [ ] Amos' Bow _<-- WIP_
