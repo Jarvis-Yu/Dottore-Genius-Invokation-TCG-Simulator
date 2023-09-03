@@ -636,8 +636,8 @@ class _ShadowswordBaseSummon(_DmgPerRoundSummon):
             ):
                 return self
             char = game_state.get_character_target(information.source)
-            from ..character.character import Maguukenki
-            if isinstance(char, Maguukenki):
+            from ..character.character import MaguuKenki
+            if isinstance(char, MaguuKenki):
                 return replace(self, activated=True)
         return self
 

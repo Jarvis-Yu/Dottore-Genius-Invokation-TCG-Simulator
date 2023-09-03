@@ -3,15 +3,15 @@ import unittest
 from dgisim.tests.test_characters.common_imports import *
 
 
-class TestMaguukenki(unittest.TestCase):
+class TestMaguuKenki(unittest.TestCase):
     BASE_GAME = replace_character_make_active_add_card(
         ACTION_TEMPLATE,
         Pid.P1,
-        Maguukenki,
+        MaguuKenki,
         char_id=2,
         card=TranscendentAutomaton,
     )
-    assert type(BASE_GAME.get_player1().just_get_active_character()) is Maguukenki
+    assert type(BASE_GAME.get_player1().just_get_active_character()) is MaguuKenki
 
     def test_normal_attack(self):
         game_state = step_skill(

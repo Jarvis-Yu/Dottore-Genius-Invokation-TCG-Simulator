@@ -148,7 +148,7 @@ __all__ = [
     "ExplosiveSparkStatus",
     "PoundingSurpriseStatus",
     "SparksnSplashStatus",
-    ## Maguukenki ##
+    ## Maguu Kenki ##
     "TranscendentAutomatonStatus",
     ## Mona ##
     "IllusoryBubbleStatus",
@@ -2508,7 +2508,7 @@ class SparksnSplashStatus(CombatStatus, _UsageStatus):
         return es, new_self
 
 
-#### Maguukenki ####
+#### Maguu Kenki ####
 
 @dataclass(frozen=True, kw_only=True)
 class TranscendentAutomatonStatus(TalentEquipmentStatus):

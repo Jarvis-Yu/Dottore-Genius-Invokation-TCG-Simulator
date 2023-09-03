@@ -40,7 +40,7 @@ __all__ = [
     "Kaeya",
     "Keqing",
     "Klee",
-    "Maguukenki",
+    "MaguuKenki",
     "Mona",
     "Nahida",
     "Noelle",
@@ -801,6 +801,24 @@ class FatuiPyroAgent(Character):
         )
 
 
+class Fischl(Character):
+    _ELEMENT = Element.ELECTRO
+    _WEAPON_TYPE = WeaponType.BOW
+    _TALENT_STATUS = None
+    _FACTIONS = frozenset((Faction.MONDSTADT,))
+
+    _NORMAL_ATTACK_COST = AbstractDices({
+        Element.ELECTRO: 1,
+        Element.ANY: 2,
+    })
+    _ELEMENTAL_SKILL1_COST = AbstractDices({
+        Element.ELECTRO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDices({
+        Element.ELECTRO: 3,
+    })
+
+
 class Jean(Character):
     _ELEMENT = Element.ANEMO
     _WEAPON_TYPE = WeaponType.SWORD
@@ -1313,7 +1331,7 @@ class Klee(Character):
         )
 
 
-class Maguukenki(Character):
+class MaguuKenki(Character):
     _ELEMENT = Element.ANEMO
     _WEAPON_TYPE = WeaponType.NONE
     _TALENT_STATUS = stt.TranscendentAutomatonStatus

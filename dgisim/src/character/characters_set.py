@@ -16,7 +16,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     Keqing,
     Kaeya,
     Klee,
-    Maguukenki,
+    MaguuKenki,
     Mona,
     Nahida,
     Noelle,

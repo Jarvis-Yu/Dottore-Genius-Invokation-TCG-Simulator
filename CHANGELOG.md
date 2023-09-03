@@ -7,7 +7,7 @@
 - New Characters:
   - Fatui Pyro Agent
   - Jean
-  - Maguukenki
+  - Maguu Kenki
   - Sangonomiya Kokomi
   - Yoimiya
 - New Cards:

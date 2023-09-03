@@ -22,7 +22,7 @@ all I need now is to implement each card and character.
 - [ ] Anemo:
   - [x] Jean
   - [x] Kaedehara Kazuha
-  - [x] MaguuKenki
+  - [x] Maguu Kenki
   - [x] Venti
 - [ ] Electro:
   - [x] Electro Hypostasis

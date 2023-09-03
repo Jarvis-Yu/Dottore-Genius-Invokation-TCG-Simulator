@@ -138,7 +138,7 @@ __all__ = [
     "ThunderingPenance",
     ## Klee ##
     "PoundingSurprise",
-    ## Maguukenki ##
+    ## Maguu Kenki ##
     "TranscendentAutomaton",
     ## Mona ##
     "ProphecyOfSubmersion",
@@ -2044,11 +2044,11 @@ class PoundingSurprise(_TalentEquipmentSkillCard):
     _SKILL = CharacterSkill.ELEMENTAL_SKILL1
 
 
-#### Maguukenki ####
+#### Maguu Kenki ####
 
 class TranscendentAutomaton(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.ANEMO: 3})
-    _CHARACTER = chr.Maguukenki
+    _CHARACTER = chr.MaguuKenki
     _EQUIPMENT_STATUS = stt.TranscendentAutomatonStatus
     _SKILL = CharacterSkill.ELEMENTAL_SKILL1
 
