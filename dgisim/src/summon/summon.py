@@ -41,6 +41,7 @@ __all__ = [
     "BurningFlameSummon",
     "ChainsOfWardingThunderSummon",
     "ClusterbloomArrowSummon",
+    "CuileinAnbarSummon",
     "DandelionFieldSummon",
     "OceanicMimicFrogSummon",
     "OceanicMimicRaptorSummon",
@@ -408,6 +409,14 @@ class ClusterbloomArrowSummon(_DmgPerRoundSummon):
 
 
 @dataclass(frozen=True, kw_only=True)
+class CuileinAnbarSummon(_DmgPerRoundSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 2
+    ELEMENT: ClassVar[Element] = Element.DENDRO
+
+
+@dataclass(frozen=True, kw_only=True)
 class DandelionFieldSummon(_DestroyOnNumSummon):
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2
@@ -547,7 +556,7 @@ class OzSummon(_DmgPerRoundSummon):
         if info_type is Informables.SKILL_USAGE:
             assert isinstance(information, SkillIEvent)
             from ..character.character import Fischl
-            if information.is_skill_from_character(
+            if not self.activated and information.is_skill_from_character(
                     game_state,
                     status_source.pid,
                     CharacterSkill.NORMAL_ATTACK,
@@ -683,7 +692,7 @@ class _ShadowswordBaseSummon(_DmgPerRoundSummon):
         if info_type is Informables.SKILL_USAGE:
             assert isinstance(information, SkillIEvent)
             from ..character.character import MaguuKenki
-            if information.is_skill_from_character(
+            if not self.activated and information.is_skill_from_character(
                     game_state,
                     status_source.pid,
                     CharacterSkill.ELEMENTAL_BURST,
@@ -698,7 +707,7 @@ class _ShadowswordBaseSummon(_DmgPerRoundSummon):
             game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
             return [
                 eft.ReferredDamageEffect(

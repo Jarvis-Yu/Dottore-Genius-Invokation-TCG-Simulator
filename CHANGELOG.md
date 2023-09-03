@@ -5,6 +5,7 @@
 ### Added
 
 - New Characters:
+  - Collei
   - Fatui Pyro Agent
   - Fischl
   - Jean
@@ -14,6 +15,7 @@
 - New Cards:
   - Equipment Card:
     - Talent Equipment Card:
+      - Floral Sidewinder
       - Lands of Dandelion
       - Naganohara Meteor Swarm
       - Paid in Full

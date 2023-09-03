@@ -76,12 +76,15 @@ class SkillIEvent(InformableEvent):
             game_state: GameState,
             pid_to_check: Pid,
             skill_type: CharacterSkill,
-            char_type: type[Character],
+            char_type: None | type[Character] = None,
     ) -> bool:
         return (
             self.source.pid is pid_to_check
             and self.skill_type is skill_type
-            and isinstance(game_state.get_character_target(self.source), char_type)
+            and (
+                char_type is None
+                or isinstance(game_state.get_character_target(self.source), char_type)
+            )
         )
 
 

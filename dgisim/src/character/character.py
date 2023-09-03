@@ -4,9 +4,9 @@ and implementation of all characters. (in alphabetic order)
 """
 from __future__ import annotations
 from dataclasses import replace
-from typing import Callable, Optional, TYPE_CHECKING, Union
-from typing_extensions import override, Self
 from functools import lru_cache
+from typing import Callable, Optional, TYPE_CHECKING, Union, cast
+from typing_extensions import override, Self
 
 from ..card import card as cd
 from ..effect import effect as eft
@@ -33,6 +33,7 @@ __all__ = [
     # concretes
     "AratakiItto",
     "Bennett",
+    "Collei",
     "ElectroHypostasis",
     "Fischl",
     "FatuiPyroAgent",
@@ -644,6 +645,101 @@ class Bennett(Character):
             energy=0,
             max_energy=2,
             hiddens=stts.Statuses(()),
+            equipments=stts.EquipmentStatuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
+class Collei(Character):
+    _ELEMENT = Element.DENDRO
+    _WEAPON_TYPE = WeaponType.BOW
+    _TALENT_STATUS = stt.FloralSidewinderStatus
+    _FACTIONS = frozenset((Faction.SUMERU,))
+
+    _NORMAL_ATTACK_COST = AbstractDices({
+        Element.DENDRO: 1,
+        Element.ANY: 2,
+    })
+    _ELEMENTAL_SKILL1_COST = AbstractDices({
+        Element.DENDRO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDices({
+        Element.DENDRO: 3,
+    })
+
+    @override
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        )
+
+    @override
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        talent_status: None | stt.ColleiTalentStatus = None
+        trigger_sprout: bool = False
+        if self.talent_equiped():
+            talent_status = cast(
+                stt.ColleiTalentStatus,
+                self.get_hidden_statuses().find(stt.ColleiTalentStatus)
+            )
+            assert talent_status is not None
+            if not talent_status.elemental_skill_used:
+                oppo_active = game_state.get_player(source.pid.other()).just_get_active_character()
+                trigger_sprout = \
+                    oppo_active.get_elemental_aura().consult_reaction(Element.DENDRO) is not None
+        return (
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.DENDRO,
+                damage=3,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+        ) + (
+            (
+                eft.UpdateCombatStatusEffect(
+                    target_pid=source.pid,
+                    status=stt.SproutStatus(activated=trigger_sprout)
+                ),
+            )
+            if talent_status is not None and not talent_status.elemental_skill_used
+            else ()
+        )
+
+    @override
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.get_max_energy(),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.DENDRO,
+                damage=2,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=sm.CuileinAnbarSummon,
+            ),
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=2,
+            hiddens=stts.Statuses((stt.ColleiTalentStatus(),)),
             equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),

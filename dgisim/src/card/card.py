@@ -123,6 +123,8 @@ __all__ = [
     "AratakiIchiban",
     ## Bennett ##
     "GrandExpectation",
+    ## Collei ##
+    "FloralSidewinder",
     ## Electro Hypostasis ##
     "AbsorbingPrism",
     ## Fatui Pyro Agent ##
@@ -1895,8 +1897,16 @@ class GrandExpectation(_TalentEquipmentSkillCard):
     _SKILL = CharacterSkill.ELEMENTAL_BURST
 
 
-#### Electro Hypostasis ####
+#### Collei ####
 
+class FloralSidewinder(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDices({Element.DENDRO: 4})
+    _CHARACTER = chr.Collei
+    _EQUIPMENT_STATUS = stt.FloralSidewinderStatus
+    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+
+
+#### Electro Hypostasis ####
 
 class AbsorbingPrism(TalentEventCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDices({Element.ELECTRO: 3})
@@ -1929,7 +1939,6 @@ class AbsorbingPrism(TalentEventCard, _CombatActionCard, _DiceOnlyChoiceProvider
 
 
 #### Fatui Pyro Agent ####
-
 
 class PaidInFull(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.PYRO: 3})

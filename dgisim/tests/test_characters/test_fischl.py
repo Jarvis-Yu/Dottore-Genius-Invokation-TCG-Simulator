@@ -25,7 +25,7 @@ class TestFischl(unittest.TestCase):
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
 
     def test_elemental_skill1(self):
-        # test elemental skill deals 3 anemo damage and force forward swap
+        # test elemental skill deals 1 electro damage and summons Oz
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,

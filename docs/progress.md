@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (22/54 implemented)](#character-2254-implemented)
-  - [Card (65/200 implemented)](#card-65200-implemented)
+  - [Character (23/54 implemented)](#character-2354-implemented)
+  - [Card (66/200 implemented)](#card-66200-implemented)
 
-## Character (22/54 implemented)
+## Character (23/54 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -30,7 +30,7 @@ all I need now is to implement each card and character.
   - [x] Keqing
   - [x] Yae Miko
 - [ ] Dendro:
-  - [ ] Collei _<-- WIP_
+  - [x] Collei
   - [ ] Jadeplume Terrorshroom _<-- WIP_
   - [x] Nahida
   - [x] Tighnari
@@ -45,13 +45,14 @@ all I need now is to implement each card and character.
   - [ ] Ningguang _<-- WIP_
   - [x] Noelle
 
-## Card (65/200 implemented)
+## Card (66/200 implemented)
 
-- [ ] Equipment Card (29/107):
+- [ ] Equipment Card (32/107):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] Cold-Blooded Strike
     - [x] Embrace of Winds
+    - [x] Floral Sidewinder
     - [x] Grand Expectation
     - [x] I Got Your Back
     - [x] Keen Sight

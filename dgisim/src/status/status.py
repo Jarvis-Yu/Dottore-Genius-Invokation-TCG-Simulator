@@ -115,6 +115,10 @@ __all__ = [
     "InspirationFieldEnhancedStatus",
     ## Chongyun ##
     "ChonghuasFrostFieldStatus",
+    ## Collei ##
+    "ColleiTalentStatus",
+    "FloralSidewinderStatus",
+    "SproutStatus",
     ## Electro Hypostasis ##
     "ElectroCrystalCoreHiddenStatus",
     "ElectroCrystalCoreStatus",
@@ -1900,6 +1904,105 @@ class ChonghuasFrostFieldStatus(CombatStatus, _InfusionStatus):
     # TODO: other effects'll be implemented when Chongyun is implemented
 
 
+#### Collei ####
+
+@dataclass(frozen=True, kw_only=True)
+class ColleiTalentStatus(HiddenStatus):
+    """ Saves the elemental skill usages of Collei per round """
+    elemental_skill_used: bool = False
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if (
+                    not self.elemental_skill_used
+                    and information.source == status_source
+                    and information.skill_type is CharacterSkill.ELEMENTAL_SKILL1
+            ):
+                return replace(self, elemental_skill_used=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END and self.elemental_skill_used:
+            return [], replace(self, elemental_skill_used=False)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class FloralSidewinderStatus(TalentEquipmentStatus):
+    pass
+
+
+@dataclass(frozen=True, kw_only=True)
+class SproutStatus(CombatStatus, _UsageStatus):
+    activated: bool = False
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.DMG_DELT:
+            assert isinstance(information, DmgIEvent)
+            dmg = information.dmg
+            if (
+                    not self.activated
+                    and dmg.source.pid is status_source.pid
+                    and dmg.reaction is not None
+                    and dmg.reaction.elem_reaction(Element.DENDRO)
+                    and dmg.damage_type.directly_from_character()
+            ):
+                return replace(self, activated=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+            return [
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=Element.DENDRO,
+                    damage=1,
+                    damage_type=DamageType(status=True),
+                )
+            ], replace(self, usages=-1, activated=False)
+        elif signal is TriggeringSignal.ROUND_END:
+            return [], replace(self, usages=-1)
+        return [], self
+
+
 #### Electro Hypostasis ####
 
 
@@ -3284,7 +3387,7 @@ class RainbowBladeworkStatus(CombatStatus, _UsageStatus):
             game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
             assert self.usages >= 1
             return [

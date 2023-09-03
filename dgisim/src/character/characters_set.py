@@ -9,6 +9,7 @@ __all__ = [
 _DEFAULT_CHARACTERS: list[type[Character]] = [
     AratakiItto,
     Bennett,
+    Collei,
     ElectroHypostasis,
     FatuiPyroAgent,
     Fischl,
