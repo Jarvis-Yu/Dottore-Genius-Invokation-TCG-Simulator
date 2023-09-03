@@ -45,6 +45,7 @@ __all__ = [
     "OceanicMimicFrogSummon",
     "OceanicMimicRaptorSummon",
     "OceanicMimicSquirrelSummon",
+    "OzSummon",
     "ReflectionSummon",
     "SesshouSakura",
     "ShadowswordGallopingFrostSummon",
@@ -524,6 +525,58 @@ class OceanicMimicSquirrelSummon(_DmgPerRoundSummon):
 
 
 @dataclass(frozen=True, kw_only=True)
+class OzSummon(_DmgPerRoundSummon):
+    usages: int = 2
+    activated: bool = False
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 1
+    ACTIVATED_DMG: ClassVar[int] = 2
+    ELEMENT: ClassVar[Element] = Element.ELECTRO
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+    ) + tuple(_DmgPerRoundSummon.REACTABLE_SIGNALS))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            from ..character.character import Fischl
+            if information.is_skill_from_character(
+                    game_state,
+                    status_source.pid,
+                    CharacterSkill.NORMAL_ATTACK,
+                    Fischl,
+            ):
+                return replace(self, activated=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+            return [
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=self.ELEMENT,
+                    damage=self.ACTIVATED_DMG,
+                    damage_type=DamageType(summon=True),
+                ),
+            ], replace(self, usages=-1, activated=False)
+        return super()._react_to_signal(game_state, source, signal)
+
+
+@dataclass(frozen=True, kw_only=True)
 class ReflectionSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 1
@@ -629,15 +682,13 @@ class _ShadowswordBaseSummon(_DmgPerRoundSummon):
     ) -> Self:
         if info_type is Informables.SKILL_USAGE:
             assert isinstance(information, SkillIEvent)
-            if not (
-                    information.source.pid is status_source.pid
-                    and information.skill_type is CharacterSkill.ELEMENTAL_BURST
-                    and not self.activated
-            ):
-                return self
-            char = game_state.get_character_target(information.source)
             from ..character.character import MaguuKenki
-            if isinstance(char, MaguuKenki):
+            if information.is_skill_from_character(
+                    game_state,
+                    status_source.pid,
+                    CharacterSkill.ELEMENTAL_BURST,
+                    MaguuKenki,
+            ):
                 return replace(self, activated=True)
         return self
 

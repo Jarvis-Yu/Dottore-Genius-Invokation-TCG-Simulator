@@ -11,11 +11,13 @@ from typing_extensions import Self
 
 if TYPE_CHECKING:
     from .card.card import Card
+    from .character.character import Character
     from .character.enums import CharacterSkill
     from .effect.effect import SpecificDamageEffect
     from .effect.structs import StaticTarget
     from .element import Element
     from .dices import AbstractDices
+    from .state.game_state import GameState
     from .state.enums import Pid
 
 __all__ = [
@@ -68,6 +70,19 @@ class CharacterDeathIEvent(InformableEvent):
 class SkillIEvent(InformableEvent):
     source: StaticTarget
     skill_type: CharacterSkill
+
+    def is_skill_from_character(
+            self,
+            game_state: GameState,
+            pid_to_check: Pid,
+            skill_type: CharacterSkill,
+            char_type: type[Character],
+    ) -> bool:
+        return (
+            self.source.pid is pid_to_check
+            and self.skill_type is skill_type
+            and isinstance(game_state.get_character_target(self.source), char_type)
+        )
 
 
 @dataclass(frozen=True, kw_only=True)

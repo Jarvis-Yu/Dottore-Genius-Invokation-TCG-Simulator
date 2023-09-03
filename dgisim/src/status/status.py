@@ -124,6 +124,8 @@ __all__ = [
     "PaidInFullStatus",
     "StealthMasterStatus",
     "StealthStatus",
+    ## Fischl ##
+    "StellarPredatorStatus",
     ## Jean ##
     "LandsOfDandelionStatus",
     ## Kaedehara Kazuha ##
@@ -2095,6 +2097,13 @@ class StealthStatus(CharacterStatus, FixedShieldStatus):
             return item.convert_element(self.INFUSION_ELEMENT), self
 
         return super()._preprocess(game_state, status_source, item, signal)
+
+
+#### Fischl ####
+
+@dataclass(frozen=True, kw_only=True)
+class StellarPredatorStatus(TalentEquipmentStatus):
+    pass
 
 
 #### Jean ####

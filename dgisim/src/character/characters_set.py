@@ -11,6 +11,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     Bennett,
     ElectroHypostasis,
     FatuiPyroAgent,
+    Fischl,
     Jean,
     KaedeharaKazuha,
     Keqing,

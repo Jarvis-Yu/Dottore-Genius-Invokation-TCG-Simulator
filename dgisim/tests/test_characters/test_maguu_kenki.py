@@ -88,7 +88,8 @@ class TestMaguuKenki(unittest.TestCase):
         # As both summons inherits the exact same parent class, and the only diff is elem.
         # Only one summon needs to be tested here.
         game_state = AddSummonEffect(
-            Pid.P1, ShadowswordGallopingFrostSummon).execute(self.BASE_GAME)
+            Pid.P1, ShadowswordGallopingFrostSummon
+        ).execute(self.BASE_GAME)
         game_state = next_round(game_state)
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()

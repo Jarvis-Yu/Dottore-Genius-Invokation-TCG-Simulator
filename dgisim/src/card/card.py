@@ -127,6 +127,8 @@ __all__ = [
     "AbsorbingPrism",
     ## Fatui Pyro Agent ##
     "PaidInFull",
+    ## Fischl ##
+    "StellarPredator",
     ## Jean ##
     "LandsOfDandelion",
     ## Kaedehara Kazuha ##
@@ -1933,6 +1935,15 @@ class PaidInFull(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.PYRO: 3})
     _CHARACTER = chr.FatuiPyroAgent
     _EQUIPMENT_STATUS = stt.PaidInFullStatus
+    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+
+
+#### Fischl ####
+
+class StellarPredator(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDices({Element.ELECTRO: 3})
+    _CHARACTER = chr.Fischl
+    _EQUIPMENT_STATUS = stt.StellarPredatorStatus
     _SKILL = CharacterSkill.ELEMENTAL_SKILL1
 
 

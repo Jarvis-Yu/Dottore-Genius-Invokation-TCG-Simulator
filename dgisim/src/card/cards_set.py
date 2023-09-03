@@ -21,6 +21,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     PoeticsOfFuubutsu,
     PoundingSurprise,
     ProphecyOfSubmersion,
+    StellarPredator,
     StreamingSurge,
     TamakushiCasket,
     TheScentRemained,

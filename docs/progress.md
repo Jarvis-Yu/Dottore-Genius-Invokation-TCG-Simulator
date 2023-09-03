@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (21/54 implemented)](#character-2154-implemented)
-  - [Card (64/200 implemented)](#card-64200-implemented)
+  - [Character (22/54 implemented)](#character-2254-implemented)
+  - [Card (65/200 implemented)](#card-65200-implemented)
 
-## Character (21/54 implemented)
+## Character (22/54 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -26,7 +26,7 @@ all I need now is to implement each card and character.
   - [x] Venti
 - [ ] Electro:
   - [x] Electro Hypostasis
-  - [ ] Fischl _<-- WIP_
+  - [x] Fischl
   - [x] Keqing
   - [x] Yae Miko
 - [ ] Dendro:
@@ -45,7 +45,7 @@ all I need now is to implement each card and character.
   - [ ] Ningguang _<-- WIP_
   - [x] Noelle
 
-## Card (64/200 implemented)
+## Card (65/200 implemented)
 
 - [ ] Equipment Card (29/107):
   - [ ] Talent Card:
@@ -62,6 +62,7 @@ all I need now is to implement each card and character.
     - [x] Poetics of Fuubutsu
     - [x] Pounding Surprise
     - [x] Prophecy of Submersion
+    - [x] Stellar Predator
     - [x] Streaming Surge
     - [x] Tamakushi Casket
     - [x] The Scent Remained

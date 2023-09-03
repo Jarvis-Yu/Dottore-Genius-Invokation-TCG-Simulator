@@ -6,6 +6,7 @@
 
 - New Characters:
   - Fatui Pyro Agent
+  - Fischl
   - Jean
   - Maguu Kenki
   - Sangonomiya Kokomi
@@ -16,6 +17,7 @@
       - Lands of Dandelion
       - Naganohara Meteor Swarm
       - Paid in Full
+      - Stellar Predator
       - Tamakushi Casket
       - Transcendent Automaton
 
