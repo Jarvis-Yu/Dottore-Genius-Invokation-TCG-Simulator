@@ -27,6 +27,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     TheSeedOfStoredKnowledge,
     TheShrinesSacredShade,
     ThunderingPenance,
+    TranscendentAutomaton,
     ## Weapons ##
     ### Bow ###
     RavenBow,

@@ -7,6 +7,7 @@
 - New Characters:
   - Fatui Pyro Agent
   - Jean
+  - Maguukenki
   - Sangonomiya Kokomi
   - Yoimiya
 - New Cards:
@@ -16,6 +17,7 @@
       - Naganohara Meteor Swarm
       - Paid in Full
       - Tamakushi Casket
+      - Transcendent Automaton
 
 ## v0.3.1 (28 Aug 2023)
 

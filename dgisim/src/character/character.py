@@ -40,6 +40,7 @@ __all__ = [
     "Kaeya",
     "Keqing",
     "Klee",
+    "Maguukenki",
     "Mona",
     "Nahida",
     "Noelle",
@@ -1293,6 +1294,101 @@ class Klee(Character):
             eft.AddCombatStatusEffect(
                 target_pid=source.pid.other(),
                 status=stt.SparksnSplashStatus,
+            ),
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=3,
+            hiddens=stts.Statuses(()),
+            equipments=stts.EquipmentStatuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
+class Maguukenki(Character):
+    _ELEMENT = Element.ANEMO
+    _WEAPON_TYPE = WeaponType.NONE
+    _TALENT_STATUS = stt.TranscendentAutomatonStatus
+    _FACTIONS = frozenset((Faction.MONSTER,))
+
+    _NORMAL_ATTACK_COST = AbstractDices({
+        Element.ANEMO: 1,
+        Element.ANY: 2,
+    })
+    _ELEMENTAL_SKILL1_COST = AbstractDices({
+        Element.ANEMO: 3,
+    })
+    _ELEMENTAL_SKILL2_COST = AbstractDices({
+        Element.CRYO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDices({
+        Element.ANEMO: 3,
+    })
+
+    @override
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        )
+
+    @override
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=sm.ShadowswordLoneGaleSummon,
+            ),
+        ) + (
+            (
+                eft.ForwardSwapCharacterEffect(
+                    target_player=source.pid,
+                ),
+            )
+            if self.talent_equiped()
+            else ()
+        )
+
+    @override
+    def _elemental_skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=sm.ShadowswordGallopingFrostSummon,
+            ),
+        ) + (
+            (
+                eft.BackwardSwapCharacterEffect(
+                    target_player=source.pid,
+                ),
+            )
+            if self.talent_equiped()
+            else ()
+        )
+
+    @override
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.get_max_energy(),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.ANEMO,
+                damage=4,
+                damage_type=DamageType(elemental_burst=True),
             ),
         )
 

@@ -138,6 +138,8 @@ __all__ = [
     "ThunderingPenance",
     ## Klee ##
     "PoundingSurprise",
+    ## Maguukenki ##
+    "TranscendentAutomaton",
     ## Mona ##
     "ProphecyOfSubmersion",
     ## Nahida ##
@@ -2039,6 +2041,15 @@ class PoundingSurprise(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.PYRO: 3})
     _CHARACTER = chr.Klee
     _EQUIPMENT_STATUS = stt.PoundingSurpriseStatus
+    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+
+
+#### Maguukenki ####
+
+class TranscendentAutomaton(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDices({Element.ANEMO: 3})
+    _CHARACTER = chr.Maguukenki
+    _EQUIPMENT_STATUS = stt.TranscendentAutomatonStatus
     _SKILL = CharacterSkill.ELEMENTAL_SKILL1
 
 #### Mona ####

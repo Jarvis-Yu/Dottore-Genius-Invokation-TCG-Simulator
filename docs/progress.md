@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (20/54 implemented)](#character-2054-implemented)
-  - [Card (63/200 implemented)](#card-63200-implemented)
+  - [Character (21/54 implemented)](#character-2154-implemented)
+  - [Card (64/200 implemented)](#card-64200-implemented)
 
-## Character (20/54 implemented)
+## Character (21/54 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -22,7 +22,7 @@ all I need now is to implement each card and character.
 - [ ] Anemo:
   - [x] Jean
   - [x] Kaedehara Kazuha
-  - [ ] MaguuKenki _<-- WIP_
+  - [x] MaguuKenki
   - [x] Venti
 - [ ] Electro:
   - [x] Electro Hypostasis
@@ -45,7 +45,7 @@ all I need now is to implement each card and character.
   - [ ] Ningguang _<-- WIP_
   - [x] Noelle
 
-## Card (63/200 implemented)
+## Card (64/200 implemented)
 
 - [ ] Equipment Card (29/107):
   - [ ] Talent Card:
@@ -68,6 +68,7 @@ all I need now is to implement each card and character.
     - [x] The Seed of Stored Knowledge
     - [x] The Shrine's Sacred Shade
     - [x] Thundering Penance
+    - [x] Transcendent Automaton
   - [ ] Weapon Card:
     - [ ] Bow:
       - [ ] Amos' Bow _<-- WIP_

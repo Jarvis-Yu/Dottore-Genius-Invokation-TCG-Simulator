@@ -119,7 +119,7 @@ class TestJean(unittest.TestCase):
 
         # test teammate gets boost
         game_state = replace_character(base_state, Pid.P1, Venti, 3)
-        game_state = slient_fast_swap(game_state, Pid.P1, 3)
+        game_state = silent_fast_swap(game_state, Pid.P1, 3)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL1)
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 7)

@@ -240,7 +240,7 @@ def next_round(game_state: GameState, observe: bool = False) -> GameState:
     return gsm.get_game_state()
 
 
-def slient_fast_swap(game_state: GameState, pid: Pid, char_id: int) -> GameState:
+def silent_fast_swap(game_state: GameState, pid: Pid, char_id: int) -> GameState:
     return game_state.factory().f_player(
         pid,
         lambda p: p.factory().f_characters(

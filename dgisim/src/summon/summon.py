@@ -610,23 +610,65 @@ class SesshouSakura(_DestroyOnNumSummon):
 
 
 @dataclass(frozen=True, kw_only=True)
-class ShadowswordGallopingFrostSummon(_DmgPerRoundSummon):
+class _ShadowswordBaseSummon(_DmgPerRoundSummon):
     usages: int = 2
+    activated: bool = False
     MAX_USAGES: ClassVar[int] = 2
     DMG: ClassVar[int] = 1
-    ELEMENT: ClassVar[Element] = Element.CRYO
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+    ) + tuple(_DmgPerRoundSummon.REACTABLE_SIGNALS))
 
-    # TODO: trigger on burst
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if not (
+                    information.source.pid is status_source.pid
+                    and information.skill_type is CharacterSkill.ELEMENTAL_BURST
+                    and not self.activated
+            ):
+                return self
+            char = game_state.get_character_target(information.source)
+            from ..character.character import Maguukenki
+            if isinstance(char, Maguukenki):
+                return replace(self, activated=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], Optional[Self]]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+            return [
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=self.ELEMENT,
+                    damage=self.DMG,
+                    damage_type=DamageType(summon=True),
+                ),
+            ], replace(self, usages=0, activated=False)
+        return super()._react_to_signal(game_state, source, signal)
 
 
 @dataclass(frozen=True, kw_only=True)
-class ShadowswordLoneGaleSummon(_DmgPerRoundSummon):
-    usages: int = 2
-    MAX_USAGES: ClassVar[int] = 2
-    DMG: ClassVar[int] = 1
-    ELEMENT: ClassVar[Element] = Element.ANEMO
+class ShadowswordGallopingFrostSummon(_ShadowswordBaseSummon):
+    ELEMENT: ClassVar[Element] = Element.CRYO
 
-    # TODO: trigger on burst
+
+@dataclass(frozen=True, kw_only=True)
+class ShadowswordLoneGaleSummon(_ShadowswordBaseSummon):
+    ELEMENT: ClassVar[Element] = Element.ANEMO
 
 
 @dataclass(frozen=True, kw_only=True)

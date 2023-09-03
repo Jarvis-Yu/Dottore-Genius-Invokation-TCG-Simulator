@@ -148,6 +148,8 @@ __all__ = [
     "ExplosiveSparkStatus",
     "PoundingSurpriseStatus",
     "SparksnSplashStatus",
+    ## Maguukenki ##
+    "TranscendentAutomatonStatus",
     ## Mona ##
     "IllusoryBubbleStatus",
     "IllusoryTorrentStatus",
@@ -2506,10 +2508,17 @@ class SparksnSplashStatus(CombatStatus, _UsageStatus):
         return es, new_self
 
 
+#### Maguukenki ####
+
+@dataclass(frozen=True, kw_only=True)
+class TranscendentAutomatonStatus(TalentEquipmentStatus):
+    pass
+
+
 #### Mona ####
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class IllusoryBubbleStatus(CombatStatus):
     @override
     def _preprocess(
@@ -2529,7 +2538,7 @@ class IllusoryBubbleStatus(CombatStatus):
         return super()._preprocess(game_state, status_source, item, signal)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class IllusoryTorrentStatus(HiddenStatus):
     available: bool = True
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
@@ -2568,7 +2577,7 @@ class IllusoryTorrentStatus(HiddenStatus):
         return super().__str__() + f"({'*' if self.available else ''})"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ProphecyOfSubmersionStatus(TalentEquipmentStatus):
     DMG_BOOST: ClassVar[int] = 2
 
