@@ -6,11 +6,13 @@
 
 - New Characters:
   - Fatui Pyro Agent
+  - Jean
   - Sangonomiya Kokomi
   - Yoimiya
 - New Cards:
   - Equipment Card:
     - Talent Equipment Card:
+      - Lands of Dandelion
       - Naganohara Meteor Swarm
       - Paid in Full
       - Tamakushi Casket

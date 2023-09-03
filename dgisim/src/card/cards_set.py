@@ -14,6 +14,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     GrandExpectation,
     IGotYourBack,
     KeenSight,
+    LandsOfDandelion,
     MysticalAbandon,
     NaganoharaMeteorSwarm,
     PaidInFull,

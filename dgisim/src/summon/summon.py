@@ -41,6 +41,7 @@ __all__ = [
     "BurningFlameSummon",
     "ChainsOfWardingThunderSummon",
     "ClusterbloomArrowSummon",
+    "DandelionFieldSummon",
     "OceanicMimicFrogSummon",
     "OceanicMimicRaptorSummon",
     "OceanicMimicSquirrelSummon",
@@ -260,7 +261,7 @@ class AutumnWhirlwindSummon(_ConvertableAnemoSummon):
 
 
 @dataclass(frozen=True, kw_only=True)
-class BakeKurageSummon(_DestoryOnEndNumSummon, stt._UsageStatus):
+class BakeKurageSummon(_DestroyOnNumSummon):
     usages: int = 2
     activated: bool = False
     MAX_USAGES: ClassVar[int] = 2
@@ -295,12 +296,13 @@ class BakeKurageSummon(_DestoryOnEndNumSummon, stt._UsageStatus):
                 return replace(self, activated=True)
         return self
 
+    @override
     def _react_to_signal(
             self,
             game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
             return [], replace(self, usages=self.MAX_USAGES, activated=False)
         elif signal is TriggeringSignal.END_ROUND_CHECK_OUT:
@@ -366,7 +368,7 @@ class ChainsOfWardingThunderSummon(_DmgPerRoundSummon):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.SWAP:
             assert isinstance(item, ActionPEvent) and item.event_type is EventType.SWAP
             if item.source.pid is status_source.pid.other() \
@@ -402,6 +404,68 @@ class ClusterbloomArrowSummon(_DmgPerRoundSummon):
     MAX_USAGES: ClassVar[int] = 2
     DMG: ClassVar[int] = 1
     ELEMENT: ClassVar[Element] = Element.DENDRO
+
+
+@dataclass(frozen=True, kw_only=True)
+class DandelionFieldSummon(_DestroyOnNumSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DAMAGE_AMOUNT: ClassVar[int] = 2
+    DAMAGE_ELEM: ClassVar[Element] = Element.ANEMO
+    DAMAGE_BOOST: ClassVar[int] = 1
+    HEAL_AMOUNT: ClassVar[int] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            if not (
+                    dmg.source.pid is status_source.pid
+                    and dmg.element is Element.ANEMO
+                    and dmg.damage_type.directly_from_character()
+            ):
+                return item, self
+            self_chars = game_state.get_player(status_source.pid).get_characters()
+            from ..character.character import Jean
+            if any(
+                isinstance(char, Jean) and char.talent_equiped()
+                for char in self_chars
+            ):
+                return item.delta_damage(self.DAMAGE_BOOST), self
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            return [
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=self.DAMAGE_ELEM,
+                    damage=self.DAMAGE_AMOUNT,
+                    damage_type=DamageType(summon=True),
+                ),
+                eft.RecoverHPEffect(
+                    target=StaticTarget.from_player_active(game_state, source.pid),
+                    recovery=self.HEAL_AMOUNT,
+                ),
+            ], replace(self, usages=-1)
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -612,7 +676,7 @@ class TalismanSpiritSummon(_DmgPerRoundSummon):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg

@@ -127,6 +127,8 @@ __all__ = [
     "AbsorbingPrism",
     ## Fatui Pyro Agent ##
     "PaidInFull",
+    ## Jean ##
+    "LandsOfDandelion",
     ## Kaedehara Kazuha ##
     "PoeticsOfFuubutsu",
     ## Kaeya ##
@@ -1930,6 +1932,16 @@ class PaidInFull(_TalentEquipmentSkillCard):
     _CHARACTER = chr.FatuiPyroAgent
     _EQUIPMENT_STATUS = stt.PaidInFullStatus
     _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+
+
+#### Jean ####
+
+class LandsOfDandelion(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDices({Element.ANEMO: 4})
+    _CHARACTER = chr.Jean
+    _EQUIPMENT_STATUS = stt.LandsOfDandelionStatus
+    _SKILL = CharacterSkill.ELEMENTAL_BURST
+
 
 #### Kaedehara Kazuha ####
 
