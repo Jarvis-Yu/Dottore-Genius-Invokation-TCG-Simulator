@@ -8,6 +8,7 @@
   - Collei
   - Fatui Pyro Agent
   - Fischl
+  - Jadeplume Terrorshroom
   - Jean
   - Maguu Kenki
   - Sangonomiya Kokomi
@@ -19,6 +20,7 @@
       - Lands of Dandelion
       - Naganohara Meteor Swarm
       - Paid in Full
+      - Proliferating Spores
       - Stellar Predator
       - Tamakushi Casket
       - Transcendent Automaton

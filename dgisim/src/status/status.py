@@ -130,6 +130,10 @@ __all__ = [
     "StealthStatus",
     ## Fischl ##
     "StellarPredatorStatus",
+    ## Jadeplume Terrorshroom ##
+    "ProliferatingSporesStatus",
+    "RadicalVitalityHiddenStatus",
+    "RadicalVitalityStatus",
     ## Jean ##
     "LandsOfDandelionStatus",
     ## Kaedehara Kazuha ##
@@ -474,7 +478,10 @@ class PlayerHiddenStatus(Status):
 
 @dataclass(frozen=True)
 class PersonalStatus(Status):
-    pass
+    def talent_equiped(self, game_state: GameState, status_source: StaticTarget) -> int:
+        char = game_state.get_character_target(status_source)
+        assert char is not None
+        return char.talent_equiped()
 
 
 @dataclass(frozen=True)
@@ -509,7 +516,7 @@ class WeaponEquipmentStatus(EquipmentStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
@@ -577,8 +584,8 @@ class _UsageStatus(Status):
             item: PreprocessableEvent,
             signal: Preprocessables,
             new_item: PreprocessableEvent,
-            new_self: Optional[Self],
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+            new_self: None | Self,
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if new_self is not None:
             if self._auto_destroy() and new_self.usages <= 0:
                 new_self = None
@@ -587,7 +594,7 @@ class _UsageStatus(Status):
         return super()._post_preprocess(game_state, status_source, item, signal, new_item, new_self)
 
     @override
-    def _post_update(self, new_self: Optional[Self]) -> Optional[Self]:
+    def _post_update(self, new_self: None | Self) -> None | Self:
         """ remove the status if usages <= 0 """
         if new_self is not None:
             if self._auto_destroy() and new_self.usages <= 0:
@@ -597,7 +604,7 @@ class _UsageStatus(Status):
         return super()._post_update(new_self)
 
     @override
-    def _update(self, other: Self) -> Optional[Self]:
+    def _update(self, other: Self) -> None | Self:
         max_usages = max((self.usages, other.usages, self.MAX_USAGES))
         new_usages = min(self.usages + other.usages, max_usages)
         return replace(other, usages=new_usages)
@@ -2207,6 +2214,134 @@ class StealthStatus(CharacterStatus, FixedShieldStatus):
 @dataclass(frozen=True, kw_only=True)
 class StellarPredatorStatus(TalentEquipmentStatus):
     pass
+
+
+#### Jadeplume Terrorshroom ##
+
+@dataclass(frozen=True, kw_only=True)
+class ProliferatingSporesStatus(TalentEquipmentStatus):
+    pass
+
+
+@dataclass(frozen=True, kw_only=True)
+class RadicalVitalityHiddenStatus(HiddenStatus):
+    REACTABLE_SIGNALS = frozenset({
+        TriggeringSignal.GAME_START,
+    })
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.GAME_START:
+            return [
+                eft.AddCharacterStatusEffect(
+                    target=source,
+                    status=RadicalVitalityStatus,
+                )
+            ], None
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class RadicalVitalityStatus(CharacterStatus, _UsageStatus):
+    activated: bool = False
+    to_clear: bool = False
+    usages: int = 0
+    NOMINAL_MAX_USAGES: ClassVar[int] = 3
+    REACTABLE_SIGNALS = frozenset({
+        TriggeringSignal.POST_DMG,
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    })
+
+    @override
+    @staticmethod
+    def _auto_destroy() -> bool:
+        return False
+
+    def max_usages(self, game_state: GameState, source: StaticTarget) -> int:
+        return self.NOMINAL_MAX_USAGES + (
+            1
+            if self.talent_equiped(game_state, source)
+            else 0
+        )
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.DMG_DELT:
+            assert isinstance(information, DmgIEvent)
+            dmg = information.dmg
+            if (
+                not self.activated
+                and (
+                    (
+                    dmg.source == status_source
+                    and dmg.element.is_pure_element()
+                    and dmg.damage_type.directly_from_character()
+                    )
+                    or (
+                    dmg.target == status_source
+                    and dmg.element.is_pure_element()
+                    )
+                )
+                and self.usages < self.max_usages(game_state, status_source)
+            ):
+                return replace(self, activated=True)
+        return self
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            if (
+                dmg.source == status_source
+                and dmg.damage_type.direct_elemental_burst()
+            ):
+                return item.delta_damage(self.usages), replace(self, to_clear=True)
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.POST_DMG:
+            d_usages = 0
+            if self.activated:
+                d_usages = 1
+            if self.to_clear:
+                d_usages = -self.usages
+            if d_usages == 0:
+                return [], self
+            assert self.usages + d_usages <= self.max_usages(game_state, source)
+            return [], replace(self, usages=d_usages, activated=False, to_clear=False)
+        elif signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            if self.usages >= self.max_usages(game_state, source):
+                char = game_state.get_character_target(source)
+                assert char is not None
+                return [
+                    eft.EnergyDrainEffect(
+                        target=source,
+                        drain=char.get_max_energy(),
+                    ),
+                ], replace(self, usages=-self.usages)
+        return [], self
+
+    def __str__(self) -> str:
+        return super().__str__() + \
+            f"({'*' if self.activated else '' }|{'*' if self.to_clear else ''})"
 
 
 #### Jean ####

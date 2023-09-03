@@ -20,6 +20,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     PaidInFull,
     PoeticsOfFuubutsu,
     PoundingSurprise,
+    ProliferatingSpores,
     ProphecyOfSubmersion,
     StellarPredator,
     StreamingSurge,

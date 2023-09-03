@@ -131,6 +131,8 @@ __all__ = [
     "PaidInFull",
     ## Fischl ##
     "StellarPredator",
+    ## Jadeplume Terrorshroom ##
+    "ProliferatingSpores",
     ## Jean ##
     "LandsOfDandelion",
     ## Kaedehara Kazuha ##
@@ -1953,6 +1955,15 @@ class StellarPredator(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.ELECTRO: 3})
     _CHARACTER = chr.Fischl
     _EQUIPMENT_STATUS = stt.StellarPredatorStatus
+    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+
+
+#### Jadeplume Terrorshroom ####
+
+class ProliferatingSpores(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDices({Element.DENDRO: 3})
+    _CHARACTER = chr.JadeplumeTerrorshroom
+    _EQUIPMENT_STATUS = stt.ProliferatingSporesStatus
     _SKILL = CharacterSkill.ELEMENTAL_SKILL1
 
 

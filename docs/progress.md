@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (23/54 implemented)](#character-2354-implemented)
-  - [Card (66/200 implemented)](#card-66200-implemented)
+  - [Character (24/54 implemented)](#character-2454-implemented)
+  - [Card (67/200 implemented)](#card-67200-implemented)
 
-## Character (23/54 implemented)
+## Character (24/54 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -31,7 +31,7 @@ all I need now is to implement each card and character.
   - [x] Yae Miko
 - [ ] Dendro:
   - [x] Collei
-  - [ ] Jadeplume Terrorshroom _<-- WIP_
+  - [x] Jadeplume Terrorshroom
   - [x] Nahida
   - [x] Tighnari
 - [ ] Cryo:
@@ -45,9 +45,9 @@ all I need now is to implement each card and character.
   - [ ] Ningguang _<-- WIP_
   - [x] Noelle
 
-## Card (66/200 implemented)
+## Card (67/200 implemented)
 
-- [ ] Equipment Card (32/107):
+- [ ] Equipment Card (33/107):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] Cold-Blooded Strike
@@ -62,6 +62,7 @@ all I need now is to implement each card and character.
     - [x] Paid in Full
     - [x] Poetics of Fuubutsu
     - [x] Pounding Surprise
+    - [x] Proliferating Spores
     - [x] Prophecy of Submersion
     - [x] Stellar Predator
     - [x] Streaming Surge

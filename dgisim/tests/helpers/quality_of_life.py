@@ -369,8 +369,37 @@ def skip_action_round(game_state: GameState, pid: Pid) -> GameState:
     assert pid is game_state.waiting_for()
     return auto_step(TurnEndEffect().execute(game_state))
 
+
 def skip_action_round_until(game_state: GameState, pid: Pid) -> GameState:
     """ pid is the player that is skipped """
     while pid is not game_state.waiting_for():
         game_state = skip_action_round(game_state, just(game_state.waiting_for()))
+    return game_state
+
+
+@dataclass(frozen=True, kw_only=True)
+class TempTestThickShield(CharacterStatus, StackedShieldStatus):
+    usages: int = BIG_INT
+    MAX_USAGES: ClassVar[int] = BIG_INT
+    SHIELD_AMOUNT: ClassVar[int] = BIG_INT
+
+
+def grant_all_thick_shield(game_state: GameState) -> GameState:
+    for pid in (Pid.P1, Pid.P2):
+        alive_chars = game_state.get_player(pid).get_characters().get_alive_characters()
+        for char in alive_chars:
+            game_state = AddCharacterStatusEffect(
+                target=StaticTarget.from_char_id(pid, char.get_id()),
+                status=TempTestThickShield,
+            ).execute(game_state)
+    return game_state
+
+def remove_all_thick_shield(game_state: GameState) -> GameState:
+    for pid in (Pid.P1, Pid.P2):
+        alive_chars = game_state.get_player(pid).get_characters().get_alive_characters()
+        for char in alive_chars:
+            game_state = RemoveCharacterStatusEffect(
+                target=StaticTarget.from_char_id(pid, char.get_id()),
+                status=TempTestThickShield,
+            ).execute(game_state)
     return game_state

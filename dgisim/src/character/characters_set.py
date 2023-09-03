@@ -13,6 +13,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     ElectroHypostasis,
     FatuiPyroAgent,
     Fischl,
+    JadeplumeTerrorshroom,
     Jean,
     KaedeharaKazuha,
     Keqing,

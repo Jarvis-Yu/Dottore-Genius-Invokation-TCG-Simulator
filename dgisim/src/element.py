@@ -34,6 +34,20 @@ class Element(Enum):
     def __repr__(self) -> str:
         return self.name
 
+    def is_pure_element(self) -> bool:
+        return self in PURE_ELEMENTS
+
+
+PURE_ELEMENTS: set[Element] = {
+    Element.PYRO,
+    Element.HYDRO,
+    Element.ANEMO,
+    Element.ELECTRO,
+    Element.DENDRO,
+    Element.CRYO,
+    Element.GEO,
+}
+
 
 AURA_ELEMENTS_ORDERED: tuple[Element, ...] = (
     Element.PYRO,

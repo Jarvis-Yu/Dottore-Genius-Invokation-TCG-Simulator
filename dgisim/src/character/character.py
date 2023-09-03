@@ -37,6 +37,7 @@ __all__ = [
     "ElectroHypostasis",
     "Fischl",
     "FatuiPyroAgent",
+    "JadeplumeTerrorshroom",
     "Jean",
     "KaedeharaKazuha",
     "Kaeya",
@@ -975,6 +976,76 @@ class Fischl(Character):
             statuses=stts.Statuses(()),
             hiddens=stts.Statuses(()),
             equipments=stts.EquipmentStatuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
+class JadeplumeTerrorshroom(Character):
+    _ELEMENT = Element.DENDRO
+    _WEAPON_TYPE = WeaponType.NONE
+    _TALENT_STATUS = stt.ProliferatingSporesStatus
+    _FACTIONS = frozenset((Faction.MONSTER,))
+
+    _NORMAL_ATTACK_COST = AbstractDices({
+        Element.DENDRO: 1,
+        Element.ANY: 2,
+    })
+    _ELEMENTAL_SKILL1_COST = AbstractDices({
+        Element.DENDRO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDices({
+        Element.DENDRO: 3,
+    })
+
+    @override
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        )
+
+    @override
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.DENDRO,
+                damage=3,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+        )
+
+    @override
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.get_max_energy(),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.DENDRO,
+                damage=4,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=2,
+            hiddens=stts.Statuses((stt.RadicalVitalityHiddenStatus(),)),
+            equipments=stts.EquipmentStatuses(()),
+            statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
 
