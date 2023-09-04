@@ -36,7 +36,7 @@ class TestTeyvatFriedEgg(unittest.TestCase):
         # check player 1's character 1 is alive again
         p1c1 = game_state.get_player1().get_characters().just_get_character(1)
         self.assertTrue(p1c1.alive())
-        self.assertEqual(p1c1.get_hp(), 3)
+        self.assertEqual(p1c1.get_hp(), 1)
         self.assertIn(ReviveOnCooldownStatus, game_state.get_player1().get_combat_statuses())
 
         # check cannot use twice per round
@@ -65,7 +65,7 @@ class TestTeyvatFriedEgg(unittest.TestCase):
         # check player 1's character 1 is alive again the next round
         p1c1 = game_state.get_player1().get_characters().just_get_character(1)
         self.assertTrue(p1c1.alive())
-        self.assertEqual(p1c1.get_hp(), 3)
+        self.assertEqual(p1c1.get_hp(), 1)
         self.assertIn(ReviveOnCooldownStatus, game_state.get_player1().get_combat_statuses())
 
     def test_revival_resets_character_statuses(self):
@@ -98,5 +98,5 @@ class TestTeyvatFriedEgg(unittest.TestCase):
         # check player 1's character 1 is alive again
         p1c1 = game_state.get_player1().get_characters().just_get_character(1)
         self.assertTrue(p1c1.alive())
-        self.assertEqual(p1c1.get_hp(), 3)
+        self.assertEqual(p1c1.get_hp(), 1)
         self.assertTrue(p1c1.get_hidden_statuses().just_find(IllusoryTorrentStatus).available)

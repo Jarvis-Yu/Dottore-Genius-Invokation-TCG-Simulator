@@ -285,7 +285,7 @@ def replace_character_make_active_add_card(
                 char_id
             ).build()
         ).f_hand_cards(
-            lambda hcs: hcs.add(card)
+            lambda hcs: hcs.add(card).add(card)
         ).build()
     ).build()
 

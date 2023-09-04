@@ -12,6 +12,7 @@
   - Jadeplume Terrorshroom
   - Jean
   - Maguu Kenki
+  - Qiqi
   - Sangonomiya Kokomi
   - Yoimiya
 - New Cards:
@@ -22,6 +23,7 @@
       - Naganohara Meteor Swarm
       - Paid in Full
       - Proliferating Spores
+      - Rite of Resurrection
       - Stellar Predator
       - Tamakushi Casket
       - Transcendent Automaton

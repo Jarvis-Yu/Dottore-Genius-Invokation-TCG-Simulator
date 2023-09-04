@@ -30,7 +30,7 @@ class TestSangonomiyaKokomi(unittest.TestCase):
             self.BASE_GAME,
             Pid.P1,
             CharacterSkill.ELEMENTAL_SKILL1,
-            dices=ActualDices({Element.HYDRO: 1}),
+            dices=ActualDices({Element.HYDRO: 3}),
         )
         p1 = game_state.get_player1()
         p1ac = p1.just_get_active_character()

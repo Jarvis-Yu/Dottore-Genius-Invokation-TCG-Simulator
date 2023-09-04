@@ -176,6 +176,10 @@ __all__ = [
     "FullPlateStatus",
     "IGotYourBackStatus",
     "SweepingTimeStatus",
+    ## Qiqi ##
+    "FortunePreservingTalismanStatus",
+    "QiqiTalentStatus",
+    "RiteOfResurrectionStatus",
     ## Rhodeia of Loch ##
     "StreamingSurgeStatus",
     ## Sangonomiya Kokomi ##
@@ -3163,6 +3167,81 @@ class SweepingTimeStatus(CharacterStatus, _InfusionStatus):
 
     def __str__(self) -> str:
         return super().__str__() + f"({self.dice_reduction_usages})"
+
+
+#### Qiqi ####
+
+@dataclass(frozen=True, kw_only=True)
+class FortunePreservingTalismanStatus(CombatStatus, _UsageStatus):
+    """
+    Tested, Qiqi's burst doesn't trigger this status
+    """
+    usages: int = 3
+    activated: bool = False
+    MAX_USAGES: ClassVar[int] = 3
+    HEAL_AMOUNT: ClassVar[int] = 2
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+    ))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            from ..character.character import Qiqi
+            if (
+                    not self.activated
+                    and information.is_skill_from_character(game_state, status_source.pid)
+                    and not information.is_skill_from_character(
+                        game_state,
+                        status_source.pid,
+                        CharacterSkill.ELEMENTAL_BURST,
+                        Qiqi,
+                    )
+            ):
+                return replace(self, activated=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+            active_char = game_state.get_player(source.pid).just_get_active_character()
+            if active_char.hp_lost() == 0:
+                return [], replace(self, usages=0, activated=False)
+            return [
+                eft.RecoverHPEffect(
+                    target=StaticTarget.from_char_id(source.pid, active_char.get_id()),
+                    recovery=self.HEAL_AMOUNT,
+                )
+            ], replace(self, usages=-1, activated=False)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class QiqiTalentStatus(HiddenStatus):
+    revival_count: int = 0
+    MAX_COUNT: ClassVar[int] = 2
+
+    def revivable(self) -> bool:
+        return self.revival_count < self.MAX_COUNT
+
+    def __str__(self) -> str:
+        return super().__str__() + f"({self.revival_count})"
+
+
+@dataclass(frozen=True, kw_only=True)
+class RiteOfResurrectionStatus(TalentEquipmentStatus):
+    pass
+
 
 #### Rhodeia of Loch ####
 

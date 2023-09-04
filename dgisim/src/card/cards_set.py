@@ -22,6 +22,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     PoundingSurprise,
     ProliferatingSpores,
     ProphecyOfSubmersion,
+    RiteOfResurrection,
     StellarPredator,
     StreamingSurge,
     TamakushiCasket,

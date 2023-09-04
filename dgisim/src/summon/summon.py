@@ -43,6 +43,7 @@ __all__ = [
     "ClusterbloomArrowSummon",
     "CuileinAnbarSummon",
     "DandelionFieldSummon",
+    "HeraldOfFrostSummon",
     "OceanicMimicFrogSummon",
     "OceanicMimicRaptorSummon",
     "OceanicMimicSquirrelSummon",
@@ -503,6 +504,67 @@ class DandelionFieldSummon(_DestroyOnNumSummon):
                 ),
             ], replace(self, usages=-1)
         return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class HeraldOfFrostSummon(_DmgPerRoundSummon):
+    usages: int = 3
+    activated: bool = False
+    MAX_USAGES: ClassVar[int] = 3
+    DMG: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.CRYO
+    HEAL_AMOUNT: ClassVar[int] = 1
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+    ) + tuple(_DmgPerRoundSummon.REACTABLE_SIGNALS))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            from ..character.character import Qiqi
+            if not self.activated and information.is_skill_from_character(
+                    game_state,
+                    status_source.pid,
+                    CharacterSkill.NORMAL_ATTACK,
+                    Qiqi,
+            ):
+                return replace(self, activated=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+            self_alive_chars = game_state.get_player(
+                source.pid
+            ).get_characters().get_alive_character_in_activity_order()
+            most_damage = max(char.hp_lost() for char in self_alive_chars)
+            if most_damage == 0:
+                return [], replace(self, usages=0, activated=False)
+            char_to_heal = next(
+                char
+                for char in self_alive_chars
+                if char.hp_lost() == most_damage
+            )
+            return [
+                eft.RecoverHPEffect(
+                    target=StaticTarget.from_char_id(source.pid, char_to_heal.get_id()),
+                    recovery=self.HEAL_AMOUNT,
+                )
+            ], replace(self, usages=0, activated=False)
+        return super()._react_to_signal(game_state, source, signal)
 
 
 @dataclass(frozen=True, kw_only=True)

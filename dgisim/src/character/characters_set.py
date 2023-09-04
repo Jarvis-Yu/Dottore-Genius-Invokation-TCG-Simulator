@@ -24,6 +24,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     Mona,
     Nahida,
     Noelle,
+    Qiqi,
     RhodeiaOfLoch,
     SangonomiyaKokomi,
     Shenhe,

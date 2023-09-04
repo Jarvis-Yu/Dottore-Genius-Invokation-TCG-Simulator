@@ -154,6 +154,8 @@ __all__ = [
     "TheSeedOfStoredKnowledge",
     ## Noelle ##
     "IGotYourBack",
+    ## Qiqi ##
+    "RiteOfResurrection",
     ## Rhodeia of Loch ##
     "StreamingSurge",
     ## Sangonomiya Kokomi ##
@@ -1302,7 +1304,7 @@ class TeyvatFriedEgg(FoodCard, _CharTargetChoiceProvider):
         return (
             eft.ReviveRecoverHPEffect(
                 target=instruction.target,
-                recovery=3,
+                recovery=1,
             ),
         )
 
@@ -2120,6 +2122,19 @@ class IGotYourBack(_TalentEquipmentSkillCard):
     _CHARACTER = chr.Noelle
     _EQUIPMENT_STATUS = stt.IGotYourBackStatus
     _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+
+
+#### Qiqi ####
+
+class RiteOfResurrection(_TalentEquipmentSkillCard):
+    """
+    - Tested, second equipment doesn't refresh rivial limit per game.
+    - Tested, revival of Qiqi resets revival chances per game.
+    """
+    _DICE_COST = AbstractDices({Element.CRYO: 5})
+    _CHARACTER = chr.Qiqi
+    _EQUIPMENT_STATUS = stt.RiteOfResurrectionStatus
+    _SKILL = CharacterSkill.ELEMENTAL_BURST
 
 
 #### Rhodeia of Loch ####

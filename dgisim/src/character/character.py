@@ -48,6 +48,7 @@ __all__ = [
     "Mona",
     "Nahida",
     "Noelle",
+    "Qiqi",
     "RhodeiaOfLoch",
     "SangonomiyaKokomi",
     "Shenhe",
@@ -136,6 +137,9 @@ class Character:
 
     def factory(self) -> CharacterFactory:
         return CharacterFactory(self, type(self))
+
+    def hp_lost(self) -> int:
+        return self._max_hp - self._hp
 
     @classmethod
     def FACTIONS(cls) -> frozenset[Faction]:
@@ -2081,6 +2085,105 @@ class Noelle(Character):
         )
 
 
+class Qiqi(Character):
+    _ELEMENT = Element.CRYO
+    _WEAPON_TYPE = WeaponType.SWORD
+    _TALENT_STATUS = stt.RiteOfResurrectionStatus
+    _FACTIONS = frozenset((Faction.LIYUE,))
+
+    _NORMAL_ATTACK_COST = AbstractDices({
+        Element.CRYO: 1,
+        Element.ANY: 2,
+    })
+    _ELEMENTAL_SKILL1_COST = AbstractDices({
+        Element.CRYO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDices({
+        Element.CRYO: 3,
+    })
+
+    @override
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        )
+
+    @override
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=sm.HeraldOfFrostSummon,
+            ),
+        )
+
+    @override
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        effects: tuple[eft.Effect, ...] = ()
+        if self.talent_equiped():
+            hidden_status = self.get_hidden_statuses().just_find(stt.QiqiTalentStatus)
+            if hidden_status.revivable():
+                self_chars = game_state.get_player(
+                    source.pid
+                ).get_characters().get_character_in_activity_order()
+                defeated_chars = [
+                    char
+                    for char in self_chars
+                    if char.defeated()
+                ]
+                if defeated_chars:
+                    effects = (
+                        eft.UpdateCharacterStatusEffect(
+                            target=source,
+                            status=replace(
+                                hidden_status,
+                                revival_count=hidden_status.revival_count + 1
+                            )
+                        ),
+                    ) + tuple(
+                        eft.ReviveRecoverHPEffect(
+                            target=StaticTarget.from_char_id(source.pid, char.get_id()),
+                            recovery=2,
+                        )
+                        for char in defeated_chars
+                    )
+        return effects + (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.get_max_energy(),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.CRYO,
+                damage=3,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            eft.AddCombatStatusEffect(
+                target_pid=source.pid,
+                status=stt.FortunePreservingTalismanStatus,
+            ),
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=3,
+            hiddens=stts.Statuses((stt.QiqiTalentStatus(),)),
+            equipments=stts.EquipmentStatuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
 class RhodeiaOfLoch(Character):
     # basic info
     _ELEMENT = Element.HYDRO
@@ -2233,7 +2336,7 @@ class SangonomiyaKokomi(Character):
         Element.ANY: 2,
     })
     _ELEMENTAL_SKILL1_COST = AbstractDices({
-        Element.HYDRO: 1,
+        Element.HYDRO: 3,
     })
     _ELEMENTAL_BURST_COST = AbstractDices({
         Element.HYDRO: 3,
