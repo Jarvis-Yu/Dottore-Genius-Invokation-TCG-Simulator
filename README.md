@@ -1,6 +1,7 @@
 # Dottore Genius Invokation TCG Simulator
 
 [![PyPI Version](https://img.shields.io/pypi/v/dgisim.svg)](https://pypi.org/project/dgisim/)
+[![Documentation Status](https://readthedocs.org/projects/dottore-genius-invokation-tcg-simulator/badge/?version=latest)](https://dottore-genius-invokation-tcg-simulator.readthedocs.io/en/latest/?badge=latest)
 ![Python 3.10](https://img.shields.io/badge/python->=3.10-blue.svg)
 [![Coverage Status](https://coveralls.io/repos/github/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/badge.svg?branch=master)](https://coveralls.io/github/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator?branch=master)
 [![license](https://img.shields.io/github/license/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator)](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/LICENSE)
