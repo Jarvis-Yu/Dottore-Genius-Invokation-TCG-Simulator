@@ -7,7 +7,7 @@
 
 A Genshin Impact Genius Invokation TCG simulator intended to be used for AI training.
 
-- [**Documentation**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/wiki/v0.2.dev3-Documentation)
+- [**Documentation**](https://dottore-genius-invokation-tcg-simulator.readthedocs.io/en/latest/)
 - [**Source code**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator)
 - [**Contributing**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/dev_docs/dev_readme.md)
 - [**Game design**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/dev_docs/state_machine_design.md)
