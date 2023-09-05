@@ -13,6 +13,10 @@ Check out :ref:`installation` to install the package.
 
    This project is under active development.
 
+.. note::
+
+   Documentation is incomplete, but under active updates.
+
 Contents
 --------
 
