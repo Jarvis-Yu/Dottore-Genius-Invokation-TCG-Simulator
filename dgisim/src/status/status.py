@@ -106,6 +106,8 @@ __all__ = [
     "SatiatedStatus",
 
     # character specific status
+    ## Albedo ##
+    "DescentOfDivinityStatus",
     ## Arataki Itto ##
     "AratakiIchibanStatus",
     "RagingOniKingStatus",
@@ -473,6 +475,19 @@ class Status:
             target: StaticTarget,
     ):
         return status_source == target
+
+    def _some_char_equiped_talent(
+            self,
+            game_state: GameState,
+            pid: Pid,
+            char_type: type[Character],
+    ) -> bool:
+        alive_chars = game_state.get_player(pid).get_characters().get_alive_characters()
+        return any(
+            char.talent_equiped()
+            for char in alive_chars
+            if isinstance(char, char_type)
+        )
 
     def __str__(self) -> str:
         return self.__class__.__name__.removesuffix("Status")  # pragma: no cover
@@ -1667,6 +1682,14 @@ class SatiatedStatus(CharacterStatus):
 """
 Group statues by characters, characters ordered alphabetically
 """
+
+#### Albedo ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class DescentOfDivinityStatus(TalentEquipmentStatus):
+    pass
+
 
 #### Arataki Itto ####
 

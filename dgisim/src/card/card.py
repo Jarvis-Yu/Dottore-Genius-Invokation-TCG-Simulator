@@ -119,6 +119,8 @@ __all__ = [
     "Vanarana",
 
     # Character Specific
+    ## Albedo ##
+    "DescentOfDivinity",
     ## Arataki Itto ##
     "AratakiIchiban",
     ## Bennett ##
@@ -1881,6 +1883,16 @@ class Vanarana(LocationCard):
 # >>>>>>>>>>>>>>>>>>>> Support Cards / Location Cards >>>>>>>>>>>>>>>>>>>>
 
 # >>>>>>>>>>>>>>>>>>>> Support Cards >>>>>>>>>>>>>>>>>>>>
+
+#### Albedo ####
+
+
+class DescentOfDivinity(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDices({Element.GEO: 3})
+    _CHARACTER = chr.Albedo
+    _EQUIPMENT_STATUS = stt.DescentOfDivinityStatus
+    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+
 
 #### Arataki Itto ####
 

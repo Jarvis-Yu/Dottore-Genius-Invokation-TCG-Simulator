@@ -401,6 +401,22 @@ class AbstractDices(Dices):
         Element.ANY,
     })
 
+    def can_cost_less_any(self) -> bool:
+        return self[Element.ANY] > 0
+
+    def cost_less_any(self, num: int) -> Self:
+        return (self - {Element.ANY: 1}).validify()
+
+    def can_cost_less_elem(self, elem: Element) -> bool:
+        return self[elem] > 0 or self[Element.ANY] > 0
+
+    def cost_less_elem(self, num: int, elem: Element) -> Self:
+        elem_less_amount = min(self[elem], num)
+        any_less_amount = max(0, num - elem_less_amount)
+        ret_val = self - {elem: elem_less_amount, Element.ANY: any_less_amount}
+        assert ret_val.is_legal()
+        return ret_val
+
     @classmethod
     def from_dices(cls, dices: Dices) -> Optional[AbstractDices]:
         new_dices = AbstractDices(dices._dices)

@@ -53,6 +53,7 @@ __all__ = [
     "SesshouSakuraSummon",
     "ShadowswordGallopingFrostSummon",
     "ShadowswordLoneGaleSummon",
+    "SolarIsotomaSummon",
     "StormEyeSummon",
     "TalismanSpiritSummon",
     "UshiSummon",
@@ -831,6 +832,72 @@ class ShadowswordLoneGaleSummon(_ShadowswordBaseSummon):
 
 
 @dataclass(frozen=True, kw_only=True)
+class SolarIsotomaSummon(_DmgPerRoundSummon):
+    # Tested behaviour: recreation refreshes cost reduction usages
+    usages: int = 3
+    MAX_USAGES: ClassVar[int] = 3
+    DMG: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.GEO
+    passive_usages: int = 1
+    DEFAULT_PASSIVE_USAGES: ClassVar[int] = 1
+    COST_DEDUCTION: ClassVar[int] = 1
+    DMG_BOOST: ClassVar[int] = 1
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ) + tuple(_DmgPerRoundSummon.REACTABLE_SIGNALS))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.SKILL and self.passive_usages > 0:
+            assert isinstance(item, ActionPEvent)
+            if not (
+                    item.source.pid is status_source.pid
+                    and item.event_type is EventType.NORMAL_ATTACK
+                    and item.dices_cost.can_cost_less_any()
+            ):
+                return item, self
+            plunge_status = game_state.get_player(
+                status_source.pid
+            ).get_hidden_statuses().just_find(stt.PlungeAttackStatus)
+            if plunge_status.can_plunge:
+                new_item = replace(
+                    item,
+                    dices_cost=item.dices_cost.cost_less_any(self.COST_DEDUCTION),
+                )
+                return new_item, replace(self, passive_usages=self.passive_usages - 1)
+        elif signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            from ..character.character import Albedo
+            dmg = item.dmg
+            if (
+                    dmg.source.pid is status_source.pid
+                    and dmg.damage_type.direct_plunge_attack()
+                    and self._some_char_equiped_talent(game_state, status_source.pid, Albedo)
+            ):
+                return item.delta_damage(self.DMG_BOOST), self
+
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END and self.passive_usages < self.DEFAULT_PASSIVE_USAGES:
+            return [], replace(self, usages=0, passive_usages=self.DEFAULT_PASSIVE_USAGES)
+        return super()._react_to_signal(game_state, source, signal)
+
+
+@dataclass(frozen=True, kw_only=True)
 class StormEyeSummon(_ConvertableAnemoSummon):
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2
@@ -948,7 +1015,7 @@ class UshiSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
             game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             return [
                 eft.ReferredDamageEffect(

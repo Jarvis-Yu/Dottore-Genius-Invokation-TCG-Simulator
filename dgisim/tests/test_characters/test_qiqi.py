@@ -25,7 +25,7 @@ class TestQiqi(unittest.TestCase):
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
 
     def test_elemental_skill1(self):
-        # test elemental skill generate summon and applies hydro aura
+        # test elemental skill generate summon
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,

@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (26/54 implemented)](#character-2654-implemented)
-  - [Card (69/200 implemented)](#card-69200-implemented)
+  - [Character (27/54 implemented)](#character-2754-implemented)
+  - [Card (70/200 implemented)](#card-70200-implemented)
 
-## Character (26/54 implemented)
+## Character (27/54 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -40,17 +40,18 @@ all I need now is to implement each card and character.
   - [x] Qiqi
   - [x] Shenhe
 - [ ] Geo:
-  - [ ] Albedo _<-- WIP_
+  - [x] Albedo
   - [x] Arataki Itto
   - [ ] Ningguang _<-- WIP_
   - [x] Noelle
 
-## Card (69/200 implemented)
+## Card (70/200 implemented)
 
-- [ ] Equipment Card (35/107):
+- [ ] Equipment Card (36/107):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] Cold-Blooded Strike
+    - [x] Descent of Divinity
     - [x] Embrace of Winds
     - [x] Floral Sidewinder
     - [x] Grand Expectation

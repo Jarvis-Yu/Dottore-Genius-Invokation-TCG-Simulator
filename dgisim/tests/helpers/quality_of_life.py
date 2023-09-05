@@ -192,10 +192,20 @@ def set_active_player_id(game_state: GameState, pid: Pid, character_id: int) -> 
 
 
 def fill_dices_with_omni(game_state: GameState) -> GameState:
+    dices = {
+        Element.OMNI: BIG_INT,
+        Element.PYRO: BIG_INT,
+        Element.HYDRO: BIG_INT,
+        Element.ANEMO: BIG_INT,
+        Element.ELECTRO: BIG_INT,
+        Element.DENDRO: BIG_INT,
+        Element.CRYO: BIG_INT,
+        Element.GEO: BIG_INT,
+    }
     return game_state.factory().f_player1(
-        lambda p: p.factory().dices(ActualDices({Element.OMNI: BIG_INT})).build()
+        lambda p: p.factory().dices(ActualDices(dices)).build()
     ).f_player2(
-        lambda p: p.factory().dices(ActualDices({Element.OMNI: BIG_INT})).build()
+        lambda p: p.factory().dices(ActualDices(dices)).build()
     ).build()
 
 
@@ -242,6 +252,12 @@ def next_round(game_state: GameState, observe: bool = False) -> GameState:
     gsm.step_until_phase(game_state.get_mode().action_phase, observe=observe)
     gsm.auto_step(observe=observe)
     return gsm.get_game_state()
+
+
+def next_round_with_great_omni(game_state: GameState, observe: bool = False) -> GameState:
+    """ skips to next round and fill players with even number of dices """
+    game_state = next_round(game_state, observe)
+    return fill_dices_with_omni(game_state)
 
 
 def silent_fast_swap(game_state: GameState, pid: Pid, char_id: int) -> GameState:
@@ -387,7 +403,7 @@ def skip_action_round_until(game_state: GameState, pid: Pid) -> GameState:
 
 
 @dataclass(frozen=True, kw_only=True)
-class TempTestThickShield(CharacterStatus, StackedShieldStatus):
+class TempTestThickShieldStatus(CharacterStatus, StackedShieldStatus):
     """
     can take BIG_INT to BIG_INT^2 non-PIERCING damage
     """
@@ -407,7 +423,7 @@ def grant_all_thick_shield(game_state: GameState) -> GameState:
         for char in alive_chars:
             game_state = AddCharacterStatusEffect(
                 target=StaticTarget.from_char_id(pid, char.get_id()),
-                status=TempTestThickShield,
+                status=TempTestThickShieldStatus,
             ).execute(game_state)
     return game_state
 
@@ -421,7 +437,7 @@ def remove_all_thick_shield(game_state: GameState) -> GameState:
         for char in alive_chars:
             game_state = RemoveCharacterStatusEffect(
                 target=StaticTarget.from_char_id(pid, char.get_id()),
-                status=TempTestThickShield,
+                status=TempTestThickShieldStatus,
             ).execute(game_state)
     return game_state
 
@@ -439,7 +455,8 @@ class TempTestDmgListenerStatus(PlayerHiddenStatus):
     ) -> Self:
         if info_type is Informables.DMG_DELT:
             assert isinstance(information, DmgIEvent)
-            return replace(self, dmgs=self.dmgs + (information.dmg,))
+            if information.dmg.source.pid is status_source.pid:
+                return replace(self, dmgs=self.dmgs + (information.dmg,))
         return self
 
 
@@ -462,3 +479,58 @@ def remove_dmg_listener(game_state: GameState, pid: Pid) -> GameState:
         pid,
         status=TempTestDmgListenerStatus,
     ).execute(game_state)
+
+
+@dataclass(frozen=True, kw_only=True)
+class TempTestInfiniteRevivalStatus(HiddenStatus, RevivalStatus):
+    REACTABLE_SIGNALS = frozenset({
+        TriggeringSignal.TRIGGER_REVIVAL,
+    })
+
+    def revivable(self, game_state: GameState, char: StaticTarget) -> bool:
+        return True
+
+    def _post_update_react_to_signal(
+            self,
+            game_state: GameState,
+            effects: list[Effect],
+            source: StaticTarget,
+            signal: TriggeringSignal,
+    ) -> list[Effect]:
+        if signal is TriggeringSignal.TRIGGER_REVIVAL:
+            effects.append(
+                ReviveRecoverHPEffect(
+                    target=source,
+                    recovery=BIG_INT,
+                )
+            )
+        return effects
+
+
+def grant_all_infinite_revival(game_state: GameState) -> GameState:
+    """
+    Gives all alive characters a hidden character revival status,
+    that can revive the attached character infinite times.
+    """
+    for pid in (Pid.P1, Pid.P2):
+        alive_chars = game_state.get_player(pid).get_characters().get_alive_characters()
+        for char in alive_chars:
+            game_state = AddCharacterStatusEffect(
+                target=StaticTarget.from_char_id(pid, char.get_id()),
+                status=TempTestInfiniteRevivalStatus,
+            ).execute(game_state)
+    return game_state
+
+
+def remove_all_infinite_revival(game_state: GameState) -> GameState:
+    """
+    Removes the infinite revival statuses granted.
+    """
+    for pid in (Pid.P1, Pid.P2):
+        alive_chars = game_state.get_player(pid).get_characters().get_alive_characters()
+        for char in alive_chars:
+            game_state = RemoveCharacterStatusEffect(
+                target=StaticTarget.from_char_id(pid, char.get_id()),
+                status=TempTestInfiniteRevivalStatus,
+            ).execute(game_state)
+    return game_state

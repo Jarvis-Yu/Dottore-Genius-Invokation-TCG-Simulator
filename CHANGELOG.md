@@ -5,6 +5,7 @@
 ### Added
 
 - New Characters:
+  - Albedo
   - Collei
   - Fatui Pyro Agent
   - Fischl
@@ -18,6 +19,7 @@
 - New Cards:
   - Equipment Card:
     - Talent Equipment Card:
+      - Descent of Divinity
       - Floral Sidewinder
       - Lands of Dandelion
       - Naganohara Meteor Swarm
