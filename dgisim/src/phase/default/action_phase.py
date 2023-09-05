@@ -221,13 +221,16 @@ class ActionPhase(ph.Phase):
         active_character = player.get_characters().get_active_character()
         assert active_character is not None
         assert active_character.can_cast_skill()
-        # note: it's important to cast skill before new_dices are putted into the game_state
-        #       so that normal_attacks can correctly be marked as charged attack
-        new_effects += active_character.skill(
-            game_state,
-            StaticTarget(pid, Zone.CHARACTERS, active_character.get_id()),
-            action.skill
-        )
+        if dices.is_even():
+            from ...status.status import ChargedAttackStatus
+            new_effects.append(UpdateHiddenStatusEffect(
+                target_pid=pid,
+                status=ChargedAttackStatus(can_charge=True),
+            ))
+        new_effects.append(CastSkillEffect(
+            target=StaticTarget.from_char_id(pid, active_character.get_id()),
+            skill=action.skill,
+        ))
         new_effects.append(AllStatusTriggererEffect(
             pid,
             TriggeringSignal.COMBAT_ACTION,
@@ -304,6 +307,12 @@ class ActionPhase(ph.Phase):
 
         # Card
         new_effects.append(PublicRemoveCardEffect(pid, card))
+        if card.is_combat_action() and dices.is_even():
+            from ...status.status import ChargedAttackStatus
+            new_effects.append(UpdateHiddenStatusEffect(
+                target_pid=pid,
+                status=ChargedAttackStatus(can_charge=True),
+            ))
         new_effects += card.effects(game_state, pid, action.instruction)
         if card.is_combat_action():
             new_effects.append(AllStatusTriggererEffect(

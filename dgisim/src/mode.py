@@ -112,8 +112,8 @@ class Mode(ABC):
 
     def player_default_hidden_statuses(self) -> Statuses:
         from .status.statuses import Statuses
-        from .status.status import PlungeAttackStatus, DeathThisRoundStatus
-        return Statuses((PlungeAttackStatus(), DeathThisRoundStatus()))
+        from .status.status import ChargedAttackStatus, PlungeAttackStatus, DeathThisRoundStatus
+        return Statuses((ChargedAttackStatus(), PlungeAttackStatus(), DeathThisRoundStatus()))
 
     @abstractmethod
     def all_cards(self) -> frozenset[type[Card]]:

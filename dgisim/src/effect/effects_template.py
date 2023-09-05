@@ -27,9 +27,8 @@ def normal_attack_template(
         damage: int,
 ) -> tuple[eft.Effect, ...]:
     player = game_state.get_player(source.pid)
-    dices_num = player.get_dices().num_dices()
-    character = game_state.get_character_target(source)
-    assert character is not None
+    assert stt.ChargedAttackStatus in player.get_hidden_statuses()
+    charged_status = player.get_hidden_statuses().just_find(stt.ChargedAttackStatus)
     assert stt.PlungeAttackStatus in player.get_hidden_statuses()
     plunge_status = player.get_hidden_statuses().just_find(stt.PlungeAttackStatus)
     effects: list[eft.Effect] = []
@@ -40,11 +39,12 @@ def normal_attack_template(
         damage=damage,
         damage_type=DamageType(
             normal_attack=True,
-            charged_attack=dices_num % 2 == 0,
+            charged_attack=charged_status.can_charge,
             plunge_attack=plunge_status.can_plunge,
         ),
     ))
     return tuple(effects)
+
 
 def standard_post_effects(
         game_state: GameState,

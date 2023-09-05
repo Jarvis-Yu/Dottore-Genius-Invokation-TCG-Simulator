@@ -59,6 +59,7 @@ __all__ = [
     "RevivalStatus",
 
     # hidden status
+    "ChargedAttackStatus",
     "PlungeAttackStatus",
     "DeathThisRoundStatus",
 
@@ -806,6 +807,25 @@ class _InfusionStatus(_UsageStatus):
 
 
 ############################## Hidden Status ##############################
+
+
+@dataclass(frozen=True, kw_only=True)
+class ChargedAttackStatus(PlayerHiddenStatus):
+    """
+    When present, character's normal attack of the player should be treated as charged-attack
+    """
+    can_charge: bool = False
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.can_charge:
+            return [], replace(self, can_charge=False)
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)

@@ -373,3 +373,26 @@ class TestAratakiItto(unittest.TestCase):
         talent = p1ac.get_equipment_statuses().just_find(AratakiIchibanStatus)
         self.assertFalse(talent.activated())
         self.assertEqual(talent.usages, 0)
+
+        # test telant card normal attack can correctly be (charged)
+        game_state = self.BASE_GAME
+        p1_dices = game_state.get_player1().get_dices()
+        assert p1_dices.is_even()
+        game_state = add_dmg_listener(game_state, Pid.P1)
+        game_state = grant_all_thick_shield(game_state)
+        game_state = step_action(game_state, Pid.P1, CardAction(
+            card=AratakiIchiban,
+            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+        ))
+        dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
+        self.assertTrue(dmg.damage_type.charged_attack)
+
+        # odd dices now so not charged
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
+        self.assertFalse(dmg.damage_type.charged_attack)
+
+        # even dices again now, so charged
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
+        self.assertTrue(dmg.damage_type.charged_attack)
