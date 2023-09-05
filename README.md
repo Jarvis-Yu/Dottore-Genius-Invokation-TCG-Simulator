@@ -9,8 +9,8 @@ A Genshin Impact Genius Invokation TCG simulator intended to be used for AI trai
 
 - [**Documentation**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/wiki/v0.2.dev3-Documentation)
 - [**Source code**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator)
-- [**Contributing**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/dev_readme.md)
-- [**Game design**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/state_machine_design.md)
+- [**Contributing**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/dev_docs/dev_readme.md)
+- [**Game design**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/dev_docs/state_machine_design.md)
 - [**Bug reports**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/issues)
 - [**Discord server**](https://discord.gg/arammB6BEY)
 
@@ -51,7 +51,7 @@ You may try the CLI online on [Google Colab](https://colab.research.google.com/d
 
 ### CLI Simple Usages
 
-See CLI's [README](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/cli_readme.md)
+See CLI's [README](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/dev_docs/cli_readme.md)
 for showcase and explanations of the CLI.
 
 ## Customize Player Agents _(Important For AI Or Building App)_
@@ -148,8 +148,8 @@ generate valid player actions.
 Currently a full game can be played with any combination of the characters and cards implemented.
 
 - [x] Implement all game phases (Action Phase, End Phase...)
-- [ ] Implement all cards (70/200 implemented) ([details](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/progress.md))
-- [ ] Implement all characters with their talent cards (27/54 implemented) ([details](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/docs/progress.md))
+- [ ] Implement all cards (70/200 implemented) ([details](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/dev_docs/progress.md))
+- [ ] Implement all characters with their talent cards (27/54 implemented) ([details](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/dev_docs/progress.md))
 - [x] Implement all reactions, death handling, revival handling etc.
 - [x] Implement all game logics to support the implemented cards and characters
 - [x] Implement interactive CLI for better debugging experience
