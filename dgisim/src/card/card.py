@@ -1377,13 +1377,12 @@ class ChangingShifts(EventCard, _DiceOnlyChoiceProvider):
 
     @override
     @classmethod
-    def _valid_instruction(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction
-    ) -> bool:
-        return isinstance(instruction, act.DiceOnlyInstruction)
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        chars = game_state.get_player(pid).get_characters().get_none_active_characters()
+        return any(
+            char.alive()
+            for char in chars
+        ) and super()._loosely_usable(game_state, pid)
 
     @override
     @classmethod
@@ -1724,13 +1723,12 @@ class LeaveItToMe(EventCard, _DiceOnlyChoiceProvider):
 
     @override
     @classmethod
-    def _valid_instruction(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction
-    ) -> bool:
-        return isinstance(instruction, act.DiceOnlyInstruction)
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        chars = game_state.get_player(pid).get_characters().get_none_active_characters()
+        return any(
+            char.alive()
+            for char in chars
+        ) and super()._loosely_usable(game_state, pid)
 
     @override
     @classmethod
