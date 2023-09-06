@@ -6,6 +6,8 @@ Tutorial
 Installation
 ------------
 
+Please make sure your python version >= 3.10 before installation.
+
 .. code-block:: console
 
     $ pip install dgisim
@@ -91,7 +93,8 @@ It's now time to create the initial game state of a game.
     to the next ``GameState``.
 
     The ``dgisim.DefaultMode()`` defines the rules about how game should be run.
-    ``DefaultMode`` is the usual mode where each team has 3 characters and 30 cards etc.
+    ``DefaultMode`` is the usual mode where each player has 3 characters and 30
+    cards etc.
 
     You could also use ``dgisim.mode.AllOmniMode()`` to make the game always generate
     **omni dics** during the **roll phase**.
