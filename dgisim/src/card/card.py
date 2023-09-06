@@ -154,6 +154,8 @@ __all__ = [
     "ProphecyOfSubmersion",
     ## Nahida ##
     "TheSeedOfStoredKnowledge",
+    ## Ningguang ##
+    "StrategicReserve",
     ## Noelle ##
     "IGotYourBack",
     ## Qiqi ##
@@ -2123,6 +2125,16 @@ class TheSeedOfStoredKnowledge(_TalentEquipmentSkillCard):
     _CHARACTER = chr.Nahida
     _EQUIPMENT_STATUS = stt.TheSeedOfStoredKnowledgeStatus
     _SKILL = CharacterSkill.ELEMENTAL_BURST
+
+
+#### Ningguang ####
+
+class StrategicReserve(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDices({Element.GEO: 4})
+    _CHARACTER = chr.Ningguang
+    _EQUIPMENT_STATUS = stt.StrategicReserveStatus
+    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+
 
 #### Noelle ####
 

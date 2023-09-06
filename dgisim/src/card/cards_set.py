@@ -25,6 +25,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ProphecyOfSubmersion,
     RiteOfResurrection,
     StellarPredator,
+    StrategicReserve,
     StreamingSurge,
     TamakushiCasket,
     TheScentRemained,

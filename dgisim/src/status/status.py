@@ -175,6 +175,9 @@ __all__ = [
     "SeedOfSkandhaStatus",
     "ShrineOfMayaStatus",
     "TheSeedOfStoredKnowledgeStatus",
+    ## Ningguang ##
+    "JadeScreenStatus",
+    "StrategicReserveStatus",
     ## Noelle ##
     "FullPlateStatus",
     "IGotYourBackStatus",
@@ -3089,6 +3092,46 @@ class ShrineOfMayaStatus(CombatStatus, _UsageStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class TheSeedOfStoredKnowledgeStatus(TalentEquipmentStatus):
+    pass
+
+
+#### Ningguang ####
+
+@dataclass(frozen=True, kw_only=True)
+class JadeScreenStatus(CombatStatus, FixedShieldStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    SHIELD_AMOUNT: ClassVar[int] = 1
+    DAMAGE_THRESHOLD: ClassVar[int] = 2
+
+    @override
+    def _triggering_condition(self, damage: eft.SpecificDamageEffect) -> bool:
+        return damage.damage >= self.DAMAGE_THRESHOLD
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            if (
+                    item.dmg.element is Element.GEO
+                    and item.dmg.source.pid is status_source.pid
+                    and item.dmg.damage_type.can_boost()
+            ):
+                active_char = game_state.get_player(status_source.pid).just_get_active_character()
+                from ..character.character import Ningguang
+                if isinstance(active_char, Ningguang) and active_char.talent_equiped():
+                    return item.delta_damage(1), self
+        return super()._preprocess(game_state, status_source, item, signal)
+
+
+@dataclass(frozen=True, kw_only=True)
+class StrategicReserveStatus(TalentEquipmentStatus):
     pass
 
 

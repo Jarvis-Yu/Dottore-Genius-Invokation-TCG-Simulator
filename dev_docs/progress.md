@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (27/54 implemented)](#character-2754-implemented)
-  - [Card (70/200 implemented)](#card-70200-implemented)
+  - [Character (28/54 implemented)](#character-2854-implemented)
+  - [Card (71/200 implemented)](#card-71200-implemented)
 
-## Character (27/54 implemented)
+## Character (28/54 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -42,12 +42,12 @@ all I need now is to implement each card and character.
 - [ ] Geo:
   - [x] Albedo
   - [x] Arataki Itto
-  - [ ] Ningguang _<-- WIP_
+  - [x] Ningguang
   - [x] Noelle
 
-## Card (70/200 implemented)
+## Card (71/200 implemented)
 
-- [ ] Equipment Card (36/107):
+- [ ] Equipment Card (37/107):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] Cold-Blooded Strike
@@ -67,6 +67,7 @@ all I need now is to implement each card and character.
     - [x] Prophecy of Submersion
     - [x] Rite of Resurrection
     - [x] Stellar Predator
+    - [x] Strategic Reserve
     - [x] Streaming Surge
     - [x] Tamakushi Casket
     - [x] The Scent Remained

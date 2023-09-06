@@ -13,6 +13,7 @@
   - Jadeplume Terrorshroom
   - Jean
   - Maguu Kenki
+  - Ningguang
   - Qiqi
   - Sangonomiya Kokomi
   - Yoimiya
@@ -27,6 +28,7 @@
       - Proliferating Spores
       - Rite of Resurrection
       - Stellar Predator
+      - Strategic Reserve
       - Tamakushi Casket
       - Transcendent Automaton
       - Undivided Heart
