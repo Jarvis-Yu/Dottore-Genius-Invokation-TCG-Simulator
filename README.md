@@ -31,7 +31,7 @@ Please make sure your Python version `>= 3.10` before installing.
 pip install dgisim
 ```
 
-## Simple Start With CLI
+## Try The Simulator In CLI
 
 ### Run Locally
 
@@ -55,76 +55,14 @@ You may try the CLI online on [Google Colab](https://colab.research.google.com/d
 See CLI's [README](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/dev_docs/cli_readme.md)
 for showcase and explanations of the CLI.
 
-## Customize Player Agents _(Important For AI Or Building App)_
-
-A player agent controls all actions of a player in a game.
-
-To implement a player agent, all you need to do is to inherit the abstract class
-`PlayerAgent` and implement the method `choose_action()`.
-
-A simple example is shown below, the agent implemented choose 3 random cards to
-replace during _Card Select Phase_, and normal attacks until there's no dices
-for it during _Action Phase_.
-
-```py
-class ExampleAgent(PlayerAgent):
-    def choose_action(self, history: list[GameState], pid: Pid) -> PlayerAction:
-        latest_game_state: GameState = history[-1]
-        game_mode: Mode = latest_game_state.get_mode()
-        curr_phase: Phase = latest_game_state.get_phase()
-
-        if isinstance(curr_phase, game_mode.card_select_phase):
-            cards_to_select_from: Cards = latest_game_state.get_player(pid).get_hand_cards()
-            _, selected_cards = cards_to_select_from.pick_random_cards(num=3)
-            return CardsSelectAction(selected_cards=selected_cards)
-
-        elif isinstance(curr_phase, game_mode.action_phase):
-            me: PlayerState = latest_game_state.get_player(pid)
-            active_character: Character = me.just_get_active_character()
-            dices: ActualDices = me.get_dices()
-            # check if dices are enough for normal attack
-            normal_attack_cost = active_character.skill_cost(CharacterSkill.NORMAL_ATTACK)
-            dices_to_use = dices.basically_satisfy(normal_attack_cost)
-            if dices_to_use is not None:
-                # normal attack if dices can be found to pay for normal attack
-                return SkillAction(
-                    skill=CharacterSkill.NORMAL_ATTACK,
-                    instruction=DiceOnlyInstruction(dices=dices_to_use),
-                )
-            return EndRoundAction()  # end round otherwise
-
-        else:
-            raise NotImplementedError(f"actions for {curr_phase} not defined yet")
-```
-
-The above example manually tests if there are dices for some action, which is
-straightforward but takes time to exhaust all options.
-So the `GameState` can return an `ActionGenerator` object which automatically
-provides you with all valid actions to choose from.
-More about `ActionGenerator` will be updated later.
-
-You can find more examples of implementations of `PlayerAgent` in `dgisim/src/agents.py`.
-The `RandomAgent` in `agents.py` is implemented based on `ActionGenerator` mentioned above
-to make random but valid decision.
-
-Once you defined your own player agent, you can test it against the `RandomAgent`.
-
-```py
-# generates a random initial game state with random decks
-init_game_state = GameState.from_default()
-# forms a `game`; YourCustomAgent is Player 1, RandomAgent is Player 2
-game_state_machine = GameStateMachine(init_game_state, YourCustomAgent(), RandomAgent())
-# runs the game and prints who wins
-game_state_machine.run()
-# gets full history of the game
-history: tuple[GameState, ...] = game_state_machine.get_history()
-# gets only history of game states that are right before a player action
-act_history: tuple[GameState, ...] = game_state_machine.get_action_history()
-# any GameState can be printed with nice formatting directly
-print(history[-1])
-```
-
 ## Features
+
+The package allows:
+
+- Customization of player agents
+- Customization of characters
+- Customization of cards
+- Customization of game modes
 
 This simulator is modeled as a finite state machine, which means any intermediate state can be
 standalone and be used to proceed to other states.
