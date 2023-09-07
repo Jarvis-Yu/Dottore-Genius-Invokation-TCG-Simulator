@@ -22,4 +22,9 @@ class PlayerAgent(ABC):
     """
     @abstractmethod
     def choose_action(self, history: list[GameState], pid: Pid) -> PlayerAction:
+        """
+        `history` contains all game-states of the current game in chronological order.
+
+        `pid` represents the player the agent if choosing action for.
+        """
         pass

@@ -1,4 +1,6 @@
 # sub-packages
+from .action.action import PlayerAction
+from .action.enums import ActionType
 from .card.card import Card
 from .card.cards import Cards
 from .character.character import Character
@@ -29,6 +31,7 @@ from .player_agent import PlayerAgent
 __all__ = [
     "Act",
     "AbstractDices",
+    "ActionType",
     "ActualDices",
     "CLISession",
     "Card",
@@ -49,6 +52,7 @@ __all__ = [
     "MutableDeck",
     "Pid",
     "Phase",
+    "PlayerAction",
     "PlayerAgent",
     "PlayerState",
     "Status",

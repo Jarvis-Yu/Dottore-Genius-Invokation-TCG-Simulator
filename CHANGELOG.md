@@ -1,6 +1,8 @@
 # Change Log
 
-## v0.3.2 (To be released)
+## 0.3.2 (To be released)
+
+Removes preceding `v` in version name to be like `0.3.2`.
 
 ### Added
 
