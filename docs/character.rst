@@ -6,4 +6,4 @@ Character
 .. toctree::
     :maxdepth: 1
 
-    Available Characters </character/available_chars>
+    Available Characters </character/available-chars>

@@ -6,4 +6,4 @@ Card
 .. toctree::
     :maxdepth: 1
 
-    Available Cards </card/available_cards>
+    Available Cards </card/available-cards>
