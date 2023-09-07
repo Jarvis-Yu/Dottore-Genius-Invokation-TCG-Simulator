@@ -190,13 +190,23 @@ class Character:
             return cls._ELEMENTAL_BURST_COST
         raise NotImplementedError(f"{skill_type} cost for {cls.__name__} not defined")
 
+    def skill_energy_cost(self, skill_type: CharacterSkill) -> int:
+        if skill_type is CharacterSkill.ELEMENTAL_BURST:
+            return self._max_energy
+        return 0
+
     def skill(self, game_state: GameState, source: StaticTarget, skill_type: CharacterSkill) -> tuple[eft.Effect, ...]:
         """
         This should only be called to get effects right before the skill is to be executed.
 
         Otherwise faulty effects may be generated.
         """
-        return self._post_skill(
+        return (
+            eft.BroadCastPreSkillInfoEffect(
+                source=source,
+                skill=skill_type,
+            ),
+        ) + self._post_skill(
             game_state,
             source,
             skill_type,
@@ -223,7 +233,7 @@ class Character:
     ) -> tuple[eft.Effect, ...]:
         return effects + (
             eft.DefeatedCheckerEffect(),
-            eft.BroadCastSkillInfoEffect(
+            eft.BroadCastPostSkillInfoEffect(
                 source=source,
                 skill=skill_type,
             ),

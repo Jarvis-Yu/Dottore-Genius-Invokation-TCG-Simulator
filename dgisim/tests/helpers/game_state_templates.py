@@ -109,6 +109,12 @@ ACTION_TEMPLATE = BASE_GAME.factory().f_phase(
     .build()
 ).build()
 
+ONE_ACTION_TEMPLATE = ACTION_TEMPLATE.factory().f_player2(
+    lambda p: p.factory()
+    .phase(Act.END_PHASE)
+    .build()
+).build()
+
 
 END_TEMPLATE = BASE_GAME.factory().f_phase(
     lambda mode: mode.end_phase()

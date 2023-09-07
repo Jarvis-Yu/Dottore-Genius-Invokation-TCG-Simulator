@@ -118,7 +118,7 @@ __all__ = [
     "UpdateSupportEffect",
     "OverrideSupportEffect",
     "CastSkillEffect",
-    "BroadCastSkillInfoEffect",
+    "BroadCastPostSkillInfoEffect",
 ]
 
 ############################## base ##############################
@@ -1822,7 +1822,7 @@ class CastSkillEffect(DirectEffect):
 
 
 @dataclass(frozen=True, repr=False)
-class BroadCastSkillInfoEffect(DirectEffect):
+class BroadCastPostSkillInfoEffect(DirectEffect):
     source: StaticTarget
     skill: CharacterSkill
 
@@ -1830,7 +1830,23 @@ class BroadCastSkillInfoEffect(DirectEffect):
         return StatusProcessing.inform_all_statuses(
             game_state,
             self.source.pid,
-            Informables.SKILL_USAGE,
+            Informables.POST_SKILL_USAGE,
+            SkillIEvent(
+                source=self.source,
+                skill_type=self.skill,
+            ),
+        )
+
+@dataclass(frozen=True, repr=False)
+class BroadCastPreSkillInfoEffect(DirectEffect):
+    source: StaticTarget
+    skill: CharacterSkill
+
+    def execute(self, game_state: GameState) -> GameState:
+        return StatusProcessing.inform_all_statuses(
+            game_state,
+            self.source.pid,
+            Informables.PRE_SKILL_USAGE,
             SkillIEvent(
                 source=self.source,
                 skill_type=self.skill,

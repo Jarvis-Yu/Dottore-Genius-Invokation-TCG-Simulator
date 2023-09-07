@@ -34,6 +34,8 @@ Removes preceding `v` in version name to be like `0.3.2`.
       - Tamakushi Casket
       - Transcendent Automaton
       - Undivided Heart
+    - Weapon Card:
+      - Amos' Bow
 
 ## v0.3.1 (28 Aug 2023)
 

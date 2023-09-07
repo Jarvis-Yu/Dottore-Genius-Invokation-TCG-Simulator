@@ -66,6 +66,7 @@ __all__ = [
     # equipment status
     ## Weapon ##
     ### bow ###
+    "AmosBowStatus",
     "RavenBowStatus",
     "SacrificialBowStatus",
     ### catalyst ###
@@ -552,9 +553,16 @@ class WeaponEquipmentStatus(EquipmentStatus):
                 and dmg.damage_type.directly_from_character()
                 and dmg.element is not Element.PIERCING
             ):
-                new_damage = replace(dmg, damage=dmg.damage + self.BASE_DAMAGE_BOOST)
-                return DmgPEvent(dmg=new_damage), self
+                return self._process_dmg(game_state, status_source, item)
         return super()._preprocess(game_state, status_source, item, signal)
+
+    def _process_dmg(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            dmg: DmgPEvent,
+    ) -> tuple[DmgPEvent, Self]:
+        return dmg.delta_damage(self.BASE_DAMAGE_BOOST), self
 
 
 @dataclass(frozen=True)
@@ -638,6 +646,13 @@ class _UsageStatus(Status):
 
     def __str__(self) -> str:
         return super().__str__() + f"({self.usages})"  # pragma: no cover
+
+
+class _UsageLivingStatus(_UsageStatus):
+    @override
+    @staticmethod
+    def _auto_destroy() -> bool:
+        return False
 
 
 @dataclass(frozen=True)
@@ -956,7 +971,7 @@ class _SacrificialWeaponStatus(WeaponEquipmentStatus, _UsageStatus):
             info_type: Informables,
             information: InformableEvent,
     ) -> Self:
-        if info_type is Informables.SKILL_USAGE:
+        if info_type is Informables.POST_SKILL_USAGE:
             assert isinstance(information, SkillIEvent)
             if (
                     self.usages > 0
@@ -991,6 +1006,69 @@ class _SacrificialWeaponStatus(WeaponEquipmentStatus, _UsageStatus):
         return [], self
 
 #### Bow ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class AmosBowStatus(WeaponEquipmentStatus, _UsageLivingStatus):
+    WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.BOW
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    activated: bool = False
+    ADDITIONAL_DMG_BOOST: ClassVar[int] = 2
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.PRE_SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if not (
+                    self.usages > 0
+                    and self._target_is_self_active(game_state, status_source, information.source)
+            ):
+                return self
+            this_char = game_state.get_character_target(status_source)
+            assert this_char is not None
+            total_cost = (
+                this_char.skill_cost(information.skill_type).num_dices()
+                + this_char.skill_energy_cost(information.skill_type)
+            )
+            if total_cost < 5:
+                return self
+            return replace(self, activated=True)
+        if info_type is Informables.POST_SKILL_USAGE and self.activated:
+            return replace(self, activated=False)
+        return self
+
+    @override
+    def _process_dmg(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            dmg: DmgPEvent,
+    ) -> tuple[DmgPEvent, Self]:
+        delta_dmg = self.BASE_DAMAGE_BOOST
+        if not self.activated:
+            return dmg.delta_damage(delta_dmg), self
+        assert self.usages > 0
+        delta_dmg += self.ADDITIONAL_DMG_BOOST
+        return dmg.delta_damage(delta_dmg), replace(self, usages=self.usages - 1, activated=False)
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
+            return [], replace(self, usages=self.MAX_USAGES)
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1726,7 +1804,7 @@ class AratakiIchibanStatus(TalentEquipmentStatus, _UsageStatus):
             information: InformableEvent,
     ) -> Self:
         if self.activated() \
-                or info_type is not Informables.SKILL_USAGE:
+                or info_type is not Informables.POST_SKILL_USAGE:
             return self
 
         assert isinstance(information, SkillIEvent)
@@ -1778,7 +1856,7 @@ class RagingOniKingStatus(CharacterStatus, _InfusionStatus):
             info_type: Informables,
             information: InformableEvent,
     ) -> Self:
-        if info_type is Informables.SKILL_USAGE:
+        if info_type is Informables.POST_SKILL_USAGE:
             assert isinstance(information, SkillIEvent)
             if information.source == status_source \
                     and information.skill_type is CharacterSkill.NORMAL_ATTACK \
@@ -1887,7 +1965,7 @@ class _InspirationFieldStatus(CombatStatus, _UsageStatus):
             info_type: Informables,
             information: InformableEvent,
     ) -> Self:
-        if info_type is Informables.SKILL_USAGE:
+        if info_type is Informables.POST_SKILL_USAGE:
             assert isinstance(information, SkillIEvent)
             if self.activated:
                 return self
@@ -1983,7 +2061,7 @@ class ColleiTalentStatus(HiddenStatus):
             info_type: Informables,
             information: InformableEvent,
     ) -> Self:
-        if info_type is Informables.SKILL_USAGE:
+        if info_type is Informables.POST_SKILL_USAGE:
             assert isinstance(information, SkillIEvent)
             if (
                     not self.elemental_skill_used
@@ -2284,7 +2362,7 @@ class GanyuTalentStatus(HiddenStatus):
             info_type: Informables,
             information: InformableEvent,
     ) -> Self:
-        if info_type is Informables.SKILL_USAGE:
+        if info_type is Informables.POST_SKILL_USAGE:
             assert isinstance(information, SkillIEvent)
             if information.is_skill_from_character(
                     game_state,
@@ -2463,7 +2541,7 @@ class MidareRanzanStatus(CharacterStatus):
             info_type: Informables,
             information: InformableEvent,
     ) -> Self:
-        if info_type is Informables.SKILL_USAGE:
+        if info_type is Informables.POST_SKILL_USAGE:
             assert isinstance(information, SkillIEvent)
             if information.source == status_source \
                     and not self._protected \
@@ -2659,7 +2737,7 @@ class ColdBloodedStrikeStatus(TalentEquipmentStatus):
         if self.activated or self.usages == 0:
             return self
 
-        if info_type is not Informables.SKILL_USAGE:
+        if info_type is not Informables.POST_SKILL_USAGE:
             return self
 
         assert isinstance(information, SkillIEvent)
@@ -2811,7 +2889,7 @@ class SparksnSplashStatus(CombatStatus, _UsageStatus):
         if self.activated or self.usages == 0:
             return self
 
-        if info_type is not Informables.SKILL_USAGE:
+        if info_type is not Informables.POST_SKILL_USAGE:
             return self
 
         assert isinstance(information, SkillIEvent), information
@@ -3279,7 +3357,7 @@ class FortunePreservingTalismanStatus(CombatStatus, _UsageStatus):
             info_type: Informables,
             information: InformableEvent,
     ) -> Self:
-        if info_type is Informables.SKILL_USAGE:
+        if info_type is Informables.POST_SKILL_USAGE:
             assert isinstance(information, SkillIEvent)
             from ..character.character import Qiqi
             if (
@@ -3850,7 +3928,7 @@ class AurousBlazeStatus(CombatStatus, _UsageStatus):
         if self.activated:
             return self
 
-        if info_type is Informables.SKILL_USAGE:
+        if info_type is Informables.POST_SKILL_USAGE:
             assert isinstance(information, SkillIEvent)
             if status_source.pid is not information.source.pid:
                 return self

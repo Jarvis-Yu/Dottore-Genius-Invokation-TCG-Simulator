@@ -36,6 +36,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     UndividedHeart,
     ## Weapons ##
     ### Bow ###
+    AmosBow,
     RavenBow,
     SacrificialBow,
     ### Catalyst ###

@@ -61,6 +61,7 @@ __all__ = [
 
     # Weapon Card
     ## Bow ##
+    "AmosBow",
     "RavenBow",
     "SacrificialBow",
     ## Catalyst ##
@@ -1061,6 +1062,12 @@ class _DirectHealCard(FoodCard):
 # <<<<<<<<<<<<<<<<<<<< Equipment Cards <<<<<<<<<<<<<<<<<<<<
 ########## Weapon Card ##########
 #### Bow ####
+
+
+class AmosBow(WeaponEquipmentCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    WEAPON_TYPE = WeaponType.BOW
+    WEAPON_STATUS = stt.AmosBowStatus
 
 
 class RavenBow(WeaponEquipmentCard):

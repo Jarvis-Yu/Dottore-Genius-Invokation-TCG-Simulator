@@ -27,5 +27,6 @@ class Preprocessables(Enum):
 
 class Informables(Enum):
     DMG_DELT = "DmgDelt"
-    SKILL_USAGE = "SkillUsage"
+    PRE_SKILL_USAGE = "PreSkillUsage"
+    POST_SKILL_USAGE = "PostSkillUsage"
     CHARACTER_DEATH = "CharacterDeath"

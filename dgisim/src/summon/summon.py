@@ -313,7 +313,7 @@ class BakeKurageSummon(_DestroyOnNumSummon):
             info_type: Informables,
             information: InformableEvent,
     ) -> Self:
-        if info_type is Informables.SKILL_USAGE:
+        if info_type is Informables.POST_SKILL_USAGE:
             assert isinstance(information, SkillIEvent)
             if not (
                     information.source.pid is status_source.pid
@@ -528,7 +528,7 @@ class HeraldOfFrostSummon(_DmgPerRoundSummon):
             info_type: Informables,
             information: InformableEvent,
     ) -> Self:
-        if info_type is Informables.SKILL_USAGE:
+        if info_type is Informables.POST_SKILL_USAGE:
             assert isinstance(information, SkillIEvent)
             from ..character.character import Qiqi
             if not self.activated and information.is_skill_from_character(
@@ -643,7 +643,7 @@ class OzSummon(_DmgPerRoundSummon):
             info_type: Informables,
             information: InformableEvent,
     ) -> Self:
-        if info_type is Informables.SKILL_USAGE:
+        if info_type is Informables.POST_SKILL_USAGE:
             assert isinstance(information, SkillIEvent)
             from ..character.character import Fischl
             if not self.activated and information.is_skill_from_character(
@@ -789,7 +789,7 @@ class _ShadowswordBaseSummon(_DmgPerRoundSummon):
             info_type: Informables,
             information: InformableEvent,
     ) -> Self:
-        if info_type is Informables.SKILL_USAGE:
+        if info_type is Informables.POST_SKILL_USAGE:
             assert isinstance(information, SkillIEvent)
             from ..character.character import MaguuKenki
             if not self.activated and information.is_skill_from_character(
