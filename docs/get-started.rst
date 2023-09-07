@@ -1,5 +1,5 @@
-Tutorial
-========
+Get Started
+===========
 
 .. _installation:
 
@@ -231,10 +231,10 @@ You need to inherit from the class ``PlayerAgent`` and override method
 
 The method takes two parameters ``history`` and ``pid``.
 
-- ``history`` contains all game states of the current game in chronological order.
+* ``history`` contains all game states of the current game in chronological order.
   For simple agents that choose action solely based on the current game state,
   you can get it from ``history[-1]``.
-- ``pid`` represents the player the agent is choosing action for. ``Pid.P1`` is
+* ``pid`` represents the player the agent is choosing action for. ``Pid.P1`` is
   player 1, and ``Pid.P2`` is player 2. You could use methods ``.is_player1()``
   and ``.is_player2()`` to check the value of ``pid``.
 
