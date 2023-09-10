@@ -79,6 +79,7 @@ __all__ = [
     ### claymore ###
     "SacrificialGreatswordStatus",
     "WhiteIronGreatswordStatus",
+    "WolfsGravestoneStatus",
     ### polearm ###
     "WhiteTasselStatus",
     ### sword ###
@@ -1133,6 +1134,29 @@ class SacrificialGreatswordStatus(_SacrificialWeaponStatus):
 class WhiteIronGreatswordStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CLAYMORE
     # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.WhiteIronGreatsword
+
+
+@dataclass(frozen=True, kw_only=True)
+class WolfsGravestoneStatus(WeaponEquipmentStatus):
+    WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CLAYMORE
+    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.WhiteIronGreatsword
+    HP_THRESHOLD: ClassVar[int] = 6
+    ADDITIONAL_DMG_BOOST: ClassVar[int] = 2
+
+    @override
+    def _process_dmg(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            dmg: DmgPEvent,
+    ) -> tuple[DmgPEvent, Self]:
+        oppo_active_char = game_state.get_player(
+            status_source.pid.other()
+        ).just_get_active_character()
+        final_dmg_boost = self.BASE_DAMAGE_BOOST
+        if oppo_active_char.get_hp() <= self.HP_THRESHOLD:
+            final_dmg_boost += self.ADDITIONAL_DMG_BOOST
+        return dmg.delta_damage(final_dmg_boost), self
 
 
 #### Polearm ####

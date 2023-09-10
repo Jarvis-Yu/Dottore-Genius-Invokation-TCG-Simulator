@@ -72,6 +72,7 @@ __all__ = [
     ## Claymore ##
     "SacrificialGreatsword",
     "WhiteIronGreatsword",
+    "WolfsGravestone",
     ## Polearm ##
     "WhiteTassel",
     ## Sword ##
@@ -1115,6 +1116,7 @@ class SacrificialBow(WeaponEquipmentCard):
 
 #### Catalyst ####
 
+
 class FruitOfFulfillment(WeaponEquipmentCard):
     _DICE_COST = AbstractDices({Element.ANY: 3})
     WEAPON_TYPE = WeaponType.CATALYST
@@ -1160,6 +1162,13 @@ class WhiteIronGreatsword(WeaponEquipmentCard):
     _DICE_COST = AbstractDices({Element.OMNI: 2})
     WEAPON_TYPE = WeaponType.CLAYMORE
     WEAPON_STATUS = stt.WhiteIronGreatswordStatus
+
+
+class WolfsGravestone(WeaponEquipmentCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    WEAPON_TYPE = WeaponType.CLAYMORE
+    WEAPON_STATUS = stt.WolfsGravestoneStatus
+
 
 #### Polearm ####
 

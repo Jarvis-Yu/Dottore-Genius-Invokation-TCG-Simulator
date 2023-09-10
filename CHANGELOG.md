@@ -38,6 +38,7 @@ Removes preceding `v` in version name to be like `0.3.2`.
       - Amos' Bow
       - Fruit of Fulfillment
       - King's Squire
+      - Wolf's Gravestone
 
 ## v0.3.1 (28 Aug 2023)
 

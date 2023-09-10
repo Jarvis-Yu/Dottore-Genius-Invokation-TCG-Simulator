@@ -27,6 +27,7 @@ Weapon Card
 
   * Sacrificial Greatsword
   * White Iron Greatsword
+  * Wolf's Gravestone
 
 * Polearm
 
