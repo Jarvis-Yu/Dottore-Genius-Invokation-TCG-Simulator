@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (28/54 implemented)](#character-2854-implemented)
-  - [Card (72/200 implemented)](#card-72200-implemented)
+  - [Card (73/200 implemented)](#card-73200-implemented)
 
 ## Character (28/54 implemented)
 
@@ -45,7 +45,7 @@ all I need now is to implement each card and character.
   - [x] Ningguang
   - [x] Noelle
 
-## Card (72/200 implemented)
+## Card (73/200 implemented)
 
 - [ ] Equipment Card (38/107):
   - [ ] Talent Card:
@@ -79,7 +79,7 @@ all I need now is to implement each card and character.
   - [ ] Weapon Card:
     - [ ] Bow:
       - [x] Amos' Bow
-      - [ ] King's Squire _<-- WIP_
+      - [x] King's Squire
       - [x] Raven Bow
       - [x] Sacrificial Bow
     - [ ] Catalyst:

@@ -407,14 +407,28 @@ class AbstractDices(Dices):
     def cost_less_any(self, num: int) -> Self:
         return (self - {Element.ANY: 1}).validify()
 
-    def can_cost_less_elem(self, elem: Element) -> bool:
-        return self[elem] > 0 or self[Element.ANY] > 0
+    def can_cost_less_elem(self, elem: None | Element = None) -> bool:
+        if elem is not None:
+            return self[elem] > 0 or self[Element.ANY] > 0
+        else:
+            return any(
+                self[elem] > 0
+                for elem in _PURE_ELEMS
+            ) or self[Element.ANY] > 0
 
-    def cost_less_elem(self, num: int, elem: Element) -> Self:
+    def cost_less_elem(self, num: int, elem: None | Element = None) -> Self:
+        if elem is None:
+            elem = next((
+                elem
+                for elem in ActualDices._LEGAL_ELEMS_ORDERED
+                if self[elem] > 0
+            ), None)
+            if elem is None:
+                return self
         elem_less_amount = min(self[elem], num)
         any_less_amount = max(0, num - elem_less_amount)
-        ret_val = self - {elem: elem_less_amount, Element.ANY: any_less_amount}
-        assert ret_val.is_legal()
+        ret_val = (self - {elem: elem_less_amount, Element.ANY: any_less_amount}).validify()
+        assert ret_val.is_legal(), f"{self} - {num}{elem} -> {ret_val}"
         return ret_val
 
     @classmethod

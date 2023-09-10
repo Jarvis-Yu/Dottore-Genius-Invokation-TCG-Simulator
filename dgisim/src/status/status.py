@@ -1484,7 +1484,37 @@ class ElementalResonanceSprawlingGreeneryStatus(CombatStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class KingsSquireEffectStatus(CharacterStatus):
-    ...
+    COST_DEDUCTION: ClassVar[int] = 2
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.SKILL:
+            assert isinstance(item, ActionPEvent)
+            if (
+                    item.source == status_source
+                    and item.event_sub_type is CharacterSkillType.ELEMENTAL_SKILL
+                    and item.dices_cost.can_cost_less_elem()
+            ):
+                new_cost = item.dices_cost.cost_less_elem(self.COST_DEDUCTION)
+                return replace(item, dices_cost=new_cost), None
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], None
+        return [], self  # pragma: no cover
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1496,7 +1526,7 @@ class LeaveItToMeStatus(CombatStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.SWAP:
             assert isinstance(item, ActionPEvent) and item.event_type is EventType.SWAP
             if item.source.pid is status_source.pid \

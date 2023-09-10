@@ -13,6 +13,7 @@ Weapon Card
 * Bow
 
   * Amos' Bow
+  * King's Squire
   * Raven Bow
   * Sacrificial Bow
 

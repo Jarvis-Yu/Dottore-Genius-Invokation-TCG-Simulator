@@ -802,7 +802,16 @@ class WeaponEquipmentCard(EquipmentCard, _CharTargetChoiceProvider):
                 target=instruction.target,
                 status=cls.WEAPON_STATUS,
             ),
-        )
+        ) + cls.on_enter_effects(game_state, pid, instruction)
+
+    @classmethod
+    def on_enter_effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.StaticTargetInstruction
+    ) -> tuple[eft.Effect, ...]:
+        return ()
 
 
 class ArtifactEquipmentCard(EquipmentCard, _CharTargetChoiceProvider):
@@ -1075,6 +1084,21 @@ class KingsSquire(WeaponEquipmentCard):
     _DICE_COST = AbstractDices({Element.OMNI: 3})
     WEAPON_TYPE = WeaponType.BOW
     WEAPON_STATUS = stt.KingsSquireStatus
+
+    @override
+    @classmethod
+    def on_enter_effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.StaticTargetInstruction
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddCharacterStatusEffect(
+                target=instruction.target,
+                status=stt.KingsSquireEffectStatus,
+            ),
+        )
 
 
 class RavenBow(WeaponEquipmentCard):
