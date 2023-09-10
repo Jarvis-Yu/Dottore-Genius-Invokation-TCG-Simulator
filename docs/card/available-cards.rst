@@ -19,6 +19,7 @@ Weapon Card
 
 * Catalyst
 
+  * Fruit of Fulfillment
   * Magic Guide
   * Sacrificial Fragments
 

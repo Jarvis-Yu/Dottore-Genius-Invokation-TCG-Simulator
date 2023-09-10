@@ -89,6 +89,7 @@ __all__ = [
     "EnergyDrainEffect",
     "RecoverHPEffect",
     "ReviveRecoverHPEffect",
+    "DrawRandomCardEffect",
     "PublicAddCardEffect",
     "PublicRemoveCardEffect",
     "PublicRemoveAllCardEffect",
@@ -1279,6 +1280,26 @@ class ReviveRecoverHPEffect(RecoverHPEffect):
                 target=self.target,
                 signal=TriggeringSignal.GAME_START,
             ))
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class DrawRandomCardEffect(DirectEffect):
+    pid: Pid
+    num: int
+
+    def execute(self, game_state: GameState) -> GameState:
+        deck_cards = game_state.get_player(self.pid).get_deck_cards()
+        left_cards, chosen_cards = deck_cards.pick_random_cards(self.num)
+        if chosen_cards.num_cards() == 0:
+            return game_state
+        return game_state.factory().f_player(
+            self.pid,
+            lambda p: p.factory().deck_cards(
+                left_cards
+            ).f_hand_cards(
+                lambda cards: cards + chosen_cards
+            ).build()
         ).build()
 
 

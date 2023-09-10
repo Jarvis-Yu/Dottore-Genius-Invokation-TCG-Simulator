@@ -36,6 +36,7 @@ Removes preceding `v` in version name to be like `0.3.2`.
       - Undivided Heart
     - Weapon Card:
       - Amos' Bow
+      - Fruit of Fulfillment
       - King's Squire
 
 ## v0.3.1 (28 Aug 2023)

@@ -62,6 +62,16 @@ class Statuses:
         assert isinstance(found_status, status)
         return found_status  # type: ignore
 
+    def find_type(self, status: type[stt.Status]) -> None | stt.Status:
+        return next((bf for bf in self._statuses if isinstance(bf, status)), None)
+
+    def just_find_type(self, status: type[_U]) -> _U:
+        """ _U should be a subclass of type[Status] """
+        assert issubclass(status, stt.Status)
+        found_status = just(self.find_type(status))
+        assert isinstance(found_status, status)
+        return found_status  # type: ignore
+
     def remove(self, status: type[stt.Status]) -> Self:
         return type(self)(tuple(
             filter(lambda bf: type(bf) != status, self._statuses)

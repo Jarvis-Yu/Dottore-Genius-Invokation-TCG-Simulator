@@ -66,6 +66,7 @@ __all__ = [
     "RavenBow",
     "SacrificialBow",
     ## Catalyst ##
+    "FruitOfFulfillment",
     "MagicGuide",
     "SacrificialFragments",
     ## Claymore ##
@@ -1114,6 +1115,26 @@ class SacrificialBow(WeaponEquipmentCard):
 
 #### Catalyst ####
 
+class FruitOfFulfillment(WeaponEquipmentCard):
+    _DICE_COST = AbstractDices({Element.ANY: 3})
+    WEAPON_TYPE = WeaponType.CATALYST
+    WEAPON_STATUS = stt.FruitOfFulfillmentStatus
+
+    @override
+    @classmethod
+    def on_enter_effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.StaticTargetInstruction
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.DrawRandomCardEffect(
+                pid=pid,
+                num=2,
+            ),
+        )
+
 
 class MagicGuide(WeaponEquipmentCard):
     _DICE_COST = AbstractDices({Element.OMNI: 2})
@@ -1857,6 +1878,24 @@ class Starsigns(EventCard, _DiceOnlyChoiceProvider):
                 1
             ),
         )
+
+
+class WhereIsTheUnseenRazor(EventCard, _CharTargetChoiceProvider):
+    _DICE_COST = AbstractDices({Element.OMNI: 1})
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.StaticTargetInstruction)
+        char_target = game_state.get_character_target(instruction.target)
+        assert char_target is not None
+        weapon = char_target.get_equipment_statuses().just_find_type(stt.WeaponEquipmentStatus)
+        raise NotImplementedError()
 
 
 class WindAndFreedom(EventCard, _DiceOnlyChoiceProvider):

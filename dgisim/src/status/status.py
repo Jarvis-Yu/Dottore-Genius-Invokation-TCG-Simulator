@@ -14,6 +14,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from dataclasses import dataclass, replace
 from enum import Enum
+from functools import cached_property
 from math import ceil
 from typing import ClassVar, cast, Optional, TYPE_CHECKING
 from typing_extensions import override, Self
@@ -32,6 +33,7 @@ from ..helper.quality_of_life import just, BIG_INT, case_val
 from .enums import Preprocessables, Informables
 
 if TYPE_CHECKING:
+    from ..card import card as crd
     from ..card.card import Card
     from ..character.character import Character
     from ..state.enums import Pid
@@ -71,6 +73,7 @@ __all__ = [
     "RavenBowStatus",
     "SacrificialBowStatus",
     ### catalyst ###
+    "FruitOfFulfillmentStatus",
     "MagicGuideStatus",
     "SacrificialFragmentsStatus",
     ### claymore ###
@@ -537,6 +540,13 @@ class TalentEquipmentStatus(EquipmentStatus):
 @dataclass(frozen=True)
 class WeaponEquipmentStatus(EquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType]
+    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]]
+
+    # @property
+    # @classmethod
+    # def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    #     from ..card.card import AmosBow
+    #     return AmosBow
     BASE_DAMAGE_BOOST: ClassVar[int] = 1
 
     @override
@@ -1013,6 +1023,7 @@ class _SacrificialWeaponStatus(WeaponEquipmentStatus, _UsageStatus):
 @dataclass(frozen=True, kw_only=True)
 class AmosBowStatus(WeaponEquipmentStatus, _UsageLivingStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.BOW
+    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.AmosBow
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 1
     activated: bool = False
@@ -1076,28 +1087,38 @@ class AmosBowStatus(WeaponEquipmentStatus, _UsageLivingStatus):
 @dataclass(frozen=True, kw_only=True)
 class KingsSquireStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.BOW
+    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.KingsSquire
 
 
 @dataclass(frozen=True, kw_only=True)
 class RavenBowStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.BOW
+    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.RavenBow
 
 
 @dataclass(frozen=True, kw_only=True)
 class SacrificialBowStatus(_SacrificialWeaponStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.BOW
+    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.SacrificialBow
 
 #### Catalyst ####
 
 
 @dataclass(frozen=True, kw_only=True)
+class FruitOfFulfillmentStatus(WeaponEquipmentStatus):
+    WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CATALYST
+
+
+@dataclass(frozen=True, kw_only=True)
 class MagicGuideStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CATALYST
+    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.MagicGuide
 
 
 @dataclass(frozen=True, kw_only=True)
 class SacrificialFragmentsStatus(_SacrificialWeaponStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CATALYST
+    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.SacrificialFragments
 
 #### Claymore ####
 
@@ -1105,11 +1126,13 @@ class SacrificialFragmentsStatus(_SacrificialWeaponStatus):
 @dataclass(frozen=True, kw_only=True)
 class SacrificialGreatswordStatus(_SacrificialWeaponStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CLAYMORE
+    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.SacrificialGreatsword
 
 
 @dataclass(frozen=True, kw_only=True)
 class WhiteIronGreatswordStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CLAYMORE
+    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.WhiteIronGreatsword
 
 
 #### Polearm ####
@@ -1118,6 +1141,7 @@ class WhiteIronGreatswordStatus(WeaponEquipmentStatus):
 @dataclass(frozen=True, kw_only=True)
 class WhiteTasselStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.POLEARM
+    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.WhiteTassel
 
 #### Sword ####
 
@@ -1125,11 +1149,13 @@ class WhiteTasselStatus(WeaponEquipmentStatus):
 @dataclass(frozen=True, kw_only=True)
 class SacrificialSwordStatus(_SacrificialWeaponStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.SWORD
+    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.SacrificialSword
 
 
 @dataclass(frozen=True, kw_only=True)
 class TravelersHandySwordStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.SWORD
+    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.TravelersHandySword
 
 
 ########## Artifact Status ##########
