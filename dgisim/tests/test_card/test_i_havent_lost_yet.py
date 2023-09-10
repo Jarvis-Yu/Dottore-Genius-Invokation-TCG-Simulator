@@ -37,7 +37,7 @@ class TestIHaventLostYet(unittest.TestCase):
         p2_old_dices = game_state.get_player2().get_dices()
         a1.inject_action(
             SkillAction(
-                skill=CharacterSkill.NORMAL_ATTACK,
+                skill=CharacterSkill.SKILL1,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             )
         )

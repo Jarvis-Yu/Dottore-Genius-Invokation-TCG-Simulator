@@ -17,8 +17,8 @@ class TestTeyvatFriedEgg(unittest.TestCase):
     def test_basic_revival(self):
         base_game = kill_character(self.BASE_GAME, character_id=1, pid=Pid.P1, hp=1)
         game_state = base_game
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
-        game_state = step_skill(game_state, Pid.P2, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
+        game_state = step_skill(game_state, Pid.P2, CharacterSkill.SKILL1)
         game_state = step_action(game_state, Pid.P1, DeathSwapAction(char_id=2))
 
         # check player 1's character 1 is defeated
@@ -79,8 +79,8 @@ class TestTeyvatFriedEgg(unittest.TestCase):
                 ).build()
             ).build()
         ).build()
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
-        game_state = step_skill(game_state, Pid.P2, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
+        game_state = step_skill(game_state, Pid.P2, CharacterSkill.SKILL1)
         game_state = step_action(game_state, Pid.P1, DeathSwapAction(char_id=2))
 
         # check player 1's character 1 is defeated

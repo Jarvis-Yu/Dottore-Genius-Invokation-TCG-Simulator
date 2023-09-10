@@ -37,6 +37,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ## Weapons ##
     ### Bow ###
     AmosBow,
+    KingsSquire,
     RavenBow,
     SacrificialBow,
     ### Catalyst ###

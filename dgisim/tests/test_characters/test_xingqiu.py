@@ -21,7 +21,7 @@ class TestXingqiu(unittest.TestCase):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -37,7 +37,7 @@ class TestXingqiu(unittest.TestCase):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.ELEMENTAL_SKILL1,
+            skill=CharacterSkill.SKILL2,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -137,7 +137,7 @@ class TestXingqiu(unittest.TestCase):
         base_game = AddCombatStatusEffect(Pid.P1, RainbowBladeworkStatus).execute(self.BASE_GAME)
 
         # p1 normal attack with Xingqiu
-        game_state = step_skill(base_game, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(base_game, Pid.P1, CharacterSkill.SKILL1)
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertIn(RainbowBladeworkStatus, p1.get_combat_statuses())
@@ -148,7 +148,7 @@ class TestXingqiu(unittest.TestCase):
         # p2 normal attack doesn't trigger
         p2ac = game_state.get_player2().just_get_active_character()
         assert isinstance(p2ac, RhodeiaOfLoch)
-        game_state = step_skill(game_state, Pid.P2, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P2, CharacterSkill.SKILL1)
         p1 = game_state.get_player1()
         p1ac = game_state.get_player1().just_get_active_character()
         self.assertIn(RainbowBladeworkStatus, p1.get_combat_statuses())
@@ -159,7 +159,7 @@ class TestXingqiu(unittest.TestCase):
         game_state = AddCombatStatusEffect(Pid.P1, LeaveItToMeStatus).execute(game_state)
         game_state = step_swap(game_state, Pid.P1, char_id=3)
         assert isinstance(game_state.get_player1().just_get_active_character(), Keqing)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertIn(RainbowBladeworkStatus, p1.get_combat_statuses())

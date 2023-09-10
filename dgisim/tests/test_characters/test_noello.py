@@ -21,7 +21,7 @@ class TestNoelle(unittest.TestCase):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -38,7 +38,7 @@ class TestNoelle(unittest.TestCase):
         game_state = oppo_aura_elem(self.BASE_GAME, Element.ELECTRO)
         gsm = GameStateMachine(game_state, a1, a2)
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.ELEMENTAL_SKILL1,
+            skill=CharacterSkill.SKILL2,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -111,7 +111,7 @@ class TestNoelle(unittest.TestCase):
         game_state = step_skill(
             base_state,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.PYRO: 1, Element.CRYO: 1}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
@@ -120,7 +120,7 @@ class TestNoelle(unittest.TestCase):
         game_state = step_skill(
             game_state,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.GEO: 1, Element.DENDRO: 1, Element.ANEMO: 1}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
@@ -138,13 +138,13 @@ class TestNoelle(unittest.TestCase):
         game_state = step_skill(
             game_state,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.OMNI: 2}),
         )
         game_state = step_skill(
             game_state,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.OMNI: 3}),
         )
 
@@ -171,13 +171,13 @@ class TestNoelle(unittest.TestCase):
         ))
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         # first normal attack heals with shield on
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1_cs = game_state.get_player1().get_characters()
         for char in p1_cs:
             self.assertEqual(char.get_hp(), 6)
 
         # second normal attack doesn't heal
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1_cs = game_state.get_player1().get_characters()
         for char in p1_cs:
             self.assertEqual(char.get_hp(), 6)
@@ -186,11 +186,11 @@ class TestNoelle(unittest.TestCase):
         game_state = next_round(game_state)
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         game_state = fill_dices_with_omni(game_state)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1_cs = game_state.get_player1().get_characters()
         for char in p1_cs:
             self.assertEqual(char.get_hp(), 7)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1_cs = game_state.get_player1().get_characters()
         for char in p1_cs:
             self.assertEqual(char.get_hp(), 7)
@@ -201,7 +201,7 @@ class TestNoelle(unittest.TestCase):
         game_state = fill_dices_with_omni(game_state)
         game_state = auto_step(add_damage_effect(game_state, 2, Element.ELECTRO, Pid.P1, char_id=2))
         game_state = kill_character(game_state, character_id=1, hp=10)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1_cs = game_state.get_player1().get_characters()
         for char in p1_cs:
             self.assertEqual(char.get_hp(), 7)

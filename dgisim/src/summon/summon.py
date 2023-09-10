@@ -19,7 +19,7 @@ from typing_extensions import override, Self
 from ..effect import effect as eft
 from ..status import status as stt
 
-from ..character.enums import CharacterSkill
+from ..character.enums import CharacterSkill, CharacterSkillType
 from ..effect.enums import TriggeringSignal, DynamicCharacterTarget, Zone
 from ..effect.structs import DamageType, StaticTarget
 from ..element import Element, Reaction
@@ -534,7 +534,7 @@ class HeraldOfFrostSummon(_DmgPerRoundSummon):
             if not self.activated and information.is_skill_from_character(
                     game_state,
                     status_source.pid,
-                    CharacterSkill.NORMAL_ATTACK,
+                    CharacterSkill.SKILL1,
                     Qiqi,
             ):
                 return replace(self, activated=True)
@@ -649,7 +649,7 @@ class OzSummon(_DmgPerRoundSummon):
             if not self.activated and information.is_skill_from_character(
                     game_state,
                     status_source.pid,
-                    CharacterSkill.NORMAL_ATTACK,
+                    CharacterSkill.SKILL1,
                     Fischl,
             ):
                 return replace(self, activated=True)
@@ -859,7 +859,7 @@ class SolarIsotomaSummon(_DmgPerRoundSummon):
             assert isinstance(item, ActionPEvent)
             if not (
                     item.source.pid is status_source.pid
-                    and item.event_type is EventType.NORMAL_ATTACK
+                    and item.event_sub_type is CharacterSkillType.NORMAL_ATTACK
                     and item.dices_cost.can_cost_less_any()
             ):
                 return item, self

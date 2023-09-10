@@ -21,7 +21,7 @@ class TestYaeMiko(unittest.TestCase):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -41,15 +41,15 @@ class TestYaeMiko(unittest.TestCase):
         gsm = GameStateMachine(base_game, a1, a2)
         a1.inject_actions([
             SkillAction(
-                skill=CharacterSkill.ELEMENTAL_SKILL1,
+                skill=CharacterSkill.SKILL2,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
             SkillAction(
-                skill=CharacterSkill.ELEMENTAL_SKILL1,
+                skill=CharacterSkill.SKILL2,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
             SkillAction(
-                skill=CharacterSkill.ELEMENTAL_SKILL1,
+                skill=CharacterSkill.SKILL2,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
         ])
@@ -121,7 +121,7 @@ class TestYaeMiko(unittest.TestCase):
             self.assertNotIn(SesshouSakuraSummon, p1.get_summons())
 
         with self.subTest(condition="oppo take action"):
-            game_state = step_skill(post_burst_state, Pid.P2, CharacterSkill.NORMAL_ATTACK)
+            game_state = step_skill(post_burst_state, Pid.P2, CharacterSkill.SKILL1)
             p2ac = game_state.get_player2().just_get_active_character()
             self.assertEqual(p2ac.get_hp(), 3)
             self.assertIn(Element.ELECTRO, p2ac.get_elemental_aura())
@@ -214,13 +214,13 @@ class TestYaeMiko(unittest.TestCase):
 
         # then next skill has cost deduction
         game_state = step_action(post_burst_state, Pid.P1, SkillAction(
-            skill=CharacterSkill.ELEMENTAL_SKILL1,
+            skill=CharacterSkill.SKILL2,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
         ))
         p1ac = game_state.get_player1().just_get_active_character()
         self.assertNotIn(RiteOfDispatchStatus, p1ac.get_character_statuses())
         game_state = step_action(game_state, Pid.P1, SkillAction(
-            skill=CharacterSkill.ELEMENTAL_SKILL1,
+            skill=CharacterSkill.SKILL2,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
 

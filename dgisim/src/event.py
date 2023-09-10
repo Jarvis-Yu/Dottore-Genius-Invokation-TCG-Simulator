@@ -12,7 +12,7 @@ from typing_extensions import Self
 if TYPE_CHECKING:
     from .card.card import Card
     from .character.character import Character
-    from .character.enums import CharacterSkill
+    from .character.enums import CharacterSkill, CharacterSkillType
     from .effect.effect import SpecificDamageEffect
     from .effect.structs import StaticTarget
     from .element import Element
@@ -23,6 +23,7 @@ if TYPE_CHECKING:
 __all__ = [
     # enums
     "EventSpeed",
+    "EventSubType",
     "EventType",
 
     "InformableEvent",
@@ -43,10 +44,14 @@ class EventSpeed(Enum):
     COMBAT_ACTION = "Combat-Action"
 
 
+class EventSubType(Enum):
+    pass
+
+
 class EventType(Enum):
-    NORMAL_ATTACK = "Normal-Attack"
-    ELEMENTAL_SKILL1 = "Elemental-Skill1"
-    ELEMENTAL_SKILL2 = "Elemental-Skill2"
+    SKILL1 = "Normal-Attack1"
+    SKILL2 = "Elemental-Skill1"
+    SKILL3 = "Elemental-Skill2"
     ELEMENTAL_BURST = "Elemental-Burst"
     SWAP = "Swap"
 
@@ -70,6 +75,7 @@ class CharacterDeathIEvent(InformableEvent):
 class SkillIEvent(InformableEvent):
     source: StaticTarget
     skill_type: CharacterSkill
+    skill_true_type: CharacterSkillType
 
     def is_skill_from_character(
             self,
@@ -101,6 +107,7 @@ class ActionPEvent(PreprocessableEvent):
     source: StaticTarget       # this source is who caused the GameEvent
     target: None | StaticTarget = None
     event_type: EventType
+    event_sub_type: None | EventSubType | CharacterSkillType = None
     event_speed: EventSpeed
     dices_cost: AbstractDices
 

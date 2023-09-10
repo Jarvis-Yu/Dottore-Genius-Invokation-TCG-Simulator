@@ -62,6 +62,7 @@ __all__ = [
     # Weapon Card
     ## Bow ##
     "AmosBow",
+    "KingsSquire",
     "RavenBow",
     "SacrificialBow",
     ## Catalyst ##
@@ -709,9 +710,9 @@ class TalentEquipmentCard(EquipmentCard, TalentCard):
         ret_val = True
         if issubclass(cls, _CombatActionCard) and cls._IS_SKILL:
             if cls._SKILL in {
-                    CharacterSkill.NORMAL_ATTACK,
-                    CharacterSkill.ELEMENTAL_SKILL1,
-                    CharacterSkill.ELEMENTAL_SKILL2,
+                    CharacterSkill.SKILL1,
+                    CharacterSkill.SKILL2,
+                    CharacterSkill.SKILL3,
             }:
                 ret_val = (
                     ret_val
@@ -1068,6 +1069,12 @@ class AmosBow(WeaponEquipmentCard):
     _DICE_COST = AbstractDices({Element.OMNI: 3})
     WEAPON_TYPE = WeaponType.BOW
     WEAPON_STATUS = stt.AmosBowStatus
+
+
+class KingsSquire(WeaponEquipmentCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    WEAPON_TYPE = WeaponType.BOW
+    WEAPON_STATUS = stt.KingsSquireStatus
 
 
 class RavenBow(WeaponEquipmentCard):
@@ -1900,7 +1907,7 @@ class DescentOfDivinity(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.GEO: 3})
     _CHARACTER = chr.Albedo
     _EQUIPMENT_STATUS = stt.DescentOfDivinityStatus
-    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+    _SKILL = CharacterSkill.SKILL2
 
 
 #### Arataki Itto ####
@@ -1910,7 +1917,7 @@ class AratakiIchiban(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.GEO: 1, Element.ANY: 2})
     _CHARACTER = chr.AratakiItto
     _EQUIPMENT_STATUS = stt.AratakiIchibanStatus
-    _SKILL = CharacterSkill.NORMAL_ATTACK
+    _SKILL = CharacterSkill.SKILL1
 
 #### Bennett ####
 
@@ -1928,7 +1935,7 @@ class FloralSidewinder(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.DENDRO: 4})
     _CHARACTER = chr.Collei
     _EQUIPMENT_STATUS = stt.FloralSidewinderStatus
-    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+    _SKILL = CharacterSkill.SKILL2
 
 
 #### Electro Hypostasis ####
@@ -1969,7 +1976,7 @@ class PaidInFull(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.PYRO: 3})
     _CHARACTER = chr.FatuiPyroAgent
     _EQUIPMENT_STATUS = stt.PaidInFullStatus
-    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+    _SKILL = CharacterSkill.SKILL2
 
 
 #### Fischl ####
@@ -1978,7 +1985,7 @@ class StellarPredator(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.ELECTRO: 3})
     _CHARACTER = chr.Fischl
     _EQUIPMENT_STATUS = stt.StellarPredatorStatus
-    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+    _SKILL = CharacterSkill.SKILL2
 
 
 #### Ganyu ####
@@ -1987,7 +1994,7 @@ class UndividedHeart(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.CRYO: 5})
     _CHARACTER = chr.Ganyu
     _EQUIPMENT_STATUS = stt.UndividedHeartStatus
-    _SKILL = CharacterSkill.ELEMENTAL_SKILL2
+    _SKILL = CharacterSkill.SKILL3
 
 
 #### Jadeplume Terrorshroom ####
@@ -1996,7 +2003,7 @@ class ProliferatingSpores(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.DENDRO: 3})
     _CHARACTER = chr.JadeplumeTerrorshroom
     _EQUIPMENT_STATUS = stt.ProliferatingSporesStatus
-    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+    _SKILL = CharacterSkill.SKILL2
 
 
 #### Jean ####
@@ -2015,7 +2022,7 @@ class PoeticsOfFuubutsu(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.ANEMO: 3})
     _CHARACTER = chr.KaedeharaKazuha
     _EQUIPMENT_STATUS = stt.PoeticsOfFuubutsuStatus
-    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+    _SKILL = CharacterSkill.SKILL2
 
 #### Kaeya ####
 
@@ -2024,7 +2031,7 @@ class ColdBloodedStrike(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.CRYO: 4})
     _CHARACTER = chr.Kaeya
     _EQUIPMENT_STATUS = stt.ColdBloodedStrikeStatus
-    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+    _SKILL = CharacterSkill.SKILL2
 
 #### Keqing ####
 
@@ -2086,7 +2093,7 @@ class LightningStiletto(TalentEventCard, _CombatActionCard, _CharTargetChoicePro
             ),
             eft.CastSkillEffect(
                 target=instruction.target,
-                skill=CharacterSkill.ELEMENTAL_SKILL1,
+                skill=CharacterSkill.SKILL2,
             ),
         )
 
@@ -2095,7 +2102,7 @@ class ThunderingPenance(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.ELECTRO: 3})
     _CHARACTER = chr.Keqing
     _EQUIPMENT_STATUS = stt.ThunderingPenanceStatus
-    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+    _SKILL = CharacterSkill.SKILL2
 
 #### Klee ####
 
@@ -2104,7 +2111,7 @@ class PoundingSurprise(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.PYRO: 3})
     _CHARACTER = chr.Klee
     _EQUIPMENT_STATUS = stt.PoundingSurpriseStatus
-    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+    _SKILL = CharacterSkill.SKILL2
 
 
 #### Maguu Kenki ####
@@ -2113,7 +2120,7 @@ class TranscendentAutomaton(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.ANEMO: 3})
     _CHARACTER = chr.MaguuKenki
     _EQUIPMENT_STATUS = stt.TranscendentAutomatonStatus
-    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+    _SKILL = CharacterSkill.SKILL2
 
 #### Mona ####
 
@@ -2140,7 +2147,7 @@ class StrategicReserve(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.GEO: 4})
     _CHARACTER = chr.Ningguang
     _EQUIPMENT_STATUS = stt.StrategicReserveStatus
-    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+    _SKILL = CharacterSkill.SKILL2
 
 
 #### Noelle ####
@@ -2150,7 +2157,7 @@ class IGotYourBack(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.GEO: 3})
     _CHARACTER = chr.Noelle
     _EQUIPMENT_STATUS = stt.IGotYourBackStatus
-    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+    _SKILL = CharacterSkill.SKILL2
 
 
 #### Qiqi ####
@@ -2190,7 +2197,7 @@ class MysticalAbandon(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.CRYO: 3})
     _CHARACTER = chr.Shenhe
     _EQUIPMENT_STATUS = stt.MysticalAbandonStatus
-    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+    _SKILL = CharacterSkill.SKILL2
 
 
 #### Tighnari ####
@@ -2200,7 +2207,7 @@ class KeenSight(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.DENDRO: 4})
     _CHARACTER = chr.Tighnari
     _EQUIPMENT_STATUS = stt.KeenSightStatus
-    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+    _SKILL = CharacterSkill.SKILL2
 
 
 #### Venti ####
@@ -2209,7 +2216,7 @@ class EmbraceOfWinds(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.ANEMO: 3})
     _CHARACTER = chr.Venti
     _EQUIPMENT_STATUS = stt.EmbraceOfWindsStatus
-    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+    _SKILL = CharacterSkill.SKILL2
 
 #### Xingqiu ####
 
@@ -2218,7 +2225,7 @@ class TheScentRemained(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.HYDRO: 4})
     _CHARACTER = chr.Xingqiu
     _EQUIPMENT_STATUS = stt.TheScentRemainedStatus
-    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+    _SKILL = CharacterSkill.SKILL2
 
 #### Yae Miko ####
 
@@ -2236,4 +2243,4 @@ class NaganoharaMeteorSwarm(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDices({Element.PYRO: 2})
     _CHARACTER = chr.Yoimiya
     _EQUIPMENT_STATUS = stt.NaganoharaMeteorSwarmStatus
-    _SKILL = CharacterSkill.ELEMENTAL_SKILL1
+    _SKILL = CharacterSkill.SKILL2

@@ -15,11 +15,11 @@ class TestWindAndFreedom(unittest.TestCase):
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1}))
             ),
             SkillAction(
-                skill=CharacterSkill.NORMAL_ATTACK,
+                skill=CharacterSkill.SKILL1,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
             ),
             SkillAction(
-                skill=CharacterSkill.NORMAL_ATTACK,
+                skill=CharacterSkill.SKILL1,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
             ),
         ])
@@ -40,8 +40,8 @@ class TestWindAndFreedom(unittest.TestCase):
             card=WindAndFreedom,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
         ))
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
-        game_state = step_skill(game_state, Pid.P2, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
+        game_state = step_skill(game_state, Pid.P2, CharacterSkill.SKILL1)
         game_state = step_action(game_state, Pid.P1, DeathSwapAction(char_id=2))
         self.assertIn(WindAndFreedomStatus, game_state.get_player1().get_combat_statuses())
         self.assertEqual(game_state.get_active_player_id(), Pid.P1)

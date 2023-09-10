@@ -43,7 +43,7 @@ class TestElementalResonanceEnduringRock(unittest.TestCase):
             self.BASE_GAME
         )
         # GEO damage without stacked shield in combat statuses doesn't trigger
-        game_state = step_skill(base_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL1)
+        game_state = step_skill(base_state, Pid.P1, CharacterSkill.SKILL2)
         p1_combat_statuses = game_state.get_player1().get_combat_statuses()
         self.assertFalse(any(
             isinstance(status, StackedShieldStatus)
@@ -51,23 +51,23 @@ class TestElementalResonanceEnduringRock(unittest.TestCase):
         ))
         self.assertIn(ElementalResonanceEnduringRockStatus, p1_combat_statuses)
 
-        game_state = step_skill(game_state, Pid.P2, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P2, CharacterSkill.SKILL1)
 
         game_state = AddCombatStatusEffect(Pid.P1, LeaveItToMeStatus).execute(game_state)
         game_state = step_swap(game_state, Pid.P1, char_id=2)
         game_state = UpdateCombatStatusEffect(Pid.P1, FullPlateStatus(usages=1)).execute(game_state)
 
         # PHYSICAL attack with stacked shield in combat statuses doesn't trigger
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         self.assertEqual(
             game_state.get_player1().get_combat_statuses().just_find(FullPlateStatus).usages,
             1
         )
 
-        game_state = step_skill(game_state, Pid.P2, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P2, CharacterSkill.SKILL1)
 
         # GEO attack with stacked shield in combat statuses triggers
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL1)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
         p1_combat_statuses = game_state.get_player1().get_combat_statuses()
         self.assertEqual(p1_combat_statuses.just_find(FullPlateStatus).usages, 5)
         self.assertNotIn(ElementalResonanceEnduringRockStatus, p1_combat_statuses)

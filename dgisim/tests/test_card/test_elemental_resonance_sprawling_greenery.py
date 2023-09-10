@@ -63,14 +63,14 @@ class TestElementalResonanceSprawlingGreenery(unittest.TestCase):
 
         # Reaction does boost the damage that triggers the reaction
         game_state = oppo_aura_elem(base_state, Element.ELECTRO)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1_combat_statuses = game_state.get_player1().get_combat_statuses()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertNotIn(ElementalResonanceSprawlingGreeneryStatus, p1_combat_statuses)
         self.assertEqual(p2ac.get_hp(), 6)
 
         # None reaction damage doesn't trigger status
-        game_state = step_skill(base_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(base_state, Pid.P1, CharacterSkill.SKILL1)
         p1_combat_statuses = game_state.get_player1().get_combat_statuses()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertIn(ElementalResonanceSprawlingGreeneryStatus, p1_combat_statuses)

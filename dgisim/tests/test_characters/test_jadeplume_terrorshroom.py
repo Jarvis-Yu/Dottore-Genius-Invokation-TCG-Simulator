@@ -17,7 +17,7 @@ class TestJadeplumeTerrorshroom(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.DENDRO: 1, Element.HYDRO: 1, Element.GEO: 1}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
@@ -29,7 +29,7 @@ class TestJadeplumeTerrorshroom(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.ELEMENTAL_SKILL1,
+            CharacterSkill.SKILL2,
             dices=ActualDices({Element.DENDRO: 3}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
@@ -57,32 +57,32 @@ class TestJadeplumeTerrorshroom(unittest.TestCase):
 
         # dealing elemental damage increases stacks
         game_state = grant_all_thick_shield(game_state)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL1)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         p1ac = game_state.get_player1().just_get_active_character()
         self.assertIn(RadicalVitalityStatus, p1ac.get_character_statuses())
         self.assertEqual(p1ac.get_character_statuses().just_find(RadicalVitalityStatus).usages, 1)
 
         # normal attack (physical) doesn't increase stacks
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1ac = game_state.get_player1().just_get_active_character()
         self.assertIn(RadicalVitalityStatus, p1ac.get_character_statuses())
         self.assertEqual(p1ac.get_character_statuses().just_find(RadicalVitalityStatus).usages, 1)
 
         # dealing elemental damage increases stacks
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL1)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
         p1ac = game_state.get_player1().just_get_active_character()
         self.assertIn(RadicalVitalityStatus, p1ac.get_character_statuses())
         self.assertEqual(p1ac.get_character_statuses().just_find(RadicalVitalityStatus).usages, 2)
 
         # dealing elemental damage increases stacks
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL1)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
         p1ac = game_state.get_player1().just_get_active_character()
         self.assertIn(RadicalVitalityStatus, p1ac.get_character_statuses())
         self.assertEqual(p1ac.get_character_statuses().just_find(RadicalVitalityStatus).usages, 3)
 
         # dealing elemental damage increases stacks (cap at 3)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL1)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
         p1ac = game_state.get_player1().just_get_active_character()
         self.assertIn(RadicalVitalityStatus, p1ac.get_character_statuses())
         self.assertEqual(p1ac.get_character_statuses().just_find(RadicalVitalityStatus).usages, 3)
@@ -148,20 +148,20 @@ class TestJadeplumeTerrorshroom(unittest.TestCase):
         self.assertEqual(p1ac.get_character_statuses().just_find(RadicalVitalityStatus).usages, 2)
 
         # normal attack (physical) doesn't increase stacks
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1ac = game_state.get_player1().just_get_active_character()
         self.assertIn(RadicalVitalityStatus, p1ac.get_character_statuses())
         self.assertEqual(p1ac.get_character_statuses().just_find(RadicalVitalityStatus).usages, 2)
 
         # dealing elemental damage increases stacks
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL1)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
         p1ac = game_state.get_player1().just_get_active_character()
         self.assertIn(RadicalVitalityStatus, p1ac.get_character_statuses())
         self.assertEqual(p1ac.get_character_statuses().just_find(RadicalVitalityStatus).usages, 3)
         game_state_3_stack = game_state
 
         # dealing elemental damage increases stacks
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL1)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
         p1ac = game_state.get_player1().just_get_active_character()
         self.assertIn(RadicalVitalityStatus, p1ac.get_character_statuses())
         self.assertEqual(p1ac.get_character_statuses().just_find(RadicalVitalityStatus).usages, 4)

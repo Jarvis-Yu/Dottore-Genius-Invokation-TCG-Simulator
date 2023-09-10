@@ -19,7 +19,7 @@ class TestKeqing(unittest.TestCase):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -35,7 +35,7 @@ class TestKeqing(unittest.TestCase):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.ELEMENTAL_SKILL1,
+            skill=CharacterSkill.SKILL2,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -58,7 +58,7 @@ class TestKeqing(unittest.TestCase):
         # second skill by casting skill directly
         gsm = GameStateMachine(game_state_1, a1, a2)
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.ELEMENTAL_SKILL1,
+            skill=CharacterSkill.SKILL2,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         gsm.player_step()
@@ -119,7 +119,7 @@ class TestKeqing(unittest.TestCase):
         # test normal attack electro infused
         gsm = GameStateMachine(game_state_1_2, a1, a2)
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         gsm.player_step()
@@ -136,7 +136,7 @@ class TestKeqing(unittest.TestCase):
         game_state = set_active_player_id(game_state_1_2, Pid.P1, 2)
         gsm = GameStateMachine(game_state, a1, a2)
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         gsm.player_step()
@@ -269,11 +269,11 @@ class TestKeqing(unittest.TestCase):
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
             SkillAction(
-                skill=CharacterSkill.ELEMENTAL_SKILL1,
+                skill=CharacterSkill.SKILL2,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
             SkillAction(
-                skill=CharacterSkill.NORMAL_ATTACK,
+                skill=CharacterSkill.SKILL1,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             )
         ])
@@ -295,7 +295,7 @@ class TestKeqing(unittest.TestCase):
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_actions([
             SkillAction(
-                skill=CharacterSkill.ELEMENTAL_SKILL1,
+                skill=CharacterSkill.SKILL2,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
             CardAction(
@@ -303,7 +303,7 @@ class TestKeqing(unittest.TestCase):
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
             SkillAction(
-                skill=CharacterSkill.NORMAL_ATTACK,
+                skill=CharacterSkill.SKILL1,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             )
         ])

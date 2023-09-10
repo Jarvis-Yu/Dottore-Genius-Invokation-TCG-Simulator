@@ -26,7 +26,7 @@ class TestKaeya(unittest.TestCase):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -42,7 +42,7 @@ class TestKaeya(unittest.TestCase):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.ELEMENTAL_SKILL1,
+            skill=CharacterSkill.SKILL2,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -162,7 +162,7 @@ class TestKaeya(unittest.TestCase):
         ).build()
 
         a2.inject_action(SkillAction(
-            skill=CharacterSkill.ELEMENTAL_SKILL1,
+            skill=CharacterSkill.SKILL2,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         gsm = GameStateMachine(game_state_p2_move, a1, a2)
@@ -182,7 +182,7 @@ class TestKaeya(unittest.TestCase):
         game_state_p2_move_and_low = kill_character(game_state_p2_move, 3, hp=2)
         a2.inject_actions([
             SkillAction(
-                skill=CharacterSkill.ELEMENTAL_SKILL1,
+                skill=CharacterSkill.SKILL2,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
             DeathSwapAction(
@@ -228,12 +228,12 @@ class TestKaeya(unittest.TestCase):
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 4})),
             ),
             SkillAction(
-                skill=CharacterSkill.ELEMENTAL_SKILL1,
+                skill=CharacterSkill.SKILL2,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
             EndRoundAction(),
             SkillAction(
-                skill=CharacterSkill.ELEMENTAL_SKILL1,
+                skill=CharacterSkill.SKILL2,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
         ])

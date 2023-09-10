@@ -21,7 +21,7 @@ class TestFatuiPyroAgent(unittest.TestCase):
         game_state = step_skill(
             self.BASE_NO_STEALTH,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.PYRO: 1, Element.HYDRO: 1, Element.DENDRO: 1}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
@@ -32,7 +32,7 @@ class TestFatuiPyroAgent(unittest.TestCase):
         game_state = step_skill(
             self.BASE_NO_STEALTH,
             Pid.P1,
-            CharacterSkill.ELEMENTAL_SKILL1,
+            CharacterSkill.SKILL2,
             dices=ActualDices({Element.PYRO: 3}),
         )
         p1ac = game_state.get_player1().just_get_active_character()
@@ -63,7 +63,7 @@ class TestFatuiPyroAgent(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.PYRO: 1, Element.HYDRO: 1, Element.DENDRO: 1}),
         )
         p1ac = game_state.get_player1().just_get_active_character()
@@ -76,7 +76,7 @@ class TestFatuiPyroAgent(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.ELEMENTAL_SKILL1,
+            CharacterSkill.SKILL2,
             dices=ActualDices({Element.PYRO: 3}),
         )
         p1ac = game_state.get_player1().just_get_active_character()
@@ -130,7 +130,7 @@ class TestFatuiPyroAgent(unittest.TestCase):
         self.assertEqual(p1ac.get_character_statuses().just_find(StealthStatus).usages, 2)
 
         # test normal attack gains pyro infusion
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1ac = game_state.get_player1().just_get_active_character()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 5)

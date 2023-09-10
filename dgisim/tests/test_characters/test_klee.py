@@ -23,7 +23,7 @@ class TestKlee(unittest.TestCase):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -42,7 +42,7 @@ class TestKlee(unittest.TestCase):
         ).build()
         gsm = GameStateMachine(base_game, a1, a2)
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.ELEMENTAL_SKILL1,
+            skill=CharacterSkill.SKILL2,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -58,7 +58,7 @@ class TestKlee(unittest.TestCase):
 
         # first normal attack
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         gsm.player_step()
@@ -77,12 +77,12 @@ class TestKlee(unittest.TestCase):
         # second normal attack (charged)
         self.assertEqual(
             just(
-                gsm.get_game_state().skill_checker().usable(Pid.P1, 2, CharacterSkill.NORMAL_ATTACK)
+                gsm.get_game_state().skill_checker().usable(Pid.P1, 2, CharacterSkill.SKILL1)
             )[1],
             AbstractDices({Element.ANY: 2})
         )
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2})),
         ))
         gsm.player_step()
@@ -131,7 +131,7 @@ class TestKlee(unittest.TestCase):
         gsm = GameStateMachine(game_state, a1, a2)
         a2.inject_action(
             SkillAction(
-                skill=CharacterSkill.NORMAL_ATTACK,
+                skill=CharacterSkill.SKILL1,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             )
         )
@@ -165,7 +165,7 @@ class TestKlee(unittest.TestCase):
         # p2 skill again
         a2.inject_action(
             SkillAction(
-                skill=CharacterSkill.NORMAL_ATTACK,
+                skill=CharacterSkill.SKILL1,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             )
         )
@@ -189,19 +189,19 @@ class TestKlee(unittest.TestCase):
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
             SkillAction(
-                skill=CharacterSkill.NORMAL_ATTACK,
+                skill=CharacterSkill.SKILL1,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
             SkillAction(
-                skill=CharacterSkill.NORMAL_ATTACK,
+                skill=CharacterSkill.SKILL1,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2})),
             ),
             SkillAction(
-                skill=CharacterSkill.NORMAL_ATTACK,
+                skill=CharacterSkill.SKILL1,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2})),
             ),
             SkillAction(
-                skill=CharacterSkill.NORMAL_ATTACK,
+                skill=CharacterSkill.SKILL1,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
             EndRoundAction(),

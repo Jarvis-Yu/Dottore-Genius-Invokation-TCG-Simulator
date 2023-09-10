@@ -18,7 +18,7 @@ class TestNingguang(unittest.TestCase):
         game_state = step_skill(
             game_state,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.GEO: 1, Element.HYDRO: 1, Element.DENDRO: 1}),
         )
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
@@ -31,7 +31,7 @@ class TestNingguang(unittest.TestCase):
         game_state = step_skill(
             game_state,
             Pid.P1,
-            CharacterSkill.ELEMENTAL_SKILL1,
+            CharacterSkill.SKILL2,
             dices=ActualDices({Element.GEO: 3}),
         )
         p1 = game_state.get_player1()
@@ -98,12 +98,12 @@ class TestNingguang(unittest.TestCase):
         self.assertIs(dmg.element, Element.GEO)
 
         # test has geo damage boost
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertEqual(dmg.damage, 2)
         self.assertIs(dmg.element, Element.GEO)
 
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL1)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertEqual(dmg.damage, 3)
         self.assertIs(dmg.element, Element.GEO)
@@ -111,7 +111,7 @@ class TestNingguang(unittest.TestCase):
         # not activated when Ningguang is off-field
         game_state = replace_character(game_state, Pid.P1, Noelle, 3)
         game_state = step_swap(game_state, Pid.P1, 3)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL1)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertEqual(dmg.damage, 1)
         self.assertIs(dmg.element, Element.GEO)
@@ -119,7 +119,7 @@ class TestNingguang(unittest.TestCase):
         # not activated when there's no JadeScreen
         game_state = step_swap(game_state, Pid.P1, 2)
         game_state = RemoveCombatStatusEffect(Pid.P1, JadeScreenStatus).execute(game_state)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertEqual(dmg.damage, 1)
         self.assertIs(dmg.element, Element.GEO)

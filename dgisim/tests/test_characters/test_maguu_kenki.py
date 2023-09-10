@@ -17,7 +17,7 @@ class TestMaguuKenki(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.ANEMO: 1, Element.HYDRO: 1, Element.DENDRO: 1}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
@@ -29,7 +29,7 @@ class TestMaguuKenki(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.ELEMENTAL_SKILL1,
+            CharacterSkill.SKILL2,
             dices=ActualDices({Element.ANEMO: 3}),
         )
         p1 = game_state.get_player1()
@@ -44,7 +44,7 @@ class TestMaguuKenki(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.ELEMENTAL_SKILL2,
+            CharacterSkill.SKILL3,
             dices=ActualDices({Element.CRYO: 3}),
         )
         p1 = game_state.get_player1()
@@ -115,6 +115,6 @@ class TestMaguuKenki(unittest.TestCase):
 
         game_state = skip_action_round(game_state, Pid.P2)
         game_state = silent_fast_swap(game_state, Pid.P1, char_id=2)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL2)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL3)
         p1ac = game_state.get_player1().just_get_active_character()
         self.assertEqual(p1ac.get_id(), 1)

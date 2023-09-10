@@ -21,7 +21,7 @@ class TestBennett(unittest.TestCase):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -37,7 +37,7 @@ class TestBennett(unittest.TestCase):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.ELEMENTAL_SKILL1,
+            skill=CharacterSkill.SKILL2,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -121,14 +121,14 @@ class TestBennett(unittest.TestCase):
                 base_game = kill_character(base_game, character_id=2, pid=Pid.P1, hp=4)
 
                 # P1 normal attack
-                game_state = step_skill(base_game, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+                game_state = step_skill(base_game, Pid.P1, CharacterSkill.SKILL1)
                 p1ac = game_state.get_player1().just_get_active_character()
                 p2ac = game_state.get_player2().just_get_active_character()
                 self.assertEqual(p1ac.get_hp(), 6)
                 self.assertEqual(p2ac.get_hp(), 8 if status is InspirationFieldStatus else 6)
 
                 # P2 normal attack
-                game_state = step_skill(game_state, Pid.P2, CharacterSkill.NORMAL_ATTACK)
+                game_state = step_skill(game_state, Pid.P2, CharacterSkill.SKILL1)
                 p1ac = game_state.get_player1().just_get_active_character()
                 p2ac = game_state.get_player2().just_get_active_character()
                 self.assertEqual(p1ac.get_hp(), 5)  # because opponent AC is Rhodeia of Loch
@@ -137,7 +137,7 @@ class TestBennett(unittest.TestCase):
                 game_state = kill_character(game_state, character_id=2, pid=Pid.P1, hp=7)
 
                 # P1 normal attack
-                game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+                game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
                 p1ac = game_state.get_player1().just_get_active_character()
                 p2ac = game_state.get_player2().just_get_active_character()
                 self.assertEqual(p1ac.get_hp(), 7)

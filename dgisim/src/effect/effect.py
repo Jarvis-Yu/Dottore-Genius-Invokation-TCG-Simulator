@@ -1827,6 +1827,8 @@ class BroadCastPostSkillInfoEffect(DirectEffect):
     skill: CharacterSkill
 
     def execute(self, game_state: GameState) -> GameState:
+        char = game_state.get_character_target(self.source)
+        assert char is not None
         return StatusProcessing.inform_all_statuses(
             game_state,
             self.source.pid,
@@ -1834,6 +1836,7 @@ class BroadCastPostSkillInfoEffect(DirectEffect):
             SkillIEvent(
                 source=self.source,
                 skill_type=self.skill,
+                skill_true_type=char.skill_actual_type(self.skill),
             ),
         )
 
@@ -1843,6 +1846,8 @@ class BroadCastPreSkillInfoEffect(DirectEffect):
     skill: CharacterSkill
 
     def execute(self, game_state: GameState) -> GameState:
+        char = game_state.get_character_target(self.source)
+        assert char is not None
         return StatusProcessing.inform_all_statuses(
             game_state,
             self.source.pid,
@@ -1850,5 +1855,6 @@ class BroadCastPreSkillInfoEffect(DirectEffect):
             SkillIEvent(
                 source=self.source,
                 skill_type=self.skill,
+                skill_true_type=char.skill_actual_type(self.skill),
             ),
         )

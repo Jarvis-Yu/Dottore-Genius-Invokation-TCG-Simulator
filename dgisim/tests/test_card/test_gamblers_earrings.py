@@ -47,7 +47,7 @@ class TestGamblersEarrings(unittest.TestCase):
         game_state = just(game_state.action_step(
             Pid.P1,
             SkillAction(
-                skill=CharacterSkill.ELEMENTAL_SKILL1,
+                skill=CharacterSkill.SKILL2,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
             )
         ))

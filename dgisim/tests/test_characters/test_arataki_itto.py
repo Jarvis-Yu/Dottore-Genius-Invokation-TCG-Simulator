@@ -27,7 +27,7 @@ class TestAratakiItto(unittest.TestCase):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -43,7 +43,7 @@ class TestAratakiItto(unittest.TestCase):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.ELEMENTAL_SKILL1,
+            skill=CharacterSkill.SKILL2,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -118,7 +118,7 @@ class TestAratakiItto(unittest.TestCase):
                 gsm = GameStateMachine(game_state, a1, a2)
 
                 a1.inject_action(SkillAction(
-                    skill=CharacterSkill.NORMAL_ATTACK,
+                    skill=CharacterSkill.SKILL1,
                     instruction=DiceOnlyInstruction(dices=ActualDices({
                         Element.OMNI: case_val(i < 2, 3, 2)
                     })),
@@ -154,7 +154,7 @@ class TestAratakiItto(unittest.TestCase):
 
         # first character damage triggers ushi
         game_state = base_game.action_step(Pid.P2, SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
         ))
         game_state = auto_step(just(game_state))
@@ -173,7 +173,7 @@ class TestAratakiItto(unittest.TestCase):
 
         # second character damage doesn't trigger ushi
         game_state = game_state.action_step(Pid.P2, SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
         ))
         game_state = auto_step(just(game_state))
@@ -246,7 +246,7 @@ class TestAratakiItto(unittest.TestCase):
 
         # first character damage triggers ushi
         game_state = base_game.action_step(Pid.P2, SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
         ))
         game_state = auto_step(just(game_state))
@@ -279,7 +279,7 @@ class TestAratakiItto(unittest.TestCase):
         game_state = just(game_state.action_step(
             Pid.P1,
             SkillAction(
-                skill=CharacterSkill.NORMAL_ATTACK,
+                skill=CharacterSkill.SKILL1,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
             )
         ))
@@ -303,7 +303,7 @@ class TestAratakiItto(unittest.TestCase):
         game_state = just(game_state.action_step(
             Pid.P1,
             SkillAction(
-                skill=CharacterSkill.NORMAL_ATTACK,
+                skill=CharacterSkill.SKILL1,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
             )
         ))
@@ -345,11 +345,11 @@ class TestAratakiItto(unittest.TestCase):
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
             SkillAction(  # odd dices
-                skill=CharacterSkill.ELEMENTAL_SKILL1,
+                skill=CharacterSkill.SKILL2,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
             SkillAction(  # even dices; second normal attach (charged)
-                skill=CharacterSkill.NORMAL_ATTACK,
+                skill=CharacterSkill.SKILL1,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
             EndRoundAction(),
@@ -388,11 +388,11 @@ class TestAratakiItto(unittest.TestCase):
         self.assertTrue(dmg.damage_type.charged_attack)
 
         # odd dices now so not charged
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertFalse(dmg.damage_type.charged_attack)
 
         # even dices again now, so charged
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertTrue(dmg.damage_type.charged_attack)

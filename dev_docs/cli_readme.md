@@ -636,7 +636,7 @@ Selections are:
 e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
 ::>     // entered nothing to use suggested dices
 
-#### Player1 Action: <CharacterSkill.ELEMENTAL_SKILL1, DiceOnlyInstruction:(dices=[('ELECTRO', '3')])>
+#### Player1 Action: <CharacterSkill.SKILL2, DiceOnlyInstruction:(dices=[('ELECTRO', '3')])>
 
 :> 
 <Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
@@ -772,7 +772,7 @@ e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
 ---------------------------------------------------------------
 <Effects>
 ===============================================================
-#### Player2 Action: <CharacterSkill.NORMAL_ATTACK, DiceOnlyInstruction:(dices=[('HYDRO', '1'), ('GEO', '1'), ('CRYO', '1')])>
+#### Player2 Action: <CharacterSkill.SKILL1, DiceOnlyInstruction:(dices=[('HYDRO', '1'), ('GEO', '1'), ('CRYO', '1')])>
 
 :> 
 <Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
@@ -1142,7 +1142,7 @@ Please choose id (0-3)
 ----------------------------------------------------------------------
 <Effects>
 ======================================================================
-#### Player2 Action: <CharacterSkill.NORMAL_ATTACK, DiceOnlyInstruction:(dices=[('ELECTRO', '2'), ('OMNI', '1')])>
+#### Player2 Action: <CharacterSkill.SKILL1, DiceOnlyInstruction:(dices=[('ELECTRO', '2'), ('OMNI', '1')])>
 
 :> 
 <Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
@@ -1837,7 +1837,7 @@ Please choose id (0-3)
 ----------------------------------------------------------------------
 <Effects>
 ======================================================================
-#### Player2 Action: <CharacterSkill.NORMAL_ATTACK, DiceOnlyInstruction:(dices=[('PYRO', '1'), ('CRYO', '1'), ('OMNI', '1')])>
+#### Player2 Action: <CharacterSkill.SKILL1, DiceOnlyInstruction:(dices=[('PYRO', '1'), ('CRYO', '1'), ('OMNI', '1')])>
 
 :> q    // quit CLI
 ```

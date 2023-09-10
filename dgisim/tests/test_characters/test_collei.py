@@ -17,7 +17,7 @@ class TestCollei(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.DENDRO: 1, Element.HYDRO: 1, Element.GEO: 1}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
@@ -29,7 +29,7 @@ class TestCollei(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.ELEMENTAL_SKILL1,
+            CharacterSkill.SKILL2,
             dices=ActualDices({Element.DENDRO: 3}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
@@ -84,7 +84,7 @@ class TestCollei(unittest.TestCase):
         game_state = skip_action_round(game_state, Pid.P2)
         game_state = silent_fast_swap(game_state, Pid.P1, char_id=3)
         assert isinstance(game_state.get_player1().just_get_active_character(), Keqing)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL1)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 1)  # damage = 6 = 4 + 2
@@ -112,7 +112,7 @@ class TestCollei(unittest.TestCase):
         game_state = next_round(game_state)
         game_state = fill_dices_with_omni(game_state)
         game_state = skip_action_round_until(game_state, Pid.P1)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL1)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
         p1 = game_state.get_player1()
         self.assertIn(SproutStatus, p1.get_combat_statuses())
         self.assertEqual(p1.get_combat_statuses().just_find(SproutStatus).usages, 1)

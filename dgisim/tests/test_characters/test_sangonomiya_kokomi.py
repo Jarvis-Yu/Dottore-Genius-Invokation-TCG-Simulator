@@ -17,7 +17,7 @@ class TestSangonomiyaKokomi(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.HYDRO: 1, Element.ELECTRO: 1, Element.DENDRO: 1}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
@@ -29,7 +29,7 @@ class TestSangonomiyaKokomi(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.ELEMENTAL_SKILL1,
+            CharacterSkill.SKILL2,
             dices=ActualDices({Element.HYDRO: 3}),
         )
         p1 = game_state.get_player1()
@@ -90,7 +90,7 @@ class TestSangonomiyaKokomi(unittest.TestCase):
         game_state = simulate_status_dmg(game_state, dmg_amount=6, pid=Pid.P1, char_id=1)
         game_state = simulate_status_dmg(game_state, dmg_amount=5, pid=Pid.P1, char_id=2)
         game_state = simulate_status_dmg(game_state, dmg_amount=4, pid=Pid.P1, char_id=3)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1ac = game_state.get_player1().just_get_active_character()
         p1cs = game_state.get_player1().get_characters()
         p2ac = game_state.get_player2().just_get_active_character()
@@ -106,7 +106,7 @@ class TestSangonomiyaKokomi(unittest.TestCase):
         game_state = skip_action_round(game_state, Pid.P2)
         game_state = step_swap(game_state, Pid.P1, 1)
         game_state = skip_action_round(game_state, Pid.P2)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1cs = game_state.get_player1().get_characters()
         self.assertEqual(p1cs.just_get_character(1).get_hp(), 5)
         self.assertEqual(p1cs.just_get_character(2).get_hp(), 6)
@@ -161,7 +161,7 @@ class TestSangonomiyaKokomi(unittest.TestCase):
         # burst normal attack functions as usual
         game_state = skip_action_round_until(game_state, Pid.P1)
         game_state = fill_dices_with_omni(game_state)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1 = game_state.get_player1()
         p1ac = p1.just_get_active_character()
         p2ac = game_state.get_player2().just_get_active_character()

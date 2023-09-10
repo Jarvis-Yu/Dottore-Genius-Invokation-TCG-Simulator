@@ -4,36 +4,44 @@ from ..event import EventType
 
 __all__ = [
     "CharacterSkill",
+    "CharacterSkillType",
     "Faction",
     "WeaponType",
 ]
 
 
 class CharacterSkill(Enum):
-    NORMAL_ATTACK = 0
-    ELEMENTAL_BURST = 1
-    ELEMENTAL_SKILL1 = 2
-    ELEMENTAL_SKILL2 = 3
+    SKILL1 = 0
+    SKILL2 = 1
+    SKILL3 = 2
+    ELEMENTAL_BURST = 3
 
     def to_event_type(self) -> EventType:
-        if self is CharacterSkill.NORMAL_ATTACK:
-            return EventType.NORMAL_ATTACK
-        elif self is CharacterSkill.ELEMENTAL_SKILL1:
-            return EventType.ELEMENTAL_SKILL1
-        elif self is CharacterSkill.ELEMENTAL_SKILL2:
-            return EventType.ELEMENTAL_SKILL2
+        if self is CharacterSkill.SKILL1:
+            return EventType.SKILL1
+        elif self is CharacterSkill.SKILL2:
+            return EventType.SKILL2
+        elif self is CharacterSkill.SKILL3:
+            return EventType.SKILL3
         elif self is CharacterSkill.ELEMENTAL_BURST:
             return EventType.ELEMENTAL_BURST
         raise NotImplementedError
 
+    # TODO: remove
     def is_normal_attack(self) -> bool:
-        return self is CharacterSkill.NORMAL_ATTACK
+        return self is CharacterSkill.SKILL1
 
+    # TODO: remove
     def is_elemental_skill(self) -> bool:
-        return self is CharacterSkill.ELEMENTAL_SKILL1 or self is CharacterSkill.ELEMENTAL_SKILL2
+        return self is CharacterSkill.SKILL2 or self is CharacterSkill.SKILL3
 
     def is_elemental_burst(self) -> bool:
         return self is CharacterSkill.ELEMENTAL_BURST
+
+class CharacterSkillType(Enum):
+    NORMAL_ATTACK = "Normal-Attack"
+    ELEMENTAL_SKILL = "Elemental-Skill"
+    ELEMENTAL_BURST = "Elemental-Burst"
 
 class WeaponType(Enum):
     BOW = 0

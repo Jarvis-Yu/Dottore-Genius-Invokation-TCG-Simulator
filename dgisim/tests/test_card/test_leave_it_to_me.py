@@ -60,7 +60,7 @@ class TestLeaveItToMe(unittest.TestCase):
 
         # test opponent cannot use this
         game_state = buffed_game_state.action_step(Pid.P1, SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
         ))
         assert game_state is not None

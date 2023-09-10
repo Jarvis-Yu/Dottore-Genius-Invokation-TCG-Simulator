@@ -36,7 +36,7 @@ class TestElementalShatteringIce(unittest.TestCase):
         )
 
         # Elemental skill (of Rhodeia of Loch) doesn't trigger or consume
-        game_state = step_skill(base_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL1)
+        game_state = step_skill(base_state, Pid.P1, CharacterSkill.SKILL2)
         p1_combat_statuses = game_state.get_player1().get_combat_statuses()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertIn(ElementalResonanceShatteringIceStatus, p1_combat_statuses)
@@ -45,7 +45,7 @@ class TestElementalShatteringIce(unittest.TestCase):
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
 
         # Normal attack (of Rhodeia of Loch) triggers
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1_combat_statuses = game_state.get_player1().get_combat_statuses()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertNotIn(ElementalResonanceShatteringIceStatus, p1_combat_statuses)

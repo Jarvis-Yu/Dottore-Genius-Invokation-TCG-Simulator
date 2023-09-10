@@ -17,7 +17,7 @@ class TestJean(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.ANEMO: 1, Element.HYDRO: 1, Element.DENDRO: 1}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
@@ -30,7 +30,7 @@ class TestJean(unittest.TestCase):
         game_state = step_skill(
             game_state,
             Pid.P1,
-            CharacterSkill.ELEMENTAL_SKILL1,
+            CharacterSkill.SKILL2,
             dices=ActualDices({Element.ANEMO: 3}),
         )
         p2cs = game_state.get_player2().get_characters()
@@ -102,7 +102,7 @@ class TestJean(unittest.TestCase):
         base_state = skip_action_round_until(base_state, Pid.P1)
 
         # test non-anemo damage doesn't get boost
-        game_state = step_skill(base_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(base_state, Pid.P1, CharacterSkill.SKILL1)
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 8)
 
@@ -112,7 +112,7 @@ class TestJean(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 8)
 
         # test jean elemental skill (anemo damage) does get ANEMO boost
-        game_state = step_skill(base_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL1)
+        game_state = step_skill(base_state, Pid.P1, CharacterSkill.SKILL2)
         game_state = step_swap(game_state, Pid.P2, 1)
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 6)
@@ -120,7 +120,7 @@ class TestJean(unittest.TestCase):
         # test teammate gets boost
         game_state = replace_character(base_state, Pid.P1, Venti, 3)
         game_state = silent_fast_swap(game_state, Pid.P1, 3)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL1)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 7)
 
@@ -128,6 +128,6 @@ class TestJean(unittest.TestCase):
         game_state = replace_character(base_state, Pid.P1, Venti, 3)
         game_state = simulate_status_dmg(game_state, BIG_INT, pid=Pid.P1)
         game_state = step_action(game_state, Pid.P1, DeathSwapAction(char_id=3))
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL1)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 8)

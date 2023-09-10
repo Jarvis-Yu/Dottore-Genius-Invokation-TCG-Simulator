@@ -21,7 +21,7 @@ from ..effect.structs import StaticTarget, DamageType
 from ..element import *
 from ..helper.quality_of_life import case_val
 from ..state.enums import Pid
-from .enums import CharacterSkill, Faction, WeaponType
+from .enums import CharacterSkill, CharacterSkillType, Faction, WeaponType
 
 if TYPE_CHECKING:
     from ..state.game_state import GameState
@@ -72,6 +72,11 @@ class Character:
     _ELEMENTAL_SKILL1_COST: None | AbstractDices = None
     _ELEMENTAL_SKILL2_COST: None | AbstractDices = None
     _ELEMENTAL_BURST_COST: None | AbstractDices = None
+
+    _SKILL1_ACTUAL_TYPE = CharacterSkillType.NORMAL_ATTACK
+    _SKILL2_ACTUAL_TYPE = CharacterSkillType.ELEMENTAL_SKILL
+    _SKILL3_ACTUAL_TYPE = CharacterSkillType.ELEMENTAL_SKILL
+    _BURST_ACTUAL_TYPE = CharacterSkillType.ELEMENTAL_BURST
 
     def __init__(
         self,
@@ -169,22 +174,34 @@ class Character:
         """ Provides the skill types with corresponding cost that the character has """
         my_skills: list[CharacterSkill] = []
         if cls._normal_attack is not Character._normal_attack:
-            my_skills.append(CharacterSkill.NORMAL_ATTACK)
+            my_skills.append(CharacterSkill.SKILL1)
         if cls._elemental_skill1 is not Character._elemental_skill1:
-            my_skills.append(CharacterSkill.ELEMENTAL_SKILL1)
+            my_skills.append(CharacterSkill.SKILL2)
         if cls._elemental_skill2 is not Character._elemental_skill2:
-            my_skills.append(CharacterSkill.ELEMENTAL_SKILL2)
+            my_skills.append(CharacterSkill.SKILL3)
         if cls._elemental_burst is not Character._elemental_burst:
             my_skills.append(CharacterSkill.ELEMENTAL_BURST)
         return tuple(my_skills)
 
     @classmethod
+    def skill_actual_type(cls, skill: CharacterSkill) -> CharacterSkillType:
+        if skill is CharacterSkill.SKILL1:
+            return cls._SKILL1_ACTUAL_TYPE
+        elif skill is CharacterSkill.SKILL2:
+            return cls._SKILL2_ACTUAL_TYPE
+        elif skill is CharacterSkill.SKILL3:
+            return cls._SKILL3_ACTUAL_TYPE
+        elif skill is CharacterSkill.ELEMENTAL_BURST:
+            return cls._BURST_ACTUAL_TYPE
+        raise NotImplementedError(f"{skill} type for {cls.__name__} not defined")
+
+    @classmethod
     def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
-        if skill_type is CharacterSkill.NORMAL_ATTACK and cls._NORMAL_ATTACK_COST is not None:
+        if skill_type is CharacterSkill.SKILL1 and cls._NORMAL_ATTACK_COST is not None:
             return cls._NORMAL_ATTACK_COST
-        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1 and cls._ELEMENTAL_SKILL1_COST is not None:
+        elif skill_type is CharacterSkill.SKILL2 and cls._ELEMENTAL_SKILL1_COST is not None:
             return cls._ELEMENTAL_SKILL1_COST
-        elif skill_type is CharacterSkill.ELEMENTAL_SKILL2 and cls._ELEMENTAL_SKILL2_COST is not None:
+        elif skill_type is CharacterSkill.SKILL3 and cls._ELEMENTAL_SKILL2_COST is not None:
             return cls._ELEMENTAL_SKILL2_COST
         elif skill_type is CharacterSkill.ELEMENTAL_BURST and cls._ELEMENTAL_BURST_COST is not None:
             return cls._ELEMENTAL_BURST_COST
@@ -214,11 +231,11 @@ class Character:
         )
 
     def _skill(self, game_state: GameState, source: StaticTarget, skill_type: CharacterSkill) -> tuple[eft.Effect, ...]:
-        if skill_type is CharacterSkill.NORMAL_ATTACK:
+        if skill_type is CharacterSkill.SKILL1:
             return self.normal_attack(game_state, source)
-        elif skill_type is CharacterSkill.ELEMENTAL_SKILL1:
+        elif skill_type is CharacterSkill.SKILL2:
             return self.elemental_skill1(game_state, source)
-        elif skill_type is CharacterSkill.ELEMENTAL_SKILL2:
+        elif skill_type is CharacterSkill.SKILL3:
             return self.elemental_skill2(game_state, source)
         elif skill_type is CharacterSkill.ELEMENTAL_BURST:
             return self.elemental_burst(game_state, source)
@@ -1087,6 +1104,8 @@ class Ganyu(Character):
         Element.CRYO: 3,
     })
 
+    _SKILL3_ACTUAL_TYPE = CharacterSkillType.NORMAL_ATTACK
+
     @override
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
@@ -1129,13 +1148,11 @@ class Ganyu(Character):
                 damage=piercing_dmg,
                 damage_type=DamageType(elemental_skill=True),
             ),
-            eft.ReferredDamageEffect(
-                source=source,
-                target=DynamicCharacterTarget.OPPO_ACTIVE,
-                element=Element.CRYO,
-                damage=2,
-                damage_type=DamageType(elemental_skill=True),
-            ),
+        ) + normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.CRYO,
+            damage=2,
         )
 
     @override
@@ -1412,7 +1429,7 @@ class KaedeharaKazuha(Character):
         appended_effects: tuple[eft.Effect, ...] = super()._post_skill(
             game_state, source, skill_type, effects
         )
-        if skill_type is CharacterSkill.ELEMENTAL_SKILL1:
+        if skill_type is CharacterSkill.SKILL2:
             appended_effects += (
                 eft.ForwardSwapCharacterCheckEffect(
                     target_player=source.pid,

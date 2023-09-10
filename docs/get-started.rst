@@ -274,10 +274,10 @@ It is a class to help you generate valid actions.
 
             # check if normal attack is usable
             choices = action_generator.choices()
-            if dg.CharacterSkill.NORMAL_ATTACK not in choices:
+            if dg.CharacterSkill.SKILL1 not in choices:
                 return dagt.RandomAgent().choose_action(history, pid)
 
-            action_generator = action_generator.choose(dg.CharacterSkill.NORMAL_ATTACK)
+            action_generator = action_generator.choose(dg.CharacterSkill.SKILL1)
 
             # choose the dices to pay for the normal attack action
             choices = action_generator.choices()
@@ -358,10 +358,10 @@ and get a new action generator to make the next choice.
         ...
         # check if normal attack is usable
         choices = action_generator.choices()
-        if dg.CharacterSkill.NORMAL_ATTACK not in choices:
+        if dg.CharacterSkill.SKILL1 not in choices:
             return dagt.RandomAgent().choose_action(history, pid)
 
-        action_generator = action_generator.choose(dg.CharacterSkill.NORMAL_ATTACK)
+        action_generator = action_generator.choose(dg.CharacterSkill.SKILL1)
         ...
 
 The category of skills contains not only normal attack, but elemental skills and burst.

@@ -134,7 +134,7 @@ class SkillAction(GameAction):
 
     @classmethod
     def _empty(cls) -> Self:
-        return cls(skill=CharacterSkill.NORMAL_ATTACK, instruction=DiceOnlyInstruction._empty())
+        return cls(skill=CharacterSkill.SKILL1, instruction=DiceOnlyInstruction._empty())
 
 
 @dataclass(frozen=True, kw_only=True, repr=False)

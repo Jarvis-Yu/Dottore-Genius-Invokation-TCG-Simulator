@@ -21,7 +21,7 @@ class TestNahida(unittest.TestCase):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -38,7 +38,7 @@ class TestNahida(unittest.TestCase):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.ELEMENTAL_SKILL1,
+            skill=CharacterSkill.SKILL2,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -65,7 +65,7 @@ class TestNahida(unittest.TestCase):
 
         # with reaction and no prior Seed of Skandha Status
         game_state = oppo_aura_elem(self.BASE_GAME, Element.ELECTRO)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL1)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
 
         p2cs = game_state.get_player2().get_characters()
         p2c1 = p2cs.just_get_character(1)
@@ -89,7 +89,7 @@ class TestNahida(unittest.TestCase):
             target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
             status=SeedOfSkandhaStatus(usages=1),
         ).execute(self.BASE_GAME)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL1)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
 
         p2cs = game_state.get_player2().get_characters()
         p2c1 = p2cs.just_get_character(1)
@@ -120,7 +120,7 @@ class TestNahida(unittest.TestCase):
             status=SeedOfSkandhaStatus(usages=1),
         ).execute(self.BASE_GAME)
         game_state = oppo_aura_elem(game_state, Element.PYRO)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL1)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
 
         p2cs = game_state.get_player2().get_characters()
         p2c1 = p2cs.just_get_character(1)
@@ -150,7 +150,7 @@ class TestNahida(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.ELEMENTAL_SKILL2,
+            CharacterSkill.SKILL3,
             ActualDices({Element.OMNI: 5}),
         )
 
@@ -179,7 +179,7 @@ class TestNahida(unittest.TestCase):
 
         # with reaction
         game_state = oppo_aura_elem(self.BASE_GAME, Element.HYDRO)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL2)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL3)
 
         p2cs = game_state.get_player2().get_characters()
         p2c1 = p2cs.just_get_character(1)
@@ -321,7 +321,7 @@ class TestNahida(unittest.TestCase):
         but opponent cannot get to choose active character until all seeds are
         triggered
         """
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
 
         p2cs = game_state.get_player2().get_characters()
         p2c1 = p2cs.just_get_character(1)
@@ -345,7 +345,7 @@ class TestNahida(unittest.TestCase):
         game_state = oppo_aura_elem(game_state, Element.PYRO)
 
         # test character reaction dmg boosted
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 7)
 

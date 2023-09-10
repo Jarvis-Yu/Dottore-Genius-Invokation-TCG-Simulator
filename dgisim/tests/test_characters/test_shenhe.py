@@ -23,7 +23,7 @@ class TestShenhe(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.OMNI: 3}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
@@ -34,7 +34,7 @@ class TestShenhe(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.ELEMENTAL_SKILL1,
+            CharacterSkill.SKILL2,
             dices=ActualDices({Element.OMNI: 3}),
         )
         p1 = game_state.get_player1()
@@ -66,7 +66,7 @@ class TestShenhe(unittest.TestCase):
         base_state = AddSummonEffect(Pid.P1, ShadowswordGallopingFrostSummon).execute(base_state)
 
         # test cryo-infused normal attack gets boost
-        game_state = step_skill(base_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(base_state, Pid.P1, CharacterSkill.SKILL1)
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 7)
@@ -96,7 +96,7 @@ class TestShenhe(unittest.TestCase):
         ).execute(game_state)
 
         # test character swirl benefits from IcyQuillStatus
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1 = game_state.get_player1()
         p2cs = game_state.get_player2().get_characters()
         self.assertEqual(p2cs.just_get_character(1).get_hp(), 3)
@@ -116,7 +116,7 @@ class TestShenhe(unittest.TestCase):
         base_state = AddCombatStatusEffect(Pid.P1, IcicleStatus).execute(base_state)
 
         # test normal attack gets boost
-        game_state = step_skill(base_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(base_state, Pid.P1, CharacterSkill.SKILL1)
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 7)
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
@@ -149,7 +149,7 @@ class TestShenhe(unittest.TestCase):
         game_state = step_swap(game_state, Pid.P1, char_id=3)  # to Kaeya
 
         # elemental skill consumes status as normal
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL1)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 4)  # initial Shenhe skill already 
@@ -157,7 +157,7 @@ class TestShenhe(unittest.TestCase):
         self.assertEqual(p1.get_combat_statuses().just_find(IcyQuillStatus).usages, 2)
 
         # first normal attack is a free boost
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 1)
@@ -166,7 +166,7 @@ class TestShenhe(unittest.TestCase):
 
         # second normal attack is not free
         game_state = heal_for_all(game_state)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 7)
@@ -177,7 +177,7 @@ class TestShenhe(unittest.TestCase):
         game_state = fill_dices_with_omni(game_state)
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         # first normal attack is a free boost
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 4)
@@ -185,7 +185,7 @@ class TestShenhe(unittest.TestCase):
         self.assertEqual(p1.get_combat_statuses().just_find(IcyQuillStatus).usages, 1)
 
         # second normal attack is not free
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 1)

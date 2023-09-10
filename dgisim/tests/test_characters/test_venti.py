@@ -21,7 +21,7 @@ class TestVenti(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.OMNI: 3}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
@@ -33,7 +33,7 @@ class TestVenti(unittest.TestCase):
         game_state = step_skill(
             game_state,
             Pid.P1,
-            CharacterSkill.ELEMENTAL_SKILL1,
+            CharacterSkill.SKILL2,
             dices=ActualDices({Element.OMNI: 3}),
         )
         p1 = game_state.get_player1()
@@ -109,9 +109,9 @@ class TestVenti(unittest.TestCase):
         # starting with self2 oppo1 with oppo2 dead swaps to oppo3
         base_state = AddSummonEffect(Pid.P1, StormEyeSummon).execute(self.BASE_GAME)
         base_state = kill_character(base_state, 2, hp=1)
-        game_state = step_skill(base_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(base_state, Pid.P1, CharacterSkill.SKILL1)
         game_state = step_swap(game_state, Pid.P2, 2)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         game_state = step_action(game_state, Pid.P2, DeathSwapAction(char_id=1))
         game_state = next_round(game_state)
         p2cs = game_state.get_player2().get_characters()
@@ -135,13 +135,13 @@ class TestVenti(unittest.TestCase):
         self.assertRaises(Exception, lambda: step_skill(
             base_state,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.GEO: 2}),
         ))
         game_state = step_skill(
             base_state,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.OMNI: 1, Element.GEO: 1}),
         )
         self.assertNotIn(WindsOfHarmonyStatus, game_state.get_player1().get_combat_statuses())

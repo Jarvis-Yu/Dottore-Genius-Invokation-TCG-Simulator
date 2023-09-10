@@ -19,7 +19,7 @@ class TestJueyunGuoba(unittest.TestCase):
         # without JueyunGuoba
         gsm = GameStateMachine(base_game_state, p1, p2)
         p1.inject_action(SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         gsm.one_step()  # p1 normal attacks
@@ -40,7 +40,7 @@ class TestJueyunGuoba(unittest.TestCase):
             )
         ))
         p1.inject_action(SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         gsm.one_step()  # p1 has JueyunGuoba
@@ -83,7 +83,7 @@ class TestJueyunGuoba(unittest.TestCase):
             )
         ))
         p1.inject_action(SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         gsm.one_step()  # p1 has JueyunGuoba
@@ -128,7 +128,7 @@ class TestJueyunGuoba(unittest.TestCase):
             )
         ))
         p1.inject_action(SkillAction(
-            skill=CharacterSkill.ELEMENTAL_SKILL1,
+            skill=CharacterSkill.SKILL2,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         gsm.player_step()  # p1 has JueyunGuoba

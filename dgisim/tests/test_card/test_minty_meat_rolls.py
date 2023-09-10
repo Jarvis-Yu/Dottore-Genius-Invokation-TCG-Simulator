@@ -42,7 +42,7 @@ class TestMintyMeatRolls(unittest.TestCase):
 
         # test normal attack with 3 dices fails
         normal_attack_action = SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
         )
         self.assertRaises(
@@ -52,7 +52,7 @@ class TestMintyMeatRolls(unittest.TestCase):
 
         # test normal attack with 2 dices pass
         normal_attack_action = SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2}))
         )
         game_state = buffed_game_state.action_step(Pid.P1, normal_attack_action)
@@ -73,7 +73,7 @@ class TestMintyMeatRolls(unittest.TestCase):
         gsm = GameStateMachine(buffed_game_state, a1, a2)
         a1.inject_actions([
             SkillAction(
-                skill=CharacterSkill.NORMAL_ATTACK,
+                skill=CharacterSkill.SKILL1,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2}))
             )
         ] * 3)

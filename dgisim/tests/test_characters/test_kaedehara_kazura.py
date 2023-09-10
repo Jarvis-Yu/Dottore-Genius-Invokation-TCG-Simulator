@@ -28,7 +28,7 @@ class TestKaedeharaKazuha(unittest.TestCase):
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
-            skill=CharacterSkill.NORMAL_ATTACK,
+            skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -55,7 +55,7 @@ class TestKaedeharaKazuha(unittest.TestCase):
 
                 gsm = GameStateMachine(game_state, a1, a2)
                 a1.inject_action(SkillAction(
-                    skill=CharacterSkill.ELEMENTAL_SKILL1,
+                    skill=CharacterSkill.SKILL2,
                     instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
                 ))
                 p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -83,7 +83,7 @@ class TestKaedeharaKazuha(unittest.TestCase):
                         instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1}))
                     ),
                     SkillAction(
-                        skill=CharacterSkill.NORMAL_ATTACK,
+                        skill=CharacterSkill.SKILL1,
                         instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
                     ),
                     EndRoundAction(),
@@ -133,7 +133,7 @@ class TestKaedeharaKazuha(unittest.TestCase):
                 a1.clear()
                 a2.clear()
                 a1.inject_action(SkillAction(
-                    skill=CharacterSkill.ELEMENTAL_SKILL1,
+                    skill=CharacterSkill.SKILL2,
                     instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
                 ))
                 p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -246,7 +246,7 @@ class TestKaedeharaKazuha(unittest.TestCase):
             with self.subTest(elem=elem):
                 game_state = oppo_aura_elem(base_game_state, elem)
                 game_state = just(game_state.action_step(Pid.P1, SkillAction(
-                    skill=CharacterSkill.ELEMENTAL_SKILL1,
+                    skill=CharacterSkill.SKILL2,
                     instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
                 )))
                 game_state = auto_step(game_state)
@@ -378,7 +378,7 @@ class TestKaedeharaKazuha(unittest.TestCase):
         gsm = GameStateMachine(game_state, a1, a2)
         a1.inject_action(
             SkillAction(
-                skill=CharacterSkill.ELEMENTAL_SKILL1,
+                skill=CharacterSkill.SKILL2,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             )
         )
@@ -434,7 +434,7 @@ class TestKaedeharaKazuha(unittest.TestCase):
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1}))
             ),
             SkillAction(
-                skill=CharacterSkill.ELEMENTAL_SKILL1,
+                skill=CharacterSkill.SKILL2,
                 instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
             ),
         ])

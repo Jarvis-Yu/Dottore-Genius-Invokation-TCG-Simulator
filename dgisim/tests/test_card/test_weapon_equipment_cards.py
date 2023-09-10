@@ -30,7 +30,7 @@ class TestWeaponEquipmentCard(unittest.TestCase):
         )))
         game_state = auto_step(game_state)
 
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1ac = game_state.get_player1().just_get_active_character()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 7)

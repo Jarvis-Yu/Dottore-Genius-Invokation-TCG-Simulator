@@ -17,7 +17,7 @@ class TestFischl(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.ELECTRO: 1, Element.HYDRO: 1, Element.DENDRO: 1}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
@@ -29,7 +29,7 @@ class TestFischl(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.ELEMENTAL_SKILL1,
+            CharacterSkill.SKILL2,
             dices=ActualDices({Element.ELECTRO: 3}),
         )
         p1 = game_state.get_player1()
@@ -87,7 +87,7 @@ class TestFischl(unittest.TestCase):
 
         game_state = apply_elemental_aura(game_state, Element.HYDRO, Pid.P2)
         game_state = skip_action_round(game_state, Pid.P2)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.NORMAL_ATTACK)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 5)

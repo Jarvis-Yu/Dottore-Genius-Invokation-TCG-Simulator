@@ -17,7 +17,7 @@ class TestYoimiya(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.PYRO: 1, Element.HYDRO: 1, Element.DENDRO: 1}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
@@ -29,7 +29,7 @@ class TestYoimiya(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.ELEMENTAL_SKILL1,
+            CharacterSkill.SKILL2,
             dices=ActualDices({Element.PYRO: 1}),
         )
         p1ac = game_state.get_player1().just_get_active_character()
@@ -64,7 +64,7 @@ class TestYoimiya(unittest.TestCase):
         game_state = step_skill(
             game_state,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.OMNI: 3}),
         )
         p1ac = game_state.get_player1().just_get_active_character()
@@ -79,7 +79,7 @@ class TestYoimiya(unittest.TestCase):
         game_state = step_skill(
             game_state,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.OMNI: 3}),
         )
         p1ac = game_state.get_player1().just_get_active_character()
@@ -91,7 +91,7 @@ class TestYoimiya(unittest.TestCase):
         game_state = step_skill(
             game_state,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.OMNI: 3}),
         )
         p1 = game_state.get_player1()
@@ -110,7 +110,7 @@ class TestYoimiya(unittest.TestCase):
         game_state = skip_action_round(game_state, Pid.P2)
 
         # test Keqing skill triggers status and then overloaded
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL1)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
         p1 = game_state.get_player1()
         p2_last_ac = game_state.get_player2().get_characters().just_get_character(1)
         self.assertEqual(p2_last_ac.get_hp(), 2)
@@ -148,7 +148,7 @@ class TestYoimiya(unittest.TestCase):
         game_state = step_skill(
             game_state,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.OMNI: 3}),
         )
         p1ac = game_state.get_player1().just_get_active_character()

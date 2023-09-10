@@ -17,7 +17,7 @@ class TestGanyu(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.NORMAL_ATTACK,
+            CharacterSkill.SKILL1,
             dices=ActualDices({Element.CRYO: 1, Element.HYDRO: 1, Element.DENDRO: 1}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
@@ -29,7 +29,7 @@ class TestGanyu(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.ELEMENTAL_SKILL1,
+            CharacterSkill.SKILL2,
             dices=ActualDices({Element.CRYO: 3}),
         )
         p1 = game_state.get_player1()
@@ -44,7 +44,7 @@ class TestGanyu(unittest.TestCase):
         game_state = step_skill(
             self.BASE_GAME,
             Pid.P1,
-            CharacterSkill.ELEMENTAL_SKILL2,
+            CharacterSkill.SKILL3,
             dices=ActualDices({Element.CRYO: 5}),
         )
         p2cs = game_state.get_player2().get_characters()
@@ -55,6 +55,21 @@ class TestGanyu(unittest.TestCase):
         self.assertIn(Element.CRYO, p2c1.get_elemental_aura())
         self.assertFalse(p2c2.get_elemental_aura().has_aura())
         self.assertFalse(p2c3.get_elemental_aura().has_aura())
+
+        # test skill2 is treated as normal attack
+        game_state = PublicAddCardEffect(Pid.P1, JueyunGuoba).execute(game_state)
+        game_state = AddCombatStatusEffect(Pid.P1, RainbowBladeworkStatus).execute(game_state)
+        game_state = step_action(game_state, Pid.P2, EndRoundAction())
+        game_state = step_action(game_state, Pid.P1, CardAction(
+            card=JueyunGuoba,
+            instruction=StaticTargetInstruction(
+                dices=ActualDices({}),
+                target=StaticTarget.from_player_active(game_state, Pid.P1),
+            )
+        ))
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL3)
+        p2ac = game_state.get_player2().just_get_active_character()
+        self.assertEqual(p2ac.get_hp(), 3)  # skill 2 + guoba 1 + rainbow 1 + frozen 1
 
     def test_elemental_burst(self):
         game_state = fill_energy_for_all(self.BASE_GAME)
@@ -134,7 +149,7 @@ class TestGanyu(unittest.TestCase):
         self.assertFalse(p2c2.get_elemental_aura().has_aura())
         self.assertFalse(p2c3.get_elemental_aura().has_aura())
 
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL2)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL3)
         p2cs = game_state.get_player2().get_characters()
         p2c1, p2c2, p2c3 = p2cs.get_characters()
         self.assertEqual(p2c1.get_hp(), 6)
@@ -147,7 +162,7 @@ class TestGanyu(unittest.TestCase):
         game_state = next_round(game_state)
         game_state = fill_dices_with_omni(game_state)
         game_state = skip_action_round_until(game_state, Pid.P1)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_SKILL2)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL3)
         p2cs = game_state.get_player2().get_characters()
         p2c1, p2c2, p2c3 = p2cs.get_characters()
         self.assertEqual(p2c1.get_hp(), 4)
@@ -158,7 +173,7 @@ class TestGanyu(unittest.TestCase):
         self.assertFalse(p2c3.get_elemental_aura().has_aura())
 
         # test late equip
-        game_state = step_skill(self.BASE_GAME, Pid.P1, CharacterSkill.ELEMENTAL_SKILL2)
+        game_state = step_skill(self.BASE_GAME, Pid.P1, CharacterSkill.SKILL3)
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         p2cs = game_state.get_player2().get_characters()
         p2c1, p2c2, p2c3 = p2cs.get_characters()

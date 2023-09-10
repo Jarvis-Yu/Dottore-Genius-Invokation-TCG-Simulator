@@ -20,7 +20,7 @@ from typing_extensions import override, Self
 
 from ..effect import effect as eft
 
-from ..character.enums import CharacterSkill, WeaponType
+from ..character.enums import CharacterSkill, CharacterSkillType, WeaponType
 from ..dices import ActualDices
 from ..effect.effects_template import standard_post_effects
 from ..effect.enums import Zone, TriggeringSignal, DynamicCharacterTarget
@@ -67,6 +67,7 @@ __all__ = [
     ## Weapon ##
     ### bow ###
     "AmosBowStatus",
+    "KingsSquireStatus",
     "RavenBowStatus",
     "SacrificialBowStatus",
     ### catalyst ###
@@ -92,6 +93,7 @@ __all__ = [
     "ElementalResonanceFerventFlamesStatus",
     "ElementalResonanceShatteringIceStatus",
     "ElementalResonanceSprawlingGreeneryStatus",
+    "KingsSquireEffectStatus",
     "LeaveItToMeStatus",
     "IHaventLostYetOnCooldownStatus",
     "ReviveOnCooldownStatus",
@@ -1072,6 +1074,11 @@ class AmosBowStatus(WeaponEquipmentStatus, _UsageLivingStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
+class KingsSquireStatus(WeaponEquipmentStatus):
+    WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.BOW
+
+
+@dataclass(frozen=True, kw_only=True)
 class RavenBowStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.BOW
 
@@ -1475,7 +1482,12 @@ class ElementalResonanceSprawlingGreeneryStatus(CombatStatus):
         return [], self
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
+class KingsSquireEffectStatus(CharacterStatus):
+    ...
+
+
+@dataclass(frozen=True, kw_only=True)
 class LeaveItToMeStatus(CombatStatus):
     @override
     def _preprocess(
@@ -1661,7 +1673,7 @@ class MintyMeatRollsStatus(CharacterStatus, _UsageStatus):
         if signal is Preprocessables.SKILL:
             assert isinstance(item, ActionPEvent)
             if status_source == item.source \
-                    and item.event_type is EventType.NORMAL_ATTACK \
+                    and item.event_sub_type is CharacterSkillType.NORMAL_ATTACK \
                     and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION:
                 item = replace(
                     item,
@@ -1726,7 +1738,7 @@ class NorthernSmokedChickenStatus(CharacterStatus):
         if signal is Preprocessables.SKILL:
             assert isinstance(item, ActionPEvent)
             if status_source == item.source \
-                    and item.event_type is EventType.NORMAL_ATTACK \
+                    and item.event_sub_type is CharacterSkillType.NORMAL_ATTACK \
                     and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION:
                 item = replace(
                     item,
@@ -1809,7 +1821,7 @@ class AratakiIchibanStatus(TalentEquipmentStatus, _UsageStatus):
 
         assert isinstance(information, SkillIEvent)
         if status_source != information.source \
-                or information.skill_type != CharacterSkill.NORMAL_ATTACK:
+                or information.skill_type != CharacterSkill.SKILL1:
             return self
 
         return replace(self, usages=self.usages + 1)
@@ -1859,7 +1871,7 @@ class RagingOniKingStatus(CharacterStatus, _InfusionStatus):
         if info_type is Informables.POST_SKILL_USAGE:
             assert isinstance(information, SkillIEvent)
             if information.source == status_source \
-                    and information.skill_type is CharacterSkill.NORMAL_ATTACK \
+                    and information.skill_type is CharacterSkill.SKILL1 \
                     and not self.status_gaining_available:
                 return replace(self, status_gaining_available=True)
         return self
@@ -1919,7 +1931,7 @@ class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
             if (
                     self.usages >= 2
                     and status_source == item.source
-                    and item.event_type is EventType.NORMAL_ATTACK
+                    and item.event_type is EventType.SKILL1
                     and player.get_dices().is_even()
                     and item.dices_cost[Element.ANY] > 0
             ):
@@ -2066,7 +2078,7 @@ class ColleiTalentStatus(HiddenStatus):
             if (
                     not self.elemental_skill_used
                     and information.source == status_source
-                    and information.skill_type is CharacterSkill.ELEMENTAL_SKILL1
+                    and information.skill_type is CharacterSkill.SKILL2
             ):
                 return replace(self, elemental_skill_used=True)
         return self
@@ -2367,7 +2379,7 @@ class GanyuTalentStatus(HiddenStatus):
             if information.is_skill_from_character(
                     game_state,
                     status_source.pid,
-                    CharacterSkill.ELEMENTAL_SKILL2,
+                    CharacterSkill.SKILL3,
             ):
                 return replace(self, elemental_skill2ed=True)
         return self
@@ -2742,7 +2754,7 @@ class ColdBloodedStrikeStatus(TalentEquipmentStatus):
 
         assert isinstance(information, SkillIEvent)
         if status_source != information.source \
-                or information.skill_type != CharacterSkill.ELEMENTAL_SKILL1:
+                or information.skill_type != CharacterSkill.SKILL2:
             return self
 
         return replace(self, activated=True)
@@ -2843,7 +2855,7 @@ class ExplosiveSparkStatus(CharacterStatus, _UsageStatus):
             player = game_state.get_player(status_source.pid)
             if (
                     status_source == item.source
-                    and item.event_type is EventType.NORMAL_ATTACK
+                    and item.event_type is EventType.SKILL1
                     and player.get_dices().is_even()
                     and item.dices_cost[Element.ANY] + item.dices_cost[Element.PYRO] > 0
             ):
@@ -3311,7 +3323,7 @@ class SweepingTimeStatus(CharacterStatus, _InfusionStatus):
             if (
                     self.dice_reduction_usages > 0
                     and status_source == item.source
-                    and item.event_type is EventType.NORMAL_ATTACK
+                    and item.event_type is EventType.SKILL1
                     and item.dices_cost[Element.GEO] >= self.DICE_REDUCTION
             ):
                 item = replace(
@@ -3565,7 +3577,7 @@ class KeenSightStatus(TalentEquipmentStatus):
             characters = player.get_characters()
             if (
                     status_source == item.source
-                    and item.event_type is EventType.NORMAL_ATTACK
+                    and item.event_sub_type is CharacterSkillType.NORMAL_ATTACK
                     and player.get_dices().is_even()
                     and characters.just_get_character(
                         cast(int, status_source.id)
@@ -3739,7 +3751,7 @@ class WindsOfHarmonyStatus(CombatStatus):
         if signal is Preprocessables.SKILL:
             assert isinstance(item, ActionPEvent)
             if status_source.pid is item.source.pid \
-                    and item.event_type is EventType.NORMAL_ATTACK \
+                    and item.event_sub_type is CharacterSkillType.NORMAL_ATTACK \
                     and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION:
                 item = replace(
                     item,
@@ -3793,7 +3805,7 @@ class RainbowBladeworkStatus(CombatStatus, _UsageStatus):
     ) -> Self:
         if (
                 not isinstance(information, SkillIEvent)
-                or information.skill_type is not CharacterSkill.NORMAL_ATTACK
+                or information.skill_true_type is not CharacterSkillType.NORMAL_ATTACK
                 or status_source.pid is not information.source.pid
         ):
             return self
@@ -3851,7 +3863,7 @@ class RiteOfDispatchStatus(CharacterStatus):
             assert isinstance(item, ActionPEvent)
             if (
                     status_source == item.source
-                    and item.event_type is EventType.ELEMENTAL_SKILL1
+                    and item.event_type is EventType.SKILL2
                     and item.dices_cost.num_dices() > 0
             ):
                 item = replace(
