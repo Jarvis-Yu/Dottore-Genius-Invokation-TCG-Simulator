@@ -52,6 +52,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     WolfsGravestone,
     ### Polearm ###
     LithicSpear,
+    VortexVanquisher,
     WhiteTassel,
     ### Sword ###
     SacrificialSword,

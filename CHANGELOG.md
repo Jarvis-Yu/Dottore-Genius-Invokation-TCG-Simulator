@@ -41,6 +41,7 @@ Removes preceding `v` in version name to be like `0.3.2`.
       - King's Squire
       - Lithic Spear
       - The Bell
+      - Vortex Vanquisher
       - Wolf's Gravestone
   - Event Card:
     - Where Is the Unseen Razor?

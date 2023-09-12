@@ -77,6 +77,7 @@ __all__ = [
     "WolfsGravestone",
     ## Polearm ##
     "LithicSpear",
+    "VortexVanquisher",
     "WhiteTassel",
     ## Sword ##
     "SacrificialSword",
@@ -1222,6 +1223,12 @@ class LithicSpear(WeaponEquipmentCard):
                 status=stt.LithicGuardStatus(usages=stacks),
             ),
         )
+
+
+class VortexVanquisher(WeaponEquipmentCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    WEAPON_TYPE = WeaponType.POLEARM
+    WEAPON_STATUS = stt.VortexVanquisherStatus
 
 
 class WhiteTassel(WeaponEquipmentCard):

@@ -84,6 +84,7 @@ __all__ = [
     "WolfsGravestoneStatus",
     ### polearm ###
     "LithicSpearStatus",
+    "VortexVanquisherStatus",
     "WhiteTasselStatus",
     ### sword ###
     "SacrificialSwordStatus",
@@ -1309,6 +1310,39 @@ class LithicSpearStatus(WeaponEquipmentStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
+class VortexVanquisherStatus(WeaponEquipmentStatus):
+    WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.POLEARM
+    ADDITIONAL_DMG_BOOST: ClassVar[int] = 1
+
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        from ..card.card import VortexVanquisher
+        return VortexVanquisher
+
+    @override
+    def _process_dmg(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            dmg: DmgPEvent,
+    ) -> tuple[DmgPEvent, Self]:
+        this_player = game_state.get_player(status_source.pid)
+        active_char = this_player.just_get_active_character()
+        final_dmg_boost = self.BASE_DAMAGE_BOOST
+        if (
+                any(
+                    isinstance(status, StackedShieldStatus)
+                    for status in this_player.get_combat_statuses()
+                )
+                or any(
+                    isinstance(status, StackedShieldStatus)
+                    for status in active_char.get_character_statuses()
+                )
+        ):
+            final_dmg_boost += self.ADDITIONAL_DMG_BOOST
+        return dmg.delta_damage(final_dmg_boost), self
+
+@dataclass(frozen=True, kw_only=True)
 class WhiteTasselStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.POLEARM
 
@@ -1913,10 +1947,10 @@ class JueyunGuobaStatus(CharacterStatus, _UsageStatus):
         return [], self
 
 
-
 @dataclass(frozen=True, kw_only=True)
 class LithicGuardStatus(CharacterStatus, StackedShieldStatus):
     MAX_USAGES: ClassVar[int] = 3
+
 
 @dataclass(frozen=True)
 class LotusFlowerCrispStatus(CharacterStatus, FixedShieldStatus):

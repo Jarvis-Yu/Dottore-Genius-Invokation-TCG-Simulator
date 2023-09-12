@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (28/54 implemented)](#character-2854-implemented)
-  - [Card (79/200 implemented)](#card-79200-implemented)
+  - [Card (80/200 implemented)](#card-80200-implemented)
 
 ## Character (28/54 implemented)
 
@@ -45,9 +45,9 @@ all I need now is to implement each card and character.
   - [x] Ningguang
   - [x] Noelle
 
-## Card (79/200 implemented)
+## Card (80/200 implemented)
 
-- [ ] Equipment Card (44/107):
+- [ ] Equipment Card (45/107):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] Cold-Blooded Strike
@@ -94,7 +94,7 @@ all I need now is to implement each card and character.
       - [x] Wolf's Gravestone
     - [ ] Polearm:
       - [x] Lithic Spear
-      - [ ] Vortex Vanquisher _<-- WIP_
+      - [x] Vortex Vanquisher
       - [x] White Tassel
     - [ ] Sword:
       - [ ] Aquila Favonia _<-- WIP_
