@@ -73,6 +73,7 @@ __all__ = [
     "RavenBowStatus",
     "SacrificialBowStatus",
     ### catalyst ###
+    "AThousandFloatingDreamsStatus",
     "FruitOfFulfillmentStatus",
     "MagicGuideStatus",
     "SacrificialFragmentsStatus",
@@ -618,10 +619,7 @@ class CombatStatus(Status):
 class _UsageStatus(Status):
     usages: int
     MAX_USAGES: ClassVar[int] = BIG_INT
-
-    @staticmethod
-    def _auto_destroy() -> bool:
-        return True
+    AUTO_DESTROY: ClassVar[bool] = True
 
     @override
     def _post_preprocess(
@@ -634,7 +632,7 @@ class _UsageStatus(Status):
             new_self: None | Self,
     ) -> tuple[PreprocessableEvent, None | Self]:
         if new_self is not None:
-            if self._auto_destroy() and new_self.usages <= 0:
+            if self.AUTO_DESTROY and new_self.usages <= 0:
                 new_self = None
             elif new_self.usages < 0:
                 new_self = replace(new_self, usages=0)
@@ -644,7 +642,7 @@ class _UsageStatus(Status):
     def _post_update(self, new_self: None | Self) -> None | Self:
         """ remove the status if usages <= 0 """
         if new_self is not None:
-            if self._auto_destroy() and new_self.usages <= 0:
+            if self.AUTO_DESTROY and new_self.usages <= 0:
                 new_self = None
             elif new_self.usages < 0:
                 new_self = replace(new_self, usages=0)
@@ -661,10 +659,7 @@ class _UsageStatus(Status):
 
 
 class _UsageLivingStatus(_UsageStatus):
-    @override
-    @staticmethod
-    def _auto_destroy() -> bool:
-        return False
+    AUTO_DESTROY: ClassVar[bool] = False
 
 
 @dataclass(frozen=True)
@@ -728,7 +723,7 @@ class FixedShieldStatus(_ShieldStatus, _UsageStatus):
                 new_dmg = replace(dmg, damage=new_dmg_amount)
                 new_item = DmgPEvent(dmg=new_dmg)
                 new_usages = self.usages - 1
-                if self._auto_destroy() and new_usages == 0:
+                if self.AUTO_DESTROY and new_usages == 0:
                     return new_item, None
                 else:
                     return new_item, replace(self, usages=new_usages)
@@ -959,7 +954,7 @@ class DeathThisRoundStatus(PlayerHiddenStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class _SacrificialWeaponStatus(WeaponEquipmentStatus, _UsageStatus):
+class _SacrificialWeaponStatus(WeaponEquipmentStatus, _UsageLivingStatus):
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 1
     activated: bool = False
@@ -969,11 +964,6 @@ class _SacrificialWeaponStatus(WeaponEquipmentStatus, _UsageStatus):
         TriggeringSignal.COMBAT_ACTION,
         TriggeringSignal.ROUND_END,
     ))
-
-    @override
-    @staticmethod
-    def _auto_destroy() -> bool:
-        return False
 
     @override
     def _inform(
@@ -1118,6 +1108,57 @@ class SacrificialBowStatus(_SacrificialWeaponStatus):
         return SacrificialBow
 
 #### Catalyst ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class AThousandFloatingDreamsStatus(WeaponEquipmentStatus, _UsageLivingStatus):
+    WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CATALYST
+    DMG_BOOST: ClassVar[int] = 1
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        from ..card.card import AThousandFloatingDreams
+        return AThousandFloatingDreams
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        item, new_self = super()._preprocess(game_state, status_source, item, signal)
+        if new_self is None:
+            return item, new_self
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            if (
+                    new_self.usages > 0
+                    and dmg.source.pid is status_source.pid
+                    and dmg.damage_type.directly_from_character()
+                    and dmg.reaction is not None
+            ):
+                return (
+                    item.delta_damage(new_self.DMG_BOOST),
+                    replace(new_self, usages=new_self.usages - 1),
+                )
+        return item, new_self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
+            return [], replace(self, usages=self.MAX_USAGES)
+        return [], self  # pragma: no cover
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1783,7 +1824,7 @@ class JueyunGuobaStatus(CharacterStatus, _UsageStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
@@ -1958,17 +1999,13 @@ class DescentOfDivinityStatus(TalentEquipmentStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class AratakiIchibanStatus(TalentEquipmentStatus, _UsageStatus):
+class AratakiIchibanStatus(TalentEquipmentStatus, _UsageLivingStatus):
     usages: int = 0  # here means num of normal attacks in the past
     ACTIVATION_THRESHOLD: ClassVar[int] = 2
     DAMAGE_BOOST: ClassVar[int] = 1
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
     ))
-
-    @staticmethod
-    def _auto_destroy() -> bool:
-        return False
 
     def activated(self) -> bool:
         return self.usages + 1 >= self.ACTIVATION_THRESHOLD
@@ -2595,7 +2632,7 @@ class RadicalVitalityHiddenStatus(HiddenStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class RadicalVitalityStatus(CharacterStatus, _UsageStatus):
+class RadicalVitalityStatus(CharacterStatus, _UsageLivingStatus):
     activated: bool = False
     to_clear: bool = False
     usages: int = 0
@@ -2604,11 +2641,6 @@ class RadicalVitalityStatus(CharacterStatus, _UsageStatus):
         TriggeringSignal.POST_DMG,
         TriggeringSignal.END_ROUND_CHECK_OUT,
     })
-
-    @override
-    @staticmethod
-    def _auto_destroy() -> bool:
-        return False
 
     def max_usages(self, game_state: GameState, source: StaticTarget) -> int:
         return self.NOMINAL_MAX_USAGES + (

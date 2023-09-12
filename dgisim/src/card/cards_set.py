@@ -41,6 +41,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     RavenBow,
     SacrificialBow,
     ### Catalyst ###
+    AThousandFloatingDreams,
     FruitOfFulfillment,
     MagicGuide,
     SacrificialFragments,

@@ -66,6 +66,7 @@ __all__ = [
     "RavenBow",
     "SacrificialBow",
     ## Catalyst ##
+    "AThousandFloatingDreams",
     "FruitOfFulfillment",
     "MagicGuide",
     "SacrificialFragments",
@@ -1124,6 +1125,12 @@ class SacrificialBow(WeaponEquipmentCard):
     WEAPON_STATUS = stt.SacrificialBowStatus
 
 #### Catalyst ####
+
+
+class AThousandFloatingDreams(WeaponEquipmentCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    WEAPON_TYPE = WeaponType.CATALYST
+    WEAPON_STATUS = stt.AThousandFloatingDreamsStatus
 
 
 class FruitOfFulfillment(WeaponEquipmentCard):

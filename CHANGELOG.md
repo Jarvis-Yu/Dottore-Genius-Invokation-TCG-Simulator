@@ -35,6 +35,7 @@ Removes preceding `v` in version name to be like `0.3.2`.
       - Transcendent Automaton
       - Undivided Heart
     - Weapon Card:
+      - A Thousand Floating Dreams
       - Amos' Bow
       - Fruit of Fulfillment
       - King's Squire

@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (28/54 implemented)](#character-2854-implemented)
-  - [Card (76/200 implemented)](#card-76200-implemented)
+  - [Card (77/200 implemented)](#card-77200-implemented)
 
 ## Character (28/54 implemented)
 
@@ -45,9 +45,9 @@ all I need now is to implement each card and character.
   - [x] Ningguang
   - [x] Noelle
 
-## Card (76/200 implemented)
+## Card (77/200 implemented)
 
-- [ ] Equipment Card (41/107):
+- [ ] Equipment Card (42/107):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] Cold-Blooded Strike
@@ -83,7 +83,7 @@ all I need now is to implement each card and character.
       - [x] Raven Bow
       - [x] Sacrificial Bow
     - [ ] Catalyst:
-      - [ ] A Thousand Floating Dreams _<-- WIP_
+      - [x] A Thousand Floating Dreams
       - [x] Fruit of Fulfillment
       - [x] Magic Guide
       - [x] Sacrificial Fragments

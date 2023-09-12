@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, replace
-from typing import ClassVar
+from typing import ClassVar, cast
 
 from typing_extensions import Self
 
@@ -327,6 +327,31 @@ def apply_elemental_aura(
             element=element,
         ).execute(game_state)
     )
+
+
+def use_elemental_aura(
+        game_state: GameState,
+        element: None | Element,
+        pid: Pid,
+        char_id: None | int = None,
+) -> GameState:
+    """ Replace elemental aura of the target character """
+    if char_id is None:
+        target = StaticTarget.from_player_active(game_state, pid)
+    else:
+        target = StaticTarget.from_char_id(pid, char_id)
+    aura = ElementalAura.from_default()
+    if element is not None:
+        aura = aura.add(element)
+    return game_state.factory().f_player(
+        target.pid,
+        lambda p: p.factory().f_characters(
+            lambda cs: cs.factory().f_character(
+                cast(int, target.id),
+                lambda c: c.factory().elemental_aura(aura).build()
+            ).build()
+        ).build()
+    ).build()
 
 
 @dataclass(frozen=True, kw_only=True)

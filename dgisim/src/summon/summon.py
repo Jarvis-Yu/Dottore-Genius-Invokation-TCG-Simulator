@@ -572,16 +572,12 @@ class HeraldOfFrostSummon(_DmgPerRoundSummon):
 class OceanicMimicFrogSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2
+    AUTO_DESTROY: ClassVar[bool] = False
     SHIELD_AMOUNT: ClassVar[int] = 1
     DMG: ClassVar[int] = 2
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.END_ROUND_CHECK_OUT,
     ))
-
-    @override
-    @staticmethod
-    def _auto_destroy() -> bool:
-        return False
 
     @override
     def _react_to_signal(
@@ -679,16 +675,12 @@ class OzSummon(_DmgPerRoundSummon):
 class ReflectionSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 1
+    AUTO_DESTROY: ClassVar[bool] = False
     SHIELD_AMOUNT: ClassVar[int] = 1
     DMG: ClassVar[int] = 1
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.END_ROUND_CHECK_OUT,
     ))
-
-    @override
-    @staticmethod
-    def _auto_destroy() -> bool:
-        return False
 
     @override
     def _react_to_signal(
@@ -965,6 +957,7 @@ class TalismanSpiritSummon(_DmgPerRoundSummon):
 class UshiSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 1
+    AUTO_DESTROY: ClassVar[bool] = False
     SHIELD_AMOUNT: ClassVar[int] = 1
     DMG: ClassVar[int] = 1
     status_gaining_usages: int = 1
@@ -973,11 +966,6 @@ class UshiSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
         TriggeringSignal.END_ROUND_CHECK_OUT,
         TriggeringSignal.POST_DMG,
     ))
-
-    @override
-    @staticmethod
-    def _auto_destroy() -> bool:
-        return False
 
     @override
     def _inform(
