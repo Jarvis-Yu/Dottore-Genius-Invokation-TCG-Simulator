@@ -39,6 +39,8 @@ Removes preceding `v` in version name to be like `0.3.2`.
       - Fruit of Fulfillment
       - King's Squire
       - Wolf's Gravestone
+  - Event Card:
+    - Where Is the Unseen Razor?
 
 ## v0.3.1 (28 Aug 2023)
 

@@ -77,6 +77,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     LeaveItToMe,
     QuickKnit,
     Starsigns,
+    WhereIsTheUnseenRazor,
     WindAndFreedom,
 
     ## Event Card / Food ##

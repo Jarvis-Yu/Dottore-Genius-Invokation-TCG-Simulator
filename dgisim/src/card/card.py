@@ -113,6 +113,7 @@ __all__ = [
     "LeaveItToMe",
     "QuickKnit",
     "Starsigns",
+    "WhereIsTheUnseenRazor",
     "WindAndFreedom",
 
     # Support Card
@@ -445,6 +446,14 @@ class _DiceOnlyChoiceProvider(Card):
 
 
 class _CharTargetChoiceProvider(Card):
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        return any(
+            cls._valid_char(game_state, pid, char)
+            for char in game_state.get_player(pid).get_characters()
+        ) and super()._loosely_usable(game_state, pid)
+
     @override
     @classmethod
     def _valid_instruction(
@@ -1890,7 +1899,15 @@ class Starsigns(EventCard, _DiceOnlyChoiceProvider):
 
 
 class WhereIsTheUnseenRazor(EventCard, _CharTargetChoiceProvider):
-    _DICE_COST = AbstractDices({Element.OMNI: 1})
+    _DICE_COST = AbstractDices({Element.OMNI: 0})
+
+    @override
+    @classmethod
+    def _valid_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:
+        return any(
+            isinstance(status, stt.WeaponEquipmentStatus)
+            for status in char.get_equipment_statuses()
+        ) and super()._valid_char(game_state, pid, char)
 
     @override
     @classmethod
@@ -1904,7 +1921,21 @@ class WhereIsTheUnseenRazor(EventCard, _CharTargetChoiceProvider):
         char_target = game_state.get_character_target(instruction.target)
         assert char_target is not None
         weapon = char_target.get_equipment_statuses().just_find_type(stt.WeaponEquipmentStatus)
-        raise NotImplementedError()
+        card = weapon.WEAPON_CARD
+        return (
+            eft.RemoveCharacterStatusEffect(
+                target=instruction.target,
+                status=type(weapon),
+            ),
+            eft.PublicAddCardEffect(
+                pid=instruction.target.pid,
+                card=card,
+            ),
+            eft.AddCombatStatusEffect(
+                target_pid=instruction.target.pid,
+                status=stt.WhereIsTheUnseenRazorStatus,
+            ),
+        )
 
 
 class WindAndFreedom(EventCard, _DiceOnlyChoiceProvider):

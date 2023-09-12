@@ -29,7 +29,7 @@ from ..effect.structs import StaticTarget, DamageType
 from ..element import Element, Reaction
 from ..event import *
 from ..helper.hashable_dict import HashableDict
-from ..helper.quality_of_life import just, BIG_INT, case_val
+from ..helper.quality_of_life import BIG_INT, case_val, classproperty
 from .enums import Preprocessables, Informables
 
 if TYPE_CHECKING:
@@ -102,6 +102,7 @@ __all__ = [
     "IHaventLostYetOnCooldownStatus",
     "ReviveOnCooldownStatus",
     "WindAndFreedomStatus",
+    "WhereIsTheUnseenRazorStatus",
 
     # character status
     "FrozenStatus",
@@ -541,13 +542,11 @@ class TalentEquipmentStatus(EquipmentStatus):
 @dataclass(frozen=True)
 class WeaponEquipmentStatus(EquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType]
-    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]]
 
-    # @property
-    # @classmethod
-    # def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
-    #     from ..card.card import AmosBow
-    #     return AmosBow
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        raise NotImplementedError()
+
     BASE_DAMAGE_BOOST: ClassVar[int] = 1
 
     @override
@@ -1024,11 +1023,15 @@ class _SacrificialWeaponStatus(WeaponEquipmentStatus, _UsageStatus):
 @dataclass(frozen=True, kw_only=True)
 class AmosBowStatus(WeaponEquipmentStatus, _UsageLivingStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.BOW
-    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.AmosBow
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 1
     activated: bool = False
     ADDITIONAL_DMG_BOOST: ClassVar[int] = 2
+
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        from ..card.card import AmosBow
+        return AmosBow
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
@@ -1088,19 +1091,31 @@ class AmosBowStatus(WeaponEquipmentStatus, _UsageLivingStatus):
 @dataclass(frozen=True, kw_only=True)
 class KingsSquireStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.BOW
-    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.KingsSquire
+
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        from ..card.card import KingsSquire
+        return KingsSquire
 
 
 @dataclass(frozen=True, kw_only=True)
 class RavenBowStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.BOW
-    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.RavenBow
+
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        from ..card.card import RavenBow
+        return RavenBow
 
 
 @dataclass(frozen=True, kw_only=True)
 class SacrificialBowStatus(_SacrificialWeaponStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.BOW
-    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.SacrificialBow
+
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        from ..card.card import SacrificialBow
+        return SacrificialBow
 
 #### Catalyst ####
 
@@ -1109,17 +1124,30 @@ class SacrificialBowStatus(_SacrificialWeaponStatus):
 class FruitOfFulfillmentStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CATALYST
 
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        from ..card.card import FruitOfFulfillment
+        return FruitOfFulfillment
+
 
 @dataclass(frozen=True, kw_only=True)
 class MagicGuideStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CATALYST
-    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.MagicGuide
+
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        from ..card.card import MagicGuide
+        return MagicGuide
 
 
 @dataclass(frozen=True, kw_only=True)
 class SacrificialFragmentsStatus(_SacrificialWeaponStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CATALYST
-    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.SacrificialFragments
+
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        from ..card.card import SacrificialFragments
+        return SacrificialFragments
 
 #### Claymore ####
 
@@ -1127,21 +1155,33 @@ class SacrificialFragmentsStatus(_SacrificialWeaponStatus):
 @dataclass(frozen=True, kw_only=True)
 class SacrificialGreatswordStatus(_SacrificialWeaponStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CLAYMORE
-    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.SacrificialGreatsword
+
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        from ..card.card import SacrificialGreatsword
+        return SacrificialGreatsword
 
 
 @dataclass(frozen=True, kw_only=True)
 class WhiteIronGreatswordStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CLAYMORE
-    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.WhiteIronGreatsword
+
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        from ..card.card import WhiteIronGreatsword
+        return WhiteIronGreatsword
 
 
 @dataclass(frozen=True, kw_only=True)
 class WolfsGravestoneStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CLAYMORE
-    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.WhiteIronGreatsword
     HP_THRESHOLD: ClassVar[int] = 6
     ADDITIONAL_DMG_BOOST: ClassVar[int] = 2
+
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        from ..card.card import WolfsGravestone
+        return WolfsGravestone
 
     @override
     def _process_dmg(
@@ -1165,7 +1205,11 @@ class WolfsGravestoneStatus(WeaponEquipmentStatus):
 @dataclass(frozen=True, kw_only=True)
 class WhiteTasselStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.POLEARM
-    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.WhiteTassel
+
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        from ..card.card import WhiteTassel
+        return WhiteTassel
 
 #### Sword ####
 
@@ -1173,13 +1217,21 @@ class WhiteTasselStatus(WeaponEquipmentStatus):
 @dataclass(frozen=True, kw_only=True)
 class SacrificialSwordStatus(_SacrificialWeaponStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.SWORD
-    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.SacrificialSword
+
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        from ..card.card import SacrificialSword
+        return SacrificialSword
 
 
 @dataclass(frozen=True, kw_only=True)
 class TravelersHandySwordStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.SWORD
-    # WEAPON_CARD: ClassVar[type[crd.WeaponEquipmentCard]] = crd.TravelersHandySword
+
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        from ..card.card import TravelersHandySword
+        return TravelersHandySword
 
 
 ########## Artifact Status ##########
@@ -1635,6 +1687,44 @@ class WindAndFreedomStatus(CombatStatus):
             if self.activated:
                 return [eft.ConsecutiveActionEffect(target_pid=source.pid)], None
         elif signal is TriggeringSignal.ROUND_END:
+            return [], None
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class WhereIsTheUnseenRazorStatus(CombatStatus):
+    COST_DEDUCTION: ClassVar[int] = 2
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.CARD:
+            assert isinstance(item, CardPEvent)
+            from ..card.card import WeaponEquipmentCard
+            if not (
+                    item.pid is status_source.pid
+                    and issubclass(item.card_type, WeaponEquipmentCard)
+                    and item.dices_cost.can_cost_less_elem()
+            ):
+                return replace(
+                    item,
+                    dices_cost=item.dices_cost.cost_less_elem(self.COST_DEDUCTION)
+                ), None
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
             return [], None
         return [], self
 

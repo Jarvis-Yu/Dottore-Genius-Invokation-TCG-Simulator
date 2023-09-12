@@ -7,6 +7,7 @@ from typing import Any, TypeVar
 __all__ = [
     "BIG_INT",
     "case_val",
+    "classproperty",
     "dataclass_repr",
     "just",
 ]
@@ -19,6 +20,24 @@ BIG_INT = 0x7fffffff
 def case_val(condition: bool, first: _T, second: _T) -> _T:
     """ if condition is True; then return first; else return second """
     return first if condition else second
+
+
+class _ClassProperty:
+    def __init__(self, fget):
+        self._fget = fget
+
+    def __get__(self, obj, klass=None):
+        if klass is None:
+            klass = type(obj)
+        return self._fget.__get__(obj, klass)()
+
+
+def classproperty(func) -> _ClassProperty:
+    # credit: https://stackoverflow.com/a/5191224
+    if not isinstance(func, classmethod):
+        func = classmethod(func)
+
+    return _ClassProperty(func)
 
 
 def dataclass_repr(self) -> str:
