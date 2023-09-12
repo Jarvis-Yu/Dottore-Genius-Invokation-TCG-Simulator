@@ -63,3 +63,9 @@ class TestTheBell(unittest.TestCase):
         p1_combat_stts = game_state.get_player1().get_combat_statuses()
         self.assertIn(RebelliousShieldStatus, p1_combat_stts)
         self.assertEqual(p1_combat_stts.just_find(RebelliousShieldStatus).usages, 2)
+
+        # test normal dmg boost
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
+        last_dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
+        self.assertEqual(last_dmg.damage, 3)
+        self.assertIs(last_dmg.element, Element.PHYSICAL)

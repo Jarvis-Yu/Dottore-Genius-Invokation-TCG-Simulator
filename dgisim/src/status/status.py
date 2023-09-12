@@ -83,6 +83,7 @@ __all__ = [
     "WhiteIronGreatswordStatus",
     "WolfsGravestoneStatus",
     ### polearm ###
+    "LithicSpearStatus",
     "WhiteTasselStatus",
     ### sword ###
     "SacrificialSwordStatus",
@@ -110,6 +111,7 @@ __all__ = [
     # character status
     "FrozenStatus",
     "JueyunGuobaStatus",
+    "LithicGuardStatus",
     "LotusFlowerCrispStatus",
     "MintyMeatRollsStatus",
     "MushroomPizzaStatus",
@@ -1296,6 +1298,15 @@ class WolfsGravestoneStatus(WeaponEquipmentStatus):
 
 #### Polearm ####
 
+@dataclass(frozen=True, kw_only=True)
+class LithicSpearStatus(WeaponEquipmentStatus):
+    WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.POLEARM
+
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        from ..card.card import LithicSpear
+        return LithicSpear
+
 
 @dataclass(frozen=True, kw_only=True)
 class WhiteTasselStatus(WeaponEquipmentStatus):
@@ -1901,6 +1912,11 @@ class JueyunGuobaStatus(CharacterStatus, _UsageStatus):
             return [], None
         return [], self
 
+
+
+@dataclass(frozen=True, kw_only=True)
+class LithicGuardStatus(CharacterStatus, StackedShieldStatus):
+    MAX_USAGES: ClassVar[int] = 3
 
 @dataclass(frozen=True)
 class LotusFlowerCrispStatus(CharacterStatus, FixedShieldStatus):

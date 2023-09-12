@@ -76,6 +76,7 @@ __all__ = [
     "WhiteIronGreatsword",
     "WolfsGravestone",
     ## Polearm ##
+    "LithicSpear",
     "WhiteTassel",
     ## Sword ##
     "SacrificialSword",
@@ -1194,6 +1195,33 @@ class WolfsGravestone(WeaponEquipmentCard):
 
 
 #### Polearm ####
+
+class LithicSpear(WeaponEquipmentCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    WEAPON_TYPE = WeaponType.POLEARM
+    WEAPON_STATUS = stt.LithicSpearStatus
+
+    @override
+    @classmethod
+    def on_enter_effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.StaticTargetInstruction
+    ) -> tuple[eft.Effect, ...]:
+        stacks = len([
+            None
+            for char in game_state.get_player(pid).get_characters()
+            if char.of_faction(Faction.LIYUE)
+        ])
+        if stacks == 0:
+            return ()
+        return (
+            eft.UpdateCharacterStatusEffect(
+                target=instruction.target,
+                status=stt.LithicGuardStatus(usages=stacks),
+            ),
+        )
 
 
 class WhiteTassel(WeaponEquipmentCard):
