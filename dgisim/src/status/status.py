@@ -79,6 +79,7 @@ __all__ = [
     "SacrificialFragmentsStatus",
     ### claymore ###
     "SacrificialGreatswordStatus",
+    "TheBellStatus",
     "WhiteIronGreatswordStatus",
     "WolfsGravestoneStatus",
     ### polearm ###
@@ -101,6 +102,7 @@ __all__ = [
     "KingsSquireEffectStatus",
     "LeaveItToMeStatus",
     "IHaventLostYetOnCooldownStatus",
+    "RebelliousShieldStatus",
     "ReviveOnCooldownStatus",
     "WindAndFreedomStatus",
     "WhereIsTheUnseenRazorStatus",
@@ -1204,6 +1206,58 @@ class SacrificialGreatswordStatus(_SacrificialWeaponStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
+class TheBellStatus(WeaponEquipmentStatus, _UsageLivingStatus):
+    WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CLAYMORE
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    activated: bool = False
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        from ..card.card import TheBell
+        return TheBell
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.POST_SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if (
+                    self.usages > 0
+                    and not self.activated
+                    and information.source == status_source
+            ):
+                return replace(self, activated=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+            return [
+                eft.AddCombatStatusEffect(
+                    target_pid=source.pid,
+                    status=RebelliousShieldStatus,
+                ),
+            ], replace(self, usages=-1, activated=False)
+        elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
+            assert not self.activated
+            return [], replace(self, usages=self.MAX_USAGES)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
 class WhiteIronGreatswordStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CLAYMORE
 
@@ -1676,6 +1730,12 @@ class LeaveItToMeStatus(CombatStatus):
                     and item.event_speed is EventSpeed.COMBAT_ACTION:
                 return replace(item, event_speed=EventSpeed.FAST_ACTION), None
         return super()._preprocess(game_state, status_source, item, signal)
+
+
+@dataclass(frozen=True, kw_only=True)
+class RebelliousShieldStatus(CombatStatus, StackedShieldStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 2
 
 
 @dataclass(frozen=True, kw_only=True)

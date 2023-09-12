@@ -72,6 +72,7 @@ __all__ = [
     "SacrificialFragments",
     ## Claymore ##
     "SacrificialGreatsword",
+    "TheBell",
     "WhiteIronGreatsword",
     "WolfsGravestone",
     ## Polearm ##
@@ -1172,6 +1173,12 @@ class SacrificialGreatsword(WeaponEquipmentCard):
     _DICE_COST = AbstractDices({Element.OMNI: 3})
     WEAPON_TYPE = WeaponType.CLAYMORE
     WEAPON_STATUS = stt.SacrificialGreatswordStatus
+
+
+class TheBell(WeaponEquipmentCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    WEAPON_TYPE = WeaponType.CLAYMORE
+    WEAPON_STATUS = stt.TheBellStatus
 
 
 class WhiteIronGreatsword(WeaponEquipmentCard):

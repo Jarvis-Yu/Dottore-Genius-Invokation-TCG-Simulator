@@ -39,6 +39,7 @@ Removes preceding `v` in version name to be like `0.3.2`.
       - Amos' Bow
       - Fruit of Fulfillment
       - King's Squire
+      - The Bell
       - Wolf's Gravestone
   - Event Card:
     - Where Is the Unseen Razor?

@@ -47,6 +47,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     SacrificialFragments,
     ### Claymore ###
     SacrificialGreatsword,
+    TheBell,
     WhiteIronGreatsword,
     WolfsGravestone,
     ### Polearm ###

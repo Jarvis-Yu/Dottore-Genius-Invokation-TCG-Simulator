@@ -2,7 +2,7 @@ import unittest
 
 from .common_imports import *
 
-class TestFruitOfFullfillment(unittest.TestCase):
+class TestWolfsGravestone(unittest.TestCase):
     def test_behaviour(self):
         base_state = ONE_ACTION_TEMPLATE
         base_state = PublicAddCardEffect(Pid.P1, WolfsGravestone).execute(base_state)

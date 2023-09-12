@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (28/54 implemented)](#character-2854-implemented)
-  - [Card (77/200 implemented)](#card-77200-implemented)
+  - [Card (78/200 implemented)](#card-78200-implemented)
 
 ## Character (28/54 implemented)
 
@@ -45,9 +45,9 @@ all I need now is to implement each card and character.
   - [x] Ningguang
   - [x] Noelle
 
-## Card (77/200 implemented)
+## Card (78/200 implemented)
 
-- [ ] Equipment Card (42/107):
+- [ ] Equipment Card (43/107):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] Cold-Blooded Strike
@@ -89,7 +89,7 @@ all I need now is to implement each card and character.
       - [x] Sacrificial Fragments
     - [ ] Claymore:
       - [x] Sacrificial Greatsword
-      - [ ] The Bell _<-- WIP_
+      - [x] The Bell
       - [x] White Iron Greatsword
       - [x] Wolf's Gravestone
     - [ ] Polearm:
