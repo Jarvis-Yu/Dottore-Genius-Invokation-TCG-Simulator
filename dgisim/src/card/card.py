@@ -80,6 +80,7 @@ __all__ = [
     "VortexVanquisher",
     "WhiteTassel",
     ## Sword ##
+    "AquilaFavonia",
     "SacrificialSword",
     "TravelersHandySword",
 
@@ -1237,6 +1238,11 @@ class WhiteTassel(WeaponEquipmentCard):
     WEAPON_STATUS = stt.WhiteTasselStatus
 
 #### Sword ####
+
+class AquilaFavonia(WeaponEquipmentCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    WEAPON_TYPE = WeaponType.SWORD
+    WEAPON_STATUS = stt.AquilaFavoniaStatus
 
 
 class SacrificialSword(WeaponEquipmentCard):

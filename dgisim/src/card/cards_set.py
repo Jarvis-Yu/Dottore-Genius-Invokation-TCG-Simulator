@@ -55,6 +55,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     VortexVanquisher,
     WhiteTassel,
     ### Sword ###
+    AquilaFavonia,
     SacrificialSword,
     TravelersHandySword,
     ## Artifact ##

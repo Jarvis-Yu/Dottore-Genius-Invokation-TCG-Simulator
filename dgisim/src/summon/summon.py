@@ -69,7 +69,7 @@ class Summon(stt.Status):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            target: StaticTarget
+            target: None | StaticTarget = None,
     ) -> bool:
         active_char = game_state.get_player(status_source.pid).get_active_character()
         if active_char is None:

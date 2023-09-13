@@ -87,6 +87,7 @@ __all__ = [
     "VortexVanquisherStatus",
     "WhiteTasselStatus",
     ### sword ###
+    "AquilaFavoniaStatus",
     "SacrificialSwordStatus",
     "TravelersHandySwordStatus",
     ## Artifact ##
@@ -489,9 +490,10 @@ class Status:
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            target: StaticTarget,
+            target: None | StaticTarget = None,
     ):
-        return status_source == target
+        active_id = game_state.get_player(status_source.pid).get_characters().get_active_character_id()
+        return status_source.id == active_id
 
     def _some_char_equiped_talent(
             self,
@@ -607,8 +609,10 @@ class CombatStatus(Status):
             self,
             game_state: GameState,
             status_source: StaticTarget,
-            target: StaticTarget,
+            target: None | StaticTarget = None,
     ) -> bool:
+        """ target needs to be not None """
+        assert target is not None
         active_char = game_state.get_player(status_source.pid).get_active_character()
         if active_char is None:
             return False
@@ -1342,6 +1346,7 @@ class VortexVanquisherStatus(WeaponEquipmentStatus):
             final_dmg_boost += self.ADDITIONAL_DMG_BOOST
         return dmg.delta_damage(final_dmg_boost), self
 
+
 @dataclass(frozen=True, kw_only=True)
 class WhiteTasselStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.POLEARM
@@ -1352,6 +1357,61 @@ class WhiteTasselStatus(WeaponEquipmentStatus):
         return WhiteTassel
 
 #### Sword ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class AquilaFavoniaStatus(WeaponEquipmentStatus, _UsageLivingStatus):
+    WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.SWORD
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    activated: bool = False
+    HP_RECOVERY: ClassVar[int] = 1
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        from ..card.card import AquilaFavonia
+        return AquilaFavonia
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.POST_SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if (
+                    self.usages > 0
+                    and not self.activated
+                    and information.source.pid is status_source.pid.other()
+            ):
+                return replace(self, activated=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+            if self._target_is_self_active(game_state, source, source):
+                return [
+                    eft.RecoverHPEffect(
+                        target=source,
+                        recovery=self.HP_RECOVERY,
+                    ),
+                ], replace(self, usages=-1, activated=False)
+            else:
+                return [], replace(self, usages=0, activated=False)
+        elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
+            return [], replace(self, usages=self.MAX_USAGES)
+        return [], self  # pragma: no cover
 
 
 @dataclass(frozen=True, kw_only=True)

@@ -37,6 +37,7 @@ Removes preceding `v` in version name to be like `0.3.2`.
     - Weapon Card:
       - A Thousand Floating Dreams
       - Amos' Bow
+      - Aquila Favonia
       - Fruit of Fulfillment
       - King's Squire
       - Lithic Spear
