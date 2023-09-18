@@ -93,6 +93,7 @@ __all__ = [
     ## Artifact ##
     "GamblersEarringsStatus",
     "InstructorsCapStatus",
+    "TenacityOfTheMillelithStatus",
 
     # combat status
     "CatalyzingFieldStatus",
@@ -120,6 +121,7 @@ __all__ = [
     "MushroomPizzaStatus",
     "NorthernSmokedChickenStatus",
     "SatiatedStatus",
+    "UnmovableMountainStatus",
 
     # character specific status
     ## Albedo ##
@@ -493,7 +495,8 @@ class Status:
             status_source: StaticTarget,
             target: None | StaticTarget = None,
     ):
-        active_id = game_state.get_player(status_source.pid).get_characters().get_active_character_id()
+        active_id = game_state.get_player(
+            status_source.pid).get_characters().get_active_character_id()
         return status_source.id == active_id
 
     def _some_char_equiped_talent(
@@ -1496,6 +1499,7 @@ class GamblersEarringsStatus(ArtifactEquipmentStatus):
     def __str__(self) -> str:
         return super().__str__() + f"({self.informed_num},{self.triggered_num})"
 
+
 @dataclass(frozen=True, kw_only=True)
 class InstructorsCapStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
     usages: int = 3
@@ -1544,6 +1548,64 @@ class InstructorsCapStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
             return [], replace(self, usages=self.MAX_USAGES)
         return [], self
 
+
+@dataclass(frozen=True, kw_only=True)
+class TenacityOfTheMillelithStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    activated: bool = False
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_DMG,
+        TriggeringSignal.ROUND_START,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.DMG_DELT:
+            assert isinstance(information, DmgIEvent)
+            dmg = information.dmg
+            if (
+                    not self.activated
+                    and self.usages > 0
+                    and dmg.target == status_source
+            ):
+                return replace(self, activated=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.POST_DMG and self.activated:
+            if not self._target_is_self_active(game_state, source, source):
+                return [], replace(self, activated=False)
+            this_char = game_state.get_character_target(source)
+            assert this_char is not None
+            return [
+                eft.AddDiceEffect(
+                    pid=source.pid,
+                    element=this_char.ELEMENT(),
+                    num=1,
+                ),
+            ], replace(self, usages=-1, activated=False)
+        elif signal is TriggeringSignal.ROUND_START:
+            return [
+                eft.AddCharacterStatusEffect(
+                    target=source,
+                    status=UnmovableMountainStatus,
+                ),
+            ], self
+        elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
+            return [], replace(self, usages=self.MAX_USAGES)
+        return [], self
 
 
 ############################## Combat Status ##############################
@@ -2181,7 +2243,7 @@ class NorthernSmokedChickenStatus(CharacterStatus):
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
         return [], self
@@ -2196,7 +2258,25 @@ class SatiatedStatus(CharacterStatus):
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], None
+        return [], self  # pragma: no cover
+
+
+@dataclass(frozen=True, kw_only=True)
+class UnmovableMountainStatus(CharacterStatus, StackedShieldStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
         return [], self  # pragma: no cover

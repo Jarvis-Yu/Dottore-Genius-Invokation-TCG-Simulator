@@ -87,6 +87,7 @@ __all__ = [
     # Artifact Card
     "GamblersEarrings",
     "InstructorsCap",
+    "TenacityOfTheMillelith",
 
     # Event Card
     ## Food Card ##
@@ -1269,6 +1270,11 @@ class GamblersEarrings(ArtifactEquipmentCard):
 class InstructorsCap(ArtifactEquipmentCard):
     _DICE_COST = AbstractDices({Element.ANY: 2})
     ARTIFACT_STATUS = stt.InstructorsCapStatus
+
+
+class TenacityOfTheMillelith(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    ARTIFACT_STATUS = stt.TenacityOfTheMillelithStatus
 
 # <<<<<<<<<<<<<<<<<<<< Event Cards <<<<<<<<<<<<<<<<<<<<
 # <<<<<<<<<<<<<<<<<<<< Event Cards / Food Cards <<<<<<<<<<<<<<<<<<<<

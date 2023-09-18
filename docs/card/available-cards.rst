@@ -48,6 +48,7 @@ Artifact Card
 
 * Gambler's Earrings
 * Instructor's Cap
+* Tenacity of the Millelith
 
 Talent Card
 ^^^^^^^^^^^

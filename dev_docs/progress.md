@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (28/54 implemented)](#character-2854-implemented)
-  - [Card (82/200 implemented)](#card-82200-implemented)
+  - [Card (83/200 implemented)](#card-83200-implemented)
 
 ## Character (28/54 implemented)
 
@@ -45,9 +45,9 @@ all I need now is to implement each card and character.
   - [x] Ningguang
   - [x] Noelle
 
-## Card (82/200 implemented)
+## Card (83/200 implemented)
 
-- [ ] Equipment Card (47/107):
+- [ ] Equipment Card (48/107):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] Cold-Blooded Strike
@@ -103,7 +103,7 @@ all I need now is to implement each card and character.
   - [ ] Artifact Card:
     - [x] Gambler's Earrings
     - [x] Instructor's Cap
-    - [ ] Tenacity of the Millelith _<-- WIP_
+    - [x] Tenacity of the Millelith
 - [ ] Support Card (3/36):
   - [ ] Companion Card:
     - [ ] Chang the Ninth _<-- WIP_
