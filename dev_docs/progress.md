@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (28/54 implemented)](#character-2854-implemented)
-  - [Card (84/200 implemented)](#card-84200-implemented)
+  - [Card (85/200 implemented)](#card-85200-implemented)
 
 ## Character (28/54 implemented)
 
@@ -45,7 +45,7 @@ all I need now is to implement each card and character.
   - [x] Ningguang
   - [x] Noelle
 
-## Card (84/200 implemented)
+## Card (85/200 implemented)
 
 - [ ] Equipment Card (49/107):
   - [ ] Talent Card:
@@ -105,9 +105,9 @@ all I need now is to implement each card and character.
     - [x] General's Ancient Helm
     - [x] Instructor's Cap
     - [x] Tenacity of the Millelith
-- [ ] Support Card (3/36):
+- [ ] Support Card (4/36):
   - [ ] Companion Card:
-    - [ ] Chang the Ninth _<-- WIP_
+    - [x] Chang the Ninth
     - [ ] Liben _<-- WIP_
     - [ ] Paimon _<-- WIP_
     - [x] Xudong

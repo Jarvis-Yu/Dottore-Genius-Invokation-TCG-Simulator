@@ -457,15 +457,15 @@ class Status:
             self,
             game_state: GameState,
             effects: list[eft.Effect],
-            new_status: Optional[Self],
+            new_status: None | Self,
             source: StaticTarget,
             signal: TriggeringSignal,
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         return effects, case_val(new_status == self, self, new_status)
 
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         """
         Returns a tuple, containg the effects and how to update self
         * if the returned new self is the same object as myself, then it is taken as no change
@@ -496,9 +496,15 @@ class Status:
             status_source: StaticTarget,
             target: None | StaticTarget = None,
     ):
-        active_id = game_state.get_player(
-            status_source.pid).get_characters().get_active_character_id()
-        return status_source.id == active_id
+        if target is None:
+            target = status_source
+        return (
+            status_source.pid is target.pid
+            and target.zone is Zone.CHARACTERS
+            and status_source.id == game_state.get_player(
+                status_source.pid
+            ).get_characters().get_active_character_id()
+        )
 
     def _some_char_equiped_talent(
             self,

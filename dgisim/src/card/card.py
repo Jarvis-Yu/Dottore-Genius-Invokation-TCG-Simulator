@@ -126,6 +126,7 @@ __all__ = [
 
     # Support Card
     ## Companion ##
+    "ChangTheNinth",
     "Xudong",
     ## Location ##
     "KnightsOfFavoniusLibrary",
@@ -2043,6 +2044,11 @@ class WindAndFreedom(EventCard, _DiceOnlyChoiceProvider):
 
 # <<<<<<<<<<<<<<<<<<<< Support Cards <<<<<<<<<<<<<<<<<<<<
 # <<<<<<<<<<<<<<<<<<<< Support Cards / Companion Cards <<<<<<<<<<<<<<<<<<<<
+
+
+class ChangTheNinth(CompanionCard):
+    _DICE_COST = AbstractDices.from_empty()
+    _SUPPORT_STATUS = sp.ChangTheNinthSupport
 
 
 class Xudong(CompanionCard):

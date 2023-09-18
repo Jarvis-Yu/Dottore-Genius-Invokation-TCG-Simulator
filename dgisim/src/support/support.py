@@ -25,7 +25,7 @@ from ..status import status as stt
 from ..effect.enums import TriggeringSignal, Zone
 from ..element import Element
 from ..helper.quality_of_life import BIG_INT
-from ..status.enums import Preprocessables
+from ..status.enums import Informables, Preprocessables
 
 if TYPE_CHECKING:
     from ..state.game_state import GameState
@@ -37,6 +37,7 @@ __all__ = [
 
     # concrete implementations
     ## Companions ##
+    "ChangTheNinthSupport",
     "XudongSupport",
 
     ## Locations ##
@@ -72,6 +73,62 @@ class Support(stt.Status):
 
     def content_str(self) -> str:  # pragma: no cover
         return ""
+
+
+@dataclass(frozen=True, kw_only=True)
+class ChangTheNinthSupport(Support, stt._UsageLivingStatus):
+    usages: int = 0  # this is the "Inspiration" of the card
+    MAX_USAGES: ClassVar[int] = 3
+    listening: bool = False
+    activated: bool = False
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+    ))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.PRE_SKILL_USAGE:
+            assert not self.listening
+            return replace(self, listening=True)
+        elif info_type is Informables.REACTION_TRIGGERED and self.listening and not self.activated:
+            return replace(self, activated=True, listening=False)
+        elif info_type is Informables.DMG_DELT and self.listening and not self.activated:
+            assert isinstance(information, DmgIEvent)
+            if (
+                    information.dmg.reaction is not None
+                    or information.dmg.element is Element.PIERCING
+                    or information.dmg.element is Element.PHYSICAL
+            ):
+                return replace(self, activated=True, listening=False)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION:
+            d_usages = 1 if self.activated else 0
+            if self.usages + d_usages == self.MAX_USAGES:
+                return [
+                    eft.DrawRandomCardEffect(
+                        pid=source.pid,
+                        num=2,
+                    ),
+                ], None
+            assert self.usages + d_usages < self.MAX_USAGES
+            return [], replace(self, usages=d_usages, activated=False, listening=False)
+        return [], self
+
+    @override
+    def content_str(self) -> str:
+        return f"{self.usages}|{self.listening}|{self.activated}"
 
 
 @dataclass(frozen=True, kw_only=True)

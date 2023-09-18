@@ -48,6 +48,9 @@ Removes preceding `v` in version name to be like `0.3.2`.
       - General's Ancient Helm
       - Instructor's Cap
       - Tenacity of the Millelith
+  - Support Card:
+    - Companion Card:
+      - Chang the Ninth
   - Event Card:
     - Where Is the Unseen Razor?
 

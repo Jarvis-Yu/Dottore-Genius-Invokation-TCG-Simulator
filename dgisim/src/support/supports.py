@@ -67,6 +67,7 @@ class Supports:
         return Supports(tuple(supports), self._max_num)
 
     def new_sid(self, support_type: type[Support]) -> int:
+        """ Returns an available SID in this Supports object, start from 1 """
         existings: set[int] = set(s.sid for s in self._supports)
         i = 1
         while i in existings:

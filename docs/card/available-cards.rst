@@ -1,7 +1,7 @@
 Available Cards
 ===============
 
-84 of 200 cards in Genius Invokation TCG are available in the simulator.
+85 of 200 cards in Genius Invokation TCG are available in the simulator.
 (excluding character cards which are not counted as cards in ``dgisim``)
 
 Equipment Cards
@@ -88,6 +88,7 @@ Support Card
 Companion Card
 ^^^^^^^^^^^^^^
 
+* Chang the Ninth
 * Xudong
 
 Item Card

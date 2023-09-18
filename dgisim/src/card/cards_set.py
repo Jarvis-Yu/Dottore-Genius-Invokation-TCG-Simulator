@@ -100,6 +100,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
 
     # Support Card
     ## Support Card / Companion ##
+    ChangTheNinth,
     Xudong,
     ## Support Card / Location ##
     KnightsOfFavoniusLibrary,
