@@ -45,6 +45,7 @@ Removes preceding `v` in version name to be like `0.3.2`.
       - Vortex Vanquisher
       - Wolf's Gravestone
     - Artifact Card:
+      - General's Ancient Helm
       - Instructor's Cap
       - Tenacity of the Millelith
   - Event Card:

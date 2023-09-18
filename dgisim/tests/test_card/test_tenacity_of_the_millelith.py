@@ -63,3 +63,15 @@ class TestTenacityOfTheMillelith(unittest.TestCase):
         new_dices = game_state.get_player1().get_dices()
         self.assertEqual(new_dices[Element.GEO], base_dices[Element.GEO] + 1)
         self.assertEqual(new_dices[Element.CRYO], base_dices[Element.CRYO])
+
+        # test shield generation
+        game_state = simulate_status_dmg(equipped_state, 3, Element.PHYSICAL, Pid.P1)
+        p1ac = game_state.get_player1().just_get_active_character()
+        self.assertEqual(p1ac.get_hp(), 7)
+
+        game_state = next_round(game_state)
+        game_state = simulate_status_dmg(game_state, 3, Element.PHYSICAL, Pid.P1, char_id=1)
+        game_state = simulate_status_dmg(game_state, 3, Element.PHYSICAL, Pid.P1, char_id=2)
+        p1c1, p1c2, _ = game_state.get_player1().get_characters().get_characters()
+        self.assertEqual(p1c1.get_hp(), 6)
+        self.assertEqual(p1c2.get_hp(), 9)

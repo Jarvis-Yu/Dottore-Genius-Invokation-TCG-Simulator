@@ -86,6 +86,7 @@ __all__ = [
 
     # Artifact Card
     "GamblersEarrings",
+    "GeneralsAncientHelm",
     "InstructorsCap",
     "TenacityOfTheMillelith",
 
@@ -1265,6 +1266,11 @@ class TravelersHandySword(WeaponEquipmentCard):
 class GamblersEarrings(ArtifactEquipmentCard):
     _DICE_COST = AbstractDices({Element.OMNI: 1})
     ARTIFACT_STATUS = stt.GamblersEarringsStatus
+
+
+class GeneralsAncientHelm(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 2})
+    ARTIFACT_STATUS = stt.GeneralsAncientHelmStatus
 
 
 class InstructorsCap(ArtifactEquipmentCard):

@@ -92,6 +92,7 @@ __all__ = [
     "TravelersHandySwordStatus",
     ## Artifact ##
     "GamblersEarringsStatus",
+    "GeneralsAncientHelmStatus",
     "InstructorsCapStatus",
     "TenacityOfTheMillelithStatus",
 
@@ -1498,6 +1499,26 @@ class GamblersEarringsStatus(ArtifactEquipmentStatus):
 
     def __str__(self) -> str:
         return super().__str__() + f"({self.informed_num},{self.triggered_num})"
+
+
+@dataclass(frozen=True, kw_only=True)
+class GeneralsAncientHelmStatus(ArtifactEquipmentStatus):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_START,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_START:
+            return [
+                eft.AddCharacterStatusEffect(
+                    target=source,
+                    status=UnmovableMountainStatus,
+                ),
+            ], self
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)
