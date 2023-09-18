@@ -316,15 +316,20 @@ def apply_elemental_aura(
         pid: Pid,
         char_id: None | int = None,
 ) -> GameState:
-    """ Apply elemental aura to the target character """
+    """
+    Apply elemental aura to the target character.
+    If char_id is None (by default), then active character of pid is targeted.
+    """
     if char_id is None:
         target = StaticTarget.from_player_active(game_state, pid)
     else:
         target = StaticTarget.from_char_id(pid, char_id)
     return auto_step(
         ApplyElementalAuraEffect(
+            source=target,
             target=target,
             element=element,
+            source_type=DamageType(status=True),
         ).execute(game_state)
     )
 

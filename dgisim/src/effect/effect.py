@@ -821,8 +821,10 @@ _DAMAGE_ELEMENTS: FrozenSet[Element] = frozenset({
 
 @dataclass(frozen=True, kw_only=True, repr=False)
 class ApplyElementalAuraEffect(DirectEffect):
+    source: StaticTarget
     target: StaticTarget
     element: Element
+    source_type: DamageType
 
     def execute(self, game_state: GameState) -> GameState:
         target_char = game_state.get_character_target(self.target)
@@ -892,7 +894,7 @@ class ApplyElementalAuraEffect(DirectEffect):
                     Reaction.SWIRL,
                 }, f"{reaction_detail.reaction_type} is not covered"
 
-        return game_state.factory().f_player(
+        game_state = game_state.factory().f_player(
             self.target.pid,
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().f_character(
@@ -903,6 +905,21 @@ class ApplyElementalAuraEffect(DirectEffect):
         ).f_effect_stack(
             lambda efs: efs.push_many_fl(effects)
         ).build()
+
+        if reaction_detail is not None:
+            game_state = StatusProcessing.inform_all_statuses(
+                game_state,
+                self.source.pid,
+                Informables.REACTION_TRIGGERED,
+                ReactionIEvent(
+                    source=self.source,
+                    target=self.target,
+                    source_type=self.source_type,
+                    reaction=reaction_detail.reaction_type,
+                ),
+            )
+
+        return game_state
 
 
 @dataclass(frozen=True, kw_only=True, repr=False)
@@ -1114,6 +1131,19 @@ class SpecificDamageEffect(DirectEffect):
         ).f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
+
+        if reaction is not None:
+            game_state = StatusProcessing.inform_all_statuses(
+                game_state,
+                self.source.pid,
+                Informables.REACTION_TRIGGERED,
+                ReactionIEvent(
+                    source=self.source,
+                    target=self.target,
+                    source_type=self.damage_type,
+                    reaction=reaction.reaction_type,
+                ),
+            )
 
         return game_state
 

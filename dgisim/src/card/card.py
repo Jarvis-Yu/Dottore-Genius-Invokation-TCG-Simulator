@@ -86,6 +86,7 @@ __all__ = [
 
     # Artifact Card
     "GamblersEarrings",
+    "InstructorsCap",
 
     # Event Card
     ## Food Card ##
@@ -1239,6 +1240,7 @@ class WhiteTassel(WeaponEquipmentCard):
 
 #### Sword ####
 
+
 class AquilaFavonia(WeaponEquipmentCard):
     _DICE_COST = AbstractDices({Element.OMNI: 3})
     WEAPON_TYPE = WeaponType.SWORD
@@ -1262,6 +1264,11 @@ class TravelersHandySword(WeaponEquipmentCard):
 class GamblersEarrings(ArtifactEquipmentCard):
     _DICE_COST = AbstractDices({Element.OMNI: 1})
     ARTIFACT_STATUS = stt.GamblersEarringsStatus
+
+
+class InstructorsCap(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDices({Element.ANY: 2})
+    ARTIFACT_STATUS = stt.InstructorsCapStatus
 
 # <<<<<<<<<<<<<<<<<<<< Event Cards <<<<<<<<<<<<<<<<<<<<
 # <<<<<<<<<<<<<<<<<<<< Event Cards / Food Cards <<<<<<<<<<<<<<<<<<<<

@@ -53,24 +53,14 @@ class TestStatus(unittest.TestCase):
         """
         # PYRO to HYDRO
         game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.HYDRO)
-        game_state = auto_step(
-            ApplyElementalAuraEffect(
-                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
-                element=Element.PYRO,
-            ).execute(game_state)
-        )
+        game_state = apply_elemental_aura(game_state, Element.PYRO, Pid.P2, char_id=1)
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
 
         # HYDRO to PYRO
         game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
-        game_state = auto_step(
-            ApplyElementalAuraEffect(
-                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
-                element=Element.HYDRO,
-            ).execute(game_state)
-        )
+        game_state = apply_elemental_aura(game_state, Element.HYDRO, Pid.P2, char_id=1)
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
@@ -112,24 +102,14 @@ class TestStatus(unittest.TestCase):
         """
         # PYRO to CRYO
         game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.CRYO)
-        game_state = auto_step(
-            ApplyElementalAuraEffect(
-                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
-                element=Element.PYRO,
-            ).execute(game_state)
-        )
+        game_state = apply_elemental_aura(game_state, Element.PYRO, Pid.P2)
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
 
         # CRYO to PYRO
         game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
-        game_state = auto_step(
-            ApplyElementalAuraEffect(
-                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
-                element=Element.CRYO,
-            ).execute(game_state)
-        )
+        game_state = apply_elemental_aura(game_state, Element.CRYO, Pid.P2)
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
@@ -367,12 +347,7 @@ class TestStatus(unittest.TestCase):
         """
         # ELECTRO to PYRO
         game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
-        game_state = auto_step(
-            ApplyElementalAuraEffect(
-                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
-                element=Element.ELECTRO,
-            ).execute(game_state)
-        )
+        game_state = apply_elemental_aura(game_state, Element.ELECTRO, Pid.P2)
         p2_cs = game_state.get_player2().get_characters()
         self.assertEqual(p2_cs.just_get_character(1).get_hp(), 10)
         self.assertFalse(p2_cs.just_get_character(1).get_elemental_aura().has_aura())
@@ -380,12 +355,7 @@ class TestStatus(unittest.TestCase):
 
         # PYRO to ELECTRO
         game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO)
-        game_state = auto_step(
-            ApplyElementalAuraEffect(
-                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
-                element=Element.PYRO,
-            ).execute(game_state)
-        )
+        game_state = apply_elemental_aura(game_state, Element.PYRO, Pid.P2)
         p2_cs = game_state.get_player2().get_characters()
         self.assertEqual(p2_cs.just_get_character(1).get_hp(), 10)
         self.assertFalse(p2_cs.just_get_character(1).get_elemental_aura().has_aura())
@@ -397,12 +367,7 @@ class TestStatus(unittest.TestCase):
         """
         # ELECTRO to PYRO
         game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO, char_id=2)
-        game_state = auto_step(
-            ApplyElementalAuraEffect(
-                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 2),
-                element=Element.ELECTRO,
-            ).execute(game_state)
-        )
+        game_state = apply_elemental_aura(game_state, Element.ELECTRO, Pid.P2, char_id=2)
         p2_cs = game_state.get_player2().get_characters()
         self.assertEqual(p2_cs.just_get_character(2).get_hp(), 10)
         self.assertFalse(p2_cs.just_get_character(2).get_elemental_aura().has_aura())
@@ -410,12 +375,7 @@ class TestStatus(unittest.TestCase):
 
         # PYRO to ELECTRO
         game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO, char_id=2)
-        game_state = auto_step(
-            ApplyElementalAuraEffect(
-                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 2),
-                element=Element.PYRO,
-            ).execute(game_state)
-        )
+        game_state = apply_elemental_aura(game_state, Element.PYRO, Pid.P2, char_id=2)
         p2_cs = game_state.get_player2().get_characters()
         self.assertEqual(p2_cs.just_get_character(2).get_hp(), 10)
         self.assertFalse(p2_cs.just_get_character(2).get_elemental_aura().has_aura())
@@ -463,24 +423,14 @@ class TestStatus(unittest.TestCase):
         """
         # HYDRO to ELECTRO
         game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO)
-        game_state = auto_step(
-            ApplyElementalAuraEffect(
-                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
-                element=Element.HYDRO,
-            ).execute(game_state)
-        )
+        game_state = apply_elemental_aura(game_state, Element.HYDRO, Pid.P2)
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
 
         # ELECTRO to HYDRO
         game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.HYDRO)
-        game_state = auto_step(
-            ApplyElementalAuraEffect(
-                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
-                element=Element.ELECTRO,
-            ).execute(game_state)
-        )
+        game_state = apply_elemental_aura(game_state, Element.ELECTRO, Pid.P2)
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
@@ -527,24 +477,14 @@ class TestStatus(unittest.TestCase):
         """
         # CRYO to ELECTRO
         game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO)
-        game_state = auto_step(
-            ApplyElementalAuraEffect(
-                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
-                element=Element.CRYO,
-            ).execute(game_state)
-        )
+        game_state = apply_elemental_aura(game_state, Element.CRYO, Pid.P2)
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
 
         # ELECTRO to CRYO
         game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.CRYO)
-        game_state = auto_step(
-            ApplyElementalAuraEffect(
-                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
-                element=Element.ELECTRO,
-            ).execute(game_state)
-        )
+        game_state = apply_elemental_aura(game_state, Element.ELECTRO, Pid.P2)
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
@@ -659,12 +599,7 @@ class TestStatus(unittest.TestCase):
         for elem in aurable_elems:
             with self.subTest(elem=elem):
                 game_state = oppo_aura_elem(ACTION_TEMPLATE, elem)
-                game_state = auto_step(
-                    ApplyElementalAuraEffect(
-                        target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
-                        element=Element.ANEMO,
-                    ).execute(game_state)
-                )
+                game_state = apply_elemental_aura(game_state, Element.ANEMO, Pid.P2)
                 p2ac = game_state.get_player2().just_get_active_character()
                 self.assertEqual(p2ac.get_hp(), 10)
                 if elem is not Element.DENDRO:
@@ -738,12 +673,7 @@ class TestStatus(unittest.TestCase):
         """
         # HYDRO to CRYO
         game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.CRYO)
-        game_state = auto_step(
-            ApplyElementalAuraEffect(
-                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
-                element=Element.HYDRO,
-            ).execute(game_state)
-        )
+        game_state = apply_elemental_aura(game_state, Element.HYDRO, Pid.P2)
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
@@ -751,12 +681,7 @@ class TestStatus(unittest.TestCase):
 
         # CRYO to HYDRO
         game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.HYDRO)
-        game_state = auto_step(
-            ApplyElementalAuraEffect(
-                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
-                element=Element.CRYO,
-            ).execute(game_state)
-        )
+        game_state = apply_elemental_aura(game_state, Element.CRYO, Pid.P2)
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
@@ -808,12 +733,7 @@ class TestStatus(unittest.TestCase):
         """
         # ELECTRO to DENDRO
         game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.DENDRO)
-        game_state = auto_step(
-            ApplyElementalAuraEffect(
-                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
-                element=Element.ELECTRO,
-            ).execute(game_state)
-        )
+        game_state = apply_elemental_aura(game_state, Element.ELECTRO, Pid.P2)
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -822,12 +742,7 @@ class TestStatus(unittest.TestCase):
 
         # DENDRO to ELECTRO
         game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.ELECTRO)
-        game_state = auto_step(
-            ApplyElementalAuraEffect(
-                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
-                element=Element.DENDRO,
-            ).execute(game_state)
-        )
+        game_state = apply_elemental_aura(game_state, Element.DENDRO, Pid.P2)
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -960,12 +875,7 @@ class TestStatus(unittest.TestCase):
         """
         # HYDRO to DENDRO
         game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.DENDRO)
-        game_state = auto_step(
-            ApplyElementalAuraEffect(
-                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
-                element=Element.HYDRO,
-            ).execute(game_state)
-        )
+        game_state = apply_elemental_aura(game_state, Element.HYDRO, Pid.P2)
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -975,12 +885,7 @@ class TestStatus(unittest.TestCase):
 
         # DENDRO to HYDRO
         game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.HYDRO)
-        game_state = auto_step(
-            ApplyElementalAuraEffect(
-                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
-                element=Element.DENDRO,
-            ).execute(game_state)
-        )
+        game_state = apply_elemental_aura(game_state, Element.DENDRO, Pid.P2)
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -1113,11 +1018,8 @@ class TestStatus(unittest.TestCase):
         for elem in aurable_elems:
             with self.subTest(elem=elem):
                 game_state = oppo_aura_elem(ACTION_TEMPLATE, elem)
-                game_state = auto_step(
-                    ApplyElementalAuraEffect(
-                        target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
-                        element=Element.GEO,
-                    ).execute(game_state)
+                game_state = apply_elemental_aura(
+                    game_state, Element.GEO, Pid.P2, char_id=1,
                 )
                 p1 = game_state.get_player1()
                 p2ac = game_state.get_player2().just_get_active_character()
@@ -1269,12 +1171,7 @@ class TestStatus(unittest.TestCase):
         """
         # PYRO to DENDRO
         game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.DENDRO)
-        game_state = auto_step(
-            ApplyElementalAuraEffect(
-                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
-                element=Element.PYRO,
-            ).execute(game_state)
-        )
+        game_state = apply_elemental_aura(game_state, Element.PYRO, Pid.P2, char_id=1)
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -1284,12 +1181,7 @@ class TestStatus(unittest.TestCase):
 
         # DENDRO to PYRO
         game_state = oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
-        game_state = auto_step(
-            ApplyElementalAuraEffect(
-                target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
-                element=Element.DENDRO,
-            ).execute(game_state)
-        )
+        game_state = apply_elemental_aura(game_state, Element.DENDRO, Pid.P2, char_id=1)
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)

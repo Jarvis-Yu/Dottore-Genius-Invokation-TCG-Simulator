@@ -60,6 +60,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     TravelersHandySword,
     ## Artifact ##
     GamblersEarrings,
+    InstructorsCap,
 
     # Event Card
     CalxsArts,

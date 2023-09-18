@@ -14,8 +14,8 @@ if TYPE_CHECKING:
     from .character.character import Character
     from .character.enums import CharacterSkill, CharacterSkillType
     from .effect.effect import SpecificDamageEffect
-    from .effect.structs import StaticTarget
-    from .element import Element
+    from .effect.structs import DamageType, StaticTarget
+    from .element import Element, Reaction
     from .dices import AbstractDices
     from .state.game_state import GameState
     from .state.enums import Pid
@@ -29,6 +29,7 @@ __all__ = [
     "InformableEvent",
     "DmgIEvent",
     "CharacterDeathIEvent",
+    "ReactionIEvent",
     "SkillIEvent",
 
     "PreprocessableEvent",
@@ -69,6 +70,15 @@ class DmgIEvent(InformableEvent):
 @dataclass(frozen=True, kw_only=True)
 class CharacterDeathIEvent(InformableEvent):
     target: StaticTarget
+
+
+@dataclass(frozen=True, kw_only=True)
+class ReactionIEvent(InformableEvent):
+    source: StaticTarget
+    target: StaticTarget
+    source_type: DamageType
+    reaction: Reaction
+
 
 
 @dataclass(frozen=True, kw_only=True)

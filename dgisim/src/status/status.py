@@ -92,6 +92,7 @@ __all__ = [
     "TravelersHandySwordStatus",
     ## Artifact ##
     "GamblersEarringsStatus",
+    "InstructorsCapStatus",
 
     # combat status
     "CatalyzingFieldStatus",
@@ -1494,6 +1495,55 @@ class GamblersEarringsStatus(ArtifactEquipmentStatus):
 
     def __str__(self) -> str:
         return super().__str__() + f"({self.informed_num},{self.triggered_num})"
+
+@dataclass(frozen=True, kw_only=True)
+class InstructorsCapStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
+    usages: int = 3
+    MAX_USAGES: ClassVar[int] = 3
+    activated: bool = False
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.REACTION_TRIGGERED:
+            assert isinstance(information, ReactionIEvent)
+            if (
+                    not self.activated
+                    and self.usages > 0
+                    and information.source == status_source
+                    and information.source_type.directly_from_character()
+            ):
+                return replace(self, activated=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+            this_char = game_state.get_character_target(source)
+            assert this_char is not None
+            return [
+                eft.AddDiceEffect(
+                    pid=source.pid,
+                    element=this_char.ELEMENT(),
+                    num=1,
+                ),
+            ], replace(self, usages=-1, activated=False)
+        elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
+            return [], replace(self, usages=self.MAX_USAGES)
+        return [], self
+
 
 
 ############################## Combat Status ##############################

@@ -44,6 +44,8 @@ Removes preceding `v` in version name to be like `0.3.2`.
       - The Bell
       - Vortex Vanquisher
       - Wolf's Gravestone
+    - Artifact Card:
+      - Instructor's Cap
   - Event Card:
     - Where Is the Unseen Razor?
 

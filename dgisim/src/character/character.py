@@ -2531,8 +2531,10 @@ class SangonomiyaKokomi(Character):
     def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ApplyElementalAuraEffect(
+                source=source,
                 target=source,
                 element=Element.HYDRO,
+                source_type=DamageType(elemental_skill=True),
             ),
             eft.AddSummonEffect(
                 target_pid=source.pid,
@@ -2854,8 +2856,10 @@ class Xingqiu(Character):
                 damage_type=DamageType(elemental_skill=True),
             ),
             eft.ApplyElementalAuraEffect(
+                source=source,
                 target=source,
                 element=Element.HYDRO,
+                source_type=DamageType(elemental_skill=True),
             ),
             eft.UpdateCombatStatusEffect(
                 target_pid=source.pid,
@@ -2877,8 +2881,10 @@ class Xingqiu(Character):
                 damage_type=DamageType(elemental_burst=True),
             ),
             eft.ApplyElementalAuraEffect(
+                source=source,
                 target=source,
                 element=Element.HYDRO,
+                source_type=DamageType(elemental_burst=True),
             ),
             eft.AddCombatStatusEffect(
                 target_pid=source.pid,
