@@ -468,7 +468,7 @@ class Status:
     ) -> tuple[list[eft.Effect], None | Self]:
         """
         Returns a tuple, containg the effects and how to update self
-        * if the returned new self is the same object as myself, then it is taken as no change
+        * if the returned new self is the same object as itself, then it is taken as no change
           requested
         * if the returned new self is none, then it is taken as a removal request
         * if the returned new self is different object than myself, then it is taken as an update

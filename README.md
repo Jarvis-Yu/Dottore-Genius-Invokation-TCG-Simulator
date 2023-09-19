@@ -87,7 +87,7 @@ generate valid player actions.
 Currently a full game can be played with any combination of the characters and cards implemented.
 
 - [x] Implement all game phases (Action Phase, End Phase...)
-- [ ] Implement all cards (85/200 implemented) ([details](https://dottore-genius-invokation-tcg-simulator.readthedocs.io/en/latest/card/available_cards.html#))
+- [ ] Implement all cards (86/200 implemented) ([details](https://dottore-genius-invokation-tcg-simulator.readthedocs.io/en/latest/card/available_cards.html#))
 - [ ] Implement all characters with their talent cards (28/54 implemented) ([details](https://dottore-genius-invokation-tcg-simulator.readthedocs.io/en/latest/character/available_chars.html))
 - [x] Implement all reactions, death handling, revival handling etc.
 - [x] Implement all game logics to support the implemented cards and characters

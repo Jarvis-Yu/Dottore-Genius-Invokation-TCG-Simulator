@@ -38,6 +38,7 @@ __all__ = [
     # concrete implementations
     ## Companions ##
     "ChangTheNinthSupport",
+    "PaimonSupport",
     "XudongSupport",
 
     ## Locations ##
@@ -130,6 +131,28 @@ class ChangTheNinthSupport(Support, stt._UsageLivingStatus):
     def content_str(self) -> str:
         return f"{self.usages}|{self.listening}|{self.activated}"
 
+@dataclass(frozen=True, kw_only=True)
+class PaimonSupport(Support, stt._UsageStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    NUM_GENERATED: ClassVar[int] = 2
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_START,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_START:
+            return [
+                eft.AddDiceEffect(
+                    pid=source.pid,
+                    element=Element.OMNI,
+                    num=self.NUM_GENERATED,
+                ),
+            ], replace(self, usages=-1)
+        return [], self
 
 @dataclass(frozen=True, kw_only=True)
 class XudongSupport(Support):
