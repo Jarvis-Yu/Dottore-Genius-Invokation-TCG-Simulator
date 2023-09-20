@@ -319,6 +319,11 @@ class ActionPhase(ph.Phase):
                 pid,
                 TriggeringSignal.COMBAT_ACTION,
             ))
+        new_effects.append(AllStatusTriggererEffect(
+            pid,
+            TriggeringSignal.POST_CARD,
+        ))
+        if card.is_combat_action():
             new_effects.append(TurnEndEffect())
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(new_effects)

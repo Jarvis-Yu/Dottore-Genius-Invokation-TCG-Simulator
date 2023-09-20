@@ -52,6 +52,23 @@ class Cards:
         ))
         return Cards(self._cards - picked_cards), Cards(picked_cards)
 
+    def pick_random_cards_of_type(self, num: int, card_type: type[Card]) -> tuple[Cards, Cards]:
+        """
+        Similar to `pick_random_cards`, but only pick cards of `card_type`
+        """
+        qualified_cards = dict(
+            (c_type, c_num)
+            for c_type, c_num in self._cards.items()
+            if issubclass(c_type, card_type)
+        )
+        num = min(sum(qualified_cards.values()), num)
+        if num == 0:
+            return (self, Cards.from_empty())
+        picked_cards: dict[type[Card], int] = dict(Counter(
+            random.sample(list(qualified_cards.keys()), counts=qualified_cards.values(), k=num)
+        ))
+        return Cards(self._cards - picked_cards), Cards(picked_cards)
+
     def num_cards(self) -> int:
         return sum(self._cards.values())
 

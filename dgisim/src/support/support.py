@@ -41,6 +41,9 @@ __all__ = [
     "PaimonSupport",
     "XudongSupport",
 
+    ## Item ##
+    "NRESupport",
+
     ## Locations ##
     "KnightsOfFavoniusLibrarySupport",
     "VanaranaSupport",
@@ -131,6 +134,7 @@ class ChangTheNinthSupport(Support, stt._UsageLivingStatus):
     def content_str(self) -> str:
         return f"{self.usages}|{self.listening}|{self.activated}"
 
+
 @dataclass(frozen=True, kw_only=True)
 class PaimonSupport(Support, stt._UsageStatus):
     usages: int = 2
@@ -153,6 +157,7 @@ class PaimonSupport(Support, stt._UsageStatus):
                 ),
             ], replace(self, usages=-1)
         return [], self
+
 
 @dataclass(frozen=True, kw_only=True)
 class XudongSupport(Support):
@@ -199,6 +204,57 @@ class XudongSupport(Support):
     @override
     def content_str(self) -> str:
         return f"({self.usages})"
+
+
+@dataclass(frozen=True, kw_only=True)
+class NRESupport(Support, stt._UsageLivingStatus):
+    # Game Test Result:
+    #   If there's no food left in the deck, then it is still activated and got usages decrement
+    #   (tested by using Sumeru Resonance with NRE)
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    activated: bool = False
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_CARD,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.CARD:
+            assert isinstance(item, CardPEvent)
+            if (
+                    not self.activated
+                    and self.usages > 0
+                    and item.pid is status_source.pid
+                    and issubclass(item.card_type, cd.FoodCard)
+            ):
+                return item, replace(self, activated=True)
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.POST_CARD and self.activated:
+            return [
+                eft.DrawRandomCardOfTypeEffect(
+                    pid=source.pid,
+                    num=1,
+                    card_type=cd.FoodCard,
+                ),
+            ], replace(self, usages=-1, activated=False)
+        elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
+            assert not self.activated
+            return [], replace(self, usages=self.MAX_USAGES)
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)

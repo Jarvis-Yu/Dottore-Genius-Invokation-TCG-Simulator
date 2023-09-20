@@ -90,6 +90,7 @@ __all__ = [
     "RecoverHPEffect",
     "ReviveRecoverHPEffect",
     "DrawRandomCardEffect",
+    "DrawRandomCardOfTypeEffect",
     "PublicAddCardEffect",
     "PublicRemoveCardEffect",
     "PublicRemoveAllCardEffect",
@@ -1321,6 +1322,27 @@ class DrawRandomCardEffect(DirectEffect):
     def execute(self, game_state: GameState) -> GameState:
         deck_cards = game_state.get_player(self.pid).get_deck_cards()
         left_cards, chosen_cards = deck_cards.pick_random_cards(self.num)
+        if chosen_cards.num_cards() == 0:
+            return game_state
+        return game_state.factory().f_player(
+            self.pid,
+            lambda p: p.factory().deck_cards(
+                left_cards
+            ).f_hand_cards(
+                lambda cards: cards + chosen_cards
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class DrawRandomCardOfTypeEffect(DirectEffect):
+    pid: Pid
+    num: int
+    card_type: type[Card]
+
+    def execute(self, game_state: GameState) -> GameState:
+        deck_cards = game_state.get_player(self.pid).get_deck_cards()
+        left_cards, chosen_cards = deck_cards.pick_random_cards_of_type(self.num, self.card_type)
         if chosen_cards.num_cards() == 0:
             return game_state
         return game_state.factory().f_player(

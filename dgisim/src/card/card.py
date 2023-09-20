@@ -11,7 +11,7 @@ ordered alphabetically.
 - concrete classes, the implementation of cards that are actually in the game
 """
 from __future__ import annotations
-from typing import cast, TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 from dataclasses import replace
 from typing_extensions import override
 
@@ -56,6 +56,7 @@ __all__ = [
     "ArtifactEquipmentCard",
     "SupportCard",
     "CompanionCard",
+    "ItemCard",
     "LocationCard",
     "FoodCard",
 
@@ -129,6 +130,8 @@ __all__ = [
     "ChangTheNinth",
     "Paimon",
     "Xudong",
+    ## Item ##
+    "NRE",
     ## Location ##
     "KnightsOfFavoniusLibrary",
     "Vanarana",
@@ -1007,6 +1010,10 @@ class SupportCard(Card):
 
 
 class CompanionCard(SupportCard):
+    pass
+
+
+class ItemCard(SupportCard):
     pass
 
 
@@ -2062,6 +2069,29 @@ class Xudong(CompanionCard):
     _SUPPORT_STATUS = sp.XudongSupport
 
 # >>>>>>>>>>>>>>>>>>>> Support Cards / Companion Cards >>>>>>>>>>>>>>>>>>>>
+
+# <<<<<<<<<<<<<<<<<<<< Support Cards / Item Cards <<<<<<<<<<<<<<<<<<<<
+
+
+class NRE(ItemCard):
+    _DICE_COST = AbstractDices({Element.ANY: 2})
+    _SUPPORT_STATUS = sp.NRESupport
+
+    @classmethod
+    def _effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.DrawRandomCardOfTypeEffect(
+                pid=pid,
+                num=1,
+                card_type=FoodCard,
+            ),
+        )
+
+# >>>>>>>>>>>>>>>>>>>> Support Cards / Item Cards >>>>>>>>>>>>>>>>>>>>
 
 # <<<<<<<<<<<<<<<<<<<< Support Cards / Location Cards <<<<<<<<<<<<<<<<<<<<
 

@@ -21,22 +21,23 @@ class Zone(Enum):
 
 
 class TriggeringSignal(Enum):
-    FAST_ACTION = 0
-    COMBAT_ACTION = 1
-    DEATH_EVENT = 2
-    TRIGGER_REVIVAL = 3
-    SWAP_EVENT_1 = 4  # P1's swap
-    SWAP_EVENT_2 = 5  # P2's swap
-    POST_REACTION = 6
-    POST_DMG = 7  # triggering after each summon effect
-    GAME_START = 8  # on triggered once at the start of the first round
-    ROUND_START = 9
-    PRE_ACTION = 10
-    ACT_PRE_SKILL = 11  # trigger prepare skill
-    SELF_DECLARE_END_ROUND = 12
-    OPPO_DECLARE_END_ROUND = 13
-    END_ROUND_CHECK_OUT = 14  # summons etc.
-    ROUND_END = 15  # remove frozen etc.
+    ACT_PRE_SKILL = "ActPreSkill"  # trigger prepare skill
+    COMBAT_ACTION = "CombatAction"
+    DEATH_EVENT = "DeathEvent"
+    END_ROUND_CHECK_OUT = "EndRoundCheckOut"  # summons etc.
+    FAST_ACTION = "FastAction"
+    GAME_START = "GameStart"  # on triggered once at the start of the first round
+    OPPO_DECLARE_END_ROUND = "OppoDeclareEndRound"
+    POST_CARD = "PostCard"
+    POST_DMG = "PostDmg"  # triggering after each summon effect
+    POST_REACTION = "PostReaction"
+    PRE_ACTION = "PreAction"
+    ROUND_END = "RoundEnd"  # remove frozen etc.
+    ROUND_START = "RoundStart"
+    SELF_DECLARE_END_ROUND = "SelfDeclareEndRound"
+    SWAP_EVENT_1 = "SwapEvent1"  # P1's swap; TODO: make it relative
+    SWAP_EVENT_2 = "SwapEvent2"  # P2's swap; TODO: make it relative
+    TRIGGER_REVIVAL = "TriggerRevival"
 
     @classmethod
     def swap_event(cls, pid: Pid) -> TriggeringSignal:

@@ -103,6 +103,8 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ChangTheNinth,
     Paimon,
     Xudong,
+    ## Support Card / Item ##
+    NRE,
     ## Support Card / Location ##
     KnightsOfFavoniusLibrary,
     Vanarana,
