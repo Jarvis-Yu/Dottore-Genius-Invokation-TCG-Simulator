@@ -106,6 +106,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     Xudong,
     ## Support Card / Item ##
     NRE,
+    ParametricTransformer,
     ## Support Card / Location ##
     KnightsOfFavoniusLibrary,
     Vanarana,

@@ -133,6 +133,7 @@ __all__ = [
     "Xudong",
     ## Item ##
     "NRE",
+    "ParametricTransformer",
     ## Location ##
     "KnightsOfFavoniusLibrary",
     "Vanarana",
@@ -2096,6 +2097,10 @@ class NRE(ItemCard):
                 card_type=FoodCard,
             ),
         )
+
+class ParametricTransformer(ItemCard):
+    _DICE_COST = AbstractDices({Element.ANY: 2})
+    _SUPPORT_STATUS = sp.ParametricTransformerSupport
 
 # >>>>>>>>>>>>>>>>>>>> Support Cards / Item Cards >>>>>>>>>>>>>>>>>>>>
 

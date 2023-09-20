@@ -11,9 +11,9 @@ __all__ = [
 
 
 class CharacterSkill(Enum):
-    SKILL1 = 0
-    SKILL2 = 1
-    SKILL3 = 2
+    SKILL1 = 0  # typically the normal attack
+    SKILL2 = 1  # typically the 1st elemental skill
+    SKILL3 = 2  # typically the 2nd elemental skill
     ELEMENTAL_BURST = 3
 
     def to_event_type(self) -> EventType:

@@ -359,11 +359,11 @@ class ActualDices(Dices):
         )
 
     @classmethod
-    def from_random(cls, size: int) -> ActualDices:
+    def from_random(cls, size: int, excepted_elems: set[Element] = set()) -> ActualDices:
         dices = ActualDices.from_empty()
         dices._dices._unfreeze()
         for i in range(size):
-            elem = random.choice(tuple(ActualDices._LEGAL_ELEMS))
+            elem = random.choice(tuple(ActualDices._LEGAL_ELEMS - excepted_elems))
             dices._dices[elem] += 1
         dices._dices.freeze()
         return dices

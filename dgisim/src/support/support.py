@@ -44,6 +44,7 @@ __all__ = [
 
     ## Item ##
     "NRESupport",
+    "ParametricTransformerSupport",
 
     ## Locations ##
     "KnightsOfFavoniusLibrarySupport",
@@ -307,6 +308,58 @@ class NRESupport(Support, stt._UsageLivingStatus):
             return [], replace(self, usages=self.MAX_USAGES)
         return [], self
 
+@dataclass(frozen=True, kw_only=True)
+class ParametricTransformerSupport(Support, stt._UsageLivingStatus):
+    usages: int = 0
+    MAX_USAGES: ClassVar[int] = 3
+    listening: bool = False
+    activated: bool = False
+    NUM_DICES_GENERATED: ClassVar[int] = 3
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+    ))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.PRE_SKILL_USAGE:
+            assert not self.listening
+            return replace(self, listening=True)
+        elif info_type is Informables.DMG_DELT and self.listening and not self.activated:
+            assert isinstance(information, DmgIEvent)
+            from ..dices import _PURE_ELEMS
+            if information.dmg.element in _PURE_ELEMS:
+                return replace(self, activated=True, listening=False)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION:
+            d_usages = 1 if self.activated else 0
+            if self.usages + d_usages == self.MAX_USAGES:
+                dices = ActualDices.from_random(
+                    self.NUM_DICES_GENERATED,
+                    excepted_elems={Element.OMNI},
+                )
+                return [
+                    eft.AddDiceEffect(
+                        pid=source.pid,
+                        element=elem,
+                        num=dices[elem],
+                    )
+                    for elem in dices
+                ], None
+            assert self.usages + d_usages < self.MAX_USAGES
+            return [], replace(self, usages=d_usages, activated=False, listening=False)
+        return [], self
 
 @dataclass(frozen=True, kw_only=True)
 class KnightsOfFavoniusLibrarySupport(Support):
