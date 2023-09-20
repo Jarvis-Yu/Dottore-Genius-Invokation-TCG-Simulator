@@ -214,7 +214,7 @@ class ActualDices(Dices):
 
         # test OMNI requirement
         omni_remained = self[Element.OMNI] - omni_needed
-        most_pure = max(pure_deducted.values())
+        most_pure: int = max(pure_deducted.values())
         if omni_remained + most_pure < requirement[Element.OMNI]:
             return False
 

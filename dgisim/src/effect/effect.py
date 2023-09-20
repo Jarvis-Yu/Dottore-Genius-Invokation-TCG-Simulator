@@ -1443,7 +1443,8 @@ class RemoveDiceEffect(DirectEffect):
         dices = self.dices
         new_dices = game_state.get_player(pid).get_dices() - dices
         if not new_dices.is_legal():
-            raise Exception("Not enough dices for this effect")
+            raise Exception(f"Not enough dices for this effect "
+                            + f"{game_state.get_player(pid).get_dices()} - {dices}")
         return game_state.factory().f_player(
             pid,
             lambda p: p.factory().dices(new_dices).build()

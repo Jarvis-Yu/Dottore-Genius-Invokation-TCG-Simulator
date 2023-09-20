@@ -128,6 +128,7 @@ __all__ = [
     # Support Card
     ## Companion ##
     "ChangTheNinth",
+    "Liben",
     "Paimon",
     "Xudong",
     ## Item ##
@@ -2057,6 +2058,11 @@ class WindAndFreedom(EventCard, _DiceOnlyChoiceProvider):
 class ChangTheNinth(CompanionCard):
     _DICE_COST = AbstractDices.from_empty()
     _SUPPORT_STATUS = sp.ChangTheNinthSupport
+
+
+class Liben(CompanionCard):
+    _DICE_COST = AbstractDices.from_empty()
+    _SUPPORT_STATUS = sp.LibenSupport
 
 
 class Paimon(CompanionCard):

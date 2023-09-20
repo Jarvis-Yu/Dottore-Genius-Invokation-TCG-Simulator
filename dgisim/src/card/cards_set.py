@@ -101,6 +101,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     # Support Card
     ## Support Card / Companion ##
     ChangTheNinth,
+    Liben,
     Paimon,
     Xudong,
     ## Support Card / Item ##

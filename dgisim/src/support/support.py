@@ -38,6 +38,7 @@ __all__ = [
     # concrete implementations
     ## Companions ##
     "ChangTheNinthSupport",
+    "LibenSupport",
     "PaimonSupport",
     "XudongSupport",
 
@@ -133,6 +134,56 @@ class ChangTheNinthSupport(Support, stt._UsageLivingStatus):
     @override
     def content_str(self) -> str:
         return f"{self.usages}|{self.listening}|{self.activated}"
+
+@dataclass(frozen=True, kw_only=True)
+class LibenSupport(Support, stt._UsageLivingStatus):
+    usages: int = 0
+    MAX_USAGES: ClassVar[int] = 3
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_START,
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            this_player = game_state.get_player(source.pid)
+            dices = this_player.get_dices()
+            if dices.is_empty():
+                return [], self
+            curr_size = 0
+            ordered_dices = dices.readonly_dices_ordered(this_player)
+            used_dices: dict[Element, int] = {}
+            for elem, num in ordered_dices.items():
+                num_used = 1
+                if elem is Element.OMNI:
+                    num_used = min(self.MAX_USAGES - self.usages - curr_size, num)
+                curr_size += num_used
+                used_dices[elem] = num_used
+                if curr_size + self.usages == self.MAX_USAGES:
+                    break
+                assert curr_size + self.usages < self.MAX_USAGES
+            return [
+                eft.RemoveDiceEffect(
+                    pid=source.pid,
+                    dices=ActualDices(used_dices),
+                ),
+            ], replace(self, usages=curr_size)
+        elif signal is TriggeringSignal.ROUND_START and self.usages == self.MAX_USAGES:
+            return [
+                eft.DrawRandomCardEffect(
+                    pid=source.pid,
+                    num=2,
+                ),
+                eft.AddDiceEffect(
+                    pid=source.pid,
+                    element=Element.OMNI,
+                    num=2,
+                ),
+            ], None
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -281,14 +332,14 @@ class VanaranaSupport(Support):
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_START,
-        TriggeringSignal.ROUND_END,
+        TriggeringSignal.END_ROUND_CHECK_OUT,
     ))
 
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.ROUND_END:
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             this_player = game_state.get_player(source.pid)
             dices = this_player.get_dices()
             if dices.is_empty():
