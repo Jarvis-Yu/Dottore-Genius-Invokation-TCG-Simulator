@@ -111,6 +111,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     KnightsOfFavoniusLibrary,
     LiyueHarborWharf,
     SumeruCity,
+    Tenshukaku,
     Vanarana,
 ]
 

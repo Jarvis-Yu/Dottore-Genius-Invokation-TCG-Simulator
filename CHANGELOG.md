@@ -59,6 +59,7 @@ Removes preceding `v` in version name to be like `0.3.2`.
     - Location Card:
       - Liyue Harbor Wharf
       - Sumeru City
+      - Tenshukaku
   - Event Card:
     - Where Is the Unseen Razor?
 

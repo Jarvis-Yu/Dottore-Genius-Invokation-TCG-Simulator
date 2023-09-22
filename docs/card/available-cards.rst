@@ -1,7 +1,7 @@
 Available Cards
 ===============
 
-91 of 200 cards in Genius Invokation TCG are available in the simulator.
+92 of 200 cards in Genius Invokation TCG are available in the simulator.
 (excluding character cards which are not counted as cards in ``dgisim``)
 
 Equipment Cards
@@ -105,6 +105,7 @@ Location Card
 * Knights of Favonius Library
 * Liyue Harbor Wharf
 * Sumeru City
+* Tenshukaku
 * Vanarana
 
 Event Card

@@ -138,6 +138,7 @@ __all__ = [
     "KnightsOfFavoniusLibrary",
     "LiyueHarborWharf",
     "SumeruCity",
+    "Tenshukaku",
     "Vanarana",
 
     # Character Specific
@@ -2100,6 +2101,7 @@ class NRE(ItemCard):
             ),
         )
 
+
 class ParametricTransformer(ItemCard):
     _DICE_COST = AbstractDices({Element.ANY: 2})
     _SUPPORT_STATUS = sp.ParametricTransformerSupport
@@ -2123,6 +2125,7 @@ class KnightsOfFavoniusLibrary(LocationCard):
             eft.RollPhaseStartEffect(),
         )
 
+
 class LiyueHarborWharf(LocationCard):
     _DICE_COST = AbstractDices({Element.OMNI: 2})
     _SUPPORT_STATUS = sp.LiyueHarborWharfSupport
@@ -2131,6 +2134,11 @@ class LiyueHarborWharf(LocationCard):
 class SumeruCity(LocationCard):
     _DICE_COST = AbstractDices({Element.OMNI: 2})
     _SUPPORT_STATUS = sp.SumeruCitySupport
+
+
+class Tenshukaku(LocationCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 2})
+    _SUPPORT_STATUS = sp.TenshukakuSupport
 
 
 class Vanarana(LocationCard):

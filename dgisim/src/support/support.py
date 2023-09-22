@@ -50,6 +50,7 @@ __all__ = [
     "KnightsOfFavoniusLibrarySupport",
     "LiyueHarborWharfSupport",
     "SumeruCitySupport",
+    "TenshukakuSupport",
     "VanaranaSupport",
 ]
 
@@ -462,6 +463,34 @@ class SumeruCitySupport(Support, stt._UsageLivingStatus):
                     replace(self, usages=self.usages - 1),
                 )
         return item, self
+
+
+@dataclass(frozen=True, kw_only=True)
+class TenshukakuSupport(Support):
+    MINIMAL_KINDS: ClassVar[int] = 5
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_START,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_START:
+            this_player_dices = game_state.get_player(source.pid).get_dices()
+            num_kinds = sum([
+                1 if elem is not Element.OMNI else this_player_dices[elem]
+                for elem in this_player_dices
+            ])
+            if num_kinds >= self.MINIMAL_KINDS:
+                return [
+                    eft.AddDiceEffect(
+                        pid=source.pid,
+                        element=Element.OMNI,
+                        num=1,
+                    ),
+                ], self
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)
