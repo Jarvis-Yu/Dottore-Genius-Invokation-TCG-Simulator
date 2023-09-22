@@ -58,6 +58,7 @@ Removes preceding `v` in version name to be like `0.3.2`.
       - Parametric Transformer
     - Location Card:
       - Liyue Harbor Wharf
+      - Sumeru City
   - Event Card:
     - Where Is the Unseen Razor?
 

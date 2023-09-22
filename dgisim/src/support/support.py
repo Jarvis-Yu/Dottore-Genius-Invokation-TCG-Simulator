@@ -49,6 +49,7 @@ __all__ = [
     ## Locations ##
     "KnightsOfFavoniusLibrarySupport",
     "LiyueHarborWharfSupport",
+    "SumeruCitySupport",
     "VanaranaSupport",
 ]
 
@@ -408,6 +409,59 @@ class LiyueHarborWharfSupport(Support, stt._UsageStatus):
     @override
     def content_str(self) -> str:
         return f"{self.usages}"
+
+
+@dataclass(frozen=True, kw_only=True)
+class SumeruCitySupport(Support, stt._UsageLivingStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    COST_REDUCTION: ClassVar[int] = 1
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.SKILL:
+            assert isinstance(item, ActionPEvent)
+            if not (
+                    self.usages > 0
+                    and item.source.pid is status_source.pid
+                    and item.dices_cost.can_cost_less_elem()
+            ):
+                return item, self
+            this_player = game_state.get_player(status_source.pid)
+            if this_player.get_dices().num_dices() <= this_player.get_hand_cards().num_cards():
+                return (
+                    item.with_new_cost(item.dices_cost.cost_less_elem(1)),
+                    replace(self, usages=self.usages - 1),
+                )
+        elif signal is Preprocessables.CARD:
+            # though the part below is kinda a duplicate of the above block of code,
+            # the CardPEvent may become more different with ActionPEvent in the future,
+            # so leave it as it is.
+            assert isinstance(item, CardPEvent)
+            if not (
+                    self.usages > 0
+                    and issubclass(item.card_type, cd.TalentCard)
+                    and item.pid is status_source.pid
+                    and item.dices_cost.can_cost_less_elem()
+            ):
+                return item, self
+            this_player = game_state.get_player(status_source.pid)
+            if this_player.get_dices().num_dices() <= this_player.get_hand_cards().num_cards():
+                return (
+                    item.with_new_cost(item.dices_cost.cost_less_elem(1)),
+                    replace(self, usages=self.usages - 1),
+                )
+        return item, self
 
 
 @dataclass(frozen=True, kw_only=True)

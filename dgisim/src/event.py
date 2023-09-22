@@ -121,12 +121,18 @@ class ActionPEvent(PreprocessableEvent):
     event_speed: EventSpeed
     dices_cost: AbstractDices
 
+    def with_new_cost(self, new_cost: AbstractDices) -> Self:
+        return replace(self, dices_cost=new_cost)
+
 
 @dataclass(frozen=True, kw_only=True)
 class CardPEvent(PreprocessableEvent):
     pid: Pid
     card_type: type[Card]
     dices_cost: AbstractDices
+
+    def with_new_cost(self, new_cost: AbstractDices) -> Self:
+        return replace(self, dices_cost=new_cost)
 
 
 @dataclass(frozen=True, kw_only=True)

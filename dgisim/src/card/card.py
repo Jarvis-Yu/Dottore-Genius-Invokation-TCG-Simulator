@@ -137,6 +137,7 @@ __all__ = [
     ## Location ##
     "KnightsOfFavoniusLibrary",
     "LiyueHarborWharf",
+    "SumeruCity",
     "Vanarana",
 
     # Character Specific
@@ -2125,6 +2126,11 @@ class KnightsOfFavoniusLibrary(LocationCard):
 class LiyueHarborWharf(LocationCard):
     _DICE_COST = AbstractDices({Element.OMNI: 2})
     _SUPPORT_STATUS = sp.LiyueHarborWharfSupport
+
+
+class SumeruCity(LocationCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 2})
+    _SUPPORT_STATUS = sp.SumeruCitySupport
 
 
 class Vanarana(LocationCard):

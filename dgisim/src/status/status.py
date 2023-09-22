@@ -1684,7 +1684,7 @@ class ChangingShiftsStatus(CombatStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.SWAP:
             assert isinstance(item, ActionPEvent) and item.event_type is EventType.SWAP
             if item.source.pid is status_source.pid \
