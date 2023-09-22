@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (28/54 implemented)](#character-2854-implemented)
-  - [Card (92/200 implemented)](#card-92200-implemented)
+  - [Card (93/200 implemented)](#card-93200-implemented)
 
 ## Character (28/54 implemented)
 
@@ -45,7 +45,7 @@ all I need now is to implement each card and character.
   - [x] Ningguang
   - [x] Noelle
 
-## Card (92/200 implemented)
+## Card (93/200 implemented)
 
 - [ ] Equipment Card (49/107):
   - [ ] Talent Card:
@@ -120,7 +120,7 @@ all I need now is to implement each card and character.
     - [x] Sumeru City
     - [x] Tenshukaku
     - [x] Vanarana
-- [ ] Event Card (32/57):
+- [ ] Event Card (33/57):
   - [ ] Talent Card:
     - [x] Absorbing Prism
     - [x] Lightning Stiletto
@@ -132,7 +132,7 @@ all I need now is to implement each card and character.
     - [x] Mushroom Pizza
     - [x] Nothern Smoked Chicken
     - [x] Sweet Madame
-    - [ ] Tendoori Roast Chicken _<-- WIP_
+    - [x] Tandoori Roast Chicken
     - [x] Teyvat Fried Egg
   - [ ] Other Card:
     - [x] Calxs Arts

@@ -1,7 +1,7 @@
 Available Cards
 ===============
 
-92 of 200 cards in Genius Invokation TCG are available in the simulator.
+93 of 200 cards in Genius Invokation TCG are available in the simulator.
 (excluding character cards which are not counted as cards in ``dgisim``)
 
 Equipment Cards
@@ -121,6 +121,7 @@ Food Card
 * Mushroom Pizza
 * Nothern Smoked Chicken
 * Sweet Madame
+* Tandoori Roast Chicken
 * Teyvat Fried Egg
 
 Talent Card

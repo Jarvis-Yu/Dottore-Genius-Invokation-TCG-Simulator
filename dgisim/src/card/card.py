@@ -11,6 +11,7 @@ ordered alphabetically.
 - concrete classes, the implementation of cards that are actually in the game
 """
 from __future__ import annotations
+from abc import abstractmethod
 from typing import TYPE_CHECKING, cast
 from dataclasses import replace
 from typing_extensions import override
@@ -100,6 +101,7 @@ __all__ = [
     "MushroomPizza",
     "NorthernSmokedChicken",
     "SweetMadame",
+    "TandooriRoastChicken",
     "TeyvatFriedEgg",
     ## Other ##
     "CalxsArts",
@@ -1080,6 +1082,55 @@ class FoodCard(EventCard):
         return ()
 
 
+class _RangedFoodCard(FoodCard, _DiceOnlyChoiceProvider):
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        """ This only applies to food with a single target, override if needed """
+        if not isinstance(instruction, act.DiceOnlyInstruction):
+            return False  # pragma: no cover
+        return cls._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.DiceOnlyInstruction)
+        targets = [
+            StaticTarget.from_char_id(pid, char.get_id())
+            for char in game_state.get_player(pid).get_characters()
+            if cls._valid_char(game_state, pid, char)
+        ]
+        return sum([
+            cls.ranged_food_effects(instruction, target)
+            for target in targets
+         ], ()) + tuple([
+            eft.AddCharacterStatusEffect(
+                target,
+                stt.SatiatedStatus
+            )
+            for target in targets
+        ])
+
+    @classmethod
+    @abstractmethod
+    def ranged_food_effects(
+            cls,
+            instruction: act.DiceOnlyInstruction,
+            target: StaticTarget,
+    ) -> tuple[eft.Effect, ...]:
+        pass
+
+
 class _DirectHealCard(FoodCard):
     @classmethod
     def heal_amount(cls) -> int:  # pragma: no cover
@@ -1404,6 +1455,24 @@ class SweetMadame(_DirectHealCard, _CharTargetChoiceProvider):
     @classmethod
     def heal_amount(cls) -> int:
         return 1
+
+
+class TandooriRoastChicken(_RangedFoodCard):
+    _DICE_COST = AbstractDices({Element.ANY: 2})
+
+    @override
+    @classmethod
+    def ranged_food_effects(
+            cls,
+            instruction: act.DiceOnlyInstruction,
+            target: StaticTarget,
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddCharacterStatusEffect(
+                target=target,
+                status=stt.TandooriRoastChickenStatus,
+            ),
+        )
 
 
 class TeyvatFriedEgg(FoodCard, _CharTargetChoiceProvider):
