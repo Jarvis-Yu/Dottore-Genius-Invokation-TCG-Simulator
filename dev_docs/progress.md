@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (28/54 implemented)](#character-2854-implemented)
-  - [Card (89/200 implemented)](#card-89200-implemented)
+  - [Card (90/200 implemented)](#card-90200-implemented)
 
 ## Character (28/54 implemented)
 
@@ -45,7 +45,7 @@ all I need now is to implement each card and character.
   - [x] Ningguang
   - [x] Noelle
 
-## Card (89/200 implemented)
+## Card (90/200 implemented)
 
 - [ ] Equipment Card (49/107):
   - [ ] Talent Card:
@@ -105,7 +105,7 @@ all I need now is to implement each card and character.
     - [x] General's Ancient Helm
     - [x] Instructor's Cap
     - [x] Tenacity of the Millelith
-- [ ] Support Card (8/36):
+- [ ] Support Card (9/36):
   - [ ] Companion Card:
     - [x] Chang the Ninth
     - [x] Liben
@@ -116,7 +116,7 @@ all I need now is to implement each card and character.
     - [x] Parametric Transformer
   - [ ] Location Card:
     - [x] Knights of Favonius Library
-    - [ ] Liyue Harbor Wharf _<-- WIP_
+    - [x] Liyue Harbor Wharf
     - [ ] Sumeru City _<-- WIP_
     - [ ] Tenshukaku _<-- WIP_
     - [x] Vanarana

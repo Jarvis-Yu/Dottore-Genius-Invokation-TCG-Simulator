@@ -109,6 +109,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ParametricTransformer,
     ## Support Card / Location ##
     KnightsOfFavoniusLibrary,
+    LiyueHarborWharf,
     Vanarana,
 ]
 

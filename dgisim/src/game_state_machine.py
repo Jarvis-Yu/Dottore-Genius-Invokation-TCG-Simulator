@@ -116,6 +116,7 @@ class GameStateMachine:
         return True
 
     def step_until_phase(self, phase: type[Phase] | Phase, observe=False) -> None:
+        """ Skip until the next occurance of `phase`.  """
         if isinstance(phase, Phase):
             phase = type(phase)
         while isinstance(self._game_state.get_phase(), phase):

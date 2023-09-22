@@ -136,6 +136,7 @@ __all__ = [
     "ParametricTransformer",
     ## Location ##
     "KnightsOfFavoniusLibrary",
+    "LiyueHarborWharf",
     "Vanarana",
 
     # Character Specific
@@ -2121,9 +2122,13 @@ class KnightsOfFavoniusLibrary(LocationCard):
             eft.RollPhaseStartEffect(),
         )
 
+class LiyueHarborWharf(LocationCard):
+    _DICE_COST = AbstractDices({Element.OMNI: 2})
+    _SUPPORT_STATUS = sp.LiyueHarborWharfSupport
+
 
 class Vanarana(LocationCard):
-    _DICE_COST = AbstractDices({})
+    _DICE_COST = AbstractDices.from_empty()
     _SUPPORT_STATUS = sp.VanaranaSupport
 
 # >>>>>>>>>>>>>>>>>>>> Support Cards / Location Cards >>>>>>>>>>>>>>>>>>>>

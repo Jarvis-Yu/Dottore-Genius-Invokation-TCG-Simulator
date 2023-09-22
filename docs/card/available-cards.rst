@@ -103,6 +103,7 @@ Location Card
 ^^^^^^^^^^^^^
 
 * Knights of Favonius Library
+* Liyue Harbor Wharf
 * Vanarana
 
 Event Card

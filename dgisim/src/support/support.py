@@ -48,6 +48,7 @@ __all__ = [
 
     ## Locations ##
     "KnightsOfFavoniusLibrarySupport",
+    "LiyueHarborWharfSupport",
     "VanaranaSupport",
 ]
 
@@ -135,6 +136,7 @@ class ChangTheNinthSupport(Support, stt._UsageLivingStatus):
     @override
     def content_str(self) -> str:
         return f"{self.usages}|{self.listening}|{self.activated}"
+
 
 @dataclass(frozen=True, kw_only=True)
 class LibenSupport(Support, stt._UsageLivingStatus):
@@ -308,6 +310,7 @@ class NRESupport(Support, stt._UsageLivingStatus):
             return [], replace(self, usages=self.MAX_USAGES)
         return [], self
 
+
 @dataclass(frozen=True, kw_only=True)
 class ParametricTransformerSupport(Support, stt._UsageLivingStatus):
     usages: int = 0
@@ -361,6 +364,7 @@ class ParametricTransformerSupport(Support, stt._UsageLivingStatus):
             return [], replace(self, usages=d_usages, activated=False, listening=False)
         return [], self
 
+
 @dataclass(frozen=True, kw_only=True)
 class KnightsOfFavoniusLibrarySupport(Support):
     @override
@@ -376,6 +380,34 @@ class KnightsOfFavoniusLibrarySupport(Support):
             if item.pid is status_source.pid:
                 return replace(item, chances=item.chances + 1), self
         return item, self
+
+
+@dataclass(frozen=True, kw_only=True)
+class LiyueHarborWharfSupport(Support, stt._UsageStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            assert self.usages > 0
+            return [
+                eft.DrawRandomCardEffect(
+                    pid=source.pid,
+                    num=2,
+                ),
+            ], replace(self, usages=-1)
+        return [], self
+
+    @override
+    def content_str(self) -> str:
+        return f"{self.usages}"
 
 
 @dataclass(frozen=True, kw_only=True)

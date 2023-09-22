@@ -56,6 +56,8 @@ Removes preceding `v` in version name to be like `0.3.2`.
     - Item Card:
       - NRE
       - Parametric Transformer
+    - Location Card:
+      - Liyue Harbor Wharf
   - Event Card:
     - Where Is the Unseen Razor?
 

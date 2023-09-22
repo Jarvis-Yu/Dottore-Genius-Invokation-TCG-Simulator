@@ -18,6 +18,7 @@ from dgisim.src.event import *
 from dgisim.src.game_state_machine import GameStateMachine
 from dgisim.src.helper.level_print import GamePrinter
 from dgisim.src.helper.quality_of_life import *
+from dgisim.src.phase import Phase
 from dgisim.src.state.enums import Pid
 from dgisim.src.state.game_state import GameState
 from dgisim.src.state.player_state import PlayerState
@@ -26,6 +27,7 @@ from dgisim.src.status.status import *
 
 
 def auto_step(game_state: GameState, observe: bool = False) -> GameState:
+    """ Step the game state until a player action is required. """
     gsm = GameStateMachine(game_state, PuppetAgent(), PuppetAgent())
     if not observe:
         gsm.auto_step()
@@ -258,6 +260,25 @@ def next_round_with_great_omni(game_state: GameState, observe: bool = False) -> 
     """ skips to next round and fill players with even number of dices """
     game_state = next_round(game_state, observe)
     return fill_dices_with_omni(game_state)
+
+
+def step_until_phase(game_state: GameState, phase: type[Phase], observe: bool = False) -> GameState:
+    """ If game state is already in the `phase` then skip until the next one. """
+    gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
+    gsm.step_until_phase(phase, observe=observe)
+    return gsm.get_game_state()
+
+def step_until_signal(game_state: GameState, signal: TriggeringSignal, observe: bool = False) -> GameState:
+    """ Step until the next effect is trigger all statuses with `signal` """
+    gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
+    gsm.step_until_holds(lambda gs: (
+        gs.get_effect_stack().is_not_empty()
+        and (
+            gs.get_effect_stack().peek() == AllStatusTriggererEffect(Pid.P1, signal)
+            or gs.get_effect_stack().peek() == AllStatusTriggererEffect(Pid.P2, signal)
+        )
+    ), observe=observe)
+    return gsm.get_game_state()
 
 
 def silent_fast_swap(game_state: GameState, pid: Pid, char_id: int) -> GameState:
