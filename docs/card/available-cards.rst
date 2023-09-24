@@ -152,6 +152,7 @@ Other Card
 * I Haven't Lost Yet!
 * Leave It to Me!
 * Quick Knit
+* Send Off
 * Starsigns
 * Where Is the Unseen Razor?
 * Wind and Freedom

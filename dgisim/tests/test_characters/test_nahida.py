@@ -315,6 +315,7 @@ class TestNahida(unittest.TestCase):
         ).execute(game_state)
         game_state = kill_character(game_state, character_id=1, hp=3)
         game_state = oppo_aura_elem(game_state, Element.ELECTRO)
+        base_state = game_state
 
         """
         normal attack triggers seeds which kill opponent active character,
@@ -336,6 +337,23 @@ class TestNahida(unittest.TestCase):
         self.assertNotIn(SeedOfSkandhaStatus, p2c1.get_character_statuses())
         self.assertNotIn(SeedOfSkandhaStatus, p2c2.get_character_statuses())
         self.assertNotIn(SeedOfSkandhaStatus, p2c3.get_character_statuses())
+
+        return # TODO: fix for the test below
+        """
+        skill triggers reaction that kills opponent active character,
+        seeds get triggered normally (before death swap)
+        """
+        game_state = replace_character(base_state, Pid.P1, Noelle, char_id=3)
+        game_state = silent_fast_swap(game_state, Pid.P1, char_id=3)
+        game_state = AddCharacterStatusEffect(
+            StaticTarget.from_player_active(game_state, Pid.P1),
+            status=WolfsGravestoneStatus,
+        ).execute(game_state)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
+        p2c1, p2c2, p2c3 = game_state.get_player2().get_characters().get_characters()
+        self.assertTrue(p2c1.defeated())
+        self.assertEqual(p2c2.get_hp(), 9)
+        self.assertEqual(p2c3.get_hp(), 10)
 
     def test_shine_of_maya_status(self):
         game_state = AddCombatStatusEffect(

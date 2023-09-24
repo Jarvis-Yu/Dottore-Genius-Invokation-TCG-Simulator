@@ -38,6 +38,10 @@ class StaticTarget:
     def from_char_id(cls, pid: Pid, char_id: int) -> Self:
         return cls(pid, Zone.CHARACTERS, char_id)
 
+    @classmethod
+    def from_summon(cls, pid: Pid, summon: type["Summon"]) -> Self:
+        return cls(pid, Zone.SUMMONS, summon)
+
 
 @dataclass(frozen=True, kw_only=True, repr=False)
 class DamageType:

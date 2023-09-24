@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (28/54 implemented)](#character-2854-implemented)
-  - [Card (93/200 implemented)](#card-93200-implemented)
+  - [Card (94/200 implemented)](#card-94200-implemented)
 
 ## Character (28/54 implemented)
 
@@ -45,7 +45,7 @@ all I need now is to implement each card and character.
   - [x] Ningguang
   - [x] Noelle
 
-## Card (93/200 implemented)
+## Card (94/200 implemented)
 
 - [ ] Equipment Card (49/107):
   - [ ] Talent Card:
@@ -120,7 +120,7 @@ all I need now is to implement each card and character.
     - [x] Sumeru City
     - [x] Tenshukaku
     - [x] Vanarana
-- [ ] Event Card (33/57):
+- [ ] Event Card (34/57):
   - [ ] Talent Card:
     - [x] Absorbing Prism
     - [x] Lightning Stiletto
@@ -154,7 +154,7 @@ all I need now is to implement each card and character.
     - [x] I Haven't Lost Yet!
     - [x] Leave It to Me!
     - [x] Quick Knit
-    - [ ] Send Off _<-- WIP_
+    - [x] Send Off
     - [x] Starsigns
     - [ ] The Bestest Travel Companion! _<-- WIP_
     - [x] Where Is the Unseen Razor?

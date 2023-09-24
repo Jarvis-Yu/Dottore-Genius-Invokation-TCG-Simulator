@@ -84,6 +84,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     IHaventLostYet,
     LeaveItToMe,
     QuickKnit,
+    SendOff,
     Starsigns,
     WhereIsTheUnseenRazor,
     WindAndFreedom,

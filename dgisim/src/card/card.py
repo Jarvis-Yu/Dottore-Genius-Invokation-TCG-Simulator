@@ -123,6 +123,7 @@ __all__ = [
     "IHaventLostYet",
     "LeaveItToMe",
     "QuickKnit",
+    "SendOff",
     "Starsigns",
     "WhereIsTheUnseenRazor",
     "WindAndFreedom",
@@ -586,6 +587,50 @@ class _SummonTargetChoiceProvider(Card):
     @classmethod
     def _valid_summon(cls, summon: sm.Summon) -> bool:  # pragma: no cover
         return True
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        return (
+            (
+                not cls._MY_SIDE
+                or (
+                    not (summons := game_state.get_player(pid).get_summons()).empty()
+                    and any(
+                        cls._valid_summon(summon)
+                        for summon in summons
+                    )
+                )
+            ) and (
+                not cls._OPPO_SIDE
+                or (
+                    not (summons := game_state.get_other_player(pid).get_summons()).empty()
+                    and any(
+                        cls._valid_summon(summon)
+                        for summon in summons
+                    )
+                )
+            )
+        )
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        return (
+            isinstance(instruction, act.StaticTargetInstruction)
+            and (
+                (not cls._MY_SIDE or instruction.target.pid is pid)
+                and (not cls._OPPO_SIDE or instruction.target.pid is pid.other())
+            )
+            and isinstance(summon := game_state.get_target(instruction.target), sm.Summon)
+            and cls._valid_summon(summon)
+            and cls.loosely_usable(game_state, pid)
+        )
 
     @classmethod
     def _choices_helper(
@@ -1119,7 +1164,7 @@ class _RangedFoodCard(FoodCard, _DiceOnlyChoiceProvider):
                 stt.SatiatedStatus
             )
             for target in targets
-        ])
+             ])
 
     @classmethod
     @abstractmethod
@@ -1990,28 +2035,6 @@ class QuickKnit(EventCard, _SummonTargetChoiceProvider):
 
     @override
     @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        return not game_state.get_player(pid).get_summons().empty()
-
-    @override
-    @classmethod
-    def _valid_instruction(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction
-    ) -> bool:
-        if not isinstance(instruction, act.StaticTargetInstruction):  # pragma: no cover
-            return False
-
-        return (
-            instruction.target.pid is pid
-            and isinstance(game_state.get_target(instruction.target), sm.Summon)
-            and cls.loosely_usable(game_state, pid)
-        )
-
-    @override
-    @classmethod
     def effects(
             cls,
             game_state: gs.GameState,
@@ -2023,6 +2046,27 @@ class QuickKnit(EventCard, _SummonTargetChoiceProvider):
             eft.OneSummonIncreaseUsage(
                 target=instruction.target,
                 d_usages=1,
+            ),
+        )
+
+
+class SendOff(EventCard, _SummonTargetChoiceProvider):
+    _DICE_COST = AbstractDices({Element.ANY: 2})
+    _OPPO_SIDE = True
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.StaticTargetInstruction)
+        return (
+            eft.OneSummonDecreaseUsage(
+                target=instruction.target,
+                d_usages=2,
             ),
         )
 

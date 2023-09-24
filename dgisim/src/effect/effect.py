@@ -1813,7 +1813,7 @@ class OneSummonDecreaseUsage(DirectEffect):
         effects.append(
             UpdateSummonEffect(
                 target_pid=self.target.pid,
-                summon=replace(summon, usages=summon.usages + self.d_usages),
+                summon=replace(summon, usages=-self.d_usages),
             )
         )
         return game_state.factory().f_effect_stack(

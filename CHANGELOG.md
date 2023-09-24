@@ -61,6 +61,7 @@ Removes preceding `v` in version name to be like `0.3.2`.
       - Sumeru City
       - Tenshukaku
   - Event Card:
+    - Send Off
     - Tandoori Roast Chicken
     - Where Is the Unseen Razor?
 
