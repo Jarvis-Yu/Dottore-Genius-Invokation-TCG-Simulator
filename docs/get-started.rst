@@ -28,7 +28,7 @@ built-in CLI to play or watch a game.
 
     CLI has built-in command hints, so it should be intuitive to use it.
 
-    The detailed documentation for CLI is **WIP**.
+    More details can be found at :ref:`cli`.
 
 Create A Game With Custom Deck
 ------------------------------

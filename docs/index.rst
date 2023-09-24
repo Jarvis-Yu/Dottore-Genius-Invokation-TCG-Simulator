@@ -24,5 +24,6 @@ Contents
    :maxdepth: 1
 
    get-started
+   cli
    character
    card
