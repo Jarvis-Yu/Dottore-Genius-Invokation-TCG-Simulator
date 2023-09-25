@@ -6,7 +6,7 @@ CLI (Command Line Interface)
 ``dgisim`` has a built-in CLI for developers to manually play and test the game.
 
 CLI Session Basics
-------------------------------
+------------------
 
 All you need to do to run the CLI is to import and use directly.
 
@@ -82,5 +82,107 @@ each representing the choice of *PVP*, *PVE* and *EVE*.
 
 After you choose your game mode, the game starts immediately and becomes the
 focused game of the session.
+(A CLI session can only have one focused game)
 To choose a new mode or start a new game, you need to run ``rst`` when prompt
 is ``:>``.
+
+Run the Game
+------------
+
+Assuming now you have chosen a game mode to play.
+(see `CLI Session Basics`_ if you don't know how to)
+The initial game state will immediately be printed.
+
+It may look somewhat like this:
+
+.. code-block:: console
+
+    <Mode: DefaultMode>  <Phase: CardSelectPhase>  <Round: 0>
+    ----------------------------------------------------------------------
+    <Player: *Player1>                | <Player: Player2>                |
+    <Phase: Passive Wait Phase>       | <Phase: Passive Wait Phase>      |
+    <Card/Dice Redraw Chances: 0/0>   | <Card/Dice Redraw Chances: 0/0>  |
+    <Characters>                      | <Characters>                     |
+      <1-FatuiPyroAgent>              |   <1-Shenhe>                     |
+        <Aura: []>                    |     <Aura: []>                   |
+        <HP: 10/10>                   |     <HP: 10/10>                  |
+        <Energy: 0/2>                 |     <Energy: 0/2>                |
+        <Hiddens>                     |     <Hiddens>                    |
+          <StealthMaster>             |     <Equipments>                 |
+        <Equipments>                  |     <Statuses>                   |
+        <Statuses>                    |   <2-SangonomiyaKokomi>          |
+      <2-Jean>                        |     <Aura: []>                   |
+        <Aura: []>                    |     <HP: 10/10>                  |
+        <HP: 10/10>                   |     <Energy: 0/2>                |
+        <Energy: 0/3>                 |     <Hiddens>                    |
+        <Hiddens>                     |     <Equipments>                 |
+        <Equipments>                  |     <Statuses>                   |
+        <Statuses>                    |   <3-Venti>                      |
+      <3-Keqing>                      |     <Aura: []>                   |
+        <Aura: []>                    |     <HP: 10/10>                  |
+        <HP: 10/10>                   |     <Energy: 0/2>                |
+        <Energy: 0/3>                 |     <Hiddens>                    |
+        <Hiddens>                     |     <Equipments>                 |
+          <KeqingTalent(0)>           |     <Statuses>                   |
+        <Equipments>                  | <Hidden Statuses>                |
+        <Statuses>                    |   <ChargedAttack>                |
+    <Hidden Statuses>                 |   <PlungeAttack()>               |
+      <ChargedAttack>                 |   <DeathThisRound()>             |
+      <PlungeAttack()>                | <Combat Statuses>                |
+      <DeathThisRound()>              | <Summons>                        |
+    <Combat Statuses>                 | <Supports>                       |
+    <Summons>                         | <Dices>                          |
+    <Supports>                        | <Hand Cards>                     |
+    <Dices>                           | <Deck Cards>                     |
+    <Hand Cards>                      |   <NRE: 2>                       |
+    <Deck Cards>                      |   <EmbraceOfWinds: 2>            |
+      <TheBestestTravelCompanion: 2>  |   <WolfsGravestone: 2>           |
+      <NRE: 2>                        |   <MagicGuide: 2>                |
+      <TravelersHandySword: 2>        |   <WhiteTassel: 2>               |
+      <ParametricTransformer: 2>      |   <TheBell: 2>                   |
+      <MushroomPizza: 2>              |   <TamakushiCasket: 2>           |
+      <LandsOfDandelion: 2>           |   <KingsSquire: 2>               |
+      <WhereIsTheUnseenRazor: 2>      |   <WhereIsTheUnseenRazor: 2>     |
+      <TheBell: 2>                    |   <JueyunGuoba: 2>               |
+      <KnightsOfFavoniusLibrary: 2>   |   <AmosBow: 2>                   |
+      <AThousandFloatingDreams: 2>    |   <KnightsOfFavoniusLibrary: 2>  |
+      <SacrificialBow: 2>             |   <MysticalAbandon: 2>           |
+      <GamblersEarrings: 2>           |   <CalxsArts: 2>                 |
+      <QuickKnit: 2>                  |   <SacrificialGreatsword: 2>     |
+      <VortexVanquisher: 2>           | <Publicly Used Cards>            |
+      <MintyMeatRolls: 2>             | <Publicly Gained Cards>          |
+    <Publicly Used Cards>             |                                  |
+    <Publicly Gained Cards>           |                                  |
+    ----------------------------------------------------------------------
+    <Effects>
+    ======================================================================
+
+Although this section may appear complex at first glance,
+upon closer examination,
+you'll find it more intuitively understandable than it may initially seem.
+
+The top row shows the some global game information shared by both players.
+
+The middle section (divided into the left and right part),
+contains all the information of each player.
+The indentation marks the scope of each piece of information.
+
+The bottom part lists upcoming effects to be executed.
+Initially it's empty.
+
+The printed game state, is the current state of the game you are focusing on.
+In this case, the future of the game is yet to be decided.
+To have the game *run*, you need to input commands to tell the CLI how much
+you want the game to proceed forward.
+
+* ``n`` is the command to take only one step forward, that is the minimal change
+  to the game that can be isolated.
+* ``a`` is the command to proceed the game until a player input is required.
+  (the player input can be from any player that is either human or computer)
+
+Meanwhile, some commands are provided to traverse the history of the current game.
+The commands are ``bn`` and ``ba`` which functions similar to ``n`` and ``a``.
+
+.. note::
+
+    Once again, note that commands can only work if prompt is ``:>``

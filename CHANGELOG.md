@@ -1,6 +1,6 @@
 # Change Log
 
-## 0.3.2 (25 Sept 2023)
+## 0.3.2 (xx Sept 2023)
 
 Removes preceding `v` in version name to be like `0.3.2`.
 
