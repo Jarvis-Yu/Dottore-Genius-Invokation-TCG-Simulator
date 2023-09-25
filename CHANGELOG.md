@@ -63,6 +63,7 @@ Removes preceding `v` in version name to be like `0.3.2`.
   - Event Card:
     - Send Off
     - Tandoori Roast Chicken
+    - The Bestest Travel Companion!
     - Where Is the Unseen Razor?
 
 ## v0.3.1 (28 Aug 2023)

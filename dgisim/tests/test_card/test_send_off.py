@@ -3,7 +3,7 @@ import unittest
 from .common_imports import *
 
 
-class TestTenshukaku(unittest.TestCase):
+class TestSendOff(unittest.TestCase):
     def test_behaviour(self):
         base_state = ACTION_TEMPLATE
         base_state = replace_hand_cards(base_state, Pid.P1, Cards({

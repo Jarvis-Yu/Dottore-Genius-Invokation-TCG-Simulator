@@ -86,6 +86,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     QuickKnit,
     SendOff,
     Starsigns,
+    TheBestestTravelCompanion,
     WhereIsTheUnseenRazor,
     WindAndFreedom,
 
