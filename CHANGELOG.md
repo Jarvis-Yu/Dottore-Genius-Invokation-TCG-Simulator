@@ -66,6 +66,11 @@ Removes preceding `v` in version name to be like `0.3.2`.
     - The Bestest Travel Companion!
     - Where Is the Unseen Razor?
 
+### Known Issue
+
+- Damage that kills the character and caused reaction doesn't properly trigger
+  Seed Of Skandha Status of Nahida
+
 ## v0.3.1 (28 Aug 2023)
 
 ### Added
