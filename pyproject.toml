@@ -37,7 +37,7 @@ dependencies = [
 source = "https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator"
 tracker = "https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/issues"
 changelog = "https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/CHANGELOG.md"
-documentation = "https://dottore-genius-invokation-tcg-simulator.readthedocs.io/en/latest/"
+documentation = "https://dottore-genius-invokation-tcg-simulator.readthedocs.io/en/stable/"
 
 [tool.setuptools.package-dir]
 dgisim = "dgisim/src"
