@@ -3722,7 +3722,7 @@ class ShrineOfMayaStatus(CombatStatus, _UsageStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
@@ -3739,7 +3739,7 @@ class ShrineOfMayaStatus(CombatStatus, _UsageStatus):
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], replace(self, usages=-1)
         return [], self

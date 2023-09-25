@@ -125,6 +125,7 @@ __all__ = [
     "QuickKnit",
     "SendOff",
     "Starsigns",
+    "TheBestestTravelCompanion",
     "WhereIsTheUnseenRazor",
     "WindAndFreedom",
 
@@ -2095,6 +2096,25 @@ class Starsigns(EventCard, _DiceOnlyChoiceProvider):
             eft.EnergyRechargeEffect(
                 StaticTarget.from_player_active(game_state, pid),
                 1
+            ),
+        )
+
+class TheBestestTravelCompanion(EventCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDices({Element.ANY: 2})
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddDiceEffect(
+                pid=pid,
+                element=Element.OMNI,
+                num=2,
             ),
         )
 

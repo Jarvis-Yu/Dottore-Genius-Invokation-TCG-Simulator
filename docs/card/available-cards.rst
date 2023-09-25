@@ -1,7 +1,7 @@
 Available Cards
 ===============
 
-93 of 200 cards in Genius Invokation TCG are available in the simulator.
+95 of 200 cards in Genius Invokation TCG are available in the simulator.
 (excluding character cards which are not counted as cards in ``dgisim``)
 
 Equipment Cards
@@ -130,8 +130,8 @@ Talent Card
 * Absorbing Prism
 * Lightning Stiletto
 
-Other Card
-^^^^^^^^^^
+Other Event Card
+^^^^^^^^^^^^^^^^
 
 * Calxs Arts
 * Changing Shifts
@@ -154,5 +154,6 @@ Other Card
 * Quick Knit
 * Send Off
 * Starsigns
+* The Bestest Travel Companion!
 * Where Is the Unseen Razor?
 * Wind and Freedom

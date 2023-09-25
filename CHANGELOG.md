@@ -1,6 +1,6 @@
 # Change Log
 
-## 0.3.2 (To be released)
+## 0.3.2 (25 Sept 2023)
 
 Removes preceding `v` in version name to be like `0.3.2`.
 
@@ -63,7 +63,13 @@ Removes preceding `v` in version name to be like `0.3.2`.
   - Event Card:
     - Send Off
     - Tandoori Roast Chicken
+    - The Bestest Travel Companion!
     - Where Is the Unseen Razor?
+
+### Known Issue
+
+- Damage that kills the character and caused reaction doesn't properly trigger
+  Seed Of Skandha Status of Nahida
 
 ## v0.3.1 (28 Aug 2023)
 
