@@ -186,3 +186,70 @@ The commands are ``bn`` and ``ba`` which functions similar to ``n`` and ``a``.
 .. note::
 
     Once again, note that commands can only work if prompt is ``:>``
+
+.. tip::
+
+    You can enter nothing to repeat the last **valid** command executed.
+
+Handle Player Input
+-------------------
+
+**Player Input** manipulates the human players in the game.
+Actions like choosing the starting hand cards,
+casting a skill are all **Player Input**.
+
+When the prompt of CLI is ``::>``,
+it means you are expected to input the **Player Input**.
+
+The very first **Player Input** you might need to provide at the start of the game
+is selecting the initial hand cards.
+
+What you may see is:
+
+.. code-block:: console
+
+    Choices are:
+    @0: SELECT_CARDS  |||  @1: END_ROUND
+    Please choose id (0-1)
+    ::> @
+
+* ``@0: SELECT_CARDS`` means the 0th option is select cards to replace
+* ``@1: END_ROUND`` take the current hand cards and keep them
+
+If you input ``0``, choosing ``SELECT_CARDS`` you'll see something like:
+
+.. code-block:: console
+
+    Selections are:
+    @0: <SacrificialBow, 2>  |||  @1: <VortexVanquisher, 1>  |||  @2: <GamblersEarrings, 2>
+    e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
+    ::> 
+
+In this case, you need to input some dictionary-like text to represent the cards
+you are to choose and replace.
+
+.. note::
+
+    ``<CardName, n>`` means there are ``n`` of ``CardName(s)``.
+
+To replace all the ``SacrificialBow`` and one of ``GamblersEarrings``, I can input:
+``0:2, 2:1``
+
+After any **Player Input** is passed to the game,
+the **Player Action** is printed out.
+So after the input ``0:2, 2:1``, you'll see:
+
+.. code-block:: console
+
+    #### Player1 Action: CardsSelectAction(selected_cards={SacrificialBow: 2, GamblersEarrings: 1})
+
+Then, you'll be able to proceed the game with ``a``, ``n`` or other commands.
+
+Great, now you have officially made an impact on the game.
+**Player Input** of other types follow a similar pattern.
+You just need to keep the following note in your mind.
+
+.. note::
+    Once your prompt is ``::>``, every input you've made is not undoable.
+    You have to complete the entire **Player Input** before being able to
+    execute any commands.
