@@ -1,7 +1,7 @@
 .. _cli:
 
-CLI (Command Line Interface)
-============================
+CLI Tutorial
+============
 
 ``dgisim`` has a built-in CLI for developers to manually play and test the game.
 

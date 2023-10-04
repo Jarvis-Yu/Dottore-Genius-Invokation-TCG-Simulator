@@ -5,7 +5,7 @@ from .card.card import Card
 from .card.cards import Cards
 from .character.character import Character
 from .character.characters import Characters
-from .character.enums import CharacterSkill
+from .character.enums import CharacterSkill, CharacterSkillType, Faction, WeaponType
 from .effect.effect import Effect
 from .effect.effect_stack import EffectStack
 from .phase import Phase
@@ -38,6 +38,7 @@ __all__ = [
     "Cards",
     "Character",
     "CharacterSkill",
+    "CharacterSkillType",
     "Characters",
     "Deck",
     "DefaultMode",
@@ -45,6 +46,7 @@ __all__ = [
     "Effect",
     "EffectStack",
     "Element",
+    "Faction",
     "FrozenDeck",
     "GameState",
     "GameStateMachine",
@@ -61,4 +63,5 @@ __all__ = [
     "Summons",
     "Support",
     "Supports",
+    "WeaponType"
 ]

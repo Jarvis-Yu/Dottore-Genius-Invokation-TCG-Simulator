@@ -14,4 +14,5 @@ To use a character, you can do:
 .. toctree::
     :maxdepth: 1
 
-    Available Characters </character/available-chars>
+    Character Class </character/char-base>
+    /character/available-chars

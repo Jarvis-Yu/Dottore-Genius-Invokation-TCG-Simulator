@@ -30,7 +30,7 @@ built-in CLI to play or watch a game.
 
     More details can be found at :ref:`cli`.
 
-Create A Game With Custom Deck
+Create a Game With Custom Deck
 ------------------------------
 
 You need to start by importing relative modules.
@@ -167,7 +167,7 @@ The output below is what you should get.
     <Effects>
     ===================================================================================
 
-Run An Existing Game
+Run an Existing Game
 --------------------
 
 Given you have created a game state following `Create A Game With Custom Deck`_.
@@ -211,7 +211,7 @@ to see how the game looks like by the end.
 There are other ways to fine control over the game progress,
 more details are **WIP**.
 
-Customize A Player Agent
+Customize a Player Agent
 ------------------------
 
 Simplying having a running game is not enough, it is always fun to create

@@ -27,3 +27,4 @@ Contents
    cli
    character
    card
+   enums

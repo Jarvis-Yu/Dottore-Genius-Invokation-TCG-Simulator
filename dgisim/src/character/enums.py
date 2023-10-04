@@ -28,10 +28,6 @@ class CharacterSkill(Enum):
         raise NotImplementedError
 
     # TODO: remove
-    def is_normal_attack(self) -> bool:
-        return self is CharacterSkill.SKILL1
-
-    # TODO: remove
     def is_elemental_skill(self) -> bool:
         return self is CharacterSkill.SKILL2 or self is CharacterSkill.SKILL3
 
