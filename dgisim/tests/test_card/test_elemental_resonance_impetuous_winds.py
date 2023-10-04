@@ -28,37 +28,37 @@ class TestElementalImpetuousWinds(unittest.TestCase):
             ).execute(base_state)
 
         self.assertTrue(ElementalResonanceImpetuousWinds.strictly_usable(base_state, Pid.P1))
-        old_dices = base_state.get_player1().get_dices()
+        old_dice = base_state.get_player1().get_dice()
         game_state = step_action(base_state, Pid.P1, CardAction(
             card=ElementalResonanceImpetuousWinds,
             instruction=StaticTargetInstruction(
                 target=StaticTarget.from_char_id(Pid.P1, 2),
-                dices=ActualDices({Element.ANEMO: 1}),
+                dice=ActualDice({Element.ANEMO: 1}),
             )
         ))
         p1ac = game_state.get_player1().just_get_active_character()
-        p1_dices = game_state.get_player1().get_dices()
+        p1_dice = game_state.get_player1().get_dice()
         self.assertEqual(p1ac.get_id(), 2)
         self.assertIs(game_state.get_active_player_id(), Pid.P1)
-        self.assertEqual(p1_dices[Element.ANEMO] + 1, old_dices[Element.ANEMO])
-        self.assertEqual(p1_dices[Element.OMNI] - 1, old_dices[Element.OMNI])
+        self.assertEqual(p1_dice[Element.ANEMO] + 1, old_dice[Element.ANEMO])
+        self.assertEqual(p1_dice[Element.OMNI] - 1, old_dice[Element.OMNI])
 
         game_state = kill_character(game_state, 1, Pid.P1)
         self.assertTrue(ElementalResonanceImpetuousWinds.strictly_usable(game_state, Pid.P1))
-        old_dices = game_state.get_player1().get_dices()
+        old_dice = game_state.get_player1().get_dice()
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=ElementalResonanceImpetuousWinds,
             instruction=StaticTargetInstruction(
                 target=StaticTarget.from_char_id(Pid.P1, 3),
-                dices=ActualDices({Element.OMNI: 1}),
+                dice=ActualDice({Element.OMNI: 1}),
             )
         ))
         p1ac = game_state.get_player1().just_get_active_character()
-        p1_dices = game_state.get_player1().get_dices()
+        p1_dice = game_state.get_player1().get_dice()
         self.assertEqual(p1ac.get_id(), 3)
         self.assertIs(game_state.get_active_player_id(), Pid.P1)
-        self.assertEqual(p1_dices[Element.ANEMO], old_dices[Element.ANEMO])
-        self.assertEqual(p1_dices[Element.OMNI], old_dices[Element.OMNI])
+        self.assertEqual(p1_dice[Element.ANEMO], old_dice[Element.ANEMO])
+        self.assertEqual(p1_dice[Element.OMNI], old_dice[Element.OMNI])
 
         game_state = kill_character(game_state, 2, Pid.P1)
         self.assertFalse(ElementalResonanceImpetuousWinds.strictly_usable(game_state, Pid.P1))

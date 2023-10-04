@@ -22,7 +22,7 @@ class TestNahida(unittest.TestCase):
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -39,7 +39,7 @@ class TestNahida(unittest.TestCase):
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL2,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -151,7 +151,7 @@ class TestNahida(unittest.TestCase):
             self.BASE_GAME,
             Pid.P1,
             CharacterSkill.SKILL3,
-            ActualDices({Element.OMNI: 5}),
+            ActualDice({Element.OMNI: 5}),
         )
 
         p2cs = game_state.get_player2().get_characters()
@@ -210,7 +210,7 @@ class TestNahida(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.ELEMENTAL_BURST,
-            ActualDices({Element.OMNI: 3}),
+            ActualDice({Element.OMNI: 3}),
         )
 
         p1 = game_state.get_player1()
@@ -241,7 +241,7 @@ class TestNahida(unittest.TestCase):
         ))
         game_state = step_action(base_state, Pid.P1, CardAction(
             card=TheSeedOfStoredKnowledge,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         p1 = game_state.get_player1()
         p2cs = game_state.get_player2().get_characters()
@@ -282,7 +282,7 @@ class TestNahida(unittest.TestCase):
         ))
         game_state = step_action(base_state, Pid.P1, CardAction(
             card=TheSeedOfStoredKnowledge,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         p1 = game_state.get_player1()
         p2cs = game_state.get_player2().get_characters()

@@ -26,7 +26,7 @@ class TestAratakiItto(unittest.TestCase):
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -42,7 +42,7 @@ class TestAratakiItto(unittest.TestCase):
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL2,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 5})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 5})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -62,7 +62,7 @@ class TestAratakiItto(unittest.TestCase):
         # p1 second skill (prepare skill)
         a2.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -76,7 +76,7 @@ class TestAratakiItto(unittest.TestCase):
         # p1 third skill (prepare skill)
         a2.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -100,7 +100,7 @@ class TestAratakiItto(unittest.TestCase):
         gsm = GameStateMachine(game_state, a1, a2)
         a2.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -130,7 +130,7 @@ class TestAratakiItto(unittest.TestCase):
         gsm = GameStateMachine(game_state, a1, a2)
         a2.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -162,7 +162,7 @@ class TestAratakiItto(unittest.TestCase):
         # test burst base damage
         a1.inject_action(SkillAction(
             skill=CharacterSkill.ELEMENTAL_BURST,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         gsm = GameStateMachine(base_game, a1, a2)
         gsm.player_step()
@@ -195,11 +195,11 @@ class TestAratakiItto(unittest.TestCase):
         a2.inject_actions([
             SwapAction(
                 char_id=2,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 2})),
             ),
             SwapAction(
                 char_id=1,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 1})),
             ),
         ])
         gsm.player_step()  # first swap costs more due to summon
@@ -216,16 +216,16 @@ class TestAratakiItto(unittest.TestCase):
         gsm = GameStateMachine(gsm.get_game_state(), a1, a2)
         gsm.step_until_phase(base_game.get_mode().action_phase())
         a1, a2 = LazyAgent(), PuppetAgent()
-        gsm = GameStateMachine(fill_dices_with_omni(gsm.get_game_state()), a1, a2)
+        gsm = GameStateMachine(fill_dice_with_omni(gsm.get_game_state()), a1, a2)
         gsm.player_step()  # p1 ends round
         a2.inject_actions([
             SwapAction(
                 char_id=2,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 2})),
             ),
             SwapAction(
                 char_id=1,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 1})),
             ),
         ])
         gsm.player_step()  # first swap costs more due to summon
@@ -278,11 +278,11 @@ class TestAratakiItto(unittest.TestCase):
         gsm = GameStateMachine(base_game, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         ))
         a2.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         ))
         gsm.player_step()  # P1 normal attack
         gsm.player_step()  # P2 normal attack; kills P1
@@ -290,7 +290,7 @@ class TestAratakiItto(unittest.TestCase):
                              gs.get_effect_stack().is_not_empty()
                              and isinstance(gs.get_effect_stack().peek(), AliveMarkCheckerEffect)
                              )
-        p2_dices_after_attack = gsm.get_game_state().get_player2().get_dices().num_dices()
+        p2_dice_after_attack = gsm.get_game_state().get_player2().get_dice().num_dice()
         # checks alive check is before skill energy recharge
         p1ac = gsm.get_game_state().get_player1().just_get_active_character()
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
@@ -320,7 +320,7 @@ class TestAratakiItto(unittest.TestCase):
         self.assertNotIn(ElectroCrystalCoreStatus, p1ac.get_character_statuses())
         self.assertEqual(p2ac.get_energy(), 1)
         # checks Gambler's Earrings not triggered
-        self.assertEqual(p2.get_dices().num_dices(), p2_dices_after_attack)
+        self.assertEqual(p2.get_dice().num_dice(), p2_dice_after_attack)
         # check it's P1's turn again as usual
         self.assertIs(game_state.waiting_for(), Pid.P1)
 
@@ -340,7 +340,7 @@ class TestAratakiItto(unittest.TestCase):
         gsm = GameStateMachine(base_game, a1, a2)
         a1.inject_action(CardAction(
             card=AbsorbingPrism,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.ELECTRO: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.ELECTRO: 3})),
         ))
         gsm.player_step()
         gsm.auto_step()

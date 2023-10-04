@@ -14,7 +14,7 @@ class TestChangTheNinth(unittest.TestCase):
         # use the support card
         game_state = step_action(base_state, Pid.P1, CardAction(
             card=ChangTheNinth,
-            instruction=DiceOnlyInstruction(dices=ActualDices.from_empty()),
+            instruction=DiceOnlyInstruction(dice=ActualDice.from_empty()),
         ))
 
         def get_chang(game_state: GameState) -> ChangTheNinthSupport:

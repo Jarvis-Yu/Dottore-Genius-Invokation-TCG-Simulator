@@ -54,7 +54,7 @@ class TestPlayerState(unittest.TestCase):
         assert player_state1._combat_statuses     == player_state2._combat_statuses
         assert player_state1._summons             == player_state2._summons
         assert player_state1._supports            == player_state2._supports
-        assert player_state1._dices               == player_state2._dices
+        assert player_state1._dice               == player_state2._dice
         assert player_state1._hand_cards          == player_state2._hand_cards
         assert player_state1._deck_cards          == player_state2._deck_cards
         self.assertEqual(player_state1, player_state2)

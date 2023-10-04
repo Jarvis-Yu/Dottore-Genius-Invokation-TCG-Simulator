@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from .effect.effect import SpecificDamageEffect
     from .effect.structs import DamageType, StaticTarget
     from .element import Element, Reaction
-    from .dices import AbstractDices
+    from .dice import AbstractDice
     from .state.game_state import GameState
     from .state.enums import Pid
 
@@ -119,20 +119,20 @@ class ActionPEvent(PreprocessableEvent):
     event_type: EventType
     event_sub_type: None | EventSubType | CharacterSkillType = None
     event_speed: EventSpeed
-    dices_cost: AbstractDices
+    dice_cost: AbstractDice
 
-    def with_new_cost(self, new_cost: AbstractDices) -> Self:
-        return replace(self, dices_cost=new_cost)
+    def with_new_cost(self, new_cost: AbstractDice) -> Self:
+        return replace(self, dice_cost=new_cost)
 
 
 @dataclass(frozen=True, kw_only=True)
 class CardPEvent(PreprocessableEvent):
     pid: Pid
     card_type: type[Card]
-    dices_cost: AbstractDices
+    dice_cost: AbstractDice
 
-    def with_new_cost(self, new_cost: AbstractDices) -> Self:
-        return replace(self, dices_cost=new_cost)
+    def with_new_cost(self, new_cost: AbstractDice) -> Self:
+        return replace(self, dice_cost=new_cost)
 
 
 @dataclass(frozen=True, kw_only=True)

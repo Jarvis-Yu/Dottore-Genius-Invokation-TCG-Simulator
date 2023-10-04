@@ -17,7 +17,7 @@ class TestAThousandFloatingDreams(unittest.TestCase):
         game_state = step_action(base_state, Pid.P1, CardAction(
             card=AThousandFloatingDreams,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.PYRO: 3}),
+                dice=ActualDice({Element.PYRO: 3}),
                 target=StaticTarget.from_char_id(Pid.P1, 1),
             )
         ))
@@ -51,7 +51,7 @@ class TestAThousandFloatingDreams(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=AThousandFloatingDreams,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.PYRO: 3}),
+                dice=ActualDice({Element.PYRO: 3}),
                 target=StaticTarget.from_char_id(Pid.P1, 2),
             )
         ))

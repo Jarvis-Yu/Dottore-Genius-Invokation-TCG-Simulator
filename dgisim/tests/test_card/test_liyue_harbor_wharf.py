@@ -11,7 +11,7 @@ class TestLiyueHarborWharf(unittest.TestCase):
         game_state = base_state
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=LiyueHarborWharf,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.DENDRO: 2})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.DENDRO: 2})),
         ))
 
         # test 2 more card is drawn for the first round

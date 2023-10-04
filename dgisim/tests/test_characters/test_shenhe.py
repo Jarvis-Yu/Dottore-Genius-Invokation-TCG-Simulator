@@ -24,7 +24,7 @@ class TestShenhe(unittest.TestCase):
             self.BASE_GAME,
             Pid.P1,
             CharacterSkill.SKILL1,
-            dices=ActualDices({Element.OMNI: 3}),
+            dice=ActualDice({Element.OMNI: 3}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 8)
@@ -35,7 +35,7 @@ class TestShenhe(unittest.TestCase):
             self.BASE_GAME,
             Pid.P1,
             CharacterSkill.SKILL2,
-            dices=ActualDices({Element.OMNI: 3}),
+            dice=ActualDice({Element.OMNI: 3}),
         )
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
@@ -49,7 +49,7 @@ class TestShenhe(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.ELEMENTAL_BURST,
-            dices=ActualDices({Element.OMNI: 3}),
+            dice=ActualDice({Element.OMNI: 3}),
         )
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
@@ -143,7 +143,7 @@ class TestShenhe(unittest.TestCase):
         ).execute(self.BASE_GAME)
         game_state = step_action(base_state, Pid.P1, CardAction(
             card=MysticalAbandon,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.CRYO: 3}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.CRYO: 3}))
         ))
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         game_state = step_swap(game_state, Pid.P1, char_id=3)  # to Kaeya
@@ -174,7 +174,7 @@ class TestShenhe(unittest.TestCase):
         self.assertEqual(p1.get_combat_statuses().just_find(IcyQuillStatus).usages, 1)
 
         game_state = next_round(game_state)
-        game_state = fill_dices_with_omni(game_state)
+        game_state = fill_dice_with_omni(game_state)
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         # first normal attack is a free boost
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)

@@ -15,7 +15,7 @@ class TestFruitOfFullfillment(unittest.TestCase):
         game_state = step_action(base_state, Pid.P1, CardAction(
             card=FruitOfFulfillment,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.GEO: 1, Element.ELECTRO: 1, Element.ANEMO: 1}),
+                dice=ActualDice({Element.GEO: 1, Element.ELECTRO: 1, Element.ANEMO: 1}),
                 target=StaticTarget.from_char_id(Pid.P1, 1),
             )
         ))
@@ -29,7 +29,7 @@ class TestFruitOfFullfillment(unittest.TestCase):
         )
 
         # test basic dmg boost
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1, ActualDices(
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1, ActualDice(
             {Element.PYRO: 3}
         ))
         last_dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]

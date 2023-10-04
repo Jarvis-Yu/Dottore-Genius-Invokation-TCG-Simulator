@@ -18,7 +18,7 @@ class TestNRE(unittest.TestCase):
         # test food added on entry
         game_state = step_action(base_state, Pid.P1, CardAction(
             card=NRE,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.PYRO: 1, Element.GEO: 1})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.PYRO: 1, Element.GEO: 1})),
         ))
         deck_cards = game_state.get_player1().get_deck_cards()
         hand_cards = game_state.get_player1().get_hand_cards()
@@ -30,7 +30,7 @@ class TestNRE(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=NorthernSmokedChicken,
             instruction=StaticTargetInstruction(
-                dices=ActualDices.from_empty(),
+                dice=ActualDice.from_empty(),
                 target=StaticTarget.from_char_id(Pid.P1, 1),
             ),
         ))
@@ -49,7 +49,7 @@ class TestNRE(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=NorthernSmokedChicken,
             instruction=StaticTargetInstruction(
-                dices=ActualDices.from_empty(),
+                dice=ActualDice.from_empty(),
                 target=StaticTarget.from_char_id(Pid.P1, 2),
             ),
         ))
@@ -68,7 +68,7 @@ class TestNRE(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=NorthernSmokedChicken,
             instruction=StaticTargetInstruction(
-                dices=ActualDices.from_empty(),
+                dice=ActualDice.from_empty(),
                 target=StaticTarget.from_char_id(Pid.P1, 1),
             ),
         ))
@@ -80,7 +80,7 @@ class TestNRE(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=NorthernSmokedChicken,
             instruction=StaticTargetInstruction(
-                dices=ActualDices.from_empty(),
+                dice=ActualDice.from_empty(),
                 target=StaticTarget.from_char_id(Pid.P1, 2),
             ),
         ))
@@ -96,7 +96,7 @@ class TestNRE(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=NorthernSmokedChicken,
             instruction=StaticTargetInstruction(
-                dices=ActualDices.from_empty(),
+                dice=ActualDice.from_empty(),
                 target=StaticTarget.from_char_id(Pid.P1, 2),
             ),
         ))

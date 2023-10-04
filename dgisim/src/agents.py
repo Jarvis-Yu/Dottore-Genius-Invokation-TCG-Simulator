@@ -11,7 +11,7 @@ from .action.action_generator_generator import *
 from .action.types import DecidedChoiceType
 from .card.card import *
 from .card.cards import Cards
-from .dices import AbstractDices, ActualDices
+from .dice import AbstractDice, ActualDice
 from .effect.effect import *
 from .element import Element
 from .phase.default.action_phase import ActionPhase
@@ -61,7 +61,7 @@ class LazyAgent(PlayerAgent):
             return CharacterSelectAction(char_id=1)
 
         elif isinstance(curr_phase, mode.roll_phase):
-            return DicesSelectAction(selected_dices=ActualDices({}))
+            return DiceSelectAction(selected_dice=ActualDice({}))
 
         elif isinstance(curr_phase, mode.action_phase)  \
                 or isinstance(curr_phase, mode.end_phase):
@@ -161,30 +161,30 @@ class RandomAgent(PlayerAgent):
                     choices = tuple(c for c in choices if c is not ActionType.END_ROUND)
                 choice = random.choice(choices)
                 action_generator = action_generator.choose(choice)
-            elif isinstance(choices, AbstractDices):
-                optional_choice = action_generator.dices_available().basically_satisfy(choices)
+            elif isinstance(choices, AbstractDice):
+                optional_choice = action_generator.dice_available().basically_satisfy(choices)
                 if optional_choice is None:
-                    raise Exception(f"There's not enough dices for {choices} from "  # pragma: no cover
-                                    + f"{action_generator.dices_available()} at game_state:"
+                    raise Exception(f"There's not enough dice for {choices} from "  # pragma: no cover
+                                    + f"{action_generator.dice_available()} at game_state:"
                                     + f"{action_generator.game_state}")
                 choice = optional_choice
                 action_generator = action_generator.choose(choice)
             elif isinstance(choices, Cards):
                 _, choice = choices.pick_random_cards(random.randint(0, choices.num_cards()))
                 action_generator = action_generator.choose(choice)
-            elif isinstance(choices, ActualDices):
+            elif isinstance(choices, ActualDice):
                 game_state = action_generator.game_state
                 wanted_elems = game_state.get_player(
                     action_generator.pid
                 ).get_characters().all_elems()
                 if game_state.get_phase() == game_state.get_mode().roll_phase():
-                    choice = ActualDices(dict(
+                    choice = ActualDice(dict(
                         (elem, choices[elem])
                         for elem in choices.elems()
                         if not (elem is Element.OMNI or elem in wanted_elems)
                     ))
                 else:
-                    _, choice = choices.pick_random_dices(random.randint(0, choices.num_dices()))
+                    _, choice = choices.pick_random_dice(random.randint(0, choices.num_dice()))
                 action_generator = action_generator.choose(choice)
             else:
                 raise NotImplementedError
@@ -247,12 +247,12 @@ class CustomChoiceAgent(RandomAgent):  # pragma: no cover
     def _dict_class_choose_handler(
             self,
             action_generator: ActionGenerator,
-            choices: ActualDices | Cards,
-            default_choice: None | ActualDices | Cards = None,
-    ) -> ActualDices | Cards:
-        base_selection: ActualDices | Cards
-        if isinstance(choices, ActualDices):
-            base_selection = action_generator.dices_available()
+            choices: ActualDice | Cards,
+            default_choice: None | ActualDice | Cards = None,
+    ) -> ActualDice | Cards:
+        base_selection: ActualDice | Cards
+        if isinstance(choices, ActualDice):
+            base_selection = action_generator.dice_available()
         else:
             base_selection = action_generator.hand_cards_available()
         choice = default_choice
@@ -265,8 +265,8 @@ class CustomChoiceAgent(RandomAgent):  # pragma: no cover
                 default_choice is not None,
             )
             if manual_choice is not None:
-                if isinstance(choices, ActualDices):
-                    selection = ActualDices(manual_choice)  # type: ignore
+                if isinstance(choices, ActualDice):
+                    selection = ActualDice(manual_choice)  # type: ignore
                 elif isinstance(choices, Cards):
                     selection = Cards(manual_choice)  # type: ignore
                 else:
@@ -294,16 +294,16 @@ class CustomChoiceAgent(RandomAgent):  # pragma: no cover
             if isinstance(choices, tuple):
                 choice = self._choose_handler(choices)
                 action_generator = action_generator.choose(choice)
-            elif isinstance(choices, AbstractDices):
-                optional_choice = action_generator.dices_available().basically_satisfy(choices)
+            elif isinstance(choices, AbstractDice):
+                optional_choice = action_generator.dice_available().basically_satisfy(choices)
                 if optional_choice is None:
-                    raise Exception(f"There's not enough dices for {repr(choices)} from "
-                                    + f"{action_generator.dices_available()} at game_state:"
+                    raise Exception(f"There's not enough dice for {repr(choices)} from "
+                                    + f"{action_generator.dice_available()} at game_state:"
                                     + f"{action_generator.game_state}")
                 self._prompt_handler("info", f"You need to pay for {repr(choices)}")
                 choice = self._dict_class_choose_handler(
                     action_generator,
-                    action_generator.dices_available(),
+                    action_generator.dice_available(),
                     optional_choice,
                 )
                 action_generator = action_generator.choose(choice)
@@ -313,10 +313,10 @@ class CustomChoiceAgent(RandomAgent):  # pragma: no cover
                     action_generator.hand_cards_available(),
                 )
                 action_generator = action_generator.choose(choice)
-            elif isinstance(choices, ActualDices):
+            elif isinstance(choices, ActualDice):
                 choice = self._dict_class_choose_handler(
                     action_generator,
-                    action_generator.dices_available(),
+                    action_generator.dice_available(),
                 )
                 action_generator = action_generator.choose(choice)
             else:

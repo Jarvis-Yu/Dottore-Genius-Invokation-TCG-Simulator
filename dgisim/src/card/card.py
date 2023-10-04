@@ -25,7 +25,7 @@ from ..summon import summon as sm
 from ..support import support as sp
 
 from ..character.enums import CharacterSkill, Faction, WeaponType
-from ..dices import AbstractDices, ActualDices
+from ..dice import AbstractDice, ActualDice
 from ..effect.enums import Zone
 from ..effect.structs import StaticTarget
 from ..element import Element
@@ -209,7 +209,7 @@ __all__ = [
 
 
 class Card:
-    _DICE_COST = AbstractDices({Element.OMNI: BIG_INT})
+    _DICE_COST = AbstractDice({Element.OMNI: BIG_INT})
 
     @classmethod
     def effects(
@@ -225,7 +225,7 @@ class Card:
         return True
 
     @classmethod
-    def base_dice_cost(cls) -> AbstractDices:  # pragma: no cover
+    def base_dice_cost(cls) -> AbstractDice:  # pragma: no cover
         return cls._DICE_COST
 
     @classmethod
@@ -233,11 +233,11 @@ class Card:
             cls,
             game_state: gs.GameState,
             pid: Pid
-    ) -> tuple[gs.GameState, AbstractDices]:
+    ) -> tuple[gs.GameState, AbstractDice]:
         """
-        Return a tuple of GameState and AbstractDices:
+        Return a tuple of GameState and AbstractDice:
         - returned game-state is the game-state after preprocessing the usage of the card
-        - returned abstract-dices are the actual cost of using the card at the provided game_state
+        - returned abstract-dice are the actual cost of using the card at the provided game_state
         """
         game_state, card_event = StatusProcessing.preprocess_by_all_statuses(
             game_state=game_state,
@@ -246,18 +246,18 @@ class Card:
             item=CardPEvent(
                 pid=pid,
                 card_type=cls,
-                dices_cost=cls._DICE_COST,
+                dice_cost=cls._DICE_COST,
             ),
         )
         assert isinstance(card_event, CardPEvent)
-        return game_state, card_event.dices_cost
+        return game_state, card_event.dice_cost
 
     @classmethod
     def just_preprocessed_dice_cost(
             cls,
             game_state: gs.GameState,
             pid: Pid
-    ) -> AbstractDices:
+    ) -> AbstractDice:
         return cls.preprocessed_dice_cost(game_state, pid)[1]
 
     # TODO add a post effect adding inform() to all status
@@ -279,7 +279,7 @@ class Card:
     @classmethod
     def usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         """
-        checks if card can be used (but neglect if player have enough dices for this)
+        checks if card can be used (but neglect if player have enough dice for this)
 
         don't override this unless you know what you are doing
         """
@@ -293,10 +293,10 @@ class Card:
 
         don't override this unless you know what you are doing
         """
-        dices_satisfy = game_state.get_player(pid).get_dices().loosely_satisfy(
+        dice_satisfy = game_state.get_player(pid).get_dice().loosely_satisfy(
             cls.just_preprocessed_dice_cost(game_state, pid)
         )
-        return dices_satisfy and cls.usable(game_state, pid)
+        return dice_satisfy and cls.usable(game_state, pid)
 
     @classmethod
     def valid_instruction(
@@ -309,10 +309,10 @@ class Card:
         if not game_state.get_player(pid).get_hand_cards().contains(cls) \
                 or not game_state.get_active_player_id() is pid \
                 or not cls._valid_instruction(game_state, pid, instruction) \
-                or not (game_state.get_player(pid).get_dices() - instruction.dices).is_legal():
+                or not (game_state.get_player(pid).get_dice() - instruction.dice).is_legal():
             return None
-        game_state, dices_cost = cls.preprocessed_dice_cost(game_state, pid)
-        if instruction.dices.just_satisfy(dices_cost):
+        game_state, dice_cost = cls.preprocessed_dice_cost(game_state, pid)
+        if instruction.dice.just_satisfy(dice_cost):
             return game_state
         else:
             return None
@@ -421,7 +421,7 @@ class _DiceOnlyChoiceProvider(Card):
 
         instruction = action_generator.instruction
         assert type(instruction) is act.DiceOnlyInstruction
-        if instruction.dices is None:
+        if instruction.dice is None:
             return cls.preprocessed_dice_cost(game_state, pid)[1]
 
         raise Exception("Not Reached!"
@@ -439,11 +439,11 @@ class _DiceOnlyChoiceProvider(Card):
 
         instruction = action_generator.instruction
         assert type(instruction) is act.DiceOnlyInstruction
-        if instruction.dices is None:
-            assert isinstance(player_choice, ActualDices)
+        if instruction.dice is None:
+            assert isinstance(player_choice, ActualDice)
             return replace(
                 action_generator,
-                instruction=replace(instruction, dices=player_choice),
+                instruction=replace(instruction, dice=player_choice),
             )
 
         raise Exception("Not Reached!")
@@ -523,7 +523,7 @@ class _CharTargetChoiceProvider(Card):
                 for char in chars
             )
 
-        elif instruction.dices is None:
+        elif instruction.dice is None:
             return cls.preprocessed_dice_cost(game_state, pid)[1]
 
         raise Exception("Not Reached!"
@@ -549,11 +549,11 @@ class _CharTargetChoiceProvider(Card):
                 instruction=replace(instruction, target=player_choice),
             )
 
-        elif instruction.dices is None:
-            assert isinstance(player_choice, ActualDices)
+        elif instruction.dice is None:
+            assert isinstance(player_choice, ActualDice)
             return replace(
                 action_generator,
-                instruction=replace(instruction, dices=player_choice),
+                instruction=replace(instruction, dice=player_choice),
             )
 
         raise Exception("Not Reached!")
@@ -665,7 +665,7 @@ class _SummonTargetChoiceProvider(Card):
                 ]
             return tuple(choices)
 
-        elif instruction.dices is None:
+        elif instruction.dice is None:
             return cls.preprocessed_dice_cost(game_state, pid)[1]
 
         raise Exception("Not Reached!"
@@ -689,11 +689,11 @@ class _SummonTargetChoiceProvider(Card):
                 instruction=replace(instruction, target=player_choice),
             )
 
-        elif instruction.dices is None:
-            assert isinstance(player_choice, ActualDices)
+        elif instruction.dice is None:
+            assert isinstance(player_choice, ActualDice)
             return replace(
                 action_generator,
-                instruction=replace(instruction, dices=player_choice),
+                instruction=replace(instruction, dice=player_choice),
             )
 
         raise Exception("Not Reached!")
@@ -993,10 +993,10 @@ class SupportCard(Card):
                 for support in supports
             )
 
-        # only dices unfilled here
+        # only dice unfilled here
         assert type(instruction) is act.DiceOnlyInstruction \
             or type(instruction) is act.StaticTargetInstruction
-        if instruction.dices is None:
+        if instruction.dice is None:
             return cls.preprocessed_dice_cost(game_state, pid)[1]
 
         raise Exception("Not Reached!"
@@ -1024,11 +1024,11 @@ class SupportCard(Card):
 
         assert type(instruction) is act.DiceOnlyInstruction \
             or type(instruction) is act.StaticTargetInstruction
-        if instruction.dices is None:
-            assert isinstance(player_choice, ActualDices)
+        if instruction.dice is None:
+            assert isinstance(player_choice, ActualDice)
             return replace(
                 action_generator,
-                instruction=replace(instruction, dices=player_choice),
+                instruction=replace(instruction, dice=player_choice),
             )
 
         raise Exception("Not Reached!")
@@ -1205,13 +1205,13 @@ class _DirectHealCard(FoodCard):
 
 
 class AmosBow(WeaponEquipmentCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    _DICE_COST = AbstractDice({Element.OMNI: 3})
     WEAPON_TYPE = WeaponType.BOW
     WEAPON_STATUS = stt.AmosBowStatus
 
 
 class KingsSquire(WeaponEquipmentCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    _DICE_COST = AbstractDice({Element.OMNI: 3})
     WEAPON_TYPE = WeaponType.BOW
     WEAPON_STATUS = stt.KingsSquireStatus
 
@@ -1232,13 +1232,13 @@ class KingsSquire(WeaponEquipmentCard):
 
 
 class RavenBow(WeaponEquipmentCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 2})
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
     WEAPON_TYPE = WeaponType.BOW
     WEAPON_STATUS = stt.RavenBowStatus
 
 
 class SacrificialBow(WeaponEquipmentCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    _DICE_COST = AbstractDice({Element.OMNI: 3})
     WEAPON_TYPE = WeaponType.BOW
     WEAPON_STATUS = stt.SacrificialBowStatus
 
@@ -1246,13 +1246,13 @@ class SacrificialBow(WeaponEquipmentCard):
 
 
 class AThousandFloatingDreams(WeaponEquipmentCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    _DICE_COST = AbstractDice({Element.OMNI: 3})
     WEAPON_TYPE = WeaponType.CATALYST
     WEAPON_STATUS = stt.AThousandFloatingDreamsStatus
 
 
 class FruitOfFulfillment(WeaponEquipmentCard):
-    _DICE_COST = AbstractDices({Element.ANY: 3})
+    _DICE_COST = AbstractDice({Element.ANY: 3})
     WEAPON_TYPE = WeaponType.CATALYST
     WEAPON_STATUS = stt.FruitOfFulfillmentStatus
 
@@ -1273,13 +1273,13 @@ class FruitOfFulfillment(WeaponEquipmentCard):
 
 
 class MagicGuide(WeaponEquipmentCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 2})
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
     WEAPON_TYPE = WeaponType.CATALYST
     WEAPON_STATUS = stt.MagicGuideStatus
 
 
 class SacrificialFragments(WeaponEquipmentCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    _DICE_COST = AbstractDice({Element.OMNI: 3})
     WEAPON_TYPE = WeaponType.CATALYST
     WEAPON_STATUS = stt.SacrificialFragmentsStatus
 
@@ -1287,25 +1287,25 @@ class SacrificialFragments(WeaponEquipmentCard):
 
 
 class SacrificialGreatsword(WeaponEquipmentCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    _DICE_COST = AbstractDice({Element.OMNI: 3})
     WEAPON_TYPE = WeaponType.CLAYMORE
     WEAPON_STATUS = stt.SacrificialGreatswordStatus
 
 
 class TheBell(WeaponEquipmentCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    _DICE_COST = AbstractDice({Element.OMNI: 3})
     WEAPON_TYPE = WeaponType.CLAYMORE
     WEAPON_STATUS = stt.TheBellStatus
 
 
 class WhiteIronGreatsword(WeaponEquipmentCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 2})
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
     WEAPON_TYPE = WeaponType.CLAYMORE
     WEAPON_STATUS = stt.WhiteIronGreatswordStatus
 
 
 class WolfsGravestone(WeaponEquipmentCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    _DICE_COST = AbstractDice({Element.OMNI: 3})
     WEAPON_TYPE = WeaponType.CLAYMORE
     WEAPON_STATUS = stt.WolfsGravestoneStatus
 
@@ -1313,7 +1313,7 @@ class WolfsGravestone(WeaponEquipmentCard):
 #### Polearm ####
 
 class LithicSpear(WeaponEquipmentCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    _DICE_COST = AbstractDice({Element.OMNI: 3})
     WEAPON_TYPE = WeaponType.POLEARM
     WEAPON_STATUS = stt.LithicSpearStatus
 
@@ -1341,13 +1341,13 @@ class LithicSpear(WeaponEquipmentCard):
 
 
 class VortexVanquisher(WeaponEquipmentCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    _DICE_COST = AbstractDice({Element.OMNI: 3})
     WEAPON_TYPE = WeaponType.POLEARM
     WEAPON_STATUS = stt.VortexVanquisherStatus
 
 
 class WhiteTassel(WeaponEquipmentCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 2})
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
     WEAPON_TYPE = WeaponType.POLEARM
     WEAPON_STATUS = stt.WhiteTasselStatus
 
@@ -1355,19 +1355,19 @@ class WhiteTassel(WeaponEquipmentCard):
 
 
 class AquilaFavonia(WeaponEquipmentCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    _DICE_COST = AbstractDice({Element.OMNI: 3})
     WEAPON_TYPE = WeaponType.SWORD
     WEAPON_STATUS = stt.AquilaFavoniaStatus
 
 
 class SacrificialSword(WeaponEquipmentCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    _DICE_COST = AbstractDice({Element.OMNI: 3})
     WEAPON_TYPE = WeaponType.SWORD
     WEAPON_STATUS = stt.SacrificialSwordStatus
 
 
 class TravelersHandySword(WeaponEquipmentCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 2})
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
     WEAPON_TYPE = WeaponType.SWORD
     WEAPON_STATUS = stt.TravelersHandySwordStatus
 
@@ -1375,22 +1375,22 @@ class TravelersHandySword(WeaponEquipmentCard):
 
 
 class GamblersEarrings(ArtifactEquipmentCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 1})
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
     ARTIFACT_STATUS = stt.GamblersEarringsStatus
 
 
 class GeneralsAncientHelm(ArtifactEquipmentCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 2})
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
     ARTIFACT_STATUS = stt.GeneralsAncientHelmStatus
 
 
 class InstructorsCap(ArtifactEquipmentCard):
-    _DICE_COST = AbstractDices({Element.ANY: 2})
+    _DICE_COST = AbstractDice({Element.ANY: 2})
     ARTIFACT_STATUS = stt.InstructorsCapStatus
 
 
 class TenacityOfTheMillelith(ArtifactEquipmentCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    _DICE_COST = AbstractDice({Element.OMNI: 3})
     ARTIFACT_STATUS = stt.TenacityOfTheMillelithStatus
 
 # <<<<<<<<<<<<<<<<<<<< Event Cards <<<<<<<<<<<<<<<<<<<<
@@ -1398,7 +1398,7 @@ class TenacityOfTheMillelith(ArtifactEquipmentCard):
 
 
 class JueyunGuoba(FoodCard, _CharTargetChoiceProvider):
-    _DICE_COST = AbstractDices({})
+    _DICE_COST = AbstractDice({})
 
     @override
     @classmethod
@@ -1413,7 +1413,7 @@ class JueyunGuoba(FoodCard, _CharTargetChoiceProvider):
 
 
 class LotusFlowerCrisp(FoodCard, _CharTargetChoiceProvider):
-    _DICE_COST = AbstractDices({Element.OMNI: 1})
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
 
     @override
     @classmethod
@@ -1428,7 +1428,7 @@ class LotusFlowerCrisp(FoodCard, _CharTargetChoiceProvider):
 
 
 class MintyMeatRolls(FoodCard, _CharTargetChoiceProvider):
-    _DICE_COST = AbstractDices({Element.OMNI: 1})
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
 
     @override
     @classmethod
@@ -1443,7 +1443,7 @@ class MintyMeatRolls(FoodCard, _CharTargetChoiceProvider):
 
 
 class MondstadtHashBrown(_DirectHealCard, _CharTargetChoiceProvider):
-    _DICE_COST = AbstractDices({Element.OMNI: 1})
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
 
     @override
     @classmethod
@@ -1456,7 +1456,7 @@ class MushroomPizza(FoodCard, _CharTargetChoiceProvider):
     Heal first then the status
     """
 
-    _DICE_COST = AbstractDices({Element.OMNI: 1})
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
 
     @override
     @classmethod
@@ -1480,7 +1480,7 @@ class MushroomPizza(FoodCard, _CharTargetChoiceProvider):
 
 
 class NorthernSmokedChicken(FoodCard, _CharTargetChoiceProvider):
-    _DICE_COST = AbstractDices({})
+    _DICE_COST = AbstractDice({})
 
     @override
     @classmethod
@@ -1495,7 +1495,7 @@ class NorthernSmokedChicken(FoodCard, _CharTargetChoiceProvider):
 
 
 class SweetMadame(_DirectHealCard, _CharTargetChoiceProvider):
-    _DICE_COST = AbstractDices({})
+    _DICE_COST = AbstractDice({})
 
     @override
     @classmethod
@@ -1504,7 +1504,7 @@ class SweetMadame(_DirectHealCard, _CharTargetChoiceProvider):
 
 
 class TandooriRoastChicken(_RangedFoodCard):
-    _DICE_COST = AbstractDices({Element.ANY: 2})
+    _DICE_COST = AbstractDice({Element.ANY: 2})
 
     @override
     @classmethod
@@ -1522,7 +1522,7 @@ class TandooriRoastChicken(_RangedFoodCard):
 
 
 class TeyvatFriedEgg(FoodCard, _CharTargetChoiceProvider):
-    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    _DICE_COST = AbstractDice({Element.OMNI: 3})
 
     @classmethod
     def revive_on_cooldown(cls, game_state: gs.GameState, pid: Pid) -> bool:
@@ -1596,7 +1596,7 @@ class TeyvatFriedEgg(FoodCard, _CharTargetChoiceProvider):
 
 
 class CalxsArts(EventCard, _DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDices({Element.OMNI: 1})
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
 
     @override
     @classmethod
@@ -1657,7 +1657,7 @@ class CalxsArts(EventCard, _DiceOnlyChoiceProvider):
 
 
 class ChangingShifts(EventCard, _DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDices({})
+    _DICE_COST = AbstractDice({})
 
     @override
     @classmethod
@@ -1698,7 +1698,7 @@ class _ElementalResonanceCard(EventCard):
 
 
 class ElementalResonanceEnduringRock(_ElementalResonanceCard, _DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDices({Element.GEO: 1})
+    _DICE_COST = AbstractDice({Element.GEO: 1})
     _ELEMENT = Element.GEO
 
     @override
@@ -1718,7 +1718,7 @@ class ElementalResonanceEnduringRock(_ElementalResonanceCard, _DiceOnlyChoicePro
 
 
 class ElementalResonanceFerventFlames(_ElementalResonanceCard, _DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDices({Element.PYRO: 1})
+    _DICE_COST = AbstractDice({Element.PYRO: 1})
     _ELEMENT = Element.PYRO
 
     @override
@@ -1738,7 +1738,7 @@ class ElementalResonanceFerventFlames(_ElementalResonanceCard, _DiceOnlyChoicePr
 
 
 class ElementalResonanceHighVoltage(_ElementalResonanceCard, _DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDices({Element.ELECTRO: 1})
+    _DICE_COST = AbstractDice({Element.ELECTRO: 1})
     _ELEMENT = Element.ELECTRO
 
     @override
@@ -1775,7 +1775,7 @@ class ElementalResonanceHighVoltage(_ElementalResonanceCard, _DiceOnlyChoiceProv
 
 
 class ElementalResonanceImpetuousWinds(_ElementalResonanceCard, _CharTargetChoiceProvider):
-    _DICE_COST = AbstractDices({Element.ANEMO: 1})
+    _DICE_COST = AbstractDice({Element.ANEMO: 1})
     _ELEMENT = Element.ANEMO
 
     @override
@@ -1808,7 +1808,7 @@ class ElementalResonanceImpetuousWinds(_ElementalResonanceCard, _CharTargetChoic
 
 
 class ElementalResonanceShatteringIce(_ElementalResonanceCard, _DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDices({Element.CRYO: 1})
+    _DICE_COST = AbstractDice({Element.CRYO: 1})
     _ELEMENT = Element.CRYO
 
     @override
@@ -1828,7 +1828,7 @@ class ElementalResonanceShatteringIce(_ElementalResonanceCard, _DiceOnlyChoicePr
 
 
 class ElementalResonanceSoothingWater(_ElementalResonanceCard, _DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDices({Element.HYDRO: 1})
+    _DICE_COST = AbstractDice({Element.HYDRO: 1})
     _ELEMENT = Element.HYDRO
 
     _MAIN_RECOVERY = 2
@@ -1862,7 +1862,7 @@ class ElementalResonanceSoothingWater(_ElementalResonanceCard, _DiceOnlyChoicePr
 
 
 class ElementalResonanceSprawlingGreenery(_ElementalResonanceCard, _DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDices({Element.DENDRO: 1})
+    _DICE_COST = AbstractDice({Element.DENDRO: 1})
     _ELEMENT = Element.DENDRO
 
     @override
@@ -1907,8 +1907,8 @@ class ElementalResonanceSprawlingGreenery(_ElementalResonanceCard, _DiceOnlyChoi
 
 
 class _ElementalResonanceDie(_ElementalResonanceCard, _DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDices({})
-    _DICES_NUM = 1
+    _DICE_COST = AbstractDice({})
+    _DICE_NUM = 1
 
     @override
     @classmethod
@@ -1922,7 +1922,7 @@ class _ElementalResonanceDie(_ElementalResonanceCard, _DiceOnlyChoiceProvider):
             eft.AddDiceEffect(
                 pid=pid,
                 element=cls._ELEMENT,
-                num=cls._DICES_NUM,
+                num=cls._DICE_NUM,
             ),
         )
 
@@ -1956,7 +1956,7 @@ class ElementalResonanceWovenWinds(_ElementalResonanceDie):
 
 
 class IHaventLostYet(EventCard, _DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDices({})
+    _DICE_COST = AbstractDice({})
 
     @override
     @classmethod
@@ -2003,7 +2003,7 @@ class IHaventLostYet(EventCard, _DiceOnlyChoiceProvider):
 
 
 class LeaveItToMe(EventCard, _DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDices({})
+    _DICE_COST = AbstractDice({})
 
     @override
     @classmethod
@@ -2031,7 +2031,7 @@ class LeaveItToMe(EventCard, _DiceOnlyChoiceProvider):
 
 
 class QuickKnit(EventCard, _SummonTargetChoiceProvider):
-    _DICE_COST = AbstractDices({Element.OMNI: 1})
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
     _MY_SIDE = True
 
     @override
@@ -2052,7 +2052,7 @@ class QuickKnit(EventCard, _SummonTargetChoiceProvider):
 
 
 class SendOff(EventCard, _SummonTargetChoiceProvider):
-    _DICE_COST = AbstractDices({Element.ANY: 2})
+    _DICE_COST = AbstractDice({Element.ANY: 2})
     _OPPO_SIDE = True
 
     @override
@@ -2073,7 +2073,7 @@ class SendOff(EventCard, _SummonTargetChoiceProvider):
 
 
 class Starsigns(EventCard, _DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDices({Element.ANY: 2})
+    _DICE_COST = AbstractDice({Element.ANY: 2})
 
     @override
     @classmethod
@@ -2100,7 +2100,7 @@ class Starsigns(EventCard, _DiceOnlyChoiceProvider):
         )
 
 class TheBestestTravelCompanion(EventCard, _DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDices({Element.ANY: 2})
+    _DICE_COST = AbstractDice({Element.ANY: 2})
 
     @override
     @classmethod
@@ -2120,7 +2120,7 @@ class TheBestestTravelCompanion(EventCard, _DiceOnlyChoiceProvider):
 
 
 class WhereIsTheUnseenRazor(EventCard, _CharTargetChoiceProvider):
-    _DICE_COST = AbstractDices({Element.OMNI: 0})
+    _DICE_COST = AbstractDice({Element.OMNI: 0})
 
     @override
     @classmethod
@@ -2160,7 +2160,7 @@ class WhereIsTheUnseenRazor(EventCard, _CharTargetChoiceProvider):
 
 
 class WindAndFreedom(EventCard, _DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDices({Element.OMNI: 1})
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
 
     @override
     @classmethod
@@ -2193,22 +2193,22 @@ class WindAndFreedom(EventCard, _DiceOnlyChoiceProvider):
 
 
 class ChangTheNinth(CompanionCard):
-    _DICE_COST = AbstractDices.from_empty()
+    _DICE_COST = AbstractDice.from_empty()
     _SUPPORT_STATUS = sp.ChangTheNinthSupport
 
 
 class Liben(CompanionCard):
-    _DICE_COST = AbstractDices.from_empty()
+    _DICE_COST = AbstractDice.from_empty()
     _SUPPORT_STATUS = sp.LibenSupport
 
 
 class Paimon(CompanionCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    _DICE_COST = AbstractDice({Element.OMNI: 3})
     _SUPPORT_STATUS = sp.PaimonSupport
 
 
 class Xudong(CompanionCard):
-    _DICE_COST = AbstractDices({Element.ANY: 2})
+    _DICE_COST = AbstractDice({Element.ANY: 2})
     _SUPPORT_STATUS = sp.XudongSupport
 
 # >>>>>>>>>>>>>>>>>>>> Support Cards / Companion Cards >>>>>>>>>>>>>>>>>>>>
@@ -2217,7 +2217,7 @@ class Xudong(CompanionCard):
 
 
 class NRE(ItemCard):
-    _DICE_COST = AbstractDices({Element.ANY: 2})
+    _DICE_COST = AbstractDice({Element.ANY: 2})
     _SUPPORT_STATUS = sp.NRESupport
 
     @classmethod
@@ -2236,7 +2236,7 @@ class NRE(ItemCard):
 
 
 class ParametricTransformer(ItemCard):
-    _DICE_COST = AbstractDices({Element.ANY: 2})
+    _DICE_COST = AbstractDice({Element.ANY: 2})
     _SUPPORT_STATUS = sp.ParametricTransformerSupport
 
 # >>>>>>>>>>>>>>>>>>>> Support Cards / Item Cards >>>>>>>>>>>>>>>>>>>>
@@ -2245,7 +2245,7 @@ class ParametricTransformer(ItemCard):
 
 
 class KnightsOfFavoniusLibrary(LocationCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 1})
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
     _SUPPORT_STATUS = sp.KnightsOfFavoniusLibrarySupport
 
     @classmethod
@@ -2260,22 +2260,22 @@ class KnightsOfFavoniusLibrary(LocationCard):
 
 
 class LiyueHarborWharf(LocationCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 2})
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
     _SUPPORT_STATUS = sp.LiyueHarborWharfSupport
 
 
 class SumeruCity(LocationCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 2})
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
     _SUPPORT_STATUS = sp.SumeruCitySupport
 
 
 class Tenshukaku(LocationCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 2})
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
     _SUPPORT_STATUS = sp.TenshukakuSupport
 
 
 class Vanarana(LocationCard):
-    _DICE_COST = AbstractDices.from_empty()
+    _DICE_COST = AbstractDice.from_empty()
     _SUPPORT_STATUS = sp.VanaranaSupport
 
 # >>>>>>>>>>>>>>>>>>>> Support Cards / Location Cards >>>>>>>>>>>>>>>>>>>>
@@ -2286,7 +2286,7 @@ class Vanarana(LocationCard):
 
 
 class DescentOfDivinity(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.GEO: 3})
+    _DICE_COST = AbstractDice({Element.GEO: 3})
     _CHARACTER = chr.Albedo
     _EQUIPMENT_STATUS = stt.DescentOfDivinityStatus
     _SKILL = CharacterSkill.SKILL2
@@ -2296,7 +2296,7 @@ class DescentOfDivinity(_TalentEquipmentSkillCard):
 
 
 class AratakiIchiban(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.GEO: 1, Element.ANY: 2})
+    _DICE_COST = AbstractDice({Element.GEO: 1, Element.ANY: 2})
     _CHARACTER = chr.AratakiItto
     _EQUIPMENT_STATUS = stt.AratakiIchibanStatus
     _SKILL = CharacterSkill.SKILL1
@@ -2305,7 +2305,7 @@ class AratakiIchiban(_TalentEquipmentSkillCard):
 
 
 class GrandExpectation(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.PYRO: 4})
+    _DICE_COST = AbstractDice({Element.PYRO: 4})
     _CHARACTER = chr.Bennett
     _EQUIPMENT_STATUS = stt.GrandExpectationStatus
     _SKILL = CharacterSkill.ELEMENTAL_BURST
@@ -2314,7 +2314,7 @@ class GrandExpectation(_TalentEquipmentSkillCard):
 #### Collei ####
 
 class FloralSidewinder(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.DENDRO: 4})
+    _DICE_COST = AbstractDice({Element.DENDRO: 4})
     _CHARACTER = chr.Collei
     _EQUIPMENT_STATUS = stt.FloralSidewinderStatus
     _SKILL = CharacterSkill.SKILL2
@@ -2323,7 +2323,7 @@ class FloralSidewinder(_TalentEquipmentSkillCard):
 #### Electro Hypostasis ####
 
 class AbsorbingPrism(TalentEventCard, _CombatActionCard, _DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDices({Element.ELECTRO: 3})
+    _DICE_COST = AbstractDice({Element.ELECTRO: 3})
     _CHARACTER = chr.ElectroHypostasis
 
     @override
@@ -2355,7 +2355,7 @@ class AbsorbingPrism(TalentEventCard, _CombatActionCard, _DiceOnlyChoiceProvider
 #### Fatui Pyro Agent ####
 
 class PaidInFull(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.PYRO: 3})
+    _DICE_COST = AbstractDice({Element.PYRO: 3})
     _CHARACTER = chr.FatuiPyroAgent
     _EQUIPMENT_STATUS = stt.PaidInFullStatus
     _SKILL = CharacterSkill.SKILL2
@@ -2364,7 +2364,7 @@ class PaidInFull(_TalentEquipmentSkillCard):
 #### Fischl ####
 
 class StellarPredator(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.ELECTRO: 3})
+    _DICE_COST = AbstractDice({Element.ELECTRO: 3})
     _CHARACTER = chr.Fischl
     _EQUIPMENT_STATUS = stt.StellarPredatorStatus
     _SKILL = CharacterSkill.SKILL2
@@ -2373,7 +2373,7 @@ class StellarPredator(_TalentEquipmentSkillCard):
 #### Ganyu ####
 
 class UndividedHeart(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.CRYO: 5})
+    _DICE_COST = AbstractDice({Element.CRYO: 5})
     _CHARACTER = chr.Ganyu
     _EQUIPMENT_STATUS = stt.UndividedHeartStatus
     _SKILL = CharacterSkill.SKILL3
@@ -2382,7 +2382,7 @@ class UndividedHeart(_TalentEquipmentSkillCard):
 #### Jadeplume Terrorshroom ####
 
 class ProliferatingSpores(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.DENDRO: 3})
+    _DICE_COST = AbstractDice({Element.DENDRO: 3})
     _CHARACTER = chr.JadeplumeTerrorshroom
     _EQUIPMENT_STATUS = stt.ProliferatingSporesStatus
     _SKILL = CharacterSkill.SKILL2
@@ -2391,7 +2391,7 @@ class ProliferatingSpores(_TalentEquipmentSkillCard):
 #### Jean ####
 
 class LandsOfDandelion(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.ANEMO: 4})
+    _DICE_COST = AbstractDice({Element.ANEMO: 4})
     _CHARACTER = chr.Jean
     _EQUIPMENT_STATUS = stt.LandsOfDandelionStatus
     _SKILL = CharacterSkill.ELEMENTAL_BURST
@@ -2401,7 +2401,7 @@ class LandsOfDandelion(_TalentEquipmentSkillCard):
 
 
 class PoeticsOfFuubutsu(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.ANEMO: 3})
+    _DICE_COST = AbstractDice({Element.ANEMO: 3})
     _CHARACTER = chr.KaedeharaKazuha
     _EQUIPMENT_STATUS = stt.PoeticsOfFuubutsuStatus
     _SKILL = CharacterSkill.SKILL2
@@ -2410,7 +2410,7 @@ class PoeticsOfFuubutsu(_TalentEquipmentSkillCard):
 
 
 class ColdBloodedStrike(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.CRYO: 4})
+    _DICE_COST = AbstractDice({Element.CRYO: 4})
     _CHARACTER = chr.Kaeya
     _EQUIPMENT_STATUS = stt.ColdBloodedStrikeStatus
     _SKILL = CharacterSkill.SKILL2
@@ -2419,7 +2419,7 @@ class ColdBloodedStrike(_TalentEquipmentSkillCard):
 
 
 class LightningStiletto(TalentEventCard, _CombatActionCard, _CharTargetChoiceProvider):
-    _DICE_COST = AbstractDices({Element.ELECTRO: 3})
+    _DICE_COST = AbstractDice({Element.ELECTRO: 3})
 
     @override
     @classmethod
@@ -2481,7 +2481,7 @@ class LightningStiletto(TalentEventCard, _CombatActionCard, _CharTargetChoicePro
 
 
 class ThunderingPenance(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.ELECTRO: 3})
+    _DICE_COST = AbstractDice({Element.ELECTRO: 3})
     _CHARACTER = chr.Keqing
     _EQUIPMENT_STATUS = stt.ThunderingPenanceStatus
     _SKILL = CharacterSkill.SKILL2
@@ -2490,7 +2490,7 @@ class ThunderingPenance(_TalentEquipmentSkillCard):
 
 
 class PoundingSurprise(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.PYRO: 3})
+    _DICE_COST = AbstractDice({Element.PYRO: 3})
     _CHARACTER = chr.Klee
     _EQUIPMENT_STATUS = stt.PoundingSurpriseStatus
     _SKILL = CharacterSkill.SKILL2
@@ -2499,7 +2499,7 @@ class PoundingSurprise(_TalentEquipmentSkillCard):
 #### Maguu Kenki ####
 
 class TranscendentAutomaton(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.ANEMO: 3})
+    _DICE_COST = AbstractDice({Element.ANEMO: 3})
     _CHARACTER = chr.MaguuKenki
     _EQUIPMENT_STATUS = stt.TranscendentAutomatonStatus
     _SKILL = CharacterSkill.SKILL2
@@ -2508,7 +2508,7 @@ class TranscendentAutomaton(_TalentEquipmentSkillCard):
 
 
 class ProphecyOfSubmersion(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.HYDRO: 3})
+    _DICE_COST = AbstractDice({Element.HYDRO: 3})
     _CHARACTER = chr.Mona
     _EQUIPMENT_STATUS = stt.ProphecyOfSubmersionStatus
     _SKILL = CharacterSkill.ELEMENTAL_BURST
@@ -2517,7 +2517,7 @@ class ProphecyOfSubmersion(_TalentEquipmentSkillCard):
 
 
 class TheSeedOfStoredKnowledge(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.DENDRO: 3})
+    _DICE_COST = AbstractDice({Element.DENDRO: 3})
     _CHARACTER = chr.Nahida
     _EQUIPMENT_STATUS = stt.TheSeedOfStoredKnowledgeStatus
     _SKILL = CharacterSkill.ELEMENTAL_BURST
@@ -2526,7 +2526,7 @@ class TheSeedOfStoredKnowledge(_TalentEquipmentSkillCard):
 #### Ningguang ####
 
 class StrategicReserve(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.GEO: 4})
+    _DICE_COST = AbstractDice({Element.GEO: 4})
     _CHARACTER = chr.Ningguang
     _EQUIPMENT_STATUS = stt.StrategicReserveStatus
     _SKILL = CharacterSkill.SKILL2
@@ -2536,7 +2536,7 @@ class StrategicReserve(_TalentEquipmentSkillCard):
 
 
 class IGotYourBack(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.GEO: 3})
+    _DICE_COST = AbstractDice({Element.GEO: 3})
     _CHARACTER = chr.Noelle
     _EQUIPMENT_STATUS = stt.IGotYourBackStatus
     _SKILL = CharacterSkill.SKILL2
@@ -2549,7 +2549,7 @@ class RiteOfResurrection(_TalentEquipmentSkillCard):
     - Tested, second equipment doesn't refresh rivial limit per game.
     - Tested, revival of Qiqi resets revival chances per game.
     """
-    _DICE_COST = AbstractDices({Element.CRYO: 5})
+    _DICE_COST = AbstractDice({Element.CRYO: 5})
     _CHARACTER = chr.Qiqi
     _EQUIPMENT_STATUS = stt.RiteOfResurrectionStatus
     _SKILL = CharacterSkill.ELEMENTAL_BURST
@@ -2559,7 +2559,7 @@ class RiteOfResurrection(_TalentEquipmentSkillCard):
 
 
 class StreamingSurge(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.HYDRO: 4})
+    _DICE_COST = AbstractDice({Element.HYDRO: 4})
     _CHARACTER = chr.RhodeiaOfLoch
     _EQUIPMENT_STATUS = stt.StreamingSurgeStatus
     _SKILL = CharacterSkill.ELEMENTAL_BURST
@@ -2567,7 +2567,7 @@ class StreamingSurge(_TalentEquipmentSkillCard):
 
 #### Sangonomiya Kokomi ####
 class TamakushiCasket(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.HYDRO: 3})
+    _DICE_COST = AbstractDice({Element.HYDRO: 3})
     _CHARACTER = chr.SangonomiyaKokomi
     _EQUIPMENT_STATUS = stt.TamakushiCasketStatus
     _SKILL = CharacterSkill.ELEMENTAL_BURST
@@ -2576,7 +2576,7 @@ class TamakushiCasket(_TalentEquipmentSkillCard):
 #### Shenhe ####
 
 class MysticalAbandon(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.CRYO: 3})
+    _DICE_COST = AbstractDice({Element.CRYO: 3})
     _CHARACTER = chr.Shenhe
     _EQUIPMENT_STATUS = stt.MysticalAbandonStatus
     _SKILL = CharacterSkill.SKILL2
@@ -2586,7 +2586,7 @@ class MysticalAbandon(_TalentEquipmentSkillCard):
 
 
 class KeenSight(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.DENDRO: 4})
+    _DICE_COST = AbstractDice({Element.DENDRO: 4})
     _CHARACTER = chr.Tighnari
     _EQUIPMENT_STATUS = stt.KeenSightStatus
     _SKILL = CharacterSkill.SKILL2
@@ -2595,7 +2595,7 @@ class KeenSight(_TalentEquipmentSkillCard):
 #### Venti ####
 
 class EmbraceOfWinds(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.ANEMO: 3})
+    _DICE_COST = AbstractDice({Element.ANEMO: 3})
     _CHARACTER = chr.Venti
     _EQUIPMENT_STATUS = stt.EmbraceOfWindsStatus
     _SKILL = CharacterSkill.SKILL2
@@ -2604,7 +2604,7 @@ class EmbraceOfWinds(_TalentEquipmentSkillCard):
 
 
 class TheScentRemained(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.HYDRO: 4})
+    _DICE_COST = AbstractDice({Element.HYDRO: 4})
     _CHARACTER = chr.Xingqiu
     _EQUIPMENT_STATUS = stt.TheScentRemainedStatus
     _SKILL = CharacterSkill.SKILL2
@@ -2613,7 +2613,7 @@ class TheScentRemained(_TalentEquipmentSkillCard):
 
 
 class TheShrinesSacredShade(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.ELECTRO: 3})
+    _DICE_COST = AbstractDice({Element.ELECTRO: 3})
     _CHARACTER = chr.YaeMiko
     _EQUIPMENT_STATUS = stt.TheShrinesSacredShadeStatus
     _SKILL = CharacterSkill.ELEMENTAL_BURST
@@ -2622,7 +2622,7 @@ class TheShrinesSacredShade(_TalentEquipmentSkillCard):
 #### Yoimiya ####
 
 class NaganoharaMeteorSwarm(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDices({Element.PYRO: 2})
+    _DICE_COST = AbstractDice({Element.PYRO: 2})
     _CHARACTER = chr.Yoimiya
     _EQUIPMENT_STATUS = stt.NaganoharaMeteorSwarmStatus
     _SKILL = CharacterSkill.SKILL2

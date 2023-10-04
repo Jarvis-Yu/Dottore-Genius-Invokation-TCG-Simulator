@@ -93,7 +93,7 @@ Please choose id (0-2)
 <Combat Statuses: []>         | <Combat Statuses: []>         |
 <Summons>                     | <Summons>                     |
 <Supports>                    | <Supports>                    |
-<Dices>                       | <Dices>                       |
+<Dice>                       | <Dice>                       |
 <Hand Cards>                  | <Hand Cards>                  |
 <Deck Cards>                  | <Deck Cards>                  |
   <Xudong: 2>                 |   <Xudong: 2>                 |
@@ -154,7 +154,7 @@ Please choose id (0-2)
 <Combat Statuses: []>         | <Combat Statuses: []>         |
 <Summons>                     | <Summons>                     |
 <Supports>                    | <Supports>                    |
-<Dices>                       | <Dices>                       |
+<Dice>                       | <Dice>                       |
 <Hand Cards>                  | <Hand Cards>                  |
   <ThunderingPenance: 2>      |   <ChangingShifts: 1>         |
   <SweetMadame: 1>            |   <StreamingSurge: 1>         |
@@ -227,7 +227,7 @@ e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
 <Combat Statuses: []>         | <Combat Statuses: []>         |
 <Summons>                     | <Summons>                     |
 <Supports>                    | <Supports>                    |
-<Dices>                       | <Dices>                       |
+<Dice>                       | <Dice>                       |
 <Hand Cards>                  | <Hand Cards>                  |
   <ChangingShifts: 1>         |   <ChangingShifts: 1>         |
   <JueyunGuoba: 1>            |   <StreamingSurge: 1>         |
@@ -290,7 +290,7 @@ e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
 <Combat Statuses: []>         | <Combat Statuses: []>         |
 <Summons>                     | <Summons>                     |
 <Supports>                    | <Supports>                    |
-<Dices>                       | <Dices>                       |
+<Dice>                       | <Dice>                       |
 <Hand Cards>                  | <Hand Cards>                  |
   <ChangingShifts: 1>         |   <Xudong: 1>                 |
   <JueyunGuoba: 1>            |   <MintyMeatRolls: 1>         |
@@ -358,7 +358,7 @@ Please choose id (0-2)
 <Combat Statuses: []>         | <Combat Statuses: []>         |
 <Summons>                     | <Summons>                     |
 <Supports>                    | <Supports>                    |
-<Dices>                       | <Dices>                       |
+<Dice>                       | <Dice>                       |
 <Hand Cards>                  | <Hand Cards>                  |
   <ChangingShifts: 1>         |   <Xudong: 1>                 |
   <JueyunGuoba: 1>            |   <MintyMeatRolls: 1>         |
@@ -421,7 +421,7 @@ Please choose id (0-2)
 <Combat Statuses: []>         | <Combat Statuses: []>         |
 <Summons>                     | <Summons>                     |
 <Supports>                    | <Supports>                    |
-<Dices>                       | <Dices>                       |
+<Dice>                       | <Dice>                       |
   <HYDRO: 1>                  |   <OMNI: 2>                   |
   <GEO: 1>                    |   <GEO: 1>                    |
   <CRYO: 1>                   |   <CRYO: 1>                   |
@@ -453,14 +453,14 @@ Please choose id (0-2)
 <Effects>
 ===============================================================
 Choices are:
-@0: SELECT_DICES  |||  @1: END_ROUND
+@0: SELECT_DICE  |||  @1: END_ROUND
 Please choose id (0-1)
 ::> @0
 
 Selections are:
 @1: <HYDRO, 1>  |||  @2: <GEO, 1>  |||  @3: <CRYO, 1>  |||  @4: <ELECTRO, 5>
 e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
-::> 1:100    // deliberate faulty input, player doesn't have 100 HYDO dices
+::> 1:100    // deliberate faulty input, player doesn't have 100 HYDO dice
 
 [error] -- Last input is invalid!
 Selections are:
@@ -474,7 +474,7 @@ Selections are:
 e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
 ::> 1:1, 2:1    // finally I gave some correct input
 
-#### Player1 Action: DicesSelectAction[<HYDRO>: 1; <GEO>: 1; ]
+#### Player1 Action: DiceSelectAction[<HYDRO>: 1; <GEO>: 1; ]
 
 :> 
 <Mode: DefaultMode>  <Phase: RollPhase>  <Round: 0>
@@ -511,7 +511,7 @@ e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
 <Combat Statuses: []>         | <Combat Statuses: []>         |
 <Summons>                     | <Summons>                     |
 <Supports>                    | <Supports>                    |
-<Dices>                       | <Dices>                       |
+<Dice>                       | <Dice>                       |
   <OMNI: 1>                   |   <OMNI: 2>                   |
   <GEO: 1>                    |   <GEO: 1>                    |
   <CRYO: 1>                   |   <CRYO: 1>                   |
@@ -542,7 +542,7 @@ e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
 ---------------------------------------------------------------
 <Effects>
 ===============================================================
-#### Player2 Action: DicesSelectAction[<OMNI>: 1; ]
+#### Player2 Action: DiceSelectAction[<OMNI>: 1; ]
 
 :> 
 <Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
@@ -579,7 +579,7 @@ e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
 <Combat Statuses: []>         | <Combat Statuses: []>         |
 <Summons>                     | <Summons>                     |
 <Supports>                    | <Supports>                    |
-<Dices>                       | <Dices>                       |
+<Dice>                       | <Dice>                       |
   <OMNI: 1>                   |   <OMNI: 2>                   |
   <GEO: 1>                    |   <GEO: 1>                    |
   <CRYO: 1>                   |   <CRYO: 1>                   |
@@ -634,9 +634,9 @@ e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
 Selections are:
 @0: <OMNI, 1>  |||  @2: <GEO, 1>  |||  @3: <CRYO, 1>  |||  @4: <ELECTRO, 5>
 e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
-::>     // entered nothing to use suggested dices
+::>     // entered nothing to use suggested dice
 
-#### Player1 Action: <CharacterSkill.SKILL2, DiceOnlyInstruction:(dices=[('ELECTRO', '3')])>
+#### Player1 Action: <CharacterSkill.SKILL2, DiceOnlyInstruction:(dice=[('ELECTRO', '3')])>
 
 :> 
 <Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
@@ -673,7 +673,7 @@ e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
 <Combat Statuses: []>         | <Combat Statuses: []>         |
 <Summons>                     | <Summons>                     |
 <Supports>                    | <Supports>                    |
-<Dices>                       | <Dices>                       |
+<Dice>                       | <Dice>                       |
   <OMNI: 1>                   |   <OMNI: 2>                   |
   <GEO: 1>                    |   <GEO: 1>                    |
   <CRYO: 1>                   |   <CRYO: 1>                   |
@@ -741,7 +741,7 @@ e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
 <Combat Statuses: []>         | <Combat Statuses: []>         |
 <Summons>                     | <Summons>                     |
 <Supports>                    | <Supports>                    |
-<Dices>                       | <Dices>                       |
+<Dice>                       | <Dice>                       |
   <OMNI: 1>                   |   <OMNI: 2>                   |
   <GEO: 1>                    |   <HYDRO: 1>                  |
   <CRYO: 1>                   |   <GEO: 1>                    |
@@ -772,7 +772,7 @@ e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
 ---------------------------------------------------------------
 <Effects>
 ===============================================================
-#### Player2 Action: <CharacterSkill.SKILL1, DiceOnlyInstruction:(dices=[('HYDRO', '1'), ('GEO', '1'), ('CRYO', '1')])>
+#### Player2 Action: <CharacterSkill.SKILL1, DiceOnlyInstruction:(dice=[('HYDRO', '1'), ('GEO', '1'), ('CRYO', '1')])>
 
 :> 
 <Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
@@ -809,7 +809,7 @@ e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
 <Combat Statuses: []>         | <Combat Statuses: []>         |
 <Summons>                     | <Summons>                     |
 <Supports>                    | <Supports>                    |
-<Dices>                       | <Dices>                       |
+<Dice>                       | <Dice>                       |
   <OMNI: 1>                   |   <OMNI: 2>                   |
   <GEO: 1>                    |   <ELECTRO: 2>                |
   <CRYO: 1>                   |   <PYRO: 1>                   |
@@ -892,7 +892,7 @@ Please choose id (0-1)
 <Combat Statuses: []>         | <Combat Statuses: []>         |
 <Summons>                     | <Summons>                     |
 <Supports>                    | <Supports>                    |
-<Dices>                       | <Dices>                       |
+<Dice>                       | <Dice>                       |
   <OMNI: 1>                   |   <OMNI: 2>                   |
   <CRYO: 1>                   |   <ELECTRO: 2>                |
   <ELECTRO: 3>                |   <PYRO: 1>                   |
@@ -939,7 +939,7 @@ Selections are:
 e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
 ::> 0:1, 4:2    // this is not optimal choice, just to show that you can make the choice
 
-#### Player1 Action: <ThunderingPenance, DiceOnlyInstruction:(dices=[('OMNI', '1'), ('ELECTRO', '2')])>
+#### Player1 Action: <ThunderingPenance, DiceOnlyInstruction:(dice=[('OMNI', '1'), ('ELECTRO', '2')])>
 
 :> 
 <Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
@@ -976,9 +976,9 @@ e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
     <Equipments>                     | <Combat Statuses: []>         |
     <Statuses>                       | <Summons>                     |
 <Combat Statuses: []>                | <Supports>                    |
-<Summons>                            | <Dices>                       |
+<Summons>                            | <Dice>                       |
 <Supports>                           |   <OMNI: 2>                   |
-<Dices>                              |   <ELECTRO: 2>                |
+<Dice>                              |   <ELECTRO: 2>                |
   <CRYO: 1>                          |   <PYRO: 1>                   |
   <ELECTRO: 1>                       | <Hand Cards>                  |
 <Hand Cards>                         |   <Xudong: 1>                 |
@@ -1005,7 +1005,7 @@ e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
 ----------------------------------------------------------------------
 <Effects>
 ======================================================================
-#### Player2 Action: SwapAction:(char_id=1, instruction=DiceOnlyInstruction:(dices=[('PYRO', '1')]))
+#### Player2 Action: SwapAction:(char_id=1, instruction=DiceOnlyInstruction:(dice=[('PYRO', '1')]))
 
 :> 
 <Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
@@ -1042,9 +1042,9 @@ e.g. input "0:2,4:1,3:1" means choosing 2 of @0, 1 of @4 and 1 of @3
     <Equipments>                     | <Combat Statuses: []>         |
     <Statuses>                       | <Summons>                     |
 <Combat Statuses: []>                | <Supports>                    |
-<Summons>                            | <Dices>                       |
+<Summons>                            | <Dice>                       |
 <Supports>                           |   <OMNI: 2>                   |
-<Dices>                              |   <ELECTRO: 2>                |
+<Dice>                              |   <ELECTRO: 2>                |
   <CRYO: 1>                          | <Hand Cards>                  |
   <ELECTRO: 1>                       |   <Xudong: 1>                 |
 <Hand Cards>                         |   <MintyMeatRolls: 1>         |
@@ -1113,9 +1113,9 @@ Please choose id (0-3)
     <Equipments>                     | <Combat Statuses: []>         |
     <Statuses>                       | <Summons>                     |
 <Combat Statuses: []>                | <Supports>                    |
-<Summons>                            | <Dices>                       |
+<Summons>                            | <Dice>                       |
 <Supports>                           |   <OMNI: 2>                   |
-<Dices>                              |   <ELECTRO: 2>                |
+<Dice>                              |   <ELECTRO: 2>                |
   <CRYO: 1>                          | <Hand Cards>                  |
   <ELECTRO: 1>                       |   <Xudong: 1>                 |
 <Hand Cards>                         |   <MintyMeatRolls: 1>         |
@@ -1142,7 +1142,7 @@ Please choose id (0-3)
 ----------------------------------------------------------------------
 <Effects>
 ======================================================================
-#### Player2 Action: <CharacterSkill.SKILL1, DiceOnlyInstruction:(dices=[('ELECTRO', '2'), ('OMNI', '1')])>
+#### Player2 Action: <CharacterSkill.SKILL1, DiceOnlyInstruction:(dice=[('ELECTRO', '2'), ('OMNI', '1')])>
 
 :> 
 <Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
@@ -1179,9 +1179,9 @@ Please choose id (0-3)
     <Equipments>                     | <Combat Statuses: []>         |
     <Statuses>                       | <Summons>                     |
 <Combat Statuses: []>                | <Supports>                    |
-<Summons>                            | <Dices>                       |
+<Summons>                            | <Dice>                       |
 <Supports>                           |   <OMNI: 1>                   |
-<Dices>                              | <Hand Cards>                  |
+<Dice>                              | <Hand Cards>                  |
   <CRYO: 1>                          |   <Xudong: 1>                 |
   <ELECTRO: 1>                       |   <MintyMeatRolls: 1>         |
 <Hand Cards>                         |   <NorthernSmokedChicken: 1>  |
@@ -1208,7 +1208,7 @@ Please choose id (0-3)
 ----------------------------------------------------------------------
 <Effects>
 ======================================================================
-#### Player2 Action: <MintyMeatRolls, StaticTargetInstruction:(dices=[('OMNI', '1')], target=StaticTarget(pid=<Pid.P2: 2>, zone=<ZONE.CHARACTERS: 'Characters'>, id=1))>
+#### Player2 Action: <MintyMeatRolls, StaticTargetInstruction:(dice=[('OMNI', '1')], target=StaticTarget(pid=<Pid.P2: 2>, zone=<ZONE.CHARACTERS: 'Characters'>, id=1))>
 
 :> 
 <Mode: DefaultMode>  <Phase: ActionPhase>  <Round: 0>
@@ -1247,7 +1247,7 @@ Please choose id (0-3)
 <Combat Statuses: []>                | <Combat Statuses: []>         |
 <Summons>                            | <Summons>                     |
 <Supports>                           | <Supports>                    |
-<Dices>                              | <Dices>                       |
+<Dice>                              | <Dice>                       |
   <CRYO: 1>                          | <Hand Cards>                  |
   <ELECTRO: 1>                       |   <Xudong: 1>                 |
 <Hand Cards>                         |   <NorthernSmokedChicken: 1>  |
@@ -1311,9 +1311,9 @@ Please choose id (0-3)
     <Equipments>                     | <Combat Statuses: []>         |
     <Statuses>                       | <Summons>                     |
 <Combat Statuses: []>                | <Supports>                    |
-<Summons>                            | <Dices>                       |
+<Summons>                            | <Dice>                       |
 <Supports>                           |   <OMNI: 1>                   |
-<Dices>                              |   <HYDRO: 4>                  |
+<Dice>                              |   <HYDRO: 4>                  |
   <HYDRO: 1>                         |   <CRYO: 2>                   |
   <CRYO: 1>                          |   <PYRO: 1>                   |
   <DENDRO: 2>                        | <Hand Cards>                  |
@@ -1344,7 +1344,7 @@ Please choose id (0-3)
 <Effects>
 ======================================================================
 Choices are:
-@0: SELECT_DICES  |||  @1: END_ROUND
+@0: SELECT_DICE  |||  @1: END_ROUND
 Please choose id (0-1)
 ::> @1    // not doing reroll here
 
@@ -1385,9 +1385,9 @@ Please choose id (0-1)
     <Equipments>                     | <Combat Statuses: []>         |
     <Statuses>                       | <Summons>                     |
 <Combat Statuses: []>                | <Supports>                    |
-<Summons>                            | <Dices>                       |
+<Summons>                            | <Dice>                       |
 <Supports>                           |   <OMNI: 1>                   |
-<Dices>                              |   <HYDRO: 4>                  |
+<Dice>                              |   <HYDRO: 4>                  |
   <HYDRO: 1>                         |   <CRYO: 2>                   |
   <CRYO: 1>                          |   <PYRO: 1>                   |
   <DENDRO: 2>                        | <Hand Cards>                  |
@@ -1454,9 +1454,9 @@ Please choose id (0-1)
     <Equipments>                     | <Combat Statuses: []>         |
     <Statuses>                       | <Summons>                     |
 <Combat Statuses: []>                | <Supports>                    |
-<Summons>                            | <Dices>                       |
+<Summons>                            | <Dice>                       |
 <Supports>                           |   <OMNI: 1>                   |
-<Dices>                              |   <HYDRO: 4>                  |
+<Dice>                              |   <HYDRO: 4>                  |
   <HYDRO: 1>                         |   <CRYO: 2>                   |
   <CRYO: 1>                          |   <PYRO: 1>                   |
   <DENDRO: 2>                        | <Hand Cards>                  |
@@ -1528,9 +1528,9 @@ Please choose id (0-3)
     <Equipments>                     | <Combat Statuses: []>         |
     <Statuses>                       | <Summons>                     |
 <Combat Statuses: []>                | <Supports>                    |
-<Summons>                            | <Dices>                       |
+<Summons>                            | <Dice>                       |
 <Supports>                           |   <OMNI: 1>                   |
-<Dices>                              |   <HYDRO: 4>                  |
+<Dice>                              |   <HYDRO: 4>                  |
   <HYDRO: 1>                         |   <CRYO: 2>                   |
   <CRYO: 1>                          |   <PYRO: 1>                   |
   <DENDRO: 2>                        | <Hand Cards>                  |
@@ -1598,9 +1598,9 @@ Please choose id (0-3)
     <Equipments>                     | <Combat Statuses: []>         |
     <Statuses>                       | <Summons>                     |
 <Combat Statuses: []>                | <Supports>                    |
-<Summons>                            | <Dices>                       |
+<Summons>                            | <Dice>                       |
 <Supports>                           |   <OMNI: 1>                   |
-<Dices>                              |   <HYDRO: 4>                  |
+<Dice>                              |   <HYDRO: 4>                  |
   <HYDRO: 1>                         |   <CRYO: 2>                   |
   <CRYO: 1>                          |   <PYRO: 1>                   |
   <DENDRO: 2>                        | <Hand Cards>                  |
@@ -1670,7 +1670,7 @@ Please choose id (0-3)
 <Combat Statuses: []>                | <Combat Statuses: []>         |
 <Summons>                            | <Summons>                     |
 <Supports>                           | <Supports>                    |
-<Dices>                              | <Dices>                       |
+<Dice>                              | <Dice>                       |
   <CRYO: 1>                          | <Hand Cards>                  |
   <ELECTRO: 1>                       |   <Xudong: 1>                 |
 <Hand Cards>                         |   <NorthernSmokedChicken: 1>  |
@@ -1735,9 +1735,9 @@ Please choose id (0-3)
     <Equipments>                     | <Combat Statuses: []>         |
     <Statuses>                       | <Summons>                     |
 <Combat Statuses: []>                | <Supports>                    |
-<Summons>                            | <Dices>                       |
+<Summons>                            | <Dice>                       |
 <Supports>                           |   <OMNI: 1>                   |
-<Dices>                              |   <HYDRO: 4>                  |
+<Dice>                              |   <HYDRO: 4>                  |
   <HYDRO: 1>                         |   <CRYO: 2>                   |
   <CRYO: 1>                          |   <PYRO: 1>                   |
   <DENDRO: 2>                        | <Hand Cards>                  |
@@ -1805,9 +1805,9 @@ Please choose id (0-3)
     <Equipments>                     | <Combat Statuses: []>         |
     <Statuses>                       | <Summons>                     |
 <Combat Statuses: []>                | <Supports>                    |
-<Summons>                            | <Dices>                       |
+<Summons>                            | <Dice>                       |
 <Supports>                           |   <OMNI: 1>                   |
-<Dices>                              |   <HYDRO: 4>                  |
+<Dice>                              |   <HYDRO: 4>                  |
   <HYDRO: 1>                         |   <CRYO: 2>                   |
   <CRYO: 1>                          |   <PYRO: 1>                   |
   <DENDRO: 2>                        | <Hand Cards>                  |
@@ -1837,7 +1837,7 @@ Please choose id (0-3)
 ----------------------------------------------------------------------
 <Effects>
 ======================================================================
-#### Player2 Action: <CharacterSkill.SKILL1, DiceOnlyInstruction:(dices=[('PYRO', '1'), ('CRYO', '1'), ('OMNI', '1')])>
+#### Player2 Action: <CharacterSkill.SKILL1, DiceOnlyInstruction:(dice=[('PYRO', '1'), ('CRYO', '1'), ('OMNI', '1')])>
 
 :> q    // quit CLI
 ```

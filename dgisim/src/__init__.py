@@ -22,7 +22,7 @@ from .support.supports import Supports
 # module files
 from .cli import CLISession
 from .deck import Deck, FrozenDeck, MutableDeck
-from .dices import AbstractDices, ActualDices, Dices
+from .dice import AbstractDice, ActualDice, Dice
 from .element import Element
 from .game_state_machine import GameStateMachine
 from .mode import DefaultMode, Mode
@@ -30,9 +30,9 @@ from .player_agent import PlayerAgent
 
 __all__ = [
     "Act",
-    "AbstractDices",
+    "AbstractDice",
     "ActionType",
-    "ActualDices",
+    "ActualDice",
     "CLISession",
     "Card",
     "Cards",
@@ -42,7 +42,7 @@ __all__ = [
     "Characters",
     "Deck",
     "DefaultMode",
-    "Dices",
+    "Dice",
     "Effect",
     "EffectStack",
     "Element",

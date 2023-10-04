@@ -101,7 +101,7 @@ and let `phase` make the transition.
 also checks if the action self is valid.
 (Is the card played is in hand?
 Is the player allowed to take an action?
-Has enough dices be paid for the action...)
+Has enough dice be paid for the action...)
 
 Then `phase` make changes like, pushing new effects to the `effect_stack`...
 
@@ -142,17 +142,17 @@ From the player action, `phase` can know:
 
 - Which card the player wants to play
 - Which target the card is used on
-- Which dices the player wants to use to pay for the action
+- Which dice the player wants to use to pay for the action
 
 `phase` then go over each piece of information to check if the action is valid.
 
 - Does the player has "Mondstadt Hash Brown" in hand?
 - Is the target an alive character of this player that is not satiated?
-- Can the dices pay for the card and does the player have the dices they stated?
+- Can the dice pay for the card and does the player have the dice they stated?
 
 If everything goes fine, then a number of things happen.
 
-- Dices paid are removed
+- Dice paid are removed
 - Effects of the card is pushed to the `effect_stack`
 
 Note that all changes above is done to a copy of the current game state,
@@ -373,16 +373,16 @@ class ActionGenerator:
 _SingleChoiceType = (
     StaticTarget      # a reference of a target in the game
     | int
-    | ActualDices
+    | ActualDice
     | CharacterSkill  # enum of skill types
     | type[Card]
     | Element
     | ActionType      # the type of a player action
 )
 
-GivenChoiceType = tuple[_SingleChoiceType, ...] | ActualDices | AbstractDices | Cards
+GivenChoiceType = tuple[_SingleChoiceType, ...] | ActualDice | AbstractDice | Cards
 
-DecidedChoiceType = _SingleChoiceType | ActualDices | Cards
+DecidedChoiceType = _SingleChoiceType | ActualDice | Cards
 ```
 
 Based on the comments you should be able to tell what each method is for,
@@ -392,14 +392,14 @@ Don't worry, it's quite simple.
 - If `GivenChoiceType` returns a `tuple`,
   then you are expected to choose one item from the `tuple` as the chosen choice.
 
-- If `GivenChoiceType` returns `ActualDices`,
-  then you are expected to choose some of the dices from the returned one.
-  (As to how many and which dices to choose is based on the context
+- If `GivenChoiceType` returns `ActualDice`,
+  then you are expected to choose some of the dice from the returned one.
+  (As to how many and which dice to choose is based on the context
   that needs to be judged by the user)
 
-- If `GivenChoiceType` returns `AbstractDices`,
-  then you are expected to provide some `ActualDices` that can satisfy the `AbstractDices`.
-  (the concept of `AbstractDices` and `ActualDices` will be discussed later)
+- If `GivenChoiceType` returns `AbstractDice`,
+  then you are expected to provide some `ActualDice` that can satisfy the `AbstractDice`.
+  (the concept of `AbstractDice` and `ActualDice` will be discussed later)
 
 - If `GivenChoiceType` returns `Cards`,
   then you are expected to choose some `Cards` from the returned one.

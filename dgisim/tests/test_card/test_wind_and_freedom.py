@@ -12,15 +12,15 @@ class TestWindAndFreedom(unittest.TestCase):
         a1.inject_actions([
             CardAction(
                 card=WindAndFreedom,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1}))
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 1}))
             ),
             SkillAction(
                 skill=CharacterSkill.SKILL1,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
             ),
             SkillAction(
                 skill=CharacterSkill.SKILL1,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
             ),
         ])
         gsm.player_step(); gsm.auto_step()  # P1 play card
@@ -38,7 +38,7 @@ class TestWindAndFreedom(unittest.TestCase):
         game_state = kill_character(base_game, 1, Pid.P1, hp=1)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=WindAndFreedom,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 1})),
         ))
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         game_state = step_skill(game_state, Pid.P2, CharacterSkill.SKILL1)

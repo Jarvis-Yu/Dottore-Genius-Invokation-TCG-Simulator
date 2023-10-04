@@ -15,20 +15,20 @@ class TestXudong(unittest.TestCase):
             ).build()
         ).build()
 
-        # test giving wrong num of dices
+        # test giving wrong num of dice
         card_action = CardAction(
             card=Xudong,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 1})),
         )
         self.assertRaises(
             Exception,
             lambda: base_game.action_step(Pid.P1, card_action)
         )
 
-        # test giving right num of dices
+        # test giving right num of dice
         card_action = CardAction(
             card=Xudong,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.PYRO: 1, Element.GEO: 1})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.PYRO: 1, Element.GEO: 1})),
         )
         game_state = base_game.action_step(Pid.P1, card_action)
         assert game_state is not None
@@ -46,7 +46,7 @@ class TestXudong(unittest.TestCase):
         card_action = CardAction(
             card=SweetMadame,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({}),
+                dice=ActualDice({}),
                 target=StaticTarget(
                     pid=Pid.P1,
                     zone=Zone.CHARACTERS,
@@ -70,7 +70,7 @@ class TestXudong(unittest.TestCase):
         card_action = CardAction(
             card=MondstadtHashBrown,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({}),
+                dice=ActualDice({}),
                 target=StaticTarget(
                     pid=Pid.P1,
                     zone=Zone.CHARACTERS,

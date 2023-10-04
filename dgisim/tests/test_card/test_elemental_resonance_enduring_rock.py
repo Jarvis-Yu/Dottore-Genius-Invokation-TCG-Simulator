@@ -31,7 +31,7 @@ class TestElementalResonanceEnduringRock(unittest.TestCase):
     def test_card_adds_status(self):
         game_state = step_action(self.BASE_GAME, Pid.P1, CardAction(
             card=ElementalResonanceEnduringRock,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.GEO: 1}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.GEO: 1}))
         ))
         self.assertIn(
             ElementalResonanceEnduringRockStatus,

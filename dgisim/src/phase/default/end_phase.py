@@ -5,7 +5,7 @@ from .. import phase as ph
 
 from ...action.action import *
 from ...action.action_generator import ActionGenerator
-from ...dices import ActualDices
+from ...dice import ActualDice
 from ...effect.effect import *
 from ...effect.enums import Zone
 from ...effect.structs import StaticTarget
@@ -59,8 +59,8 @@ class EndPhase(ph.Phase):
             active_player_id,
             lambda p: p.factory().phase(
                 Act.PASSIVE_WAIT_PHASE
-            ).dices(
-                ActualDices.from_empty()
+            ).dice(
+                ActualDice.from_empty()
             ).hand_cards(
                 active_player_hand
             ).deck_cards(
@@ -70,8 +70,8 @@ class EndPhase(ph.Phase):
             active_player_id,
             lambda p: p.factory().phase(
                 Act.PASSIVE_WAIT_PHASE
-            ).dices(
-                ActualDices.from_empty()
+            ).dice(
+                ActualDice.from_empty()
             ).hand_cards(
                 other_player_hand
             ).deck_cards(

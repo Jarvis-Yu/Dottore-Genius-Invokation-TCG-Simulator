@@ -17,7 +17,7 @@ from typing import ClassVar, TYPE_CHECKING
 from typing_extensions import Self, override
 
 from ..card import card as cd
-from ..dices import ActualDices
+from ..dice import ActualDice
 from ..effect import effect as eft
 from ..event import *
 from ..status import status as stt
@@ -155,25 +155,25 @@ class LibenSupport(Support, stt._UsageLivingStatus):
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             this_player = game_state.get_player(source.pid)
-            dices = this_player.get_dices()
-            if dices.is_empty():
+            dice = this_player.get_dice()
+            if dice.is_empty():
                 return [], self
             curr_size = 0
-            ordered_dices = dices.readonly_dices_ordered(this_player)
-            used_dices: dict[Element, int] = {}
-            for elem, num in ordered_dices.items():
+            ordered_dice = dice.readonly_dice_ordered(this_player)
+            used_dice: dict[Element, int] = {}
+            for elem, num in ordered_dice.items():
                 num_used = 1
                 if elem is Element.OMNI:
                     num_used = min(self.MAX_USAGES - self.usages - curr_size, num)
                 curr_size += num_used
-                used_dices[elem] = num_used
+                used_dice[elem] = num_used
                 if curr_size + self.usages == self.MAX_USAGES:
                     break
                 assert curr_size + self.usages < self.MAX_USAGES
             return [
                 eft.RemoveDiceEffect(
                     pid=source.pid,
-                    dices=ActualDices(used_dices),
+                    dice=ActualDice(used_dice),
                 ),
             ], replace(self, usages=curr_size)
         elif signal is TriggeringSignal.ROUND_START and self.usages == self.MAX_USAGES:
@@ -235,18 +235,18 @@ class XudongSupport(Support):
             assert isinstance(item, CardPEvent)
             if item.pid is status_source.pid \
                     and issubclass(item.card_type, cd.FoodCard) \
-                    and item.dices_cost.num_dices() > 0 \
+                    and item.dice_cost.num_dice() > 0 \
                     and self.usages > 0:
-                # note that this only handle cases when food requires only one kind of dices
+                # note that this only handle cases when food requires only one kind of dice
                 major_elem: Element
-                if item.dices_cost[Element.OMNI] == item.dices_cost.num_dices():
+                if item.dice_cost[Element.OMNI] == item.dice_cost.num_dice():
                     major_elem = Element.OMNI
-                elif item.dices_cost[Element.ANY] == item.dices_cost.num_dices():
+                elif item.dice_cost[Element.ANY] == item.dice_cost.num_dice():
                     major_elem = Element.ANY
                 else:
                     raise NotImplementedError
-                new_cost = (item.dices_cost - {major_elem: self.COST_DEDUCTION}).validify()
-                return replace(item, dices_cost=new_cost), replace(self, usages=self.usages - 1)
+                new_cost = (item.dice_cost - {major_elem: self.COST_DEDUCTION}).validify()
+                return replace(item, dice_cost=new_cost), replace(self, usages=self.usages - 1)
         return super()._preprocess(game_state, status_source, item, signal)
 
     @override
@@ -319,7 +319,7 @@ class ParametricTransformerSupport(Support, stt._UsageLivingStatus):
     MAX_USAGES: ClassVar[int] = 3
     listening: bool = False
     activated: bool = False
-    NUM_DICES_GENERATED: ClassVar[int] = 3
+    NUM_DICE_GENERATED: ClassVar[int] = 3
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.COMBAT_ACTION,
@@ -338,7 +338,7 @@ class ParametricTransformerSupport(Support, stt._UsageLivingStatus):
             return replace(self, listening=True)
         elif info_type is Informables.DMG_DELT and self.listening and not self.activated:
             assert isinstance(information, DmgIEvent)
-            from ..dices import _PURE_ELEMS
+            from ..dice import _PURE_ELEMS
             if information.dmg.element in _PURE_ELEMS:
                 return replace(self, activated=True, listening=False)
         return self
@@ -350,17 +350,17 @@ class ParametricTransformerSupport(Support, stt._UsageLivingStatus):
         if signal is TriggeringSignal.COMBAT_ACTION:
             d_usages = 1 if self.activated else 0
             if self.usages + d_usages == self.MAX_USAGES:
-                dices = ActualDices.from_random(
-                    self.NUM_DICES_GENERATED,
+                dice = ActualDice.from_random(
+                    self.NUM_DICE_GENERATED,
                     excepted_elems={Element.OMNI},
                 )
                 return [
                     eft.AddDiceEffect(
                         pid=source.pid,
                         element=elem,
-                        num=dices[elem],
+                        num=dice[elem],
                     )
-                    for elem in dices
+                    for elem in dice
                 ], None
             assert self.usages + d_usages < self.MAX_USAGES
             return [], replace(self, usages=d_usages, activated=False, listening=False)
@@ -435,13 +435,13 @@ class SumeruCitySupport(Support, stt._UsageLivingStatus):
             if not (
                     self.usages > 0
                     and item.source.pid is status_source.pid
-                    and item.dices_cost.can_cost_less_elem()
+                    and item.dice_cost.can_cost_less_elem()
             ):
                 return item, self
             this_player = game_state.get_player(status_source.pid)
-            if this_player.get_dices().num_dices() <= this_player.get_hand_cards().num_cards():
+            if this_player.get_dice().num_dice() <= this_player.get_hand_cards().num_cards():
                 return (
-                    item.with_new_cost(item.dices_cost.cost_less_elem(1)),
+                    item.with_new_cost(item.dice_cost.cost_less_elem(1)),
                     replace(self, usages=self.usages - 1),
                 )
         elif signal is Preprocessables.CARD:
@@ -453,13 +453,13 @@ class SumeruCitySupport(Support, stt._UsageLivingStatus):
                     self.usages > 0
                     and issubclass(item.card_type, cd.TalentCard)
                     and item.pid is status_source.pid
-                    and item.dices_cost.can_cost_less_elem()
+                    and item.dice_cost.can_cost_less_elem()
             ):
                 return item, self
             this_player = game_state.get_player(status_source.pid)
-            if this_player.get_dices().num_dices() <= this_player.get_hand_cards().num_cards():
+            if this_player.get_dice().num_dice() <= this_player.get_hand_cards().num_cards():
                 return (
-                    item.with_new_cost(item.dices_cost.cost_less_elem(1)),
+                    item.with_new_cost(item.dice_cost.cost_less_elem(1)),
                     replace(self, usages=self.usages - 1),
                 )
         return item, self
@@ -477,10 +477,10 @@ class TenshukakuSupport(Support):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_START:
-            this_player_dices = game_state.get_player(source.pid).get_dices()
+            this_player_dice = game_state.get_player(source.pid).get_dice()
             num_kinds = sum([
-                1 if elem is not Element.OMNI else this_player_dices[elem]
-                for elem in this_player_dices
+                1 if elem is not Element.OMNI else this_player_dice[elem]
+                for elem in this_player_dice
             ])
             if num_kinds >= self.MINIMAL_KINDS:
                 return [
@@ -495,7 +495,7 @@ class TenshukakuSupport(Support):
 
 @dataclass(frozen=True, kw_only=True)
 class VanaranaSupport(Support):
-    saved_dices: ActualDices = ActualDices({})
+    saved_dice: ActualDice = ActualDice({})
     _CAPACITY: ClassVar[int] = 2
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
@@ -509,35 +509,35 @@ class VanaranaSupport(Support):
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             this_player = game_state.get_player(source.pid)
-            dices = this_player.get_dices()
-            if dices.is_empty():
+            dice = this_player.get_dice()
+            if dice.is_empty():
                 return [], self
             curr_size = 0
-            ordered_dices = dices.readonly_dices_ordered(this_player)
-            saved_dices: dict[Element, int] = {}
-            for elem, num in ordered_dices.items():
+            ordered_dice = dice.readonly_dice_ordered(this_player)
+            saved_dice: dict[Element, int] = {}
+            for elem, num in ordered_dice.items():
                 fitting_num = min(num, self._CAPACITY - curr_size)
                 curr_size += fitting_num
-                saved_dices[elem] = fitting_num
+                saved_dice[elem] = fitting_num
                 if curr_size == self._CAPACITY:
                     break
-            actual_saved_dices = ActualDices(saved_dices)
+            actual_saved_dice = ActualDice(saved_dice)
             return [
                 eft.RemoveDiceEffect(
                     pid=source.pid,
-                    dices=actual_saved_dices,
+                    dice=actual_saved_dice,
                 )
-            ], replace(self, saved_dices=actual_saved_dices)
+            ], replace(self, saved_dice=actual_saved_dice)
 
         elif signal is TriggeringSignal.ROUND_START:
-            if self.saved_dices.is_empty():
+            if self.saved_dice.is_empty():
                 return [], self
             effects: list[eft.Effect] = []
-            for elem in self.saved_dices:
+            for elem in self.saved_dice:
                 effects.append(eft.AddDiceEffect(
                     pid=source.pid,
                     element=elem,
-                    num=self.saved_dices[elem],
+                    num=self.saved_dice[elem],
                 ))
             return effects, type(self)(sid=self.sid)
 
@@ -546,6 +546,6 @@ class VanaranaSupport(Support):
     @override
     def content_str(self) -> str:
         return ','.join(
-            f"{elem.name[:2]}:{self.saved_dices[elem]}"
-            for elem in self.saved_dices
+            f"{elem.name[:2]}:{self.saved_dice[elem]}"
+            for elem in self.saved_dice
         )

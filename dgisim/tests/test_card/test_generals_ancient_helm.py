@@ -14,7 +14,7 @@ class TestGeneralsAncientHelm(unittest.TestCase):
             game_state = step_action(game_state, Pid.P1, CardAction(
                 card=GeneralsAncientHelm,
                 instruction=StaticTargetInstruction(
-                    dices=ActualDices({Element.OMNI: 2}),
+                    dice=ActualDice({Element.OMNI: 2}),
                     target=StaticTarget.from_char_id(Pid.P1, i),
                 )
             ))

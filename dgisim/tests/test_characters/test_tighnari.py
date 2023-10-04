@@ -13,8 +13,8 @@ class TestTighnari(unittest.TestCase):
             ).build()
         ).f_hand_cards(
             lambda hcs: hcs.add(KeenSight)
-        ).dices(
-            ActualDices({Element.OMNI: 100})  # even number
+        ).dice(
+            ActualDice({Element.OMNI: 100})  # even number
         ).build()
     ).f_player2(
         lambda p: p.factory().phase(
@@ -28,7 +28,7 @@ class TestTighnari(unittest.TestCase):
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -44,7 +44,7 @@ class TestTighnari(unittest.TestCase):
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL2,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -55,14 +55,14 @@ class TestTighnari(unittest.TestCase):
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 8)
         self.assertTrue(p2ac.get_elemental_aura().contains(Element.DENDRO))
-        self.assertFalse(gsm.get_game_state().get_player1().get_dices().is_even())
+        self.assertFalse(gsm.get_game_state().get_player1().get_dice().is_even())
 
         # first normal attack
         game_state = remove_aura(gsm.get_game_state())
         gsm = GameStateMachine(game_state, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -71,7 +71,7 @@ class TestTighnari(unittest.TestCase):
         p1ac = p1.just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 6)
         self.assertFalse(p2ac.get_elemental_aura().contains(Element.DENDRO))
-        self.assertTrue(p1.get_dices().is_even())
+        self.assertTrue(p1.get_dice().is_even())
         self.assertEqual(
             p1ac.get_character_statuses().just_find(VijnanaSuffusionStatus).usages,
             2
@@ -81,7 +81,7 @@ class TestTighnari(unittest.TestCase):
         # second normal attack (charged)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -90,7 +90,7 @@ class TestTighnari(unittest.TestCase):
         p1ac = p1.just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 4)
         self.assertTrue(p2ac.get_elemental_aura().contains(Element.DENDRO))
-        self.assertFalse(p1.get_dices().is_even())
+        self.assertFalse(p1.get_dice().is_even())
         self.assertEqual(
             p1ac.get_character_statuses().just_find(VijnanaSuffusionStatus).usages,
             1
@@ -101,13 +101,13 @@ class TestTighnari(unittest.TestCase):
         )
 
         # third normal attack
-        game_state = gsm.get_game_state().factory().f_player1(  # reset dices to even
-            lambda p1: p1.factory().dices(ActualDices({Element.OMNI: 100})).build()
+        game_state = gsm.get_game_state().factory().f_player1(  # reset dice to even
+            lambda p1: p1.factory().dice(ActualDice({Element.OMNI: 100})).build()
         ).build()
         gsm = GameStateMachine(game_state, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -116,7 +116,7 @@ class TestTighnari(unittest.TestCase):
         p1ac = p1.just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 2)
         self.assertTrue(p2ac.get_elemental_aura().contains(Element.DENDRO))
-        self.assertFalse(p1.get_dices().is_even())
+        self.assertFalse(p1.get_dice().is_even())
         self.assertTrue(VijnanaSuffusionStatus not in p1ac.get_character_statuses())
         self.assertEqual(
             p1.get_summons().just_find(ClusterbloomArrowSummon).usages,
@@ -140,7 +140,7 @@ class TestTighnari(unittest.TestCase):
         a1.inject_action(
             SkillAction(
                 skill=CharacterSkill.ELEMENTAL_BURST,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
             )
         )
         gsm.player_step()
@@ -178,8 +178,8 @@ class TestTighnari(unittest.TestCase):
         # after first end round
         gsm.player_step()  # P1 END
         gsm.auto_step()
-        a1.inject_action(DicesSelectAction(selected_dices=ActualDices({})))  # skip roll phase
-        a2.inject_action(DicesSelectAction(selected_dices=ActualDices({})))
+        a1.inject_action(DiceSelectAction(selected_dice=ActualDice({})))  # skip roll phase
+        a2.inject_action(DiceSelectAction(selected_dice=ActualDice({})))
         gsm.step_until_phase(base_game.get_mode().action_phase())
 
         game_state = gsm.get_game_state()
@@ -194,8 +194,8 @@ class TestTighnari(unittest.TestCase):
         a2.inject_action(EndRoundAction())
         gsm.step_until_next_phase() # to End Phase
         gsm.auto_step()
-        a1.inject_action(DicesSelectAction(selected_dices=ActualDices({})))  # skip roll phase
-        a2.inject_action(DicesSelectAction(selected_dices=ActualDices({})))
+        a1.inject_action(DiceSelectAction(selected_dice=ActualDice({})))  # skip roll phase
+        a2.inject_action(DiceSelectAction(selected_dice=ActualDice({})))
         gsm.step_until_phase(base_game.get_mode().action_phase())
 
         game_state = gsm.get_game_state()
@@ -213,19 +213,19 @@ class TestTighnari(unittest.TestCase):
         a1.inject_actions([
             CardAction(
                 card=KeenSight,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 4})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 4})),
             ),
             SkillAction(
                 skill=CharacterSkill.SKILL1,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 2})),
             ),
             SkillAction(
                 skill=CharacterSkill.SKILL1,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 2})),
             ),
             SkillAction(
                 skill=CharacterSkill.SKILL1,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
             ),
             EndRoundAction(),
         ])

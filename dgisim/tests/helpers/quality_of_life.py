@@ -10,7 +10,7 @@ from dgisim.src.card.card import Card
 from dgisim.src.card.cards import Cards
 from dgisim.src.character.character import Character
 from dgisim.src.character.enums import CharacterSkill
-from dgisim.src.dices import ActualDices
+from dgisim.src.dice import ActualDice
 from dgisim.src.effect.effect import *
 from dgisim.src.effect.enums import DynamicCharacterTarget, TriggeringSignal, Zone
 from dgisim.src.effect.structs import DamageType, StaticTarget
@@ -204,8 +204,8 @@ def fill_energy_for_all(game_state: GameState) -> GameState:
     ).build()
 
 
-def fill_dices_with_omni(game_state: GameState) -> GameState:
-    dices = {
+def fill_dice_with_omni(game_state: GameState) -> GameState:
+    dice = {
         Element.OMNI: BIG_INT,
         Element.PYRO: BIG_INT,
         Element.HYDRO: BIG_INT,
@@ -216,9 +216,9 @@ def fill_dices_with_omni(game_state: GameState) -> GameState:
         Element.GEO: BIG_INT,
     }
     return game_state.factory().f_player1(
-        lambda p: p.factory().dices(ActualDices(dices)).build()
+        lambda p: p.factory().dice(ActualDice(dice)).build()
     ).f_player2(
-        lambda p: p.factory().dices(ActualDices(dices)).build()
+        lambda p: p.factory().dice(ActualDice(dice)).build()
     ).build()
 
 
@@ -311,9 +311,9 @@ def next_round(game_state: GameState, observe: bool = False) -> GameState:
 
 
 def next_round_with_great_omni(game_state: GameState, observe: bool = False) -> GameState:
-    """ skips to next round and fill players with even number of dices """
+    """ skips to next round and fill players with even number of dice """
     game_state = next_round(game_state, observe)
-    return fill_dices_with_omni(game_state)
+    return fill_dice_with_omni(game_state)
 
 
 def oppo_aura_elem(game_state: GameState, elem: Element, char_id: None | int = None) -> GameState:
@@ -440,10 +440,10 @@ def replace_character_make_active_add_card(
     ).build()
 
 
-def replace_dices(game_state: GameState, pid: Pid, dices: ActualDices) -> GameState:
+def replace_dice(game_state: GameState, pid: Pid, dice: ActualDice) -> GameState:
     return game_state.factory().f_player(
         pid,
-        lambda p: p.factory().dices(dices).build()
+        lambda p: p.factory().dice(dice).build()
     ).build()
 
 
@@ -527,17 +527,17 @@ def step_skill(
         game_state: GameState,
         pid: Pid,
         skill: CharacterSkill,
-        dices: None | ActualDices = None,
+        dice: None | ActualDice = None,
         observe: bool = False,
 ) -> GameState:
     active_character = game_state.get_player(pid).just_get_active_character()
-    if dices is None:
-        dices_used = ActualDices({Element.OMNI: active_character.skill_cost(skill).num_dices()})
+    if dice is None:
+        dice_used = ActualDice({Element.OMNI: active_character.skill_cost(skill).num_dice()})
     else:
-        dices_used = dices
+        dice_used = dice
     player_action = SkillAction(
         skill=skill,
-        instruction=DiceOnlyInstruction(dices=dices_used)
+        instruction=DiceOnlyInstruction(dice=dice_used)
     )
     return step_action(game_state, pid, player_action, observe=observe)
 
@@ -552,7 +552,7 @@ def step_swap(
     player_action = SwapAction(
         char_id=char_id,
         instruction=DiceOnlyInstruction(
-            dices=ActualDices({Element.OMNI: cost})
+            dice=ActualDice({Element.OMNI: cost})
         )
     )
     return step_action(game_state, pid, player_action, observe=observe)

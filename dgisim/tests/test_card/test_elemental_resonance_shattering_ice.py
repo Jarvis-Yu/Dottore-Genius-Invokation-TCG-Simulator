@@ -23,7 +23,7 @@ class TestElementalShatteringIce(unittest.TestCase):
     def test_card_adds_status(self):
         game_state = step_action(self.BASE_GAME, Pid.P1, CardAction(
             card=ElementalResonanceShatteringIce,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.CRYO: 1}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.CRYO: 1}))
         ))
         self.assertIn(
             ElementalResonanceShatteringIceStatus,

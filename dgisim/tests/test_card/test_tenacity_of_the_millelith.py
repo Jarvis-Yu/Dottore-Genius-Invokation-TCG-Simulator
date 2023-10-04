@@ -13,7 +13,7 @@ class TestTenacityOfTheMillelith(unittest.TestCase):
         base_state = replace_character(base_state, Pid.P2, Keqing, char_id=1)
         base_state = replace_character(base_state, Pid.P2, Klee, char_id=2)
         base_state = grant_all_infinite_revival(base_state)
-        base_dices = base_state.get_player1().get_dices()
+        base_dice = base_state.get_player1().get_dice()
 
         # test basic triggering
         game_state = base_state
@@ -21,31 +21,31 @@ class TestTenacityOfTheMillelith(unittest.TestCase):
             game_state = step_action(game_state, Pid.P1, CardAction(
                 card=TenacityOfTheMillelith,
                 instruction=StaticTargetInstruction(
-                    dices=ActualDices({Element.OMNI: 3}),
+                    dice=ActualDice({Element.OMNI: 3}),
                     target=StaticTarget.from_char_id(Pid.P1, i),
                 )
             ))
         equipped_state = game_state
         game_state = skip_action_round(game_state, Pid.P1)
         game_state = step_skill(game_state, Pid.P2, CharacterSkill.SKILL1)
-        new_dices = game_state.get_player1().get_dices()
-        self.assertEqual(new_dices[Element.GEO], base_dices[Element.GEO] + 1)
-        self.assertEqual(new_dices[Element.CRYO], base_dices[Element.CRYO])
+        new_dice = game_state.get_player1().get_dice()
+        self.assertEqual(new_dice[Element.GEO], base_dice[Element.GEO] + 1)
+        self.assertEqual(new_dice[Element.CRYO], base_dice[Element.CRYO])
 
         # test can only trigger once
         game_state = skip_action_round(game_state, Pid.P1)
         game_state = step_skill(game_state, Pid.P2, CharacterSkill.SKILL1)
-        new_dices = game_state.get_player1().get_dices()
-        self.assertEqual(new_dices[Element.GEO], base_dices[Element.GEO] + 1)
-        self.assertEqual(new_dices[Element.CRYO], base_dices[Element.CRYO])
+        new_dice = game_state.get_player1().get_dice()
+        self.assertEqual(new_dice[Element.GEO], base_dice[Element.GEO] + 1)
+        self.assertEqual(new_dice[Element.CRYO], base_dice[Element.CRYO])
 
         # test overload fails
         game_state = apply_elemental_aura(equipped_state, Element.PYRO, Pid.P1)
         game_state = skip_action_round(game_state, Pid.P1)
         game_state = step_skill(game_state, Pid.P2, CharacterSkill.SKILL2)
-        new_dices = game_state.get_player1().get_dices()
-        self.assertEqual(new_dices[Element.GEO], base_dices[Element.GEO])
-        self.assertEqual(new_dices[Element.CRYO], base_dices[Element.CRYO])
+        new_dice = game_state.get_player1().get_dice()
+        self.assertEqual(new_dice[Element.GEO], base_dice[Element.GEO])
+        self.assertEqual(new_dice[Element.CRYO], base_dice[Element.CRYO])
 
         # test klee's burst can trigger
         game_state = skip_action_round(base_state, Pid.P1)
@@ -55,14 +55,14 @@ class TestTenacityOfTheMillelith(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=TenacityOfTheMillelith,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.OMNI: 3}),
+                dice=ActualDice({Element.OMNI: 3}),
                 target=StaticTarget.from_char_id(Pid.P1, 1),
             )
         ))
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
-        new_dices = game_state.get_player1().get_dices()
-        self.assertEqual(new_dices[Element.GEO], base_dices[Element.GEO] + 1)
-        self.assertEqual(new_dices[Element.CRYO], base_dices[Element.CRYO])
+        new_dice = game_state.get_player1().get_dice()
+        self.assertEqual(new_dice[Element.GEO], base_dice[Element.GEO] + 1)
+        self.assertEqual(new_dice[Element.CRYO], base_dice[Element.CRYO])
 
         # test shield generation
         game_state = simulate_status_dmg(equipped_state, 3, Element.PHYSICAL, Pid.P1)

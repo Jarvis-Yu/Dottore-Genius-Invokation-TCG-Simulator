@@ -20,7 +20,7 @@ class TestJueyunGuoba(unittest.TestCase):
         gsm = GameStateMachine(base_game_state, p1, p2)
         p1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         gsm.one_step()  # p1 normal attacks
         gsm.auto_step()  # process normal attack
@@ -31,7 +31,7 @@ class TestJueyunGuoba(unittest.TestCase):
         p1.inject_action(CardAction(
             card=JueyunGuoba,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({}),
+                dice=ActualDice({}),
                 target=StaticTarget(
                     Pid.P1,
                     Zone.CHARACTERS,
@@ -41,7 +41,7 @@ class TestJueyunGuoba(unittest.TestCase):
         ))
         p1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         gsm.one_step()  # p1 has JueyunGuoba
         gsm.auto_step()
@@ -74,7 +74,7 @@ class TestJueyunGuoba(unittest.TestCase):
         p1.inject_action(CardAction(
             card=JueyunGuoba,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({}),
+                dice=ActualDice({}),
                 target=StaticTarget(
                     Pid.P1,
                     Zone.CHARACTERS,
@@ -84,7 +84,7 @@ class TestJueyunGuoba(unittest.TestCase):
         ))
         p1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         gsm.one_step()  # p1 has JueyunGuoba
         gsm.auto_step()
@@ -119,7 +119,7 @@ class TestJueyunGuoba(unittest.TestCase):
         p1.inject_action(CardAction(
             card=JueyunGuoba,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({}),
+                dice=ActualDice({}),
                 target=StaticTarget(
                     Pid.P1,
                     Zone.CHARACTERS,
@@ -129,7 +129,7 @@ class TestJueyunGuoba(unittest.TestCase):
         ))
         p1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL2,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         gsm.player_step()  # p1 has JueyunGuoba
         gsm.auto_step()

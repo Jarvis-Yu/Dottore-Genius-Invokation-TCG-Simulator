@@ -131,9 +131,9 @@ It may look somewhat like this:
       <PlungeAttack()>                | <Combat Statuses>                |
       <DeathThisRound()>              | <Summons>                        |
     <Combat Statuses>                 | <Supports>                       |
-    <Summons>                         | <Dices>                          |
+    <Summons>                         | <Dice>                           |
     <Supports>                        | <Hand Cards>                     |
-    <Dices>                           | <Deck Cards>                     |
+    <Dice>                            | <Deck Cards>                     |
     <Hand Cards>                      |   <NRE: 2>                       |
     <Deck Cards>                      |   <EmbraceOfWinds: 2>            |
       <TheBestestTravelCompanion: 2>  |   <WolfsGravestone: 2>           |

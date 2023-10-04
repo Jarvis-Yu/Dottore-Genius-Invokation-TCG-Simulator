@@ -24,27 +24,27 @@ class TestKnightsOfFavoniusLibrary(unittest.TestCase):
         a1.inject_actions([
             CardAction(
                 card=KnightsOfFavoniusLibrary,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.ANEMO: 1})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.ANEMO: 1})),
             ),
-            DicesSelectAction(
-                selected_dices=ActualDices({}),
+            DiceSelectAction(
+                selected_dice=ActualDice({}),
             ),
             EndRoundAction(),
         ])
         a2.inject_actions([
             CardAction(
                 card=KnightsOfFavoniusLibrary,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.PYRO: 1})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.PYRO: 1})),
             ),
-            DicesSelectAction(
-                selected_dices=ActualDices({}),
+            DiceSelectAction(
+                selected_dice=ActualDice({}),
             ),
             CardAction(
                 card=KnightsOfFavoniusLibrary,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.ELECTRO: 1})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.ELECTRO: 1})),
             ),
-            DicesSelectAction(
-                selected_dices=ActualDices({Element.GEO: 2}),
+            DiceSelectAction(
+                selected_dice=ActualDice({Element.GEO: 2}),
             ),
             EndRoundAction(),
         ])

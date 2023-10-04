@@ -18,7 +18,7 @@ class TestQiqi(unittest.TestCase):
             self.BASE_GAME,
             Pid.P1,
             CharacterSkill.SKILL1,
-            dices=ActualDices({Element.CRYO: 1, Element.HYDRO: 1, Element.DENDRO: 1}),
+            dice=ActualDice({Element.CRYO: 1, Element.HYDRO: 1, Element.DENDRO: 1}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 8)
@@ -30,7 +30,7 @@ class TestQiqi(unittest.TestCase):
             self.BASE_GAME,
             Pid.P1,
             CharacterSkill.SKILL2,
-            dices=ActualDices({Element.CRYO: 3}),
+            dice=ActualDice({Element.CRYO: 3}),
         )
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
@@ -46,7 +46,7 @@ class TestQiqi(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.ELEMENTAL_BURST,
-            dices=ActualDices({Element.CRYO: 3}),
+            dice=ActualDice({Element.CRYO: 3}),
         )
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
@@ -107,7 +107,7 @@ class TestQiqi(unittest.TestCase):
         # non Qiqi character's normal attack doesn't trigger
         game_state = skip_action_round_until(game_state, Pid.P1)
         game_state = silent_fast_swap(game_state, Pid.P1, char_id=3)
-        game_state = fill_dices_with_omni(game_state)
+        game_state = fill_dice_with_omni(game_state)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1c1, p1c2, p1c3 = game_state.get_player1().get_characters().get_characters()
         self.assertEqual(p1c1.get_hp(), 8)
@@ -172,7 +172,7 @@ class TestQiqi(unittest.TestCase):
         game_state = fill_energy_for_all(game_state)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=RiteOfResurrection,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.CRYO: 5}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.CRYO: 5}))
         ))
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         p1c1, p1c2, p1c3 = game_state.get_player1().get_characters().get_characters()
@@ -215,7 +215,7 @@ class TestQiqi(unittest.TestCase):
         game_state = fill_energy_for_all(game_state)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=RiteOfResurrection,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.CRYO: 5}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.CRYO: 5}))
         ))
         p1c1, p1c2, p1c3 = game_state.get_player1().get_characters().get_characters()
         self.assertTrue(p1c1.defeated())
@@ -256,7 +256,7 @@ class TestQiqi(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=TeyvatFriedEgg,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.OMNI: 3}),
+                dice=ActualDice({Element.OMNI: 3}),
                 target=StaticTarget.from_char_id(Pid.P1, 2),
             )
         ))
@@ -266,7 +266,7 @@ class TestQiqi(unittest.TestCase):
         game_state = fill_energy_for_all(game_state)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=RiteOfResurrection,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.CRYO: 5}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.CRYO: 5}))
         ))
         p1c1, p1c2, p1c3 = game_state.get_player1().get_characters().get_characters()
         self.assertTrue(p1c1.alive())

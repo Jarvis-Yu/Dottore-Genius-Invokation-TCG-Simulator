@@ -22,7 +22,7 @@ class TestBennett(unittest.TestCase):
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -38,7 +38,7 @@ class TestBennett(unittest.TestCase):
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL2,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -55,7 +55,7 @@ class TestBennett(unittest.TestCase):
         gsm = GameStateMachine(base_game, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.ELEMENTAL_BURST,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 4})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 4})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -78,7 +78,7 @@ class TestBennett(unittest.TestCase):
         # play card directly
         game_state = step_action(base_game, Pid.P1, CardAction(
             card=GrandExpectation,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 4}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 4}))
         ))
         p1 = game_state.get_player1()
         p1ac = game_state.get_player1().just_get_active_character()
@@ -97,7 +97,7 @@ class TestBennett(unittest.TestCase):
         ).execute(base_game)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=GrandExpectation,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 4}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 4}))
         ))
         p1 = game_state.get_player1()
         p1ac = game_state.get_player1().just_get_active_character()

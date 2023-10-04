@@ -5,7 +5,7 @@ from typing_extensions import Self
 
 from ..card.cards import Cards
 from ..character.enums import CharacterSkill
-from ..dices import ActualDices
+from ..dice import ActualDice
 from ..effect.enums import Zone
 from ..effect.structs import StaticTarget
 from ..element import Element
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 __all__ = [
     "PlayerAction",
     "CardsSelectAction",
-    "DicesSelectAction",
+    "DiceSelectAction",
     "CharacterSelectAction",
     "EndRoundAction",
     "GameAction",
@@ -78,12 +78,12 @@ class CardsSelectAction(PlayerAction):
 
 
 @dataclass(frozen=True, kw_only=True, repr=False)
-class DicesSelectAction(PlayerAction):
-    selected_dices: ActualDices
+class DiceSelectAction(PlayerAction):
+    selected_dice: ActualDice
 
     @classmethod
     def _empty(cls) -> Self:
-        return cls(selected_dices=ActualDices({}))
+        return cls(selected_dice=ActualDice({}))
 
 
 @dataclass(frozen=True, kw_only=True, repr=False)
@@ -158,11 +158,11 @@ class DeathSwapAction(GameAction):
 
 @dataclass(frozen=True, kw_only=True, repr=False)
 class Instruction:
-    dices: ActualDices
+    dice: ActualDice
 
     @classmethod
     def _empty(cls) -> Self:
-        return cls(dices=ActualDices({}))
+        return cls(dice=ActualDice({}))
 
     @classmethod
     def _all_none(cls) -> Self:
@@ -210,7 +210,7 @@ class StaticTargetInstruction(Instruction):
     @classmethod
     def _empty(cls) -> Self:
         return cls(
-            dices=ActualDices({}),
+            dice=ActualDice({}),
             target=StaticTarget(
                 pid=Pid.P1,
                 zone=Zone.CHARACTERS,
@@ -232,7 +232,7 @@ class SourceTargetInstruction(Instruction):
             id=-1,
         )
         return cls(
-            dices=ActualDices({}),
+            dice=ActualDice({}),
             source=target,
             target=target,
         )

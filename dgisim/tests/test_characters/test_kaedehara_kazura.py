@@ -14,8 +14,8 @@ class TestKaedeharaKazuha(unittest.TestCase):
             ).build()
         ).f_hand_cards(
             lambda hcs: hcs.add(PoeticsOfFuubutsu)
-        ).dices(
-            ActualDices({Element.OMNI: 100})  # even number
+        ).dice(
+            ActualDice({Element.OMNI: 100})  # even number
         ).build()
     ).f_player2(
         lambda p: p.factory().phase(
@@ -29,7 +29,7 @@ class TestKaedeharaKazuha(unittest.TestCase):
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -56,7 +56,7 @@ class TestKaedeharaKazuha(unittest.TestCase):
                 gsm = GameStateMachine(game_state, a1, a2)
                 a1.inject_action(SkillAction(
                     skill=CharacterSkill.SKILL2,
-                    instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                    instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
                 ))
                 p2ac = gsm.get_game_state().get_player2().just_get_active_character()
                 self.assertEqual(p2ac.get_hp(), 10)
@@ -80,11 +80,11 @@ class TestKaedeharaKazuha(unittest.TestCase):
                 a1.inject_actions([
                     SwapAction(
                         char_id=2,
-                        instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1}))
+                        instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 1}))
                     ),
                     SkillAction(
                         skill=CharacterSkill.SKILL1,
-                        instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                        instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
                     ),
                     EndRoundAction(),
                 ])
@@ -134,7 +134,7 @@ class TestKaedeharaKazuha(unittest.TestCase):
                 a2.clear()
                 a1.inject_action(SkillAction(
                     skill=CharacterSkill.SKILL2,
-                    instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                    instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
                 ))
                 p2ac = gsm.get_game_state().get_player2().just_get_active_character()
                 self.assertEqual(p2ac.get_hp(), 10)
@@ -167,7 +167,7 @@ class TestKaedeharaKazuha(unittest.TestCase):
         a1.inject_action(
             SkillAction(
                 skill=CharacterSkill.ELEMENTAL_BURST,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
             )
         )
         gsm.player_step()
@@ -200,7 +200,7 @@ class TestKaedeharaKazuha(unittest.TestCase):
                 a1.inject_action(
                     SkillAction(
                         skill=CharacterSkill.ELEMENTAL_BURST,
-                        instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                        instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
                     )
                 )
                 gsm.player_step()
@@ -247,7 +247,7 @@ class TestKaedeharaKazuha(unittest.TestCase):
                 game_state = oppo_aura_elem(base_game_state, elem)
                 game_state = just(game_state.action_step(Pid.P1, SkillAction(
                     skill=CharacterSkill.SKILL2,
-                    instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                    instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
                 )))
                 game_state = auto_step(game_state)
                 p1_summons = game_state.get_player1().get_summons()
@@ -348,7 +348,7 @@ class TestKaedeharaKazuha(unittest.TestCase):
         a1.inject_actions([
             CardAction(
                 card=PoeticsOfFuubutsu,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
             ),
             EndRoundAction(),
         ])
@@ -379,7 +379,7 @@ class TestKaedeharaKazuha(unittest.TestCase):
         a1.inject_action(
             SkillAction(
                 skill=CharacterSkill.SKILL2,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
             )
         )
         gsm.player_step()
@@ -431,11 +431,11 @@ class TestKaedeharaKazuha(unittest.TestCase):
         a1.inject_actions([
             SwapAction(
                 char_id=2,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1}))
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 1}))
             ),
             SkillAction(
                 skill=CharacterSkill.SKILL2,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
             ),
         ])
         gsm.player_step()

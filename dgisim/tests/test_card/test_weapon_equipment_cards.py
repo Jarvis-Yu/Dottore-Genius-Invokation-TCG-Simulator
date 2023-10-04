@@ -24,7 +24,7 @@ class TestWeaponEquipmentCard(unittest.TestCase):
         game_state = just(game_state.action_step(Pid.P1, CardAction(
             card=TravelersHandySword,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.OMNI: 2}),
+                dice=ActualDice({Element.OMNI: 2}),
                 target=StaticTarget(Pid.P1, Zone.CHARACTERS, 3),
             ),
         )))

@@ -17,7 +17,7 @@ class TestLithicSpear(unittest.TestCase):
         game_state = step_action(liyue_1, Pid.P1, CardAction(
             card=LithicSpear,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.PYRO: 3}),
+                dice=ActualDice({Element.PYRO: 3}),
                 target=StaticTarget.from_char_id(Pid.P1, 1),
             )
         ))
@@ -33,7 +33,7 @@ class TestLithicSpear(unittest.TestCase):
         game_state = step_action(liyue_2, Pid.P1, CardAction(
             card=LithicSpear,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.PYRO: 3}),
+                dice=ActualDice({Element.PYRO: 3}),
                 target=StaticTarget.from_char_id(Pid.P1, 1),
             )
         ))
@@ -50,7 +50,7 @@ class TestLithicSpear(unittest.TestCase):
         game_state = step_action(liyue_3, Pid.P1, CardAction(
             card=LithicSpear,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.PYRO: 3}),
+                dice=ActualDice({Element.PYRO: 3}),
                 target=StaticTarget.from_char_id(Pid.P1, 1),
             )
         ))
@@ -64,7 +64,7 @@ class TestLithicSpear(unittest.TestCase):
         game_state = step_action(liyue_2_equiped, Pid.P1, CardAction(
             card=LithicSpear,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.PYRO: 3}),
+                dice=ActualDice({Element.PYRO: 3}),
                 target=StaticTarget.from_char_id(Pid.P1, 1),
             )
         ))

@@ -29,16 +29,16 @@ class TestIHaventLostYet(unittest.TestCase):
             Pid.P1,
             CardAction(
                 card=IHaventLostYet,
-                instruction=DiceOnlyInstruction(dices=ActualDices({})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({})),
             ),
         ))
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(game_state, a1, a2)
-        p2_old_dices = game_state.get_player2().get_dices()
+        p2_old_dice = game_state.get_player2().get_dice()
         a1.inject_action(
             SkillAction(
                 skill=CharacterSkill.SKILL1,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
             )
         )
         a2.inject_actions([
@@ -47,7 +47,7 @@ class TestIHaventLostYet(unittest.TestCase):
             ),
             CardAction(
                 card=IHaventLostYet,
-                instruction=DiceOnlyInstruction(dices=ActualDices({})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({})),
             ),
         ])
         gsm.player_step()
@@ -58,8 +58,8 @@ class TestIHaventLostYet(unittest.TestCase):
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_energy(), 1)
         self.assertEqual(
-            game_state.get_player2().get_dices()[Element.OMNI],
-            p2_old_dices[Element.OMNI] + 1,
+            game_state.get_player2().get_dice()[Element.OMNI],
+            p2_old_dice[Element.OMNI] + 1,
         )
 
         # test only one can be used per round

@@ -18,7 +18,7 @@ class TestGanyu(unittest.TestCase):
             self.BASE_GAME,
             Pid.P1,
             CharacterSkill.SKILL1,
-            dices=ActualDices({Element.CRYO: 1, Element.HYDRO: 1, Element.DENDRO: 1}),
+            dice=ActualDice({Element.CRYO: 1, Element.HYDRO: 1, Element.DENDRO: 1}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 8)
@@ -30,7 +30,7 @@ class TestGanyu(unittest.TestCase):
             self.BASE_GAME,
             Pid.P1,
             CharacterSkill.SKILL2,
-            dices=ActualDices({Element.CRYO: 3}),
+            dice=ActualDice({Element.CRYO: 3}),
         )
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
@@ -45,7 +45,7 @@ class TestGanyu(unittest.TestCase):
             self.BASE_GAME,
             Pid.P1,
             CharacterSkill.SKILL3,
-            dices=ActualDices({Element.CRYO: 5}),
+            dice=ActualDice({Element.CRYO: 5}),
         )
         p2cs = game_state.get_player2().get_characters()
         p2c1, p2c2, p2c3 = p2cs.get_characters()
@@ -63,7 +63,7 @@ class TestGanyu(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=JueyunGuoba,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({}),
+                dice=ActualDice({}),
                 target=StaticTarget.from_player_active(game_state, Pid.P1),
             )
         ))
@@ -77,7 +77,7 @@ class TestGanyu(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.ELEMENTAL_BURST,
-            dices=ActualDices({Element.CRYO: 3}),
+            dice=ActualDice({Element.CRYO: 3}),
         )
         p1 = game_state.get_player1()
         p2cs = game_state.get_player2().get_characters()
@@ -137,7 +137,7 @@ class TestGanyu(unittest.TestCase):
         # test early equip
         game_state = step_action(self.BASE_GAME, Pid.P1, CardAction(
             card=UndividedHeart,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.CRYO: 5}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.CRYO: 5}))
         ))
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         p2cs = game_state.get_player2().get_characters()
@@ -160,7 +160,7 @@ class TestGanyu(unittest.TestCase):
         self.assertFalse(p2c3.get_elemental_aura().has_aura())
 
         game_state = next_round(game_state)
-        game_state = fill_dices_with_omni(game_state)
+        game_state = fill_dice_with_omni(game_state)
         game_state = skip_action_round_until(game_state, Pid.P1)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL3)
         p2cs = game_state.get_player2().get_characters()
@@ -186,7 +186,7 @@ class TestGanyu(unittest.TestCase):
 
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=UndividedHeart,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.CRYO: 5}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.CRYO: 5}))
         ))
         p2cs = game_state.get_player2().get_characters()
         p2c1, p2c2, p2c3 = p2cs.get_characters()

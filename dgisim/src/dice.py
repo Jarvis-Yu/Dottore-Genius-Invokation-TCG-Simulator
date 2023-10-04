@@ -15,73 +15,73 @@ if TYPE_CHECKING:
     from .state.player_state import PlayerState
 
 __all__ = [
-    "AbstractDices",
-    "ActualDices",
-    "Dices",
+    "AbstractDice",
+    "ActualDice",
+    "Dice",
 ]
 
 
-class Dices:
+class Dice:
     """
-    Base class for dices
+    Base class for dice
     """
     _LEGAL_ELEMS = frozenset(elem for elem in Element)
 
-    def __init__(self, dices: dict[Element, int]) -> None:
-        self._dices = HashableDict.from_dict(dices)
+    def __init__(self, dice: dict[Element, int]) -> None:
+        self._dice = HashableDict.from_dict(dice)
 
-    def __add__(self, other: Dices | dict[Element, int]) -> Self:
-        dices: dict[Element, int]
-        if isinstance(other, Dices):
-            dices = other._dices
+    def __add__(self, other: Dice | dict[Element, int]) -> Self:
+        dice: dict[Element, int]
+        if isinstance(other, Dice):
+            dice = other._dice
         else:
-            dices = other
-        return type(self)(self._dices + dices)
+            dice = other
+        return type(self)(self._dice + dice)
 
-    def __sub__(self, other: Dices | dict[Element, int]) -> Self:
-        dices: dict[Element, int]
-        if isinstance(other, Dices):
-            dices = other._dices
+    def __sub__(self, other: Dice | dict[Element, int]) -> Self:
+        dice: dict[Element, int]
+        if isinstance(other, Dice):
+            dice = other._dice
         else:
-            dices = other
-        return type(self)(self._dices - dices)
+            dice = other
+        return type(self)(self._dice - dice)
 
-    def num_dices(self) -> int:
-        return sum(self._dices.values())
+    def num_dice(self) -> int:
+        return sum(self._dice.values())
 
     def is_even(self) -> bool:
-        return self.num_dices() % 2 == 0
+        return self.num_dice() % 2 == 0
 
     def is_empty(self) -> bool:
-        return not any(val > 0 for val in self._dices.values())
+        return not any(val > 0 for val in self._dice.values())
 
     def is_legal(self) -> bool:
-        return all(map(lambda x: x >= 0, self._dices.values())) \
-            and all(elem in self._LEGAL_ELEMS for elem in self._dices)
+        return all(map(lambda x: x >= 0, self._dice.values())) \
+            and all(elem in self._LEGAL_ELEMS for elem in self._dice)
 
     def validify(self) -> Self:
         if self.is_legal():
             return self
         return type(self)(dict(
             (elem, n)
-            for elem, n in self._dices.items()
+            for elem, n in self._dice.items()
             if elem in self._LEGAL_ELEMS and n > 0
         ))
 
     def elems(self) -> Iterable[Element]:
-        return self._dices.keys()
+        return self._dice.keys()
 
-    def pick_random_dices(self, num: int) -> tuple[Self, Self]:
+    def pick_random_dice(self, num: int) -> tuple[Self, Self]:
         """
-        Returns the left dices and selected dices
+        Returns the left dice and selected dice
         """
-        num = min(self.num_dices(), num)
+        num = min(self.num_dice(), num)
         if num == 0:
             return (self, type(self).from_empty())
-        picked_dices: dict[Element, int] = HashableDict(Counter(
-            random.sample(list(self._dices.keys()), counts=self._dices.values(), k=num)
+        picked_dice: dict[Element, int] = HashableDict(Counter(
+            random.sample(list(self._dice.keys()), counts=self._dice.values(), k=num)
         ))
-        return type(self)(self._dices - picked_dices), type(self)(picked_dices)
+        return type(self)(self._dice - picked_dice), type(self)(picked_dice)
 
     def __contains__(self, elem: Element) -> bool:
         return (
@@ -92,46 +92,46 @@ class Dices:
     def __iter__(self) -> Iterator[Element]:
         return (
             elem
-            for elem in self._dices
+            for elem in self._dice
             if self[elem] > 0
         )
 
     def __getitem__(self, index: Element) -> int:
-        return self._dices.get(index, 0)
+        return self._dice.get(index, 0)
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Dices):
+        if not isinstance(other, Dice):
             return False
-        return self is other or self._dices == other._dices
+        return self is other or self._dice == other._dice
 
     def __hash__(self) -> int:
-        return hash(self._dices)
+        return hash(self._dice)
 
     def __repr__(self) -> str:
-        existing_dices = dict([
+        existing_dice = dict([
             (dice.name, str(num))
-            for dice, num in self._dices.items()
+            for dice, num in self._dice.items()
             if num != 0
         ])
         return (
             '{'
             + ", ".join(
                 f"{key}: {val}"
-                for key, val in existing_dices.items()
+                for key, val in existing_dice.items()
             )
             + '}'
         )
 
     def to_dict(self) -> dict[Element, int]:
-        return self._dices.to_dict()
+        return self._dice.to_dict()
 
     def dict_str(self) -> dict[str, Any]:
-        existing_dices = dict([
+        existing_dice = dict([
             (dice.name, str(num))
-            for dice, num in self._dices.items()
+            for dice, num in self._dice.items()
             if num != 0
         ])
-        return existing_dices
+        return existing_dice
 
     def __copy__(self) -> Self:  # pragma: no cover
         return self
@@ -158,9 +158,9 @@ _PURE_ELEMS = frozenset({
 })
 
 
-class ActualDices(Dices):
+class ActualDice(Dice):
     """
-    Used for the actual dices a player can have.
+    Used for the actual dice a player can have.
     """
     _LEGAL_ELEMS = frozenset({
         Element.OMNI,
@@ -194,7 +194,7 @@ class ActualDices(Dices):
         for elem, i in _LEGAL_ELEMS_ORDERED_DICT.items()
     }
 
-    def _satisfy(self, requirement: AbstractDices) -> bool:
+    def _satisfy(self, requirement: AbstractDice) -> bool:
         assert self.is_legal() and requirement.is_legal()
 
         # satisfy all pure elements first
@@ -218,39 +218,39 @@ class ActualDices(Dices):
         if omni_remained + most_pure < requirement[Element.OMNI]:
             return False
 
-        # We have enough dices to satisfy Element.ANY, so success
+        # We have enough dice to satisfy Element.ANY, so success
         return True
 
-    def loosely_satisfy(self, requirement: AbstractDices) -> bool:
+    def loosely_satisfy(self, requirement: AbstractDice) -> bool:
         """
         Asserts self and requirement are legal, and then check if self can match
         requirement.
         """
-        if self.num_dices() < requirement.num_dices():
+        if self.num_dice() < requirement.num_dice():
             return False
         return self._satisfy(requirement)
 
-    def just_satisfy(self, requirement: AbstractDices) -> bool:
+    def just_satisfy(self, requirement: AbstractDice) -> bool:
         """
         Asserts self and requirement are legal, and then check if self can match
         requirement.
 
-        self must have the same number of dices as requirement asked for.
+        self must have the same number of dice as requirement asked for.
         """
-        if self.num_dices() != requirement.num_dices():
+        if self.num_dice() != requirement.num_dice():
             return False
         return self._satisfy(requirement)
 
     def basically_satisfy(
             self,
-            requirement: AbstractDices,
+            requirement: AbstractDice,
             game_state: Optional[GameState] = None,
-    ) -> Optional[ActualDices]:
-        if requirement.num_dices() > self.num_dices():
+    ) -> Optional[ActualDice]:
+        if requirement.num_dice() > self.num_dice():
             return None
         # TODO: optimize for having game_state
         from collections import defaultdict
-        remaining: dict[Element, int] = self._dices.copy()
+        remaining: dict[Element, int] = self._dice.copy()
         answer: dict[Element, int] = defaultdict(int)
         pures: dict[Element, int] = HashableDict(frozen=False)
         omni = 0
@@ -312,9 +312,9 @@ class ActualDices(Dices):
             if remaining.get(Element.OMNI, 0) < omni_required:
                 return None
             answer[Element.OMNI] += omni_required
-        return ActualDices(answer)
+        return ActualDice(answer)
 
-    def _init_ordered_dices(
+    def _init_ordered_dice(
             self,
             priority_elems: None | frozenset[Element]
     ) -> HashableDict[Element, int]:
@@ -324,9 +324,9 @@ class ActualDices(Dices):
         else:
             character_elems = priority_elems
 
-        dices: dict[Element, int] = {}
+        dice: dict[Element, int] = {}
         if self[Element.OMNI] > 0:
-            dices[Element.OMNI] = self[Element.OMNI]
+            dice[Element.OMNI] = self[Element.OMNI]
         # list[tuple[alive chars have elem, num of elem, priority of elem]]
         sorted_categories: list[tuple[int, int, int]] = sorted(
             (
@@ -342,14 +342,14 @@ class ActualDices(Dices):
         )
         for _, _, priority in sorted_categories:
             elem = self._LEGAL_ELEMS_ORDERED_DICT_REV[priority]
-            dices[elem] = self[elem]
-        return HashableDict.from_dict(dices)
+            dice[elem] = self[elem]
+        return HashableDict.from_dict(dice)
 
-    def dices_ordered(self, player_state: None | PlayerState) -> dict[Element, int]:
-        return self.readonly_dices_ordered(player_state).to_dict()
+    def dice_ordered(self, player_state: None | PlayerState) -> dict[Element, int]:
+        return self.readonly_dice_ordered(player_state).to_dict()
 
-    def readonly_dices_ordered(self, player_state: None | PlayerState) -> HashableDict[Element, int]:
-        return self._init_ordered_dices(
+    def readonly_dice_ordered(self, player_state: None | PlayerState) -> HashableDict[Element, int]:
+        return self._init_ordered_dice(
             None
             if player_state is None
             else frozenset(
@@ -359,38 +359,38 @@ class ActualDices(Dices):
         )
 
     @classmethod
-    def from_random(cls, size: int, excepted_elems: set[Element] = set()) -> ActualDices:
-        dices = ActualDices.from_empty()
-        dices._dices._unfreeze()
+    def from_random(cls, size: int, excepted_elems: set[Element] = set()) -> ActualDice:
+        dice = ActualDice.from_empty()
+        dice._dice._unfreeze()
         for i in range(size):
-            elem = random.choice(tuple(ActualDices._LEGAL_ELEMS - excepted_elems))
-            dices._dices[elem] += 1
-        dices._dices.freeze()
-        return dices
+            elem = random.choice(tuple(ActualDice._LEGAL_ELEMS - excepted_elems))
+            dice._dice[elem] += 1
+        dice._dice.freeze()
+        return dice
 
     @classmethod
-    def from_all(cls, size: int, elem: Element) -> ActualDices:
-        dices = ActualDices.from_empty()
-        dices._dices._unfreeze()
-        dices._dices[Element.OMNI] = size
-        dices._dices.freeze()
-        return dices
+    def from_all(cls, size: int, elem: Element) -> ActualDice:
+        dice = ActualDice.from_empty()
+        dice._dice._unfreeze()
+        dice._dice[Element.OMNI] = size
+        dice._dice.freeze()
+        return dice
 
     @classmethod
-    def from_dices(cls, dices: Dices) -> Optional[ActualDices]:
-        new_dices = ActualDices(dices._dices)
-        if not new_dices.is_legal():
+    def from_dice(cls, dice: Dice) -> Optional[ActualDice]:
+        new_dice = ActualDice(dice._dice)
+        if not new_dice.is_legal():
             return None
         else:
-            return new_dices
+            return new_dice
 
 
-class AbstractDices(Dices):
+class AbstractDice(Dice):
     """
     Used for the dice cost of cards and other actions
     """
     _LEGAL_ELEMS = frozenset({
-        Element.OMNI,  # represents the request for dices of the same type
+        Element.OMNI,  # represents the request for dice of the same type
         Element.PYRO,
         Element.HYDRO,
         Element.ANEMO,
@@ -420,7 +420,7 @@ class AbstractDices(Dices):
         if elem is None:
             elem = next((
                 elem
-                for elem in ActualDices._LEGAL_ELEMS_ORDERED
+                for elem in ActualDice._LEGAL_ELEMS_ORDERED
                 if self[elem] > 0
             ), None)
             if elem is None:
@@ -432,9 +432,9 @@ class AbstractDices(Dices):
         return ret_val
 
     @classmethod
-    def from_dices(cls, dices: Dices) -> Optional[AbstractDices]:
-        new_dices = AbstractDices(dices._dices)
-        if not new_dices.is_legal():
+    def from_dice(cls, dice: Dice) -> Optional[AbstractDice]:
+        new_dice = AbstractDice(dice._dice)
+        if not new_dice.is_legal():
             return None
         else:
-            return new_dices
+            return new_dice

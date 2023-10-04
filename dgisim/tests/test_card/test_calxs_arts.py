@@ -24,7 +24,7 @@ class TestCalxsArts(unittest.TestCase):
             Pid.P1,
             CardAction(
                 card=CalxsArts,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1}))
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 1}))
             )
         ))
         game_state = auto_step(game_state)
@@ -46,7 +46,7 @@ class TestCalxsArts(unittest.TestCase):
             Pid.P1,
             CardAction(
                 card=CalxsArts,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1}))
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 1}))
             )
         ))
         game_state = auto_step(game_state)
@@ -71,7 +71,7 @@ class TestCalxsArts(unittest.TestCase):
             Pid.P1,
             CardAction(
                 card=CalxsArts,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1}))
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 1}))
             )
         ))
 
@@ -88,6 +88,6 @@ class TestCalxsArts(unittest.TestCase):
             Pid.P1,
             CardAction(
                 card=CalxsArts,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1}))
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 1}))
             )
         ))

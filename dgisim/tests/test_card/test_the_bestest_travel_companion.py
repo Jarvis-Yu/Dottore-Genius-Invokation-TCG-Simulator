@@ -9,7 +9,7 @@ class TestTheBestestTravelCompanion(unittest.TestCase):
         base_state = replace_hand_cards(base_state, Pid.P1, Cards({
             TheBestestTravelCompanion: 10,
         }))
-        base_state = replace_dices(base_state, Pid.P1, ActualDices({
+        base_state = replace_dice(base_state, Pid.P1, ActualDice({
             Element.OMNI: 1,
             Element.PYRO: 1,
             Element.HYDRO: 1,
@@ -22,24 +22,24 @@ class TestTheBestestTravelCompanion(unittest.TestCase):
 
         # test behaviour
         game_state = base_state
-        dices_before = game_state.get_player1().get_dices()
+        dice_before = game_state.get_player1().get_dice()
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=TheBestestTravelCompanion,
-            instruction=DiceOnlyInstruction(dices=ActualDices(
+            instruction=DiceOnlyInstruction(dice=ActualDice(
                 {Element.PYRO: 1, Element.HYDRO: 1}
             )),
         ))
-        dices_after = game_state.get_player1().get_dices()
-        self.assertEqual(dices_after.num_dices(), dices_before.num_dices())
-        self.assertEqual(dices_after[Element.OMNI], dices_before[Element.OMNI] + 2)
+        dice_after = game_state.get_player1().get_dice()
+        self.assertEqual(dice_after.num_dice(), dice_before.num_dice())
+        self.assertEqual(dice_after[Element.OMNI], dice_before[Element.OMNI] + 2)
 
-        dices_before = dices_after
+        dice_before = dice_after
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=TheBestestTravelCompanion,
-            instruction=DiceOnlyInstruction(dices=ActualDices(
+            instruction=DiceOnlyInstruction(dice=ActualDice(
                 {Element.OMNI: 1, Element.GEO: 1}
             )),
         ))
-        dices_after = game_state.get_player1().get_dices()
-        self.assertEqual(dices_after.num_dices(), dices_before.num_dices())
-        self.assertEqual(dices_after[Element.OMNI], dices_before[Element.OMNI] + 1)
+        dice_after = game_state.get_player1().get_dice()
+        self.assertEqual(dice_after.num_dice(), dice_before.num_dice())
+        self.assertEqual(dice_after[Element.OMNI], dice_before[Element.OMNI] + 1)

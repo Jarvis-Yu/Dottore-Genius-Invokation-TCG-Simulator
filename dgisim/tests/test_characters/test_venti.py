@@ -22,7 +22,7 @@ class TestVenti(unittest.TestCase):
             self.BASE_GAME,
             Pid.P1,
             CharacterSkill.SKILL1,
-            dices=ActualDices({Element.OMNI: 3}),
+            dice=ActualDice({Element.OMNI: 3}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 8)
@@ -34,7 +34,7 @@ class TestVenti(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.SKILL2,
-            dices=ActualDices({Element.OMNI: 3}),
+            dice=ActualDice({Element.OMNI: 3}),
         )
         p1 = game_state.get_player1()
         p2cs = game_state.get_player2().get_characters()
@@ -54,7 +54,7 @@ class TestVenti(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.ELEMENTAL_BURST,
-            ActualDices({Element.OMNI: 3}),
+            ActualDice({Element.OMNI: 3}),
         )
         p1 = game_state.get_player1()
         p2cs = game_state.get_player2().get_characters()
@@ -122,7 +122,7 @@ class TestVenti(unittest.TestCase):
     def test_talent_card(self):
         game_state = step_action(self.BASE_GAME, Pid.P1, CardAction(
             card=EmbraceOfWinds,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.ANEMO: 3}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.ANEMO: 3}))
         ))
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         game_state = step_swap(game_state, Pid.P1, char_id=1, cost=0)
@@ -136,13 +136,13 @@ class TestVenti(unittest.TestCase):
             base_state,
             Pid.P1,
             CharacterSkill.SKILL1,
-            dices=ActualDices({Element.GEO: 2}),
+            dice=ActualDice({Element.GEO: 2}),
         ))
         game_state = step_skill(
             base_state,
             Pid.P1,
             CharacterSkill.SKILL1,
-            dices=ActualDices({Element.OMNI: 1, Element.GEO: 1}),
+            dice=ActualDice({Element.OMNI: 1, Element.GEO: 1}),
         )
         self.assertNotIn(WindsOfHarmonyStatus, game_state.get_player1().get_combat_statuses())
 

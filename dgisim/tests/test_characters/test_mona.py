@@ -22,7 +22,7 @@ class TestMona(unittest.TestCase):
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -41,7 +41,7 @@ class TestMona(unittest.TestCase):
         gsm = GameStateMachine(base_game, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL2,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -73,7 +73,7 @@ class TestMona(unittest.TestCase):
         a1.inject_action(
             SkillAction(
                 skill=CharacterSkill.ELEMENTAL_BURST,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
             )
         )
         gsm.player_step()
@@ -100,12 +100,12 @@ class TestMona(unittest.TestCase):
             if state is active_is_mona_state:
                 a1.inject_action(SwapAction(
                     char_id=3,
-                    instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
+                    instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 1})),
                 ))
             elif state is active_not_mona:
                 a1.inject_action(SwapAction(
                     char_id=2,
-                    instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
+                    instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 1})),
                 ))
             gsm.player_step()
             gsm.auto_step()
@@ -137,11 +137,11 @@ class TestMona(unittest.TestCase):
         a2.inject_actions([
             SkillAction(
                 skill=CharacterSkill.SKILL1,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
             ),
             SkillAction(
                 skill=CharacterSkill.SKILL1,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
             ),
             EndRoundAction(),
         ])
@@ -181,7 +181,7 @@ class TestMona(unittest.TestCase):
         game_state = oppo_aura_elem(base_game, Element. PYRO)
         game_state = step_action(game_state, Pid.P1, SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         ))
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 4)
@@ -196,7 +196,7 @@ class TestMona(unittest.TestCase):
         game_state = oppo_aura_elem(game_state, Element.CRYO)
         game_state = step_action(game_state, Pid.P1, SkillAction(
             skill=CharacterSkill.SKILL2,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         ))
         p2cs = game_state.get_player2().get_characters()
         self.assertEqual(p2cs.just_get_character(1).get_hp(), 2)
@@ -218,7 +218,7 @@ class TestMona(unittest.TestCase):
         game_state = AddCombatStatusEffect(Pid.P2, CrystallizeStatus).execute(game_state)
         game_state = step_action(game_state, Pid.P1, SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         ))
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 5)  # (1 + 2) * 2 - 1
@@ -234,7 +234,7 @@ class TestMona(unittest.TestCase):
         game_state = oppo_aura_elem(base_game, Element.DENDRO)
         game_state = step_action(game_state, Pid.P1, SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         ))
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 6)  # damage = 1 + 1 + 2
@@ -247,7 +247,7 @@ class TestMona(unittest.TestCase):
         game_state = oppo_aura_elem(base_game, Element.ELECTRO)
         game_state = step_action(game_state, Pid.P1, SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         ))
         p2ac = game_state.get_player2().just_get_active_character()
         p2cs = game_state.get_player2().get_characters()
@@ -309,7 +309,7 @@ class TestMona(unittest.TestCase):
         game_state = oppo_aura_elem(game_state, Element.HYDRO)
         game_state = step_action(game_state, Pid.P1, SkillAction(
             skill=CharacterSkill.SKILL2,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         ))
         p2cs = game_state.get_player2().get_characters()
         self.assertEqual(p2cs.just_get_character(1).get_hp(), 6)

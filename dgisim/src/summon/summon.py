@@ -404,9 +404,9 @@ class ChainsOfWardingThunderSummon(_DmgPerRoundSummon):
             assert isinstance(item, ActionPEvent) and item.event_type is EventType.SWAP
             if item.source.pid is status_source.pid.other() \
                     and self.swap_reduce_usages > 0:
-                assert item.dices_cost.num_dices() == item.dices_cost[Element.ANY]
-                new_cost = item.dices_cost + {Element.ANY: self.COST_RAISE}
-                return replace(item, dices_cost=new_cost), replace(
+                assert item.dice_cost.num_dice() == item.dice_cost[Element.ANY]
+                new_cost = item.dice_cost + {Element.ANY: self.COST_RAISE}
+                return replace(item, dice_cost=new_cost), replace(
                     self, swap_reduce_usages=self.swap_reduce_usages - 1
                 )
         return super()._preprocess(game_state, status_source, item, signal)
@@ -852,7 +852,7 @@ class SolarIsotomaSummon(_DmgPerRoundSummon):
             if not (
                     item.source.pid is status_source.pid
                     and item.event_sub_type is CharacterSkillType.NORMAL_ATTACK
-                    and item.dices_cost.can_cost_less_any()
+                    and item.dice_cost.can_cost_less_any()
             ):
                 return item, self
             plunge_status = game_state.get_player(
@@ -861,7 +861,7 @@ class SolarIsotomaSummon(_DmgPerRoundSummon):
             if plunge_status.can_plunge:
                 new_item = replace(
                     item,
-                    dices_cost=item.dices_cost.cost_less_any(self.COST_DEDUCTION),
+                    dice_cost=item.dice_cost.cost_less_any(self.COST_DEDUCTION),
                 )
                 return new_item, replace(self, passive_usages=self.passive_usages - 1)
         elif signal is Preprocessables.DMG_AMOUNT_PLUS:

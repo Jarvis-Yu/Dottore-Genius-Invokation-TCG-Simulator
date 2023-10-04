@@ -334,7 +334,7 @@ class TestStatus(unittest.TestCase):
         gsm = GameStateMachine(base_game, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.ELEMENTAL_BURST,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 4}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 4}))
         ))
         gsm.player_step()
         gsm.auto_step()

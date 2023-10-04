@@ -18,48 +18,48 @@ class TestInstructorsCap(unittest.TestCase):
             game_state = step_action(game_state, Pid.P1, CardAction(
                 card=InstructorsCap,
                 instruction=StaticTargetInstruction(
-                    dices=ActualDices({Element.PYRO: 1, Element.HYDRO: 1}),
+                    dice=ActualDice({Element.PYRO: 1, Element.HYDRO: 1}),
                     target=StaticTarget.from_char_id(Pid.P1, i),
                 )
             ))
 
-        # test no reaction doesn't generate dices
-        old_dices = game_state.get_player1().get_dices()
+        # test no reaction doesn't generate dice
+        old_dice = game_state.get_player1().get_dice()
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
-        new_dices = game_state.get_player1().get_dices()
-        # here we assume step_skill() consumes OMNI dices
-        self.assertEqual(new_dices[Element.GEO], old_dices[Element.GEO])
-        self.assertEqual(new_dices[Element.CRYO], old_dices[Element.CRYO])
+        new_dice = game_state.get_player1().get_dice()
+        # here we assume step_skill() consumes OMNI dice
+        self.assertEqual(new_dice[Element.GEO], old_dice[Element.GEO])
+        self.assertEqual(new_dice[Element.CRYO], old_dice[Element.CRYO])
 
         # test with reaction triggers
         game_state = apply_elemental_aura(game_state, Element.HYDRO, Pid.P2)
-        old_dices = new_dices
+        old_dice = new_dice
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
-        new_dices = game_state.get_player1().get_dices()
-        self.assertEqual(new_dices[Element.GEO], old_dices[Element.GEO] + 1)
-        self.assertEqual(new_dices[Element.CRYO], old_dices[Element.CRYO])
+        new_dice = game_state.get_player1().get_dice()
+        self.assertEqual(new_dice[Element.GEO], old_dice[Element.GEO] + 1)
+        self.assertEqual(new_dice[Element.CRYO], old_dice[Element.CRYO])
 
         # test triggers 3 times maximum
         game_state = apply_elemental_aura(game_state, Element.HYDRO, Pid.P2)
-        old_dices = new_dices
+        old_dice = new_dice
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
-        new_dices = game_state.get_player1().get_dices()
-        self.assertEqual(new_dices[Element.GEO], old_dices[Element.GEO] + 1)
-        self.assertEqual(new_dices[Element.CRYO], old_dices[Element.CRYO])
+        new_dice = game_state.get_player1().get_dice()
+        self.assertEqual(new_dice[Element.GEO], old_dice[Element.GEO] + 1)
+        self.assertEqual(new_dice[Element.CRYO], old_dice[Element.CRYO])
 
         game_state = apply_elemental_aura(game_state, Element.HYDRO, Pid.P2)
-        old_dices = new_dices
+        old_dice = new_dice
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
-        new_dices = game_state.get_player1().get_dices()
-        self.assertEqual(new_dices[Element.GEO], old_dices[Element.GEO] + 1)
-        self.assertEqual(new_dices[Element.CRYO], old_dices[Element.CRYO])
+        new_dice = game_state.get_player1().get_dice()
+        self.assertEqual(new_dice[Element.GEO], old_dice[Element.GEO] + 1)
+        self.assertEqual(new_dice[Element.CRYO], old_dice[Element.CRYO])
 
         game_state = apply_elemental_aura(game_state, Element.HYDRO, Pid.P2)
-        old_dices = new_dices
+        old_dice = new_dice
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
-        new_dices = game_state.get_player1().get_dices()
-        self.assertEqual(new_dices[Element.GEO], old_dices[Element.GEO] + 0)
-        self.assertEqual(new_dices[Element.CRYO], old_dices[Element.CRYO])
+        new_dice = game_state.get_player1().get_dice()
+        self.assertEqual(new_dice[Element.GEO], old_dice[Element.GEO] + 0)
+        self.assertEqual(new_dice[Element.CRYO], old_dice[Element.CRYO])
         artifact = game_state.get_player1().just_get_active_character(
         ).get_equipment_statuses().find(InstructorsCapStatus)
         self.assertIsNotNone(artifact)

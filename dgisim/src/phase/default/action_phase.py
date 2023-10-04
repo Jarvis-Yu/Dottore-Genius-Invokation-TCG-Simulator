@@ -7,7 +7,7 @@ from ...action.action import *
 from ...action.action_generator import ActionGenerator
 from ...action.enums import ActionType
 from ...character.enums import CharacterSkill
-from ...dices import ActualDices
+from ...dice import ActualDice
 from ...effect.effect import *
 from ...effect.enums import TriggeringSignal, Zone
 from ...effect.structs import StaticTarget
@@ -214,14 +214,14 @@ class ActionPhase(ph.Phase):
         instruction = action.instruction
         new_effects: list[Effect] = []
         # Costs
-        dices = player.get_dices()
-        new_dices = dices - instruction.dices
-        assert new_dices.is_legal()
+        dice = player.get_dice()
+        new_dice = dice - instruction.dice
+        assert new_dice.is_legal()
         # Skill Effect
         active_character = player.get_characters().get_active_character()
         assert active_character is not None
         assert active_character.can_cast_skill()
-        if dices.is_even():
+        if dice.is_even():
             from ...status.status import ChargedAttackStatus
             new_effects.append(UpdateHiddenStatusEffect(
                 target_pid=pid,
@@ -241,7 +241,7 @@ class ActionPhase(ph.Phase):
             lambda es: es.push_many_fl(new_effects)
         ).player(
             pid,
-            player.factory().dices(new_dices).build()
+            player.factory().dice(new_dice).build()
         ).build()
 
     def _handle_swap_action(
@@ -260,8 +260,8 @@ class ActionPhase(ph.Phase):
         new_effects: list[Effect] = []
 
         # Costs
-        new_dices = player.get_dices() - action.instruction.dices
-        assert new_dices.is_legal()
+        new_dice = player.get_dice() - action.instruction.dice
+        assert new_dice.is_legal()
 
         # Add Effects
         active_character = player.get_characters().get_active_character()
@@ -277,7 +277,7 @@ class ActionPhase(ph.Phase):
             game_state.get_effect_stack().push_many_fl(new_effects)
         ).player(
             pid,
-            player.factory().dices(new_dices).build()
+            player.factory().dice(new_dice).build()
         ).build()
 
     def _handle_card_action(
@@ -286,7 +286,7 @@ class ActionPhase(ph.Phase):
             pid: Pid,
             action: CardAction
     ) -> Optional[GameState]:
-        paid_dices = action.instruction.dices
+        paid_dice = action.instruction.dice
         card = action.card
 
         # verify action validity
@@ -301,13 +301,13 @@ class ActionPhase(ph.Phase):
         new_effects: list[Effect] = []
 
         # Costs
-        dices = player.get_dices()
-        new_dices = dices - paid_dices
-        assert new_dices.is_legal()
+        dice = player.get_dice()
+        new_dice = dice - paid_dice
+        assert new_dice.is_legal()
 
         # Card
         new_effects.append(PublicRemoveCardEffect(pid, card))
-        if card.is_combat_action() and dices.is_even():
+        if card.is_combat_action() and dice.is_even():
             from ...status.status import ChargedAttackStatus
             new_effects.append(UpdateHiddenStatusEffect(
                 target_pid=pid,
@@ -329,7 +329,7 @@ class ActionPhase(ph.Phase):
             lambda es: es.push_many_fl(new_effects)
         ).player(
             pid,
-            player.factory().dices(new_dices).build()
+            player.factory().dice(new_dice).build()
         ).build()
 
     def _handle_elemental_tuning_action(
@@ -340,21 +340,21 @@ class ActionPhase(ph.Phase):
     ) -> Optional[GameState]:
         player = game_state.get_player(pid)
         cards = player.get_hand_cards()
-        dices = player.get_dices()
+        dice = player.get_dice()
         active_character = player.get_active_character()
         assert active_character is not None
         active_character_elem = active_character.ELEMENT()
         if action.card not in cards \
-                or dices[action.dice_elem] == 0 \
+                or dice[action.dice_elem] == 0 \
                 or action.dice_elem is active_character_elem \
-                or dices[Element.OMNI] + dices[active_character_elem] == dices.num_dices():
+                or dice[Element.OMNI] + dice[active_character_elem] == dice.num_dice():
             print(f"{action} cannot be performed in game state:\n{game_state}")
             assert False
             return None
         from ...card.card import OmniCard
         return game_state.factory().f_player(
             pid,
-            lambda p: p.factory().f_dices(
+            lambda p: p.factory().f_dice(
                 lambda ds: ds + {action.dice_elem: -1, active_character_elem: 1}
             ).f_hand_cards(
                 lambda hcs: hcs.remove(action.card)
@@ -407,13 +407,13 @@ class ActionPhase(ph.Phase):
             return self._handle_death_swap_action(game_state, pid, action)
         raise Exception("Unhandld action", action)  # pragma: no cover
 
-    def _handle_dices_select_action(
+    def _handle_dice_select_action(
             self,
             game_state: GameState,
             pid: Pid,
-            action: DicesSelectAction
+            action: DiceSelectAction
     ) -> Optional[GameState]:
-        if action.selected_dices.is_empty():
+        if action.selected_dice.is_empty():
             return game_state.factory().f_player(
                 pid,
                 lambda p: p.factory().dice_reroll_chances(0).build()
@@ -422,11 +422,11 @@ class ActionPhase(ph.Phase):
             ).build()
 
         player = game_state.get_player(pid)
-        dices = player.get_dices()
-        kept_dices = dices - action.selected_dices
-        assert kept_dices.is_legal()
-        replacement_dices = ActualDices.from_random(action.selected_dices.num_dices())
-        new_dices = kept_dices + replacement_dices
+        dice = player.get_dice()
+        kept_dice = dice - action.selected_dice
+        assert kept_dice.is_legal()
+        replacement_dice = ActualDice.from_random(action.selected_dice.num_dice())
+        new_dice = kept_dice + replacement_dice
         new_reroll_chances = player.get_dice_reroll_chances() - 1
         new_effect_stack: EffectStack
         if new_reroll_chances > 0:
@@ -438,7 +438,7 @@ class ActionPhase(ph.Phase):
             pid,
             lambda p: p.factory()
             .dice_reroll_chances(new_reroll_chances)
-            .dices(new_dices)
+            .dice(new_dice)
             .build()
         ).effect_stack(
             new_effect_stack
@@ -460,13 +460,13 @@ class ActionPhase(ph.Phase):
                 raise Exception(f"Trying to execute {action} when a death swap is expected")
 
         elif self._rolling(game_state):  # pragma: no cover
-            if not isinstance(action, DicesSelectAction):
-                raise Exception(f"Trying to execute {action} when a dices selection is expected")
+            if not isinstance(action, DiceSelectAction):
+                raise Exception(f"Trying to execute {action} when a dice selection is expected")
 
         if isinstance(action, GameAction):
             return self._handle_game_action(game_state, pid, action)
-        elif isinstance(action, DicesSelectAction):
-            return self._handle_dices_select_action(game_state, pid, action)
+        elif isinstance(action, DiceSelectAction):
+            return self._handle_dice_select_action(game_state, pid, action)
         elif isinstance(action, EndRoundAction):
             return self._handle_end_round(game_state, pid, action)
         raise Exception("Not Reached! Unknown Game State to process")
@@ -511,7 +511,7 @@ class ActionPhase(ph.Phase):
 
         # inserted roll phase
         if cls._rolling(action_generator.game_state):
-            return (ActionType.SELECT_DICES, )
+            return (ActionType.SELECT_DICE, )
 
         choices: list[ActionType] = []
 
@@ -552,9 +552,9 @@ class ActionPhase(ph.Phase):
 
         # inserted roll phase
         if cls._rolling(action_generator.game_state):
-            assert player_choice is ActionType.SELECT_DICES
-            from ...action.action_generator_generator import DicesSelectionActGenGenerator
-            return just(DicesSelectionActGenGenerator.action_generator(game_state, pid))
+            assert player_choice is ActionType.SELECT_DICE
+            from ...action.action_generator_generator import DiceSelectionActGenGenerator
+            return just(DiceSelectionActGenGenerator.action_generator(game_state, pid))
 
         if player_choice is ActionType.PLAY_CARD:
             assert game_state.card_checker().playable(pid)

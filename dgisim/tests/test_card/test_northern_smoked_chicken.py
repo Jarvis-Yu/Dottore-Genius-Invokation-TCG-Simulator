@@ -11,21 +11,21 @@ class TestNorthernSmokedChicken(unittest.TestCase):
             ).build()
         ).build()
 
-        # test giving wrong num of dices
+        # test giving wrong num of dice
         card_action = CardAction(
             card=NorthernSmokedChicken,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 1})),
         )
         self.assertRaises(
             Exception,
             lambda: base_game.action_step(Pid.P1, card_action)
         )
 
-        # test giving right num of dices
+        # test giving right num of dice
         card_action = CardAction(
             card=NorthernSmokedChicken,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({}),
+                dice=ActualDice({}),
                 target=StaticTarget(
                     pid=Pid.P1,
                     zone=Zone.CHARACTERS,
@@ -49,20 +49,20 @@ class TestNorthernSmokedChicken(unittest.TestCase):
             .contains(SatiatedStatus)
         )
 
-        # test normal attack with 3 dices fails
+        # test normal attack with 3 dice fails
         normal_attack_action = SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         )
         self.assertRaises(
             Exception,
             lambda: buffed_game_state.action_step(Pid.P1, normal_attack_action)
         )
 
-        # test normal attack with 2 dices pass
+        # test normal attack with 2 dice pass
         normal_attack_action = SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 2}))
         )
         game_state = buffed_game_state.action_step(Pid.P1, normal_attack_action)
         assert game_state is not None

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dgisim.src.character.character import *
 from dgisim.src.character.characters import Characters
-from dgisim.src.dices import *
+from dgisim.src.dice import *
 from dgisim.src.effect.effect import *
 from dgisim.src.element import Element
 from dgisim.src.helper.quality_of_life import BIG_INT
@@ -24,8 +24,8 @@ BASE_GAME = GameState.from_default().factory().mode(
             Kaeya.from_default(2),
             Keqing.from_default(3),
         ), None)
-    ).dices(
-        ActualDices({
+    ).dice(
+        ActualDice({
             Element.OMNI: BIG_INT,
             Element.PYRO: BIG_INT,
             Element.HYDRO: BIG_INT,
@@ -43,8 +43,8 @@ BASE_GAME = GameState.from_default().factory().mode(
             Kaeya.from_default(2),
             Keqing.from_default(3),
         ), None)
-    ).dices(
-        ActualDices({
+    ).dice(
+        ActualDice({
             Element.OMNI: BIG_INT,
             Element.PYRO: BIG_INT,
             Element.HYDRO: BIG_INT,

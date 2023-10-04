@@ -20,7 +20,7 @@ class TestKeqing(unittest.TestCase):
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -36,7 +36,7 @@ class TestKeqing(unittest.TestCase):
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL2,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -59,7 +59,7 @@ class TestKeqing(unittest.TestCase):
         gsm = GameStateMachine(game_state_1, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL2,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -75,7 +75,7 @@ class TestKeqing(unittest.TestCase):
         a1.inject_action(CardAction(
             card=LightningStiletto,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.OMNI: 3}),
+                dice=ActualDice({Element.OMNI: 3}),
                 target=source,
             )
         ))
@@ -97,7 +97,7 @@ class TestKeqing(unittest.TestCase):
         a1.inject_action(CardAction(
             card=LightningStiletto,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.OMNI: 3}),
+                dice=ActualDice({Element.OMNI: 3}),
                 target=source,
             )
         ))
@@ -120,7 +120,7 @@ class TestKeqing(unittest.TestCase):
         gsm = GameStateMachine(game_state_1_2, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -137,7 +137,7 @@ class TestKeqing(unittest.TestCase):
         gsm = GameStateMachine(game_state, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -190,7 +190,7 @@ class TestKeqing(unittest.TestCase):
         a1.inject_action(
             SkillAction(
                 skill=CharacterSkill.ELEMENTAL_BURST,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 4})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 4})),
             )
         )
         gsm.player_step()
@@ -213,7 +213,7 @@ class TestKeqing(unittest.TestCase):
         a1.inject_action(
             SkillAction(
                 skill=CharacterSkill.ELEMENTAL_BURST,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 4})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 4})),
             )
         )
         gsm.player_step()
@@ -240,7 +240,7 @@ class TestKeqing(unittest.TestCase):
         a1.inject_action(
             SkillAction(
                 skill=CharacterSkill.ELEMENTAL_BURST,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 4})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 4})),
             )
         )
         gsm.player_step()
@@ -266,15 +266,15 @@ class TestKeqing(unittest.TestCase):
         a1.inject_actions([
             CardAction(
                 card=ThunderingPenance,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
             ),
             SkillAction(
                 skill=CharacterSkill.SKILL2,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
             ),
             SkillAction(
                 skill=CharacterSkill.SKILL1,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
             )
         ])
         gsm.player_step()
@@ -296,15 +296,15 @@ class TestKeqing(unittest.TestCase):
         a1.inject_actions([
             SkillAction(
                 skill=CharacterSkill.SKILL2,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
             ),
             CardAction(
                 card=ThunderingPenance,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
             ),
             SkillAction(
                 skill=CharacterSkill.SKILL1,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
             )
         ])
         gsm.player_step()
@@ -338,14 +338,14 @@ class TestKeqing(unittest.TestCase):
         self.assertIsNone(LightningStiletto.valid_instruction(
             game_state,
             Pid.P1,
-            DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         # False because frozen
         self.assertIsNone(LightningStiletto.valid_instruction(
             game_state,
             Pid.P1,
             StaticTargetInstruction(
-                dices=ActualDices({Element.OMNI: 3}),
+                dice=ActualDice({Element.OMNI: 3}),
                 target=StaticTarget(
                     pid=Pid.P1,
                     zone=Zone.CHARACTERS,

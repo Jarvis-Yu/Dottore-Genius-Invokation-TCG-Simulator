@@ -18,7 +18,7 @@ class TestAlbedo(unittest.TestCase):
             self.BASE_GAME,
             Pid.P1,
             CharacterSkill.SKILL1,
-            dices=ActualDices({Element.GEO: 1, Element.HYDRO: 1, Element.DENDRO: 1}),
+            dice=ActualDice({Element.GEO: 1, Element.HYDRO: 1, Element.DENDRO: 1}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 8)
@@ -30,7 +30,7 @@ class TestAlbedo(unittest.TestCase):
             self.BASE_GAME,
             Pid.P1,
             CharacterSkill.SKILL2,
-            dices=ActualDices({Element.GEO: 3}),
+            dice=ActualDice({Element.GEO: 3}),
         )
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
@@ -47,7 +47,7 @@ class TestAlbedo(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.ELEMENTAL_BURST,
-            dices=ActualDices({Element.GEO: 3}),
+            dice=ActualDice({Element.GEO: 3}),
         )
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertIs(dmg.element, Element.GEO)
@@ -62,7 +62,7 @@ class TestAlbedo(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.ELEMENTAL_BURST,
-            dices=ActualDices({Element.GEO: 3}),
+            dice=ActualDice({Element.GEO: 3}),
         )
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertIs(dmg.element, Element.GEO)
@@ -78,13 +78,13 @@ class TestAlbedo(unittest.TestCase):
         game_state = step_swap(game_state, Pid.P1, 3)
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         game_state = step_skill(
-            game_state, Pid.P1, CharacterSkill.SKILL1, dices=ActualDices({Element.OMNI: 2})
+            game_state, Pid.P1, CharacterSkill.SKILL1, dice=ActualDice({Element.OMNI: 2})
         )
 
         # test second plunge doesn't get cost reduction
         game_state = step_swap(game_state, Pid.P1, 2)
         game_state = step_skill(
-            game_state, Pid.P1, CharacterSkill.SKILL1, dices=ActualDices({Element.OMNI: 3})
+            game_state, Pid.P1, CharacterSkill.SKILL1, dice=ActualDice({Element.OMNI: 3})
         )
 
         # test summon damage and usages behaves correctly
@@ -106,7 +106,7 @@ class TestAlbedo(unittest.TestCase):
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         game_state = step_swap(game_state, Pid.P1, 3)
         game_state = step_skill(
-            game_state, Pid.P1, CharacterSkill.SKILL1, dices=ActualDices({Element.OMNI: 2})
+            game_state, Pid.P1, CharacterSkill.SKILL1, dice=ActualDice({Element.OMNI: 2})
         )
 
         # test non-plunge doesn't get reduction
@@ -114,7 +114,7 @@ class TestAlbedo(unittest.TestCase):
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         assert SolarIsotomaSummon in game_state.get_player1().get_summons()
         game_state = step_skill(
-            game_state, Pid.P1, CharacterSkill.SKILL1, dices=ActualDices({Element.OMNI: 3})
+            game_state, Pid.P1, CharacterSkill.SKILL1, dice=ActualDice({Element.OMNI: 3})
         )
 
         # check summon usages decreases as expected
@@ -130,7 +130,7 @@ class TestAlbedo(unittest.TestCase):
     def test_talent_card(self):
         game_state = step_action(self.BASE_GAME, Pid.P1, CardAction(
             card=DescentOfDivinity,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.GEO: 3}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.GEO: 3}))
         ))
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         game_state = add_dmg_listener(game_state, Pid.P1)
@@ -138,7 +138,7 @@ class TestAlbedo(unittest.TestCase):
         # test plunge gets more damage
         game_state = step_swap(game_state, Pid.P1, 3)
         game_state = step_skill(
-            game_state, Pid.P1, CharacterSkill.SKILL1, dices=ActualDices({Element.OMNI: 2})
+            game_state, Pid.P1, CharacterSkill.SKILL1, dice=ActualDice({Element.OMNI: 2})
         )
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertIs(dmg.element, Element.PHYSICAL)
@@ -148,7 +148,7 @@ class TestAlbedo(unittest.TestCase):
         # test all plunges gets more damage
         game_state = step_swap(game_state, Pid.P1, 2)
         game_state = step_skill(
-            game_state, Pid.P1, CharacterSkill.SKILL1, dices=ActualDices({Element.OMNI: 3})
+            game_state, Pid.P1, CharacterSkill.SKILL1, dice=ActualDice({Element.OMNI: 3})
         )
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertIs(dmg.element, Element.PHYSICAL)
@@ -157,7 +157,7 @@ class TestAlbedo(unittest.TestCase):
 
         # test non-plunges doesn't get boost
         game_state = step_skill(
-            game_state, Pid.P1, CharacterSkill.SKILL1, dices=ActualDices({Element.OMNI: 3})
+            game_state, Pid.P1, CharacterSkill.SKILL1, dice=ActualDice({Element.OMNI: 3})
         )
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertIs(dmg.element, Element.PHYSICAL)

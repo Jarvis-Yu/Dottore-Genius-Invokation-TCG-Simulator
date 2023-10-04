@@ -30,7 +30,7 @@ class TestGamblersEarrings(unittest.TestCase):
             base_game = just(base_game.action_step(Pid.P1, CardAction(
                 card=GamblersEarrings,
                 instruction=StaticTargetInstruction(
-                    dices=ActualDices({Element.OMNI: 1}),
+                    dice=ActualDice({Element.OMNI: 1}),
                     target=StaticTarget(Pid.P1, Zone.CHARACTERS, i)
                 )
             )))
@@ -48,19 +48,19 @@ class TestGamblersEarrings(unittest.TestCase):
             Pid.P1,
             SkillAction(
                 skill=CharacterSkill.SKILL2,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
             )
         ))
-        num_dices = game_state.get_player1().get_dices().num_dices()
+        num_dice = game_state.get_player1().get_dice().num_dice()
         gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
         gsm.step_until_holds(
             lambda gs:
             gs.get_player1().just_get_active_character().get_elemental_aura().contains(Element.CRYO)
         )
-        self.assertEqual(gsm.get_game_state().get_player1().get_dices().num_dices(), num_dices)
+        self.assertEqual(gsm.get_game_state().get_player1().get_dice().num_dice(), num_dice)
 
         gsm.auto_step(observe=False)
-        self.assertEqual(gsm.get_game_state().get_player1().get_dices().num_dices(), num_dices + 2)
+        self.assertEqual(gsm.get_game_state().get_player1().get_dice().num_dice(), num_dice + 2)
 
         # multiple kill rewards correctly
         game_state = oppo_aura_elem(base_game, Element.PYRO)  # overload, so P2 doesn't need to swap
@@ -68,10 +68,10 @@ class TestGamblersEarrings(unittest.TestCase):
             Pid.P1,
             SkillAction(
                 skill=CharacterSkill.ELEMENTAL_BURST,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 4}))
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 4}))
             )
         ))
-        num_dices = game_state.get_player1().get_dices().num_dices()
+        num_dice = game_state.get_player1().get_dice().num_dice()
         gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
         gsm.auto_step(observe=False)
-        self.assertEqual(gsm.get_game_state().get_player1().get_dices().num_dices(), num_dices + 4)
+        self.assertEqual(gsm.get_game_state().get_player1().get_dice().num_dice(), num_dice + 4)

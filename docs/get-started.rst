@@ -143,7 +143,7 @@ The output below is what you should get.
     <Combat Statuses>                       | <Combat Statuses>                       |
     <Summons>                               | <Summons>                               |
     <Supports>                              | <Supports>                              |
-    <Dices>                                 | <Dices>                                 |
+    <Dice>                                 | <Dice>                                 |
     <Hand Cards>                            | <Hand Cards>                            |
     <Deck Cards>                            | <Deck Cards>                            |
       <GrandExpectation: 2>                 |   <GrandExpectation: 2>                 |
@@ -238,7 +238,7 @@ The method takes two parameters ``history`` and ``pid``.
   player 1, and ``Pid.P2`` is player 2. You could use methods ``.is_player1()``
   and ``.is_player2()`` to check the value of ``pid``.
 
-Let's try to build an agent that keeps normal attacking until there's no dices
+Let's try to build an agent that keeps normal attacking until there's no dice
 for it.
 
 There are many ways to implement such an agent, let's get started with the way
@@ -279,12 +279,12 @@ It is a class to help you generate valid actions.
 
             action_generator = action_generator.choose(dg.CharacterSkill.SKILL1)
 
-            # choose the dices to pay for the normal attack action
+            # choose the dice to pay for the normal attack action
             choices = action_generator.choices()
-            assert isinstance(choices, dg.AbstractDices)
+            assert isinstance(choices, dg.AbstractDice)
             cost = choices
-            dices = curr_game_state.get_player(pid).get_dices()
-            payment = dices.basically_satisfy(cost)
+            dice = curr_game_state.get_player(pid).get_dice()
+            payment = dice.basically_satisfy(cost)
             assert payment is not None
 
             action_generator = action_generator.choose(payment)
@@ -340,7 +340,7 @@ First we get ``choices`` from the action generator, which is typically a ``tuple
 The first tuple of choices we get in action phase is a tuple of ``ActionType``.
 The ``choices`` only contains feasible actions, so if ``ActionType.CAST_SKILL``
 is not in choices, then player is unable to cast skill for some reason.
-(being frozen, or simply doesn't have dices for the skill)
+(being frozen, or simply doesn't have dice for the skill)
 
 After confirming we can cast skill, we tell the action generator about our choice,
 and get a new action generator to make the next choice.
@@ -371,19 +371,19 @@ So here we double check if normal attack is available.
 
     def handle_action_phase(self, history: list[dg.GameState], pid: dg.Pid) -> dg.PlayerAction:
         ...
-        # choose the dices to pay for the normal attack action
+        # choose the dice to pay for the normal attack action
         choices = action_generator.choices()
-        assert isinstance(choices, dg.AbstractDices)
+        assert isinstance(choices, dg.AbstractDice)
         cost = choices
-        dices = curr_game_state.get_player(pid).get_dices()
-        payment = dices.basically_satisfy(cost)
+        dice = curr_game_state.get_player(pid).get_dice()
+        payment = dice.basically_satisfy(cost)
         assert payment is not None
 
         action_generator = action_generator.choose(payment)
         ...
 
-Then we choose the dices to pay for the action, ``choices`` here is of type
-``AbstractDices``, a class to represent the cost of actions.
+Then we choose the dice to pay for the action, ``choices`` here is of type
+``AbstractDice``, a class to represent the cost of actions.
 
 .. note::
 
@@ -393,14 +393,14 @@ Then we choose the dices to pay for the action, ``choices`` here is of type
 
 .. note::
 
-    ``AbstractDices`` contains a private immutable dictionary representing the
+    ``AbstractDice`` contains a private immutable dictionary representing the
     cost. For a typical normal attack, the inner dictionary may look like
     ``{Element.PYRO: 1, Element.ANY: 2}``.
 
 Given ``ActionGenerator`` *approves* normal attack action, we know there are
-enough dices to pay for the action.
+enough dice to pay for the action.
 Here I use ``.basically_satisfy()`` to find a way to pay for the cost.
-(if ``dices`` cannot fulfill the ``cost`` then ``None`` is returned,
+(if ``dice`` cannot fulfill the ``cost`` then ``None`` is returned,
 but we know this is not happening here)
 
 .. code-block:: python3

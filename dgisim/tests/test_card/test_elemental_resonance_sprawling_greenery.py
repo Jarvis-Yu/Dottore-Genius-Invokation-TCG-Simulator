@@ -45,7 +45,7 @@ class TestElementalResonanceSprawlingGreenery(unittest.TestCase):
         old_flame, old_cata, old_core = get_statuses(game_state)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=ElementalResonanceSprawlingGreenery,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.DENDRO: 1}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.DENDRO: 1}))
         ))
         new_flame, new_cata, new_core = get_statuses(game_state)
         self.assertIn(

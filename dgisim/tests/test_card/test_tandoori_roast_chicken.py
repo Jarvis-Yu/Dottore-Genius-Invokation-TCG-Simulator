@@ -20,13 +20,13 @@ class TestTandooriRoastChicken(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=LotusFlowerCrisp,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.CRYO: 1}),
+                dice=ActualDice({Element.CRYO: 1}),
                 target=StaticTarget.from_char_id(Pid.P1, char_id=2),
             ),
         ))
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=TandooriRoastChicken,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.CRYO: 1, Element.GEO: 1})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.CRYO: 1, Element.GEO: 1})),
         ))
 
         # test tandoori applies to un-satiated chars and can be triggered once only by elemental skill
@@ -62,7 +62,7 @@ class TestTandooriRoastChicken(unittest.TestCase):
         game_state = skip_action_round_until(game_state, Pid.P1)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=TandooriRoastChicken,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.DENDRO: 1, Element.HYDRO: 1})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.DENDRO: 1, Element.HYDRO: 1})),
         ))
         game_state = next_round_with_great_omni(game_state)
         game_state = skip_action_round_until(game_state, Pid.P1)

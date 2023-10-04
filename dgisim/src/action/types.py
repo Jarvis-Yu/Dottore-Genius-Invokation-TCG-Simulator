@@ -4,7 +4,7 @@ from ..card import card as cd
 
 from ..card.cards import Cards
 from ..character.enums import CharacterSkill
-from ..dices import ActualDices, AbstractDices
+from ..dice import ActualDice, AbstractDice
 from ..effect.structs import StaticTarget
 from ..element import Element
 from .enums import ActionType
@@ -17,13 +17,13 @@ __all__ = [
 _SingleChoiceType = (
     StaticTarget
     | int
-    | ActualDices
+    | ActualDice
     | CharacterSkill
     | type["cd.Card"]
     | Element
     | ActionType
 )
 
-GivenChoiceType = tuple[_SingleChoiceType, ...] | ActualDices | AbstractDices | Cards
+GivenChoiceType = tuple[_SingleChoiceType, ...] | ActualDice | AbstractDice | Cards
 
-DecidedChoiceType = _SingleChoiceType | ActualDices | Cards
+DecidedChoiceType = _SingleChoiceType | ActualDice | Cards

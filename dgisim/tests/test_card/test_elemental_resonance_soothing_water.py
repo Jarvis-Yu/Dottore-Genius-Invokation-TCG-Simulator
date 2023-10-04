@@ -36,7 +36,7 @@ class TestElementalSoothingWater(unittest.TestCase):
                 self.assertTrue(ElementalResonanceSoothingWater.strictly_usable(game_state, Pid.P1))
                 game_state = step_action(game_state, Pid.P1, CardAction(
                     card=ElementalResonanceSoothingWater,
-                    instruction=DiceOnlyInstruction(dices=ActualDices({Element.HYDRO: 1}))
+                    instruction=DiceOnlyInstruction(dice=ActualDice({Element.HYDRO: 1}))
                 ))
                 expected_hp: int
                 if i == active_char_id:
@@ -54,7 +54,7 @@ class TestElementalSoothingWater(unittest.TestCase):
         self.assertTrue(ElementalResonanceSoothingWater.strictly_usable(game_state, Pid.P1))
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=ElementalResonanceSoothingWater,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.HYDRO: 1}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.HYDRO: 1}))
         ))
         p1cs = game_state.get_player1().get_characters()
         self.assertEqual(p1cs.just_get_character(1).get_hp(), 10)

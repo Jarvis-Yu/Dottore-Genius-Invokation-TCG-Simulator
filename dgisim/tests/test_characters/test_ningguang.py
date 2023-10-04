@@ -19,7 +19,7 @@ class TestNingguang(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.SKILL1,
-            dices=ActualDices({Element.GEO: 1, Element.HYDRO: 1, Element.DENDRO: 1}),
+            dice=ActualDice({Element.GEO: 1, Element.HYDRO: 1, Element.DENDRO: 1}),
         )
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertEqual(dmg.damage, 1)
@@ -32,7 +32,7 @@ class TestNingguang(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.SKILL2,
-            dices=ActualDices({Element.GEO: 3}),
+            dice=ActualDice({Element.GEO: 3}),
         )
         p1 = game_state.get_player1()
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
@@ -51,7 +51,7 @@ class TestNingguang(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.ELEMENTAL_BURST,
-            dices=ActualDices({Element.GEO: 3}),
+            dice=ActualDice({Element.GEO: 3}),
         )
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
@@ -65,7 +65,7 @@ class TestNingguang(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.ELEMENTAL_BURST,
-            dices=ActualDices({Element.GEO: 3}),
+            dice=ActualDice({Element.GEO: 3}),
         )
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertEqual(dmg.damage, 8)
@@ -90,7 +90,7 @@ class TestNingguang(unittest.TestCase):
         game_state = grant_all_infinite_revival(game_state)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=StrategicReserve,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.GEO: 4}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.GEO: 4}))
         ))
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]

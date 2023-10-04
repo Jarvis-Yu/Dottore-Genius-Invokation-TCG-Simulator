@@ -14,7 +14,7 @@ class TestWolfsGravestone(unittest.TestCase):
         game_state = step_action(base_state, Pid.P1, CardAction(
             card=WolfsGravestone,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.PYRO: 3}),
+                dice=ActualDice({Element.PYRO: 3}),
                 target=StaticTarget.from_char_id(Pid.P1, 1),
             )
         ))

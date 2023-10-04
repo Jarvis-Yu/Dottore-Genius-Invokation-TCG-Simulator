@@ -22,7 +22,7 @@ class TestNoelle(unittest.TestCase):
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -39,7 +39,7 @@ class TestNoelle(unittest.TestCase):
         gsm = GameStateMachine(game_state, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL2,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -66,7 +66,7 @@ class TestNoelle(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.ELEMENTAL_BURST,
-            ActualDices({Element.OMNI: 4}),
+            ActualDice({Element.OMNI: 4}),
         )
 
         p1 = game_state.get_player1()
@@ -112,7 +112,7 @@ class TestNoelle(unittest.TestCase):
             base_state,
             Pid.P1,
             CharacterSkill.SKILL1,
-            dices=ActualDices({Element.PYRO: 1, Element.CRYO: 1}),
+            dice=ActualDice({Element.PYRO: 1, Element.CRYO: 1}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 6)
@@ -121,7 +121,7 @@ class TestNoelle(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.SKILL1,
-            dices=ActualDices({Element.GEO: 1, Element.DENDRO: 1, Element.ANEMO: 1}),
+            dice=ActualDice({Element.GEO: 1, Element.DENDRO: 1, Element.ANEMO: 1}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 2)
@@ -133,19 +133,19 @@ class TestNoelle(unittest.TestCase):
         self.assertIn(SweepingTimeStatus, p1ac_character_statuses)
         self.assertEqual(p1ac_character_statuses.just_find(SweepingTimeStatus).usages, 1)
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
-        game_state = fill_dices_with_omni(game_state)
+        game_state = fill_dice_with_omni(game_state)
         game_state = kill_character(game_state, character_id=1, hp=10)
         game_state = step_skill(
             game_state,
             Pid.P1,
             CharacterSkill.SKILL1,
-            dices=ActualDices({Element.OMNI: 2}),
+            dice=ActualDice({Element.OMNI: 2}),
         )
         game_state = step_skill(
             game_state,
             Pid.P1,
             CharacterSkill.SKILL1,
-            dices=ActualDices({Element.OMNI: 3}),
+            dice=ActualDice({Element.OMNI: 3}),
         )
 
         # disappears eventually after two rounds
@@ -167,7 +167,7 @@ class TestNoelle(unittest.TestCase):
         ).build()
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=IGotYourBack,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         ))
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         # first normal attack heals with shield on
@@ -185,7 +185,7 @@ class TestNoelle(unittest.TestCase):
         # healing is back the next round
         game_state = next_round(game_state)
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
-        game_state = fill_dices_with_omni(game_state)
+        game_state = fill_dice_with_omni(game_state)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1_cs = game_state.get_player1().get_characters()
         for char in p1_cs:
@@ -198,7 +198,7 @@ class TestNoelle(unittest.TestCase):
         # healing doesn't work without the shield
         game_state = next_round(game_state)
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
-        game_state = fill_dices_with_omni(game_state)
+        game_state = fill_dice_with_omni(game_state)
         game_state = auto_step(add_damage_effect(game_state, 2, Element.ELECTRO, Pid.P1, char_id=2))
         game_state = kill_character(game_state, character_id=1, hp=10)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)

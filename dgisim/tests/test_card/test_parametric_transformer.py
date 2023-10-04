@@ -19,7 +19,7 @@ class TestParametricTransformer(unittest.TestCase):
             return support
         base_state = step_action(base_state, Pid.P1, CardAction(
             card=ParametricTransformer,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.ANEMO: 1, Element.GEO: 1})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.ANEMO: 1, Element.GEO: 1})),
         ))
 
         # test skill with elemental damgae triggers
@@ -38,13 +38,13 @@ class TestParametricTransformer(unittest.TestCase):
         self.assertEqual(transformer.usages, 2)
 
         # test skill wihtout elemental damage but has elemental follow-up from status triggers
-        pre_dices = game_state.get_player1().get_dices()
+        pre_dice = game_state.get_player1().get_dice()
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
-        post_dices = game_state.get_player1().get_dices()
+        post_dice = game_state.get_player1().get_dice()
         self.assertNotIn(ParametricTransformerSupport, game_state.get_player1().get_supports())
         self.assertEqual(
-            post_dices.num_dices() - post_dices[Element.OMNI],
-            pre_dices.num_dices() - pre_dices[Element.OMNI] + 3,
+            post_dice.num_dice() - post_dice[Element.OMNI],
+            pre_dice.num_dice() - pre_dice[Element.OMNI] + 3,
         )
 
         # test oppo can trigger

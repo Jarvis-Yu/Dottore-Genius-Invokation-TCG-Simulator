@@ -24,7 +24,7 @@ from ..summon import summon as sm
 from ..support import support as sp
 
 from ..character.enums import CharacterSkill
-from ..dices import ActualDices
+from ..dice import ActualDice
 from ..element import Element, Reaction, ReactionDetail
 from ..event import *
 from ..helper.quality_of_life import just, case_val
@@ -36,7 +36,7 @@ from .structs import StaticTarget, DamageType
 
 if TYPE_CHECKING:
     from ..card.card import Card
-    from ..dices import ActualDices
+    from ..dice import ActualDice
     from ..state.game_state import GameState
     from ..status.statuses import Statuses
 
@@ -1421,33 +1421,33 @@ class AddDiceEffect(DirectEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         pid = self.pid
-        curr_dices = game_state.get_player(pid).get_dices()
-        addable_num = min(self.num, game_state.get_mode().dice_limit() - curr_dices.num_dices())
+        curr_dice = game_state.get_player(pid).get_dice()
+        addable_num = min(self.num, game_state.get_mode().dice_limit() - curr_dice.num_dice())
         if addable_num <= 0:
             return game_state
-        dices = ActualDices({self.element: addable_num})
-        new_dices = curr_dices + dices
+        dice = ActualDice({self.element: addable_num})
+        new_dice = curr_dice + dice
         return game_state.factory().f_player(
             pid,
-            lambda p: p.factory().dices(new_dices).build()
+            lambda p: p.factory().dice(new_dice).build()
         ).build()
 
 
 @dataclass(frozen=True, repr=False)
 class RemoveDiceEffect(DirectEffect):
     pid: Pid
-    dices: ActualDices
+    dice: ActualDice
 
     def execute(self, game_state: GameState) -> GameState:
         pid = self.pid
-        dices = self.dices
-        new_dices = game_state.get_player(pid).get_dices() - dices
-        if not new_dices.is_legal():
-            raise Exception(f"Not enough dices for this effect "
-                            + f"{game_state.get_player(pid).get_dices()} - {dices}")
+        dice = self.dice
+        new_dice = game_state.get_player(pid).get_dice() - dice
+        if not new_dice.is_legal():
+            raise Exception(f"Not enough dice for this effect "
+                            + f"{game_state.get_player(pid).get_dice()} - {dice}")
         return game_state.factory().f_player(
             pid,
-            lambda p: p.factory().dices(new_dices).build()
+            lambda p: p.factory().dice(new_dice).build()
         ).build()
 
 

@@ -41,7 +41,7 @@ class TestElementalResonanceHighVoltage(unittest.TestCase):
         self.assertTrue(ElementalResonanceHighVoltage.strictly_usable(base_state, Pid.P1))
         game_state = step_action(base_state, Pid.P1, CardAction(
             card=ElementalResonanceHighVoltage,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.ELECTRO: 1}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.ELECTRO: 1}))
         ))
         p1c1, p1c2, p1c3 = tuple(char for char in game_state.get_player1().get_characters())
         self.assertEqual(p1c1.get_energy(), p1c1.get_max_energy() - 1)
@@ -51,7 +51,7 @@ class TestElementalResonanceHighVoltage(unittest.TestCase):
         self.assertTrue(ElementalResonanceHighVoltage.strictly_usable(game_state, Pid.P1))
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=ElementalResonanceHighVoltage,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.ELECTRO: 1}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.ELECTRO: 1}))
         ))
         p1c1, p1c2, p1c3 = tuple(char for char in game_state.get_player1().get_characters())
         self.assertEqual(p1c1.get_energy(), p1c1.get_max_energy() - 1)
@@ -61,7 +61,7 @@ class TestElementalResonanceHighVoltage(unittest.TestCase):
         self.assertTrue(ElementalResonanceHighVoltage.strictly_usable(game_state, Pid.P1))
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=ElementalResonanceHighVoltage,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.ELECTRO: 1}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.ELECTRO: 1}))
         ))
         p1c1, p1c2, p1c3 = tuple(char for char in game_state.get_player1().get_characters())
         self.assertEqual(p1c1.get_energy(), p1c1.get_max_energy())

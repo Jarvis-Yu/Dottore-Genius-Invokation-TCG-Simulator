@@ -10,7 +10,7 @@ class TestSumeruCity(unittest.TestCase):
             SumeruCity: 1,
             ThunderingPenance: 1,
         }))
-        base_state = replace_dices(base_state, Pid.P1, ActualDices({
+        base_state = replace_dice(base_state, Pid.P1, ActualDice({
             Element.OMNI: 8,
             Element.ANEMO: 2,
         }))
@@ -20,73 +20,73 @@ class TestSumeruCity(unittest.TestCase):
         game_state = base_state
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=SumeruCity,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.ANEMO: 2})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.ANEMO: 2})),
         ))
 
-        # not triggered when dices > cards
-        self.assertEqual(game_state.get_player1().get_dices().num_dices(), 8)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2, ActualDices({
+        # not triggered when dice > cards
+        self.assertEqual(game_state.get_player1().get_dice().num_dice(), 8)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2, ActualDice({
             Element.OMNI: 3,
         }))
         self.assertEqual(game_state.get_player1().get_hand_cards().num_cards(), 2)
 
-        # not triggered when dices > cards
-        self.assertEqual(game_state.get_player1().get_dices().num_dices(), 5)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1, ActualDices({
+        # not triggered when dice > cards
+        self.assertEqual(game_state.get_player1().get_dice().num_dice(), 5)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1, ActualDice({
             Element.OMNI: 3,
         }))
         self.assertEqual(game_state.get_player1().get_hand_cards().num_cards(), 2)
 
-        state_2_2 = game_state  # state with 2 cards and 2 OMNI dices
+        state_2_2 = game_state  # state with 2 cards and 2 OMNI dice
 
-        # triggered when dices == cards, normal attack
-        self.assertEqual(game_state.get_player1().get_dices().num_dices(), 2)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1, ActualDices({
+        # triggered when dice == cards, normal attack
+        self.assertEqual(game_state.get_player1().get_dice().num_dice(), 2)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1, ActualDice({
             Element.OMNI: 2,
         }))
         self.assertEqual(game_state.get_player1().get_hand_cards().num_cards(), 2)
 
-        # triggered when dices == cards, use skill that consumes card
+        # triggered when dice == cards, use skill that consumes card
         game_state = state_2_2
-        self.assertEqual(game_state.get_player1().get_dices().num_dices(), 2)
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2, ActualDices({
+        self.assertEqual(game_state.get_player1().get_dice().num_dice(), 2)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2, ActualDice({
             Element.OMNI: 2,
         }))
         self.assertEqual(game_state.get_player1().get_hand_cards().num_cards(), 1)
 
-        # triggered when dices == cards, use talent card (keqing skill generated)
+        # triggered when dice == cards, use talent card (keqing skill generated)
         game_state = state_2_2
-        self.assertEqual(game_state.get_player1().get_dices().num_dices(), 2)
+        self.assertEqual(game_state.get_player1().get_dice().num_dice(), 2)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=LightningStiletto,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.OMNI: 2}),
+                dice=ActualDice({Element.OMNI: 2}),
                 target=StaticTarget.from_player_active(game_state, Pid.P1),
             )
         ))
         self.assertEqual(game_state.get_player1().get_hand_cards().num_cards(), 1)
 
-        # triggered when dices == cards, use talent card (keqing skill generated)
+        # triggered when dice == cards, use talent card (keqing skill generated)
         game_state = state_2_2
-        self.assertEqual(game_state.get_player1().get_dices().num_dices(), 2)
+        self.assertEqual(game_state.get_player1().get_dice().num_dice(), 2)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=ThunderingPenance,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 2})),
         ))
         self.assertEqual(game_state.get_player1().get_hand_cards().num_cards(), 0)
 
         # check can only be triggered once
-        game_state = replace_dices(game_state, Pid.P1, ActualDices({Element.OMNI: 2}))
+        game_state = replace_dice(game_state, Pid.P1, ActualDice({Element.OMNI: 2}))
         game_state = replace_hand_cards(game_state, Pid.P1, Cards({NRE: 2}))
         self.assertRaises(Exception, lambda: step_skill(
             game_state,
             Pid.P1,
             CharacterSkill.SKILL1,
-            ActualDices({Element.OMNI: 2}),
+            ActualDice({Element.OMNI: 2}),
         ))
 
-        # check can be triggered when cards > dices
+        # check can be triggered when cards > dice
         game_state = replace_hand_cards(state_2_2, Pid.P1, Cards({NRE: 2, Liben: 1}))
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1, ActualDices({
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1, ActualDice({
             Element.OMNI: 2,
         }))

@@ -18,7 +18,7 @@ class TestSangonomiyaKokomi(unittest.TestCase):
             self.BASE_GAME,
             Pid.P1,
             CharacterSkill.SKILL1,
-            dices=ActualDices({Element.HYDRO: 1, Element.ELECTRO: 1, Element.DENDRO: 1}),
+            dice=ActualDice({Element.HYDRO: 1, Element.ELECTRO: 1, Element.DENDRO: 1}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 9)
@@ -30,7 +30,7 @@ class TestSangonomiyaKokomi(unittest.TestCase):
             self.BASE_GAME,
             Pid.P1,
             CharacterSkill.SKILL2,
-            dices=ActualDices({Element.HYDRO: 3}),
+            dice=ActualDice({Element.HYDRO: 3}),
         )
         p1 = game_state.get_player1()
         p1ac = p1.just_get_active_character()
@@ -48,7 +48,7 @@ class TestSangonomiyaKokomi(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.ELEMENTAL_BURST,
-            dices=ActualDices({Element.HYDRO: 3}),
+            dice=ActualDice({Element.HYDRO: 3}),
         )
         p1ac = game_state.get_player1().just_get_active_character()
         p2ac = game_state.get_player2().just_get_active_character()
@@ -132,7 +132,7 @@ class TestSangonomiyaKokomi(unittest.TestCase):
         game_state = simulate_status_dmg(game_state, dmg_amount=5, pid=Pid.P1)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=TamakushiCasket,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.HYDRO: 3}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.HYDRO: 3}))
         ), observe=False)
         p1 = game_state.get_player1()
         p1ac = p1.just_get_active_character()
@@ -160,7 +160,7 @@ class TestSangonomiyaKokomi(unittest.TestCase):
 
         # burst normal attack functions as usual
         game_state = skip_action_round_until(game_state, Pid.P1)
-        game_state = fill_dices_with_omni(game_state)
+        game_state = fill_dice_with_omni(game_state)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1 = game_state.get_player1()
         p1ac = p1.just_get_active_character()

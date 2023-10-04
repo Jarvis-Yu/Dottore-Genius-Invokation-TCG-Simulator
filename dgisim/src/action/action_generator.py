@@ -5,7 +5,7 @@ from typing_extensions import Self
 
 if TYPE_CHECKING:
     from ..card.cards import Cards
-    from ..dices import ActualDices
+    from ..dice import ActualDice
     from ..state.enums import Pid
     from ..state.game_state import GameState
 
@@ -71,8 +71,8 @@ class ActionGenerator:
         assert not self.filled()
         return self._choices_helper(self)
 
-    def dices_available(self) -> ActualDices:
-        return self.game_state.get_player(self.pid).get_dices()
+    def dice_available(self) -> ActualDice:
+        return self.game_state.get_player(self.pid).get_dice()
 
     def hand_cards_available(self) -> Cards:
         return self.game_state.get_player(self.pid).get_hand_cards()

@@ -18,7 +18,7 @@ class TestYoimiya(unittest.TestCase):
             self.BASE_GAME,
             Pid.P1,
             CharacterSkill.SKILL1,
-            dices=ActualDices({Element.PYRO: 1, Element.HYDRO: 1, Element.DENDRO: 1}),
+            dice=ActualDice({Element.PYRO: 1, Element.HYDRO: 1, Element.DENDRO: 1}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 8)
@@ -30,7 +30,7 @@ class TestYoimiya(unittest.TestCase):
             self.BASE_GAME,
             Pid.P1,
             CharacterSkill.SKILL2,
-            dices=ActualDices({Element.PYRO: 1}),
+            dice=ActualDice({Element.PYRO: 1}),
         )
         p1ac = game_state.get_player1().just_get_active_character()
         p2ac = game_state.get_player2().just_get_active_character()
@@ -47,7 +47,7 @@ class TestYoimiya(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.ELEMENTAL_BURST,
-            dices=ActualDices({Element.PYRO: 3}),
+            dice=ActualDice({Element.PYRO: 3}),
         )
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
@@ -65,7 +65,7 @@ class TestYoimiya(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.SKILL1,
-            dices=ActualDices({Element.OMNI: 3}),
+            dice=ActualDice({Element.OMNI: 3}),
         )
         p1ac = game_state.get_player1().just_get_active_character()
         p2ac = game_state.get_player2().just_get_active_character()
@@ -80,7 +80,7 @@ class TestYoimiya(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.SKILL1,
-            dices=ActualDices({Element.OMNI: 3}),
+            dice=ActualDice({Element.OMNI: 3}),
         )
         p1ac = game_state.get_player1().just_get_active_character()
         self.assertNotIn(NiwabiEnshouStatus, p1ac.get_character_statuses())
@@ -92,7 +92,7 @@ class TestYoimiya(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.SKILL1,
-            dices=ActualDices({Element.OMNI: 3}),
+            dice=ActualDice({Element.OMNI: 3}),
         )
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
@@ -132,7 +132,7 @@ class TestYoimiya(unittest.TestCase):
     def test_talent_card(self):
         game_state = step_action(self.BASE_GAME, Pid.P1, CardAction(
             card=NaganoharaMeteorSwarm,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.PYRO: 2}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.PYRO: 2}))
         ))
         p1ac = game_state.get_player1().just_get_active_character()
         p2ac = game_state.get_player2().just_get_active_character()
@@ -149,7 +149,7 @@ class TestYoimiya(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.SKILL1,
-            dices=ActualDices({Element.OMNI: 3}),
+            dice=ActualDice({Element.OMNI: 3}),
         )
         p1ac = game_state.get_player1().just_get_active_character()
         p2ac = game_state.get_player2().just_get_active_character()
@@ -165,7 +165,7 @@ class TestYoimiya(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.ELEMENTAL_BURST,
-            dices=ActualDices({Element.PYRO: 3}),
+            dice=ActualDice({Element.PYRO: 3}),
         )
         p1ac = game_state.get_player1().just_get_active_character()
         p2ac = game_state.get_player2().just_get_active_character()

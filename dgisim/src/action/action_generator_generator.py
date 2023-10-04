@@ -7,7 +7,7 @@ from abc import ABC
 from dataclasses import replace
 from typing import TYPE_CHECKING
 
-from ..dices import ActualDices
+from ..dice import ActualDice
 from ..element import Element
 from ..helper.quality_of_life import just
 from ..character.enums import CharacterSkill
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 __all__ = [
     "CardActGenGenerator",
     "CardsSelectionActGenGenerator",
-    "DicesSelectionActGenGenerator",
+    "DiceSelectionActGenGenerator",
     "ElemTuningActGenGenerator",
     "SkillActGenGenerator",
     "SwapActGenGenerator",
@@ -139,17 +139,17 @@ class CardsSelectionActGenGenerator(ABC):
         )
 
 
-class DicesSelectionActGenGenerator(ABC):
+class DiceSelectionActGenGenerator(ABC):
     """
-    This generates an ActionGenerator for DicesSelectAction.
+    This generates an ActionGenerator for DiceSelectAction.
     """
     @classmethod
     def _choices_helper(cls, action_generator: ActionGenerator) -> GivenChoiceType:
         assert not action_generator.filled()
-        assert type(action_generator.action) is DicesSelectAction
+        assert type(action_generator.action) is DiceSelectAction
         game_state = action_generator.game_state
         pid = action_generator.pid
-        return game_state.get_player(pid).get_dices()
+        return game_state.get_player(pid).get_dice()
 
     @classmethod
     def _fill_helper(
@@ -158,13 +158,13 @@ class DicesSelectionActGenGenerator(ABC):
         player_choice: DecidedChoiceType,
     ) -> ActionGenerator:
         assert not action_generator.filled()
-        assert type(action_generator.action) is DicesSelectAction
-        assert isinstance(player_choice, ActualDices)
+        assert type(action_generator.action) is DiceSelectAction
+        assert isinstance(player_choice, ActualDice)
         return replace(
             action_generator,
             action=replace(
                 action_generator.action,
-                selected_dices=player_choice,
+                selected_dice=player_choice,
             )
         )
 
@@ -177,7 +177,7 @@ class DicesSelectionActGenGenerator(ABC):
         return ActionGenerator(
             game_state=game_state,
             pid=pid,
-            action=DicesSelectAction._all_none(),
+            action=DiceSelectAction._all_none(),
             _choices_helper=cls._choices_helper,
             _fill_helper=cls._fill_helper,
         )
@@ -204,7 +204,7 @@ class ElemTuningActGenGenerator(ABC):
         if action.dice_elem is None:
             return tuple(
                 elem
-                for elem in game_state.get_player(pid).get_dices()
+                for elem in game_state.get_player(pid).get_dice()
                 if elem is not Element.OMNI and elem is not active_character.ELEMENT()
             )
 
@@ -286,11 +286,11 @@ class SkillActGenGenerator(ABC):
         assert action_generator._action_filled()
         instruction = action_generator.instruction
         assert type(instruction) is DiceOnlyInstruction
-        if instruction.dices is None:
+        if instruction.dice is None:
             retval = game_state.skill_checker().usable(pid, active_character.get_id(), action.skill)
             assert retval is not None
-            _, dices = retval
-            return dices
+            _, dice = retval
+            return dice
 
         raise Exception(  # pragma: no cover
             "Not Reached! Should be called when there is something to fill. action_generator:\n"
@@ -314,12 +314,12 @@ class SkillActGenGenerator(ABC):
 
         instruction = action_generator.instruction
         assert type(instruction) is DiceOnlyInstruction
-        if instruction.dices is None:
-            assert isinstance(player_choice, ActualDices)
+        if instruction.dice is None:
+            assert isinstance(player_choice, ActualDice)
             game_state = action_generator.game_state
             pid = action_generator.pid
-            # assert that dices player provided does satisfy the requirement and is legal
-            assert (game_state.get_player(pid).get_dices() - player_choice).is_legal()
+            # assert that dice player provided does satisfy the requirement and is legal
+            assert (game_state.get_player(pid).get_dice() - player_choice).is_legal()
             assert player_choice.just_satisfy(just(game_state.skill_checker().usable(
                 pid,
                 game_state.get_player(pid).just_get_active_character().get_id(),
@@ -327,7 +327,7 @@ class SkillActGenGenerator(ABC):
             ))[1])
             return replace(
                 action_generator,
-                instruction=replace(instruction, dices=player_choice),
+                instruction=replace(instruction, dice=player_choice),
             )
 
         raise Exception("Not Reached")
@@ -392,12 +392,12 @@ class SwapActGenGenerator(ABC):
         assert type(action) is SwapAction
         instruction = action_generator.instruction
         assert type(instruction) is DiceOnlyInstruction
-        if instruction.dices is None:
+        if instruction.dice is None:
             swap_details = game_state.swap_checker().swap_details(pid, action.char_id)
             assert swap_details is not None
-            _, dices_cost = swap_details
-            assert dices_cost is not None
-            return dices_cost
+            _, dice_cost = swap_details
+            assert dice_cost is not None
+            return dice_cost
 
         raise Exception(  # pragma: no cover
             "Not Reached! Should be called when there is something to fill. action_generator:\n"
@@ -425,11 +425,11 @@ class SwapActGenGenerator(ABC):
 
         instruction = action_generator.instruction
         assert type(instruction) is DiceOnlyInstruction
-        if instruction.dices is None:
-            assert isinstance(player_choice, ActualDices)
+        if instruction.dice is None:
+            assert isinstance(player_choice, ActualDice)
             return replace(
                 action_generator,
-                instruction=replace(instruction, dices=player_choice),
+                instruction=replace(instruction, dice=player_choice),
             )
 
         raise Exception("Not Reached")

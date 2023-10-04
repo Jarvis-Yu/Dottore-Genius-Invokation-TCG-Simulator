@@ -23,12 +23,12 @@ class TestQuickKnit(unittest.TestCase):
             ).build()
         ).build()
 
-        # test giving wrong num of dices
+        # test giving wrong num of dice
         card_action = CardAction(
             card=QuickKnit,
             instruction=StaticTargetInstruction(
                 target=StaticTarget(Pid.P1, Zone.SUMMONS, OceanicMimicFrogSummon),
-                dices=ActualDices({Element.OMNI: 0}),
+                dice=ActualDice({Element.OMNI: 0}),
             ),
         )
         self.assertRaises(
@@ -39,7 +39,7 @@ class TestQuickKnit(unittest.TestCase):
             card=QuickKnit,
             instruction=StaticTargetInstruction(
                 target=StaticTarget(Pid.P1, Zone.SUMMONS, OceanicMimicFrogSummon),
-                dices=ActualDices({Element.OMNI: 2}),
+                dice=ActualDice({Element.OMNI: 2}),
             ),
         )
         self.assertRaises(
@@ -52,7 +52,7 @@ class TestQuickKnit(unittest.TestCase):
             card=QuickKnit,
             instruction=StaticTargetInstruction(
                 target=StaticTarget(Pid.P1, Zone.SUMMONS, OceanicMimicRaptorSummon),
-                dices=ActualDices({Element.OMNI: 1}),
+                dice=ActualDice({Element.OMNI: 1}),
             ),
         )
         self.assertRaises(
@@ -69,9 +69,9 @@ class TestQuickKnit(unittest.TestCase):
         self.assertIsInstance(choices[0], StaticTarget)
         action_generator = action_generator.choose(choices[0])
         choices = action_generator.choices()
-        assert isinstance(choices, AbstractDices)
+        assert isinstance(choices, AbstractDice)
         action_generator = action_generator.choose(
-            just(action_generator.dices_available().basically_satisfy(choices))
+            just(action_generator.dice_available().basically_satisfy(choices))
         )
 
         # test right usage
@@ -79,7 +79,7 @@ class TestQuickKnit(unittest.TestCase):
             card=QuickKnit,
             instruction=StaticTargetInstruction(
                 target=StaticTarget(Pid.P1, Zone.SUMMONS, OceanicMimicFrogSummon),
-                dices=ActualDices({Element.OMNI: 1}),
+                dice=ActualDice({Element.OMNI: 1}),
             ),
         )
         usages_before = base_game.get_player1().get_summons().just_find(
@@ -97,7 +97,7 @@ class TestQuickKnit(unittest.TestCase):
             card=QuickKnit,
             instruction=StaticTargetInstruction(
                 target=StaticTarget(Pid.P1, Zone.SUMMONS, BurningFlameSummon),
-                dices=ActualDices({Element.OMNI: 1}),
+                dice=ActualDice({Element.OMNI: 1}),
             ),
         )
         usages_before = base_game.get_player1().get_summons().just_find(

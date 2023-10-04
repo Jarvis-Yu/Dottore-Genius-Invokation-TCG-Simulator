@@ -14,7 +14,7 @@ from ..action.action import PlayerAction
 from ..card.card import Card
 from ..character.character import Character
 from ..character.enums import CharacterSkill
-from ..dices import AbstractDices
+from ..dice import AbstractDice
 from ..effect.enums import Zone
 from ..effect.structs import StaticTarget
 from ..effect.effect_stack import EffectStack
@@ -420,7 +420,7 @@ class SwapChecker:
             self,
             pid: Pid,
             char_id: int,
-    ) -> None | tuple[EventSpeed, None | AbstractDices]:
+    ) -> None | tuple[EventSpeed, None | AbstractDice]:
         game_state = self._game_state
         selected_char = game_state.get_player(pid).get_characters().get_character(char_id)
         active_character_id = game_state.get_player(pid).get_characters().get_active_character_id()
@@ -451,12 +451,12 @@ class SwapChecker:
                 ),
                 event_type=EventType.SWAP,
                 event_speed=game_state.get_mode().swap_speed(),
-                dices_cost=game_state.get_mode().swap_cost(),
+                dice_cost=game_state.get_mode().swap_cost(),
             ),
         )
         assert isinstance(swap_action, ActionPEvent)
-        if game_state.get_player(pid).get_dices().loosely_satisfy(swap_action.dices_cost):
-            return swap_action.event_speed, swap_action.dices_cost
+        if game_state.get_player(pid).get_dice().loosely_satisfy(swap_action.dice_cost):
+            return swap_action.event_speed, swap_action.dice_cost
         else:
             return None
 
@@ -507,15 +507,15 @@ class SwapChecker:
                     ),
                     event_type=EventType.SWAP,
                     event_speed=game_state.get_mode().swap_speed(),
-                    dices_cost=game_state.get_mode().swap_cost(),
+                    dice_cost=game_state.get_mode().swap_cost(),
                 ),
             )
             assert isinstance(swap_action, ActionPEvent)
-            instruction_dices = action.instruction.dices
-            player_dices = game_state.get_player(pid).get_dices()
+            instruction_dice = action.instruction.dice
+            player_dice = game_state.get_player(pid).get_dice()
             return case_val(
-                (player_dices - instruction_dices).is_legal()
-                and instruction_dices.just_satisfy(swap_action.dices_cost),
+                (player_dice - instruction_dice).is_legal()
+                and instruction_dice.just_satisfy(swap_action.dice_cost),
                 (new_game_state, swap_action.event_speed),
                 None
             )
@@ -531,7 +531,7 @@ class SkillChecker:
             pid: Pid,
             char_id: int,
             skill_type: CharacterSkill,
-    ) -> None | tuple[GameState, AbstractDices]:
+    ) -> None | tuple[GameState, AbstractDice]:
         game_state = self._game_state
         character = game_state.get_player(pid).get_characters().get_character(char_id)
         if character is None \
@@ -554,12 +554,12 @@ class SkillChecker:
                 event_type=skill_type.to_event_type(),
                 event_sub_type=character.skill_actual_type(skill_type),
                 event_speed=EventSpeed.COMBAT_ACTION,
-                dices_cost=character.skill_cost(skill_type),
+                dice_cost=character.skill_cost(skill_type),
             ),
         )
         assert isinstance(skill_event, ActionPEvent)
-        if game_state.get_player(pid).get_dices().loosely_satisfy(skill_event.dices_cost):
-            return new_game_state, skill_event.dices_cost
+        if game_state.get_player(pid).get_dice().loosely_satisfy(skill_event.dice_cost):
+            return new_game_state, skill_event.dice_cost
         else:
             return None
 
@@ -601,13 +601,13 @@ class SkillChecker:
                 event_type=skill_type.to_event_type(),
                 event_sub_type=character.skill_actual_type(skill_type),
                 event_speed=EventSpeed.COMBAT_ACTION,
-                dices_cost=character.skill_cost(skill_type),
+                dice_cost=character.skill_cost(skill_type),
             ),
         )
         assert isinstance(skill_event, ActionPEvent)
-        paid_dices = action.instruction.dices
-        if paid_dices.just_satisfy(skill_event.dices_cost) \
-                and (game_state.get_player(pid).get_dices() - paid_dices).is_legal():
+        paid_dice = action.instruction.dice
+        if paid_dice.just_satisfy(skill_event.dice_cost) \
+                and (game_state.get_player(pid).get_dice() - paid_dice).is_legal():
             return game_state
         else:
             return None
@@ -626,9 +626,9 @@ class ElementalTuningChecker:
         active_character = player.get_active_character()
         assert active_character is not None
         active_character_elem = active_character.ELEMENT()
-        dices = player.get_dices()
+        dice = player.get_dice()
         return (
             player.get_hand_cards().not_empty()
-            and dices[Element.OMNI] + dices[active_character_elem] < dices.num_dices()
-            and (elem is None or dices[elem] > 0)
+            and dice[Element.OMNI] + dice[active_character_elem] < dice.num_dice()
+            and (elem is None or dice[elem] > 0)
         )

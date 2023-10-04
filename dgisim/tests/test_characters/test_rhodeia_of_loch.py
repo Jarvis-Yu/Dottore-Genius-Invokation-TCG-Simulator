@@ -94,8 +94,8 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm.player_step()  # P1 END
         gsm.player_step()  # p2 death swap
         gsm.auto_step()
-        a1.inject_action(DicesSelectAction(selected_dices=ActualDices({})))  # skip roll phase
-        a2.inject_action(DicesSelectAction(selected_dices=ActualDices({})))
+        a1.inject_action(DiceSelectAction(selected_dice=ActualDice({})))  # skip roll phase
+        a2.inject_action(DiceSelectAction(selected_dice=ActualDice({})))
         gsm.step_until_phase(base_game.get_mode().action_phase())
 
         game_state = gsm.get_game_state()
@@ -112,8 +112,8 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         a1.inject_action(EndRoundAction())  # skip action phase
         a2.inject_action(EndRoundAction())
         gsm.step_until_phase(game_state.get_mode().end_phase())
-        a1.inject_action(DicesSelectAction(selected_dices=ActualDices({})))  # skip roll phase
-        a2.inject_action(DicesSelectAction(selected_dices=ActualDices({})))
+        a1.inject_action(DiceSelectAction(selected_dice=ActualDice({})))  # skip roll phase
+        a2.inject_action(DiceSelectAction(selected_dice=ActualDice({})))
         gsm.step_until_phase(game_state.get_mode().action_phase())
 
         game_state = gsm.get_game_state()
@@ -145,7 +145,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -170,7 +170,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm = GameStateMachine(base_game, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL2,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -190,7 +190,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm = GameStateMachine(base_game, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL3,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 5})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 5})),
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -218,7 +218,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm = GameStateMachine(base_game, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.ELEMENTAL_BURST,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -238,7 +238,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm = GameStateMachine(game_state, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.ELEMENTAL_BURST,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -267,7 +267,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         a1.inject_action(
             CardAction(
                 card=StreamingSurge,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 4})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 4})),
             )
         )
         gsm.player_step()

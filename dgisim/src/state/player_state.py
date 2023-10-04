@@ -8,7 +8,7 @@ from ..support import support as sp
 
 from ..card.cards import Cards
 from ..character.characters import Characters
-from ..dices import ActualDices
+from ..dice import ActualDice
 from ..summon.summons import Summons
 from ..support.supports import Supports
 
@@ -35,7 +35,7 @@ class PlayerState:
         supports: Supports,
         card_redraw_chances: int,
         dice_reroll_chances: int,
-        dices: ActualDices,
+        dice: ActualDice,
         hand_cards: Cards,
         deck_cards: Cards,
         publicly_used_cards: Cards,
@@ -51,7 +51,7 @@ class PlayerState:
         self._combat_statuses = combat_statuses
         self._summons = summons
         self._supports = supports
-        self._dices = dices
+        self._dice = dice
         self._hand_cards = hand_cards
         self._deck_cards = deck_cards
         self._publicly_used_cards = publicly_used_cards
@@ -87,8 +87,8 @@ class PlayerState:
     def get_supports(self) -> Supports:
         return self._supports
 
-    def get_dices(self) -> ActualDices:
-        return self._dices
+    def get_dice(self) -> ActualDice:
+        return self._dice
 
     def get_hand_cards(self) -> Cards:
         return self._hand_cards
@@ -165,7 +165,7 @@ class PlayerState:
             combat_statuses=sts.Statuses(()),
             summons=Summons((), mode.summons_limit()),
             supports=Supports((), mode.supports_limit()),
-            dices=ActualDices({}),
+            dice=ActualDice({}),
             hand_cards=Cards({}),
             deck_cards=Cards(dict([(card, mode.deck_card_limit_per_kind())
                              for card in selected_cards])),
@@ -185,7 +185,7 @@ class PlayerState:
             combat_statuses=sts.Statuses(()),
             summons=Summons((), mode.summons_limit()),
             supports=Supports((), mode.supports_limit()),
-            dices=ActualDices({}),
+            dice=ActualDice({}),
             hand_cards=Cards({}),
             deck_cards=cards,
             publicly_used_cards=Cards({}),
@@ -204,7 +204,7 @@ class PlayerState:
             combat_statuses=sts.Statuses(()),
             summons=Summons((), mode.summons_limit()),
             supports=Supports((), mode.supports_limit()),
-            dices=ActualDices({}),
+            dice=ActualDice({}),
             hand_cards=Cards({}),
             deck_cards=Cards(deck.cards),
             publicly_used_cards=Cards({}),
@@ -222,7 +222,7 @@ class PlayerState:
             self._combat_statuses,
             self._summons,
             self._supports,
-            self._dices,
+            self._dice,
             self._hand_cards,
             self._deck_cards,
             self._publicly_used_cards,
@@ -253,7 +253,7 @@ class PlayerState:
             "Combat Statuses": self._combat_statuses.dict_str(),
             "Summons": self._summons.dict_str(),
             "Supports": self._supports.dict_str(),
-            "Dices": self._dices.dict_str(),
+            "Dice": self._dice.dict_str(),
             "Hand Cards": self._hand_cards.dict_str(),
             "Deck Cards": self._deck_cards.dict_str(),
             "Publicly Used Cards": self._publicly_used_cards.dict_str(),
@@ -272,7 +272,7 @@ class PlayerStateFactory:
         self._combat_statuses = player_state.get_combat_statuses()
         self._summons = player_state.get_summons()
         self._supports = player_state.get_supports()
-        self._dices = player_state.get_dices()
+        self._dice = player_state.get_dice()
         self._hand_cards = player_state.get_hand_cards()
         self._deck_cards = player_state.get_deck_cards()
         self._publicly_used_cards = player_state.get_publicly_used_cards()
@@ -339,12 +339,12 @@ class PlayerStateFactory:
     def f_supports(self, f: Callable[[Supports], Supports]) -> PlayerStateFactory:
         return self.supports(f(self._supports))
 
-    def dices(self, dices: ActualDices) -> PlayerStateFactory:
-        self._dices = dices
+    def dice(self, dice: ActualDice) -> PlayerStateFactory:
+        self._dice = dice
         return self
 
-    def f_dices(self, f: Callable[[ActualDices], ActualDices]) -> PlayerStateFactory:
-        return self.dices(f(self._dices))
+    def f_dice(self, f: Callable[[ActualDice], ActualDice]) -> PlayerStateFactory:
+        return self.dice(f(self._dice))
 
     def hand_cards(self, cards: Cards) -> PlayerStateFactory:
         self._hand_cards = cards
@@ -385,7 +385,7 @@ class PlayerStateFactory:
             combat_statuses=self._combat_statuses,
             summons=self._summons,
             supports=self._supports,
-            dices=self._dices,
+            dice=self._dice,
             hand_cards=self._hand_cards,
             deck_cards=self._deck_cards,
             publicly_used_cards=self._publicly_used_cards,

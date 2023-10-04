@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from typing_extensions import override
 
-from .dices import AbstractDices
+from .dice import AbstractDice
 from .element import *
 from .event import *
 from .helper.level_print import level_print_single
@@ -44,7 +44,7 @@ class Mode(ABC):
     _ROUND_LIMIT = 15
     _SUMMONS_LIMIT = 4
     _SUPPORTS_LIMIT = 4
-    _SWAP_COST = AbstractDices({Element.ANY: 1})
+    _SWAP_COST = AbstractDice({Element.ANY: 1})
     _SWAP_SPEED = EventSpeed.COMBAT_ACTION
 
     def card_redraw_chances(self) -> int:
@@ -104,7 +104,7 @@ class Mode(ABC):
     def supports_limit(self) -> int:
         return self._SUPPORTS_LIMIT
 
-    def swap_cost(self) -> AbstractDices:
+    def swap_cost(self) -> AbstractDice:
         return self._SWAP_COST
 
     def swap_speed(self) -> EventSpeed:

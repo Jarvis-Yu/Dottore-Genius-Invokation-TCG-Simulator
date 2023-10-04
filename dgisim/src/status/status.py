@@ -22,7 +22,7 @@ from typing_extensions import override, Self
 from ..effect import effect as eft
 
 from ..character.enums import CharacterSkill, CharacterSkillType, WeaponType
-from ..dices import ActualDices
+from ..dice import ActualDice
 from ..effect.effects_template import standard_post_effects
 from ..effect.enums import Zone, TriggeringSignal, DynamicCharacterTarget
 from ..effect.structs import StaticTarget, DamageType
@@ -979,7 +979,7 @@ class _SacrificialWeaponStatus(WeaponEquipmentStatus, _UsageLivingStatus):
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 1
     activated: bool = False
-    DICES_GAIN_NUM: ClassVar[int] = 1
+    DICE_GAIN_NUM: ClassVar[int] = 1
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.COMBAT_ACTION,
@@ -1020,7 +1020,7 @@ class _SacrificialWeaponStatus(WeaponEquipmentStatus, _UsageLivingStatus):
                     eft.AddDiceEffect(
                         pid=source.pid,
                         element=equiper.ELEMENT(),
-                        num=self.DICES_GAIN_NUM,
+                        num=self.DICE_GAIN_NUM,
                     )
                 ], replace(self, activated=False, usages=-1)
         elif signal is TriggeringSignal.ROUND_END:
@@ -1066,7 +1066,7 @@ class AmosBowStatus(WeaponEquipmentStatus, _UsageLivingStatus):
             this_char = game_state.get_character_target(status_source)
             assert this_char is not None
             total_cost = (
-                this_char.skill_cost(information.skill_type).num_dices()
+                this_char.skill_cost(information.skill_type).num_dice()
                 + this_char.skill_energy_cost(information.skill_type)
             )
             if total_cost < 5:
@@ -1454,7 +1454,7 @@ class GamblersEarringsStatus(ArtifactEquipmentStatus):
     informed_num: int = 0
     triggered_num: int = 0
     MAX_TRIGGER_NUM: ClassVar[int] = 3
-    NUM_DICES_PER_TRIGGER: ClassVar[int] = 2
+    NUM_DICE_PER_TRIGGER: ClassVar[int] = 2
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.DEATH_EVENT,
@@ -1494,7 +1494,7 @@ class GamblersEarringsStatus(ArtifactEquipmentStatus):
                 active_char_id = this_player.just_get_active_character().get_id()
                 if active_char_id is not source.id:
                     return [], replace(self, informed_num=0)
-                additions = self.informed_num * self.NUM_DICES_PER_TRIGGER
+                additions = self.informed_num * self.NUM_DICE_PER_TRIGGER
                 return [
                     eft.AddDiceEffect(pid=source.pid, element=Element.OMNI, num=additions)
                 ], replace(
@@ -1689,10 +1689,10 @@ class ChangingShiftsStatus(CombatStatus):
         if signal is Preprocessables.SWAP:
             assert isinstance(item, ActionPEvent) and item.event_type is EventType.SWAP
             if item.source.pid is status_source.pid \
-                    and item.dices_cost.num_dices() >= self.COST_DEDUCTION:
-                assert item.dices_cost.num_dices() == item.dices_cost[Element.ANY]
-                new_cost = (item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
-                return replace(item, dices_cost=new_cost), None
+                    and item.dice_cost.num_dice() >= self.COST_DEDUCTION:
+                assert item.dice_cost.num_dice() == item.dice_cost[Element.ANY]
+                new_cost = (item.dice_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
+                return replace(item, dice_cost=new_cost), None
         return super()._preprocess(game_state, status_source, item, signal)
 
 
@@ -1944,10 +1944,10 @@ class KingsSquireEffectStatus(CharacterStatus):
             if (
                     item.source == status_source
                     and item.event_sub_type is CharacterSkillType.ELEMENTAL_SKILL
-                    and item.dices_cost.can_cost_less_elem()
+                    and item.dice_cost.can_cost_less_elem()
             ):
-                new_cost = item.dices_cost.cost_less_elem(self.COST_DEDUCTION)
-                return replace(item, dices_cost=new_cost), None
+                new_cost = item.dice_cost.cost_less_elem(self.COST_DEDUCTION)
+                return replace(item, dice_cost=new_cost), None
         return item, self
 
     @override
@@ -2058,11 +2058,11 @@ class WhereIsTheUnseenRazorStatus(CombatStatus):
             if not (
                     item.pid is status_source.pid
                     and issubclass(item.card_type, WeaponEquipmentCard)
-                    and item.dices_cost.can_cost_less_elem()
+                    and item.dice_cost.can_cost_less_elem()
             ):
                 return replace(
                     item,
-                    dices_cost=item.dices_cost.cost_less_elem(self.COST_DEDUCTION)
+                    dice_cost=item.dice_cost.cost_less_elem(self.COST_DEDUCTION)
                 ), None
         return item, self
 
@@ -2195,10 +2195,10 @@ class MintyMeatRollsStatus(CharacterStatus, _UsageStatus):
             assert isinstance(item, ActionPEvent)
             if status_source == item.source \
                     and item.event_sub_type is CharacterSkillType.NORMAL_ATTACK \
-                    and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION:
+                    and item.dice_cost[Element.ANY] >= self.COST_DEDUCTION:
                 item = replace(
                     item,
-                    dices_cost=(item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
+                    dice_cost=(item.dice_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
                 )
                 return item, replace(self, usages=self.usages - 1)
         return super()._preprocess(game_state, status_source, item, signal)
@@ -2260,10 +2260,10 @@ class NorthernSmokedChickenStatus(CharacterStatus):
             assert isinstance(item, ActionPEvent)
             if status_source == item.source \
                     and item.event_sub_type is CharacterSkillType.NORMAL_ATTACK \
-                    and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION:
+                    and item.dice_cost[Element.ANY] >= self.COST_DEDUCTION:
                 item = replace(
                     item,
-                    dices_cost=(item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
+                    dice_cost=(item.dice_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
                 )
                 return item, None
         return super()._preprocess(game_state, status_source, item, signal)
@@ -2502,12 +2502,12 @@ class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
                     self.usages >= 2
                     and status_source == item.source
                     and item.event_type is EventType.SKILL1
-                    and player.get_dices().is_even()
-                    and item.dices_cost[Element.ANY] > 0
+                    and player.get_dice().is_even()
+                    and item.dice_cost[Element.ANY] > 0
             ):
                 item = replace(
                     item,
-                    dices_cost=(item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
+                    dice_cost=(item.dice_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
                 )
                 return item, self
         return item, self
@@ -3421,21 +3421,21 @@ class ExplosiveSparkStatus(CharacterStatus, _UsageStatus):
             if (
                     status_source == item.source
                     and item.event_type is EventType.SKILL1
-                    and player.get_dices().is_even()
-                    and item.dices_cost[Element.ANY] + item.dices_cost[Element.PYRO] > 0
+                    and player.get_dice().is_even()
+                    and item.dice_cost[Element.ANY] + item.dice_cost[Element.PYRO] > 0
             ):
                 elems = [Element.PYRO, Element.ANY]
                 cost_deduction_left = self.COST_DEDUCTION
                 deduction: dict[Element, int] = {}
                 for elem in elems:
                     deduction[elem] = cost_deduction_left
-                    cost_deduction_left -= item.dices_cost[elem]
+                    cost_deduction_left -= item.dice_cost[elem]
                     if cost_deduction_left <= 0:
                         break
-                if item.dices_cost[Element.PYRO] > 0:
+                if item.dice_cost[Element.PYRO] > 0:
                     item = replace(
                         item,
-                        dices_cost=(item.dices_cost - deduction).validify()
+                        dice_cost=(item.dice_cost - deduction).validify()
                     )
                 return item, self
         return item, self
@@ -3889,11 +3889,11 @@ class SweepingTimeStatus(CharacterStatus, _InfusionStatus):
                     self.dice_reduction_usages > 0
                     and status_source == item.source
                     and item.event_type is EventType.SKILL1
-                    and item.dices_cost[Element.GEO] >= self.DICE_REDUCTION
+                    and item.dice_cost[Element.GEO] >= self.DICE_REDUCTION
             ):
                 item = replace(
                     item,
-                    dices_cost=(item.dices_cost - {Element.GEO: self.DICE_REDUCTION}).validify()
+                    dice_cost=(item.dice_cost - {Element.GEO: self.DICE_REDUCTION}).validify()
                 )
                 return item, replace(self, dice_reduction_usages=self.dice_reduction_usages - 1)
         return super()._preprocess(game_state, status_source, item, signal)
@@ -4143,15 +4143,15 @@ class KeenSightStatus(TalentEquipmentStatus):
             if (
                     status_source == item.source
                     and item.event_sub_type is CharacterSkillType.NORMAL_ATTACK
-                    and player.get_dices().is_even()
+                    and player.get_dice().is_even()
                     and characters.just_get_character(
                         cast(int, status_source.id)
                     ).get_character_statuses().contains(VijnanaSuffusionStatus)
-                    and item.dices_cost[Element.ANY] > 0
+                    and item.dice_cost[Element.ANY] > 0
             ):
                 item = replace(
                     item,
-                    dices_cost=(item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
+                    dice_cost=(item.dice_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
                 )
                 return item, self
         return super()._preprocess(game_state, status_source, item, signal)
@@ -4270,11 +4270,11 @@ class StormzoneStatus(CombatStatus, _UsageStatus):
         if signal is Preprocessables.SWAP:
             assert isinstance(item, ActionPEvent) and item.event_type is EventType.SWAP
             if item.source.pid is status_source.pid \
-                    and item.dices_cost.num_dices() >= self.COST_DEDUCTION:
-                assert item.dices_cost.num_dices() == item.dices_cost[Element.ANY]
+                    and item.dice_cost.num_dice() >= self.COST_DEDUCTION:
+                assert item.dice_cost.num_dice() == item.dice_cost[Element.ANY]
                 assert not self.triggered
-                new_cost = (item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
-                return replace(item, dices_cost=new_cost), replace(self, triggered=True)
+                new_cost = (item.dice_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
+                return replace(item, dice_cost=new_cost), replace(self, triggered=True)
         return super()._preprocess(game_state, status_source, item, signal)
 
     @override
@@ -4317,10 +4317,10 @@ class WindsOfHarmonyStatus(CombatStatus):
             assert isinstance(item, ActionPEvent)
             if status_source.pid is item.source.pid \
                     and item.event_sub_type is CharacterSkillType.NORMAL_ATTACK \
-                    and item.dices_cost[Element.ANY] >= self.COST_DEDUCTION:
+                    and item.dice_cost[Element.ANY] >= self.COST_DEDUCTION:
                 item = replace(
                     item,
-                    dices_cost=(item.dices_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
+                    dice_cost=(item.dice_cost - {Element.ANY: self.COST_DEDUCTION}).validify()
                 )
                 return item, None
         return super()._preprocess(game_state, status_source, item, signal)
@@ -4422,18 +4422,18 @@ class RiteOfDispatchStatus(CharacterStatus):
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
         """
-        The assumption here is the equiper only pay elemental skill with electro or omni dices
+        The assumption here is the equiper only pay elemental skill with electro or omni dice
         """
         if signal is Preprocessables.SKILL:
             assert isinstance(item, ActionPEvent)
             if (
                     status_source == item.source
                     and item.event_type is EventType.SKILL2
-                    and item.dices_cost.num_dices() > 0
+                    and item.dice_cost.num_dice() > 0
             ):
                 item = replace(
                     item,
-                    dices_cost=(item.dices_cost - {Element.ELECTRO: self.COST_DEDUCTION}).validify()
+                    dice_cost=(item.dice_cost - {Element.ELECTRO: self.COST_DEDUCTION}).validify()
                 )
                 return item, None
         return item, self

@@ -14,8 +14,8 @@ class TestKlee(unittest.TestCase):
             ).build()
         ).f_hand_cards(
             lambda hcs: hcs.add(PoundingSurprise)
-        ).dices(
-            ActualDices({Element.OMNI: 100})  # even number
+        ).dice(
+            ActualDice({Element.OMNI: 100})  # even number
         ).build()
     ).build()
 
@@ -24,7 +24,7 @@ class TestKlee(unittest.TestCase):
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -43,7 +43,7 @@ class TestKlee(unittest.TestCase):
         gsm = GameStateMachine(base_game, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL2,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -54,12 +54,12 @@ class TestKlee(unittest.TestCase):
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 7)
         self.assertTrue(p2ac.get_elemental_aura().contains(Element.PYRO))
-        self.assertFalse(gsm.get_game_state().get_player1().get_dices().is_even())
+        self.assertFalse(gsm.get_game_state().get_player1().get_dice().is_even())
 
         # first normal attack
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -68,7 +68,7 @@ class TestKlee(unittest.TestCase):
         p1ac = p1.just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 6)
         self.assertTrue(p2ac.get_elemental_aura().contains(Element.PYRO))
-        self.assertTrue(p1.get_dices().is_even())
+        self.assertTrue(p1.get_dice().is_even())
         self.assertEqual(
             p1ac.get_character_statuses().just_find(ExplosiveSparkStatus).usages,
             1
@@ -79,11 +79,11 @@ class TestKlee(unittest.TestCase):
             just(
                 gsm.get_game_state().skill_checker().usable(Pid.P1, 2, CharacterSkill.SKILL1)
             )[1],
-            AbstractDices({Element.ANY: 2})
+            AbstractDice({Element.ANY: 2})
         )
         a1.inject_action(SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 2})),
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -111,7 +111,7 @@ class TestKlee(unittest.TestCase):
         a1.inject_action(
             SkillAction(
                 skill=CharacterSkill.ELEMENTAL_BURST,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
             )
         )
         gsm.player_step()
@@ -132,7 +132,7 @@ class TestKlee(unittest.TestCase):
         a2.inject_action(
             SkillAction(
                 skill=CharacterSkill.SKILL1,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
             )
         )
         gsm.player_step()
@@ -151,7 +151,7 @@ class TestKlee(unittest.TestCase):
         a2.inject_action(
             SwapAction(
                 char_id=2,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 1})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 1})),
             )
         )
         gsm.player_step()
@@ -166,7 +166,7 @@ class TestKlee(unittest.TestCase):
         a2.inject_action(
             SkillAction(
                 skill=CharacterSkill.SKILL1,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
             )
         )
         gsm.player_step()
@@ -186,23 +186,23 @@ class TestKlee(unittest.TestCase):
         a1.inject_actions([
             CardAction(
                 card=PoundingSurprise,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
             ),
             SkillAction(
                 skill=CharacterSkill.SKILL1,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
             ),
             SkillAction(
                 skill=CharacterSkill.SKILL1,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 2})),
             ),
             SkillAction(
                 skill=CharacterSkill.SKILL1,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 2})),
             ),
             SkillAction(
                 skill=CharacterSkill.SKILL1,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3})),
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
             ),
             EndRoundAction(),
         ])

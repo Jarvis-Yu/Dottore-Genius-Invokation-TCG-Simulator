@@ -84,8 +84,8 @@ class TestGameStateMachine(unittest.TestCase):
         state_machine.step_until_phase(RollPhase)
         state_machine.step_until_phase(ActionPhase)
         state = state_machine.get_game_state()
-        self.assertEqual(state.get_player1().get_dices().num_dices(), 8)
-        self.assertEqual(state.get_player2().get_dices().num_dices(), 8)
+        self.assertEqual(state.get_player1().get_dice().num_dice(), 8)
+        self.assertEqual(state.get_player2().get_dice().num_dice(), 8)
 
     def test_action_phase_basic_behavior(self):
         state_machine = GameStateMachine(

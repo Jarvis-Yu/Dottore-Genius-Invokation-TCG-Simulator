@@ -18,7 +18,7 @@ class TestJean(unittest.TestCase):
             self.BASE_GAME,
             Pid.P1,
             CharacterSkill.SKILL1,
-            dices=ActualDices({Element.ANEMO: 1, Element.HYDRO: 1, Element.DENDRO: 1}),
+            dice=ActualDice({Element.ANEMO: 1, Element.HYDRO: 1, Element.DENDRO: 1}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 8)
@@ -31,7 +31,7 @@ class TestJean(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.SKILL2,
-            dices=ActualDices({Element.ANEMO: 3}),
+            dice=ActualDice({Element.ANEMO: 3}),
         )
         p2cs = game_state.get_player2().get_characters()
         p2c1 = p2cs.just_get_character(1)
@@ -55,7 +55,7 @@ class TestJean(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.ELEMENTAL_BURST,
-            dices=ActualDices({Element.ANEMO: 4}),
+            dice=ActualDice({Element.ANEMO: 4}),
         )
         p1 = game_state.get_player1()
         p1cs = p1.get_characters()
@@ -97,7 +97,7 @@ class TestJean(unittest.TestCase):
         base_state = fill_energy_for_all(self.BASE_GAME)
         base_state = step_action(base_state, Pid.P1, CardAction(
             card=LandsOfDandelion,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.ANEMO: 4}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.ANEMO: 4}))
         ))
         base_state = skip_action_round_until(base_state, Pid.P1)
 

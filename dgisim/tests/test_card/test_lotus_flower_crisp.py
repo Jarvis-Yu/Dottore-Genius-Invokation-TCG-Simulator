@@ -11,21 +11,21 @@ class TestLotusFlowerCrisps(unittest.TestCase):
             ).build()
         ).build()
 
-        # test giving wrong num of dices
+        # test giving wrong num of dice
         card_action = CardAction(
             card=LotusFlowerCrisp,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 2})),
         )
         self.assertRaises(
             Exception,
             lambda: base_game.action_step(Pid.P1, card_action)
         )
 
-        # test giving right num of dices
+        # test giving right num of dice
         card_action = CardAction(
             card=LotusFlowerCrisp,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.OMNI: 1}),
+                dice=ActualDice({Element.OMNI: 1}),
                 target=StaticTarget(
                     pid=Pid.P1,
                     zone=Zone.CHARACTERS,
@@ -86,8 +86,8 @@ class TestLotusFlowerCrisps(unittest.TestCase):
         # End Action Phase
         a1.inject_action(EndRoundAction()) # skip action phase
         a2.inject_action(EndRoundAction())
-        a1.inject_action(DicesSelectAction(selected_dices=ActualDices({}))) # skip roll phase
-        a2.inject_action(DicesSelectAction(selected_dices=ActualDices({})))
+        a1.inject_action(DiceSelectAction(selected_dice=ActualDice({}))) # skip roll phase
+        a2.inject_action(DiceSelectAction(selected_dice=ActualDice({})))
         gsm.step_until_next_phase()
         gsm.step_until_phase(low_health_game_state.get_mode().action_phase())
         game_state = gsm.get_game_state()

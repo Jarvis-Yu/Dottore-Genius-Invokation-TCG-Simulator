@@ -1,77 +1,77 @@
 import unittest
 
-from dgisim.src.dices import *
+from dgisim.src.dice import *
 from dgisim.src.element import *
 from dgisim.src.helper import just
 
 
-class TestDices(unittest.TestCase):
-    def test_pick_random_dices(self):
-        dices = Dices(ActualDices.from_random(8).to_dict())
-        left, picked = dices.pick_random_dices(3)
-        self.assertEqual(picked.num_dices(), 3)
-        self.assertEqual(left.num_dices(), 5)
+class TestDice(unittest.TestCase):
+    def test_pick_random_dice(self):
+        dice = Dice(ActualDice.from_random(8).to_dict())
+        left, picked = dice.pick_random_dice(3)
+        self.assertEqual(picked.num_dice(), 3)
+        self.assertEqual(left.num_dice(), 5)
         sum_backed = left + picked
-        self.assertEqual(dices, sum_backed)
-        self.assertEqual(hash(dices), hash(sum_backed))
+        self.assertEqual(dice, sum_backed)
+        self.assertEqual(hash(dice), hash(sum_backed))
 
-        left, picked = dices.pick_random_dices(0)
-        self.assertIs(dices, left)
-        self.assertEqual(picked.num_dices(), 0)
+        left, picked = dice.pick_random_dice(0)
+        self.assertIs(dice, left)
+        self.assertEqual(picked.num_dice(), 0)
 
     def test_contains(self):
-        dices = Dices({Element.ANEMO: 3, Element.PYRO: 0, Element.OMNI: -2})
-        self.assertIn(Element.ANEMO, dices)
-        self.assertNotIn(Element.PYRO, dices)
-        self.assertNotIn(Element.OMNI, dices)
+        dice = Dice({Element.ANEMO: 3, Element.PYRO: 0, Element.OMNI: -2})
+        self.assertIn(Element.ANEMO, dice)
+        self.assertNotIn(Element.PYRO, dice)
+        self.assertNotIn(Element.OMNI, dice)
 
     def test_eq(self):
-        dices = Dices({})
-        self.assertNotEqual(dices, "dices")
+        dice = Dice({})
+        self.assertNotEqual(dice, "dice")
 
     def test_to_dict(self):
-        random_actual_dices = ActualDices.from_random(8)
-        _dices = random_actual_dices._dices
-        to_dict = random_actual_dices.to_dict()
-        dices1 = Dices(_dices)
-        dices2 = Dices(to_dict)
-        self.assertEqual(dices1, dices2)
-        self.assertIsNot(_dices, to_dict)
+        random_actual_dice = ActualDice.from_random(8)
+        _dice = random_actual_dice._dice
+        to_dict = random_actual_dice.to_dict()
+        dice1 = Dice(_dice)
+        dice2 = Dice(to_dict)
+        self.assertEqual(dice1, dice2)
+        self.assertIsNot(_dice, to_dict)
 
-    def test_from_dices(self):
-        dices = Dices({Element.PYRO: 6, Element.OMNI: 2})
-        actual_dices = ActualDices.from_dices(dices)
-        assert actual_dices is not None
-        self.assertEqual(dices._dices, actual_dices._dices)
+    def test_from_dice(self):
+        dice = Dice({Element.PYRO: 6, Element.OMNI: 2})
+        actual_dice = ActualDice.from_dice(dice)
+        assert actual_dice is not None
+        self.assertEqual(dice._dice, actual_dice._dice)
 
-        dices = Dices({Element.PYRO: 6, Element.ANY: 2})
-        actual_dices = ActualDices.from_dices(dices)
-        self.assertIsNone(actual_dices)
+        dice = Dice({Element.PYRO: 6, Element.ANY: 2})
+        actual_dice = ActualDice.from_dice(dice)
+        self.assertIsNone(actual_dice)
 
-        dices = Dices({Element.PYRO: 6, Element.OMNI: 2, Element.ANY: 2})
-        abstract_dices = AbstractDices.from_dices(dices)
-        assert abstract_dices is not None
-        self.assertEqual(dices._dices, abstract_dices._dices)
+        dice = Dice({Element.PYRO: 6, Element.OMNI: 2, Element.ANY: 2})
+        abstract_dice = AbstractDice.from_dice(dice)
+        assert abstract_dice is not None
+        self.assertEqual(dice._dice, abstract_dice._dice)
 
-        dices = Dices({Element.PYRO: 6, Element.OMNI: 2, Element.ANY: -2})
-        abstract_dices = AbstractDices.from_dices(dices)
-        self.assertIsNone(abstract_dices)
+        dice = Dice({Element.PYRO: 6, Element.OMNI: 2, Element.ANY: -2})
+        abstract_dice = AbstractDice.from_dice(dice)
+        self.assertIsNone(abstract_dice)
 
     def test_just_satisfy_pure_request(self):
-        requirement = AbstractDices({
+        requirement = AbstractDice({
             Element.PYRO: 2,
         })
-        payment1 = ActualDices({
+        payment1 = ActualDice({
             Element.OMNI: 2,
         })
-        payment2 = ActualDices({
+        payment2 = ActualDice({
             Element.OMNI: 1,
             Element.PYRO: 1,
         })
-        payment3 = ActualDices({
+        payment3 = ActualDice({
             Element.PYRO: 2,
         })
-        payment4 = ActualDices({
+        payment4 = ActualDice({
             Element.PYRO: 3,
         })
         self.assertTrue(payment1.just_satisfy(requirement))
@@ -80,27 +80,27 @@ class TestDices(unittest.TestCase):
         self.assertFalse(payment4.just_satisfy(requirement))
 
     def test_just_satisfy_typical_1pure_2any(self):
-        requirement = AbstractDices({
+        requirement = AbstractDice({
             Element.DENDRO: 1,
             Element.ANY: 2,
         })
-        payment1 = ActualDices({
+        payment1 = ActualDice({
             Element.OMNI: 3,
         })
-        payment2 = ActualDices({
+        payment2 = ActualDice({
             Element.OMNI: 1,
             Element.PYRO: 1,
             Element.ELECTRO: 1,
         })
-        payment3 = ActualDices({
+        payment3 = ActualDice({
             Element.DENDRO: 3,
         })
-        payment4 = ActualDices({
+        payment4 = ActualDice({
             Element.OMNI: 1,
             Element.DENDRO: 1,
             Element.ANEMO: 1,
         })
-        payment5 = ActualDices({
+        payment5 = ActualDice({
             Element.GEO: 2,
             Element.ANEMO: 1,
         })
@@ -111,25 +111,25 @@ class TestDices(unittest.TestCase):
         self.assertFalse(payment5.just_satisfy(requirement))
 
     def test_just_satisfy_typical_elemental_skill(self):
-        requirement = AbstractDices({
+        requirement = AbstractDice({
             Element.ELECTRO: 3,
         })
-        payment1 = ActualDices({
+        payment1 = ActualDice({
             Element.OMNI: 3,
         })
-        payment2 = ActualDices({
+        payment2 = ActualDice({
             Element.OMNI: 1,
             Element.ELECTRO: 2,
         })
-        payment3 = ActualDices({
+        payment3 = ActualDice({
             Element.ELECTRO: 3,
         })
-        payment4 = ActualDices({
+        payment4 = ActualDice({
             Element.OMNI: 1,
             Element.DENDRO: 1,
             Element.ANEMO: 1,
         })
-        payment5 = ActualDices({
+        payment5 = ActualDice({
             Element.GEO: 2,
             Element.ANEMO: 1,
         })
@@ -140,24 +140,24 @@ class TestDices(unittest.TestCase):
         self.assertFalse(payment5.just_satisfy(requirement))
 
     def test_just_satisfy_typical_all_omni(self):
-        requirement = AbstractDices({
+        requirement = AbstractDice({
             Element.OMNI: 4,
         })
-        payment1 = ActualDices({
+        payment1 = ActualDice({
             Element.OMNI: 4,
         })
-        payment2 = ActualDices({
+        payment2 = ActualDice({
             Element.OMNI: 1,
             Element.ELECTRO: 3,
         })
-        payment3 = ActualDices({
+        payment3 = ActualDice({
             Element.ELECTRO: 4,
         })
-        payment4 = ActualDices({
+        payment4 = ActualDice({
             Element.OMNI: 4,
             Element.DENDRO: 1,
         })
-        payment5 = ActualDices({
+        payment5 = ActualDice({
             Element.GEO: 2,
             Element.ANEMO: 2,
         })
@@ -168,32 +168,32 @@ class TestDices(unittest.TestCase):
         self.assertFalse(payment5.just_satisfy(requirement))
 
     def test_basically_satisfy_successes(self):
-        requirement = AbstractDices({Element.OMNI: 3})
-        payment = ActualDices({Element.CRYO: 3, Element.ANEMO: 1})
-        self.assertEqual(payment.basically_satisfy(requirement), ActualDices({Element.CRYO: 3}))
+        requirement = AbstractDice({Element.OMNI: 3})
+        payment = ActualDice({Element.CRYO: 3, Element.ANEMO: 1})
+        self.assertEqual(payment.basically_satisfy(requirement), ActualDice({Element.CRYO: 3}))
 
-        requirement = AbstractDices({Element.OMNI: 3})
-        payment = ActualDices({Element.CRYO: 2, Element.OMNI: 2})
+        requirement = AbstractDice({Element.OMNI: 3})
+        payment = ActualDice({Element.CRYO: 2, Element.OMNI: 2})
         self.assertEqual(payment.basically_satisfy(requirement),
-                         ActualDices({Element.CRYO: 2, Element.OMNI: 1}))
+                         ActualDice({Element.CRYO: 2, Element.OMNI: 1}))
 
-        requirement = AbstractDices({Element.OMNI: 3})
-        payment = ActualDices({Element.ANEMO: 1, Element.ELECTRO: 1,
+        requirement = AbstractDice({Element.OMNI: 3})
+        payment = ActualDice({Element.ANEMO: 1, Element.ELECTRO: 1,
                               Element.PYRO: 1, Element.OMNI: 2})
         self.assertEqual(just(payment.basically_satisfy(requirement))[Element.OMNI], 2)
 
     def test_basically_satisfy_failures(self):
-        requirement = AbstractDices({Element.ANY: 8})
-        payment = ActualDices({Element.OMNI: 7})
+        requirement = AbstractDice({Element.ANY: 8})
+        payment = ActualDice({Element.OMNI: 7})
         self.assertIsNone(payment.basically_satisfy(requirement))
 
-        requirement = AbstractDices({Element.OMNI: 4})
-        payment = ActualDices({Element.GEO: 3, Element.ELECTRO: 2,
+        requirement = AbstractDice({Element.OMNI: 4})
+        payment = ActualDice({Element.GEO: 3, Element.ELECTRO: 2,
                               Element.HYDRO: 1, Element.DENDRO: 3})
         self.assertIsNone(payment.basically_satisfy(requirement))
 
-    def test_ordered_actual_dices(self):
-        dices = ActualDices({
+    def test_ordered_actual_dice(self):
+        dice = ActualDice({
             Element.HYDRO: 1,
             Element.ELECTRO: 1,
             Element.ANEMO: 1,
@@ -204,12 +204,12 @@ class TestDices(unittest.TestCase):
             Element.PYRO: 1,
         })
         self.assertEqual(
-            tuple(dices.readonly_dices_ordered(None).keys()),
-            ActualDices._LEGAL_ELEMS_ORDERED,
+            tuple(dice.readonly_dice_ordered(None).keys()),
+            ActualDice._LEGAL_ELEMS_ORDERED,
         )
 
-    def test_ordered_actual_dices_with_diff_nums(self):
-        dices = ActualDices({
+    def test_ordered_actual_dice_with_diff_nums(self):
+        dice = ActualDice({
             Element.HYDRO: 1,
             Element.ELECTRO: 2,
             Element.ANEMO: 1,
@@ -219,7 +219,7 @@ class TestDices(unittest.TestCase):
             Element.DENDRO: 2,
             Element.PYRO: 1,
         })
-        keys = tuple(dices.readonly_dices_ordered(None).keys())
+        keys = tuple(dice.readonly_dice_ordered(None).keys())
         expected_order = (
             Element.OMNI,
             Element.CRYO,
@@ -235,8 +235,8 @@ class TestDices(unittest.TestCase):
             expected_order,
         )
 
-    def test_ordered_actual_dices_with_characters(self):
-        dices = ActualDices({
+    def test_ordered_actual_dice_with_characters(self):
+        dice = ActualDice({
             Element.HYDRO: 1,
             Element.ELECTRO: 2,
             Element.ANEMO: 1,
@@ -258,7 +258,7 @@ class TestDices(unittest.TestCase):
             ).factory().active_character_id(2).build(),
             Cards({}),
         )
-        keys = tuple(dices.readonly_dices_ordered(player_state).keys())
+        keys = tuple(dice.readonly_dice_ordered(player_state).keys())
         expected_order = (
             Element.OMNI,
             Element.ELECTRO,

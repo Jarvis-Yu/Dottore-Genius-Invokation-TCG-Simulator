@@ -14,7 +14,7 @@ from ..status import status as stt
 from ..status import statuses as stts
 from ..summon import summon as sm
 
-from ..dices import AbstractDices
+from ..dice import AbstractDice
 from ..effect.effects_template import *
 from ..effect.enums import Zone, DynamicCharacterTarget, TriggeringSignal
 from ..effect.structs import StaticTarget, DamageType
@@ -68,10 +68,10 @@ class Character:
     _TALENT_STATUS: None | type[stt.TalentEquipmentStatus]
     _FACTIONS: frozenset[Faction]
 
-    _SKILL1_COST: None | AbstractDices = None
-    _SKILL2_COST: None | AbstractDices = None
-    _SKILL3_COST: None | AbstractDices = None
-    _ELEMENTAL_BURST_COST: None | AbstractDices = None
+    _SKILL1_COST: None | AbstractDice = None
+    _SKILL2_COST: None | AbstractDice = None
+    _SKILL3_COST: None | AbstractDice = None
+    _ELEMENTAL_BURST_COST: None | AbstractDice = None
 
     _SKILL1_ACTUAL_TYPE = CharacterSkillType.NORMAL_ATTACK
     _SKILL2_ACTUAL_TYPE = CharacterSkillType.ELEMENTAL_SKILL
@@ -196,7 +196,7 @@ class Character:
         raise NotImplementedError(f"{skill} type for {cls.__name__} not defined")
 
     @classmethod
-    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices:
+    def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDice:
         if skill_type is CharacterSkill.SKILL1 and cls._SKILL1_COST is not None:
             return cls._SKILL1_COST
         elif skill_type is CharacterSkill.SKILL2 and cls._SKILL2_COST is not None:
@@ -522,14 +522,14 @@ class Albedo(Character):
     _TALENT_STATUS = stt.DescentOfDivinityStatus
     _FACTIONS = frozenset((Faction.MONDSTADT,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.GEO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.GEO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.GEO: 3,
     })
 
@@ -592,14 +592,14 @@ class AratakiItto(Character):
     _TALENT_STATUS = stt.AratakiIchibanStatus
     _FACTIONS = frozenset((Faction.INAZUMA,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.GEO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.GEO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.GEO: 3,
     })
 
@@ -675,14 +675,14 @@ class Bennett(Character):
     _TALENT_STATUS = stt.GrandExpectationStatus
     _FACTIONS = frozenset((Faction.MONDSTADT,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.PYRO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.PYRO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.PYRO: 4,
     })
 
@@ -762,14 +762,14 @@ class Collei(Character):
     _TALENT_STATUS = stt.FloralSidewinderStatus
     _FACTIONS = frozenset((Faction.SUMERU,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.DENDRO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.DENDRO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.DENDRO: 3,
     })
 
@@ -857,14 +857,14 @@ class ElectroHypostasis(Character):
     _TALENT_STATUS = None
     _FACTIONS = frozenset((Faction.MONSTER,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.ELECTRO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.ELECTRO: 5,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.ELECTRO: 3,
     })
 
@@ -935,14 +935,14 @@ class FatuiPyroAgent(Character):
     _TALENT_STATUS = stt.PaidInFullStatus
     _FACTIONS = frozenset((Faction.FATUI,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.PYRO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.PYRO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.PYRO: 3,
     })
 
@@ -1009,14 +1009,14 @@ class Fischl(Character):
     _TALENT_STATUS = stt.StellarPredatorStatus
     _FACTIONS = frozenset((Faction.MONDSTADT,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.ELECTRO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.ELECTRO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.ELECTRO: 3,
     })
 
@@ -1090,17 +1090,17 @@ class Ganyu(Character):
     _TALENT_STATUS = stt.UndividedHeartStatus
     _FACTIONS = frozenset((Faction.LIYUE,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.CRYO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.CRYO: 3,
     })
-    _SKILL3_COST = AbstractDices({
+    _SKILL3_COST = AbstractDice({
         Element.CRYO: 5,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.CRYO: 3,
     })
 
@@ -1204,14 +1204,14 @@ class JadeplumeTerrorshroom(Character):
     _TALENT_STATUS = stt.ProliferatingSporesStatus
     _FACTIONS = frozenset((Faction.MONSTER,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.DENDRO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.DENDRO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.DENDRO: 3,
     })
 
@@ -1274,14 +1274,14 @@ class Jean(Character):
     _TALENT_STATUS = stt.LandsOfDandelionStatus
     _FACTIONS = frozenset((Faction.MONDSTADT,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.ANEMO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.ANEMO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.ANEMO: 4,
     })
 
@@ -1353,14 +1353,14 @@ class KaedeharaKazuha(Character):
     _TALENT_STATUS = stt.PoeticsOfFuubutsuStatus
     _FACTIONS = frozenset((Faction.INAZUMA,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.ANEMO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.ANEMO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.ANEMO: 3,
     })
 
@@ -1506,14 +1506,14 @@ class Kaeya(Character):
     _TALENT_STATUS = stt.ColdBloodedStrikeStatus
     _FACTIONS = frozenset((Faction.MONDSTADT,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.CRYO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.CRYO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.CRYO: 4,
     })
 
@@ -1578,14 +1578,14 @@ class Keqing(Character):
     _TALENT_STATUS = stt.ThunderingPenanceStatus
     _FACTIONS = frozenset((Faction.LIYUE,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.ELECTRO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.ELECTRO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.ELECTRO: 4,
     })
 
@@ -1711,14 +1711,14 @@ class Klee(Character):
     _TALENT_STATUS = stt.PoundingSurpriseStatus
     _FACTIONS = frozenset((Faction.MONDSTADT,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.PYRO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.PYRO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.PYRO: 3,
     })
 
@@ -1786,17 +1786,17 @@ class MaguuKenki(Character):
     _TALENT_STATUS = stt.TranscendentAutomatonStatus
     _FACTIONS = frozenset((Faction.MONSTER,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.ANEMO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.ANEMO: 3,
     })
-    _SKILL3_COST = AbstractDices({
+    _SKILL3_COST = AbstractDice({
         Element.CRYO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.ANEMO: 3,
     })
 
@@ -1881,14 +1881,14 @@ class Mona(Character):
     _TALENT_STATUS = stt.ProphecyOfSubmersionStatus
     _FACTIONS = frozenset((Faction.MONDSTADT,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.HYDRO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.HYDRO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.HYDRO: 3,
     })
 
@@ -1958,17 +1958,17 @@ class Nahida(Character):
     _TALENT_STATUS = stt.TheSeedOfStoredKnowledgeStatus
     _FACTIONS = frozenset((Faction.SUMERU,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.DENDRO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.DENDRO: 3,
     })
-    _SKILL3_COST = AbstractDices({
+    _SKILL3_COST = AbstractDice({
         Element.DENDRO: 5,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.DENDRO: 3,
     })
 
@@ -2112,14 +2112,14 @@ class Ningguang(Character):
     _TALENT_STATUS = stt.StrategicReserveStatus
     _FACTIONS = frozenset((Faction.LIYUE,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.GEO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.GEO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.GEO: 3,
     })
 
@@ -2189,14 +2189,14 @@ class Noelle(Character):
     _TALENT_STATUS = stt.IGotYourBackStatus
     _FACTIONS = frozenset((Faction.MONDSTADT,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.GEO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.GEO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.GEO: 4,
     })
 
@@ -2267,14 +2267,14 @@ class Qiqi(Character):
     _TALENT_STATUS = stt.RiteOfResurrectionStatus
     _FACTIONS = frozenset((Faction.LIYUE,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.CRYO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.CRYO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.CRYO: 3,
     })
 
@@ -2367,17 +2367,17 @@ class RhodeiaOfLoch(Character):
     _TALENT_STATUS = stt.StreamingSurgeStatus
     _FACTIONS = frozenset((Faction.MONSTER,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.HYDRO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.HYDRO: 3,
     })
-    _SKILL3_COST = AbstractDices({
+    _SKILL3_COST = AbstractDice({
         Element.HYDRO: 5,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.HYDRO: 3,
     })
 
@@ -2507,14 +2507,14 @@ class SangonomiyaKokomi(Character):
     _TALENT_STATUS = stt.TamakushiCasketStatus
     _FACTIONS = frozenset((Faction.INAZUMA,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.HYDRO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.HYDRO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.HYDRO: 3,
     })
 
@@ -2593,14 +2593,14 @@ class Shenhe(Character):
     _TALENT_STATUS = stt.MysticalAbandonStatus
     _FACTIONS = frozenset((Faction.LIYUE,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.CRYO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.CRYO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.CRYO: 3,
     })
 
@@ -2671,14 +2671,14 @@ class Tighnari(Character):
     _TALENT_STATUS = stt.KeenSightStatus
     _FACTIONS = frozenset((Faction.SUMERU,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.DENDRO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.DENDRO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.DENDRO: 3,
     })
 
@@ -2749,14 +2749,14 @@ class Venti(Character):
     _TALENT_STATUS = stt.EmbraceOfWindsStatus
     _FACTIONS = frozenset((Faction.MONDSTADT,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.ANEMO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.ANEMO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.ANEMO: 3,
     })
 
@@ -2827,14 +2827,14 @@ class Xingqiu(Character):
     _TALENT_STATUS = stt.TheScentRemainedStatus
     _FACTIONS = frozenset((Faction.LIYUE,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.HYDRO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.HYDRO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.HYDRO: 3,
     })
 
@@ -2914,14 +2914,14 @@ class YaeMiko(Character):
     _TALENT_STATUS = stt.TheShrinesSacredShadeStatus
     _FACTIONS = frozenset((Faction.INAZUMA,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.ELECTRO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.ELECTRO: 3,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.ELECTRO: 3,
     })
 
@@ -3000,14 +3000,14 @@ class Yoimiya(Character):
     _TALENT_STATUS = stt.NaganoharaMeteorSwarmStatus
     _FACTIONS = frozenset((Faction.INAZUMA,))
 
-    _SKILL1_COST = AbstractDices({
+    _SKILL1_COST = AbstractDice({
         Element.PYRO: 1,
         Element.ANY: 2,
     })
-    _SKILL2_COST = AbstractDices({
+    _SKILL2_COST = AbstractDice({
         Element.PYRO: 1,
     })
-    _ELEMENTAL_BURST_COST = AbstractDices({
+    _ELEMENTAL_BURST_COST = AbstractDice({
         Element.PYRO: 3,
     })
 

@@ -14,7 +14,7 @@ class TestMintyMeatRolls(unittest.TestCase):
         card_action = CardAction(
             card=MintyMeatRolls,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.OMNI: 1}),
+                dice=ActualDice({Element.OMNI: 1}),
                 target=StaticTarget(
                     pid=Pid.P1,
                     zone=Zone.CHARACTERS,
@@ -40,20 +40,20 @@ class TestMintyMeatRolls(unittest.TestCase):
             .contains(SatiatedStatus)
         )
 
-        # test normal attack with 3 dices fails
+        # test normal attack with 3 dice fails
         normal_attack_action = SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 3}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         )
         self.assertRaises(
             Exception,
             lambda: buffed_game_state.action_step(Pid.P1, normal_attack_action)
         )
 
-        # test normal attack with 2 dices pass
+        # test normal attack with 2 dice pass
         normal_attack_action = SkillAction(
             skill=CharacterSkill.SKILL1,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 2}))
         )
         game_state = buffed_game_state.action_step(Pid.P1, normal_attack_action)
         assert game_state is not None
@@ -74,7 +74,7 @@ class TestMintyMeatRolls(unittest.TestCase):
         a1.inject_actions([
             SkillAction(
                 skill=CharacterSkill.SKILL1,
-                instruction=DiceOnlyInstruction(dices=ActualDices({Element.OMNI: 2}))
+                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 2}))
             )
         ] * 3)
         a2.inject_action(EndRoundAction())
@@ -95,8 +95,8 @@ class TestMintyMeatRolls(unittest.TestCase):
         gsm = GameStateMachine(buffed_game_state, a1, a2)
         a1.inject_action(EndRoundAction()) # skip action phase
         a2.inject_action(EndRoundAction())
-        a1.inject_action(DicesSelectAction(selected_dices=ActualDices({}))) # skip roll phase
-        a2.inject_action(DicesSelectAction(selected_dices=ActualDices({})))
+        a1.inject_action(DiceSelectAction(selected_dice=ActualDice({}))) # skip roll phase
+        a2.inject_action(DiceSelectAction(selected_dice=ActualDice({})))
         gsm.step_until_next_phase()
         gsm.step_until_phase(buffed_game_state.get_mode().action_phase())
         game_state = gsm.get_game_state()

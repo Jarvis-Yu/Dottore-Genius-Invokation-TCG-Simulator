@@ -17,13 +17,13 @@ class TestKingsSquire(unittest.TestCase):
         game_state = step_action(base_state, Pid.P1, CardAction(
             card=KingsSquire,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.PYRO: 3}),
+                dice=ActualDice({Element.PYRO: 3}),
                 target=StaticTarget.from_char_id(Pid.P1, 1),
             )
         ))
 
         # test Fischl's bow doesn't reduce cost for Ganyu
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2, ActualDices(
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2, ActualDice(
             {Element.CRYO: 3}
         ))
         last_dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
@@ -34,13 +34,13 @@ class TestKingsSquire(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=KingsSquire,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.PYRO: 3}),
+                dice=ActualDice({Element.PYRO: 3}),
                 target=StaticTarget.from_char_id(Pid.P1, 2),
             )
         ))
 
         # test Elemental Skill now has cost reduction of 2 and dmg boosted by weapon
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2, ActualDices(
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2, ActualDice(
             {Element.CRYO: 1}
         ))
         last_dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
@@ -52,7 +52,7 @@ class TestKingsSquire(unittest.TestCase):
         game_state = next_round_with_great_omni(game_state)
         game_state = apply_elemental_aura(game_state, Element.PYRO, Pid.P2)
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2, ActualDices(
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2, ActualDice(
             {Element.ELECTRO: 3}
         ))
         last_dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]

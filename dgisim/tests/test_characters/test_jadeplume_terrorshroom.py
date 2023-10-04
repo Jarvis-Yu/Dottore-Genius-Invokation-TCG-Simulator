@@ -18,7 +18,7 @@ class TestJadeplumeTerrorshroom(unittest.TestCase):
             self.BASE_GAME,
             Pid.P1,
             CharacterSkill.SKILL1,
-            dices=ActualDices({Element.DENDRO: 1, Element.HYDRO: 1, Element.GEO: 1}),
+            dice=ActualDice({Element.DENDRO: 1, Element.HYDRO: 1, Element.GEO: 1}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 8)
@@ -30,7 +30,7 @@ class TestJadeplumeTerrorshroom(unittest.TestCase):
             self.BASE_GAME,
             Pid.P1,
             CharacterSkill.SKILL2,
-            dices=ActualDices({Element.DENDRO: 3}),
+            dice=ActualDice({Element.DENDRO: 3}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 7)
@@ -42,7 +42,7 @@ class TestJadeplumeTerrorshroom(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.ELEMENTAL_BURST,
-            dices=ActualDices({Element.DENDRO: 3}),
+            dice=ActualDice({Element.DENDRO: 3}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 6)
@@ -140,7 +140,7 @@ class TestJadeplumeTerrorshroom(unittest.TestCase):
         # test that talent card doesn't clear existing stacks
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=ProliferatingSpores,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.DENDRO: 3}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.DENDRO: 3}))
         ))
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         p1ac = game_state.get_player1().just_get_active_character()

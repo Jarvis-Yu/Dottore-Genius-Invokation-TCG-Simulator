@@ -7,15 +7,15 @@ from .common_imports import *
 
 
 class CardA(_DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDices({Element.OMNI: BIG_INT << 32})
+    _DICE_COST = AbstractDice({Element.OMNI: BIG_INT << 32})
 
 
 class CardB(_DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDices({Element.ANY: 1})
+    _DICE_COST = AbstractDice({Element.ANY: 1})
 
 
 class CardC(SupportCard):
-    _DICE_COST = AbstractDices({})
+    _DICE_COST = AbstractDice({})
 
 
 class TestCard(unittest.TestCase):
@@ -49,20 +49,20 @@ class TestCard(unittest.TestCase):
             self.assertIn(StaticTarget(Pid.P1, Zone.SUPPORTS, id), choices)
 
         self.assertIsNone(
-            CardC.valid_instruction(full_game, Pid.P1, DiceOnlyInstruction(dices=ActualDices({})))
+            CardC.valid_instruction(full_game, Pid.P1, DiceOnlyInstruction(dice=ActualDice({})))
         )
         self.assertIsNone(
             CardC.valid_instruction(
                 full_game,
                 Pid.P1, StaticTargetInstruction(
-                    dices=ActualDices({}),
+                    dice=ActualDice({}),
                     target=StaticTarget(Pid.P1, Zone.SUPPORTS, 5)
                 )
             )
         )
         action_generator = just(Xudong.action_generator(full_game, Pid.P1))
         action_generator = just(action_generator.choose(StaticTarget(Pid.P1, Zone.SUPPORTS, 3)))
-        action_generator = just(action_generator.choose(ActualDices({Element.OMNI: 2})))
+        action_generator = just(action_generator.choose(ActualDice({Element.OMNI: 2})))
         assert action_generator.filled()
         action = action_generator.generate_action()
         game_state = full_game.action_step(Pid.P1, action)
@@ -90,7 +90,7 @@ class TestCard(unittest.TestCase):
             CardC.valid_instruction(
                 not_full_game,
                 Pid.P1, StaticTargetInstruction(
-                    dices=ActualDices({}),
+                    dice=ActualDice({}),
                     target=StaticTarget(Pid.P1, Zone.SUPPORTS, 5)
                 )
             )

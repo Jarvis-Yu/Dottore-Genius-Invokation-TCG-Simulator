@@ -18,7 +18,7 @@ class TestCollei(unittest.TestCase):
             self.BASE_GAME,
             Pid.P1,
             CharacterSkill.SKILL1,
-            dices=ActualDices({Element.DENDRO: 1, Element.HYDRO: 1, Element.GEO: 1}),
+            dice=ActualDice({Element.DENDRO: 1, Element.HYDRO: 1, Element.GEO: 1}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 8)
@@ -30,7 +30,7 @@ class TestCollei(unittest.TestCase):
             self.BASE_GAME,
             Pid.P1,
             CharacterSkill.SKILL2,
-            dices=ActualDices({Element.DENDRO: 3}),
+            dice=ActualDice({Element.DENDRO: 3}),
         )
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 7)
@@ -42,7 +42,7 @@ class TestCollei(unittest.TestCase):
             game_state,
             Pid.P1,
             CharacterSkill.ELEMENTAL_BURST,
-            dices=ActualDices({Element.DENDRO: 3}),
+            dice=ActualDice({Element.DENDRO: 3}),
         )
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
@@ -71,7 +71,7 @@ class TestCollei(unittest.TestCase):
     def test_talent_card_and_sprout_status(self):
         game_state = step_action(self.BASE_GAME, Pid.P1, CardAction(
             card=FloralSidewinder,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.DENDRO: 4}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.DENDRO: 4}))
         ))
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
@@ -99,7 +99,7 @@ class TestCollei(unittest.TestCase):
         game_state = silent_fast_swap(game_state, Pid.P1, char_id=2)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=FloralSidewinder,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.DENDRO: 4}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.DENDRO: 4}))
         ))
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
@@ -110,7 +110,7 @@ class TestCollei(unittest.TestCase):
         # elemental skill next round generates sprout status again
         game_state = heal_for_all(game_state)
         game_state = next_round(game_state)
-        game_state = fill_dices_with_omni(game_state)
+        game_state = fill_dice_with_omni(game_state)
         game_state = skip_action_round_until(game_state, Pid.P1)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
         p1 = game_state.get_player1()
@@ -121,7 +121,7 @@ class TestCollei(unittest.TestCase):
         game_state = apply_elemental_aura(self.BASE_GAME, Element.ELECTRO, Pid.P2)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=FloralSidewinder,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.DENDRO: 4}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.DENDRO: 4}))
         ))
         p1 = game_state.get_player1()
         p2ac = game_state.get_player2().just_get_active_character()
@@ -132,7 +132,7 @@ class TestCollei(unittest.TestCase):
         # sprout status disappears naturally next round
         game_state = step_action(self.BASE_GAME, Pid.P1, CardAction(
             card=FloralSidewinder,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.DENDRO: 4}))
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.DENDRO: 4}))
         ))
         game_state = next_round(game_state)
         p1 = game_state.get_player1()

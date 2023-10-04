@@ -14,7 +14,7 @@ class TestWhereIsTheUnseenRazor(unittest.TestCase):
         game_state = step_action(base_state, Pid.P1, CardAction(
             card=RavenBow,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.PYRO: 2}),
+                dice=ActualDice({Element.PYRO: 2}),
                 target=StaticTarget.from_char_id(Pid.P1, 1),
             )
         ))
@@ -24,7 +24,7 @@ class TestWhereIsTheUnseenRazor(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=WhereIsTheUnseenRazor,
             instruction=StaticTargetInstruction(
-                dices=ActualDices.from_empty(),
+                dice=ActualDice.from_empty(),
                 target=StaticTarget.from_char_id(Pid.P1, 1),
             )
         ))
@@ -36,27 +36,27 @@ class TestWhereIsTheUnseenRazor(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=KingsSquire,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.PYRO: 3}),
+                dice=ActualDice({Element.PYRO: 3}),
                 target=StaticTarget.from_char_id(Pid.P1, 1),
             )
         ))
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2, ActualDices(
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2, ActualDice(
             {Element.ELECTRO: 1}
         ))
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=WhereIsTheUnseenRazor,
             instruction=StaticTargetInstruction(
-                dices=ActualDices.from_empty(),
+                dice=ActualDice.from_empty(),
                 target=StaticTarget.from_char_id(Pid.P1, 1),
             )
         ))
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=KingsSquire,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.PYRO: 1}),
+                dice=ActualDice({Element.PYRO: 1}),
                 target=StaticTarget.from_char_id(Pid.P1, 1),
             )
         ))
-        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2, ActualDices(
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2, ActualDice(
             {Element.ELECTRO: 1}
         ))

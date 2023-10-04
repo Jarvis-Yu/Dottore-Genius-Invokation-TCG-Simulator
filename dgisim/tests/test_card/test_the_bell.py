@@ -16,7 +16,7 @@ class TestTheBell(unittest.TestCase):
         game_state = step_action(base_state, Pid.P1, CardAction(
             card=TheBell,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.PYRO: 3}),
+                dice=ActualDice({Element.PYRO: 3}),
                 target=StaticTarget.from_char_id(Pid.P1, 1),
             )
         ))
@@ -42,7 +42,7 @@ class TestTheBell(unittest.TestCase):
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=ElementalResonanceEnduringRock,
-            instruction=DiceOnlyInstruction(dices=ActualDices({Element.GEO: 1})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.GEO: 1})),
         ))
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
         p1_combat_stts = game_state.get_player1().get_combat_statuses()

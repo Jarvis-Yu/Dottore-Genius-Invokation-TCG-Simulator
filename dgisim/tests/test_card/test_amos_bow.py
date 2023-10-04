@@ -16,14 +16,14 @@ class TestAmosBow(unittest.TestCase):
         game_state = step_action(base_state, Pid.P1, CardAction(
             card=AmosBow,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.PYRO: 3}),
+                dice=ActualDice({Element.PYRO: 3}),
                 target=StaticTarget.from_char_id(Pid.P1, 1),
             )
         ))
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=AmosBow,
             instruction=StaticTargetInstruction(
-                dices=ActualDices({Element.GEO: 3}),
+                dice=ActualDice({Element.GEO: 3}),
                 target=StaticTarget.from_char_id(Pid.P1, 2),
             )
         ))
@@ -65,7 +65,7 @@ class TestAmosBow(unittest.TestCase):
         # test can trigger again next round
         game_state = next_round(game_state)
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
-        game_state = fill_dices_with_omni(game_state)
+        game_state = fill_dice_with_omni(game_state)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL3)
         last_dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertEqual(last_dmg.damage, 5)

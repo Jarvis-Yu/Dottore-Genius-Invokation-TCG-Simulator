@@ -1,22 +1,22 @@
 import unittest
 
 from dgisim.src.card.card import FoodCard
-from dgisim.src.dices import AbstractDices
+from dgisim.src.dice import AbstractDice
 from dgisim.src.element import Element
 from dgisim.src.support.support import XudongSupport
 from dgisim.tests.helpers.game_state_templates import *
 
 class CardAny3(FoodCard):
-    _DICE_COST = AbstractDices({Element.ANY: 3})
+    _DICE_COST = AbstractDice({Element.ANY: 3})
 
 class CardAny1(FoodCard):
-    _DICE_COST = AbstractDices({Element.ANY: 1})
+    _DICE_COST = AbstractDice({Element.ANY: 1})
 
 class CardOmni3(FoodCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 3})
+    _DICE_COST = AbstractDice({Element.OMNI: 3})
 
 class CardOmni1(FoodCard):
-    _DICE_COST = AbstractDices({Element.OMNI: 1})
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
 
 class TestXudong(unittest.TestCase):
     BASE_GAME = ACTION_TEMPLATE.factory().f_player1(

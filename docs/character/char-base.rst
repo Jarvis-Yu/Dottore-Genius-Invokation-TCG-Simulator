@@ -20,6 +20,14 @@ Public Class Methods
 
 Returns the factions the character belongs to.
 
+.. function:: FACTIONS(cls) -> frozenset[Faction]
+    :module: dgisim.Character
+
+    Return abc
+
+    :param abc: xyz
+    :returns: 0
+
 ``of_faction(cls, faction: Faction) -> bool``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -57,7 +65,7 @@ Returns the type of skill the the passed-in ``skill: CharacterSkill`` is of the 
 
 Refer to :ref:`character-skill`, :ref:`character-skill-type`.
 
-``skill_cost(cls, skill_type: CharacterSkill) -> AbstractDices``
+``skill_cost(cls, skill_type: CharacterSkill) -> AbstractDice``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Returns the original cost of the skill of the character.
@@ -100,7 +108,7 @@ The factions a character belongs to.
 
 Refer to :ref:`factions`.
 
-``_SKILL1_COST: None | AbstractDices``
+``_SKILL1_COST: None | AbstractDice``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The dice cost of the skill 1 of the character. Value default to ``None``.
@@ -110,17 +118,17 @@ The dice cost of the skill 1 of the character. Value default to ``None``.
 Skill *n* is the *nth* skill counting from left to right in the official TCG
 game. (excluding the elemental burst)
 
-``_SKILL2_COST: None | AbstractDices``
+``_SKILL2_COST: None | AbstractDice``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The dice cost of the skill 2 of the character. Value default to ``None``.
 
-``_SKILL3_COST: None | AbstractDices``
+``_SKILL3_COST: None | AbstractDice``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The dice cost of the skill 3 of the character. Value default to ``None``.
 
-``_ELEMENTAL_BURST_COST: None | AbstractDices``
+``_ELEMENTAL_BURST_COST: None | AbstractDice``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The dice cost of the elemental burst of the character. Value default to ``None``.
