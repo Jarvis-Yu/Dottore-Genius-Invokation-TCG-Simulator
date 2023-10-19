@@ -198,6 +198,7 @@ class GameStateMachine:
             raise Exception("GameStateMachine.player(): Invalid player id")
 
     def game_end(self) -> bool:
+        """ something nice """
         return self._game_state.game_end()
 
     def get_winner(self) -> None | Pid:

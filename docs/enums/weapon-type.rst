@@ -7,11 +7,11 @@ Weapon Type
 
     from dgisim import WeaponType
 
-This is used to indicate the type of weapon a character uses.
+:py:class:`dgisim.src.WeaponType`
 
-* ``BOW``
-* ``CATALYST``
-* ``CLAYMORE``
-* ``POLEARM``
-* ``SWORD``
-* ``NONE``
+.. py:module:: dgisim.src
+
+    .. autoenum:: WeaponType
+        :members:
+
+        This is used to indicate the type of weapon a character uses.

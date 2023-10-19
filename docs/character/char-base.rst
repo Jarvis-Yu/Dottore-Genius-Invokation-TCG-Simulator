@@ -1,74 +1,69 @@
 Character
 =========
 
-.. code-block:: python3
-
-    from dgisim import Character
-
 ``Character`` class is the base of all implemented characters.
 
-* `Private Class Properties`_
-* `Private Instance Properties`_
+.. * `Private Class Properties`_
+.. * `Private Instance Properties`_
 
 .. * `Private Methods`_
 
-Public Class Methods
---------------------
+.. autoclass:: src.Character
+    :members:
+    :undoc-members:
 
-``FACTIONS(cls) -> frozenset[Faction]``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automethod:: src.Character.get_energy
 
-Returns the factions the character belongs to.
+xxx
+---
 
-.. function:: FACTIONS(cls) -> frozenset[Faction]
-    :module: dgisim.Character
+.. py:class:: dgisim.Character
 
-    Return abc
+    .. py:method:: FACTIONS(cls) -> frozenset[Faction]
+        :classmethod:
 
-    :param abc: xyz
-    :returns: 0
+        :returns: the factions the character belongs to.
 
-``of_faction(cls, faction: Faction) -> bool``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    .. py:method:: of_faction(cls, faction: Faction) -> bool
+        :classmethod:
 
-Returns ``True`` if the character belongs to the passed in ``faction``.
+        :param faction: the ``Faction`` of interest.
+        :returns: ``True`` if the character belongs to the passed in ``faction``.
 
-``ELEMENT(cls) -> Element``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    .. py:method:: ELEMENT(cls) -> Element
+        :classmethod:
 
-Returns the element of the character.
+        :returns: the element of the character.
 
-``WEAPON_TYPE(cls) -> WeaponType``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    .. py:method:: WEAPON_TYPE(cls) -> WeaponType
+        :classmethod:
 
-Returns the type of weapon the character wield.
+        :returns: the type of weapon the character wield.
 
-Refer to :ref:`weapon-type`.
+    .. py:method:: from_default(cls, id: int = -1) -> Character
+        :classmethod:
 
-``from_default(cls, id: int = -1) -> Character``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        Creates a default instance of the character,
+        which is the common way to initialize a character.
 
-Creates a default instance of the character,
-which is the common way to initialize a character.
+    .. py:method:: skills(cls) -> tuple[CharacterSkill, ...]
+        :classmethod:
 
-``skills(cls) -> tuple[CharacterSkill, ...]``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        :returns: the skills the character is able to cast.
 
-Returns the skills the character is able to cast.
+        Refer to :ref:`character-skill`.
 
-Refer to :ref:`character-skill`.
+    .. py:method:: skill_actual_type(cls, skill: CharacterSkill) -> CharacterSkillType
+        :classmethod:
 
-``skill_actual_type(cls, skill: CharacterSkill) -> CharacterSkillType``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        :returns: the type of skill the the passed-in ``skill: CharacterSkill`` is of the character.
 
-Returns the type of skill the the passed-in ``skill: CharacterSkill`` is of the character.
+        Refer to :ref:`character-skill`, :ref:`character-skill-type`.
 
-Refer to :ref:`character-skill`, :ref:`character-skill-type`.
+    .. py:method:: skill_cost(cls, skill_type: CharacterSkill) -> AbstractDice
+        :classmethod:
 
-``skill_cost(cls, skill_type: CharacterSkill) -> AbstractDice``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Returns the original cost of the skill of the character.
+        :returns: the original cost of the skill of the character.
 
 Public Instance Methods
 -----------------------

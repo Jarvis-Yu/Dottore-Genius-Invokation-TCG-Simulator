@@ -12,3 +12,4 @@ dist/
 tokens.md
 *.prof
 *.egg-info
+html/
