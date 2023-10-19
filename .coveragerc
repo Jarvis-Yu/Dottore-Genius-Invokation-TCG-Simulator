@@ -1,10 +1,10 @@
 [run]
 omit =
-    dgisim/profiles/*
-    dgisim/tests/*
-    dgisim/src/helper/level_print.py
-    dgisim/src/cli.py
-    dgisim/src/game_state_machine.py
+    src/profiles/*
+    src/tests/*
+    src/dgisim/helper/level_print.py
+    src/dgisim/cli.py
+    src/dgisim/game_state_machine.py
 
 [report]
 skip_empty = True

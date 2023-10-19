@@ -7,9 +7,9 @@ Weapon Type
 
     from dgisim import WeaponType
 
-:py:class:`dgisim.src.WeaponType`
+:py:class:`src.dgisim.WeaponType`
 
-.. py:module:: dgisim.src
+.. py:module:: src.dgisim
 
     .. autoenum:: WeaponType
         :members:

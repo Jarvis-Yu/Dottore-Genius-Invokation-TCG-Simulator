@@ -1,3 +1,3 @@
 
 $env:PYTHONPATH += ";$PWD"
-& ./venv/bin/python -m dgisim.src.cli
+& ./venv/bin/python -m src.dgisim.cli
