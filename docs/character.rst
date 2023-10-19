@@ -9,7 +9,8 @@ To use a character, you can do:
 
     import dgisim.character.character as dchar
 
-    some_char = dchar.Keqing()
+    keqing = dchar.Keqing()
+    kaeya = dchar.Kaeya()
 
 .. toctree::
     :maxdepth: 1

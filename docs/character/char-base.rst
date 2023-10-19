@@ -3,70 +3,9 @@ Character
 
 ``Character`` class is the base of all implemented characters.
 
-.. * `Private Class Properties`_
-.. * `Private Instance Properties`_
-
-.. * `Private Methods`_
-
-.. autoclass:: src.Character
+.. autoclass:: dgisim.Character
     :members:
     :undoc-members:
-
-.. automethod:: src.Character.get_energy
-
-xxx
----
-
-.. py:class:: dgisim.Character
-
-    .. py:method:: FACTIONS(cls) -> frozenset[Faction]
-        :classmethod:
-
-        :returns: the factions the character belongs to.
-
-    .. py:method:: of_faction(cls, faction: Faction) -> bool
-        :classmethod:
-
-        :param faction: the ``Faction`` of interest.
-        :returns: ``True`` if the character belongs to the passed in ``faction``.
-
-    .. py:method:: ELEMENT(cls) -> Element
-        :classmethod:
-
-        :returns: the element of the character.
-
-    .. py:method:: WEAPON_TYPE(cls) -> WeaponType
-        :classmethod:
-
-        :returns: the type of weapon the character wield.
-
-    .. py:method:: from_default(cls, id: int = -1) -> Character
-        :classmethod:
-
-        Creates a default instance of the character,
-        which is the common way to initialize a character.
-
-    .. py:method:: skills(cls) -> tuple[CharacterSkill, ...]
-        :classmethod:
-
-        :returns: the skills the character is able to cast.
-
-        Refer to :ref:`character-skill`.
-
-    .. py:method:: skill_actual_type(cls, skill: CharacterSkill) -> CharacterSkillType
-        :classmethod:
-
-        :returns: the type of skill the the passed-in ``skill: CharacterSkill`` is of the character.
-
-        Refer to :ref:`character-skill`, :ref:`character-skill-type`.
-
-    .. py:method:: skill_cost(cls, skill_type: CharacterSkill) -> AbstractDice
-        :classmethod:
-
-        :returns: the original cost of the skill of the character.
-
-Public Instance Methods
------------------------
 
 Private Class Properties
 ------------------------
@@ -86,8 +25,6 @@ e.g. the element of Keqing is Electro, the element of Maguu Kenki is Anemo...
 
 The type of weapon a character uses.
 
-Refer to :ref:`weapon-type`.
-
 ``_TALENT_STATUS: None | type[TalentEquipmentStatus]``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -100,8 +37,6 @@ the talent status of Electro Hypostasis is ``None``.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The factions a character belongs to.
-
-Refer to :ref:`factions`.
 
 ``_SKILL1_COST: None | AbstractDice``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -135,8 +70,6 @@ The type of skill skill1 is treated as.
 The default value is ``CharacterSkillType.NORMAL_ATTACK``
 
 This property affects what statuses are triggered when a skill is cast.
-
-Refer to :ref:`character-skill-type`.
 
 ``_SKILL2_ACTUAL_TYPE: CharacterSkillType``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
