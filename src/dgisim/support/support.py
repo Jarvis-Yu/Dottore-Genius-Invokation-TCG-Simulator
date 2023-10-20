@@ -16,7 +16,6 @@ from dataclasses import dataclass, replace
 from typing import ClassVar, TYPE_CHECKING
 from typing_extensions import Self, override
 
-from ..card import card as cd
 from ..dice import ActualDice
 from ..effect import effect as eft
 from ..event import *
@@ -233,8 +232,9 @@ class XudongSupport(Support):
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.CARD:
             assert isinstance(item, CardPEvent)
+            from ..card.card import FoodCard
             if item.pid is status_source.pid \
-                    and issubclass(item.card_type, cd.FoodCard) \
+                    and issubclass(item.card_type, FoodCard) \
                     and item.dice_cost.num_dice() > 0 \
                     and self.usages > 0:
                 # note that this only handle cases when food requires only one kind of dice
@@ -284,13 +284,14 @@ class NRESupport(Support, stt._UsageLivingStatus):
             item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
+        from ..card.card import FoodCard
         if signal is Preprocessables.CARD:
             assert isinstance(item, CardPEvent)
             if (
                     not self.activated
                     and self.usages > 0
                     and item.pid is status_source.pid
-                    and issubclass(item.card_type, cd.FoodCard)
+                    and issubclass(item.card_type, FoodCard)
             ):
                 return item, replace(self, activated=True)
         return item, self
@@ -299,12 +300,13 @@ class NRESupport(Support, stt._UsageLivingStatus):
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
+        from ..card.card import FoodCard
         if signal is TriggeringSignal.POST_CARD and self.activated:
             return [
                 eft.DrawRandomCardOfTypeEffect(
                     pid=source.pid,
                     num=1,
-                    card_type=cd.FoodCard,
+                    card_type=FoodCard,
                 ),
             ], replace(self, usages=-1, activated=False)
         elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
@@ -449,9 +451,10 @@ class SumeruCitySupport(Support, stt._UsageLivingStatus):
             # the CardPEvent may become more different with ActionPEvent in the future,
             # so leave it as it is.
             assert isinstance(item, CardPEvent)
+            from ..card.card import TalentCard
             if not (
                     self.usages > 0
-                    and issubclass(item.card_type, cd.TalentCard)
+                    and issubclass(item.card_type, TalentCard)
                     and item.pid is status_source.pid
                     and item.dice_cost.can_cost_less_elem()
             ):

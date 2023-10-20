@@ -8,7 +8,6 @@ from functools import lru_cache
 from typing import Callable, Optional, TYPE_CHECKING, Union, cast
 from typing_extensions import override, Self
 
-from ..card import card as cd
 from ..effect import effect as eft
 from ..status import status as stt
 from ..status import statuses as stts
@@ -1625,11 +1624,12 @@ class Keqing(Character):
             )
 
         cards = game_state.get_player(source.pid).get_hand_cards()
-        if not can_infuse and cards.contains(cd.LightningStiletto):
+        from ..card.card import LightningStiletto
+        if not can_infuse and cards.contains(LightningStiletto):
             effects.append(
                 eft.PublicRemoveAllCardEffect(
                     source.pid,
-                    cd.LightningStiletto,
+                    LightningStiletto,
                 )
             )
             can_infuse = True
@@ -1658,7 +1658,7 @@ class Keqing(Character):
             effects.append(
                 eft.PublicAddCardEffect(
                     pid=source.pid,
-                    card=cd.LightningStiletto,
+                    card=LightningStiletto,
                 )
             )
 
