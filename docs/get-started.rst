@@ -38,31 +38,30 @@ You need to start by importing relative modules.
 .. code-block:: python3
 
     import dgisim as dg
-    from dgisim.character.character import *
-    import dgisim.card.card as dc
+    from dgisim import card, char
 
 Then define a deck for player 1.
 
 .. code-block:: python3
 
     deck1 = dg.MutableDeck(
-        chars=[Bennett, Klee, Keqing],
+        chars=[char.Bennett, char.Klee, char.Keqing],
         cards={
-            dc.GrandExpectation: 2,
-            dc.PoundingSurprise: 2,
-            dc.ThunderingPenance: 2,
-            dc.Vanarana: 2,
-            dc.ChangingShifts: 2,
-            dc.LeaveItToMe: 2,
-            dc.SacrificialSword: 2,
-            dc.GamblersEarrings: 2,
-            dc.IHaventLostYet: 2,
-            dc.LotusFlowerCrisp: 2,
-            dc.NorthernSmokedChicken: 2,
-            dc.ElementalResonanceFerventFlames: 2,
-            dc.ElementalResonanceWovenFlames: 2,
-            dc.WindAndFreedom: 2,
-            dc.TeyvatFriedEgg: 2,
+            card.GrandExpectation: 2,
+            card.PoundingSurprise: 2,
+            card.ThunderingPenance: 2,
+            card.Vanarana: 2,
+            card.ChangingShifts: 2,
+            card.LeaveItToMe: 2,
+            card.SacrificialSword: 2,
+            card.GamblersEarrings: 2,
+            card.IHaventLostYet: 2,
+            card.LotusFlowerCrisp: 2,
+            card.NorthernSmokedChicken: 2,
+            card.ElementalResonanceFerventFlames: 2,
+            card.ElementalResonanceWovenFlames: 2,
+            card.WindAndFreedom: 2,
+            card.TeyvatFriedEgg: 2,
         }
     )
 
@@ -80,7 +79,7 @@ It's now time to create the initial game state of a game.
 .. code-block:: python3
 
     initial_game_state = dg.GameState.from_decks(
-        mode=dg.mode.DefaultMode(),
+        mode=dg.DefaultMode(),
         p1_deck=deck1,
         p2_deck=deck2,
     )
@@ -96,7 +95,7 @@ It's now time to create the initial game state of a game.
     ``DefaultMode`` is the usual mode where each player has 3 characters and 30
     cards etc.
 
-    You could also use ``dgisim.mode.AllOmniMode()`` to make the game always generate
+    You could also use ``dgisim.AllOmniMode()`` to make the game always generate
     **omni dics** during the **roll phase**.
 
 You can now ``print`` the current game state to check if things seem all right.
@@ -248,8 +247,7 @@ It is a class to help you generate valid actions.
 .. code-block:: python3
 
     import dgisim as dg
-    import dgisim.action.action as dact
-    import dgisim.agents as dagt
+    from dgisim.agents import RandomAgent
 
     class NormalAttackAgent(dg.PlayerAgent):
         def choose_action(self, history: list[dg.GameState], pid: dg.Pid) -> dg.PlayerAction:
@@ -258,7 +256,7 @@ It is a class to help you generate valid actions.
             if isinstance(curr_game_state.get_phase(), curr_game_state.get_mode().action_phase):
                 return self.handle_action_phase(history, pid)
 
-            return dagt.RandomAgent().choose_action(history, pid)
+            return RandomAgent().choose_action(history, pid)
 
         def handle_action_phase(self, history: list[dg.GameState], pid: dg.Pid) -> dg.PlayerAction:
             curr_game_state = history[-1]
@@ -268,14 +266,14 @@ It is a class to help you generate valid actions.
             # check if can use any skill
             choices = action_generator.choices()
             if dg.ActionType.CAST_SKILL not in choices:
-                return dagt.RandomAgent().choose_action(history, pid)
+                return RandomAgent().choose_action(history, pid)
 
             action_generator = action_generator.choose(dg.ActionType.CAST_SKILL)
 
             # check if normal attack is usable
             choices = action_generator.choices()
             if dg.CharacterSkill.SKILL1 not in choices:
-                return dagt.RandomAgent().choose_action(history, pid)
+                return RandomAgent().choose_action(history, pid)
 
             action_generator = action_generator.choose(dg.CharacterSkill.SKILL1)
 
@@ -303,7 +301,7 @@ This may look a bit overwhelming, but don't worry, let's go though it step by st
         if isinstance(curr_game_state.get_phase(), curr_game_state.get_mode().action_phase):
             return self.handle_action_phase(history, pid)
 
-        return dagt.RandomAgent().choose_action(history, pid)
+        return RandomAgent().choose_action(history, pid)
 
 This block of code gets the latest game state first, and then see if it is in action
 phase. If not, we let ``RandomAgent`` to handle situations we haven't covered yet.
@@ -331,7 +329,7 @@ to take.
         # check if can use any skill
         choices = action_generator.choices()
         if dg.ActionType.CAST_SKILL not in choices:
-            return dagt.RandomAgent().choose_action(history, pid)
+            return RandomAgent().choose_action(history, pid)
 
         action_generator = action_generator.choose(dg.ActionType.CAST_SKILL)
         ...
@@ -359,7 +357,7 @@ and get a new action generator to make the next choice.
         # check if normal attack is usable
         choices = action_generator.choices()
         if dg.CharacterSkill.SKILL1 not in choices:
-            return dagt.RandomAgent().choose_action(history, pid)
+            return RandomAgent().choose_action(history, pid)
 
         action_generator = action_generator.choose(dg.CharacterSkill.SKILL1)
         ...

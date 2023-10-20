@@ -1,0 +1,1 @@
+from ._core.character.character import *

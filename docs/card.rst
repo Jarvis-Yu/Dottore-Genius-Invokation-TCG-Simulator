@@ -7,9 +7,9 @@ To use a card, you can do:
 
 .. code-block:: python3
 
-    import dgisim.card.card as dcard
+    from dgisim import card
 
-    some_card = dcard.GamblersEarrings
+    some_card = card.GamblersEarrings
 
 .. toctree::
     :maxdepth: 1

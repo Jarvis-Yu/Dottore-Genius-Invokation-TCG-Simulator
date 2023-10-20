@@ -1,16 +1,16 @@
 Character
 =========
 
-``dgisim.character.character`` contains all implemented characters.
+``dgisim.char`` contains all implemented characters.
 
 To use a character, you can do:
 
 .. code-block:: python3
 
-    import dgisim.character.character as dchar
+    from dgisim import char
 
-    keqing = dchar.Keqing()
-    kaeya = dchar.Kaeya()
+    keqing = char.Keqing()
+    kaeya = char.Kaeya()
 
 .. toctree::
     :maxdepth: 1

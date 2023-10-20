@@ -1,6 +1,9 @@
 Weapon Type
 ===========
 
+.. autoclass:: dgisim.character.character.Character
+    :members:
+
 .. autoenum:: dgisim.WeaponType
     :members:
 
