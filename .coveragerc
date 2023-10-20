@@ -1,5 +1,6 @@
 [run]
 omit =
+    src/package/*
     src/profiles/*
     src/tests/*
     src/dgisim/helper/level_print.py
