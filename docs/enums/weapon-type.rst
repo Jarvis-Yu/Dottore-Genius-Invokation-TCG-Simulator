@@ -1,10 +1,11 @@
 Weapon Type
 ===========
 
-.. autoclass:: dgisim.character.character.Character
-    :members:
+.. code-block:: python3
 
-.. autoenum:: dgisim.WeaponType
-    :members:
+    from dgisim import WeaponType
 
-    This is used to indicate the type of weapon a character uses.
+This is used to indicate the type of weapon a character uses.
+
+.. autoenum:: dgisim.character.enums.WeaponType
+    :members:

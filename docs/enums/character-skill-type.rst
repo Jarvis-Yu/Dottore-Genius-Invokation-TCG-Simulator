@@ -1,7 +1,12 @@
 Character Skill Type
 ====================
 
-.. autoenum:: dgisim.CharacterSkillType
+.. code-block:: python3
+
+    from dgisim import CharacterSkillType
+
+The enum to represent the type of skill the skill is for a character.
+
+.. autoenum:: dgisim.character.enums.CharacterSkillType
     :members:
 
-    The enum to represent the type of skill the skill is for a character.

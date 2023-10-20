@@ -1,7 +1,11 @@
 Faction
 =======
 
-.. autoenum:: dgisim.Faction
-    :members:
+.. code-block:: python3
 
-    This is used to indicate the factions a character belongs to.
+    from dgisim import Faction
+
+This is used to indicate the factions a character belongs to.
+
+.. autoenum:: dgisim.character.enums.Faction
+    :members:

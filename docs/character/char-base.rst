@@ -3,7 +3,7 @@ Character
 
 ``Character`` class is the base of all implemented characters.
 
-.. autoclass:: dgisim.Character
+.. autoclass:: dgisim.character.character.Character
     :members:
     :undoc-members:
 
