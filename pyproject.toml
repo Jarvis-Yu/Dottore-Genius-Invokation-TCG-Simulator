@@ -40,4 +40,5 @@ changelog = "https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulato
 documentation = "https://dottore-genius-invokation-tcg-simulator.readthedocs.io/en/stable/"
 
 [tool.setuptools.package-dir]
-dgisim = "src/dgisim"
+dgisim = "src/package"
+"dgisim._core" = "src/dgisim"
