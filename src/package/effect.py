@@ -1,1 +1,1 @@
-from ._core.effect.effect import *
+from ..dgisim.effect.effect import *

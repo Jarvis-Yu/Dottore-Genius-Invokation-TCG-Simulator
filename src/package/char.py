@@ -1,1 +1,1 @@
-from ._core.character.character import *
+from ..dgisim.character.character import *

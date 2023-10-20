@@ -1,1 +1,1 @@
-from ._core.agents import *
+from ..dgisim.agents import *

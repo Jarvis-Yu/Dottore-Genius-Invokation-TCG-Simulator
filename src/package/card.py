@@ -1,1 +1,1 @@
-from ._core.card.card import *
+from ..dgisim.card.card import *

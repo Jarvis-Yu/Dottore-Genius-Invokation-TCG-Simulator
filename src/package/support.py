@@ -1,1 +1,1 @@
-from ._core.support.support import *
+from ..dgisim.support.support import *

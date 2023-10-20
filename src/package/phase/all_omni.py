@@ -1,1 +1,1 @@
-from .._core.phase.all_omni import *
+from ...dgisim.phase.all_omni import *
