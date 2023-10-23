@@ -3,6 +3,7 @@ This file contains the base class Character for all characters,
 and implementation of all characters. (in alphabetic order)
 """
 from __future__ import annotations
+from abc import abstractmethod
 from dataclasses import replace
 from functools import lru_cache
 from typing import Callable, Optional, TYPE_CHECKING, Union, cast
@@ -62,8 +63,13 @@ __all__ = [
 
 
 class Character:
+    """
+    The base class for all characters.
+    """
+    # element of the character
     _ELEMENT: Element = Element.ANY
     _WEAPON_TYPE: WeaponType
+    # if the talent of this character is equitable, then assign the talent status here
     _TALENT_STATUS: None | type[stt.TalentEquipmentStatus]
     _FACTIONS: frozenset[Faction]
 
@@ -90,6 +96,19 @@ class Character:
         statuses: stts.Statuses,
         elemental_aura: ElementalAura,
     ):
+        """
+        :param id: the unique identifier to distinguish from other characters of the same player.
+        :param alive: used to indicate if the character is marked as defeated.
+        :param hp: current hp.
+        :param max_hp: maximum hp.
+        :param energy: current energy.
+        :param hiddens: hidden statuses.
+        :param equipments: equipment statuses.
+        :param statuses: character statuses.
+        :param aura: elemental aura.
+
+        :returns: a new instance of the character.
+        """
         self._id = id
         self._alive = alive
         self._hp = hp
@@ -106,71 +125,122 @@ class Character:
         return cls._TALENT_STATUS
 
     def get_id(self) -> int:
+        """
+        :returns: the id as an unique identifier for a character of a player.
+
+        Typically, when a player has n characters, each character is assigned
+        an id from 1 to n from left to right.
+        """
         return self._id
 
     def get_alive(self) -> bool:
+        """
+        :returns: the boolean value indicating if the character is actually defeated.
+                  This is different from hp being 0.
+
+        e.g. when Keqing's burst kills the next character and overloads to them,
+        they can still be swapped out. But a character that has been defeated
+        long ago cannot be overloaded out. In this case the just defeated characters
+        are still marked as alive despite hp being 0, and `alive` turns `False` at
+        a later time.
+        """
         return self._alive
 
     def get_hp(self) -> int:
+        """ :returns: the current hp.  """
         return self._hp
 
     def get_max_hp(self) -> int:
+        """ :returns: the maximum hp.  """
         return self._max_hp
 
     def get_energy(self) -> int:
+        """ :returns: the current energy. """
         return self._energy
 
     def get_max_energy(self) -> int:
+        """ :returns: the maximum energy. """
         return self._max_energy
 
     def get_hidden_statuses(self) -> stts.Statuses:
+        """
+        :returns: the hidden statuses.
+
+        Hidden statuses are the statues that belongs to the character but
+        invisible in the game.
+
+        e.g. Ganyu's talent deals more damage if Ganyu casted Frost Arrow before.
+        So Ganyu needs a hidden status to record that information.
+        """
         return self._hiddens
 
     def get_equipment_statuses(self) -> stts.EquipmentStatuses:
+        """ :returns: the equipment statuses. """
         return self._equipments
 
     def get_character_statuses(self) -> stts.Statuses:
+        """ :returns: the character statuses. """
         return self._statuses
 
     def get_elemental_aura(self) -> ElementalAura:
+        """ :returns: the elemental aura. """
         return self._aura
 
     def get_all_statuses_ordered(self) -> list[stts.Statuses]:
+        """
+        :returns: a list of Statuses that are ordered so that those that should be
+                  executed first has a lower index.
+        """
         return [self._hiddens, self._equipments, self._statuses]
 
     def get_all_statuses_ordered_flattened(self) -> tuple[stt.Status, ...]:
+        """
+        :returns: a tuple of statuses that are ordered so that those that should be
+                  executed first has a lower index.
+        """
         return sum([statuses.get_statuses() for statuses in self.get_all_statuses_ordered()], ())
 
     def factory(self) -> CharacterFactory:
+        """ :returns: a factory for the current character. """
         return CharacterFactory(self, type(self))
 
     def hp_lost(self) -> int:
+        """ :returns: the lost hp. """
         return self._max_hp - self._hp
 
     @classmethod
     def FACTIONS(cls) -> frozenset[Faction]:
+        """ :returns: the set of factions the character belongs to. """
         return cls._FACTIONS
 
     @classmethod
     def of_faction(cls, faction: Faction) -> bool:
+        """ :returns: if this character belongs to the `faction`. """
         return faction in cls._FACTIONS
 
     @classmethod
     def ELEMENT(cls) -> Element:
+        """ :returns: the element of the character. """
         return cls._ELEMENT
 
     @classmethod
     def WEAPON_TYPE(cls) -> WeaponType:
+        """ :returns: the type of weapon the character wields. """
         return cls._WEAPON_TYPE
 
     @classmethod
+    @abstractmethod
     def from_default(cls, id: int = -1) -> Character:
-        raise Exception("Not Overriden")
+        """
+        :returns: the default state of a character. Usually used to initialize a
+                  new instance of the character.
+        """
+        pass
 
     @classmethod
     @lru_cache(maxsize=1)
     def skills(cls) -> tuple[CharacterSkill, ...]:
-        """ Provides the skill types with corresponding cost that the character has """
+        """ :returns: the skill types the character supports """
         my_skills: list[CharacterSkill] = []
         if cls._normal_attack is not Character._normal_attack:
             my_skills.append(CharacterSkill.SKILL1)
@@ -184,6 +254,10 @@ class Character:
 
     @classmethod
     def skill_actual_type(cls, skill: CharacterSkill) -> CharacterSkillType:
+        """
+        :returns: the type of skill the character's `skill` is.
+                  e.g. Ganyu's Frost Arrow (SKILL3) is of type Normal Attack.
+        """
         if skill is CharacterSkill.SKILL1:
             return cls._SKILL1_ACTUAL_TYPE
         elif skill is CharacterSkill.SKILL2:
@@ -196,6 +270,9 @@ class Character:
 
     @classmethod
     def skill_cost(cls, skill_type: CharacterSkill) -> AbstractDice:
+        """
+        :returns: the basic dice cost of `skill_type`.
+        """
         if skill_type is CharacterSkill.SKILL1 and cls._SKILL1_COST is not None:
             return cls._SKILL1_COST
         elif skill_type is CharacterSkill.SKILL2 and cls._SKILL2_COST is not None:
@@ -207,14 +284,22 @@ class Character:
         raise NotImplementedError(f"{skill_type} cost for {cls.__name__} not defined")
 
     def skill_energy_cost(self, skill_type: CharacterSkill) -> int:
+        """
+        :returns: the basic energy cost of `skill_type`.
+        """
         if skill_type is CharacterSkill.ELEMENTAL_BURST:
             return self._max_energy
         return 0
 
     def skill(self, game_state: GameState, source: StaticTarget, skill_type: CharacterSkill) -> tuple[eft.Effect, ...]:
         """
-        This should only be called to get effects right before the skill is to be executed.
+        :param game_state: current game state when the skill is casted.
+        :param source: location information of this character.
+        :param skill_type: the skill that is to be casted.
 
+        :returns: the effects of the skill in the context.
+
+        This should only be called to get effects right before the skill is to be executed.
         Otherwise faulty effects may be generated.
         """
         return (
@@ -383,27 +468,37 @@ class Character:
             eft.AliveMarkCheckerEffect(),
         )
 
-    def talent_equiped(self) -> bool:
+    def talent_equipped(self) -> bool:
+        """ :returns: if the talent is equipped. """
         talent_status = self._talent_status()
         if talent_status is None:
             return False
         return self.get_equipment_statuses().contains(talent_status)
 
     def alive(self) -> bool:
+        """ Same as `.get_alive()`. """
         return self._alive
 
     def defeated(self) -> bool:
+        """ Negation of `.alive()`. """
         return not self._alive
 
     def satiated(self) -> bool:
+        """ :returns: if character is satiated. """
         from ..status.status import SatiatedStatus
         return self._statuses.contains(SatiatedStatus)
 
     def can_cast_skill(self) -> bool:
+        """
+        :returns: if skills can be casted.
+
+        A character cannot cast skill when it is frozen, petrified or defeated.
+        """
         from ..status.status import FrozenStatus
         return not self._statuses.contains(FrozenStatus) and not self.defeated()
 
     def name(self) -> str:
+        """ :returns: name of the character (without breaks). """
         return self.__class__.__name__
 
     def _all_unique_data(self) -> tuple:
@@ -719,7 +814,7 @@ class Bennett(Character):
             ),
         ]
         this_player = game_state.get_player(source.pid)
-        talent_equiped = self.talent_equiped()
+        talent_equiped = self.talent_equipped()
         if stt.InspirationFieldStatus in this_player.get_combat_statuses() and talent_equiped:
             effects.append(
                 eft.RemoveCombatStatusEffect(
@@ -785,7 +880,7 @@ class Collei(Character):
     def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         talent_status: None | stt.ColleiTalentStatus = None
         trigger_sprout: bool = False
-        if self.talent_equiped():
+        if self.talent_equipped():
             talent_status = cast(
                 stt.ColleiTalentStatus,
                 self.get_hidden_statuses().find(stt.ColleiTalentStatus)
@@ -966,7 +1061,7 @@ class FatuiPyroAgent(Character):
             ),
             eft.UpdateCharacterStatusEffect(
                 target=source,
-                status=stt.StealthStatus(usages=3 if self.talent_equiped() else 2),
+                status=stt.StealthStatus(usages=3 if self.talent_equipped() else 2),
             ),
         )
 
@@ -1133,7 +1228,7 @@ class Ganyu(Character):
     @override
     def _elemental_skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         piercing_dmg = 2
-        if self.talent_equiped():
+        if self.talent_equipped():
             talent_status = self.get_hidden_statuses().find(stt.GanyuTalentStatus)
             assert isinstance(talent_status, stt.GanyuTalentStatus)
             if talent_status.elemental_skill2ed:
@@ -1404,7 +1499,7 @@ class KaedeharaKazuha(Character):
                 status=midare_to_use,
             ),
         )
-        if self.talent_equiped() \
+        if self.talent_equipped() \
                 and reaction is not None \
                 and reaction.first_elem in stt._POETICS_OF_FUUBUTSU_MAP:
             poetic_status = stt._POETICS_OF_FUUBUTSU_MAP[reaction.first_elem]
@@ -1470,7 +1565,7 @@ class KaedeharaKazuha(Character):
                 ),
             ),
         )
-        if self.talent_equiped() \
+        if self.talent_equipped() \
                 and reaction is not None \
                 and reaction.first_elem in stt._POETICS_OF_FUUBUTSU_MAP:
             poetic_status = stt._POETICS_OF_FUUBUTSU_MAP[reaction.first_elem]
@@ -1635,7 +1730,7 @@ class Keqing(Character):
             can_infuse = True
 
         if can_infuse:
-            if self.talent_equiped():
+            if self.talent_equipped():
                 effects.append(
                     eft.OverrideCharacterStatusEffect(
                         target=source,
@@ -1741,7 +1836,7 @@ class Klee(Character):
             ),
             eft.OverrideCharacterStatusEffect(
                 target=source,
-                status=stt.ExplosiveSparkStatus(usages=case_val(self.talent_equiped(), 2, 1)),
+                status=stt.ExplosiveSparkStatus(usages=case_val(self.talent_equipped(), 2, 1)),
             ),
         )
 
@@ -1822,7 +1917,7 @@ class MaguuKenki(Character):
                     target_player=source.pid,
                 ),
             )
-            if self.talent_equiped()
+            if self.talent_equipped()
             else ()
         )
 
@@ -1839,7 +1934,7 @@ class MaguuKenki(Character):
                     target_player=source.pid,
                 ),
             )
-            if self.talent_equiped()
+            if self.talent_equipped()
             else ()
         )
 
@@ -2049,7 +2144,7 @@ class Nahida(Character):
             drain=self.get_max_energy(),
         )]
         if (
-                self.talent_equiped()
+                self.talent_equipped()
                 and any(
                     char.ELEMENT() is Element.ELECTRO
                     for char in game_state.get_player(source.pid).get_characters()
@@ -2072,7 +2167,7 @@ class Nahida(Character):
             damage_type=DamageType(elemental_burst=True),
         ))
         if (
-                self.talent_equiped()
+                self.talent_equipped()
                 and any(
                     char.ELEMENT() is Element.HYDRO
                     for char in game_state.get_player(source.pid).get_characters()
@@ -2299,7 +2394,7 @@ class Qiqi(Character):
     @override
     def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         effects: tuple[eft.Effect, ...] = ()
-        if self.talent_equiped():
+        if self.talent_equipped():
             hidden_status = self.get_hidden_statuses().just_find(stt.QiqiTalentStatus)
             if hidden_status.revivable():
                 self_chars = game_state.get_player(
@@ -2480,7 +2575,7 @@ class RhodeiaOfLoch(Character):
             ),
         ]
 
-        if self.talent_equiped():
+        if self.talent_equipped():
             effects.append(eft.AllSummonIncreaseUsage(target_pid=source.pid, d_usages=1))
 
         return tuple(effects)
@@ -2863,7 +2958,7 @@ class Xingqiu(Character):
             ),
             eft.UpdateCombatStatusEffect(
                 target_pid=source.pid,
-                status=stt.RainSwordStatus(usages=case_val(self.talent_equiped(), 3, 2))
+                status=stt.RainSwordStatus(usages=case_val(self.talent_equipped(), 3, 2))
             ),
         )
 
@@ -2959,7 +3054,7 @@ class YaeMiko(Character):
             ),
         ]
         if game_state.get_player(source.pid).get_summons().find(self._SUMMON_TYPE) is not None:
-            if self.talent_equiped():
+            if self.talent_equipped():
                 effects.append(
                     eft.AddCharacterStatusEffect(
                         target=source,

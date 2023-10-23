@@ -218,14 +218,27 @@ class Card:
             pid: Pid,
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
+        """
+        :param game_state: the state of the game when the card is played.
+        :param pid: the card-player's pid.
+        :param instruction: additional information on how card should be played.
+
+        Returns the effects of the card when played.
+        """
         raise NotImplementedError
 
     @classmethod
     def valid_in_deck(cls, deck: Deck) -> bool:
+        """
+        :returns: if this card can be added to the `deck`.
+        """
         return True
 
     @classmethod
     def base_dice_cost(cls) -> AbstractDice:  # pragma: no cover
+        """
+        :returns: the basic cost of the card without any discount.
+        """
         return cls._DICE_COST
 
     @classmethod
@@ -235,9 +248,11 @@ class Card:
             pid: Pid
     ) -> tuple[gs.GameState, AbstractDice]:
         """
-        Return a tuple of GameState and AbstractDice:
-        - returned game-state is the game-state after preprocessing the usage of the card
-        - returned abstract-dice are the actual cost of using the card at the provided game_state
+        :returns: a tuple of `GameState` and `AbstractDice`.
+
+        The returned game_state is the game_state after preprocessing the usage of the card.
+
+        The returned abstract_dice are the actual cost of using the card at the provided game_state.
         """
         game_state, card_event = StatusProcessing.preprocess_by_all_statuses(
             game_state=game_state,
@@ -258,6 +273,9 @@ class Card:
             game_state: gs.GameState,
             pid: Pid
     ) -> AbstractDice:
+        """
+        :returns: the actual cost of the card for `pid` at `game_state`.
+        """
         return cls.preprocessed_dice_cost(game_state, pid)[1]
 
     # TODO add a post effect adding inform() to all status
@@ -270,18 +288,16 @@ class Card:
     @classmethod
     def loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         """
-        doesn't check if player has the card in hand
-
-        don't override this unless you know what you are doing
+        :returns: `True` if the card can be played by the player `pid` provided they
+                  have the card.
         """
         return cls._loosely_usable(game_state, pid) and game_state.get_effect_stack().is_empty()
 
     @classmethod
     def usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         """
-        checks if card can be used (but neglect if player have enough dice for this)
-
-        don't override this unless you know what you are doing
+        :returns: `True` if the card can be played by the player `pid` and they
+                  have the card.
         """
         return game_state.get_player(pid).get_hand_cards().contains(cls) \
             and cls.loosely_usable(game_state, pid)
@@ -289,9 +305,8 @@ class Card:
     @classmethod
     def strictly_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         """
-        checks if card can be used
-
-        don't override this unless you know what you are doing
+        :returns: `True` if the card can be played by the player `pid`, and they
+                  have the card and they have the dice to pay for the card.
         """
         dice_satisfy = game_state.get_player(pid).get_dice().loosely_satisfy(
             cls.just_preprocessed_dice_cost(game_state, pid)
@@ -305,7 +320,10 @@ class Card:
             pid: Pid,
             instruction: act.Instruction
     ) -> None | gs.GameState:
-        """ Return the preprocessed game-state if instruction is valid, otherwise return None """
+        """
+        :returns: the preprocessed game-state if instruction is valid,
+                  otherwise return None.
+        """
         if not game_state.get_player(pid).get_hand_cards().contains(cls) \
                 or not game_state.get_active_player_id() is pid \
                 or not cls._valid_instruction(game_state, pid, instruction) \
@@ -332,6 +350,7 @@ class Card:
             game_state: gs.GameState,
             pid: Pid,
     ) -> None | acg.ActionGenerator:
+        """ :returns: the action generator if the card is `strictly_usable` otherwise None. """
         return None  # pragma: no cover
 
     def __eq__(self, other: object) -> bool:  # pragma: no cover
@@ -342,10 +361,12 @@ class Card:
 
     @staticmethod
     def is_combat_action() -> bool:
+        """ :returns: if playing the card is a combat action. """
         return False
 
     @classmethod
     def name(cls) -> str:
+        """ :returns: the name of the card without space. """
         return cls.__name__
 
 ############################## helpers functions ##############################

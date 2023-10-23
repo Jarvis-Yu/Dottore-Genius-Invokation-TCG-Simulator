@@ -3,173 +3,178 @@ Character
 
 ``Character`` class is the base of all implemented characters.
 
+.. code-block:: python3
+
+    from dgisim import Character
+
 .. autoclass:: dgisim.character.character.Character
     :members:
-    :undoc-members:
 
-Private Class Properties
-------------------------
+    .. automethod:: __init__
 
-Private class properties can be handy when you inherit the ``Character`` class
-and define your new character class.
+.. Private Class Properties
+.. ------------------------
 
-``_ELEMENT: Element``
-^^^^^^^^^^^^^^^^^^^^^
+.. Private class properties can be handy when you inherit the ``Character`` class
+.. and define your new character class.
 
-The element of the character.
+.. ``_ELEMENT: Element``
+.. ^^^^^^^^^^^^^^^^^^^^^
 
-e.g. the element of Keqing is Electro, the element of Maguu Kenki is Anemo...
+.. The element of the character.
 
-``_WEAPON_TYPE: WeaponType``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. e.g. the element of Keqing is Electro, the element of Maguu Kenki is Anemo...
 
-The type of weapon a character uses.
+.. ``_WEAPON_TYPE: WeaponType``
+.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``_TALENT_STATUS: None | type[TalentEquipmentStatus]``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. The type of weapon a character uses.
 
-The talent status of the character.
+.. ``_TALENT_STATUS: None | type[TalentEquipmentStatus]``
+.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-e.g. the talent status of Sangonomiya Kokomi is ``TamakushiCasketStatus``;
-the talent status of Electro Hypostasis is ``None``.
+.. The talent status of the character.
 
-``_FACTIONS: frozenset[Faction]``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. e.g. the talent status of Sangonomiya Kokomi is ``TamakushiCasketStatus``;
+.. the talent status of Electro Hypostasis is ``None``.
 
-The factions a character belongs to.
+.. ``_FACTIONS: frozenset[Faction]``
+.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``_SKILL1_COST: None | AbstractDice``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. The factions a character belongs to.
 
-The dice cost of the skill 1 of the character. Value default to ``None``.
+.. ``_SKILL1_COST: None | AbstractDice``
+.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``None`` here means the character doesn't have a defined skill1.
+.. The dice cost of the skill 1 of the character. Value default to ``None``.
 
-Skill *n* is the *nth* skill counting from left to right in the official TCG
-game. (excluding the elemental burst)
+.. ``None`` here means the character doesn't have a defined skill1.
 
-``_SKILL2_COST: None | AbstractDice``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. Skill *n* is the *nth* skill counting from left to right in the official TCG
+.. game. (excluding the elemental burst)
 
-The dice cost of the skill 2 of the character. Value default to ``None``.
+.. ``_SKILL2_COST: None | AbstractDice``
+.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``_SKILL3_COST: None | AbstractDice``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. The dice cost of the skill 2 of the character. Value default to ``None``.
 
-The dice cost of the skill 3 of the character. Value default to ``None``.
+.. ``_SKILL3_COST: None | AbstractDice``
+.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``_ELEMENTAL_BURST_COST: None | AbstractDice``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. The dice cost of the skill 3 of the character. Value default to ``None``.
 
-The dice cost of the elemental burst of the character. Value default to ``None``.
+.. ``_ELEMENTAL_BURST_COST: None | AbstractDice``
+.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``_SKILL1_ACTUAL_TYPE: CharacterSkillType``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. The dice cost of the elemental burst of the character. Value default to ``None``.
 
-The type of skill skill1 is treated as.
-The default value is ``CharacterSkillType.NORMAL_ATTACK``
+.. ``_SKILL1_ACTUAL_TYPE: CharacterSkillType``
+.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This property affects what statuses are triggered when a skill is cast.
+.. The type of skill skill1 is treated as.
+.. The default value is ``CharacterSkillType.NORMAL_ATTACK``
 
-``_SKILL2_ACTUAL_TYPE: CharacterSkillType``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. This property affects what statuses are triggered when a skill is cast.
 
-The type of skill skill2 is treated as.
-The default value is ``CharacterSkillType.ELEMENTAL_SKILL``
+.. ``_SKILL2_ACTUAL_TYPE: CharacterSkillType``
+.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``_SKILL3_ACTUAL_TYPE: CharacterSkillType``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. The type of skill skill2 is treated as.
+.. The default value is ``CharacterSkillType.ELEMENTAL_SKILL``
 
-The type of skill skill3 is treated as.
-The default value is ``CharacterSkillType.ELEMENTAL_SKILL``
+.. ``_SKILL3_ACTUAL_TYPE: CharacterSkillType``
+.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``_BURST_ACTUAL_TYPE: CharacterSkillType``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. The type of skill skill3 is treated as.
+.. The default value is ``CharacterSkillType.ELEMENTAL_SKILL``
 
-The type of skill elemental burst is treated as.
-The default value is ``CharacterSkillType.ELEMENTAL_BURST``
+.. ``_BURST_ACTUAL_TYPE: CharacterSkillType``
+.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Private Instance Properties
----------------------------
+.. The type of skill elemental burst is treated as.
+.. The default value is ``CharacterSkillType.ELEMENTAL_BURST``
 
-Private instance properties are typically not introduced in documentations,
-but the introduction of it can greatly help you understand how a character
-is represented.
+.. Private Instance Properties
+.. ---------------------------
 
-``_id: int``
-^^^^^^^^^^^^
+.. Private instance properties are typically not introduced in documentations,
+.. but the introduction of it can greatly help you understand how a character
+.. is represented.
 
-The unique id for a character of a player.
+.. ``_id: int``
+.. ^^^^^^^^^^^^
 
-Typically, characters of different players can share the same id.
-For each player, when its deck has *n* characters,
-the characters get id *1 to n* from left to right.
+.. The unique id for a character of a player.
 
-``_alive: bool``
-^^^^^^^^^^^^^^^^
+.. Typically, characters of different players can share the same id.
+.. For each player, when its deck has *n* characters,
+.. the characters get id *1 to n* from left to right.
 
-The boolean value indicating if the character is actually dead or not.
+.. ``_alive: bool``
+.. ^^^^^^^^^^^^^^^^
 
-Within the same skill, if the *next character* of the opponent is defeated first,
-then an **overloaded** happen to the active character,
-the *next character* who was just defeated could be swapped out to be the active
-character, even though **overloaded** typically skips the defeated characters.
+.. The boolean value indicating if the character is actually dead or not.
 
-``_alive`` is used to mark the *about to be actually defeated* characters enabling
-them to be force swapped out until the effect ``AliveMarkCheckerEffect`` is executed
-by the game.
+.. Within the same skill, if the *next character* of the opponent is defeated first,
+.. then an **overloaded** happen to the active character,
+.. the *next character* who was just defeated could be swapped out to be the active
+.. character, even though **overloaded** typically skips the defeated characters.
 
-``_hp: int``
-^^^^^^^^^^^^
+.. ``_alive`` is used to mark the *about to be actually defeated* characters enabling
+.. them to be force swapped out until the effect ``AliveMarkCheckerEffect`` is executed
+.. by the game.
 
-The current hp of the character.
+.. ``_hp: int``
+.. ^^^^^^^^^^^^
 
-``_max_hp: int``
-^^^^^^^^^^^^^^^^
+.. The current hp of the character.
 
-The maximum hp of the character.
+.. ``_max_hp: int``
+.. ^^^^^^^^^^^^^^^^
 
-``_energy: int``
-^^^^^^^^^^^^^^^^
+.. The maximum hp of the character.
 
-The current energy of the character.
+.. ``_energy: int``
+.. ^^^^^^^^^^^^^^^^
 
-``_max_energy: int``
-^^^^^^^^^^^^^^^^^^^^
+.. The current energy of the character.
 
-The maximum energy of the character.
+.. ``_max_energy: int``
+.. ^^^^^^^^^^^^^^^^^^^^
 
-``_hiddens: Statuses``
-^^^^^^^^^^^^^^^^^^^^^^
+.. The maximum energy of the character.
 
-Contains the hidden statuses of the character.
+.. ``_hiddens: Statuses``
+.. ^^^^^^^^^^^^^^^^^^^^^^
 
-e.g. Mona's passive skill is considered a hidden status.
+.. Contains the hidden statuses of the character.
 
-Hidden statuses are processed before all other statuses per character.
+.. e.g. Mona's passive skill is considered a hidden status.
 
-``_equipments: EquipmentStatuses``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. Hidden statuses are processed before all other statuses per character.
 
-Contains the equipments equipped by the character.
+.. ``_equipments: EquipmentStatuses``
+.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-e.g. weapons, artifacts, some talent cards.
+.. Contains the equipments equipped by the character.
 
-Equipment statuses are executed after hidden statuses.
+.. e.g. weapons, artifacts, some talent cards.
 
-``_statuses: Statuses``
-^^^^^^^^^^^^^^^^^^^^^^^
+.. Equipment statuses are executed after hidden statuses.
 
-Contains the other statuses of the character.
+.. ``_statuses: Statuses``
+.. ^^^^^^^^^^^^^^^^^^^^^^^
 
-e.g. Noelle's elemental burst status, satiated status, mushroom pizza status...
+.. Contains the other statuses of the character.
 
-Equipment statuses are executed after equipment statuses.
+.. e.g. Noelle's elemental burst status, satiated status, mushroom pizza status...
 
-``_elemental_aura: ElementalAura``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. Equipment statuses are executed after equipment statuses.
 
-Contains the aura of the character.
+.. ``_elemental_aura: ElementalAura``
+.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-e.g. if the character is affected by Hydro, then the next Pyro damage
-to the character is increased by 2.
+.. Contains the aura of the character.
+
+.. e.g. if the character is affected by Hydro, then the next Pyro damage
+.. to the character is increased by 2.

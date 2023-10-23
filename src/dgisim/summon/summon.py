@@ -323,7 +323,7 @@ class BakeKurageSummon(_DestroyOnNumSummon):
                 return self
             char = game_state.get_character_target(information.source)
             from ..character.character import SangonomiyaKokomi
-            if isinstance(char, SangonomiyaKokomi) and char.talent_equiped():
+            if isinstance(char, SangonomiyaKokomi) and char.talent_equipped():
                 return replace(self, activated=True)
         return self
 
@@ -341,7 +341,7 @@ class BakeKurageSummon(_DestroyOnNumSummon):
             activate_additional_dmg_boost = any(
                 (
                     stt.CeremonialGarmentStatus in char.get_character_statuses()
-                    and char.talent_equiped()
+                    and char.talent_equipped()
                 )
                 for char in self_chars
             )
@@ -477,7 +477,7 @@ class DandelionFieldSummon(_DestroyOnNumSummon):
             self_chars = game_state.get_player(status_source.pid).get_characters()
             from ..character.character import Jean
             if any(
-                isinstance(char, Jean) and char.talent_equiped()
+                isinstance(char, Jean) and char.talent_equipped()
                 for char in self_chars
             ):
                 return item.delta_damage(self.DAMAGE_BOOST), self

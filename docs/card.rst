@@ -14,4 +14,5 @@ To use a card, you can do:
 .. toctree::
     :maxdepth: 1
 
-    Available Cards </card/available-cards>
+    Card Class </card/card-base>
+    /card/available-cards

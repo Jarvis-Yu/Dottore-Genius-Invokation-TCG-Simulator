@@ -515,7 +515,7 @@ class Status:
     ) -> bool:
         alive_chars = game_state.get_player(pid).get_characters().get_alive_characters()
         return any(
-            char.talent_equiped()
+            char.talent_equipped()
             for char in alive_chars
             if isinstance(char, char_type)
         )
@@ -536,7 +536,7 @@ class PersonalStatus(Status):
     def talent_equiped(self, game_state: GameState, status_source: StaticTarget) -> int:
         char = game_state.get_character_target(status_source)
         assert char is not None
-        return char.talent_equiped()
+        return char.talent_equipped()
 
 
 @dataclass(frozen=True)
@@ -2488,7 +2488,7 @@ class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
                 character = game_state.get_character_target(status_source)
                 assert character is not None, f"source {status_source} in {game_state}"
                 dmg_boost = self.DAMAGE_BOOST
-                if character.talent_equiped():
+                if character.talent_equipped():
                     talent = character.get_equipment_statuses().just_find(AratakiIchibanStatus)
                     if talent.activated():
                         dmg_boost += talent.dmg_boost
@@ -2916,7 +2916,7 @@ class StealthStatus(CharacterStatus, FixedShieldStatus):
                 return item, self
             char = game_state.get_character_target(status_source)
             assert char is not None
-            if not char.talent_equiped():
+            if not char.talent_equipped():
                 return item, self
             return item.convert_element(self.INFUSION_ELEMENT), self
 
@@ -3647,7 +3647,7 @@ class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
             oppo_chars = oppo_player.get_characters()
             from ..character.character import Nahida
             if (
-                    any(char.talent_equiped() for char in oppo_chars if isinstance(char, Nahida))
+                    any(char.talent_equipped() for char in oppo_chars if isinstance(char, Nahida))
                     and ShrineOfMayaStatus in oppo_player.get_combat_statuses()
                     and any(char.ELEMENT() is Element.PYRO for char in oppo_chars)
             ):
@@ -3780,7 +3780,7 @@ class JadeScreenStatus(CombatStatus, FixedShieldStatus):
             ):
                 active_char = game_state.get_player(status_source.pid).just_get_active_character()
                 from ..character.character import Ningguang
-                if isinstance(active_char, Ningguang) and active_char.talent_equiped():
+                if isinstance(active_char, Ningguang) and active_char.talent_equipped():
                     return item.delta_damage(1), self
         return super()._preprocess(game_state, status_source, item, signal)
 
@@ -3831,7 +3831,7 @@ class FullPlateStatus(CombatStatus, StackedShieldStatus):
                 return [], self
             this_player = game_state.get_player(source.pid)
             char_self = this_player.just_get_active_character()
-            if not char_self.talent_equiped():
+            if not char_self.talent_equipped():
                 return [], self
             effects: list[eft.Effect] = []
             for char in this_player.get_characters().get_character_in_activity_order():
@@ -4085,7 +4085,7 @@ class IcyQuillStatus(CombatStatus, _UsageStatus):
             if (
                 self.normal_attack_deduction_usages > 0
                 and any(
-                    char.talent_equiped()
+                    char.talent_equipped()
                     for char in game_state.get_player(status_source.pid).get_characters()
                     if isinstance(char, Shenhe)
                 )
@@ -4284,7 +4284,7 @@ class StormzoneStatus(CombatStatus, _UsageStatus):
         if self.triggered and self._is_swapping_source(source, signal):
             from ..character.character import Venti
             has_talent = any(
-                char.talent_equiped()
+                char.talent_equipped()
                 for char in game_state.get_player(source.pid).get_characters()
                 if isinstance(char, Venti)
             )
@@ -4602,7 +4602,7 @@ class NiwabiEnshouStatus(CharacterStatus, _UsageStatus):
                 assert this_char is not None
                 return (
                     []
-                    if not this_char.talent_equiped()
+                    if not this_char.talent_equipped()
                     else [eft.ReferredDamageEffect(
                         source=source,
                         target=DynamicCharacterTarget.OPPO_ACTIVE,
