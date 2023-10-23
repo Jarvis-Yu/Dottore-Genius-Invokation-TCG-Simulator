@@ -28,7 +28,8 @@ Contents
    game-state
    mode
    phase
+   dice
    character
    card
-   dice
+   action-generator
    enums

@@ -33,6 +33,7 @@ class ActionGenerator:
     If both action and instruction is None, then this action generator is used 
     to generate other ActionGenerators that may eventually generate some action.
     """
+    #: the current game_state that the action generator is based on
     game_state: GameState
     pid: Pid
     action: None | PlayerAction = None
@@ -54,12 +55,17 @@ class ActionGenerator:
 
     def filled(self) -> bool:
         """
-        Return if ActionGenerator is ready to produce the final action
+        :returns: `True` if ActionGenerator is ready to produce the final action.
         """
         return not (self.action is None and self.instruction is None) \
             and self._action_filled() and self._instruction_filled()
 
     def generate_action(self) -> PlayerAction:
+        """
+        :returns: the final PlayerAction.
+
+        Precondition: `.filled()` is `True`.
+        """
         assert self.filled()
         assert self.action is not None
         action = self.action
@@ -68,16 +74,40 @@ class ActionGenerator:
         return action
 
     def choices(self) -> GivenChoiceType:
+        """
+        :returns: the choices to make a decision from.
+
+        - If return value is a tuple, choose one value from the tuple.
+        - If return value is `ActualDice`, choose some dice based on the context.
+        - If return value is `AbstractDice`, choose some dice of `ActualDice` that
+          can satisfy the `AbstractDice`.
+        - If return value is `Cards`, choose some cards from it based on the context.
+        """
         assert not self.filled()
         return self._choices_helper(self)
 
     def dice_available(self) -> ActualDice:
+        """
+        :returns: the dice the player holds.
+
+        A shortcut method to quickly get the player's dice.
+        """
         return self.game_state.get_player(self.pid).get_dice()
 
     def hand_cards_available(self) -> Cards:
+        """
+        :returns: the hand cards the player holds.
+
+        A shortcut method to quickly get the player's hand cards.
+        """
         return self.game_state.get_player(self.pid).get_hand_cards()
 
     def choose(self, choice: DecidedChoiceType) -> ActionGenerator:
+        """
+        :param choice: the choice that the user makes for this stage.
+
+        :returns: a new ActionGenerator representing the next stage of choices.
+        """
         assert not self.filled()
         return self._fill_helper(self, choice)
 

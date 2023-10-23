@@ -142,7 +142,7 @@ The output below is what you should get.
     <Combat Statuses>                       | <Combat Statuses>                       |
     <Summons>                               | <Summons>                               |
     <Supports>                              | <Supports>                              |
-    <Dice>                                 | <Dice>                                 |
+    <Dice>                                  | <Dice>                                  |
     <Hand Cards>                            | <Hand Cards>                            |
     <Deck Cards>                            | <Deck Cards>                            |
       <GrandExpectation: 2>                 |   <GrandExpectation: 2>                 |
