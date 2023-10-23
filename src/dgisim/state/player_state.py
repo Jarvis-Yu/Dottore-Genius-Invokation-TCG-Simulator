@@ -24,6 +24,10 @@ __all__ = [
 
 
 class PlayerState:
+    """
+    A class that holds all immutable data of a player.
+    """
+
     def __init__(
         self,
         phase: Act,
@@ -41,6 +45,22 @@ class PlayerState:
         publicly_used_cards: Cards,
         publicly_gained_cards: Cards,
     ):
+        """
+        :param phase: the phase the player is in.
+        :param consec_action: whether the player should act consecutively.
+        :param characters: the characters.
+        :param hidden_stateses: the hidden statuses.
+        :param combet_statuses: the combat statuses.
+        :param summons: the summons.
+        :param supports: the supports.
+        :param card_redraw_chances: the number of times a player can redraw cards.
+        :param dice_reroll_chances: the number of time a player can reroll dice.
+        :param dice: current dice in hand.
+        :param hand_cards: current hand cards.
+        :param deck_cards: cards in deck to be drawn.
+        :param publicly_used_cards: cards the player has used that the opponent knows for sure.
+        :param publicly_gained_cards: cards the player has gained that the opponent knows for sure.
+        """
         # REMINDER: don't forget to update factory when adding new fields
         self._phase = phase
         self._consec_action = consec_action
@@ -58,69 +78,104 @@ class PlayerState:
         self._publicly_gained_cards = publicly_gained_cards
 
     def factory(self) -> PlayerStateFactory:
+        """ :returns: a factory for the current game state. """
         return PlayerStateFactory(self)
 
     def get_phase(self) -> Act:
+        """ :returns: the (player) phase the player is in. """
         return self._phase
 
     def get_consec_action(self) -> bool:
+        """
+        :returns: if the player can make consecutive actions before the opponent
+                  makes a move.
+        """
         return self._consec_action
 
     def get_card_redraw_chances(self) -> int:
+        """
+        :returns: if the player can make consecutive actions before the opponent
+                  makes a move.
+        """
         return self._card_redraw_chances
 
     def get_dice_reroll_chances(self) -> int:
+        """
+        :returns: the number of chances to reroll dices.
+        """
         return self._dice_reroll_chances
 
     def get_characters(self) -> Characters:
+        """
+        :returns: the characters the player have.
+        """
         return self._characters
 
     def get_hidden_statuses(self) -> sts.Statuses:
+        """
+        :returns: the hidden statuses of the player. Typically holds information
+                  that are invisible but useful in the game.
+        """
         return self._hidden_statuses
 
     def get_combat_statuses(self) -> sts.Statuses:
+        """ :returns: the combat statuses of the player.  """
         return self._combat_statuses
 
     def get_summons(self) -> Summons:
+        """ :returns: the summons of the player.  """
         return self._summons
 
     def get_supports(self) -> Supports:
+        """ :returns: the supports of the player.  """
         return self._supports
 
     def get_dice(self) -> ActualDice:
+        """ :returns: the dice of the player.  """
         return self._dice
 
     def get_hand_cards(self) -> Cards:
+        """ :returns: the hand cards of the player.  """
         return self._hand_cards
 
     def get_deck_cards(self) -> Cards:
+        """ :returns: the deck cards that will be drawn in the future.  """
         return self._deck_cards
 
     def get_publicly_used_cards(self) -> Cards:
+        """ :returns: the cards publicly used by the player. """
         return self._publicly_used_cards
 
     def get_publicly_gained_cards(self) -> Cards:
+        """ :returns: the cards publicly gained by the player. """
         return self._publicly_gained_cards
 
-    def get_active_character(self) -> Optional[chr.Character]:
+    def get_active_character(self) -> None | chr.Character:
+        """ :returns: the active character. `None` is returned if there isn't one. """
         return self._characters.get_active_character()
 
     def just_get_active_character(self) -> chr.Character:
+        """ :returns: the active character. Exception is thrown if there isn't one. """
         return self._characters.just_get_active_character()
 
     def in_action_phase(self) -> bool:
+        """ :returns: `True` if the player is in Action Phase. """
         return self._phase is Act.ACTION_PHASE
 
     def in_passive_wait_phase(self) -> bool:
+        """ :returns: `True` if the player is in Passive Wait Phase. """
         return self._phase is Act.PASSIVE_WAIT_PHASE
 
     def in_active_wait_phase(self) -> bool:
+        """ :returns: `True` if the player is in Active Wait Phase. """
         return self._phase is Act.ACTIVE_WAIT_PHASE
 
     def in_end_phase(self) -> bool:
+        """ :returns: `True` if the player is in End Phase. """
         return self._phase is Act.END_PHASE
 
     def is_mine(self, object: chr.Character | sp.Support) -> bool:
+        """ :returns: `True` if the `object` belongs to the player. """
         if isinstance(object, chr.Character):
             return self._characters.get_id(object) is not None
         elif isinstance(object, sp.Support):
@@ -130,9 +185,18 @@ class PlayerState:
             raise NotImplementedError
 
     def defeated(self) -> bool:
+        """ :returns: `True` if the player is defeated. """
         return self._characters.all_defeated()
 
     def hide_cards(self) -> PlayerState:
+        """
+        :returns: the same player but hides cards and dice. So opponent agent
+                  cannot cheat with extra information.
+
+        Note that currently only cards can be hidden but dice.
+
+        Cards are hidden by replacing them all with `OmniCard`.
+        """
         return self.factory().f_hand_cards(
             lambda hcs: hcs.hide_all()
         ).f_deck_cards(
@@ -141,6 +205,9 @@ class PlayerState:
 
     @classmethod
     def example_player(cls, mode: Mode) -> Self:
+        """
+        :returns: a random initial player state under the `mode`.
+        """
         from ..deck import FrozenDeck
         from ..helper.hashable_dict import HashableDict
         cards = mode.all_cards()
@@ -175,6 +242,9 @@ class PlayerState:
 
     @classmethod
     def from_chars_cards(cls, mode: Mode, characters: Characters, cards: Cards) -> Self:
+        """
+        :returns: the initial state of a player under `mode` with `characters` and `cards`.
+        """
         return cls(
             phase=Act.PASSIVE_WAIT_PHASE,
             consec_action=False,
@@ -194,6 +264,9 @@ class PlayerState:
 
     @classmethod
     def from_deck(cls, mode: Mode, deck: Deck) -> Self:
+        """
+        :returns: the initial state of a player under `mode` with `deck`.
+        """
         return cls(
             phase=Act.PASSIVE_WAIT_PHASE,
             consec_action=False,

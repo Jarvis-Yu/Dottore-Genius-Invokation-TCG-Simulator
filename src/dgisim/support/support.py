@@ -40,7 +40,6 @@ __all__ = [
     "LibenSupport",
     "PaimonSupport",
     "XudongSupport",
-
     ## Item ##
     "NRESupport",
     "ParametricTransformerSupport",
@@ -56,6 +55,7 @@ __all__ = [
 
 @dataclass(frozen=True, kw_only=True)
 class Support(stt.Status):
+    #: a unique identifier for each support, used to distinguish supports of the same type.
     sid: int
 
     @override

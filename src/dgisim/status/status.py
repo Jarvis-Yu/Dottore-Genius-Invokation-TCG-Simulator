@@ -16,7 +16,7 @@ from dataclasses import dataclass, replace
 from enum import Enum
 from functools import cached_property
 from math import ceil
-from typing import ClassVar, cast, Optional, TYPE_CHECKING
+from typing import ClassVar, cast, TYPE_CHECKING
 from typing_extensions import override, Self
 
 from ..effect import effect as eft
@@ -240,6 +240,10 @@ __all__ = [
 @dataclass(frozen=True)
 class Status:
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset()
+    """
+    The set of signals the status may react to.
+    This is used to improve the performance.
+    """
 
     def __init__(self) -> None:
         if type(self) is Status:  # pragma: no cover
@@ -251,9 +255,16 @@ class Status:
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         """
-        Returns the processed PreprocessableEvent and possibly updated or deleted self
+        :param game_state: the current game state.
+        :param status_source: the position of this status.
+        :param item: data to be preprocessed.
+        :param signal: proprocessing signal.
+
+        :returns: the preprocessed PreprocessableEvent and updated self.
+                  If `None` is returned instead of a new self, then the status
+                  is removed.
         """
         new_item, new_self = self._preprocess(game_state, status_source, item, signal)
         return self._post_preprocess(
@@ -271,7 +282,7 @@ class Status:
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         return item, self
 
     def _post_preprocess(
@@ -281,8 +292,8 @@ class Status:
             item: PreprocessableEvent,
             signal: Preprocessables,
             new_item: PreprocessableEvent,
-            new_self: Optional[Self],
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+            new_self: None | Self,
+    ) -> tuple[PreprocessableEvent, None | Self]:
         return (new_item, new_self)
 
     def inform(
@@ -292,6 +303,14 @@ class Status:
             info_type: Informables,
             information: InformableEvent,
     ) -> GameState:
+        """
+        :param game_state: the current game state.
+        :param status_source: the position of this status.
+        :param info_type: the type of information.
+        :param information: the information.
+
+        :returns: the updated game state.
+        """
         new_self = self._inform(game_state, status_source, info_type, information)
         if new_self == self:
             return game_state
@@ -347,6 +366,14 @@ class Status:
             signal: TriggeringSignal,
             silent: bool = False,  # ignore post checkers if True
     ) -> list[eft.Effect]:
+        """
+        :param game_state: the current game state.
+        :param source: the status position in the game.
+        :param signal: the triggering signal.
+        :param silent: ignores some post checkers if `True`. (just leave it as `False`)
+
+        :returns: a list of effects generated.
+        """
         es, new_status = self._react_to_signal(game_state, source, signal)
         es, new_status = self._post_react_to_signal(game_state, es, new_status, source, signal)
 
@@ -482,13 +509,16 @@ class Status:
             or source.pid.is_player2() and signal is TriggeringSignal.SWAP_EVENT_2
 
     def update(self, other: Self) -> None | Self:
+        """
+        Defines how the status update itself with an incoming status of the same type.
+        """
         new_self = self._update(other)
         return self._post_update(new_self)
 
-    def _post_update(self, new_self: Optional[Self]) -> Optional[Self]:
+    def _post_update(self, new_self: None | Self) -> None | Self:
         return new_self
 
-    def _update(self, other: Self) -> Optional[Self]:
+    def _update(self, other: Self) -> None | Self:
         return other
 
     def _target_is_self_active(
@@ -766,7 +796,7 @@ class StackedShieldStatus(_ShieldStatus, _UsageStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_MINUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
@@ -819,7 +849,7 @@ class _InfusionStatus(_UsageStatus):
             item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
-        new_item: Optional[DmgPEvent] = None
+        new_item: None | DmgPEvent = None
         if isinstance(item, DmgPEvent):
             dmg = item.dmg
             if signal is Preprocessables.DMG_ELEMENT:
@@ -960,7 +990,7 @@ class DeathThisRoundStatus(PlayerHiddenStatus):
             game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             if self.activated:
                 return [], replace(self, activated=False)
@@ -1487,7 +1517,7 @@ class GamblersEarringsStatus(ArtifactEquipmentStatus):
             game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.DEATH_EVENT:
             if self.triggerable():
                 this_player = game_state.get_player(source.pid)
@@ -1651,7 +1681,7 @@ class CatalyzingFieldStatus(CombatStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[CatalyzingFieldStatus]]:
+    ) -> tuple[PreprocessableEvent, None | CatalyzingFieldStatus]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, eft.DmgPEvent)
             dmg = item.dmg
@@ -1721,7 +1751,7 @@ class DendroCoreStatus(CombatStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[DendroCoreStatus]]:
+    ) -> tuple[PreprocessableEvent, None | DendroCoreStatus]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
@@ -1833,7 +1863,7 @@ class ElementalResonanceFerventFlamesStatus(CombatStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
@@ -1868,7 +1898,7 @@ class ElementalResonanceShatteringIceStatus(CombatStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
@@ -1902,7 +1932,7 @@ class ElementalResonanceSprawlingGreeneryStatus(CombatStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         # TODO
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
@@ -2028,7 +2058,7 @@ class WindAndFreedomStatus(CombatStatus):
             game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.DEATH_EVENT:
             if self.activated:
                 return [eft.ConsecutiveActionEffect(target_pid=source.pid)], None
@@ -2091,7 +2121,7 @@ class FrozenStatus(CharacterStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
@@ -2107,7 +2137,7 @@ class FrozenStatus(CharacterStatus):
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[FrozenStatus]]:
+    ) -> tuple[list[eft.Effect], None | FrozenStatus]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
         return [], self  # pragma: no cover
@@ -2141,7 +2171,7 @@ class JueyunGuobaStatus(CharacterStatus, _UsageStatus):
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
         return [], self
@@ -2167,7 +2197,7 @@ class LotusFlowerCrispStatus(CharacterStatus, FixedShieldStatus):
             game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         d_usages = 0
         if signal is TriggeringSignal.ROUND_END:
             d_usages = -BIG_INT
@@ -2190,7 +2220,7 @@ class MintyMeatRollsStatus(CharacterStatus, _UsageStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.SKILL:
             assert isinstance(item, ActionPEvent)
             if status_source == item.source \
@@ -2206,7 +2236,7 @@ class MintyMeatRollsStatus(CharacterStatus, _UsageStatus):
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         d_usages = 0
         if signal is TriggeringSignal.ROUND_END:
             d_usages = -BIG_INT
@@ -2225,7 +2255,7 @@ class MushroomPizzaStatus(CharacterStatus, _UsageStatus):
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         es: list[eft.Effect] = []
         d_usages = 0
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
@@ -2255,7 +2285,7 @@ class NorthernSmokedChickenStatus(CharacterStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.SKILL:
             assert isinstance(item, ActionPEvent)
             if status_source == item.source \
@@ -2478,7 +2508,7 @@ class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
@@ -3213,7 +3243,7 @@ class _PoeticsOfFuubutsuElementStatus(CombatStatus, _UsageStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
@@ -3276,7 +3306,7 @@ class IcicleStatus(CombatStatus, _UsageStatus):
             game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[IcicleStatus]]:
+    ) -> tuple[list[eft.Effect], None | IcicleStatus]:
         if self._is_swapping_source(source, signal):
             effects: list[eft.Effect] = [
                 eft.ReferredDamageEffect(
@@ -3367,7 +3397,7 @@ class KeqingTalentStatus(HiddenStatus):
             game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[KeqingTalentStatus]]:
+    ) -> tuple[list[eft.Effect], None | KeqingTalentStatus]:
         if signal is TriggeringSignal.COMBAT_ACTION:
             return [], type(self)(can_infuse=False)
         return [], self  # pragma: no cover
@@ -3405,7 +3435,7 @@ class ExplosiveSparkStatus(CharacterStatus, _UsageStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
@@ -3481,7 +3511,7 @@ class SparksnSplashStatus(CombatStatus, _UsageStatus):
             game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         es: list[eft.Effect] = []
         new_self = self
 
@@ -3581,7 +3611,7 @@ class ProphecyOfSubmersionStatus(TalentEquipmentStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
@@ -3882,7 +3912,7 @@ class SweepingTimeStatus(CharacterStatus, _InfusionStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.SKILL:
             assert isinstance(item, ActionPEvent)
             if (
@@ -4069,7 +4099,7 @@ class IcyQuillStatus(CombatStatus, _UsageStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
@@ -4105,7 +4135,7 @@ class IcyQuillStatus(CombatStatus, _UsageStatus):
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             if self.normal_attack_deduction_usages < self.DEFAULT_NORMAL_ATTACK_DEDUCTION_USAGES:
                 return [], replace(
@@ -4135,7 +4165,7 @@ class KeenSightStatus(TalentEquipmentStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.SKILL:
             assert isinstance(item, ActionPEvent)
             player = game_state.get_player(status_source.pid)
@@ -4192,7 +4222,7 @@ class VijnanaSuffusionStatus(CharacterStatus, _UsageStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         new_item: None | DmgPEvent = None
         if signal is Preprocessables.DMG_ELEMENT:
             assert isinstance(item, DmgPEvent)
@@ -4212,7 +4242,7 @@ class VijnanaSuffusionStatus(CharacterStatus, _UsageStatus):
             game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         es: list[eft.Effect] = []
         new_self = self
 
@@ -4266,7 +4296,7 @@ class StormzoneStatus(CombatStatus, _UsageStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.SWAP:
             assert isinstance(item, ActionPEvent) and item.event_type is EventType.SWAP
             if item.source.pid is status_source.pid \
@@ -4312,7 +4342,7 @@ class WindsOfHarmonyStatus(CombatStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, Optional[Self]]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.SKILL:
             assert isinstance(item, ActionPEvent)
             if status_source.pid is item.source.pid \
@@ -4328,7 +4358,7 @@ class WindsOfHarmonyStatus(CombatStatus):
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
         return [], self
@@ -4462,7 +4492,7 @@ class TenkoThunderboltsStatus(CombatStatus):
             game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.PRE_ACTION:
             if game_state.get_active_player_id() is source.pid:
                 return [

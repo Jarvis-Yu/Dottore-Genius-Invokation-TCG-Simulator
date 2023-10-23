@@ -200,15 +200,12 @@ What we could do here is to call ``.run()`` to run until the end of the game.
 
 .. code-block:: python3
 
-    game_state_machine.run()
+    print(game_state_machine.run())
 
     last_game_state = game_state_machine.get_game_state()
 
-``.run()`` prints the results of the game, and you could ``print(last_game_state)``
-to see how the game looks like by the end.
-
-There are other ways to fine control over the game progress,
-more details are **WIP**.
+``.run()`` returns the winner of the game (or ``None`` if this is a drawn),
+and you could ``print(last_game_state)`` to see how the game looks like by the end.
 
 Customize a Player Agent
 ------------------------

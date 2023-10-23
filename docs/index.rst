@@ -13,10 +13,6 @@ Check out :ref:`installation` to install the package.
 
    This project is under active development.
 
-.. note::
-
-   Documentation is incomplete, but under active updates.
-
 Contents
 --------
 
@@ -28,8 +24,11 @@ Contents
    game-state
    mode
    phase
+   player-state
    dice
    character
    card
    action-generator
+   control-game-flow
+   status-summon-support
    enums

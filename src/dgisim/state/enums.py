@@ -18,6 +18,7 @@ class Pid(Enum):
         return self is Pid.P2
 
     def other(self) -> Pid:
+        """ :returns: `P2` if this is `P1`, vice versa. """
         if self is Pid.P1:
             return Pid.P2
         elif self is Pid.P2:
