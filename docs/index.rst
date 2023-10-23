@@ -33,4 +33,5 @@ Contents
    control-game-flow
    status-summon-support
    enums
+   structs
    others

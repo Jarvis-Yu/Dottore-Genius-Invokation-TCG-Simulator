@@ -11,3 +11,4 @@ a variety of collections of data.
     collections/characters
     collections/cards
     collections/statuses
+    collections/effect-stack

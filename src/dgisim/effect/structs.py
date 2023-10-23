@@ -28,6 +28,9 @@ class StaticTarget:
 
     @classmethod
     def from_player_active(cls, game_state: "GameState", pid: Pid) -> Self:
+        """
+        :returns: the static target for the player `pid` in `game_state`.
+        """
         return cls(
             pid,
             Zone.CHARACTERS,
@@ -36,11 +39,24 @@ class StaticTarget:
 
     @classmethod
     def from_char_id(cls, pid: Pid, char_id: int) -> Self:
+        """
+        :returns: the static target for character with `char_id` of player `pid`.
+        """
         return cls(pid, Zone.CHARACTERS, char_id)
 
     @classmethod
     def from_summon(cls, pid: Pid, summon: type["Summon"]) -> Self:
+        """
+        :returns: the static target for `summon` of player `pid`.
+        """
         return cls(pid, Zone.SUMMONS, summon)
+
+    @classmethod
+    def from_support(cls, pid: Pid, sid: int) -> Self:
+        """
+        :returns: the static target for support with `sid` of player `pid`.
+        """
+        return cls(pid, Zone.SUPPORTS, sid)
 
 
 @dataclass(frozen=True, kw_only=True, repr=False)

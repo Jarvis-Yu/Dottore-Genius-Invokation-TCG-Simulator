@@ -14,3 +14,4 @@ All enums can be imported directly from ``dgisim``.
     enums/pid
     enums/triggering-signal
     enums/weapon-type
+    enums/zone

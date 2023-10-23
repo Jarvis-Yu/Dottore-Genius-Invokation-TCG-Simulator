@@ -1,6 +1,10 @@
 Mode
 ====
 
+.. code-block:: python3
+
+    from dgisim import Mode
+
 ``Mode`` is a class used to describe the game mode. It has full control to define
 how a game should be run.
 
