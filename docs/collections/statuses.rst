@@ -5,7 +5,7 @@ Statuses
 
     from dgisim import EquipmentStatuses, Statuses
 
-``__eq__`` and ``__hash__`` are implemented so that any two ``Statuses``s with the
+``__eq__`` and ``__hash__`` are implemented so that any two ``Statuses`` with the
 equivalent content are equal to each other and have the same hash.
 
 Statuses
