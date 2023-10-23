@@ -9,8 +9,21 @@ Character
 
 .. autoclass:: dgisim.character.character.Character
     :members:
+    :exclude-members: factory
 
     .. automethod:: __init__
+    .. automethod:: factory
+
+        The factory allows modifications to the existing a copy of the origial
+        character to produce a new one.
+
+        You may call ``.<attribute-name>(new_val)`` to replace the current value.
+
+        Or call ``.f_<attribute-name>(<function>)`` to make modifications based
+        on the current value.
+
+        e.g. ``character.factory().f_hp(lambda h: h - 1).alive(False).build()``
+        returns a new character with 1 less hp and marked defeated.
 
 .. Private Class Properties
 .. ------------------------

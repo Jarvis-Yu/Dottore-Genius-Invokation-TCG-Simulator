@@ -59,6 +59,16 @@ class GameState:
         player2: ps.PlayerState,
         effect_stack: EffectStack
     ):
+        """
+        :param mode: game mode.
+        :param phase: game phase of game mode.
+        :param round: current round number.
+        :param active_player_id: the active player which should take action first.
+        :param player1: player 1, which normally is the first to act at the
+                        beginning of the game.
+        :param player2: player 2, the opponent of `player1`.
+        :param effect_stack: pending effects to be executed by the game.
+        """
         # REMINDER: don't forget to update factory when adding new fields
         self._mode = mode
         self._phase = phase
@@ -76,6 +86,10 @@ class GameState:
 
     @classmethod
     def from_default(cls) -> Self:
+        """
+        :returns: a random initial game state with default mode and random decks
+                  for both players.
+        """
         mode = md.DefaultMode()
         return cls(
             mode=mode,
@@ -89,6 +103,9 @@ class GameState:
 
     @classmethod
     def from_players(cls, mode: md.Mode, player1: ps.PlayerState, player2: ps.PlayerState) -> Self:
+        """
+        :returns: the initial game state of `mode` with `player1` and `player2`.
+        """
         return cls(  # pragma: no cover
             mode=mode,
             phase=mode.first_phase(),
@@ -101,6 +118,9 @@ class GameState:
 
     @classmethod
     def from_decks(cls, mode: md.Mode, p1_deck: Deck, p2_deck: Deck) -> Self:  # pragma: no cover
+        """
+        :returns: the initial game state of `mode` with two decks for each player.
+        """
         if not p1_deck.immutable:
             p1_deck = p1_deck.to_frozen()
         if not p2_deck.immutable:
@@ -118,30 +138,42 @@ class GameState:
         )
 
     def factory(self) -> GameStateFactory:
+        """ :returns: a factory for the current game state. """
         return GameStateFactory(self)
 
     def get_mode(self) -> md.Mode:
+        """ :returns: the game mode of the game. """
         return self._mode
 
     def get_phase(self) -> ph.Phase:
+        """ :returns: the current phase the game is in in the mode. """
         return self._phase
 
     def get_round(self) -> int:
+        """ :returns: the current round number. """
         return self._round
 
     def get_active_player_id(self) -> Pid:
+        """ :returns: the current active player which should be the first player to take actions. """
         return self._active_player_id
 
     def get_effect_stack(self) -> EffectStack:
+        """ :returns: the stack of pending effects to be executed. """
         return self._effect_stack
 
     def get_player1(self) -> ps.PlayerState:
+        """ :returns: all information about player 1. """
         return self._player1
 
     def get_player2(self) -> ps.PlayerState:
+        """ :returns: all information about player 2. """
         return self._player2
 
     def get_pid(self, player: ps.PlayerState) -> Pid:
+        """
+        :param player: a player that is in this game state.
+        :returns: the `Pid` of the given `player`.
+        """
         if player is self._player1:
             return Pid.P1
         elif player is self._player2:
@@ -150,6 +182,7 @@ class GameState:
             raise Exception("player unknown")
 
     def get_player(self, player_id: Pid) -> ps.PlayerState:
+        """ :returns: the player with `player_id`.  """
         if player_id.is_player1():
             return self._player1
         elif player_id.is_player2():
@@ -158,6 +191,7 @@ class GameState:
             raise Exception("player_id unknown")
 
     def get_other_player(self, player_id: Pid) -> ps.PlayerState:
+        """ :returns: the player with the other of `player_id`.  """
         if player_id.is_player1():
             return self._player2
         elif player_id.is_player2():
@@ -166,6 +200,10 @@ class GameState:
             raise Exception("player_id unknown")
 
     def death_swapping(self, player_id: None | Pid = None) -> bool:
+        """
+        :returns: if the player with `player_id` or any player (if `player_id` is None)
+                  is undergoing death swapping.
+        """
         from ..effect.effect import DeathSwapPhaseStartEffect
         return (
             self._effect_stack.is_not_empty()
@@ -177,19 +215,23 @@ class GameState:
         )
 
     def card_checker(self) -> CardChecker:
+        """ :returns: a validity checker for playing cards.  """
         return self._card_checker
 
     def swap_checker(self) -> SwapChecker:
+        """ :returns: a validity checker for performing character swaps.  """
         return self._swap_checker
 
     def skill_checker(self) -> SkillChecker:
+        """ :returns: a validity checker for casting character skills.  """
         return self._skill_checker
 
     def elem_tuning_checker(self) -> ElementalTuningChecker:
+        """ :returns: a validity checker for performing elemental tuning. """
         return self._elem_tuning_checker
 
     def belongs_to(self, object: Character | Support) -> None | Pid:
-        """ int in object type is just place holder """
+        """ :returns: which player the `object` belongs to. """
         if self._player1.is_mine(object):
             return Pid.P1
         elif self._player2.is_mine(object):
@@ -198,6 +240,7 @@ class GameState:
             return None
 
     def get_target(self, target: StaticTarget) -> None | Character | Summon | Support:
+        """ :returns: the target that `target` specifies. """
         player = self.get_player(target.pid)
         if target.zone is Zone.CHARACTERS:
             return player.get_characters().get_character(cast(int, target.id))
@@ -209,27 +252,48 @@ class GameState:
             raise Exception("Not Reached!")
 
     def get_character_target(self, target: StaticTarget) -> None | Character:
+        """ :returns: the character target that `target` specifies. """
         character = self.get_target(target)
         if not isinstance(character, Character):  # pragma: no cover
             return None
         return character
 
     def waiting_for(self) -> Optional[Pid]:
+        """
+        :returns: which player the current game state is waiting action from.
+                  `None` is returned if the game state doesn't need any player action.
+        """
         return self._phase.waiting_for(self)
 
     def step(self) -> GameState:
+        """
+        :returns: the next state of a state-transition from the current one without
+                  any player action.
+        """
         return self._phase.step(self)
 
     def action_step(self, pid: Pid, action: PlayerAction) -> Optional[GameState]:
         """
-        Returns None if the action is illegal or undefined
+        :returns: the next state of a state-transition from the current one with
+                  a player action from `pid`. None is returned if the `action` is
+                  illegal in the context.
         """
         return self._phase.step_action(self, pid, action)
 
     def action_generator(self, pid: Pid) -> None | acg.ActionGenerator:
+        """
+        :returns: an action generator for player `pid` under this game state.
+                  None is returned if the player cannot take any action at the
+                  moment.
+        """
         return self._phase.action_generator(self, pid)
 
     def get_winner(self) -> Optional[Pid]:  # pragma: no cover
+        """
+        :returns: the winner's `Pid` or `None` if the game is a drawn.
+
+        There'll be an assertion error if the game hasn't ended yet.
+        """
         assert self.game_end()
         if self.get_player1().defeated():
             return Pid.P2
@@ -239,9 +303,19 @@ class GameState:
             return None
 
     def game_end(self) -> bool:
+        """
+        :returns: `True` if the game has ended.
+        """
         return type(self._phase) is type(self._mode.game_end_phase())
 
     def prespective_view(self, pid: Pid) -> GameState:
+        """
+        :returns: a new `GameState` that is in the perspective of player `pid`,
+                  hiding their opponent's cards and dice.
+
+        Note the current version of the game only hides the cards, but not dice.
+        Cards are hidden by replacing all with `OmniCard`, a special type of card.
+        """
         return self.factory().f_player(
             pid.other(),
             lambda p: p.hide_cards()
@@ -312,6 +386,9 @@ class GameStateFactory:
     def round(self, new_round: int) -> GameStateFactory:
         self._round = new_round
         return self
+
+    def f_round(self, f: Callable[[int], int]) -> GameStateFactory:
+        return self.round(f(self._round))
 
     def effect_stack(self, effect_stack: EffectStack) -> GameStateFactory:
         self._effect_stack = effect_stack

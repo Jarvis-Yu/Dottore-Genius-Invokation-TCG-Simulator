@@ -63,6 +63,7 @@ ActualDice Class
     from dgisim import ActualDice
 
 .. autoclass:: dgisim.dice.ActualDice
+    :show-inheritance:
     :members:
 
     .. autoattribute:: _LEGAL_ELEMS
@@ -75,6 +76,7 @@ AbstractDice Class
     from dgisim import AbstractDice
 
 .. autoclass:: dgisim.dice.AbstractDice
+    :show-inheritance:
     :members:
 
     .. autoattribute:: _LEGAL_ELEMS

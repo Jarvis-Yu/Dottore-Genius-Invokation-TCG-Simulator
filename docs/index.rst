@@ -29,3 +29,4 @@ Contents
    card
    dice
    enums
+   game-state
