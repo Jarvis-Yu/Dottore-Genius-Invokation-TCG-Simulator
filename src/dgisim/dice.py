@@ -2,7 +2,7 @@ from __future__ import annotations
 import random
 from collections import Counter
 from functools import lru_cache
-from typing import Any, Optional, Iterator, Iterable
+from typing import Any, Iterator, Iterable
 
 from typing_extensions import Self, override, TYPE_CHECKING
 
@@ -28,6 +28,15 @@ class Dice:
     _LEGAL_ELEMS = frozenset(elem for elem in Element)
 
     def __init__(self, dice: dict[Element, int]) -> None:
+        """
+        :param dice: the initial dice of this object.
+
+        Once `dice` is passed in, it'll be stored in an internal frozen dictionary,
+        ensuring immutability.
+
+        For performance, you may want to directly pass in a HashableDict object
+        instead of an ordinary dict.
+        """
         self._dice = HashableDict.from_dict(dice)
 
     def __add__(self, other: Dice | dict[Element, int]) -> Self:
@@ -47,19 +56,44 @@ class Dice:
         return type(self)(self._dice - dice)
 
     def num_dice(self) -> int:
+        """
+        :returns: total number of dice.
+
+        Time complexity = O(k), k is kinds of dice held by this object.
+        """
         return sum(self._dice.values())
 
     def is_even(self) -> bool:
+        """
+        :returns: if total number of dice is even.
+
+        Time complexity = O(k), k is kinds of dice held by this object.
+        """
         return self.num_dice() % 2 == 0
 
     def is_empty(self) -> bool:
+        """
+        :returns: if total number of dice is even.
+
+        Worst time complexity = O(k), k is kinds of dice held by this object.
+        """
         return not any(val > 0 for val in self._dice.values())
 
     def is_legal(self) -> bool:
+        """
+        :returns: `True` if number of each kind of die is non-negative and all
+                  are one of the legal elements of this class.
+
+        Worst time complexity = O(k), k is kinds of dice held by this object.
+        """
         return all(map(lambda x: x >= 0, self._dice.values())) \
             and all(elem in self._LEGAL_ELEMS for elem in self._dice)
 
     def validify(self) -> Self:
+        """
+        :returns: validified version of this object. All dice of illegal elements
+                  are removed. All kinds of dice with non-positive number are removed.
+        """
         if self.is_legal():
             return self
         return type(self)(dict(
@@ -69,11 +103,16 @@ class Dice:
         ))
 
     def elems(self) -> Iterable[Element]:
+        """
+        :returns: all elements that have a number.
+        """
         return self._dice.keys()
 
     def pick_random_dice(self, num: int) -> tuple[Self, Self]:
         """
-        Returns the left dice and selected dice
+        :param num: the number of random dice to pick.
+
+        :returns: a tuple of left dice and picked dice.
         """
         num = min(self.num_dice(), num)
         if num == 0:
@@ -123,7 +162,12 @@ class Dice:
         )
 
     def to_dict(self) -> dict[Element, int]:
+        """ :returns: a dicrionary that contains the dice info. """
         return self._dice.to_dict()
+
+    def get_dices(self) -> HashableDict[Element, int]:
+        """ :returns: the internal frozen dictionary of dice. """
+        return self._dice
 
     def dict_str(self) -> dict[str, Any]:
         existing_dice = dict([
@@ -223,8 +267,9 @@ class ActualDice(Dice):
 
     def loosely_satisfy(self, requirement: AbstractDice) -> bool:
         """
-        Asserts self and requirement are legal, and then check if self can match
-        requirement.
+        :returns: `True` if `requirement` can be satisfied.
+
+        Asserts self and requirement are legal.
         """
         if self.num_dice() < requirement.num_dice():
             return False
@@ -232,10 +277,10 @@ class ActualDice(Dice):
 
     def just_satisfy(self, requirement: AbstractDice) -> bool:
         """
-        Asserts self and requirement are legal, and then check if self can match
-        requirement.
+        :returns: `True` if `self` exactly satisfies `requirement`, that is not
+                  a single extra die is contained.
 
-        self must have the same number of dice as requirement asked for.
+        Asserts self and requirement are legal.
         """
         if self.num_dice() != requirement.num_dice():
             return False
@@ -244,8 +289,16 @@ class ActualDice(Dice):
     def basically_satisfy(
             self,
             requirement: AbstractDice,
-            game_state: Optional[GameState] = None,
-    ) -> Optional[ActualDice]:
+            game_state: None | GameState = None,
+    ) -> None | ActualDice:
+        """
+        :param game_state: the context the selection is based on, but not used by
+                           this method, so leave it as `None` by default.
+
+        :returns: a way to fulfill the `requirement`, not necessarily the smartest
+                  solution is returned. If it is impossible to fulfill, then
+                  `None` is returned.
+        """
         if requirement.num_dice() > self.num_dice():
             return None
         # TODO: optimize for having game_state
@@ -275,7 +328,7 @@ class ActualDice(Dice):
                     answer[elem] += pures[elem]
                     remaining[elem] -= pures[elem]
         if omni > 0:
-            best_elem: Optional[Element] = None
+            best_elem: None | Element = None
             best_count = 0
             for elem in list(_PURE_ELEMS):
                 this_count = remaining.get(elem, 0)
@@ -346,9 +399,21 @@ class ActualDice(Dice):
         return HashableDict.from_dict(dice)
 
     def dice_ordered(self, player_state: None | PlayerState) -> dict[Element, int]:
+        """
+        :returns: an ordered dictionary of dice contained by `self`.
+                  The ordering follows the in-game top-down ordering when a
+                  player has multiple dice.
+
+        The return value can be utilized by cards like Liben, Vanarana...
+        """
         return self.readonly_dice_ordered(player_state).to_dict()
 
     def readonly_dice_ordered(self, player_state: None | PlayerState) -> HashableDict[Element, int]:
+        """
+        :returns: the same value as `.dice_ordered()` but a readonly version.
+
+        This method has a better performance.
+        """
         return self._init_ordered_dice(
             None
             if player_state is None
@@ -360,6 +425,9 @@ class ActualDice(Dice):
 
     @classmethod
     def from_random(cls, size: int, excepted_elems: set[Element] = set()) -> ActualDice:
+        """
+        :returns: a random `ActualDice` object with `size` of dice chosen from `expected_elems`.
+        """
         dice = ActualDice.from_empty()
         dice._dice._unfreeze()
         for i in range(size):
@@ -377,7 +445,11 @@ class ActualDice(Dice):
         return dice
 
     @classmethod
-    def from_dice(cls, dice: Dice) -> Optional[ActualDice]:
+    def from_dice(cls, dice: Dice) -> None | ActualDice:
+        """
+        :returns: a new object of `ActualDice` if the `dice` provided is legal
+                  in the context of `ActualDice`.
+        """
         new_dice = ActualDice(dice._dice)
         if not new_dice.is_legal():
             return None
@@ -402,12 +474,26 @@ class AbstractDice(Dice):
     })
 
     def can_cost_less_any(self) -> bool:
+        """
+        :returns: `True` if less `Element.ANY` can be required.
+        """
         return self[Element.ANY] > 0
 
     def cost_less_any(self, num: int) -> Self:
+        """
+        :returns: a new `AbstractDice` object where `num` less ANY dice are costed.
+
+        This method ensures the return value is legal.
+        """
         return (self - {Element.ANY: 1}).validify()
 
     def can_cost_less_elem(self, elem: None | Element = None) -> bool:
+        """
+        :param elem: if this value is None (by default), then any element is considered,
+                     otherwise, only `elem` is considered.
+
+        :returns: `True` if less elemental dice can be costed.
+        """
         if elem is not None:
             return self[elem] > 0 or self[Element.ANY] > 0
         else:
@@ -417,6 +503,13 @@ class AbstractDice(Dice):
             ) or self[Element.ANY] > 0
 
     def cost_less_elem(self, num: int, elem: None | Element = None) -> Self:
+        """
+        :param elem: if this value is None (by default), then elements of a particular
+                     order are removed (max to `num`). Otherwise, only dice of `elem`
+                     are removed.
+
+        :returns: a new `AbstractDice` object where `num` less `elem` are required.
+        """
         if elem is None:
             elem = next((
                 elem
@@ -432,7 +525,11 @@ class AbstractDice(Dice):
         return ret_val
 
     @classmethod
-    def from_dice(cls, dice: Dice) -> Optional[AbstractDice]:
+    def from_dice(cls, dice: Dice) -> None | AbstractDice:
+        """
+        :returns: a new object of `ActualDice` if the `dice` provided is legal
+                  in the context of `ActualDice`.
+        """
         new_dice = AbstractDice(dice._dice)
         if not new_dice.is_legal():
             return None
