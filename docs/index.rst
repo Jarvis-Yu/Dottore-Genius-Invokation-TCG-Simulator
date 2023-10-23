@@ -29,9 +29,10 @@ Contents
    character
    card
    collections
-   action-generator
+   action
    control-game-flow
    status-summon-support
+   effect
    enums
    structs
    others

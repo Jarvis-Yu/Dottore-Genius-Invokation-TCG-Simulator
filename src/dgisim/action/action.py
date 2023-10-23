@@ -70,6 +70,7 @@ class PlayerAction:
 
 @dataclass(frozen=True, kw_only=True, repr=False)
 class CardsSelectAction(PlayerAction):
+    #: cards selected.
     selected_cards: Cards
 
     @classmethod
@@ -79,6 +80,7 @@ class CardsSelectAction(PlayerAction):
 
 @dataclass(frozen=True, kw_only=True, repr=False)
 class DiceSelectAction(PlayerAction):
+    #: dice selected.
     selected_dice: ActualDice
 
     @classmethod
@@ -88,6 +90,7 @@ class DiceSelectAction(PlayerAction):
 
 @dataclass(frozen=True, kw_only=True, repr=False)
 class CharacterSelectAction(PlayerAction):
+    #: selected character's id.
     char_id: int
 
     @classmethod
@@ -102,12 +105,18 @@ class EndRoundAction(PlayerAction):
 
 @dataclass(frozen=True, kw_only=True, repr=False)
 class GameAction(PlayerAction):
-    ...
+    """ A superclass for actions that are mainly performed in action phase. """
+    pass
 
 
 @dataclass(frozen=True, kw_only=True, repr=False)
 class ElementalTuningAction(GameAction):
+    """
+    Used tune an elemental die.
+    """
+    #: type of card to be used for tuning.
     card: type[Card]
+    #: the element of die to be tuned.
     dice_elem: Element
 
     @classmethod
@@ -118,7 +127,12 @@ class ElementalTuningAction(GameAction):
 
 @dataclass(frozen=True, kw_only=True, repr=False)
 class CardAction(GameAction):
+    """
+    Used to play a card.
+    """
+    #: type of card to be used.
     card: type[Card]
+    #: detailed instruction on how the card should be used.
     instruction: Instruction
 
     @classmethod
@@ -129,7 +143,12 @@ class CardAction(GameAction):
 
 @dataclass(frozen=True, kw_only=True, repr=False)
 class SkillAction(GameAction):
+    """
+    Used to cast the skill of the active character.
+    """
+    #: type of skill to cast (by the active character).
     skill: CharacterSkill
+    #: instruction on which dice to be paid for the skill.
     instruction: DiceOnlyInstruction
 
     @classmethod
@@ -139,16 +158,25 @@ class SkillAction(GameAction):
 
 @dataclass(frozen=True, kw_only=True, repr=False)
 class SwapAction(GameAction):
+    """
+    Used when normal character swap is performed.
+    """
+    #: target character's id.
     char_id: int
-    instruction: Instruction
+    #: instruction on which dice to be paid for the skill.
+    instruction: DiceOnlyInstruction
 
     @classmethod
     def _empty(cls) -> Self:
-        return cls(char_id=-1, instruction=Instruction._empty())
+        return cls(char_id=-1, instruction=DiceOnlyInstruction._empty())
 
 
 @dataclass(frozen=True, kw_only=True, repr=False)
 class DeathSwapAction(GameAction):
+    """
+    Used when active character is defeated and requires swapping.
+    """
+    #: target character's id.
     char_id: int
 
     @classmethod
@@ -158,6 +186,7 @@ class DeathSwapAction(GameAction):
 
 @dataclass(frozen=True, kw_only=True, repr=False)
 class Instruction:
+    #: dice to be paid.
     dice: ActualDice
 
     @classmethod
@@ -200,11 +229,16 @@ class Instruction:
 
 @dataclass(frozen=True, kw_only=True, repr=False)
 class DiceOnlyInstruction(Instruction):
+    """ An instruction that only contains dice. """
     pass
 
 
 @dataclass(frozen=True, kw_only=True, repr=False)
 class StaticTargetInstruction(Instruction):
+    """
+    An instruction that can choose a single target.
+    """
+    #: the target selected.
     target: StaticTarget
 
     @classmethod
@@ -221,7 +255,12 @@ class StaticTargetInstruction(Instruction):
 
 @dataclass(frozen=True, kw_only=True, repr=False)
 class SourceTargetInstruction(Instruction):
+    """
+    An instruction that can choose two targets.
+    """
+    #: source target.
     source: StaticTarget
+    #: target target.
     target: StaticTarget
 
     @classmethod

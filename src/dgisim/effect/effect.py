@@ -129,6 +129,11 @@ __all__ = [
 @dataclass(frozen=True, repr=False)
 class Effect:
     def execute(self, game_state: GameState) -> GameState:  # pragma: no cover
+        """
+        :returns: the game state after effect execution.
+
+        Called to execute the effect on the passed-in `game_state`.
+        """
         raise Exception("Not Overriden or Implemented")
 
     def name(self) -> str:

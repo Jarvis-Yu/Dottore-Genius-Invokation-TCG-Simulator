@@ -29,3 +29,15 @@ calling any methods.
 .. autoclass:: dgisim.support.support.Support
     :show-inheritance:
     :members:
+
+The implementations of ``Status``, ``Summon`` and ``Support`` could be imported
+from:
+
+.. code-block:: python3
+
+    from dgisim.status import *
+    from dgisim.summon import *
+    from dgisim.support import *
+
+There are too many statuses implemented, so the details will not be elaborated here.
+Please refer to the source code for more information.
