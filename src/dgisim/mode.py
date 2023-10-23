@@ -127,36 +127,43 @@ class Mode(ABC):
     @property
     @abstractmethod
     def first_phase(self) -> type[Phase]:
+        """ :returns: the initial phase of a new game. """
         pass
 
     @property
     @abstractmethod
     def card_select_phase(self) -> type[Phase]:
+        """ :returns: the Card Select Phase. """
         pass
 
     @property
     @abstractmethod
     def starting_hand_select_phase(self) -> type[Phase]:
+        """ :returns: the Starting Hand Select Phase. """
         pass
 
     @property
     @abstractmethod
     def roll_phase(self) -> type[Phase]:
+        """ :returns: the Roll Phase. """
         pass
 
     @property
     @abstractmethod
     def action_phase(self) -> type[Phase]:
+        """ :returns: the Action Phase. """
         pass
 
     @property
     @abstractmethod
     def end_phase(self) -> type[Phase]:
+        """ :returns: the End Phase. """
         pass
 
     @property
     @abstractmethod
     def game_end_phase(self) -> type[Phase]:
+        """ :returns: the Game End Phase. """
         pass
 
     def __eq__(self, other: object) -> bool:

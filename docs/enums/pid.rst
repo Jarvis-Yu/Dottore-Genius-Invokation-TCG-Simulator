@@ -5,5 +5,6 @@ Pid
 
     from dgisim import Pid
 
-.. autoenum:: dgisim.state.enums.Pid
+.. autoclass:: dgisim.state.enums.Pid
     :members:
+    :undoc-members:

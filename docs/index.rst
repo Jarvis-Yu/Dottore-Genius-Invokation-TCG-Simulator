@@ -30,3 +30,4 @@ Contents
    dice
    enums
    game-state
+   mode

@@ -7,6 +7,7 @@ Character Skill Type
 
 The enum to represent the type of skill the skill is for a character.
 
-.. autoenum:: dgisim.character.enums.CharacterSkillType
+.. autoclass:: dgisim.character.enums.CharacterSkillType
     :members:
+    :undoc-members:
 

@@ -7,5 +7,6 @@ Character Skill
 
 The enum to represent the skill of a character. (used to select a skill to cast)
 
-.. autoenum:: dgisim.character.enums.CharacterSkill
+.. autoclass:: dgisim.character.enums.CharacterSkill
     :members:
+    :undoc-members:

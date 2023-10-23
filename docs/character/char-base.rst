@@ -3,6 +3,9 @@ Character
 
 ``Character`` class is the base of all implemented characters.
 
+``__eq__`` and ``__hash__`` are implemented so that any two characters with the
+equivalent content are equal to each other and have the same hash.
+
 .. code-block:: python3
 
     from dgisim import Character

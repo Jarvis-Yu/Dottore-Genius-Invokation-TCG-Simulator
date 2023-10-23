@@ -1,6 +1,16 @@
 Game State
 ==========
 
+``GameState`` is an immutable class used to hold all the information of a moment
+of a game.
+
+``__eq__`` and ``__hash__`` are implemented so that any two characters with the
+equivalent content are equal to each other and have the same hash.
+
+.. code-block:: python3
+
+    from dgisim import GameState
+
 .. autoclass:: dgisim.state.game_state.GameState
     :members:
     :exclude-members: factory

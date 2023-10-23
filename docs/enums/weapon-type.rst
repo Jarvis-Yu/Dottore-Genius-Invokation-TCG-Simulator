@@ -7,5 +7,6 @@ Weapon Type
 
 This is used to indicate the type of weapon a character uses.
 
-.. autoenum:: dgisim.character.enums.WeaponType
+.. autoclass:: dgisim.character.enums.WeaponType
     :members:
+    :undoc-members:
