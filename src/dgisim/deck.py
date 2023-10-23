@@ -25,6 +25,7 @@ class Deck(ABC):
     @property
     @abstractmethod
     def immutable(self) -> bool:
+        """ :returns: `True` if the deck is immutable. """
         pass
 
     def to_frozen(self) -> FrozenDeck:

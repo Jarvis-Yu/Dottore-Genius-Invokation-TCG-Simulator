@@ -126,6 +126,7 @@ class HashableDict(dict, Mapping[_T, _U]):
             )
 
     def to_dict(self) -> dict[_T, _U]:
+        """ :returns: a dictionary of the same content. """
         return dict(self)
 
     def __eq__(self, other: object) -> bool:
