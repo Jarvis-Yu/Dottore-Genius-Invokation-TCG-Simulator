@@ -8,3 +8,5 @@ a variety of collections of data.
     :maxdepth: 1
 
     collections/characters
+    collections/cards
+    collections/statuses

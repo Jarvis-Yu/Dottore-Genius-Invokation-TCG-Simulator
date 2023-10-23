@@ -22,6 +22,7 @@ class Cards:
 
     @classmethod
     def from_empty(cls) -> Cards:
+        """ :returns: an empty `Cards` object. """
         return Cards({})
 
     def __add__(self, other: Cards | dict[type[Card], int]) -> Cards:
@@ -42,7 +43,9 @@ class Cards:
 
     def pick_random_cards(self, num: int) -> tuple[Cards, Cards]:
         """
-        Returns the left cards and selected cards
+        :returns: a tuple of [cards left, cards selected].
+
+        `num` random cards are selected and returned with the left over cards.
         """
         num = min(self.num_cards(), num)
         if num == 0:
@@ -54,7 +57,7 @@ class Cards:
 
     def pick_random_cards_of_type(self, num: int, card_type: type[Card]) -> tuple[Cards, Cards]:
         """
-        Similar to `pick_random_cards`, but only pick cards of `card_type`
+        Similar to `.pick_random_cards()` but only select from cards of type `card_type`.
         """
         qualified_cards = dict(
             (c_type, c_num)
@@ -70,18 +73,27 @@ class Cards:
         return Cards(self._cards - picked_cards), Cards(picked_cards)
 
     def num_cards(self) -> int:
+        """ :returns: the number of cards. """
         return sum(self._cards.values())
 
     def is_legal(self) -> bool:
+        """ :returns: `True` if the current cards are legal (num >= 0 for each kind). """
         return all(val >= 0 for val in self._cards.values())
 
     def empty(self) -> bool:
+        """ :returns: `True` if there's no cards. """
         return all(value == 0 for value in self._cards.values())
 
     def not_empty(self) -> bool:
+        """ :returns: `True` if there's at least one card. """
         return any(value > 0 for value in self._cards.values())
 
     def contains(self, card: type[Card]) -> bool:
+        """
+        :returns: `True` if `card` can be found.
+
+        Note if there's at least one `OmniCard`, then `True` is always returned.
+        """
         from .card import OmniCard
         return self[card] > 0 or self[OmniCard] > 0
 
@@ -89,9 +101,11 @@ class Cards:
         return self.contains(card)
 
     def add(self, card: type[Card]) -> Cards:
+        """ :returns: new cards with addition of one `card`. """
         return self + {card: 1}
 
     def remove(self, card: type[Card]) -> Cards:
+        """ :returns: new cards with removal of one `card`. """
         from .card import OmniCard
         if self[card] <= 0:
             assert self[OmniCard] > 0
@@ -99,6 +113,11 @@ class Cards:
         return self - {card: 1}
 
     def remove_all(self, card: type[Card]) -> Cards:
+        """
+        :returns: new cards with removal of all cards of exactly type `card`.
+
+        If the card cannot be found, then no cards are removed no matter what.
+        """
         if self[card] >= 1:
             return self - {card: self._cards[card]}
         else:
@@ -107,6 +126,9 @@ class Cards:
             return self
 
     def hide_all(self) -> Cards:
+        """
+        :returns: the hidden version of cards. (replace all by `OmniCard`)
+        """
         from .card import OmniCard
         return Cards({OmniCard: self.num_cards()})
 

@@ -4,7 +4,7 @@ Game State
 ``GameState`` is an immutable class used to hold all the information of a moment
 of a game.
 
-``__eq__`` and ``__hash__`` are implemented so that any two characters with the
+``__eq__`` and ``__hash__`` are implemented so that any two game states with the
 equivalent content are equal to each other and have the same hash.
 
 .. code-block:: python3

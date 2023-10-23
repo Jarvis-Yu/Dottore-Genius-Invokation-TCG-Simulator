@@ -24,8 +24,12 @@ class Statuses:
 
     def update_status(self, incoming_status: stt.Status, override: bool = False) -> Self:
         """
-        Replaces existing status of the same type with the new_status,
-        or append the new_status to the end of current statuses
+        :param override: set to `True` if the `incoming_status` unconditionally overrides the
+                         existing status of the same type. (or simple add to statuses if there's not
+                         one)
+
+        Updates existing status of the same type with the `incoming_status`,
+        or append the new_status to the end of current statuses.
         """
         cls = type(self)
         statuses = list(self._statuses)
@@ -47,37 +51,42 @@ class Statuses:
         return cls(tuple(statuses))
 
     def contains(self, status: type[stt.Status]) -> bool:
+        """ :returns: `True` if `status` can be found. """
         return any(type(b) is status for b in self._statuses)
 
     def __contains__(self, status: type[stt.Status]) -> bool:
         return self.contains(status)
 
     def find(self, status: type[stt.Status]) -> None | stt.Status:
+        """ :returns: the status of the exact type `status`, or `None` if not found. """
         return next((bf for bf in self._statuses if type(bf) is status), None)
 
     def just_find(self, status: type[_U]) -> _U:
-        """ _U should be a subclass of type[Status] """
+        """ :returns: the status of the exact type `status`, or an exception is thrown. """
         assert issubclass(status, stt.Status)
         found_status = just(self.find(status))
         assert isinstance(found_status, status)
         return found_status  # type: ignore
 
     def find_type(self, status: type[stt.Status]) -> None | stt.Status:
+        """ :returns: the status of the type `status`, or `None` if not found. """
         return next((bf for bf in self._statuses if isinstance(bf, status)), None)
 
     def just_find_type(self, status: type[_U]) -> _U:
-        """ _U should be a subclass of type[Status] """
+        """ :returns: the status of the type `status`, or an exception is thrown. """
         assert issubclass(status, stt.Status)
         found_status = just(self.find_type(status))
         assert isinstance(found_status, status)
         return found_status  # type: ignore
 
     def remove(self, status: type[stt.Status]) -> Self:
+        """ :returns: the `Statuses` where status is removed. """
         return type(self)(tuple(
             filter(lambda bf: type(bf) != status, self._statuses)
         ))
 
     def get_statuses(self) -> tuple[stt.Status, ...]:
+        """ :returns: tuple of statuses. """
         return self._statuses
 
     def __iter__(self) -> Iterator[stt.Status]:
@@ -107,8 +116,14 @@ class EquipmentStatuses(Statuses):
 
     def update_status(self, incoming_status: stt.Status, override: bool = False) -> Self:
         """
-        Replaces existing status of the same type with the new_status,
-        or append the new_status to the end of current statuses
+        :param override: set to `True` if the `incoming_status` unconditionally overrides the
+                         existing status of the same category. (or simple add to statuses if
+                         there's not one)
+
+        Updates existing status of the same category with the `incoming_status`,
+        or append the new_status to the end of current statuses.
+
+        Unlike `Statuses`, only one status of the same category (talent, weapon, artifact) can exist.
         """
         cls = type(self)
         statuses = list(self._statuses)

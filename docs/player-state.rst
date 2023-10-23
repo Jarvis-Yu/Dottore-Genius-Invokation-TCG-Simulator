@@ -5,6 +5,9 @@ Player State
 
     from dgisim import PlayerState
 
+``__eq__`` and ``__hash__`` are implemented so that any two player states with the
+equivalent content are equal to each other and have the same hash.
+
 .. autoclass:: dgisim.state.player_state.PlayerState
     :members:
     :exclude-members: factory
