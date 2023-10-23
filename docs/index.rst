@@ -25,9 +25,10 @@ Contents
 
    get-started
    cli
+   game-state
+   mode
+   phase
    character
    card
    dice
    enums
-   game-state
-   mode

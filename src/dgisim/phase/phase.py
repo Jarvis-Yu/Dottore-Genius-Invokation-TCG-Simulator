@@ -1,5 +1,5 @@
 from __future__ import annotations
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from typing import TYPE_CHECKING
 
 from ..helper.level_print import level_print_single
@@ -15,9 +15,21 @@ __all__ = [
 ]
 
 
-class Phase:
+class Phase(ABC):
+    """
+    Phase defines how `GameState` make state transitions under this phase.
+
+    This class doesn't store any data, so all instances of `Phase` (of the same class)
+    are considered equal and have the same hash.
+    """
+
     @abstractmethod
     def step(self, game_state: GameState) -> GameState:
+        """
+        :returns: the next game state after one state transition from `game_state`.
+
+        This method defines how state transition is performed. (transtion without player action)
+        """
         raise NotImplementedError
 
     @abstractmethod
@@ -27,9 +39,22 @@ class Phase:
         pid: Pid,
         action: PlayerAction
     ) -> None | GameState:
+        """
+        :param game_state: current game state.
+        :param pid: player of action.
+        :param action: the action of player.
+
+        :returns: the next game state after one state transition from `game_state`.
+
+        This method defines how state transition is performed. (transtion with player action)
+        """
         raise NotImplementedError
 
     def waiting_for(self, game_state: GameState) -> None | Pid:
+        """
+        :returns: which player's action is required to perform the next state transition.
+                  `None` is returned if no player action is required.
+        """
         players = [game_state.get_player1(), game_state.get_player2()]
         for player in players:
             if player.get_phase().is_action_phase():
@@ -38,6 +63,10 @@ class Phase:
 
     @abstractmethod
     def action_generator(self, game_state: GameState, pid: Pid) -> None | ActionGenerator:
+        """
+        :returns: an action generator for player `pid` under `game_state`.
+                  `None` is returned if the player is not allowed to make a move.
+        """
         raise NotImplementedError
 
     def __eq__(self, other: object) -> bool:
