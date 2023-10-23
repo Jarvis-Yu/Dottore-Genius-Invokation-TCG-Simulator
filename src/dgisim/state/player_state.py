@@ -78,7 +78,7 @@ class PlayerState:
         self._publicly_gained_cards = publicly_gained_cards
 
     def factory(self) -> PlayerStateFactory:
-        """ :returns: a factory for the current game state. """
+        """ :returns: a factory for the current player state. """
         return PlayerStateFactory(self)
 
     def get_phase(self) -> Act:

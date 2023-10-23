@@ -28,6 +28,7 @@ Contents
    dice
    character
    card
+   collections
    action-generator
    control-game-flow
    status-summon-support
