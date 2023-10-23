@@ -11,4 +11,6 @@ All enums can be imported directly from ``dgisim``.
     enums/character-skill
     enums/character-skill-type
     enums/faction
+    enums/pid
+    enums/triggering-signal
     enums/weapon-type

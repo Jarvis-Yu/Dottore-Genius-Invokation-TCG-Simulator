@@ -21,26 +21,48 @@ class Zone(Enum):
 
 
 class TriggeringSignal(Enum):
-    ACT_PRE_SKILL = "ActPreSkill"  # trigger prepare skill
+    #: triggers prepare skill statuses
+    ACT_PRE_SKILL = "ActPreSkill"
+    #: triggers when "after a character uses ..." (any skill)
     COMBAT_ACTION = "CombatAction"
+    #: triggers when "after a ... character is defeated"
     DEATH_EVENT = "DeathEvent"
-    END_ROUND_CHECK_OUT = "EndRoundCheckOut"  # summons etc.
+    #: triggers when "at the end phase, ..."
+    END_ROUND_CHECK_OUT = "EndRoundCheckOut"
+    #: triggers when a fast action is performed, unused signal.
     FAST_ACTION = "FastAction"
-    GAME_START = "GameStart"  # on triggered once at the start of the first round
+    #: triggers when "when the battle begins"
+    GAME_START = "GameStart"
+    #: triggers when "when your opponent declare the end of their round"
     OPPO_DECLARE_END_ROUND = "OppoDeclareEndRound"
+    #: triggers when "when ... play a ... card"
     POST_CARD = "PostCard"
-    POST_DMG = "PostDmg"  # triggering after each summon effect
+    #: triggers when "when ... character takes DMG"
+    POST_DMG = "PostDmg"
+    #: triggers when "after ... character takes Elemental Reaction DMG"
     POST_REACTION = "PostReaction"
+    #: triggers when "before ... choose their action"
     PRE_ACTION = "PreAction"
+    #: triggers when "End Phase"
     ROUND_END = "RoundEnd"  # remove frozen etc.
+    #: triggers when "when the Action Phase starts"
     ROUND_START = "RoundStart"
+    #: triggers when "when you declare the end of your round"
     SELF_DECLARE_END_ROUND = "SelfDeclareEndRound"
+    #: ABOUT TO BE DEPRECATED: triggers when player 1 switch a character
     SWAP_EVENT_1 = "SwapEvent1"  # P1's swap; TODO: make it relative
+    #: ABOUT TO BE DEPRECATED: triggers when player 2 switch a character
     SWAP_EVENT_2 = "SwapEvent2"  # P2's swap; TODO: make it relative
+    #: triggers when "when the character ... would be defeated"
     TRIGGER_REVIVAL = "TriggerRevival"
 
     @classmethod
     def swap_event(cls, pid: Pid) -> TriggeringSignal:
+        """
+        :returns: the corresponding swap event signal for `pid`.
+
+        aBOUT TO BE DEPRECATED.
+        """
         if pid.is_player1():
             return TriggeringSignal.SWAP_EVENT_1
         elif pid.is_player2():
