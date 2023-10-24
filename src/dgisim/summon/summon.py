@@ -43,6 +43,7 @@ __all__ = [
     "ClusterbloomArrowSummon",
     "CuileinAnbarSummon",
     "DandelionFieldSummon",
+    "FierySanctumFieldSummon",
     "HeraldOfFrostSummon",
     "OceanicMimicFrogSummon",
     "OceanicMimicRaptorSummon",
@@ -506,6 +507,72 @@ class DandelionFieldSummon(_DestroyOnNumSummon):
             ], replace(self, usages=-1)
         return [], self
 
+
+@dataclass(frozen=True, kw_only=True)
+class FierySanctumFieldSummon(_DmgPerRoundSummon, stt._ShieldStatus):
+    usages: int = 3
+    activated: bool = False
+    shield_usages: int = 1
+    SHIELD_AMOUNT: ClassVar[int] = 1
+    MAX_USAGES: ClassVar[int] = 3
+    DMG: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.PYRO
+
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_DMG,
+    ) + tuple(_DmgPerRoundSummon.REACTABLE_SIGNALS))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_MINUS:
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            char = game_state.get_character_target(dmg.target)
+            from ..character.character import Dehya
+            if not (
+                    dmg.target.pid is status_source.pid
+                    and self.shield_usages > 0
+                    and dmg.damage > 0
+                    and char is not None
+                    and type(char) is not Dehya
+            ):
+                return item, self
+            return (
+                item.delta_damage(-self.SHIELD_AMOUNT),
+                replace(self, shield_usages=self.shield_usages - 1, activated=True),
+            )
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        es, new_self = super()._react_to_signal(game_state, source, signal)
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT and new_self is not None:
+            new_self = replace(new_self, shield_usages=1)
+        elif signal is TriggeringSignal.POST_DMG and self.activated:
+            from ..character.character import Dehya
+            dehya = game_state.get_player(source.pid).get_characters().find_first_character(Dehya)
+            if dehya is not None and dehya.get_hp() >= 7:
+                es.append(eft.SpecificDamageEffect(
+                    source=source,
+                    target=StaticTarget.from_char_id(source.pid, dehya.get_id()),
+                    element=Element.PIERCING,
+                    damage=1,
+                    damage_type=DamageType(summon=True),
+                ))
+                if new_self is not None:
+                    new_self = replace(new_self, activated=False)
+        return es, new_self
 
 @dataclass(frozen=True, kw_only=True)
 class HeraldOfFrostSummon(_DmgPerRoundSummon):

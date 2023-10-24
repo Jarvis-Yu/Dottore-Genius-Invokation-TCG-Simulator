@@ -4,38 +4,48 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (28/54 implemented)](#character-2854-implemented)
-  - [Card (95/200 implemented)](#card-95200-implemented)
+  - [Character (29/57 implemented)](#character-2957-implemented)
+  - [Card (95/209 implemented)](#card-95209-implemented)
 
-## Character (28/54 implemented)
+## Character (29/57 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
+  - [x] Dehya
   - [x] Fatui Pyro Agent
+  - [ ] Hu Tao
   - [x] Klee
   - [x] Yoimiya
 - [ ] Hydro:
   - [x] Mona
   - [x] Rhodeia of Loch
   - [x] Sangonomiya Kokomi
+  - [ ] Tartaglia
   - [x] Xingqiu
 - [ ] Anemo:
   - [x] Jean
   - [x] Kaedehara Kazuha
   - [x] Maguu Kenki
   - [x] Venti
+  - [ ] Wanderer
 - [ ] Electro:
   - [x] Electro Hypostasis
   - [x] Fischl
   - [x] Keqing
+  - [ ] Kujou Sara
+  - [ ] Lisa
   - [x] Yae Miko
 - [ ] Dendro:
   - [x] Collei
   - [x] Jadeplume Terrorshroom
   - [x] Nahida
   - [x] Tighnari
+  - [ ] Yaoyao
 - [ ] Cryo:
+  - [ ] Eula
+  - [ ] Fatui Cryo Cicin Mage
   - [x] Kaeya
+  - [ ] Kamisato Ayaka
   - [x] Ganyu
   - [x] Qiqi
   - [x] Shenhe
@@ -44,8 +54,9 @@ all I need now is to implement each card and character.
   - [x] Arataki Itto
   - [x] Ningguang
   - [x] Noelle
+  - [ ] Stonehide Lawachurl
 
-## Card (95/200 implemented)
+## Card (95/209 implemented)
 
 - [ ] Equipment Card (49/107):
   - [ ] Talent Card:
@@ -79,6 +90,7 @@ all I need now is to implement each card and character.
   - [ ] Weapon Card:
     - [ ] Bow:
       - [x] Amos' Bow
+      - [ ] Elegy for the End
       - [x] King's Squire
       - [x] Raven Bow
       - [x] Sacrificial Bow
@@ -93,28 +105,47 @@ all I need now is to implement each card and character.
       - [x] White Iron Greatsword
       - [x] Wolf's Gravestone
     - [ ] Polearm:
+      - [ ] Engulfing Lightning
       - [x] Lithic Spear
+      - [ ] Moonpiercer
       - [x] Vortex Vanquisher
       - [x] White Tassel
     - [ ] Sword:
       - [x] Aquila Favonia
+      - [ ] Favonius Sword
       - [x] Sacrificial Sword
       - [x] Traveler's Handy Sword
   - [ ] Artifact Card:
+    - [ ] Emblem of Severed Fate
+    - [ ] Exile's Circlet
     - [x] Gambler's Earrings
     - [x] General's Ancient Helm
     - [x] Instructor's Cap
+    - [ ] Ornate Kabuto
     - [x] Tenacity of the Millelith
 - [ ] Support Card (11/36):
   - [ ] Companion Card:
     - [x] Chang the Ninth
+    - [ ] Chef Mao
+    - [ ] Dunyarzad
     - [x] Liben
+    - [ ] Liusu
+    - [ ] Master Zhang
     - [x] Paimon
+    - [ ] Rana
+    - [ ] Setaria
+    - [ ] Timmie
     - [x] Xudong
+    - [ ] Yayoi Nanatsuki
   - [ ] Item Card:
     - [x] NRE
     - [x] Parametric Transformer
+    - [ ] Red Feather Fan
+    - [ ] Treasure-Seeking Seelie
   - [ ] Location Card:
+    - [ ] Gandharva Ville
+    - [ ] Golden House
+    - [ ] Jade Chamber
     - [x] Knights of Favonius Library
     - [x] Liyue Harbor Wharf
     - [x] Sumeru City
@@ -125,18 +156,19 @@ all I need now is to implement each card and character.
     - [x] Absorbing Prism
     - [x] Lightning Stiletto
   - [ ] Food Card:
+    - [ ] Adeptus' Temptation
+    - [ ] Butter Crab
     - [x] Jueyun Guoba
     - [x] Lotus Flower Crisp
     - [x] Minty Meat Rolls
     - [x] Mondstadt Hash Brown
     - [x] Mushroom Pizza
     - [x] Nothern Smoked Chicken
+    - [ ] Sashimi Platter
     - [x] Sweet Madame
     - [x] Tandoori Roast Chicken
     - [x] Teyvat Fried Egg
-  - [ ] Other Card:
-    - [x] Calxs Arts
-    - [x] Changing Shifts
+  - [x] Elemental Resonance:
     - [x] Elemental Resonance: Enduring Rock
     - [x] Elemental Resonance: Fervent Flames
     - [x] Elemental Resonance: High Voltage
@@ -151,11 +183,33 @@ all I need now is to implement each card and character.
     - [x] Elemental Resonance: Woven Waters
     - [x] Elemental Resonance: Woven Weeds
     - [x] Elemental Resonance: Woven Winds
+  - [ ] Arcane Legend:
+    - [ ] Ancient Courtyard
+    - [ ] Covenant of Rock
+    - [ ] Fresh Wind of Freedom
+    - [ ] Joyous Celebration
+  - [ ] Other Card:
+    - [ ] Abyssal Summons
+    - [ ] Blessing of the Divine Relic's Installation
+    - [x] Calxs Arts
+    - [x] Changing Shifts
+    - [ ] Fatui Conspiracy
+    - [ ] Guardian's Oath
+    - [ ] Heavy Strike
     - [x] I Haven't Lost Yet!
     - [x] Leave It to Me!
+    - [ ] Master of Weaponry
+    - [ ] Nature and Wisdom
+    - [ ] Pankration!
+    - [ ] Plunging Strike
     - [x] Quick Knit
     - [x] Send Off
     - [x] Starsigns
+    - [ ] Stone and Contracts
+    - [ ] Strategize
     - [x] The Bestest Travel Companion!
+    - [ ] Thunder and Eternity
+    - [ ] Toss-Up
+    - [ ] When the Crane Returned
     - [x] Where Is the Unseen Razor?
     - [x] Wind and Freedom

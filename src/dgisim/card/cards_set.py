@@ -24,6 +24,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ProliferatingSpores,
     ProphecyOfSubmersion,
     RiteOfResurrection,
+    StalwartAndTrue,
     StellarPredator,
     StrategicReserve,
     StreamingSurge,

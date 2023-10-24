@@ -1,5 +1,12 @@
 # Change Log
 
+## 0.3.3 (future)
+
+### Added
+
+- New Characters:
+  - Dehya
+
 ## 0.3.2 (24 Oct 2023)
 
 Removes preceding `v` in version name to be like `0.3.2`.

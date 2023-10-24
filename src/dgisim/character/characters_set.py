@@ -11,6 +11,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     AratakiItto,
     Bennett,
     Collei,
+    Dehya,
     ElectroHypostasis,
     FatuiPyroAgent,
     Fischl,

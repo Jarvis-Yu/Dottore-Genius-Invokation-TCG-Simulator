@@ -154,6 +154,8 @@ __all__ = [
     "GrandExpectation",
     ## Collei ##
     "FloralSidewinder",
+    ## Dehya ##
+    "StalwartAndTrue",
     ## Electro Hypostasis ##
     "AbsorbingPrism",
     ## Fatui Pyro Agent ##
@@ -2338,6 +2340,15 @@ class FloralSidewinder(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDice({Element.DENDRO: 4})
     _CHARACTER = chr.Collei
     _EQUIPMENT_STATUS = stt.FloralSidewinderStatus
+    _SKILL = CharacterSkill.SKILL2
+
+
+#### Dehya ####
+
+class StalwartAndTrue(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDice({Element.PYRO: 4})
+    _CHARACTER = chr.Dehya
+    _EQUIPMENT_STATUS = stt.StalwartAndTrueStatus
     _SKILL = CharacterSkill.SKILL2
 
 

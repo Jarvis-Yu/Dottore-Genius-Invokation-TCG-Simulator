@@ -142,6 +142,9 @@ __all__ = [
     "ColleiTalentStatus",
     "FloralSidewinderStatus",
     "SproutStatus",
+    ## Dehya ##
+    "IncinerationDriveStatus",
+    "StalwartAndTrueStatus",
     ## Electro Hypostasis ##
     "ElectroCrystalCoreHiddenStatus",
     "ElectroCrystalCoreStatus",
@@ -752,7 +755,12 @@ class FixedShieldStatus(_ShieldStatus, _UsageStatus):
     MAX_USAGES: ClassVar[int] = BIG_INT
     SHIELD_AMOUNT: ClassVar[int] = 0  # shield amount per stack
 
-    def _triggering_condition(self, damage: eft.SpecificDamageEffect) -> bool:
+    def _triggering_condition(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            damage: eft.SpecificDamageEffect
+    ) -> bool:
         return True
 
     @override
@@ -769,7 +777,7 @@ class FixedShieldStatus(_ShieldStatus, _UsageStatus):
             if dmg.damage > 0 and self.usages > 0 \
                     and dmg.element != Element.PIERCING \
                     and self._is_target(game_state, status_source, dmg) \
-                    and self._triggering_condition(dmg):
+                    and self._triggering_condition(game_state, status_source, dmg):
                 new_dmg_amount = max(0, dmg.damage - self.SHIELD_AMOUNT)
                 new_dmg = replace(dmg, damage=new_dmg_amount)
                 new_item = DmgPEvent(dmg=new_dmg)
@@ -2755,6 +2763,65 @@ class SproutStatus(CombatStatus, _UsageStatus):
         return [], self
 
 
+#### Dehya ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class IncinerationDriveStatus(CharacterStatus, PrepareSkillStatus):
+    DAMAGE: ClassVar[int] = 3
+    DMG_ELEM: ClassVar[Element] = Element.PYRO
+
+    REACTABLE_SIGNALS = frozenset({
+        TriggeringSignal.SWAP_EVENT_1,
+        TriggeringSignal.SWAP_EVENT_2,
+        TriggeringSignal.ACT_PRE_SKILL,
+    })
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ACT_PRE_SKILL:
+            return [
+                eft.RemoveCharacterStatusEffect(
+                    target=source,
+                    status=type(self),
+                ),
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=self.DMG_ELEM,
+                    damage=self.DAMAGE,
+                    damage_type=DamageType(elemental_burst=True, status=True),
+                ),
+            ], self
+        elif self._is_swapping_source(source, signal):
+            return [], None
+        return [], self
+
+@dataclass(frozen=True, kw_only=True)
+class StalwartAndTrueStatus(TalentEquipmentStatus):
+    REACTABLE_SIGNALS = frozenset({
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    })
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            this_char = game_state.get_character_target(source)
+            assert this_char is not None
+            if (
+                    this_char.alive()
+                    and this_char.get_hp() <= 6
+            ):
+                return [eft.RecoverHPEffect(
+                    target=source,
+                    recovery=2,
+                )], self
+        return [], self
+
 #### Electro Hypostasis ####
 
 
@@ -3804,7 +3871,12 @@ class JadeScreenStatus(CombatStatus, FixedShieldStatus):
     DAMAGE_THRESHOLD: ClassVar[int] = 2
 
     @override
-    def _triggering_condition(self, damage: eft.SpecificDamageEffect) -> bool:
+    def _triggering_condition(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            damage: eft.SpecificDamageEffect
+    ) -> bool:
         return damage.damage >= self.DAMAGE_THRESHOLD
 
     @override
@@ -4388,7 +4460,12 @@ class RainSwordStatus(CombatStatus, FixedShieldStatus):
     DAMAGE_THRESHOLD: ClassVar[int] = 3
 
     @override
-    def _triggering_condition(self, damage: eft.SpecificDamageEffect) -> bool:
+    def _triggering_condition(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            damage: eft.SpecificDamageEffect
+    ) -> bool:
         return damage.damage >= self.DAMAGE_THRESHOLD
 
 
