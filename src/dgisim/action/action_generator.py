@@ -33,8 +33,9 @@ class ActionGenerator:
     If both action and instruction is None, then this action generator is used 
     to generate other ActionGenerators that may eventually generate some action.
     """
-    #: the current game_state that the action generator is based on
+    #: the current game_state that the action generator is based on.
     game_state: GameState
+    #: the `pid` of the player ActionGenerator is generating action for.
     pid: Pid
     action: None | PlayerAction = None
     instruction: None | Instruction = None

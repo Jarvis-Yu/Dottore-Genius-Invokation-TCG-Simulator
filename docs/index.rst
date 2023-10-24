@@ -20,7 +20,8 @@ Contents
    :maxdepth: 1
 
    get-started
-   cli
+   tutorials
+   design-n-philosophy
    game-state
    mode
    phase
