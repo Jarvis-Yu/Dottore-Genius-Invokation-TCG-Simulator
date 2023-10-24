@@ -8,6 +8,7 @@ All enums can be imported directly from ``dgisim``.
 .. toctree::
     :maxdepth: 1
 
+    enums/action-type
     enums/character-skill
     enums/character-skill-type
     enums/faction
