@@ -25,6 +25,7 @@ Contents
    mode
    phase
    player-state
+   element-n-reaction
    dice
    character
    card

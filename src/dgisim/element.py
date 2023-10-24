@@ -35,9 +35,15 @@ class Element(Enum):
         return self.name
 
     def is_pure_element(self) -> bool:
+        """ :returns: `True` if the element is a pure element. """
         return self in PURE_ELEMENTS
 
+    def is_aurable_element(self) -> bool:
+        """ :returns: `True` if the element is an aurable element. """
+        return self in AURA_ELEMENTS
 
+
+#: Elements of the seven.
 PURE_ELEMENTS: set[Element] = {
     Element.PYRO,
     Element.HYDRO,
@@ -49,6 +55,7 @@ PURE_ELEMENTS: set[Element] = {
 }
 
 
+#: Aurable elements ordered by reaction priority.
 AURA_ELEMENTS_ORDERED: tuple[Element, ...] = (
     Element.PYRO,
     Element.HYDRO,
@@ -57,6 +64,7 @@ AURA_ELEMENTS_ORDERED: tuple[Element, ...] = (
     Element.DENDRO,
 )
 
+#: Elements that can be applied to characters.
 AURA_ELEMENTS: FrozenSet[Element] = frozenset(AURA_ELEMENTS_ORDERED)
 
 
@@ -134,6 +142,9 @@ class Reaction(Enum):
 
     @classmethod
     def consult_reaction(cls, first: Element, second: Element) -> Optional[Reaction]:
+        """
+        :returns: a Reaction if the `first` element can react with the `second` element.
+        """
         for reaction in cls:
             e1, e2 = reaction.value.reaction_elems
             if (first in e1 and second in e2) or (first in e2 and second in e1):
@@ -144,6 +155,10 @@ class Reaction(Enum):
     def consult_reaction_with_aura(
             cls, aura: ElementalAura, second: Element
     ) -> None | ReactionDetail:
+        """
+        :returns: the ReactionDetail if the incoming element has a reaction
+                  with any aura elements.
+        """
         for elem in aura:
             reaction = cls.consult_reaction(elem, second)
             if reaction is not None:
@@ -151,6 +166,9 @@ class Reaction(Enum):
         return None
 
     def damage_boost(self) -> int:
+        """
+        :returns: the direct damage boost of the reaction.
+        """
         return self.value.damage_boost
 
 
@@ -161,6 +179,7 @@ class ReactionDetail:
     second_elem: Element
 
     def elem_reaction(self, elem: Element) -> bool:
+        """ :returns: `True` if this reaction is an `elem` reaction. """
         return self.first_elem is elem or self.second_elem is elem
 
     def __post_init__(self):
@@ -176,12 +195,22 @@ class ReactionDetail:
 
 
 class ElementalAura:
+    """
+    Stores the aura elements (element applications) of a character.
+
+    This class must initialized by calling `.from_default()` for correct
+    aura element ordering.
+    """
     def __init__(self, aura: dict[Element, bool] = {}) -> None:
         assert aura.keys() <= AURA_ELEMENTS
         self._aura = HashableDict.from_dict(aura)
 
     @classmethod
     def from_default(cls) -> ElementalAura:
+        """
+        :returns: an ElementalAura object that respects aura orders.
+                  (namely, Cryo reacts prior to Dendro)
+        """
         return cls(HashableDict(
             (elem, False)
             for elem in AURA_ELEMENTS_ORDERED
@@ -189,15 +218,22 @@ class ElementalAura:
 
     @staticmethod
     def aurable(elem: Element) -> bool:
+        """ :returnx: `True` if `elem` is an aura element. """
         return elem in AURA_ELEMENTS
 
     def peek(self) -> Optional[Element]:
+        """ :returns: the element that has the highest priority to be reacted. """
         for elem, aura in self._aura.items():
             if aura:
                 return elem
         return None
 
     def remove(self, elem: Element) -> ElementalAura:
+        """
+        :returns: a new ElementalAura without `elem`.
+
+        This should only be called if `elem` is contained.
+        """
         assert elem in AURA_ELEMENTS
         return ElementalAura(HashableDict(
             (e, aura if e != elem else False)
@@ -205,6 +241,11 @@ class ElementalAura:
         ))
 
     def add(self, elem: Element) -> ElementalAura:
+        """
+        :returns: a new ElementalAura with `elem`.
+
+        This should only be called if `elem` is aurable.
+        """
         assert elem in AURA_ELEMENTS
         if elem in self._aura and self._aura[elem]:
             return self
@@ -214,6 +255,7 @@ class ElementalAura:
         ))
 
     def contains(self, elem: Element) -> bool:
+        """ :returns: `True` if `elem` is applied to the character. """
         assert elem in AURA_ELEMENTS
         return self._aura[elem]
 
@@ -221,12 +263,18 @@ class ElementalAura:
         return self.contains(elem)
 
     def has_aura(self) -> bool:
+        """ :returns: `True` if any element is applied. """
         return any(self._aura.values())
 
     def elem_auras(self) -> tuple[Element, ...]:
+        """ :returns: a tuple of applied elements from highest priority to the lowest. """
         return tuple(iter(self))
 
     def consult_reaction(self, incoming_elem: Element) -> None | ReactionDetail:
+        """
+        :returns: ReactionDetail if `incoming_elem` triggers a reaction with
+                  the current elements.
+        """
         return Reaction.consult_reaction_with_aura(self, incoming_elem)
 
     def __iter__(self) -> Iterator[Element]:
