@@ -30,6 +30,7 @@ Contents
    card
    collections
    action
+   player-agent
    control-game-flow
    status-summon-support
    effect

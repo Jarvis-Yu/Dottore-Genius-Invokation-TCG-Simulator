@@ -35,7 +35,8 @@ __all__ = [
 
 class NoneAgent(PlayerAgent):
     """
-    A dummy agent.
+    A dummy agent that doesn't do anything.
+    This means any call to `.choose_action()` results in an exception.
     """
     pass
 
@@ -43,6 +44,7 @@ class NoneAgent(PlayerAgent):
 class LazyAgent(PlayerAgent):
     """
     A player agent that only end round whenever possible.
+    It can also reluctantly perform death swaps.
     """
     _NUM_PICKED_CARDS = 3
 
@@ -95,18 +97,30 @@ class PuppetAgent(PlayerAgent):
     """
 
     def __init__(self, actions: Optional[list[PlayerAction]] = None) -> None:
+        """
+        :param actions: initial actions that will be executed from left to right.
+        """
         if actions is None:
             self._actions = []
         else:  # pragma: no cover
             self._actions = actions
 
     def inject_action(self, action: PlayerAction) -> None:
+        """
+        Push an action to right end.
+        """
         self._actions.append(action)
 
     def inject_front_action(self, action: PlayerAction) -> None:
+        """
+        Push an action to left end.
+        """
         self._actions.insert(0, action)
 
     def inject_actions(self, actions: list[PlayerAction]) -> None:
+        """
+        Push actions to right end.
+        """
         self._actions += actions
 
     def choose_action(self, history: list[GameState], pid: Pid) -> PlayerAction:
@@ -114,6 +128,9 @@ class PuppetAgent(PlayerAgent):
         return self._actions.pop(0)
 
     def clear(self) -> None:
+        """
+        Clears all pending actions.
+        """
         self._actions = []
 
     def __str__(self) -> str:
