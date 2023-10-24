@@ -350,6 +350,7 @@ class Character:
                 pid=source.pid,
                 signal=TriggeringSignal.POST_REACTION,
             ),
+            eft.DefeatedMarkCheckerEffect(),
             eft.AllStatusTriggererEffect(
                 pid=source.pid,
                 signal=TriggeringSignal.DEATH_EVENT,

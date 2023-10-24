@@ -3638,19 +3638,20 @@ class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2
     activated_usages: int = 0
+    priority: int = 0
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.POST_REACTION,
     ))
 
     @override
-    def _inform(
+    def inform(
             self,
             game_state: GameState,
             status_source: StaticTarget,
             info_type: Informables,
             information: InformableEvent,
-    ) -> Self:
+    ) -> GameState:
         if info_type is Informables.DMG_DELT:
             assert isinstance(information, DmgIEvent)
             if (
@@ -3658,12 +3659,24 @@ class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
                     or information.dmg.reaction is None
                     or information.dmg.target != status_source
             ):
-                return self
-            char_target = game_state.get_character_target(information.dmg.target)
-            assert char_target is not None
-            if type(self) in char_target.get_character_statuses():
-                return replace(self, activated_usages=self.activated_usages + 1)
-        return self
+                return game_state
+            chars = game_state.get_player(status_source.pid).get_characters()
+            this_char = chars.get_character(cast(int, status_source.id))
+            assert this_char is not None
+            if type(self) not in this_char.get_character_statuses():
+                return game_state
+            base_priority = 0
+            for char in chars:
+                if char is this_char:
+                    continue
+                if (status := char.get_character_statuses().find(type(self))) is not None:
+                    assert isinstance(status, type(self))
+                    base_priority = max(base_priority, status.priority)
+            return eft.OverrideCharacterStatusEffect(
+                target=status_source,
+                status=replace(self, activated_usages=self.activated_usages + 1, priority=base_priority)
+            ).execute(game_state)
+        return game_state
 
     @override
     def _react_to_signal(
@@ -3690,7 +3703,7 @@ class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
                 element=dmg_element,
                 damage=1,
                 damage_type=DamageType(status=True, no_boost=True),
-            )], replace(self, usages=-1, activated_usages=-1)
+            )], replace(self, usages=-1, activated_usages=-1, priority=0)
         return [], self
 
     @override

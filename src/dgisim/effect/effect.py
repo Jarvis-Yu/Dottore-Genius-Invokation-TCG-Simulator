@@ -27,7 +27,7 @@ from ..character.enums import CharacterSkill
 from ..dice import ActualDice
 from ..element import Element, Reaction, ReactionDetail
 from ..event import *
-from ..helper.quality_of_life import just, case_val
+from ..helper.quality_of_life import just, case_val, BIG_INT
 from ..state.enums import Pid, Act
 from ..status.enums import Preprocessables, Informables
 from ..status.status_processing import StatusProcessing
@@ -72,6 +72,7 @@ __all__ = [
 
     # Checker Effect
     "AliveMarkCheckerEffect",  # mark dead characters defeated and revive the revivables
+    "DefeatedMarkCheckerEffect",
     "SwapCharacterCheckerEffect",  # detect on swap
     "DeathCheckCheckerEffect",  # detect death swap
     "DefeatedCheckerEffect",
@@ -530,6 +531,8 @@ class TurnEndEffect(PhaseEffect):
 
 @dataclass(frozen=True, repr=False)
 class AliveMarkCheckerEffect(CheckerEffect):
+    """ Revive all revivable characters.  """
+
     def execute(self, game_state: GameState) -> GameState:
         active_pid = game_state.get_active_player_id()
         revival_effects: list[Effect] = []
@@ -546,23 +549,7 @@ class AliveMarkCheckerEffect(CheckerEffect):
                         and status.revivable(game_state, char_source)
                     )
                 ), None)
-                if revival_status is None:
-                    game_state = StatusProcessing.inform_all_statuses(
-                        game_state,
-                        pid,
-                        Informables.CHARACTER_DEATH,
-                        CharacterDeathIEvent(target=char_source),
-                    ).factory().f_player(
-                        pid,
-                        lambda p: p.factory().f_characters(
-                            lambda cs: cs.factory().f_character(
-                                char.get_id(),
-                                lambda c: type(c).from_default(c.get_id()).factory()
-                                .hp(0).alive(False).build()
-                            ).build()
-                        ).build()
-                    ).build()
-                else:
+                if revival_status is not None:
                     assert isinstance(revival_status, stt.PersonalStatus)
                     revival_effects.append(
                         TriggerStatusEffect(
@@ -571,10 +558,48 @@ class AliveMarkCheckerEffect(CheckerEffect):
                             signal=TriggeringSignal.TRIGGER_REVIVAL,
                         )
                     )
+                else:
+                    game_state = game_state.factory().f_player(
+                        pid,
+                        lambda p: p.factory().f_characters(
+                            lambda cs: cs.factory().f_character(
+                                char.get_id(),
+                                lambda c: c.factory().hp(-BIG_INT).alive(False).build()
+                            ).build()
+                        ).build()
+                    ).build()
         if revival_effects:
             game_state = game_state.factory().f_effect_stack(
                 lambda es: es.push_many_fl(revival_effects)
             ).build()
+        return game_state
+
+@dataclass(frozen=True, repr=False)
+class DefeatedMarkCheckerEffect(CheckerEffect):
+    """ Mark all defeated characters as defeated.  """
+
+    def execute(self, game_state: GameState) -> GameState:
+        active_pid = game_state.get_active_player_id()
+        for pid in (active_pid, active_pid.other()):
+            for char in game_state.get_player(pid).get_characters().get_character_in_activity_order():
+                if char.alive() or char.get_hp() >= 0:
+                    continue
+                char_source = StaticTarget(pid, Zone.CHARACTERS, char.get_id())
+                game_state = StatusProcessing.inform_all_statuses(
+                    game_state,
+                    pid,
+                    Informables.CHARACTER_DEATH,
+                    CharacterDeathIEvent(target=char_source),
+                ).factory().f_player(
+                    pid,
+                    lambda p: p.factory().f_characters(
+                        lambda cs: cs.factory().f_character(
+                            char.get_id(),
+                            lambda c: type(c).from_default(c.get_id()).factory()
+                            .hp(0).alive(False).build()
+                        ).build()
+                    ).build()
+                ).build()
         return game_state
 
 
@@ -618,6 +643,9 @@ class SwapCharacterCheckerEffect(CheckerEffect):
 
 @dataclass(frozen=True, repr=False)
 class DeathCheckCheckerEffect(CheckerEffect):
+    """
+    Checks if Deah Swap Phase is required to be inserted or game should end.
+    """
     def execute(self, game_state: GameState) -> GameState:
         p1_character = game_state.get_player1().get_characters().get_active_character()
         p2_character = game_state.get_player2().get_characters().get_active_character()
@@ -659,6 +687,12 @@ class DeathCheckCheckerEffect(CheckerEffect):
 
 @dataclass(frozen=True, repr=False)
 class DefeatedCheckerEffect(CheckerEffect):
+    """
+    Checks if game should end immediately due to the defeat of a player.
+
+    This effect is supposed to be used after revive check, meaning if all characters
+    have 0 hp, then the game should end.
+    """
     def execute(self, game_state: GameState) -> GameState:
         if game_state.get_player1().defeated() \
                 or game_state.get_player2().defeated():
@@ -1007,6 +1041,11 @@ class SpecificDamageEffect(DirectEffect):
         return cls._damage_preprocess(game_state, damage, Preprocessables.DMG_AMOUNT_MINUS)
 
     def execute(self, game_state: GameState) -> GameState:
+        # Check damage target
+        target = game_state.get_character_target(self.target)
+        if target is None or target.defeated():  # pragma: no cover
+            return game_state
+
         # Preprocessing
         game_state, elemented_damage = self._element_confirmation(game_state, self)
         game_state, reactioned_damage, reaction = self._reaction_confirmation(
@@ -1026,10 +1065,9 @@ class SpecificDamageEffect(DirectEffect):
             DmgIEvent(dmg=actual_damage),
         )
 
-        # Get damage target
+        # Check damage target
         target = game_state.get_character_target(actual_damage.target)
-        if target is None:  # pragma: no cover
-            return game_state
+        assert target is not None
 
         # Damage Calculation
         hp = target.get_hp()

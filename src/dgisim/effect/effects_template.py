@@ -77,6 +77,7 @@ def standard_post_effects(
             pid=priorized_pid,
             signal=TriggeringSignal.POST_REACTION,
         ))
+        es.append(eft.DefeatedMarkCheckerEffect())
         es.append(eft.AllStatusTriggererEffect(
             pid=priorized_pid,
             signal=TriggeringSignal.DEATH_EVENT,

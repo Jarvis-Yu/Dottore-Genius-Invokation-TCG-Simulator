@@ -55,7 +55,7 @@ class TestGamblersEarrings(unittest.TestCase):
         gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
         gsm.step_until_holds(
             lambda gs:
-            gs.get_player1().just_get_active_character().get_elemental_aura().contains(Element.CRYO)
+            gs.get_player1().just_get_active_character().get_elemental_aura().contains(Element.CRYO),
         )
         self.assertEqual(gsm.get_game_state().get_player1().get_dice().num_dice(), num_dice)
 

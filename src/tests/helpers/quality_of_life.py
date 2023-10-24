@@ -133,6 +133,7 @@ def add_damage_effect(
                                      damage_type),  # type: ignore
             ),
             AliveMarkCheckerEffect(),
+            DefeatedMarkCheckerEffect(),
             DeathCheckCheckerEffect(),
         ))
     ).build()

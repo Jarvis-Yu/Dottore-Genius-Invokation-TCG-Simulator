@@ -45,7 +45,7 @@ class TestNahida(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 10)
 
         gsm.player_step()
-        gsm.auto_step()
+        gsm.auto_step(observe=False)
         p2cs = gsm.get_game_state().get_player2().get_characters()
         p2c1 = p2cs.just_get_character(1)
         p2c2 = p2cs.just_get_character(2)
@@ -338,7 +338,6 @@ class TestNahida(unittest.TestCase):
         self.assertNotIn(SeedOfSkandhaStatus, p2c2.get_character_statuses())
         self.assertNotIn(SeedOfSkandhaStatus, p2c3.get_character_statuses())
 
-        return # TODO: fix for the test below
         """
         skill triggers reaction that kills opponent active character,
         seeds get triggered normally (before death swap)
