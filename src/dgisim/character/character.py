@@ -40,6 +40,7 @@ __all__ = [
     "Fischl",
     "FatuiPyroAgent",
     "Ganyu",
+    "HuTao",
     "JadeplumeTerrorshroom",
     "Jean",
     "KaedeharaKazuha",
@@ -985,9 +986,9 @@ class Dehya(Character):
                 damage=1,
                 damage_type=DamageType(elemental_skill=True),
             ))
-        effects.append( eft.AddSummonEffect(
-                target_pid=source.pid,
-                summon=sm.FierySanctumFieldSummon,
+        effects.append(eft.AddSummonEffect(
+            target_pid=source.pid,
+            summon=sm.FierySanctumFieldSummon,
         ))
         return tuple(effects)
 
@@ -1368,6 +1369,92 @@ class Ganyu(Character):
             energy=0,
             max_energy=3,
             hiddens=stts.Statuses((stt.GanyuTalentStatus(),)),
+            equipments=stts.EquipmentStatuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
+class HuTao(Character):
+    _ELEMENT = Element.PYRO
+    _WEAPON_TYPE = WeaponType.POLEARM
+    _TALENT_STATUS = stt.SanguineRougeStatus
+    _FACTIONS = frozenset((Faction.LIYUE,))
+
+    _SKILL1_COST = AbstractDice({
+        Element.PYRO: 1,
+        Element.ANY: 2,
+    })
+    _SKILL2_COST = AbstractDice({
+        Element.PYRO: 2,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDice({
+        Element.PYRO: 3,
+    })
+
+    @override
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        effects: list[eft.Effect] = []
+        if stt.ParamitaPapilioStatus in self.get_character_statuses():
+            charged_status = game_state.get_player(
+                source.pid
+            ).get_hidden_statuses().just_find(stt.ChargedAttackStatus)
+            if charged_status.can_charge:
+                effects.append(eft.AddCharacterStatusEffect(
+                    target=StaticTarget.from_player_active(game_state, source.pid.other()),
+                    status=stt.BloodBlossomStatus,
+                ))
+        return tuple(effects) + normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        )
+
+    @override
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddCharacterStatusEffect(
+                target=source,
+                status=stt.ParamitaPapilioStatus,
+            ),
+        )
+
+    @override
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        dmg = 4
+        heal = 2
+        if self.get_hp() <= 6:
+            dmg += 1
+            heal += 1
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.get_max_energy(),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.PYRO,
+                damage=dmg,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            eft.RecoverHPEffect(
+                target=source,
+                recovery=heal,
+            ),
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=3,
+            hiddens=stts.Statuses(()),
             equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),

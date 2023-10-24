@@ -6,6 +6,12 @@
 
 - New Characters:
   - Dehya
+  - Hu Tao
+- New Cards:
+  - Equipment Card:
+    - Talent Equipment Card:
+      - Sanguine Rouge
+      - Stalwart and True
 
 ## 0.3.2 (24 Oct 2023)
 

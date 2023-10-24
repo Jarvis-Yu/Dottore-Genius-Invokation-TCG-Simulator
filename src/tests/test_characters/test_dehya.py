@@ -3,7 +3,7 @@ import unittest
 from src.tests.test_characters.common_imports import *
 
 
-class TestNingguang(unittest.TestCase):
+class TestDehya(unittest.TestCase):
     BASE_GAME = replace_character_make_active_add_card(
         ACTION_TEMPLATE,
         Pid.P1,
@@ -25,7 +25,7 @@ class TestNingguang(unittest.TestCase):
         self.assertIs(dmg.element, Element.PHYSICAL)
 
     def test_elemental_skill1(self):
-        # test elemental skill generate status
+        # test elemental skill generate summon
         game_state = add_dmg_listener(self.BASE_GAME, Pid.P1)
         game_state = step_skill(
             game_state,

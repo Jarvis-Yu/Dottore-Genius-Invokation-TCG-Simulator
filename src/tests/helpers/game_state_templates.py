@@ -109,6 +109,7 @@ ACTION_TEMPLATE = BASE_GAME.factory().f_phase(
     .build()
 ).build()
 
+#: The action template where P2 has ended the round
 ONE_ACTION_TEMPLATE = ACTION_TEMPLATE.factory().f_player2(
     lambda p: p.factory()
     .phase(Act.END_PHASE)

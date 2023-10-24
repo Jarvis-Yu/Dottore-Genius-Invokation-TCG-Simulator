@@ -4,16 +4,16 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (29/57 implemented)](#character-2957-implemented)
-  - [Card (95/209 implemented)](#card-95209-implemented)
+  - [Character (30/57 implemented)](#character-3057-implemented)
+  - [Card (97/209 implemented)](#card-97209-implemented)
 
-## Character (29/57 implemented)
+## Character (30/57 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
   - [x] Dehya
   - [x] Fatui Pyro Agent
-  - [ ] Hu Tao
+  - [x] Hu Tao
   - [x] Klee
   - [x] Yoimiya
 - [ ] Hydro:
@@ -56,9 +56,9 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (95/209 implemented)
+## Card (97/209 implemented)
 
-- [ ] Equipment Card (49/107):
+- [ ] Equipment Card (51/107):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] Cold-Blooded Strike
@@ -77,6 +77,8 @@ all I need now is to implement each card and character.
     - [x] Proliferating Spores
     - [x] Prophecy of Submersion
     - [x] Rite of Resurrection
+    - [x] Sanguine Rouge
+    - [x] Stalwart and True
     - [x] Stellar Predator
     - [x] Strategic Reserve
     - [x] Streaming Surge

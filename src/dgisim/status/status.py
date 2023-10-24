@@ -160,6 +160,10 @@ __all__ = [
     "GanyuTalentStatus",
     "IceLotusStatus",
     "UndividedHeartStatus",
+    ## Hu Tao ##
+    "BloodBlossomStatus",
+    "ParamitaPapilioStatus",
+    "SanguineRougeStatus",
     ## Jadeplume Terrorshroom ##
     "ProliferatingSporesStatus",
     "RadicalVitalityHiddenStatus",
@@ -3063,6 +3067,65 @@ class IceLotusStatus(CombatStatus, FixedShieldStatus):
 @dataclass(frozen=True, kw_only=True)
 class UndividedHeartStatus(TalentEquipmentStatus):
     pass
+
+
+#### Hu Tao ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class BloodBlossomStatus(CharacterStatus):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    ))
+
+    @override
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            return [
+                eft.SpecificDamageEffect(
+                    source=source,
+                    target=source,
+                    element=Element.PYRO,
+                    damage=1,
+                    damage_type=DamageType(no_boost=True, status=True),
+                )
+            ], None
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class ParamitaPapilioStatus(CharacterStatus, _InfusionStatus):
+    usages: int = 2
+    ELEMENT: ClassVar[Element] = Element.PYRO
+    damage_boost: int = 1
+
+@dataclass(frozen=True, kw_only=True)
+class SanguineRougeStatus(TalentEquipmentStatus):
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            this_char = game_state.get_character_target(status_source)
+            assert this_char is not None
+            if (
+                    item.dmg.source == status_source
+                    and item.dmg.element is Element.PYRO
+                    and item.dmg.damage_type.directly_from_character()
+                    and this_char.get_hp() <= 6
+            ):
+                return item.delta_damage(1), self
+        return item, self
 
 
 #### Jadeplume Terrorshroom ##

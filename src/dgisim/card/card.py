@@ -164,6 +164,8 @@ __all__ = [
     "StellarPredator",
     ## Ganyu ##
     "UndividedHeart",
+    ## Hu Tao ##
+    "SanguineRouge",
     ## Jadeplume Terrorshroom ##
     "ProliferatingSpores",
     ## Jean ##
@@ -2409,6 +2411,16 @@ class UndividedHeart(_TalentEquipmentSkillCard):
     _CHARACTER = chr.Ganyu
     _EQUIPMENT_STATUS = stt.UndividedHeartStatus
     _SKILL = CharacterSkill.SKILL3
+
+
+#### Hu Tao ####
+
+
+class SanguineRouge(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDice({Element.PYRO: 2})
+    _CHARACTER = chr.HuTao
+    _EQUIPMENT_STATUS = stt.SanguineRougeStatus
+    _SKILL = CharacterSkill.SKILL2
 
 
 #### Jadeplume Terrorshroom ####

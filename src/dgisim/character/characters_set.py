@@ -16,6 +16,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     FatuiPyroAgent,
     Fischl,
     Ganyu,
+    HuTao,
     JadeplumeTerrorshroom,
     Jean,
     KaedeharaKazuha,
