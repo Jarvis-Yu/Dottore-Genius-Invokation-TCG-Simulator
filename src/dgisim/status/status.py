@@ -1869,7 +1869,8 @@ class ElementalResonanceFerventFlamesStatus(CombatStatus):
             dmg = item.dmg
             if (
                     dmg.reaction is not None
-                    and dmg.damage_type.directly_from_character()
+                    and dmg.reaction.elem_reaction(Element.PYRO)
+                    and dmg.damage_type.from_character()
                     and self._target_is_self_active(game_state, status_source, dmg.source)
             ):
                 return replace(item, dmg=replace(dmg, damage=dmg.damage + self.DMG_BOOST)), None
@@ -3674,7 +3675,7 @@ class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
                     base_priority = max(base_priority, status.priority)
             return eft.OverrideCharacterStatusEffect(
                 target=status_source,
-                status=replace(self, activated_usages=self.activated_usages + 1, priority=base_priority)
+                status=replace(self, activated_usages=self.activated_usages + 1, priority=base_priority + 1)
             ).execute(game_state)
         return game_state
 

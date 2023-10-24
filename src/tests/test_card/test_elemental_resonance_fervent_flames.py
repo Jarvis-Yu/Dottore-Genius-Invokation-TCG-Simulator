@@ -40,7 +40,7 @@ class TestElementalResonanceFerventFlames(unittest.TestCase):
         base_state = AddCombatStatusEffect(Pid.P1, ElementalResonanceFerventFlamesStatus).execute(
             self.BASE_GAME
         )
-        base_state = oppo_aura_elem(base_state, Element.ELECTRO)
+        base_state = oppo_aura_elem(base_state, Element.PYRO)
         # None reaction damage doesn't trigger status
         game_state = step_skill(base_state, Pid.P1, CharacterSkill.SKILL1)
         p1_combat_statuses = game_state.get_player1().get_combat_statuses()
@@ -63,9 +63,21 @@ class TestElementalResonanceFerventFlames(unittest.TestCase):
         p1_combat_statuses = game_state.get_player1().get_combat_statuses()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertNotIn(ElementalResonanceFerventFlamesStatus, p1_combat_statuses)
-        self.assertEqual(p2ac.get_hp(), 8)  # raptor 1 + electro-charged 1
+        self.assertEqual(p2ac.get_hp(), 7)  # raptor 1 + vaporize 2
 
         # status naturally disappears next round
         game_state = next_round(base_state)
         p1_combat_statuses = game_state.get_player1().get_combat_statuses()
         self.assertNotIn(ElementalResonanceFerventFlamesStatus, p1_combat_statuses)
+
+        # swirled pyro reaction can be buffed
+        game_state = apply_elemental_aura(base_state, Element.HYDRO, Pid.P2)
+        game_state = apply_elemental_aura(game_state, Element.HYDRO, Pid.P2)
+        game_state = apply_elemental_aura(game_state, Element.PYRO, Pid.P2, char_id=3)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
+        p1_combat_statuses = game_state.get_player1().get_combat_statuses()
+        p2c1, p2c2, p2c3 = game_state.get_player2().get_characters().get_characters()
+        self.assertNotIn(ElementalResonanceFerventFlamesStatus, p1_combat_statuses)
+        self.assertEqual(p2c1.get_hp(), 7)
+        self.assertEqual(p2c2.get_hp(), 9)
+        self.assertEqual(p2c3.get_hp(), 4)

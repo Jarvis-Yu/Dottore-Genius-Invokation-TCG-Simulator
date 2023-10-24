@@ -175,6 +175,7 @@ class TestGameStateMachine(unittest.TestCase):
         num_transitions = 0
         num_actions = 0
         num_games = 0
+        max_effect_stack_depth = 0
         for i in range(repeats):
             if show_progress:
                 print(end='\b' * len(prev_progress))
@@ -202,6 +203,11 @@ class TestGameStateMachine(unittest.TestCase):
                 num_transitions += len(state_machine.get_history())
                 num_actions += len(state_machine.get_action_history())
                 num_games += 1
+                for game_state in state_machine.get_history():
+                    max_effect_stack_depth = max(
+                        max_effect_stack_depth,
+                        len(game_state.get_effect_stack()._effects),
+                    )
                 wins[state_machine.get_winner()] += 1
             except Exception:
                 all_state = state_machine.get_history()
@@ -220,4 +226,5 @@ class TestGameStateMachine(unittest.TestCase):
         print(end=f"[[A random game takes {round(average_time_in_ms, 1)} ms on average, "
               + f"{round(average_state_time_in_μs)} μs per state, "
               + f"with {round(num_transitions/num_games, 1)} game states, "
-              + f"and {round(num_actions/num_games, 1)} decisions to make]]")
+              + f"and {round(num_actions/num_games, 1)} decisions to make. "
+              + f"max effect stack depth = {max_effect_stack_depth}]]")
