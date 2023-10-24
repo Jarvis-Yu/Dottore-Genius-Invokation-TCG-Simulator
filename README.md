@@ -11,7 +11,7 @@ A Genshin Impact Genius Invokation TCG simulator intended to be used for AI trai
 - [**Documentation**](https://dottore-genius-invokation-tcg-simulator.readthedocs.io/en/latest/)
 - [**Source code**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator)
 - [**Contributing**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/dev_docs/dev_readme.md)
-- [**Game design**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/dev_docs/state_machine_design.md)
+- [**Game design**](https://dottore-genius-invokation-tcg-simulator.readthedocs.io/en/latest/design-n-philosophy.html)
 - [**Bug reports**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/issues)
 - [**Discord server**](https://discord.gg/arammB6BEY)
 
@@ -52,7 +52,7 @@ You may try the CLI online on [Google Colab](https://colab.research.google.com/d
 
 ### CLI Simple Usages
 
-See CLI's [README](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/dev_docs/cli_readme.md)
+See CLI's [tutorial](https://dottore-genius-invokation-tcg-simulator.readthedocs.io/en/latest/tutorials/cli.html)
 for showcase and explanations of the CLI.
 
 ## Features
@@ -87,8 +87,8 @@ generate valid player actions.
 Currently a full game can be played with any combination of the characters and cards implemented.
 
 - [x] Implement all game phases (Action Phase, End Phase...)
-- [ ] Implement all cards (95/200 implemented) ([details](https://dottore-genius-invokation-tcg-simulator.readthedocs.io/en/latest/card/available_cards.html#))
-- [ ] Implement all characters with their talent cards (28/54 implemented) ([details](https://dottore-genius-invokation-tcg-simulator.readthedocs.io/en/latest/character/available_chars.html))
+- [ ] Implement all cards (95/200 implemented) ([details](https://dottore-genius-invokation-tcg-simulator.readthedocs.io/en/latest/card/available-cards.html))
+- [ ] Implement all characters with their talent cards (28/54 implemented) ([details](https://dottore-genius-invokation-tcg-simulator.readthedocs.io/en/latest/character/available-chars.html))
 - [x] Implement all reactions, death handling, revival handling etc.
 - [x] Implement all game logics to support the implemented cards and characters
 - [x] Implement interactive CLI for better debugging experience
