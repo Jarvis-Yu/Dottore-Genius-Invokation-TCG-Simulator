@@ -73,7 +73,7 @@ highly customizable. (Default Mode and some Heated Battle Modes are implemented 
 
 Everything in the `GameState` object are immutable, so traversing game history
 and exploring different branches of possibilities in the future are not error-prone.
-The simulator did optimizations for immutability.
+stable simulator did optimizations for immutability.
 The unchanged data are shared among neighbouring game states.
 
 `GameState` implements `__eq__` and `__hash__`, enabling you to use any game state as a key in a

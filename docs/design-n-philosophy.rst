@@ -82,7 +82,7 @@ Let's go over each of its attributes.
 - ``player1``: contains all information about the player, including characters, summons,
   and so on
 - ``player2``: the other player which is the opponent of ``player1``
-- ``effect_stack``: contains the ``effect``s waiting to be executed. Each ``effect`` can transit the
+- ``effect_stack``: contains the ``effect`` s waiting to be executed. Each ``effect`` can transit the
   game state to the next as programmed. e.g. a damage effect deals damage to
   opponent, a swap character effect changes the active character of a player...
 
@@ -447,10 +447,10 @@ that is it only generates one player_action by the end.
 
 To implement an algorithm to generate all possible player actions
 (or at least explore a few branches).
-You should save the old ``action_generator``s by recursion or whatever to memorize
+You should save the old ``action_generator`` s by recursion or whatever to memorize
 the *history* as a tree.
 
 That concludes the section of ``ActionGenerator``,
-it is but a helper to generate correct ``PlayerAction``s,
+it is but a helper to generate correct ``PlayerAction`` s,
 you may write your own algorithm to directly generate a correct one without ``ActionGenerator``
 and pass it to the game state any time.
