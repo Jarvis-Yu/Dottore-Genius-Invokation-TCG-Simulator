@@ -82,7 +82,7 @@ class TestXingqiu(unittest.TestCase):
         p1 = gsm.get_game_state().get_player1()
         p1ac = p1.just_get_active_character()
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 9)
+        self.assertEqual(p2ac.get_hp(), 8)
         self.assertIn(Element.HYDRO, p2ac.get_elemental_aura())
         self.assertEqual(p1ac.get_hp(), 10)
         self.assertIn(Element.HYDRO, p1ac.get_elemental_aura())

@@ -3141,7 +3141,7 @@ class Xingqiu(Character):
                 source=source,
                 target=DynamicCharacterTarget.OPPO_ACTIVE,
                 element=Element.HYDRO,
-                damage=1,
+                damage=2,
                 damage_type=DamageType(elemental_burst=True),
             ),
             eft.ApplyElementalAuraEffect(
