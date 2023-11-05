@@ -1,8 +1,10 @@
 # Change Log
 
-## 0.3.3 (future)
+## 0.3.3 (5 Nov 2023)
 
 ### Added
+
+`dgisim` includes enum `ActionType` for action choosing.
 
 - New Characters:
   - Dehya

@@ -10,6 +10,8 @@ from ..dgisim.player_agent import *
 from ..dgisim.action.action import *
 from ..dgisim.action.action_generator import *
 from ..dgisim.action.action_generator_generator import *
+from ..dgisim.action.enums import *
+from ..dgisim.action.types import *
 
 from ..dgisim.card.card import Card
 from ..dgisim.card.cards import *
