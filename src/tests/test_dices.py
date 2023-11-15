@@ -273,3 +273,19 @@ class TestDice(unittest.TestCase):
             keys,
             expected_order,
         )
+
+    def test_less_elem(self):
+        dice = AbstractDice({Element.DENDRO: 1, Element.ANY: 2})
+        self.assertTrue(dice.can_cost_less_elem())
+        dice = dice.cost_less_elem(1)
+        self.assertEqual(dice[Element.DENDRO], 0)
+        self.assertEqual(dice[Element.ANY], 2)
+        self.assertTrue(dice.can_cost_less_elem())
+        dice = dice.cost_less_elem(1)
+        self.assertEqual(dice[Element.DENDRO], 0)
+        self.assertEqual(dice[Element.ANY], 1)
+        self.assertTrue(dice.can_cost_less_elem())
+        dice = dice.cost_less_elem(1)
+        self.assertEqual(dice[Element.DENDRO], 0)
+        self.assertEqual(dice[Element.ANY], 0)
+        self.assertFalse(dice.can_cost_less_elem())

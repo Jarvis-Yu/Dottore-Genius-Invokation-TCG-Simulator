@@ -517,7 +517,8 @@ class AbstractDice(Dice):
                 if self[elem] > 0
             ), None)
             if elem is None:
-                return self
+                # as self[ANY_PURE_ELEM] is 0, it doesn't matter which elem to choose
+                elem = Element.PYRO
         elem_less_amount = min(self[elem], num)
         any_less_amount = max(0, num - elem_less_amount)
         ret_val = (self - {elem: elem_less_amount, Element.ANY: any_less_amount}).validify()
