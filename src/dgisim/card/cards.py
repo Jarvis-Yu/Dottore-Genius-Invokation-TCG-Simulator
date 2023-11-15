@@ -125,6 +125,17 @@ class Cards:
             # but we don't know how many to remove, so nothing is removed
             return self
 
+    def extend(self, cards: Cards | dict[type[Card], int], limit: None | int = None) -> Cards:
+        """
+        :returns: new cards with addition of `cards` discarding some if the
+                  combined num exceeds limit.
+        """
+        if limit is not None:
+            if not isinstance(cards, Cards):
+                cards = Cards(cards)
+            cards = cards.pick_random_cards(max(limit - self.num_cards(), 0))[1]
+        return self + cards
+
     def hide_all(self) -> Cards:
         """
         :returns: the hidden version of cards. (replace all by `OmniCard`)

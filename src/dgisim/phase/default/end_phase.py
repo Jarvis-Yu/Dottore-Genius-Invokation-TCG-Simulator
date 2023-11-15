@@ -43,14 +43,15 @@ class EndPhase(ph.Phase):
         active_player_id = game_state.get_active_player_id()
         active_player = game_state.get_player(active_player_id)
         other_player = game_state.get_other_player(active_player_id)
+        hand_card_limit = game_state.get_mode().hand_card_limit()
         active_player_deck, new_cards = (
             active_player.get_deck_cards().pick_random_cards(self._CARDS_DRAWN)
         )
-        active_player_hand = active_player.get_hand_cards() + new_cards
+        active_player_hand = active_player.get_hand_cards().extend(new_cards, limit=hand_card_limit)
         other_player_deck, new_cards = (
             other_player.get_deck_cards().pick_random_cards(self._CARDS_DRAWN)
         )
-        other_player_hand = other_player.get_hand_cards() + new_cards
+        other_player_hand = other_player.get_hand_cards().extend(new_cards, limit=hand_card_limit)
         return game_state.factory().round(
             new_round
         ).phase(

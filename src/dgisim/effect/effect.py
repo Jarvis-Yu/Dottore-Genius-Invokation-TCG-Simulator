@@ -1372,7 +1372,10 @@ class DrawRandomCardEffect(DirectEffect):
             lambda p: p.factory().deck_cards(
                 left_cards
             ).f_hand_cards(
-                lambda cards: cards + chosen_cards
+                lambda cards: cards.extend(
+                    chosen_cards,
+                    limit=game_state.get_mode().hand_card_limit()
+                )
             ).build()
         ).build()
 
@@ -1393,7 +1396,10 @@ class DrawRandomCardOfTypeEffect(DirectEffect):
             lambda p: p.factory().deck_cards(
                 left_cards
             ).f_hand_cards(
-                lambda cards: cards + chosen_cards
+                lambda cards: cards.extend(
+                    chosen_cards,
+                    limit=game_state.get_mode().hand_card_limit()
+                )
             ).build()
         ).build()
 
@@ -1404,6 +1410,9 @@ class PublicAddCardEffect(DirectEffect):
     card: type[Card]
 
     def execute(self, game_state: GameState) -> GameState:
+        hand_card_limit = game_state.get_mode().hand_card_limit()
+        if game_state.get_player(self.pid).get_hand_cards().num_cards() >= hand_card_limit:
+            return game_state
         return game_state.factory().f_player(
             self.pid,
             lambda p: p.factory().f_hand_cards(
