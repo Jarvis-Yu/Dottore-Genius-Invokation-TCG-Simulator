@@ -124,3 +124,18 @@ class TestDeck(unittest.TestCase):
             return card.valid_in_deck(MutableDeck(chars, {}))
 
         self.assertFalse(test_card(LightningStiletto, [Keqing]))
+
+    def test_json_sl(self):
+        immutable_deck = FrozenDeck(
+            chars=(
+                Klee,
+                KaedeharaKazuha,
+            ),
+            cards=HashableDict({
+                PoundingSurprise: 1,
+                GamblersEarrings: 2,
+            })
+        )
+        json_str = immutable_deck.to_json()
+        deck_read = MutableDeck.from_json(json_str)
+        self.assertEqual(immutable_deck, deck_read)
