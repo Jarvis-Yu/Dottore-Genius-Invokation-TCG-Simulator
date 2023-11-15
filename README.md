@@ -31,7 +31,7 @@ Please make sure your Python version `>= 3.10` before installing.
 pip install dgisim
 ```
 
-## Try The Simulator in Browser
+## Try The Simulator In Browser
 
 - Website: [https://jarvis-yu.github.io/Dottore-Genius-Invokation-TCG-PWA/](https://jarvis-yu.github.io/Dottore-Genius-Invokation-TCG-PWA/)
 - Repo: [https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-PWA](https://jarvis-yu.github.io/Dottore-Genius-Invokation-TCG-PWA/)
