@@ -34,6 +34,7 @@ class Mode(ABC):
     """
 
     _CARD_REDRAW_CHANCES = 1
+    _CARDS_PER_ROUND = 2
     _DECK_CARDS_REQUIREMENT = 30
     _DECK_CARD_LIMIT_PER_KIND = 2
     _DECK_CHARS_REQUIREMENT = 3
@@ -50,6 +51,9 @@ class Mode(ABC):
 
     def card_redraw_chances(self) -> int:
         return self._CARD_REDRAW_CHANCES
+
+    def cards_per_round(self) -> int:
+        return self._CARDS_PER_ROUND
 
     def deck_cards_requirement(self) -> int:
         return self._DECK_CARDS_REQUIREMENT
