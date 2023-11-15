@@ -188,19 +188,22 @@ class PlayerState:
         """ :returns: `True` if the player is defeated. """
         return self._characters.all_defeated()
 
-    def hide_cards(self) -> PlayerState:
+    def hide_secrets(self) -> PlayerState:
         """
         :returns: the same player but hides cards and dice. So opponent agent
                   cannot cheat with extra information.
 
-        Note that currently only cards can be hidden but dice.
-
         Cards are hidden by replacing them all with `OmniCard`.
+
+        Dices are hidden by replacing them all with `ANY`. (Note this makes
+        the new ActualDice invalid)
         """
         return self.factory().f_hand_cards(
             lambda hcs: hcs.hide_all()
         ).f_deck_cards(
             lambda dcs: dcs.hide_all()
+        ).f_dice(
+            lambda d: d.hide_all()
         ).build()
 
     @classmethod

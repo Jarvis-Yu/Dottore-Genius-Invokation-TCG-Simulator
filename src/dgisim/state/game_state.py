@@ -318,7 +318,7 @@ class GameState:
         """
         return self.factory().f_player(
             pid.other(),
-            lambda p: p.hide_cards()
+            lambda p: p.hide_secrets()
         ).build()
 
     def __copy__(self) -> Self:  # pragma: no cover

@@ -423,6 +423,12 @@ class ActualDice(Dice):
             )
         )
 
+    def hide_all(self) -> Self:
+        """
+        :returns: the hidden version of actual dice. (replace all by `ANY`)
+        """
+        return ActualDice.from_all(self.num_dice(), Element.ANY)  # type: ignore
+
     @classmethod
     def from_random(cls, size: int, excepted_elems: set[Element] = set()) -> ActualDice:
         """
