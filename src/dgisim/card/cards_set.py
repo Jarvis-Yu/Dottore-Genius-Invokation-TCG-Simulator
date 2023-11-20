@@ -90,8 +90,9 @@ _DEFAULT_CARDS: list[type[Card]] = [
     SendOff,
     Starsigns,
     TheBestestTravelCompanion,
+    WhenTheCraneReturned,
     WhereIsTheUnseenRazor,
-    FreshWindOfFreedom,
+    WindAndFreedom,
 
     ## Event Card / Food ##
     JueyunGuoba,

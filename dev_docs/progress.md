@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (30/57 implemented)](#character-3057-implemented)
-  - [Card (98/209 implemented)](#card-98209-implemented)
+  - [Character (30/60 implemented)](#character-3060-implemented)
+  - [Card (99/217 implemented)](#card-99217-implemented)
 
-## Character (30/57 implemented)
+## Character (30/60 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -56,9 +56,9 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (98/209 implemented)
+## Card (99/217 implemented)
 
-- [ ] Equipment Card (51/107):
+- [ ] Equipment Card (51/117):
   - [ ] Talent Card:
     - [x] Arataki Ichiban
     - [x] Cold-Blooded Strike
@@ -125,7 +125,7 @@ all I need now is to implement each card and character.
     - [x] Instructor's Cap
     - [ ] Ornate Kabuto
     - [x] Tenacity of the Millelith
-- [ ] Support Card (11/36):
+- [ ] Support Card (11/39):
   - [ ] Companion Card:
     - [x] Chang the Ninth
     - [ ] Chef Mao
@@ -153,7 +153,7 @@ all I need now is to implement each card and character.
     - [x] Sumeru City
     - [x] Tenshukaku
     - [x] Vanarana
-- [ ] Event Card (36/57):
+- [ ] Event Card (37/61):
   - [ ] Talent Card:
     - [x] Absorbing Prism
     - [x] Lightning Stiletto
@@ -214,6 +214,6 @@ all I need now is to implement each card and character.
     - [x] The Bestest Travel Companion!
     - [ ] Thunder and Eternity
     - [ ] Toss-Up
-    - [ ] When the Crane Returned
+    - [x] When the Crane Returned
     - [x] Where Is the Unseen Razor?
     - [x] Wind and Freedom

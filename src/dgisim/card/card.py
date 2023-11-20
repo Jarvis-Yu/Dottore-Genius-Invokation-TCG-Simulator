@@ -128,6 +128,7 @@ __all__ = [
     "SendOff",
     "Starsigns",
     "TheBestestTravelCompanion",
+    "WhenTheCraneReturned",
     "WhereIsTheUnseenRazor",
     "WindAndFreedom",
 
@@ -2035,15 +2036,6 @@ class FreshWindOfFreedom(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
 
     @override
     @classmethod
-    def valid_in_deck(cls, deck: Deck) -> bool:
-        return 2 <= sum(
-            1
-            for char in deck.chars
-            if char.of_faction(Faction.MONDSTADT)
-        )
-
-    @override
-    @classmethod
     def effects(
             cls,
             game_state: gs.GameState,
@@ -2228,6 +2220,24 @@ class TheBestestTravelCompanion(EventCard, _DiceOnlyChoiceProvider):
         )
 
 
+class WhenTheCraneReturned(EventCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddCombatStatusEffect(
+                pid,
+                stt.WhenTheCraneReturnedStatus,
+            ),
+        )
+
 class WhereIsTheUnseenRazor(EventCard, _CharTargetChoiceProvider):
     _DICE_COST = AbstractDice({Element.OMNI: 0})
 
@@ -2292,7 +2302,7 @@ class WindAndFreedom(EventCard, _DiceOnlyChoiceProvider):
         return (
             eft.AddCombatStatusEffect(
                 target_pid=pid,
-                status=stt.FreshWindOfFreedomStatus,
+                status=stt.WindAndFreedomStatus,
             ),
         )
 

@@ -112,7 +112,9 @@ __all__ = [
     "IHaventLostYetOnCooldownStatus",
     "RebelliousShieldStatus",
     "ReviveOnCooldownStatus",
+    "WhenTheCraneReturnedStatus",
     "WhereIsTheUnseenRazorStatus",
+    "WindAndFreedomStatus",
 
     # character status
     "FrozenStatus",
@@ -913,10 +915,10 @@ class _InfusionStatus(_UsageStatus):
 ############################## Hidden Status ##############################
 
 
-
 @dataclass(frozen=True, kw_only=True)
 class ArcaneLegendUsedStatus(PlayerHiddenStatus):
     pass
+
 
 @dataclass(frozen=True, kw_only=True)
 class ChargedAttackStatus(PlayerHiddenStatus):
@@ -2087,6 +2089,38 @@ class FreshWindOfFreedomStatus(CombatStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
+class WhenTheCraneReturnedStatus(CombatStatus):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+    ))
+    triggered: bool = False
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.POST_SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if information.source.pid is status_source.pid and not self.triggered:
+                return replace(self, triggered=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.triggered:
+            return [
+                eft.ForwardSwapCharacterEffect(source.pid),
+            ], None
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
 class WhereIsTheUnseenRazorStatus(CombatStatus):
     COST_DEDUCTION: ClassVar[int] = 2
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
@@ -2120,6 +2154,41 @@ class WhereIsTheUnseenRazorStatus(CombatStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
+            return [], None
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class WindAndFreedomStatus(CombatStatus):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.ROUND_END,
+    ))
+    triggered: bool = False
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.POST_SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if information.source.pid is status_source.pid and not self.triggered:
+                return replace(self, triggered=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.triggered:
+            return [
+                eft.ForwardSwapCharacterEffect(source.pid),
+            ], replace(self, triggered=False)
+        elif signal is TriggeringSignal.ROUND_END:
             return [], None
         return [], self
 
@@ -2809,6 +2878,7 @@ class IncinerationDriveStatus(CharacterStatus, PrepareSkillStatus):
             return [], None
         return [], self
 
+
 @dataclass(frozen=True, kw_only=True)
 class StalwartAndTrueStatus(TalentEquipmentStatus):
     REACTABLE_SIGNALS = frozenset({
@@ -3109,6 +3179,7 @@ class ParamitaPapilioStatus(CharacterStatus, _InfusionStatus):
     usages: int = 2
     ELEMENT: ClassVar[Element] = Element.PYRO
     damage_boost: int = 1
+
 
 @dataclass(frozen=True, kw_only=True)
 class SanguineRougeStatus(TalentEquipmentStatus):
@@ -3811,7 +3882,8 @@ class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
                     base_priority = max(base_priority, status.priority)
             return eft.OverrideCharacterStatusEffect(
                 target=status_source,
-                status=replace(self, activated_usages=self.activated_usages + 1, priority=base_priority + 1)
+                status=replace(self, activated_usages=self.activated_usages +
+                               1, priority=base_priority + 1)
             ).execute(game_state)
         return game_state
 
