@@ -79,7 +79,7 @@ class TestJean(unittest.TestCase):
         p2c1 = p2cs.just_get_character(1)
         p2c2 = p2cs.just_get_character(2)
         p2c3 = p2cs.just_get_character(3)
-        self.assertEqual(p2c1.get_hp(), 8)
+        self.assertEqual(p2c1.get_hp(), 9)
         self.assertEqual(p2c2.get_hp(), 9)
         self.assertEqual(p2c3.get_hp(), 9)
         self.assertFalse(p2c1.get_elemental_aura().has_aura())
@@ -109,7 +109,7 @@ class TestJean(unittest.TestCase):
         # test summon doesn't get ANEMO boost
         game_state = next_round(base_state)
         p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 8)
+        self.assertEqual(p2ac.get_hp(), 9)
 
         # test jean elemental skill (anemo damage) does get ANEMO boost
         game_state = step_skill(base_state, Pid.P1, CharacterSkill.SKILL2)

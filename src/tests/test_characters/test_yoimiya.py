@@ -139,7 +139,7 @@ class TestYoimiya(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 10)
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
         self.assertIn(NiwabiEnshouStatus, p1ac.get_character_statuses())
-        self.assertEqual(p1ac.get_character_statuses().just_find(NiwabiEnshouStatus).usages, 2)
+        self.assertEqual(p1ac.get_character_statuses().just_find(NiwabiEnshouStatus).usages, 3)
         self.assertEqual(p1ac.get_energy(), 0)
 
         # normal attack triggers follow-up damage
@@ -156,7 +156,7 @@ class TestYoimiya(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 4)
         self.assertIn(Element.PYRO, p2ac.get_elemental_aura())
         self.assertIn(NiwabiEnshouStatus, p1ac.get_character_statuses())
-        self.assertEqual(p1ac.get_character_statuses().just_find(NiwabiEnshouStatus).usages, 1)
+        self.assertEqual(p1ac.get_character_statuses().just_find(NiwabiEnshouStatus).usages, 2)
 
         # elemental burst doesn't trigger the status
         game_state = fill_energy_for_all(game_state)
@@ -172,4 +172,4 @@ class TestYoimiya(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 1)
         self.assertIn(Element.PYRO, p2ac.get_elemental_aura())
         self.assertIn(NiwabiEnshouStatus, p1ac.get_character_statuses())
-        self.assertEqual(p1ac.get_character_statuses().just_find(NiwabiEnshouStatus).usages, 1)
+        self.assertEqual(p1ac.get_character_statuses().just_find(NiwabiEnshouStatus).usages, 2)

@@ -295,38 +295,38 @@ class AutumnWhirlwindSummon(_ConvertableAnemoSummon):
 @dataclass(frozen=True, kw_only=True)
 class BakeKurageSummon(_DestroyOnNumSummon):
     usages: int = 2
-    activated: bool = False
+    # activated: bool = False
     MAX_USAGES: ClassVar[int] = 2
     BASE_DMG: ClassVar[int] = 1
     ADDITIONAL_DMG_BOOST: ClassVar[int] = 1
     HEAL_AMOUNT: ClassVar[int] = 1
     ELEMENT: ClassVar[Element] = Element.HYDRO
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        # TriggeringSignal.COMBAT_ACTION,
         TriggeringSignal.END_ROUND_CHECK_OUT,
     ))
 
-    @override
-    def _inform(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            info_type: Informables,
-            information: InformableEvent,
-    ) -> Self:
-        if info_type is Informables.POST_SKILL_USAGE:
-            assert isinstance(information, SkillIEvent)
-            if not (
-                    information.source.pid is status_source.pid
-                    and information.skill_type is CharacterSkill.ELEMENTAL_BURST
-                    and not self.activated
-            ):
-                return self
-            char = game_state.get_character_target(information.source)
-            from ..character.character import SangonomiyaKokomi
-            if isinstance(char, SangonomiyaKokomi) and char.talent_equipped():
-                return replace(self, activated=True)
-        return self
+    # @override
+    # def _inform(
+    #         self,
+    #         game_state: GameState,
+    #         status_source: StaticTarget,
+    #         info_type: Informables,
+    #         information: InformableEvent,
+    # ) -> Self:
+    #     if info_type is Informables.POST_SKILL_USAGE:
+    #         assert isinstance(information, SkillIEvent)
+    #         if not (
+    #                 information.source.pid is status_source.pid
+    #                 and information.skill_type is CharacterSkill.ELEMENTAL_BURST
+    #                 and not self.activated
+    #         ):
+    #             return self
+    #         char = game_state.get_character_target(information.source)
+    #         from ..character.character import SangonomiyaKokomi
+    #         if isinstance(char, SangonomiyaKokomi) and char.talent_equipped():
+    #             return replace(self, activated=True)
+    #     return self
 
     @override
     def _react_to_signal(
@@ -335,9 +335,9 @@ class BakeKurageSummon(_DestroyOnNumSummon):
             source: StaticTarget,
             signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
-            return [], replace(self, usages=self.MAX_USAGES, activated=False)
-        elif signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+        # if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+        #     return [], replace(self, usages=self.MAX_USAGES, activated=False)
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             self_chars = game_state.get_player(source.pid).get_characters()
             activate_additional_dmg_boost = any(
                 (
@@ -450,7 +450,7 @@ class CuileinAnbarSummon(_DmgPerRoundSummon):
 class DandelionFieldSummon(_DestroyOnNumSummon):
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2
-    DAMAGE_AMOUNT: ClassVar[int] = 2
+    DAMAGE_AMOUNT: ClassVar[int] = 1
     DAMAGE_ELEM: ClassVar[Element] = Element.ANEMO
     DAMAGE_BOOST: ClassVar[int] = 1
     HEAL_AMOUNT: ClassVar[int] = 1

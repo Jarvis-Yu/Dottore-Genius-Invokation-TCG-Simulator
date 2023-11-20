@@ -2527,7 +2527,7 @@ class AratakiIchibanStatus(TalentEquipmentStatus, _UsageLivingStatus):
 class RagingOniKingStatus(CharacterStatus, _InfusionStatus):
     usages: int = 2  # duration
     ELEMENT: ClassVar[Element] = Element.GEO
-    damage_boost: int = 2
+    damage_boost: int = 1
     status_gaining_usages: int = 1
     status_gaining_available: bool = False
 
@@ -4309,7 +4309,7 @@ class TamakushiCasketStatus(TalentEquipmentStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class IcyQuillStatus(CombatStatus, _UsageStatus):
-    usages: int = 3
+    usages: int = 2
     MAX_USAGES: ClassVar[int] = 3
     DMG_BOOST: ClassVar[int] = 1
     normal_attack_deduction_usages: int = 1

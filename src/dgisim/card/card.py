@@ -2452,7 +2452,7 @@ class StalwartAndTrue(_TalentEquipmentSkillCard):
 #### Electro Hypostasis ####
 
 class AbsorbingPrism(TalentEventCard, _CombatActionCard, _DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDice({Element.ELECTRO: 3})
+    _DICE_COST = AbstractDice({Element.ELECTRO: 2})
     _CHARACTER = chr.ElectroHypostasis
 
     @override

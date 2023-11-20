@@ -740,7 +740,7 @@ class AratakiItto(Character):
                 source=source,
                 target=DynamicCharacterTarget.OPPO_ACTIVE,
                 element=Element.GEO,
-                damage=5,
+                damage=4,
                 damage_type=DamageType(elemental_burst=True),
             ),
             eft.AddCharacterStatusEffect(
@@ -1602,7 +1602,7 @@ class Jean(Character):
             hp=10,
             max_hp=10,
             energy=0,
-            max_energy=3,
+            max_energy=2,
             hiddens=stts.Statuses(()),
             equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
@@ -2739,7 +2739,7 @@ class RhodeiaOfLoch(Character):
                 source=source,
                 target=DynamicCharacterTarget.OPPO_ACTIVE,
                 element=Element.HYDRO,
-                damage=2 + 2 * len(summons),
+                damage=4 + 1 * len(summons),
                 damage_type=DamageType(elemental_burst=True)
             ),
         ]
@@ -2833,6 +2833,17 @@ class SangonomiyaKokomi(Character):
                 status=stt.CeremonialGarmentStatus,
             ),
         )
+        if self.talent_equipped():
+            usages = 1
+            summon = game_state.get_player(source.pid).get_summons().find(sm.BakeKurageSummon)
+            if summon is not None:
+                usages = summon.usages + 1
+            effects.append(
+                eft.OverrideSummonEffect(
+                    target_pid=source.pid,
+                    summon=sm.BakeKurageSummon(usages=usages),
+                )
+            )
         return tuple(effects)
 
     @classmethod
@@ -3286,12 +3297,20 @@ class Yoimiya(Character):
 
     @override
     def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
-        return (
-            eft.AddCharacterStatusEffect(
-                target=source,
-                status=stt.NiwabiEnshouStatus,
-            ),
-        )
+        if self.talent_equipped():
+            return (
+                eft.UpdateCharacterStatusEffect(
+                    target=source,
+                    status=stt.NiwabiEnshouStatus(usages=3),
+                ),
+            )
+        else:
+            return (
+                eft.AddCharacterStatusEffect(
+                    target=source,
+                    status=stt.NiwabiEnshouStatus,
+                ),
+            )
 
     @override
     def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:

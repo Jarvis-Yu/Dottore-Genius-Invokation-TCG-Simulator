@@ -224,7 +224,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm.auto_step()
         game_state = gsm.get_game_state()
         p2_ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2_ac.get_hp(), 6)
+        self.assertEqual(p2_ac.get_hp(), 5)
         self.assertTrue(p2_ac.get_elemental_aura().contains(Element.HYDRO))
 
         # burst with two summons

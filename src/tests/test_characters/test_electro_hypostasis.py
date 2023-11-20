@@ -340,7 +340,7 @@ class TestAratakiItto(unittest.TestCase):
         gsm = GameStateMachine(base_game, a1, a2)
         a1.inject_action(CardAction(
             card=AbsorbingPrism,
-            instruction=DiceOnlyInstruction(dice=ActualDice({Element.ELECTRO: 3})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.ELECTRO: 2})),
         ))
         gsm.player_step()
         gsm.auto_step()

@@ -41,7 +41,7 @@ class TestShenhe(unittest.TestCase):
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 8)
         self.assertIn(Element.CRYO, p2ac.get_elemental_aura())
-        self.assertEqual(p1.get_combat_statuses().just_find(IcyQuillStatus).usages, 3)
+        self.assertEqual(p1.get_combat_statuses().just_find(IcyQuillStatus).usages, 2)
 
     def test_elemental_burst(self):
         game_state = fill_energy_for_all(self.BASE_GAME)
@@ -71,7 +71,7 @@ class TestShenhe(unittest.TestCase):
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 7)
         self.assertIn(Element.CRYO, p2ac.get_elemental_aura())
-        self.assertEqual(p1.get_combat_statuses().just_find(IcyQuillStatus).usages, 2)
+        self.assertEqual(p1.get_combat_statuses().just_find(IcyQuillStatus).usages, 1)
 
         # Kaeya's burst (not from character)
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
@@ -80,7 +80,7 @@ class TestShenhe(unittest.TestCase):
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 5)
         self.assertIn(Element.CRYO, p2ac.get_elemental_aura())
-        self.assertEqual(p1.get_combat_statuses().just_find(IcyQuillStatus).usages, 2)
+        self.assertEqual(p1.get_combat_statuses().just_find(IcyQuillStatus).usages, 1)
 
         from dataclasses import dataclass
         from typing import ClassVar
@@ -101,7 +101,7 @@ class TestShenhe(unittest.TestCase):
         p2cs = game_state.get_player2().get_characters()
         self.assertEqual(p2cs.just_get_character(1).get_hp(), 3)
         self.assertEqual(p2cs.just_get_character(2).get_hp(), 8)
-        self.assertEqual(p2cs.just_get_character(3).get_hp(), 8)
+        self.assertEqual(p2cs.just_get_character(3).get_hp(), 9)
         self.assertNotIn(IcyQuillStatus, p1.get_combat_statuses())
 
         # test that IcyQuillStatus doesn't boost cryo summon
@@ -154,7 +154,7 @@ class TestShenhe(unittest.TestCase):
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 4)  # initial Shenhe skill already 
         self.assertIn(Element.CRYO, p2ac.get_elemental_aura())
-        self.assertEqual(p1.get_combat_statuses().just_find(IcyQuillStatus).usages, 2)
+        self.assertEqual(p1.get_combat_statuses().just_find(IcyQuillStatus).usages, 1)
 
         # first normal attack is a free boost
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
@@ -162,7 +162,7 @@ class TestShenhe(unittest.TestCase):
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 1)
         self.assertIn(Element.CRYO, p2ac.get_elemental_aura())
-        self.assertEqual(p1.get_combat_statuses().just_find(IcyQuillStatus).usages, 2)
+        self.assertEqual(p1.get_combat_statuses().just_find(IcyQuillStatus).usages, 1)
 
         # second normal attack is not free
         game_state = heal_for_all(game_state)
@@ -171,11 +171,12 @@ class TestShenhe(unittest.TestCase):
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 7)
         self.assertIn(Element.CRYO, p2ac.get_elemental_aura())
-        self.assertEqual(p1.get_combat_statuses().just_find(IcyQuillStatus).usages, 1)
+        self.assertNotIn(IcyQuillStatus, p1.get_combat_statuses())
 
         game_state = next_round(game_state)
         game_state = fill_dice_with_omni(game_state)
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
+        game_state = OverrideCombatStatusEffect(Pid.P1, IcyQuillStatus(usages=1)).execute(game_state)
         # first normal attack is a free boost
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1 = game_state.get_player1()

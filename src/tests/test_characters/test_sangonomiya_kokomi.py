@@ -126,9 +126,9 @@ class TestSangonomiyaKokomi(unittest.TestCase):
         self.assertNotIn(CeremonialGarmentStatus, p1ac.get_character_statuses())
 
     def test_talent_card(self):
-        # test talent burst refreshes summon usages
+        # test talent burst increases summon usages
         game_state = fill_energy_for_all(self.BASE_GAME)
-        game_state = OverrideSummonEffect(Pid.P1, BakeKurageSummon(usages=1)).execute(game_state)
+        game_state = OverrideSummonEffect(Pid.P1, BakeKurageSummon(usages=2)).execute(game_state)
         game_state = simulate_status_dmg(game_state, dmg_amount=5, pid=Pid.P1)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=TamakushiCasket,
@@ -143,7 +143,7 @@ class TestSangonomiyaKokomi(unittest.TestCase):
         self.assertIn(CeremonialGarmentStatus, p1ac.get_character_statuses())
         self.assertEqual(p1ac.get_character_statuses().just_find(CeremonialGarmentStatus).usages, 2)
         self.assertIn(BakeKurageSummon, p1.get_summons())
-        self.assertEqual(p1.get_summons().just_find(BakeKurageSummon).usages, 2)
+        self.assertEqual(p1.get_summons().just_find(BakeKurageSummon).usages, 3)
 
         # test talent boosts summon damage
         game_state = next_round(game_state)
@@ -156,7 +156,7 @@ class TestSangonomiyaKokomi(unittest.TestCase):
         self.assertIn(CeremonialGarmentStatus, p1ac.get_character_statuses())
         self.assertEqual(p1ac.get_character_statuses().just_find(CeremonialGarmentStatus).usages, 1)
         self.assertIn(BakeKurageSummon, p1.get_summons())
-        self.assertEqual(p1.get_summons().just_find(BakeKurageSummon).usages, 1)
+        self.assertEqual(p1.get_summons().just_find(BakeKurageSummon).usages, 2)
 
         # burst normal attack functions as usual
         game_state = skip_action_round_until(game_state, Pid.P1)
@@ -170,5 +170,25 @@ class TestSangonomiyaKokomi(unittest.TestCase):
         self.assertEqual(p1ac.get_hp(), 8)
         self.assertIn(CeremonialGarmentStatus, p1ac.get_character_statuses())
         self.assertEqual(p1ac.get_character_statuses().just_find(CeremonialGarmentStatus).usages, 1)
+        self.assertIn(BakeKurageSummon, p1.get_summons())
+        self.assertEqual(p1.get_summons().just_find(BakeKurageSummon).usages, 2)
+
+        # test talent burst increases summon usages for all cases
+        game_state = fill_energy_for_all(self.BASE_GAME)
+        game_state = OverrideSummonEffect(Pid.P1, BakeKurageSummon(usages=1)).execute(game_state)
+        game_state = step_action(game_state, Pid.P1, CardAction(
+            card=TamakushiCasket,
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.HYDRO: 3}))
+        ), observe=False)
+        p1 = game_state.get_player1()
+        self.assertIn(BakeKurageSummon, p1.get_summons())
+        self.assertEqual(p1.get_summons().just_find(BakeKurageSummon).usages, 2)
+
+        game_state = fill_energy_for_all(self.BASE_GAME)
+        game_state = step_action(game_state, Pid.P1, CardAction(
+            card=TamakushiCasket,
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.HYDRO: 3}))
+        ), observe=False)
+        p1 = game_state.get_player1()
         self.assertIn(BakeKurageSummon, p1.get_summons())
         self.assertEqual(p1.get_summons().just_find(BakeKurageSummon).usages, 1)

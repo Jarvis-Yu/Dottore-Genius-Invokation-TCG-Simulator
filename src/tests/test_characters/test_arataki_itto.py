@@ -93,7 +93,7 @@ class TestAratakiItto(unittest.TestCase):
         game_state = gsm.get_game_state()
         p1ac = game_state.get_player1().just_get_active_character()
         p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 4)
+        self.assertEqual(p2ac.get_hp(), 5)
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
         self.assertEqual(
             p1ac.get_character_statuses().just_find(RagingOniKingStatus).usages,
@@ -263,30 +263,18 @@ class TestAratakiItto(unittest.TestCase):
         self.assertEqual(ushi.status_gaining_available, False)
 
     def test_raging_oni_king_status(self):
-        game_state = self.BASE_GAME.factory().f_player1(
-            lambda p1: p1.factory().f_characters(
-                lambda cs: cs.factory().f_active_character(
-                    lambda ac: ac.factory().f_character_statuses(
-                        lambda csts: csts.update_status(RagingOniKingStatus())
-                    ).build()
-                ).build()
-            ).build()
-        ).build()
+        game_state = AddCharacterStatusEffect(
+            target=StaticTarget.from_player_active(self.BASE_GAME, Pid.P1),
+            status=RagingOniKingStatus,
+        ).execute(self.BASE_GAME)
         assert game_state.get_player1().get_dice().is_even()
 
         # first normal attack
         game_state = oppo_aura_elem(game_state, Element.CRYO)
-        game_state = just(game_state.action_step(
-            Pid.P1,
-            SkillAction(
-                skill=CharacterSkill.SKILL1,
-                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
-            )
-        ))
-        game_state = auto_step(game_state)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1ac = game_state.get_player1().just_get_active_character()
         p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 5)
+        self.assertEqual(p2ac.get_hp(), 6)
         self.assertIn(CrystallizeStatus, game_state.get_player1().get_combat_statuses())
         self.assertIn(SuperlativeSuperstrengthStatus, p1ac.get_character_statuses())
         self.assertEqual(
@@ -299,18 +287,12 @@ class TestAratakiItto(unittest.TestCase):
             2
         )
 
-        # second normal attack, none charged
-        game_state = just(game_state.action_step(
-            Pid.P1,
-            SkillAction(
-                skill=CharacterSkill.SKILL1,
-                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
-            )
-        ))
+        # second normal attack, not charged
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         game_state = auto_step(game_state)
         p1ac = game_state.get_player1().just_get_active_character()
         p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 1)
+        self.assertEqual(p2ac.get_hp(), 3)
         self.assertIn(RagingOniKingStatus, p1ac.get_character_statuses())
         self.assertEqual(
             p1ac.get_character_statuses().just_find(RagingOniKingStatus).usages,
