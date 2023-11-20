@@ -105,12 +105,12 @@ __all__ = [
     "ElementalResonanceFerventFlamesStatus",
     "ElementalResonanceShatteringIceStatus",
     "ElementalResonanceSprawlingGreeneryStatus",
+    "FreshWindOfFreedomStatus",
     "KingsSquireEffectStatus",
     "LeaveItToMeStatus",
     "IHaventLostYetOnCooldownStatus",
     "RebelliousShieldStatus",
     "ReviveOnCooldownStatus",
-    "WindAndFreedomStatus",
     "WhereIsTheUnseenRazorStatus",
 
     # character status
@@ -2042,7 +2042,7 @@ class ReviveOnCooldownStatus(CombatStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class WindAndFreedomStatus(CombatStatus):
+class FreshWindOfFreedomStatus(CombatStatus):
     activated: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.DEATH_EVENT,

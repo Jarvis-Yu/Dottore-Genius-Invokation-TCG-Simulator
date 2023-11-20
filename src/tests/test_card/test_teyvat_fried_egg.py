@@ -28,7 +28,7 @@ class TestTeyvatFriedEgg(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=TeyvatFriedEgg,
             instruction=StaticTargetInstruction(
-                dice=ActualDice({Element.OMNI: 3}),
+                dice=ActualDice({Element.OMNI: 2}),
                 target=StaticTarget(Pid.P1, Zone.CHARACTERS, 1),
             )
         ))
@@ -44,7 +44,7 @@ class TestTeyvatFriedEgg(unittest.TestCase):
         self.assertRaises(Exception, lambda: game_state.action_step(Pid.P1, CardAction(
             card=TeyvatFriedEgg,
             instruction=StaticTargetInstruction(
-                dice=ActualDice({Element.OMNI: 3}),
+                dice=ActualDice({Element.OMNI: 2}),
                 target=StaticTarget(Pid.P1, Zone.CHARACTERS, 1),
             )
         )))
@@ -57,7 +57,7 @@ class TestTeyvatFriedEgg(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=TeyvatFriedEgg,
             instruction=StaticTargetInstruction(
-                dice=ActualDice({Element.OMNI: 3}),
+                dice=ActualDice({Element.OMNI: 2}),
                 target=StaticTarget(Pid.P1, Zone.CHARACTERS, 1),
             )
         ))
@@ -90,7 +90,7 @@ class TestTeyvatFriedEgg(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=TeyvatFriedEgg,
             instruction=StaticTargetInstruction(
-                dice=ActualDice({Element.OMNI: 3}),
+                dice=ActualDice({Element.OMNI: 2}),
                 target=StaticTarget(Pid.P1, Zone.CHARACTERS, 1),
             )
         ))

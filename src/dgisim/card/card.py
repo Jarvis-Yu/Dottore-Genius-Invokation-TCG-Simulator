@@ -120,6 +120,7 @@ __all__ = [
     "ElementalResonanceWovenWaters",
     "ElementalResonanceWovenWeeds",
     "ElementalResonanceWovenWinds",
+    "FreshWindOfFreedom",
     "IHaventLostYet",
     "LeaveItToMe",
     "QuickKnit",
@@ -538,7 +539,8 @@ class _CharTargetChoiceProvider(Card):
         assert type(instruction) is act.StaticTargetInstruction
         if instruction.target is None:
             chars = game_state.get_player(pid).get_characters()
-            chars = [char for char in chars if cls._valid_char(game_state, pid, char)]
+            chars = [char for char in chars if cls._valid_char(
+                game_state, pid, char)]
             return tuple(
                 StaticTarget(
                     pid=pid,
@@ -621,7 +623,8 @@ class _SummonTargetChoiceProvider(Card):
             (
                 not cls._MY_SIDE
                 or (
-                    not (summons := game_state.get_player(pid).get_summons()).empty()
+                    not (summons := game_state.get_player(
+                        pid).get_summons()).empty()
                     and any(
                         cls._valid_summon(summon)
                         for summon in summons
@@ -630,7 +633,8 @@ class _SummonTargetChoiceProvider(Card):
             ) and (
                 not cls._OPPO_SIDE
                 or (
-                    not (summons := game_state.get_other_player(pid).get_summons()).empty()
+                    not (summons := game_state.get_other_player(
+                        pid).get_summons()).empty()
                     and any(
                         cls._valid_summon(summon)
                         for summon in summons
@@ -798,7 +802,8 @@ class TalentEventCard(EventCard, TalentCard):
     ) -> bool:
         ret_val = True
         if issubclass(cls, _DiceOnlyChoiceProvider):
-            ret_val = ret_val and isinstance(instruction, act.DiceOnlyInstruction)
+            ret_val = ret_val and isinstance(
+                instruction, act.DiceOnlyInstruction)
         return ret_val and cls._loosely_usable(game_state, pid)
 
 
@@ -841,7 +846,8 @@ class TalentEquipmentCard(EquipmentCard, TalentCard):
     ) -> bool:
         ret_val = True
         if issubclass(cls, _DiceOnlyChoiceProvider):
-            ret_val = ret_val and isinstance(instruction, act.DiceOnlyInstruction)
+            ret_val = ret_val and isinstance(
+                instruction, act.DiceOnlyInstruction)
         return ret_val and cls._loosely_usable(game_state, pid)
 
 
@@ -881,7 +887,8 @@ class WeaponEquipmentCard(EquipmentCard, _CharTargetChoiceProvider):
     @override
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        chars = game_state.get_player(pid).get_characters().get_alive_characters()
+        chars = game_state.get_player(
+            pid).get_characters().get_alive_characters()
         return any(cls._valid_char(game_state, pid, char) for char in chars) \
             and super()._loosely_usable(game_state, pid)
 
@@ -922,7 +929,8 @@ class ArtifactEquipmentCard(EquipmentCard, _CharTargetChoiceProvider):
     @override
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        chars = game_state.get_player(pid).get_characters().get_alive_characters()
+        chars = game_state.get_player(
+            pid).get_characters().get_alive_characters()
         return any(cls._valid_char(game_state, pid, char) for char in chars) \
             and super()._loosely_usable(game_state, pid)
 
@@ -1184,13 +1192,13 @@ class _RangedFoodCard(FoodCard, _DiceOnlyChoiceProvider):
         return sum([
             cls.ranged_food_effects(instruction, target)
             for target in targets
-         ], ()) + tuple([
+        ], ()) + tuple([
             eft.AddCharacterStatusEffect(
                 target,
                 stt.SatiatedStatus
             )
             for target in targets
-             ])
+        ])
 
     @classmethod
     @abstractmethod
@@ -1547,7 +1555,7 @@ class TandooriRoastChicken(_RangedFoodCard):
 
 
 class TeyvatFriedEgg(FoodCard, _CharTargetChoiceProvider):
-    _DICE_COST = AbstractDice({Element.OMNI: 3})
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
 
     @classmethod
     def revive_on_cooldown(cls, game_state: gs.GameState, pid: Pid) -> bool:
@@ -1675,7 +1683,8 @@ class CalxsArts(EventCard, _DiceOnlyChoiceProvider):
                 target=StaticTarget(
                     Pid.P1, Zone.CHARACTERS, active_char_id
                 ),
-                recharge=sum(1 for char in none_active_chars if char.get_energy() > 0),
+                recharge=sum(
+                    1 for char in none_active_chars if char.get_energy() > 0),
             )
         )
         return tuple(effects)
@@ -1687,7 +1696,8 @@ class ChangingShifts(EventCard, _DiceOnlyChoiceProvider):
     @override
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        chars = game_state.get_player(pid).get_characters().get_none_active_characters()
+        chars = game_state.get_player(
+            pid).get_characters().get_none_active_characters()
         return any(
             char.alive()
             for char in chars
@@ -1785,7 +1795,8 @@ class ElementalResonanceHighVoltage(_ElementalResonanceCard, _DiceOnlyChoiceProv
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         characters = \
-            game_state.get_player(pid).get_characters().get_alive_character_in_activity_order()
+            game_state.get_player(pid).get_characters(
+            ).get_alive_character_in_activity_order()
         char_id = next(
             char.get_id()
             for char in characters
@@ -1873,7 +1884,8 @@ class ElementalResonanceSoothingWater(_ElementalResonanceCard, _DiceOnlyChoicePr
             pid: Pid,
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
-        chars = game_state.get_player(pid).get_characters().get_alive_character_in_activity_order()
+        chars = game_state.get_player(pid).get_characters(
+        ).get_alive_character_in_activity_order()
         effects: list[eft.Effect] = [eft.RecoverHPEffect(
             target=StaticTarget.from_char_id(pid, chars[0].get_id()),
             recovery=cls._MAIN_RECOVERY,
@@ -1908,16 +1920,20 @@ class ElementalResonanceSprawlingGreenery(_ElementalResonanceCard, _DiceOnlyChoi
         if burning_flame_summon is not None:
             effects.append(eft.OverrideSummonEffect(
                 target_pid=pid,
-                summon=replace(burning_flame_summon, usages=burning_flame_summon.usages + 1),
+                summon=replace(burning_flame_summon,
+                               usages=burning_flame_summon.usages + 1),
             ))
 
         combat_statuses = this_player.get_combat_statuses()
-        catalyzing_field_status = combat_statuses.find(stt.CatalyzingFieldStatus)
+        catalyzing_field_status = combat_statuses.find(
+            stt.CatalyzingFieldStatus)
         if catalyzing_field_status is not None:
-            assert isinstance(catalyzing_field_status, stt.CatalyzingFieldStatus)
+            assert isinstance(catalyzing_field_status,
+                              stt.CatalyzingFieldStatus)
             effects.append(eft.OverrideCombatStatusEffect(
                 target_pid=pid,
-                status=replace(catalyzing_field_status, usages=catalyzing_field_status.usages + 1),
+                status=replace(catalyzing_field_status,
+                               usages=catalyzing_field_status.usages + 1),
             ))
 
         dendro_core_status = combat_statuses.find(stt.DendroCoreStatus)
@@ -1925,7 +1941,8 @@ class ElementalResonanceSprawlingGreenery(_ElementalResonanceCard, _DiceOnlyChoi
             assert isinstance(dendro_core_status, stt.DendroCoreStatus)
             effects.append(eft.OverrideCombatStatusEffect(
                 target_pid=pid,
-                status=replace(dendro_core_status, usages=dendro_core_status.usages + 1),
+                status=replace(dendro_core_status,
+                               usages=dendro_core_status.usages + 1),
             ))
 
         return tuple(effects)
@@ -1978,6 +1995,34 @@ class ElementalResonanceWovenWeeds(_ElementalResonanceDie):
 
 class ElementalResonanceWovenWinds(_ElementalResonanceDie):
     _ELEMENT = Element.ANEMO
+
+
+class FreshWindOfFreedom(EventCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
+
+    @override
+    @classmethod
+    def valid_in_deck(cls, deck: Deck) -> bool:
+        return 2 <= sum(
+            1
+            for char in deck.chars
+            if char.of_faction(Faction.MONDSTADT)
+        )
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddCombatStatusEffect(
+                target_pid=pid,
+                status=stt.FreshWindOfFreedomStatus,
+            ),
+        )
 
 
 class IHaventLostYet(EventCard, _DiceOnlyChoiceProvider):
@@ -2033,7 +2078,8 @@ class LeaveItToMe(EventCard, _DiceOnlyChoiceProvider):
     @override
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        chars = game_state.get_player(pid).get_characters().get_none_active_characters()
+        chars = game_state.get_player(
+            pid).get_characters().get_none_active_characters()
         return any(
             char.alive()
             for char in chars
@@ -2124,6 +2170,7 @@ class Starsigns(EventCard, _DiceOnlyChoiceProvider):
             ),
         )
 
+
 class TheBestestTravelCompanion(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDice({Element.ANY: 2})
 
@@ -2166,7 +2213,8 @@ class WhereIsTheUnseenRazor(EventCard, _CharTargetChoiceProvider):
         assert isinstance(instruction, act.StaticTargetInstruction)
         char_target = game_state.get_character_target(instruction.target)
         assert char_target is not None
-        weapon = char_target.get_equipment_statuses().just_find_type(stt.WeaponEquipmentStatus)
+        weapon = char_target.get_equipment_statuses(
+        ).just_find_type(stt.WeaponEquipmentStatus)
         card = weapon.WEAPON_CARD
         return (
             eft.RemoveCharacterStatusEffect(
@@ -2207,7 +2255,7 @@ class WindAndFreedom(EventCard, _DiceOnlyChoiceProvider):
         return (
             eft.AddCombatStatusEffect(
                 target_pid=pid,
-                status=stt.WindAndFreedomStatus,
+                status=stt.FreshWindOfFreedomStatus,
             ),
         )
 
@@ -2242,7 +2290,7 @@ class Xudong(CompanionCard):
 
 
 class NRE(ItemCard):
-    _DICE_COST = AbstractDice({Element.ANY: 2})
+    _DICE_COST = AbstractDice({Element.ANY: 1})
     _SUPPORT_STATUS = sp.NRESupport
 
     @classmethod
