@@ -4,11 +4,8 @@
 
 ### Added
 
-Subclasses of `Deck` now supports conversion to and from json by calling
-`.to_json()` and `.from_json()`.
-
----
-
+- Subclasses of `Deck` now supports conversion to and from json by calling
+  `.to_json()` and `.from_json()`.
 - New Cards:
   - Event Card:
     - Fresh Wind of Freedom
