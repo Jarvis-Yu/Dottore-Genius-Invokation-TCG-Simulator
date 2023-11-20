@@ -12,7 +12,7 @@ class TestFreshWindOfFreedom(unittest.TestCase):
         a1.inject_actions([
             CardAction(
                 card=FreshWindOfFreedom,
-                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 1}))
+                instruction=DiceOnlyInstruction(dice=ActualDice.from_empty())
             ),
             SkillAction(
                 skill=CharacterSkill.SKILL1,
@@ -38,7 +38,7 @@ class TestFreshWindOfFreedom(unittest.TestCase):
         game_state = kill_character(base_game, 1, Pid.P1, hp=1)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=FreshWindOfFreedom,
-            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 1})),
+            instruction=DiceOnlyInstruction(dice=ActualDice.from_empty()),
         ))
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         game_state = step_skill(game_state, Pid.P2, CharacterSkill.SKILL1)
@@ -51,3 +51,17 @@ class TestFreshWindOfFreedom(unittest.TestCase):
         gsm.step_until_phase(game_state.get_mode().action_phase)
         game_state = gsm.get_game_state()
         self.assertNotIn(FreshWindOfFreedomStatus, game_state.get_player1().get_combat_statuses())
+
+    def test_as_arcane_legend(self):
+        base_game = PublicAddCardEffect(Pid.P1, card=FreshWindOfFreedom).execute(ACTION_TEMPLATE)
+        base_game = PublicAddCardEffect(Pid.P1, card=FreshWindOfFreedom).execute(base_game)
+        
+        game_state = step_action(base_game, Pid.P1, CardAction(
+            card=FreshWindOfFreedom,
+            instruction=DiceOnlyInstruction(dice=ActualDice.from_empty()),
+        ))
+        # a second Arcane Legend Card cannot be used afterwards
+        self.assertRaises(Exception, lambda: step_action(game_state, Pid.P1, CardAction(
+            card=FreshWindOfFreedom,
+            instruction=DiceOnlyInstruction(dice=ActualDice.from_empty()),
+        )))

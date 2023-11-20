@@ -59,6 +59,7 @@ __all__ = [
     "CompanionCard",
     "ItemCard",
     "LocationCard",
+    "ArcaneLegendCard",
     "FoodCard",
 
     # Weapon Card
@@ -1107,6 +1108,38 @@ class LocationCard(SupportCard):
     pass
 
 
+class ArcaneLegendCard(Card):
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        return stt.ArcaneLegendUsedStatus not in game_state.get_player(pid).get_hidden_statuses()
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        return cls._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddHiddenStatusEffect(
+                pid,
+                stt.ArcaneLegendUsedStatus,
+            ),
+        )
+
+
 class FoodCard(EventCard):
     @override
     @classmethod
@@ -1997,8 +2030,8 @@ class ElementalResonanceWovenWinds(_ElementalResonanceDie):
     _ELEMENT = Element.ANEMO
 
 
-class FreshWindOfFreedom(EventCard, _DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDice({Element.OMNI: 1})
+class FreshWindOfFreedom(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 0})
 
     @override
     @classmethod
@@ -2017,7 +2050,11 @@ class FreshWindOfFreedom(EventCard, _DiceOnlyChoiceProvider):
             pid: Pid,
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
-        return (
+        return super().effects(
+            game_state,
+            pid,
+            instruction,
+        ) + (
             eft.AddCombatStatusEffect(
                 target_pid=pid,
                 status=stt.FreshWindOfFreedomStatus,

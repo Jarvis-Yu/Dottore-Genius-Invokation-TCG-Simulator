@@ -61,6 +61,7 @@ __all__ = [
     "RevivalStatus",
 
     # hidden status
+    "ArcaneLegendUsedStatus",
     "ChargedAttackStatus",
     "PlungeAttackStatus",
     "DeathThisRoundStatus",
@@ -911,6 +912,11 @@ class _InfusionStatus(_UsageStatus):
 
 ############################## Hidden Status ##############################
 
+
+
+@dataclass(frozen=True, kw_only=True)
+class ArcaneLegendUsedStatus(PlayerHiddenStatus):
+    pass
 
 @dataclass(frozen=True, kw_only=True)
 class ChargedAttackStatus(PlayerHiddenStatus):
