@@ -2743,7 +2743,7 @@ class EmbraceOfWinds(_TalentEquipmentSkillCard):
 
 
 class TheScentRemained(_TalentEquipmentSkillCard):
-    _DICE_COST = AbstractDice({Element.HYDRO: 4})
+    _DICE_COST = AbstractDice({Element.HYDRO: 3})
     _CHARACTER = chr.Xingqiu
     _EQUIPMENT_STATUS = stt.TheScentRemainedStatus
     _SKILL = CharacterSkill.SKILL2

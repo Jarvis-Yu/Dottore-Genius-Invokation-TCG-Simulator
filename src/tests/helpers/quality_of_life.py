@@ -140,6 +140,9 @@ def add_damage_effect(
 
 
 def add_dmg_listener(game_state: GameState, pid: Pid) -> GameState:
+    """
+    :param pid: the player that will receive the damage
+    """
     return AddHiddenStatusEffect(
         pid,
         status=_TempTestDmgListenerStatus,

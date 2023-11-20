@@ -97,7 +97,7 @@ class TestXingqiu(unittest.TestCase):
         gsm = GameStateMachine(self.BASE_GAME, a1, a2)
         a1.inject_action(CardAction(
             card=TheScentRemained,
-            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 4})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         p2ac = gsm.get_game_state().get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 10)
@@ -117,6 +117,17 @@ class TestXingqiu(unittest.TestCase):
             p1.get_combat_statuses().just_find(RainSwordStatus).usages,
             3
         )
+
+        # test dmg blocking
+        game_state = gsm.get_game_state()
+        game_state = add_dmg_listener(game_state, Pid.P1)
+        game_state = grant_all_infinite_revival(game_state)
+        game_state = simulate_status_dmg(game_state, 1, Element.HYDRO, Pid.P1)
+        self.assertEqual(get_dmg_listener_data(game_state, Pid.P1)[-1].damage, 1)
+        game_state = simulate_status_dmg(game_state, 2, Element.HYDRO, Pid.P1)
+        self.assertEqual(get_dmg_listener_data(game_state, Pid.P1)[-1].damage, 1)
+        game_state = simulate_status_dmg(game_state, 3, Element.HYDRO, Pid.P1)
+        self.assertEqual(get_dmg_listener_data(game_state, Pid.P1)[-1].damage, 2)
 
     def test_rain_sword_status(self):
         base_game = AddCombatStatusEffect(Pid.P1, RainSwordStatus).execute(self.BASE_GAME)

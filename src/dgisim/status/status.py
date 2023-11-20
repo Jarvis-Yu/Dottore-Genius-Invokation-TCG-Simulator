@@ -4599,6 +4599,7 @@ class RainSwordStatus(CombatStatus, FixedShieldStatus):
     MAX_USAGES: ClassVar[int] = 2
     SHIELD_AMOUNT: ClassVar[int] = 1
     DAMAGE_THRESHOLD: ClassVar[int] = 3
+    TALENT_DMG_THRESHOLD: ClassVar[int] = 2
 
     @override
     def _triggering_condition(
@@ -4607,7 +4608,18 @@ class RainSwordStatus(CombatStatus, FixedShieldStatus):
             status_source: StaticTarget,
             damage: eft.SpecificDamageEffect
     ) -> bool:
-        return damage.damage >= self.DAMAGE_THRESHOLD
+        from ..character.character import Xingqiu
+        talent_equipped = any(
+            True
+            for char in game_state.get_player(status_source.pid).get_characters()
+            if (
+                isinstance(char, Xingqiu)
+                and char.talent_equipped()
+            )
+        )
+        return damage.damage >= (
+            self.TALENT_DMG_THRESHOLD if talent_equipped else self.DAMAGE_THRESHOLD
+        )
 
 
 @dataclass(frozen=True, kw_only=True)
