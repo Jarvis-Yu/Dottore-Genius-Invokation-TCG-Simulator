@@ -1,5 +1,30 @@
 # Change Log
 
+## 0.3.4 (To be released)
+
+### Added
+
+Subclasses of `Deck` now supports conversion to and from json by calling
+`.to_json()` and `.from_json()`.
+
+---
+
+- New Cards:
+  - Event Card:
+    - Fresh Wind of Freedom
+
+### Updated
+
+- All the implemented cards and characters are now up-to-date with game version
+  4.2.
+- Perspective view of `GameState` now hides the dice of the opponent.
+  (The only things left to hide are some certain statuses and effects)
+
+### Fixed
+
+- AbstractDice.cost_less_elem() has faulty behaviour when only ANY can be reduced.
+- Hand card limit set in game mode was not enforced throughout the game.
+
 ## 0.3.3 (5 Nov 2023)
 
 ### Added
