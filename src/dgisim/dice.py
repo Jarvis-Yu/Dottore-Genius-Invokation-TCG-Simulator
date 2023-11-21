@@ -447,9 +447,7 @@ class ActualDice(Dice):
         if Element.OMNI not in dice:
             return dice
         mutable_dice = dice.to_dict()
-        omni_num = dice[Element.OMNI]
-        del mutable_dice[Element.OMNI]
-        mutable_dice[Element.OMNI] = omni_num
+        mutable_dice[Element.OMNI] = mutable_dice.pop(Element.OMNI)
         return HashableDict(mutable_dice)
 
     def dice_collection_ordered(self) -> dict[Element, int]:
