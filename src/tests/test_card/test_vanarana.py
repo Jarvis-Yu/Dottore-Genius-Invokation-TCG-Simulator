@@ -11,7 +11,13 @@ class TestVanaranan(unittest.TestCase):
             ActualDice({Element.OMNI: 1, Element.ELECTRO: 1, Element.CRYO: 1}),
             ActualDice({Element.OMNI: 1, Element.GEO: 3, Element.ELECTRO: 1, Element.CRYO: 2}),
         ]
-        for dice in dice_list:
+        expected_dice_list = [
+            ActualDice({}),
+            ActualDice({Element.ELECTRO: 1, Element.CRYO: 1}),
+            ActualDice({Element.OMNI: 1, Element.ELECTRO: 1, Element.CRYO: 1}),
+            ActualDice({Element.GEO: 2, Element.CRYO: 2}),
+        ]
+        for dice, expected_dice in zip(dice_list, expected_dice_list):
             with self.subTest(dice=dice):
                 base_game = ACTION_TEMPLATE.factory().f_player1(
                     lambda p: p.factory().hand_cards(
@@ -41,16 +47,4 @@ class TestVanaranan(unittest.TestCase):
                 p1_dice_before = gsm.get_game_state().get_player1().get_dice()
                 gsm.auto_step()
                 p1_dice_after = gsm.get_game_state().get_player1().get_dice()
-                if dice.num_dice() <= 4:
-                    self.assertEqual(
-                        p1_dice_before.num_dice() + dice.num_dice(),
-                        p1_dice_after.num_dice()
-                    )
-                    for elem in dice:
-                        self.assertEqual(p1_dice_before[elem] + dice[elem], p1_dice_after[elem])
-                else:
-                    self.assertEqual(p1_dice_before.num_dice() + 4, p1_dice_after.num_dice())
-                    for elem in dice:
-                        if elem is Element.GEO:  # hard coded for last case only
-                            continue
-                        self.assertEqual(p1_dice_before[elem] + dice[elem], p1_dice_after[elem])
+                self.assertEqual(p1_dice_before + expected_dice, p1_dice_after)

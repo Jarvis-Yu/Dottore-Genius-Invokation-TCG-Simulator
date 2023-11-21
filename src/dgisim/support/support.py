@@ -158,7 +158,7 @@ class LibenSupport(Support, stt._UsageLivingStatus):
             if dice.is_empty():
                 return [], self
             curr_size = 0
-            ordered_dice = dice.readonly_dice_ordered(this_player)
+            ordered_dice = dice.readonly_dice_collection_ordered()
             used_dice: dict[Element, int] = {}
             for elem, num in ordered_dice.items():
                 num_used = 1
@@ -516,7 +516,7 @@ class VanaranaSupport(Support):
             if dice.is_empty():
                 return [], self
             curr_size = 0
-            ordered_dice = dice.readonly_dice_ordered(this_player)
+            ordered_dice = dice.readonly_dice_collection_ordered()
             saved_dice: dict[Element, int] = {}
             for elem, num in ordered_dice.items():
                 fitting_num = min(num, self._CAPACITY - curr_size)

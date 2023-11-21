@@ -238,6 +238,27 @@ class ActualDice(Dice):
         for elem, i in _LEGAL_ELEMS_ORDERED_DICT.items()
     }
 
+    # # tested against the actual game in Genshin
+    # _LEGAL_ELEMS_COLLECTION_ORDERED: tuple[Element, ...] = (
+    #     Element.CRYO,
+    #     Element.HYDRO,
+    #     Element.PYRO,
+    #     Element.ELECTRO,
+    #     Element.GEO,
+    #     Element.DENDRO,
+    #     Element.ANEMO,
+    #     Element.OMNI,
+    # )
+    # # the bigger the i, the higher the priority
+    # _LEGAL_ELEMS_COLLECTION_ORDERED_DICT: dict[Element, int] = {
+    #     elem: i
+    #     for i, elem in enumerate(reversed(_LEGAL_ELEMS_COLLECTION_ORDERED))
+    # }
+    # _LEGAL_ELEMS_COLLECTION_ORDERED_DICT_REV: dict[int, Element] = {
+    #     i: elem
+    #     for elem, i in _LEGAL_ELEMS_COLLECTION_ORDERED_DICT.items()
+    # }
+
     def _satisfy(self, requirement: AbstractDice) -> bool:
         assert self.is_legal() and requirement.is_legal()
 
@@ -382,7 +403,7 @@ class ActualDice(Dice):
             dice[Element.OMNI] = self[Element.OMNI]
         # list[tuple[alive chars have elem, num of elem, priority of elem]]
         sorted_categories: list[tuple[int, int, int]] = sorted(
-            (
+            [
                 (
                     case_val(elem in character_elems, 1, 0),
                     self[elem],
@@ -390,7 +411,7 @@ class ActualDice(Dice):
                 )
                 for elem in self.elems()
                 if elem is not Element.OMNI and self[elem] > 0
-            ),
+            ],
             reverse=True
         )
         for _, _, priority in sorted_categories:
@@ -403,8 +424,6 @@ class ActualDice(Dice):
         :returns: an ordered dictionary of dice contained by `self`.
                   The ordering follows the in-game top-down ordering when a
                   player has multiple dice.
-
-        The return value can be utilized by cards like Liben, Vanarana...
         """
         return self.readonly_dice_ordered(player_state).to_dict()
 
@@ -422,6 +441,32 @@ class ActualDice(Dice):
                 for char in player_state.get_characters().get_alive_characters()
             )
         )
+
+    def _init_ordered_dice_collection(self) -> HashableDict[Element, int]:
+        dice = self._init_ordered_dice(None)
+        if Element.OMNI not in dice:
+            return dice
+        mutable_dice = dice.to_dict()
+        omni_num = dice[Element.OMNI]
+        del mutable_dice[Element.OMNI]
+        mutable_dice[Element.OMNI] = omni_num
+        return HashableDict(mutable_dice)
+
+    def dice_collection_ordered(self) -> dict[Element, int]:
+        """
+        :returns: an ordered dictionary of dice contained by `self`.
+                  The ordering follows the collection order of supports like
+                  Liben and Vanarana.
+        """
+        return self.readonly_dice_collection_ordered().to_dict()
+
+    def readonly_dice_collection_ordered(self) -> HashableDict[Element, int]:
+        """
+        :returns: the same value as `.dice_collection_ordered()` but a readonly version.
+
+        This method has a better performance.
+        """
+        return self._init_ordered_dice_collection()
 
     def hide_all(self) -> Self:
         """

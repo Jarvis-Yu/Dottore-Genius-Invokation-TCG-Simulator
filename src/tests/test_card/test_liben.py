@@ -22,8 +22,8 @@ class TestLiben(unittest.TestCase):
             ActualDice({}),
             ActualDice({Element.ELECTRO: 1}),
             ActualDice({}),
-            ActualDice({Element.ELECTRO: 1, Element.CRYO: 1}),
-            ActualDice({Element.GEO: 2, Element.ELECTRO: 1, Element.CRYO: 1}),
+            ActualDice({Element.OMNI: 1, Element.ELECTRO: 1}),
+            ActualDice({Element.OMNI: 1, Element.GEO: 2, Element.CRYO: 1}),
         ]
         for dice, expected_dice in zip(dice_list, expected_list):
             with self.subTest(dice=dice):
