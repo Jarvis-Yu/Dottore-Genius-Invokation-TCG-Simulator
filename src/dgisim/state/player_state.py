@@ -198,12 +198,20 @@ class PlayerState:
         Dices are hidden by replacing them all with `ANY`. (Note this makes
         the new ActualDice invalid)
         """
+        def hide_support(supports: Supports) -> Supports:
+            for support in supports:
+                if support.has_perspective_view():
+                    supports = supports.update_support(support.perspective_view(), override=True)
+            return supports
+
         return self.factory().f_hand_cards(
             lambda hcs: hcs.hide_all()
         ).f_deck_cards(
             lambda dcs: dcs.hide_all()
         ).f_dice(
             lambda d: d.hide_all()
+        ).f_supports(
+            hide_support
         ).build()
 
     @classmethod

@@ -48,3 +48,11 @@ class TestVanaranan(unittest.TestCase):
                 gsm.auto_step()
                 p1_dice_after = gsm.get_game_state().get_player1().get_dice()
                 self.assertEqual(p1_dice_before + expected_dice, p1_dice_after)
+
+    def test_perspective(self) -> None:
+        vanarana = VanaranaSupport(sid=1, saved_dice=ActualDice({Element.GEO: 1, Element.CRYO: 1}))
+        self.assertTrue(vanarana.has_perspective_view())
+        self.assertEqual(
+            vanarana.perspective_view().saved_dice,
+            ActualDice.from_all(2, Element.ANY),
+        )

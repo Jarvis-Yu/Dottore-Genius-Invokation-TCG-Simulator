@@ -547,6 +547,15 @@ class VanaranaSupport(Support):
         return [], self
 
     @override
+    def perspective_view(self) -> Self:
+        if self.saved_dice.num_dice() == 0:
+            return self
+        return replace(
+            self,
+            saved_dice=ActualDice.from_all(self.saved_dice.num_dice(), Element.ANY),
+        )
+
+    @override
     def content_str(self) -> str:
         return ','.join(
             f"{elem.name[:2]}:{self.saved_dice[elem]}"

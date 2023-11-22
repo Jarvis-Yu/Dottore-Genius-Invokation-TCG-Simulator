@@ -560,6 +560,19 @@ class Status:
             if isinstance(char, char_type)
         )
 
+    def perspective_view(self) -> Self:
+        """
+        Returns the self in the eyes of the opponent, hiding relevant information.
+        """
+        return self
+
+    @classmethod
+    def has_perspective_view(cls) -> bool:
+        """
+        Returns True if the status has a perspective view.
+        """
+        return cls.perspective_view is not Status.perspective_view
+
     def __str__(self) -> str:
         return self.__class__.__name__.removesuffix("Status")  # pragma: no cover
 
