@@ -1,3 +1,4 @@
+import random
 from typing import Callable, Optional
 
 from .action.action import PlayerAction
@@ -26,8 +27,15 @@ class GameStateMachine:
     of possibilities are no longer available to explore (via this class).)
     """
 
-    def __init__(self, game_state: GameState, agent1: PlayerAgent, agent2: PlayerAgent):
+    def __init__(
+            self,
+            game_state: GameState,
+            agent1: PlayerAgent,
+            agent2: PlayerAgent,
+            seed: int | float | None = None,
+    ):
         self._history = [game_state]
+        self._seeds: list[int | float] = []
         self._perspective_history: dict[Pid, list[GameState]] = {
             Pid.P1: [game_state.prespective_view(Pid.P1)],
             Pid.P2: [game_state.prespective_view(Pid.P2)],
@@ -37,6 +45,7 @@ class GameStateMachine:
         self._game_state = game_state
         self._player_agent1 = agent1
         self._player_agent2 = agent2
+        self._seed = seed if seed is not None else random.random()
 
     @classmethod
     def from_default(cls, agent1: PlayerAgent, agent2: PlayerAgent):
@@ -47,6 +56,12 @@ class GameStateMachine:
         :returns: the complete history of past game states in chronological order.
         """
         return tuple(self._history)
+
+    def get_seeds(self) -> tuple[int | float, ...]:
+        return tuple(self._seeds)
+
+    def set_seed(self, seed: int | float) -> None:
+        self._seed = seed
 
     def get_action_history(self) -> tuple[GameState, ...]:
         """
@@ -118,14 +133,20 @@ class GameStateMachine:
         self._perspective_history[Pid.P2].append(self._game_state.prespective_view(Pid.P2))
 
     def _step(self, observe=False) -> None:
-        self._game_state = self._game_state.step()
+        self._game_state = self._game_state.step(seed=self._seed)
+        self._seeds.append(self._seed)
+        random.seed()
+        self._seed = random.random()
         if observe:
             print(GamePrinter.dict_game_printer(self._game_state.dict_str()))
             input(":> ")
         self._append_history(self._game_state)
 
     def _action_step(self, pid: Pid, action: PlayerAction, observe=False) -> bool:
-        next_state = self._game_state.action_step(pid, action)
+        next_state = self._game_state.action_step(pid, action, seed=self._seed)
+        self._seeds.append(self._seed)
+        random.seed()
+        self._seed = random.random()
         if next_state is None:
             return False
         action_idx = len(self._history) - 1

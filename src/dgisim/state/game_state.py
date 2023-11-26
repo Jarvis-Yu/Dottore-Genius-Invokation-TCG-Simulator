@@ -265,19 +265,30 @@ class GameState:
         """
         return self._phase.waiting_for(self)
 
-    def step(self) -> GameState:
+    def step(self, seed: int | float | None = None) -> GameState:
         """
         :returns: the next state of a state-transition from the current one without
                   any player action.
         """
+        if seed is not None:
+            import random
+            random.seed(seed)
         return self._phase.step(self)
 
-    def action_step(self, pid: Pid, action: PlayerAction) -> Optional[GameState]:
+    def action_step(
+            self,
+            pid: Pid,
+            action: PlayerAction,
+            seed: int | float | None = None,
+    ) -> None | GameState:
         """
         :returns: the next state of a state-transition from the current one with
                   a player action from `pid`. None is returned if the `action` is
                   illegal in the context.
         """
+        if seed is not None:
+            import random
+            random.seed(seed)
         return self._phase.step_action(self, pid, action)
 
     def action_generator(self, pid: Pid) -> None | acg.ActionGenerator:

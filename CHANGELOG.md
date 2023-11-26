@@ -6,6 +6,7 @@
 
 - Subclasses of `Deck` now supports conversion to and from json by calling
   `.to_json()` and `.from_json()`.
+- Enables seeding when stepping `GameState`
 - New Cards:
   - Event Card:
     - Fresh Wind of Freedom
