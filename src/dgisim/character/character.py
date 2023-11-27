@@ -6,6 +6,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from dataclasses import replace
 from functools import lru_cache
+from itertools import chain
 from typing import Callable, Optional, TYPE_CHECKING, Union, cast
 from typing_extensions import override, Self
 
@@ -24,6 +25,7 @@ from ..state.enums import Pid
 from .enums import CharacterSkill, CharacterSkillType, Faction, WeaponType
 
 if TYPE_CHECKING:
+    from ..encoding.encoding_plan import EncodingPlan
     from ..state.game_state import GameState
 
 __all__ = [
@@ -531,6 +533,29 @@ class Character:
 
     def __deepcopy__(self, _) -> Self:
         return self
+
+    def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
+        """
+        :returns: the encoding of this character.
+        """
+        basics = [
+            encoding_plan.code_for(self),
+            self._ELEMENT.value,
+            self._WEAPON_TYPE.value,
+            self._id,
+            1 if self._alive else 0,
+            self._hp,
+            self._max_hp,
+            self._energy,
+            self._max_energy,
+        ]
+        return list(chain(
+            basics,
+            self._aura.encoding(),
+            self._hiddens.encoding(encoding_plan),
+            self._equipments.encoding(encoding_plan),
+            self._statuses.encoding(encoding_plan),
+        ))
 
     def dict_str(self) -> Union[dict, str]:
         return {

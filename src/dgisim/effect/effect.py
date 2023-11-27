@@ -12,12 +12,13 @@ ordered alphabetically.
 """
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from dataclasses import asdict, dataclass, field, replace
+from dataclasses import asdict, dataclass, field, fields, replace
+from enum import Enum
+from itertools import chain
 from typing import cast, FrozenSet, Iterable, Optional, Sequence, TYPE_CHECKING, Union
 
 from typing_extensions import override
 
-from ..character import character as chr
 from ..helper.quality_of_life import dataclass_repr
 from ..status import status as stt
 from ..summon import summon as sm
@@ -37,6 +38,7 @@ from .structs import StaticTarget, DamageType
 if TYPE_CHECKING:
     from ..card.card import Card
     from ..dice import ActualDice
+    from ..encoding.encoding_plan import EncodingPlan
     from ..state.game_state import GameState
     from ..status.statuses import Statuses
 
@@ -142,6 +144,49 @@ class Effect:
 
     def dict_str(self) -> Union[dict, str]:
         return asdict(self)
+
+    def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
+        """
+        :returns: the encoding of this effect.
+        """
+        from ..card.card import Card
+        from ..status.status import Status
+
+        values = list(chain.from_iterable([
+            [self.__getattribute__(fld.name)]
+            for fld in fields(self)
+        ]))
+        ret_val = [encoding_plan.code_for(self)]
+        for value in values:
+            if isinstance(value, bool):
+                ret_val.append(1 if value else 0)
+            elif isinstance(value, int):
+                ret_val.append(value)
+            elif isinstance(value, Enum):
+                ret_val.append(value.value)
+            elif value is None:
+                ret_val.append(0)
+            elif isinstance(value, StaticTarget):
+                ret_val.extend(value.encoding(encoding_plan))
+            elif isinstance(value, Status):
+                ret_val.append(encoding_plan.code_for(value))
+            elif isinstance(value, ReactionDetail):
+                ret_val.extend(value.encoding())
+            elif isinstance(value, DamageType):
+                ret_val.extend(value.encoding())
+            elif isinstance(value, ActualDice):
+                ret_val.extend(value.encoding(encoding_plan))
+            elif issubclass(value, Card):
+                ret_val.append(encoding_plan.code_for(value))
+            elif issubclass(value, Status):
+                ret_val.append(encoding_plan.code_for(value))
+            else:
+                raise Exception("Unexpected Type", type(value))
+        fillings = encoding_plan.EFFECT_FIXED_LEN - len(ret_val)
+        if fillings < 0:
+            raise Exception("Too many values in effect", self)
+        ret_val.extend([0] * fillings)
+        return ret_val
 
     def __repr__(self) -> str:
         return dataclass_repr(self)
@@ -253,7 +298,8 @@ class TriggerStatusEffect(TriggerrbleEffect):
     @override
     def new_effects(self, game_state: GameState) -> Sequence[Effect]:
         character = game_state.get_target(self.target)
-        if not isinstance(character, chr.Character):  # pragma: no cover
+        from ..character.character import Character
+        if not isinstance(character, Character):  # pragma: no cover
             return []
         effects: list[Effect] = []
 
@@ -754,7 +800,8 @@ class BackwardSwapCharacterEffect(DirectEffect):
         characters = game_state.get_player(self.target_player).get_characters()
         # oredered chars without active character
         ordered_chars = characters.get_character_in_activity_order()[:0:-1]
-        next_char: Optional[chr.Character] = next(
+        from ..character.character import Character
+        next_char: Optional[Character] = next(
             (
                 char
                 for char in ordered_chars
@@ -787,7 +834,8 @@ class ForwardSwapCharacterEffect(DirectEffect):
         characters = game_state.get_player(self.target_player).get_characters()
         # oredered chars without active character
         ordered_chars = characters.get_character_in_activity_order()[1:]
-        next_char: Optional[chr.Character] = next(
+        from ..character.character import Character
+        next_char: Optional[Character] = next(
             (
                 char
                 for char in ordered_chars
@@ -819,7 +867,8 @@ class ForwardSwapCharacterCheckEffect(DirectEffect):
     def execute(self, game_state: GameState) -> GameState:
         characters = game_state.get_player(self.target_player).get_characters()
         ordered_chars = characters.get_character_in_activity_order()
-        next_char: Optional[chr.Character] = next(
+        from ..character.character import Character
+        next_char: Optional[Character] = next(
             (
                 char
                 for char in ordered_chars[1:]
@@ -1208,9 +1257,10 @@ class ReferredDamageEffect(DirectEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         assert self.legal()
-        targets: list[Optional[chr.Character]] = []
+        from ..character.character import Character
+        targets: list[Optional[Character]] = []
         effects: list[Effect] = []
-        char: Optional[chr.Character]
+        char: Optional[Character]
 
         if self.target is DynamicCharacterTarget.OPPO_ACTIVE:
             targets.append(
@@ -1268,7 +1318,8 @@ class EnergyRechargeEffect(DirectEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
-        if not isinstance(character, chr.Character):  # pragma: no cover
+        from ..character.character import Character
+        if not isinstance(character, Character):  # pragma: no cover
             return game_state
         energy = min(character.get_energy() + self.recharge, character.get_max_energy())
         if energy == character.get_energy():
@@ -1290,7 +1341,8 @@ class EnergyDrainEffect(DirectEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
-        if not isinstance(character, chr.Character):  # pragma: no cover
+        from ..character.character import Character
+        if not isinstance(character, Character):  # pragma: no cover
             return game_state
         energy = max(character.get_energy() - self.drain, 0)
         if energy == character.get_energy():
@@ -1312,7 +1364,8 @@ class RecoverHPEffect(DirectEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
-        if not isinstance(character, chr.Character):  # pragma: no cover
+        from ..character.character import Character
+        if not isinstance(character, Character):  # pragma: no cover
             return game_state
         if character.defeated():
             return game_state
@@ -1335,7 +1388,8 @@ class ReviveRecoverHPEffect(RecoverHPEffect):
     @override
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
-        if not isinstance(character, chr.Character):  # pragma: no cover
+        from ..character.character import Character
+        if not isinstance(character, Character):  # pragma: no cover
             return game_state
         assert character.get_hp() == 0, game_state
         hp = min(self.recovery, character.get_max_hp())
@@ -1524,7 +1578,8 @@ class AddCharacterStatusEffect(DirectEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
-        assert isinstance(character, chr.Character)
+        from ..character.character import Character
+        assert isinstance(character, Character)
         if issubclass(self.status, stt.HiddenStatus):  # pragma: no cover
             character = character.factory().f_hiddens(
                 lambda ts: ts.update_status(self.status())
@@ -1586,7 +1641,8 @@ class UpdateCharacterStatusEffect(DirectEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
-        assert isinstance(character, chr.Character)
+        from ..character.character import Character
+        assert isinstance(character, Character)
         if isinstance(self.status, stt.HiddenStatus):  # pragma: no cover
             character = character.factory().f_hiddens(
                 lambda ts: ts.update_status(self.status)
@@ -1616,7 +1672,8 @@ class OverrideCharacterStatusEffect(DirectEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
-        assert isinstance(character, chr.Character)
+        from ..character.character import Character
+        assert isinstance(character, Character)
         if isinstance(self.status, stt.HiddenStatus):
             character = character.factory().f_hiddens(
                 lambda ts: ts.update_status(self.status, override=True)
@@ -1936,7 +1993,8 @@ class CastSkillEffect(DirectEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
-        assert isinstance(character, chr.Character)
+        from ..character.character import Character
+        assert isinstance(character, Character)
         if not character.can_cast_skill():  # pragma: no cover
             return game_state
         effects = character.skill(game_state, self.target, self.skill)

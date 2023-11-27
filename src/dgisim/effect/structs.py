@@ -8,6 +8,7 @@ from ..state.enums import Pid
 from .enums import Zone
 
 if TYPE_CHECKING:
+    from ..encoding.encoding_plan import EncodingPlan
     from ..state.game_state import GameState
     from ..summon.summon import Summon
 
@@ -22,6 +23,13 @@ class StaticTarget:
     pid: Pid
     zone: Zone
     id: int | type["Summon"]
+
+    def encoding(self, encoding_plan: "EncodingPlan") -> list[int]:
+        return [
+            self.pid.value,
+            self.zone.value,
+            self.id if isinstance(self.id, int) else encoding_plan.code_for(self.id),
+        ]
 
     def __repr__(self) -> str:
         return dataclass_repr(self)
@@ -106,6 +114,19 @@ class DamageType:
 
     def can_boost(self) -> bool:
         return not self.no_boost
+
+    def encoding(self) -> list[int]:
+        return [
+            int(self.normal_attack),
+            int(self.charged_attack),
+            int(self.plunge_attack),
+            int(self.elemental_skill),
+            int(self.elemental_burst),
+            int(self.status),
+            int(self.summon),
+            int(self.reaction),
+            int(self.no_boost),
+        ]
 
     def __repr__(self) -> str:
         cls_fields = fields(self)

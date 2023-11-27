@@ -11,6 +11,7 @@ from .helper.quality_of_life import BIG_INT, case_val
 from .element import Element
 
 if TYPE_CHECKING:
+    from .encoding.encoding_plan import EncodingPlan
     from .state.game_state import GameState
     from .state.player_state import PlayerState
 
@@ -168,6 +169,15 @@ class Dice:
     def get_dices(self) -> HashableDict[Element, int]:
         """ :returns: the internal frozen dictionary of dice. """
         return self._dice
+
+    def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
+        """
+        :returns: the encoding of this Dice.
+        """
+        ret_val: list[int] = []
+        for elem in Element:
+            ret_val.extend((elem.value, self[elem]))
+        return ret_val
 
     def dict_str(self) -> dict[str, Any]:
         existing_dice = dict([

@@ -1,10 +1,14 @@
 from __future__ import annotations
+from itertools import chain
 from typing import Iterator, Optional, TYPE_CHECKING, TypeVar
-from typing_extensions import Self
+from typing_extensions import override, Self
 
 from ..status import status as stt
 
 from ..helper.quality_of_life import just
+
+if TYPE_CHECKING:
+    from ..encoding.encoding_plan import EncodingPlan
 
 __all__ = [
     "Statuses",
@@ -89,6 +93,19 @@ class Statuses:
         """ :returns: tuple of statuses. """
         return self._statuses
 
+    def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
+        """
+        :returns: the encoding of this `Statuses` object.
+        """
+        statuses_encoding: list[list[int]] = [
+            status.encoding(encoding_plan)
+            for status in self._statuses
+        ]
+        fillings = encoding_plan.STATUSES_FIXED_LEN - len(statuses_encoding)
+        for _ in range(fillings):
+            statuses_encoding.append([0] * encoding_plan.STATUS_FIXED_LEN)
+        return list(chain.from_iterable(statuses_encoding))
+
     def __iter__(self) -> Iterator[stt.Status]:
         return iter(self._statuses)
 
@@ -149,3 +166,18 @@ class EquipmentStatuses(Statuses):
             return cls(tuple(statuses))
         statuses.append(incoming_status)
         return cls(tuple(statuses))
+
+    @override
+    def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
+        """
+        :returns: the encoding of this `Statuses` object.
+        """
+        statuses_encoding: list[list[int]] = [
+            status.encoding(encoding_plan)
+            for status in self._statuses
+        ]
+        STATUSES_FIXED_LEN = 3
+        fillings = STATUSES_FIXED_LEN - len(statuses_encoding)
+        for _ in range(fillings):
+            statuses_encoding.append([0] * encoding_plan.STATUS_FIXED_LEN)
+        return list(chain.from_iterable(statuses_encoding))

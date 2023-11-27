@@ -12,9 +12,10 @@ ordered alphabetically.
 """
 from __future__ import annotations
 from abc import abstractmethod
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, fields, replace
 from enum import Enum
 from functools import cached_property
+from itertools import chain
 from math import ceil
 from typing import ClassVar, cast, TYPE_CHECKING
 from typing_extensions import override, Self
@@ -36,6 +37,7 @@ if TYPE_CHECKING:
     from ..card import card as crd
     from ..card.card import Card
     from ..character.character import Character
+    from ..encoding.encoding_plan import EncodingPlan
     from ..state.enums import Pid
     from ..state.game_state import GameState
 
@@ -572,6 +574,33 @@ class Status:
         Returns True if the status has a perspective view.
         """
         return cls.perspective_view is not Status.perspective_view
+
+    def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
+        """
+        :returns: the encoding of the content of the status. (excluding the type of status)
+        """
+        values = list(chain(*[
+            [self.__getattribute__(field.name)]
+            for field in fields(self)
+        ]))
+        ret_val = [encoding_plan.code_for(self)]
+        for value in values:
+            if isinstance(value, bool):
+                ret_val.append(1 if value else 0)
+            elif isinstance(value, int):
+                ret_val.append(value)
+            elif isinstance(value, Element):
+                ret_val.append(value.value)
+            elif value is None:
+                ret_val.append(0)
+            else:
+                raise Exception(f"unknown type {type(value)}")
+        fillings = encoding_plan.STATUS_FIXED_LEN - len(ret_val)
+        if fillings < 0:
+            raise Exception(f"status {self} has too many fields")
+        for _ in range(fillings):
+            ret_val.append(0)
+        return ret_val
 
     def __str__(self) -> str:
         return self.__class__.__name__.removesuffix("Status")  # pragma: no cover

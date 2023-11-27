@@ -1,4 +1,5 @@
 from __future__ import annotations
+from itertools import chain
 from typing import Callable, Optional, Union, TYPE_CHECKING
 from typing_extensions import Self
 
@@ -16,6 +17,7 @@ from .enums import Act
 
 if TYPE_CHECKING:
     from ..deck import Deck
+    from ..encoding.encoding_plan import EncodingPlan
     from ..mode import Mode
 
 __all__ = [
@@ -214,6 +216,30 @@ class PlayerState:
             hide_support
         ).build()
 
+    def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
+        """
+        Encode the player state into a list of integers.
+        """
+        basics = [
+            self._phase.value,
+            int(self._consec_action),
+            self._card_redraw_chances,
+            self._dice_reroll_chances,
+        ]
+        return list(chain(
+            basics,
+            self._dice.encoding(encoding_plan),
+            self._hand_cards.encoding(encoding_plan),
+            self._deck_cards.encoding(encoding_plan),
+            self._publicly_used_cards.encoding(encoding_plan),
+            self._publicly_gained_cards.encoding(encoding_plan),
+            self._characters.encoding(encoding_plan),
+            self._hidden_statuses.encoding(encoding_plan),
+            self._combat_statuses.encoding(encoding_plan),
+            self._summons.encoding(encoding_plan),
+            self._supports.encoding(encoding_plan),
+        ))
+
     @classmethod
     def example_player(cls, mode: Mode) -> Self:
         """
@@ -329,7 +355,7 @@ class PlayerState:
 
     def dict_str(self) -> dict[str, Union[dict, str, list[str]]]:
         return {
-            "Phase": self._phase.value,
+            "Phase": self._phase.name,
             "Consecutive Action": str(self._consec_action),
             "Card/Dice Redraw Chances": f"{self._card_redraw_chances}/{self._dice_reroll_chances}",
             "Characters": self._characters.dict_str(),

@@ -170,6 +170,26 @@ class Mode(ABC):
         """ :returns: the Game End Phase. """
         pass
 
+    def phase_code(self, phase: Phase | type[Phase]) -> int:
+        """ :returns: the code of the given phase. """
+        from .phase.phase import Phase
+        if isinstance(phase, Phase):
+            phase = type(phase)
+        if phase is self.card_select_phase:
+            return 1
+        elif phase is self.starting_hand_select_phase:
+            return 2
+        elif phase is self.roll_phase:
+            return 3
+        elif phase is self.action_phase:
+            return 4
+        elif phase is self.end_phase:
+            return 5
+        elif phase is self.game_end_phase:
+            return 6
+        else:
+            raise Exception(f"Unknown phase: {phase}")
+
     def __eq__(self, other: object) -> bool:
         return type(self) == type(other)
 

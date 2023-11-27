@@ -1,9 +1,11 @@
 from __future__ import annotations
+from itertools import chain
 from typing import Iterator, Optional, TYPE_CHECKING, Union
 
 from ..helper.quality_of_life import just
 
 if TYPE_CHECKING:
+    from ..encoding.encoding_plan import EncodingPlan
     from .summon import Summon
 
 __all__ = [
@@ -56,6 +58,19 @@ class Summons:
 
     def full(self) -> bool:
         return len(self) == self._max_num
+
+    def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
+        """
+        :returns: the encoding of this `Summons` object.
+        """
+        summons_encoding: list[list[int]] = [
+            summon.encoding(encoding_plan)
+            for summon in self._summons
+        ]
+        fillings = encoding_plan.SUMMONS_FIXED_LEN - len(summons_encoding)
+        for _ in range(fillings):
+            summons_encoding.append([0] * encoding_plan.STATUS_FIXED_LEN)
+        return list(chain.from_iterable(summons_encoding))
 
     def contains(self, summon_type: type[Summon] | Summon) -> bool:
         return any(type(s) is summon_type for s in self._summons)

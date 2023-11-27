@@ -1,4 +1,5 @@
 from __future__ import annotations
+from itertools import chain
 from typing import Callable, Optional, TYPE_CHECKING, cast
 
 from typing_extensions import Self
@@ -31,6 +32,7 @@ from .enums import Pid
 
 if TYPE_CHECKING:
     from ..deck import Deck
+    from ..encoding.encoding_plan import EncodingPlan
 
 
 __all__ = [
@@ -331,6 +333,23 @@ class GameState:
             pid.other(),
             lambda p: p.hide_secrets()
         ).build()
+
+    def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
+        """
+        Encode the game state into a list of integers.
+        """
+        basics = [
+            encoding_plan.code_for(self._mode),
+            self._mode.phase_code(self._phase),
+            self._round,
+            self._active_player_id.value,
+        ]
+        return list(chain(
+            basics,
+            self._player1.encoding(encoding_plan),
+            self._player2.encoding(encoding_plan),
+            self._effect_stack.encoding(encoding_plan),
+        ))
 
     def __copy__(self) -> Self:  # pragma: no cover
         return self

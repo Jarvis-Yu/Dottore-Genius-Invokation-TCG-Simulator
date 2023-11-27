@@ -4,6 +4,7 @@ This file contains the enums and structs of elements and reactions.
 from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
+from itertools import chain
 from typing import Any, FrozenSet, Optional, Iterator
 
 from .helper.hashable_dict import HashableDict
@@ -19,17 +20,17 @@ __all__ = [
 
 
 class Element(Enum):
-    OMNI = 0
-    PYRO = 1
-    HYDRO = 2
-    ANEMO = 3
-    ELECTRO = 4
-    DENDRO = 5
-    CRYO = 6
-    GEO = 7
-    PHYSICAL = 8
-    PIERCING = 9
-    ANY = 10
+    OMNI = 1
+    PYRO = 2
+    HYDRO = 3
+    ANEMO = 4
+    ELECTRO = 5
+    DENDRO = 6
+    CRYO = 7
+    GEO = 8
+    PHYSICAL = 9
+    PIERCING = 10
+    ANY = 11
 
     def __repr__(self) -> str:
         return self.name
@@ -140,6 +141,15 @@ class Reaction(Enum):
         damage_boost=2,
     )
 
+    def encoding(self) -> int:
+        """
+        :returns: the encoding of the reaction.
+        """
+        for i, reaction in enumerate(Reaction):
+            if reaction is self:
+                return i + 1
+        raise Exception("Invalid reaction")
+
     @classmethod
     def consult_reaction(cls, first: Element, second: Element) -> Optional[Reaction]:
         """
@@ -181,6 +191,13 @@ class ReactionDetail:
     def elem_reaction(self, elem: Element) -> bool:
         """ :returns: `True` if this reaction is an `elem` reaction. """
         return self.first_elem is elem or self.second_elem is elem
+
+    def encoding(self) -> list[int]:
+        return [
+            self.reaction_type.encoding(),
+            self.first_elem.value,
+            self.second_elem.value,
+        ]
 
     def __post_init__(self):
         if Reaction.consult_reaction(self.first_elem, self.second_elem) != self.reaction_type:
@@ -276,6 +293,12 @@ class ElementalAura:
                   the current elements.
         """
         return Reaction.consult_reaction_with_aura(self, incoming_elem)
+
+    def encoding(self) -> list[int]:
+        return list(chain.from_iterable([
+            (elem.value, 1 if self._aura[elem] else 0)
+            for elem in AURA_ELEMENTS
+        ]))
 
     def __iter__(self) -> Iterator[Element]:
         return (

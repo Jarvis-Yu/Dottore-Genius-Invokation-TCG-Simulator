@@ -12,7 +12,8 @@ ordered alphabetically.
 - concrete classes, the implementation of summons that are actually in the game
 """
 from __future__ import annotations
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, fields, replace
+from itertools import chain
 from typing import ClassVar, TYPE_CHECKING
 from typing_extensions import Self, override
 
@@ -29,6 +30,7 @@ from ..status.enums import Informables, Preprocessables
 if TYPE_CHECKING:
     from ..state.game_state import GameState
     from ..effect.structs import StaticTarget
+    from ..encoding.encoding_plan import EncodingPlan
 
 __all__ = [
     # base
@@ -561,3 +563,36 @@ class VanaranaSupport(Support):
             f"{elem.name[:2]}:{self.saved_dice[elem]}"
             for elem in self.saved_dice
         )
+
+    @override
+    def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
+        """
+        :returns: the encoding of the content of the status. (excluding the type of status)
+        """
+        values = list(chain(*[
+            [self.__getattribute__(field.name)]
+            for field in fields(self)
+        ]))
+        ret_val = [encoding_plan.code_for(self)]
+        for value in values:
+            if isinstance(value, bool):
+                ret_val.append(1 if value else 0)
+            elif isinstance(value, int):
+                ret_val.append(value)
+            elif isinstance(value, Element):
+                ret_val.append(value.value)
+            elif isinstance(value, ActualDice):
+                fill_up = self._CAPACITY
+                for elem in value.elems():
+                    fill_up -= 1
+                    ret_val.extend((elem.value, value[elem]))
+                for _ in range(fill_up):
+                    ret_val.extend((0, 0))
+            else:
+                raise Exception(f"unknown type {type(value)}")
+        fillings = encoding_plan.STATUS_FIXED_LEN - len(ret_val)
+        if fillings < 0:
+            raise Exception(f"status {self} has too many fields")
+        for _ in range(fillings):
+            ret_val.append(0)
+        return ret_val

@@ -1,9 +1,11 @@
 from __future__ import annotations
+from itertools import chain
 from typing import Callable, Iterator, TYPE_CHECKING, Union, Iterable
 
 if TYPE_CHECKING:
     from .character import Character
     from ..element import Element
+    from ..encoding.encoding_plan import EncodingPlan
 
 __all__ = [
     "Characters",
@@ -225,6 +227,13 @@ class Characters:
 
     def __contains__(self, char: Character | type[Character]) -> bool:
         return self.contains(char)
+
+    def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
+        characters_encoding: list[list[int]] = [
+            character.encoding(encoding_plan)
+            for character in self._characters
+        ]
+        return list(chain.from_iterable(characters_encoding))
 
     def dict_str(self) -> Union[dict, str]:
         return {

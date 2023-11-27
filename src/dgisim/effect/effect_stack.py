@@ -1,8 +1,10 @@
 from __future__ import annotations
+from itertools import chain
 from typing import Iterable, Sequence, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .effect import Effect
+    from ..encoding.encoding_plan import EncodingPlan
 
 __all__ = [
     "EffectStack",
@@ -71,6 +73,21 @@ class EffectStack:
             if type(effect) == effect_type:
                 return True
         return False
+
+    def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
+        """
+        :returns: the encoding of this EffectStack.
+        """
+        ret_val: list[list[int]] = [
+            effect.encoding(encoding_plan)
+            for effect in self._effects
+        ]
+        fillings = encoding_plan.EFFECTS_FIXED_LEN - len(ret_val)
+        if fillings < 0:
+            raise Exception(f"Too many effects: {len(self._effects)}")
+        for _ in range(fillings):
+            ret_val.append([0] * encoding_plan.EFFECT_FIXED_LEN)
+        return list(chain.from_iterable(ret_val))
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, EffectStack):

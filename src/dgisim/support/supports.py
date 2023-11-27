@@ -1,8 +1,12 @@
 from __future__ import annotations
-from typing import Iterator
+from itertools import chain
+from typing import Iterator, TYPE_CHECKING
 
 from ..helper.quality_of_life import just
 from .support import Support
+
+if TYPE_CHECKING:
+    from ..encoding.encoding_plan import EncodingPlan
 
 __all__ = [
     "Supports",
@@ -105,6 +109,19 @@ class Supports:
 
     def __contains__(self, support_type: type[Support]) -> bool:
         return self.contains(support_type)
+
+    def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
+        """
+        :returns: the encoding of this `Summons` object.
+        """
+        supports_encoding: list[list[int]] = [
+            support.encoding(encoding_plan)
+            for support in self._supports
+        ]
+        fillings = encoding_plan.SUPPORTS_FIXED_LEN - len(supports_encoding)
+        for _ in range(fillings):
+            supports_encoding.append([0] * encoding_plan.STATUS_FIXED_LEN)
+        return list(chain.from_iterable(supports_encoding))
 
     def __iter__(self) -> Iterator[Support]:
         return iter(self._supports)

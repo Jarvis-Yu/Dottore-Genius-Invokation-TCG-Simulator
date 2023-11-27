@@ -11,10 +11,10 @@ __all__ = [
 
 
 class CharacterSkill(Enum):
-    SKILL1 = 0  # typically the normal attack
-    SKILL2 = 1  # typically the 1st elemental skill
-    SKILL3 = 2  # typically the 2nd elemental skill
-    ELEMENTAL_BURST = 3
+    SKILL1 = 1  # typically the normal attack
+    SKILL2 = 2  # typically the 1st elemental skill
+    SKILL3 = 3  # typically the 2nd elemental skill
+    ELEMENTAL_BURST = 4
 
     def to_event_type(self) -> EventType:
         if self is CharacterSkill.SKILL1:
@@ -40,21 +40,21 @@ class CharacterSkillType(Enum):
     ELEMENTAL_BURST = "Elemental-Burst"
 
 class WeaponType(Enum):
-    BOW = 0
-    CATALYST = 1
-    CLAYMORE = 2
-    POLEARM = 3
-    SWORD = 4
-    NONE = 5
+    BOW = 1
+    CATALYST = 2
+    CLAYMORE = 3
+    POLEARM = 4
+    SWORD = 5
+    NONE = 6
 
 class Faction(Enum):
-    MONDSTADT = 0
-    LIYUE = 1
-    INAZUMA = 2
-    SUMERU = 3
-    FONTAINE = 4
-    NATLAN = 5
-    SNEZHNAYA = 6
-    FATUI = 7
-    MONSTER = 8
-    HILICHURL = 9
+    MONDSTADT = 1
+    LIYUE = 2
+    INAZUMA = 3
+    SUMERU = 4
+    FONTAINE = 5
+    NATLAN = 6
+    SNEZHNAYA = 7
+    FATUI = 8
+    MONSTER = 9
+    HILICHURL = 10

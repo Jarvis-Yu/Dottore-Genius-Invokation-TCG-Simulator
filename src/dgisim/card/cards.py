@@ -1,12 +1,14 @@
 from __future__ import annotations
 import random
 from collections import Counter
+from itertools import chain
 from typing import Iterator, TYPE_CHECKING
 
 from ..helper.hashable_dict import HashableDict
 
 if TYPE_CHECKING:
     from .card import Card
+    from ..encoding.encoding_plan import EncodingPlan
 
 __all__ = [
     "Cards",
@@ -142,6 +144,23 @@ class Cards:
         """
         from .card import OmniCard
         return Cards({OmniCard: self.num_cards()})
+
+    def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
+        """
+        :returns: the encoding of this `Cards` object.
+        """
+        ret_val: list[tuple[int, int]] = []
+        for card, num in self._cards.items():
+            if num == 0:
+                continue
+            ret_val.append((encoding_plan.code_for(card), num))
+        ret_val.sort()
+        fillings = encoding_plan.CARDS_FIXED_LEN - len(ret_val)
+        if fillings < 0:
+            raise Exception(f"Too many cards: {len(self._cards)}")
+        for _ in range(fillings):
+            ret_val.append((0, 0))
+        return list(chain.from_iterable(ret_val))
 
     def __getitem__(self, card: type[Card]) -> int:
         return self._cards.get(card, 0)

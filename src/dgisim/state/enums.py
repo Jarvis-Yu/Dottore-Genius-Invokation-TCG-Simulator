@@ -28,10 +28,10 @@ class Pid(Enum):
 
 
 class Act(Enum):
-    ACTION_PHASE = "Action Phase"
-    PASSIVE_WAIT_PHASE = "Passive Wait Phase"
-    ACTIVE_WAIT_PHASE = "Aggressive Wait Phase"
-    END_PHASE = "End Phase"
+    ACTION_PHASE = 1
+    PASSIVE_WAIT_PHASE = 2
+    ACTIVE_WAIT_PHASE = 3
+    END_PHASE = 4
 
     def is_action_phase(self) -> bool:  # pragma: no cover
         return self is Act.ACTION_PHASE
