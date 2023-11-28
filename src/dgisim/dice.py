@@ -411,7 +411,6 @@ class ActualDice(Dice):
                   `None` is returned.
         """
 
-        # optimisation check - if required dices > avaiable dices, break
         if requirement.num_dice() > self.num_dice():
             return None
 
