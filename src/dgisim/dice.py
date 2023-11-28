@@ -427,30 +427,33 @@ class ActualDice(Dice):
         # local precedence initialization / correction
         if local_precedence is None:
             if characters is None:
-                local_precedence = [set()]
+                local_precedence = [set(_PURE_ELEMS)]
             else:
                 chars = characters.get_characters()
                 active_char = characters.get_active_character()
+                char_elems = {char.ELEMENT() for char in chars}
                 if active_char is None:
-                    local_precedence = [{char.ELEMENT() for char in chars}]
+                    local_precedence = [char_elems]
                 else:
                     local_precedence = [
-                        {active_char.ELEMENT()},
-                        {char.ELEMENT() for char in chars} - {active_char.ELEMENT()},
+                        active_elem := {active_char.ELEMENT()},
+                        char_elems - active_elem,
                     ]
+                local_precedence.append(set(_PURE_ELEMS) - char_elems)
         elif len(local_precedence) == 0:
-            local_precedence = [set()]
+            local_precedence = [set(_PURE_ELEMS)]
         first_priority_elements: set[Element] = local_precedence[0]
 
-        # check local precedence validity
-        appeared_elems: set[Element] = set()
-        for elem_set in local_precedence:
-            assert Element.OMNI not in elem_set, "OMNI should not be in precedence"
-            assert Element.ANY not in elem_set, "ANY should not be in precedence"
-            for elem in elem_set:
-                assert elem in _PURE_ELEMS, "Unknown element in precedence"
-                assert elem not in appeared_elems, "Duplicated element in precedence"
-                appeared_elems.add(elem)
+        if __debug__:
+            # check local precedence validity
+            appeared_elems: set[Element] = set()
+            for elem_set in local_precedence:
+                assert Element.OMNI not in elem_set, "OMNI should not be in precedence"
+                assert Element.ANY not in elem_set, "ANY should not be in precedence"
+                for elem in elem_set:
+                    assert elem in _PURE_ELEMS, "Unknown element in precedence"
+                    assert elem not in appeared_elems, "Duplicated element in precedence"
+                    appeared_elems.add(elem)
 
         ## 1st step - fill elemental requirement ##
         for elem in _PURE_ELEMS:
@@ -470,12 +473,10 @@ class ActualDice(Dice):
         # Rank elements by priority [is first priority, supply, user priority, implicit priority, element]
         if need[Element.OMNI] > 0:
             elems_with_omni_priority: list[tuple[int, int, int, int, Element]] = []
-            ranked_elems = {elem for elem in _PURE_ELEMS if supply[elem] > 0}
             for priority, elem_set in enumerate(local_precedence):
                 for elem in elem_set:
-                    if elem not in ranked_elems:
+                    if supply[elem] <= 0:
                         continue
-                    ranked_elems.remove(elem)
                     elems_with_omni_priority.append((
                         int(elem in first_priority_elements),
                         -supply[elem],
@@ -483,18 +484,11 @@ class ActualDice(Dice):
                         -self._LEGAL_ELEMS_ORDERED_DICT[elem],
                         elem,
                     ))
-            for elem in ranked_elems:
-                elems_with_omni_priority.append((
-                    int(elem in first_priority_elements),
-                    -supply[elem],
-                    -BIG_INT,
-                    -self._LEGAL_ELEMS_ORDERED_DICT[elem],
-                    elem,
-                ))
             elems_with_omni_priority.sort()
             # get elems in order of priority (from least valuable to most valuable)
             elems_ordered = [elem for _, _, _, _, elem in elems_with_omni_priority]
 
+            # fill OMNI requirement
             optional_elem = next((
                 elem
                 for elem in elems_ordered
@@ -519,29 +513,21 @@ class ActualDice(Dice):
         # Rank elements by priority [user priority, supply, implicit priority, element]
         if need[Element.ANY] > 0:
             elems_with_any_priority: list[tuple[int, int, int, Element]] = [(1, 0, 0, Element.OMNI)]
-            ranked_elems = {elem for elem in _PURE_ELEMS if supply[elem] > 0}
             for priority, elem_set in enumerate(local_precedence):
                 for elem in elem_set:
-                    if elem not in ranked_elems:
+                    if supply[elem] <= 0:
                         continue
-                    ranked_elems.remove(elem)
                     elems_with_any_priority.append((
                         -priority,
                         supply[elem],
                         -self._LEGAL_ELEMS_ORDERED_DICT[elem],
                         elem,
                     ))
-            for elem in ranked_elems:
-                elems_with_any_priority.append((
-                    -BIG_INT,
-                    supply[elem],
-                    -self._LEGAL_ELEMS_ORDERED_DICT[elem],
-                    elem,
-                ))
             elems_with_any_priority.sort()
             # get elems in order of priority (from least valuable to most valuable)
             elems_ordered = [elem for _, _, _, elem in elems_with_any_priority]
 
+            # fill ANY requirement
             for elem in elems_ordered:
                 elem_deduction = min(need[Element.ANY], supply[elem])
                 result_dict[elem] += elem_deduction
