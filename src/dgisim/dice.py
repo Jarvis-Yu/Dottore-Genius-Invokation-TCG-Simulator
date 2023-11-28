@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import random
 from collections import Counter, defaultdict
-from functools import cache
-from heapq import heappop, heapify
 from typing import Any, Iterator, Iterable
 from typing_extensions import override, Self, TYPE_CHECKING
 
@@ -14,7 +12,6 @@ from .helper.quality_of_life import BIG_INT, case_val
 if TYPE_CHECKING:
     from .character.characters import Characters
     from .encoding.encoding_plan import EncodingPlan
-    from .state.game_state import GameState
     from .state.player_state import PlayerState
 
 __all__ = [
@@ -402,20 +399,24 @@ class ActualDice(Dice):
             local_precedence: None | list[set[Element]] = None,
     ) -> None | Self:
         """
-        :param player_state: the context the selection is based on, but not used by
+        :param requirement: the requirement to fulfill.
+        :param characters: the context the selection is based on, but not used by
                            this method, so leave it as `None` by default.
+        :param local_precedence: the precedence of elements that should be kept
+                                 as much as possible. Automatically generated
+                                 if characters is specified.
 
         :returns: a way to fulfill the `requirement`, which tries to keep as many
                   useful dice as possible. If it is impossible to fulfill, then
                   `None` is returned.
         """
 
-        # result in dict format
-        result_dict: dict[Element, int] = defaultdict(int)
-
         # optimisation check - if required dices > avaiable dices, break
         if requirement.num_dice() > self.num_dice():
             return None
+
+        # result in dict format
+        result_dict: dict[Element, int] = defaultdict(int)
 
         supply: dict[Element, int] = defaultdict(int)
         supply.update(self._dice)
@@ -423,9 +424,10 @@ class ActualDice(Dice):
         need: dict[Element, int] = defaultdict(int)
         need.update(requirement._dice)
 
+        # local precedence initialization / correction
         if local_precedence is None:
             if characters is None:
-                local_precedence = []
+                local_precedence = [set()]
             else:
                 chars = characters.get_characters()
                 active_char = characters.get_active_character()
@@ -436,164 +438,119 @@ class ActualDice(Dice):
                         {active_char.ELEMENT()},
                         {char.ELEMENT() for char in chars} - {active_char.ELEMENT()},
                     ]
-        assert len(local_precedence) <= self._NUMBER_OF_ELEMENTS + 2
+        elif len(local_precedence) == 0:
+            local_precedence = [set()]
+        first_priority_elements: set[Element] = local_precedence[0]
 
-        # list of first priority elements
-        first_priority_elements: set[Element] = (
-            set()
-            if len(local_precedence) < 1
-            else local_precedence[0]
-        )
+        # check local precedence validity
+        appeared_elems: set[Element] = set()
+        for elem_set in local_precedence:
+            assert Element.OMNI not in elem_set, "OMNI should not be in precedence"
+            assert Element.ANY not in elem_set, "ANY should not be in precedence"
+            for elem in elem_set:
+                assert elem in _PURE_ELEMS, "Unknown element in precedence"
+                assert elem not in appeared_elems, "Duplicated element in precedence"
+                appeared_elems.add(elem)
 
-        def omni_filler_priority(
-                omni_supply: int,
-                omni_needed: int,
-                elem_supply: int,
-                elem_needed: int,
-                elem_prioritized: bool
-        ) -> tuple[int, int]:
-            """
-            return
-            Tuple[
-                how many OMNI (+ first priority elements if it so) spend if we select this ELEMENT as OMNI filler,
-                how many OMNI spent
-            ]
-
-            return BIG_INT if no possibility
-            """
-            if elem_prioritized:
-                return elem_needed + omni_needed, elem_needed + omni_needed - elem_supply
+        ## 1st step - fill elemental requirement ##
+        for elem in _PURE_ELEMS:
+            if need[elem] <= supply[elem]:
+                supply[elem] -= need[elem]
+                result_dict[elem] += need[elem]
             else:
-                omni = max((elem_needed + omni_needed) - elem_supply, 0)
-                return omni, omni  # don't spend element_needed, so engaged 0 elements of element_supply
+                omni_required = need[elem] - supply[elem]
+                if supply[Element.OMNI] < omni_required:
+                    return None
+                result_dict[elem] += supply[elem]
+                result_dict[Element.OMNI] += omni_required
+                supply[elem] = 0
+                supply[Element.OMNI] -= omni_required
 
-        @cache
-        def get_local_priority(element: Element) -> tuple[int, int]:
-            """ get priority by element, lower tuple is bigger priority and should be spent first """
-            nonlocal local_precedence
-            assert local_precedence is not None
-            if element is Element.OMNI:
-                return self._NUMBER_OF_ELEMENTS + 2, -1  # OMNI has biggest tuple
-            for i, elem_set in enumerate(local_precedence, start=1):
-                if element in elem_set:
-                    return (self._NUMBER_OF_ELEMENTS + 1 - i,
-                            self._ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY_DCT[element]
-                    )
-            else:
-                return -1, self._ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY_DCT[element]
+        ## 2nd step - fill OMNI requirement ##
+        # Rank elements by priority [is first priority, supply, user priority, implicit priority, element]
+        if need[Element.OMNI] > 0:
+            elems_with_omni_priority: list[tuple[int, int, int, int, Element]] = []
+            ranked_elems = {elem for elem in _PURE_ELEMS if supply[elem] > 0}
+            for priority, elem_set in enumerate(local_precedence):
+                for elem in elem_set:
+                    if elem not in ranked_elems:
+                        continue
+                    ranked_elems.remove(elem)
+                    elems_with_omni_priority.append((
+                        int(elem in first_priority_elements),
+                        -supply[elem],
+                        -priority,
+                        -self._LEGAL_ELEMS_ORDERED_DICT[elem],
+                        elem,
+                    ))
+            for elem in ranked_elems:
+                elems_with_omni_priority.append((
+                    int(elem in first_priority_elements),
+                    -supply[elem],
+                    -BIG_INT,
+                    -self._LEGAL_ELEMS_ORDERED_DICT[elem],
+                    elem,
+                ))
+            elems_with_omni_priority.sort()
+            # get elems in order of priority (from least valuable to most valuable)
+            elems_ordered = [elem for _, _, _, _, elem in elems_with_omni_priority]
 
-        # 1st step - fill OMNI requirement
-        if requirement[Element.OMNI] > 0:
-            @cache
-            def comparision_of_omni_priorities(x: tuple[Element, tuple[int, int]]) -> tuple[int, int, int, int]:
-                """ to sort by ascedence of least_spend omni+1st priority, then omni"""
-                type_of_element: Element = x[0]
-
-                order = x[1]
-                number_of_regular_dices: int = order[0]
-                number_of_omni: int = order[1]
-                priority_local, priority_global = get_local_priority(
-                    type_of_element
-                )  # lower - should be spent first
-                # return number_of_dices if number_of_dices is not None else
-                # -1, type_of_element
-                return number_of_regular_dices, priority_local, number_of_omni, priority_global
-
-            # find the elements to fill the OMNI requirement that costs
-            # the least (first_priority_elements number + OMNI elements number)
-            elem_cost_mapping: list[tuple[Element, tuple[int, int]]] = [
-                (
-                    element,
-                    omni_filler_priority(
-                        elem_supply=supply[element],
-                        elem_needed=need[element],
-                        omni_needed=need[Element.OMNI],
-                        elem_prioritized=element in first_priority_elements,
-                        omni_supply=supply[Element.OMNI]
-                    )
-                )
-                for element in _PURE_ELEMS
-                if supply[element] + supply[Element.OMNI] >= need[element] + need[Element.OMNI]
-            ]
-
-            if not elem_cost_mapping:
-                # Can't fill OMNI requirement
-                return None
-
-            # at first - find min priority
-            least_spend = min(
-                elem_cost_mapping,
-                key=comparision_of_omni_priorities
-            )[1]  # type: ignore
-
-            # at second - find all with this priority
-            best_omni_fillers: list[Element] = [
+            optional_elem = next((
                 elem
-                for elem, omni_to_spent in elem_cost_mapping
-                if omni_to_spent == least_spend
-            ]
+                for elem in elems_ordered
+                if need[Element.OMNI] <= supply[elem] + supply[Element.OMNI]
+            ), None)
+            if optional_elem is None:
+                if need[Element.OMNI] > supply[Element.OMNI]:
+                    return None
+                else:
+                    result_dict[Element.OMNI] += need[Element.OMNI]
+                    supply[Element.OMNI] -= need[Element.OMNI]
+            else:
+                elem = optional_elem
+                elem_deduction = min(need[Element.OMNI], supply[elem])
+                omni_deduction = need[Element.OMNI] - elem_deduction
+                result_dict[elem] += elem_deduction
+                result_dict[Element.OMNI] += omni_deduction
+                supply[elem] -= elem_deduction
+                supply[Element.OMNI] -= omni_deduction
 
-            assert best_omni_fillers, "Unknown error"
+        ## 3rd step - fill ANY requirement ##
+        # Rank elements by priority [user priority, supply, implicit priority, element]
+        if need[Element.ANY] > 0:
+            elems_with_any_priority: list[tuple[int, int, int, Element]] = [(1, 0, 0, Element.OMNI)]
+            ranked_elems = {elem for elem in _PURE_ELEMS if supply[elem] > 0}
+            for priority, elem_set in enumerate(local_precedence):
+                for elem in elem_set:
+                    if elem not in ranked_elems:
+                        continue
+                    ranked_elems.remove(elem)
+                    elems_with_any_priority.append((
+                        -priority,
+                        supply[elem],
+                        -self._LEGAL_ELEMS_ORDERED_DICT[elem],
+                        elem,
+                    ))
+            for elem in ranked_elems:
+                elems_with_any_priority.append((
+                    -BIG_INT,
+                    supply[elem],
+                    -self._LEGAL_ELEMS_ORDERED_DICT[elem],
+                    elem,
+                ))
+            elems_with_any_priority.sort()
+            # get elems in order of priority (from least valuable to most valuable)
+            elems_ordered = [elem for _, _, _, elem in elems_with_any_priority]
 
-            # get list of least-omni-spending candidates
-            filler_element: Element = min([
-                (get_local_priority(elem), elem)
-                for elem in best_omni_fillers
-            ])[1]
+            for elem in elems_ordered:
+                elem_deduction = min(need[Element.ANY], supply[elem])
+                result_dict[elem] += elem_deduction
+                supply[elem] -= elem_deduction
+                need[Element.ANY] -= elem_deduction
+                if need[Element.ANY] == 0:
+                    break
 
-            filler_element_count = min(need[Element.OMNI], supply[filler_element])
-            filler_omni_count = need[Element.OMNI] - filler_element_count
-
-            result_dict[filler_element] += filler_element_count
-            result_dict[Element.OMNI] += filler_omni_count
-
-            need[Element.OMNI] -= filler_element_count + filler_omni_count
-            supply[filler_element] -= filler_element_count
-            supply[Element.OMNI] -= filler_omni_count
-
-            assert need[Element.OMNI] == 0, "need element omni not 0"
-            assert supply[filler_element] >= 0, "supply <0"
-            assert supply[Element.OMNI] >= 0, "supply <0"
-
-        # 2nd step - fill the pure Elements
-        # with pure Elements and OMNI
-
-        for elem in self._ELEMENTS:
-            # 2.1 fill element with itself
-            num_of_elem = min(need[elem], supply[elem])
-
-            result_dict[elem] += num_of_elem
-            need[elem] -= num_of_elem
-            supply[elem] -= num_of_elem
-
-            # 2.2 fill Element with OMNI if needed
-            if need[elem] > supply[Element.OMNI]:
-                return None
-
-            number_of_omni = need[elem]
-
-            result_dict[Element.OMNI] += number_of_omni
-            need[elem] -= number_of_omni
-            supply[Element.OMNI] -= number_of_omni
-
-        # 3rd step - fill ANY with all avaiable elements
-
-        elements_by_precedence: list[tuple[tuple[int, int], Element]] = [
-            (get_local_priority(element), element) for element in self._ELEMENTS_AND_OMNI
-        ]
-        heapify(elements_by_precedence)
-
-        while need[Element.ANY] > 0 and elements_by_precedence:
-            precedence, elem = heappop(elements_by_precedence)
-
-            number_of_spent_element = min(need[Element.ANY], supply[elem])
-
-            result_dict[elem] += number_of_spent_element
-            need[Element.ANY] -= number_of_spent_element
-            supply[elem] -= number_of_spent_element
-
-        assert sum(need.values()) == 0
-        return type(self)(dice=result_dict)
+        return type(self)(result_dict)
 
     def _init_ordered_dice(
             self,
@@ -682,7 +639,7 @@ class ActualDice(Dice):
     @classmethod
     def from_random(cls, size: int, excepted_elems: set[Element] = set()) -> ActualDice:
         """
-        :returns: a random `ActualDice` object with `size` of dice chosen from `expected_elems`.
+        :returns: a random `ActualDice` object with `size` of dice that are not `excepted_elems`.
         """
         dice = ActualDice.from_empty()
         dice._dice._unfreeze()

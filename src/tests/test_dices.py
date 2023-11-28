@@ -647,3 +647,29 @@ class TestDice(unittest.TestCase):
         ), active_character_id=2))
         assert selected_dice is not None
         self.assertEqual(selected_dice, ActualDice({Element.OMNI: 2, Element.ANEMO: 1}))
+
+        selected_dice = dice.smart_selection(requirement, Characters((
+            Ganyu.from_default(1),
+            MaguuKenki.from_default(2),
+            Klee.from_default(3),
+        ), active_character_id=2))
+        assert selected_dice is not None
+        self.assertEqual(selected_dice, ActualDice({Element.OMNI: 2, Element.CRYO: 1}))
+
+        dice = ActualDice({Element.OMNI: 2, Element.CRYO: 1, Element.ANEMO: 2})
+        selected_dice = dice.smart_selection(requirement, Characters((
+            Kaeya.from_default(1),
+            Jean.from_default(2),
+            Ganyu.from_default(3),
+        ), active_character_id=2))
+        assert selected_dice is not None
+        self.assertEqual(selected_dice, ActualDice({Element.OMNI: 2, Element.CRYO: 1}))
+
+        dice = ActualDice({Element.OMNI: 3})
+        selected_dice = dice.smart_selection(requirement, Characters((
+            Kaeya.from_default(1),
+            Jean.from_default(2),
+            Ganyu.from_default(3),
+        ), active_character_id=2))
+        assert selected_dice is not None
+        self.assertEqual(selected_dice, ActualDice({Element.OMNI: 3}))

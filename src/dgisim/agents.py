@@ -179,7 +179,10 @@ class RandomAgent(PlayerAgent):
                 choice = random.choice(choices)
                 action_generator = action_generator.choose(choice)
             elif isinstance(choices, AbstractDice):
-                optional_choice = action_generator.dice_available().basically_satisfy(choices)
+                optional_choice = action_generator.dice_available().smart_selection(
+                    choices,
+                    action_generator.game_state.get_player(action_generator.pid).get_characters(),
+                )
                 if optional_choice is None:
                     raise Exception(f"There's not enough dice for {choices} from "  # pragma: no cover
                                     + f"{action_generator.dice_available()} at game_state:"
@@ -312,7 +315,10 @@ class CustomChoiceAgent(RandomAgent):  # pragma: no cover
                 choice = self._choose_handler(choices)
                 action_generator = action_generator.choose(choice)
             elif isinstance(choices, AbstractDice):
-                optional_choice = action_generator.dice_available().basically_satisfy(choices)
+                optional_choice = action_generator.dice_available().smart_selection(
+                    choices,
+                    action_generator.game_state.get_player(action_generator.pid).get_characters(),
+                )
                 if optional_choice is None:
                     raise Exception(f"There's not enough dice for {repr(choices)} from "
                                     + f"{action_generator.dice_available()} at game_state:"

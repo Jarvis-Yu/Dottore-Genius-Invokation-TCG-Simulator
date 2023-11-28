@@ -8,6 +8,7 @@
   `.to_json()` and `.from_json()`.
 - Enables seeding when stepping `GameState`
 - Basic encoding for any `GameState`
+- Smart dice selection that takes characters into account
 - New Cards:
   - Event Card:
     - Fresh Wind of Freedom
