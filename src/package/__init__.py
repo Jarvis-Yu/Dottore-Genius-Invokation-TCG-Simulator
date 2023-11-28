@@ -30,6 +30,8 @@ from ..dgisim.effect.effects_template import *
 from ..dgisim.effect.enums import *
 from ..dgisim.effect.structs import *
 
+from ..dgisim.encoding.encoding_plan import *
+
 from ..dgisim.helper.hashable_dict import *
 
 from ..dgisim.phase.phase import *

@@ -6,7 +6,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/badge.svg?branch=master)](https://coveralls.io/github/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator?branch=master)
 [![license](https://img.shields.io/github/license/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator)](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/LICENSE)
 
-A Genshin Impact Genius Invokation TCG simulator intended to be used for AI training.
+A Genshin Impact Genius Invokation TCG simulator intended to be used for Reinforcement Learning.
 
 - [**Documentation**](https://dottore-genius-invokation-tcg-simulator.readthedocs.io/en/stable/)
 - [**Source code**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator)
