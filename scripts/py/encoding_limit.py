@@ -3,7 +3,7 @@ import os
 import pickle
 import random
 from collections import defaultdict
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, field, fields
 from enum import Enum
 from itertools import chain
 from pprint import pprint
@@ -111,8 +111,9 @@ type_size_map[st.Status] = max(stt_size_list[0][0], sms_size_list[0][0], sps_siz
 
 # GameState testing...
 all_states: list[GameState] = []
+runs = 100
 print("Generating game states...")
-for _ in tqdm(range(100)):
+for _ in tqdm(range(runs)):
     game_state = GameState.from_default()
     gsm = GameStateMachine(game_state, RandomAgent(), RandomAgent())
     gsm.run()
@@ -122,25 +123,48 @@ encoding_length = set()
 
 @dataclass
 class Data:
-    max_effect_size: int = 0
-    max_effects_num: int = 0
-    max_char_hidden_size: int = 0
-    max_char_eq_size: int = 0
-    max_char_stt_size: int = 0
-    max_combat_hidden_size: int = 0
-    max_combat_stt_size: int = 0
+    total_runs: int = 0
+    max_effect_size: dict[int, int] = field(default_factory=lambda: defaultdict(int))
+    max_effects_num: dict[int, int] = field(default_factory=lambda: defaultdict(int))
+    max_char_hidden_size: dict[int, int] = field(default_factory=lambda: defaultdict(int))
+    max_char_eq_size: dict[int, int] = field(default_factory=lambda: defaultdict(int))
+    max_char_stt_size: dict[int, int] = field(default_factory=lambda: defaultdict(int))
+    max_combat_hidden_size: dict[int, int] = field(default_factory=lambda: defaultdict(int))
+    max_combat_stt_size: dict[int, int] = field(default_factory=lambda: defaultdict(int))
 
 data = Data()
-if os.path.exists("scripts/py/encoding_limit.pickle"):
-    with open("scripts/py/encoding_limit.pickle", "rb") as f:
+if os.path.exists("scripts/py/encoding_limit/encoding_limit.pickle"):
+    with open("scripts/py/encoding_limit/encoding_limit.pickle", "rb") as f:
         saved_data = pickle.load(f)
         try:
+            data.total_runs = saved_data.total_runs
+        except Exception:
+            pass
+        try:
             data.max_effect_size = saved_data.max_effect_size
+        except Exception:
+            pass
+        try:
             data.max_effects_num = saved_data.max_effects_num
+        except Exception:
+            pass
+        try:
             data.max_char_hidden_size = saved_data.max_char_hidden_size
+        except Exception:
+            pass
+        try:
             data.max_char_eq_size = saved_data.max_char_eq_size
+        except Exception:
+            pass
+        try:
             data.max_char_stt_size = saved_data.max_char_stt_size
+        except Exception:
+            pass
+        try:
             data.max_combat_hidden_size = saved_data.max_combat_hidden_size
+        except Exception:
+            pass
+        try:
             data.max_combat_stt_size = saved_data.max_combat_stt_size
         except Exception:
             pass
@@ -148,11 +172,10 @@ if os.path.exists("scripts/py/encoding_limit.pickle"):
 effect_field_types = set()
 
 print("Analyzing game states...")
-ss = []
 for game_state in tqdm(all_states):
     game_state_encoding = game_state.encoding(encoding_plan)
     encoding_length.add(len(game_state_encoding))
-    data.max_effects_num = max(data.max_effects_num, len(game_state.get_effect_stack()._effects))
+    data.max_effects_num[len(game_state.get_effect_stack()._effects)] += 1
 
     # Effects
     for effect in game_state.get_effect_stack()._effects:
@@ -178,52 +201,62 @@ for game_state in tqdm(all_states):
             else:
                 effect_field_types.add(type(field_val))
             effect_size += type_size_map[eff_type]
-        if effect_size > data.max_effect_size:
-            ss.append(f"New max effect size: {effect_size} of {effect.__class__.__name__}")
-        data.max_effect_size = max(data.max_effect_size, effect_size)
+        data.max_effect_size[effect_size] += 1
 
     # Statuses
     for char in chain(game_state.get_player1().get_characters(), game_state.get_player2().get_characters()):
-        data.max_char_hidden_size = max(
-            data.max_char_hidden_size,
-            len(char.get_hidden_statuses()._statuses),
-        )
-        data.max_char_eq_size = max(
-            data.max_char_eq_size,
-            len(char.get_equipment_statuses()._statuses),
-        )
-        data.max_char_stt_size = max(
-            data.max_char_stt_size,
-            len(char.get_character_statuses()._statuses),
-        )
+        data.max_char_hidden_size[len(char.get_hidden_statuses()._statuses)] += 1
+        data.max_char_eq_size[len(char.get_equipment_statuses()._statuses)] += 1
+        data.max_char_stt_size[len(char.get_character_statuses()._statuses)] += 1
     for player in (game_state.get_player1(), game_state.get_player2()):
-        data.max_combat_hidden_size = max(
-            data.max_combat_hidden_size,
-            len(player.get_hidden_statuses()._statuses),
-        )
-        data.max_combat_stt_size = max(
-            data.max_combat_stt_size,
-            len(player.get_combat_statuses()._statuses)
-        )
+        data.max_combat_hidden_size[len(player.get_hidden_statuses()._statuses)] += 1
+        data.max_combat_stt_size[len(player.get_combat_statuses()._statuses)] += 1
 
-print('\n'.join(ss))
+data.total_runs += runs
 
-with open("scripts/py/encoding_limit.pickle", "wb") as f:
+with open("scripts/py/encoding_limit/encoding_limit.pickle", "wb") as f:
     pickle.dump(data, f)
 
 print()
+print(f"Total runs: {data.total_runs}")
 print(f"Status max size: {stt_size_list[0][0]}")
 print(f"Summon max size: {sms_size_list[0][0]}")
 print(f"Support max size: {sps_size_list[0][0]}")
-print(f"Max effect size: {data.max_effect_size}")
-print(f"Max effects num: {data.max_effects_num}")
-print(f"Max char hidden size: {data.max_char_hidden_size}")
-print(f"Max char eq size: {data.max_char_eq_size}")
-print(f"Max char stt size: {data.max_char_stt_size}")
-print(f"Max combat hidden size: {data.max_combat_hidden_size}")
-print(f"Max combat stt size: {data.max_combat_stt_size}")
+print(f"Max effect size: {max(data.max_effect_size.keys())}")
+print(f"Max effects num: {max(data.max_effects_num.keys())}")
+print(f"Max char hidden size: {max(data.max_char_hidden_size.keys())}")
+print(f"Max char eq size: {max(data.max_char_eq_size.keys())}")
+print(f"Max char stt size: {max(data.max_char_stt_size.keys())}")
+print(f"Max combat hidden size: {max(data.max_combat_hidden_size.keys())}")
+print(f"Max combat stt size: {max(data.max_combat_stt_size.keys())}")
 print(f"Encoding length(s): {encoding_length}")
 
 print()
 print(f"Status field types: {status_field_types}")
 print(f"Effect field types: {effect_field_types}")
+
+#### Plotting ####
+import matplotlib.pyplot as plt
+
+def plot_dict(d: dict[int, int], title: str):
+    total = sum(d.values())
+    threshold = total / len(d) * 0.1
+    plt.figure(figsize=(10, 10))
+    bars = plt.bar(d.keys(), d.values())
+    plt.xticks(list(d.keys()))
+    for val, bar in zip(d.values(), bars):
+        if val > threshold:
+            continue
+        yval = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2.0, yval, str(val), ha='center', va='bottom')
+    plt.title(title)
+    plt.savefig(f"scripts/py/encoding_limit/{title}.png")
+    plt.clf()
+
+plot_dict(data.max_effect_size, "Effect size distribution")
+plot_dict(data.max_effects_num, "Effects num distribution")
+plot_dict(data.max_char_hidden_size, "Character hidden statuses size distribution")
+plot_dict(data.max_char_eq_size, "Character equipment statuses size distribution")
+plot_dict(data.max_char_stt_size, "Character statuses size distribution")
+plot_dict(data.max_combat_hidden_size, "Combat hidden statuses size distribution")
+plot_dict(data.max_combat_stt_size, "Combat statuses size distribution")
