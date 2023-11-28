@@ -93,7 +93,7 @@ class Statuses:
         """ :returns: tuple of statuses. """
         return self._statuses
 
-    def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
+    def encoding(self, encoding_plan: EncodingPlan, fixed_len: None | int = None) -> list[int]:
         """
         :returns: the encoding of this `Statuses` object.
         """
@@ -101,7 +101,8 @@ class Statuses:
             status.encoding(encoding_plan)
             for status in self._statuses
         ]
-        fillings = encoding_plan.STATUSES_FIXED_LEN - len(statuses_encoding)
+        fixed_len = encoding_plan.STATUSES_FIXED_LEN if fixed_len is None else fixed_len
+        fillings = fixed_len - len(statuses_encoding)
         for _ in range(fillings):
             statuses_encoding.append([0] * encoding_plan.STATUS_FIXED_LEN)
         return list(chain.from_iterable(statuses_encoding))

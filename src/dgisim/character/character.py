@@ -552,9 +552,9 @@ class Character:
         return list(chain(
             basics,
             self._aura.encoding(),
-            self._hiddens.encoding(encoding_plan),
+            self._hiddens.encoding(encoding_plan, encoding_plan.CHAR_HIDDEN_FIXED_LEN),
             self._equipments.encoding(encoding_plan),
-            self._statuses.encoding(encoding_plan),
+            self._statuses.encoding(encoding_plan, encoding_plan.CHAR_STT_FIXED_LEN),
         ))
 
     def dict_str(self) -> Union[dict, str]:

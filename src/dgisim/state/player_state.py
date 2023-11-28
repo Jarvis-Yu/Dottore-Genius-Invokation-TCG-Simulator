@@ -234,8 +234,8 @@ class PlayerState:
             self._publicly_used_cards.encoding(encoding_plan),
             self._publicly_gained_cards.encoding(encoding_plan),
             self._characters.encoding(encoding_plan),
-            self._hidden_statuses.encoding(encoding_plan),
-            self._combat_statuses.encoding(encoding_plan),
+            self._hidden_statuses.encoding(encoding_plan, encoding_plan.PLAYER_HIDDEN_FIXED_LEN),
+            self._combat_statuses.encoding(encoding_plan, encoding_plan.PLAYER_COMBAT_FIXED_LEN),
             self._summons.encoding(encoding_plan),
             self._supports.encoding(encoding_plan),
         ))

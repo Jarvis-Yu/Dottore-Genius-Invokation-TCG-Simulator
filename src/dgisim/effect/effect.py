@@ -163,13 +163,14 @@ class Effect:
             elif isinstance(value, int):
                 ret_val.append(value)
             elif isinstance(value, Enum):
+                assert isinstance(value.value, int)
                 ret_val.append(value.value)
             elif value is None:
                 ret_val.append(0)
             elif isinstance(value, StaticTarget):
                 ret_val.extend(value.encoding(encoding_plan))
             elif isinstance(value, Status):
-                ret_val.append(encoding_plan.code_for(value))
+                ret_val.extend(value.encoding(encoding_plan))
             elif isinstance(value, ReactionDetail):
                 ret_val.extend(value.encoding())
             elif isinstance(value, DamageType):

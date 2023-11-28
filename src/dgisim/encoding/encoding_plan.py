@@ -42,9 +42,13 @@ class EncodingPlan:
             cards_fixed_len: int = 40,
             status_fixed_len: int = 7,
             statuses_fixed_len: int = 10,
+            char_hidden_fixed_len: int = 4,
+            char_stt_fixed_len: int = 10,
+            player_hidden_fixed_len: int = 10,
+            player_combat_fixed_len: int = 10,
             summons_fixed_len: int = 4,
             supports_fixed_len: int = 4,
-            effect_fixed_len: int = 40,
+            effect_fixed_len: int = 25,
             effects_fixed_len: int = 40,
     ) -> None:
         self._card_mapping = card_mapping
@@ -57,6 +61,10 @@ class EncodingPlan:
         self.CARDS_FIXED_LEN = cards_fixed_len
         self.STATUS_FIXED_LEN = status_fixed_len
         self.STATUSES_FIXED_LEN = statuses_fixed_len
+        self.CHAR_HIDDEN_FIXED_LEN = char_hidden_fixed_len
+        self.CHAR_STT_FIXED_LEN = char_stt_fixed_len
+        self.PLAYER_HIDDEN_FIXED_LEN = player_hidden_fixed_len
+        self.PLAYER_COMBAT_FIXED_LEN = player_combat_fixed_len
         self.SUMMONS_FIXED_LEN = summons_fixed_len
         self.SUPPORTS_FIXED_LEN = supports_fixed_len
         self.EFFECT_FIXED_LEN = effect_fixed_len
