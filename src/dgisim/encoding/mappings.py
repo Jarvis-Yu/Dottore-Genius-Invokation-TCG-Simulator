@@ -402,11 +402,82 @@ STT_MAPPING: dict[type["Status"], int] = {
 
 SUMM_MAPPING: dict[type["Summon"], int] = {
     summ: 6000 + i
-    for i, summ in enumerate([
-        getattr(summon, summ)
-        for summ in summon.__all__
-    ])
+    for summ, i in (
+        #### Reaction 0 ####
+        (summon.BurningFlameSummon, 0),
+        ##(summon.BountifulCoreSummon, 1),
+
+        #### Card 50 ####
+        ##(summon.CryoHilichurlShooterSummon, 50),
+        ##(summon.HydroSamachurlSummon, 51),
+        ##(summon.HilichurlBerserkerSummon, 52),
+        ##(summon.ElectroHilichurlShooterSummon, 53),
+
+        #### Cryo 100 ####
+        (summon.SacredCryoPearlSummon, 100),
+        # (summon.DrunkenMistSummon, 101),
+        # (summon.FrostflakeSekiNoToSummon, 102),
+        (summon.ShadowswordGallopingFrostSummon, 103),
+        # (summon.LightfallSwordSummon, 104),
+        (summon.TalismanSpiritSummon, 105),
+        # (summon.CryoCicinsSummon, 106),
+        (summon.HeraldOfFrostSummon, 107),
+
+        #### Hydro 200 ####
+        # (summon.MelodyLoopSummon, 200),
+        (summon.ReflectionSummon, 201),
+        (summon.OceanicMimicSquirrelSummon, 202),
+        (summon.OceanicMimicRaptorSummon, 203),
+        (summon.OceanicMimicFrogSummon, 204),
+        (summon.BakeKurageSummon, 205),
+        # (summon.GardenOfPuritySummon, 206),
+
+        #### Pyro 300 ####
+        # (summon.GuobaSummon, 300),
+        # (summon.BaronBunnySummon, 301),
+        # (summon.DarkfireFurnaceSummon, 302),
+        (summon.FierySanctumFieldSummon, 303),
+
+        #### Electro 400 ####
+        (summon.OzSummon, 400),
+        # (summon.TenguJuuraiAmbushSummon, 401),
+        # (summon.TenguJuuraiStormclusterSummon, 402),
+        # (summon.EyeOfStormyJudgmentSummon, 403),
+        (summon.SesshouSakuraSummon, 404),
+        (summon.ChainsOfWardingThunderSummon, 405),
+        # (summon.LightningRoseSummon, 406),
+        # (summon.AfterSalesServiceRoundsSummon, 407),
+        # (summon.JinniSummon, 408),
+
+        #### Geo 500 ####
+        (summon.UshiSummon, 500),
+        # (summon.StoneSteleSummon, 501),
+        (summon.SolarIsotomaSummon, 502),
+
+        #### Dendro 600 ####
+        (summon.CuileinAnbarSummon, 600),
+        (summon.ClusterbloomArrowSummon, 601),
+        # (summon.YueguiThrowingModeSummon, 602),
+        # (summon.GossamerSpriteSummon, 603),
+
+        #### Anemo 700 ####
+        # (summon.LargeWindSpiritSummon, 701),
+        (summon.DandelionFieldSummon, 702),
+        (summon.ShadowswordLoneGaleSummon, 703),
+        (summon.StormEyeSummon, 704),
+        (summon.AutumnWhirlwindSummon, 705),
+
+        #### Unobtainable 800 ####
+        ##(summon.HealingRainSummon, 800),
+        ##(summon.TangleboltRingSummon, 801),
+        ##(summon.WhirlwindSummon, 802),
+
+        #### End 900 ####
+
+    )
 }
+
+
 
 SUPP_MAPPING: dict[type["Support"], int] = {
     supp: 7000 + i
