@@ -169,7 +169,7 @@ class EquipmentStatuses(Statuses):
         return cls(tuple(statuses))
 
     @override
-    def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
+    def encoding(self, encoding_plan: EncodingPlan, fixed_len: None | int = 3) -> list[int]:
         """
         :returns: the encoding of this `Statuses` object.
         """
@@ -177,8 +177,8 @@ class EquipmentStatuses(Statuses):
             status.encoding(encoding_plan)
             for status in self._statuses
         ]
-        STATUSES_FIXED_LEN = 3
-        fillings = STATUSES_FIXED_LEN - len(statuses_encoding)
+        assert fixed_len is not None
+        fillings = fixed_len - len(statuses_encoding)
         for _ in range(fillings):
             statuses_encoding.append([0] * encoding_plan.STATUS_FIXED_LEN)
         return list(chain.from_iterable(statuses_encoding))

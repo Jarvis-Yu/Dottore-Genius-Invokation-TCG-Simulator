@@ -337,28 +337,30 @@ class TestDice(unittest.TestCase):
                         expected = None
 
                     self.assertEqual(actual, expected)
+    
+    ORDERED_ELEMS = ActualDice._LEGAL_ELEMS_ORDERED[:0:-1]
 
     def test_smart_selection_all_any(self):
         """ test one die of every Element can fill ANY in proper order """
-        for number_of_any in range(1, len(ActualDice._ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY) + 1):
+        for number_of_any in range(1, len(ActualDice._LEGAL_ELEMS)):
             with self.subTest(number_of_any=number_of_any):
                 input_actual_dice: ActualDice = ActualDice(
-                    dice={el: 1 for el in ActualDice._ELEMENTS}
+                    dice={el: 1 for el in self.ORDERED_ELEMS}
                 )
                 input_abstract_dice: AbstractDice = AbstractDice(
                     dice={Element.ANY: number_of_any}
                 )
                 input_precedence: list[set[Element]] = [
-                    {el} for el in ActualDice._ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY
+                    {el} for el in ActualDice._LEGAL_ELEMS_ORDERED[:0:-1]
                 ]
 
                 actual: None | ActualDice = input_actual_dice.smart_selection(
                     requirement=input_abstract_dice, local_precedence=input_precedence
                 )
 
-                if ActualDice._NUMBER_OF_ELEMENTS >= number_of_any:
+                if len(ActualDice._LEGAL_ELEMS) - 1 >= number_of_any:
                     expected: None | ActualDice = ActualDice(
-                        {el: 1 for el in ActualDice._ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY[-number_of_any:]}
+                        {el: 1 for el in self.ORDERED_ELEMS[-number_of_any:]}
                     )
                 else:
                     expected = None
@@ -367,7 +369,7 @@ class TestDice(unittest.TestCase):
 
     def test_smart_selection_all_any_plus_one_omni_actual(self):
         """ test one die of every element from a to b, and ANY need: b-a+1 (a<b) """
-        elements_and_omni = (Element.OMNI,) + ActualDice._ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY
+        elements_and_omni = (Element.OMNI,) + self.ORDERED_ELEMS
         for a in range(len(elements_and_omni)):
             for b in range(a + 1, len(elements_and_omni)):
                 # need = supply, need < supply, need > supply
@@ -380,7 +382,7 @@ class TestDice(unittest.TestCase):
                             dice={Element.ANY: any_need_number}
                         )
                         input_precedence: list[set[Element]] = [
-                            {el} for el in ActualDice._ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY
+                            {el} for el in self.ORDERED_ELEMS
                         ]
 
                         actual: None | ActualDice = input_actual_dice.smart_selection(
@@ -496,7 +498,7 @@ class TestDice(unittest.TestCase):
     def test_smart_selection_something_supply_empty_need(self):
         """ test empty need with non-empty supply """
         input_actual_dice: ActualDice = ActualDice(
-            {el: 1 for el in ActualDice._ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY + (Element.OMNI,)})
+            {el: 1 for el in self.ORDERED_ELEMS + (Element.OMNI,)})
         input_abstract_dice: AbstractDice = AbstractDice({})
         input_precedence: list[set[Element]] = []
 
@@ -603,7 +605,7 @@ class TestDice(unittest.TestCase):
         supply: 2 of every elements
         need: 5 omni
         """
-        elements_and_omni = (Element.OMNI,) + ActualDice._ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY
+        elements_and_omni = (Element.OMNI,) + self.ORDERED_ELEMS
         input_actual_dice = ActualDice(
             dice={el: 2 for el in elements_and_omni}
         )
@@ -611,7 +613,7 @@ class TestDice(unittest.TestCase):
             dice={Element.OMNI: 5}
         )
         input_precedence: list[set[Element]] = [
-            {el} for el in ActualDice._ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY
+            {el} for el in self.ORDERED_ELEMS
         ]
 
         actual: None | ActualDice = input_actual_dice.smart_selection(

@@ -247,23 +247,6 @@ class ActualDice(Dice):
         for elem, i in _LEGAL_ELEMS_ORDERED_DICT.items()
     }
 
-    _ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY: tuple[Element, ...] = _LEGAL_ELEMS_ORDERED[:0:-1]
-
-    _ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY: tuple[Element, ...] = \
-        _ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY + (Element.OMNI,)
-
-    # Dict[element, global_priority]
-    _ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY_DCT: dict[Element, int] = {
-        elem: i
-        for i, elem in enumerate(_ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY)
-    }
-
-    _ELEMENTS_AND_OMNI = _ELEMENTS_AND_OMNI_BY_DECREASING_GLOBAL_PRIORITY
-
-    _ELEMENTS = _ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY
-
-    _NUMBER_OF_ELEMENTS: int = len(_ELEMENTS_BY_DECREASING_GLOBAL_PRIORITY)
-
     def _satisfy(self, requirement: AbstractDice) -> bool:
         assert self.is_legal() and requirement.is_legal()
 
