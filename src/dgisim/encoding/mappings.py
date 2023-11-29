@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from ..card import card
 from ..character import character as char
 from ..effect import effect
+from ..helper.hashable_dict import HashableDict
 from ..mode import Mode, DefaultMode, AllOmniMode
 from ..status import status
 from ..summon import summon
@@ -31,7 +32,7 @@ __all__ = [
 ]
 
 # min size: 700
-CHAR_MAPPING: dict[type["Character"], int] = {
+CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
     c: 1000 + i
     for c, i in (
         #### Cryo 000 ####
@@ -110,9 +111,9 @@ CHAR_MAPPING: dict[type["Character"], int] = {
 
         #### End 700 ####
     )
-}  # type: ignore
+})
 
-CARD_MAPPING: dict[type["Card"], int] = {
+CARD_MAPPING: dict[type["Card"], int] = HashableDict({
     card: 2000 + i
     for card, i in (
         #### 0 Weapon Card 0000 ####
@@ -380,9 +381,9 @@ CARD_MAPPING: dict[type["Card"], int] = {
 
         #### End 1625 ####
     )
-}
+})
 
-EFFECT_MAPPING: dict[type["Effect"], int] = {
+EFFECT_MAPPING: dict[type["Effect"], int] = HashableDict({
     eft: 4000 + i
     for eft, i in (
         #### 0 Phase Effect 000 ####
@@ -489,23 +490,294 @@ EFFECT_MAPPING: dict[type["Effect"], int] = {
 
         #### End 400 ####
     )
-}
+})
 
-MODE_MAPPING: dict[type["Mode"], int] = {
+MODE_MAPPING: dict[type["Mode"], int] = HashableDict({
     DefaultMode: 501,
     AllOmniMode: 502,
-}
+})
 
-STT_MAPPING: dict[type["Status"], int] = {
+STT_MAPPING: dict[type["Status"], int] = HashableDict({
     stt: 5000 + i
-    for i, stt in enumerate([
-        getattr(status, stt)
-        for stt in status.__all__
-    ])
-}
+    for stt, i in (
+        #### 0 Player Hidden Status 000 ####
+        (status.ArcaneLegendUsedStatus, 0),
+        (status.ChargedAttackStatus, 1),
+        (status.PlungeAttackStatus, 2),
+        (status.DeathThisRoundStatus, 3),
 
-SUMM_MAPPING: dict[type["Summon"], int] = {
-    summ: 6000 + i
+        #### 1 Equipment Status 050 ####
+        #### 1.1 Weapon Status 050 ####
+        #### 1.1.1 Catalyst Status 050 ####
+        (status.MagicGuideStatus, 50),
+        (status.SacrificialFragmentsStatus, 51),
+        # (status.SkywardAtlasStatus, 52),
+        (status.AThousandFloatingDreamsStatus, 53),
+        (status.FruitOfFulfillmentStatus, 54),
+
+        #### 1.1.2 Bow Status 075 ####
+        (status.RavenBowStatus, 75),
+        (status.SacrificialBowStatus, 76),
+        # (status.SkywardHarpStatus, 77),
+        (status.AmosBowStatus, 78),
+        # (status.ElegyForTheEndStatus, 79),
+        (status.KingsSquireStatus, 80),
+
+        #### 1.1.3 Claymore Status 100 ####
+        (status.WhiteIronGreatswordStatus, 100),
+        (status.SacrificialGreatswordStatus, 101),
+        # (status.SkywardPrideStatus, 102),
+        (status.WolfsGravestoneStatus, 103),
+        (status.TheBellStatus, 104),
+
+        #### 1.1.4 Polearm Status 125 ####
+        (status.WhiteTasselStatus, 125),
+        (status.LithicSpearStatus, 126),
+        # (status.SkywardSpineStatus, 127),
+        (status.VortexVanquisherStatus, 128),
+        # (status.EngulfingLightningStatus, 129),
+        # (status.MoonpiercerStatus, 130),
+
+        #### 1.1.5 Sword Status 150 ####
+        (status.TravelersHandySwordStatus, 150),
+        (status.SacrificialSwordStatus, 151),
+        # (status.SkywardBladeStatus, 152),
+        (status.AquilaFavoniaStatus, 153),
+        # (status.FavoniusSwordStatus, 154),
+
+        #### 1.2 Artifact Status 175 ####
+        # (status.AdventurersBandanaStatus, 175),
+        # (status.LuckyDogsSilverCircletStatus, 176),
+        # (status.TravellingDoctorsHandkerchiefStatus, 177),
+        (status.GamblersEarringsStatus, 178),
+        (status.InstructorsCapStatus, 179),
+        # (status.ExilesCircletStatus, 180),
+        # (status.BrokenRimesEchoStatus, 181),
+        # (status.BlizzardStrayerStatus, 182),
+        # (status.WineStainedTricorneStatus, 183),
+        # (status.HeartOfDepthStatus, 184),
+        # (status.WitchsScorchingHatStatus, 185),
+        # (status.CrimsonWitchOfFlamesStatus, 186),
+        # (status.ThunderSummonersCrownStatus, 187),
+        # (status.ThunderingFuryStatus, 188),
+        # (status.MaskOfSolitudeBasaltStatus, 189),
+        # (status.ArchaicPetraStatus, 190),
+        # (status.LaurelCoronetStatus, 191),
+        # (status.DeepwoodMemoriesStatus, 192),
+        # (status.ViridescentVenerersDiademStatus, 193),
+        # (status.ViridescentVenererStatus, 194),
+        (status.GeneralsAncientHelmStatus, 195),
+        (status.TenacityOfTheMillelithStatus, 196),
+        # (status.OrnateKabutoStatus, 197),
+        # (status.EmblemOfSeveredFateStatus, 198),
+        # (status.CapriciousVisageStatus, 199),
+        # (status.ShimenawasReminiscenceStatus, 200),
+        # (status.ThunderingPoiseStatus, 201),
+        # (status.VermillionHereafterStatus, 202),
+        # (status.CrownOfWatatsumiStatus, 203),
+        # (status.OceanHuedClamStatus, 204),
+        # (status.ShadowOfTheSandKingStatus, 205),
+
+        #### 2 Combat Status 300 ####
+        #### 2.1 General Combat Status 300 ####
+        (status.CatalyzingFieldStatus, 300),
+        (status.DendroCoreStatus, 301),
+        (status.ChangingShiftsStatus, 302),
+        (status.ElementalResonanceEnduringRockStatus, 303),
+        (status.ElementalResonanceFerventFlamesStatus, 304),
+        (status.ElementalResonanceShatteringIceStatus, 305),
+        (status.ElementalResonanceSprawlingGreeneryStatus, 306),
+        (status.FreshWindOfFreedomStatus, 307),
+        (status.KingsSquireEffectStatus, 308),
+        (status.LeaveItToMeStatus, 309),
+        (status.IHaventLostYetOnCooldownStatus, 310),
+        (status.ReviveOnCooldownStatus, 311),
+        (status.WhenTheCraneReturnedStatus, 312),
+        (status.WhereIsTheUnseenRazorStatus, 313),
+        (status.WindAndFreedomStatus, 314),
+
+        #### 2.2 Shield Combat Status 375 ####
+        (status.CrystallizeStatus, 375),
+        (status.RebelliousShieldStatus, 376),
+
+        #### 3 Character Status 450 ####
+        #### 3.1 General Character Status 450 ####
+        (status.FrozenStatus, 450),
+        (status.JueyunGuobaStatus, 451),
+        (status.MintyMeatRollsStatus, 452),
+        (status.MushroomPizzaStatus, 453),
+        (status.NorthernSmokedChickenStatus, 454),
+        (status.SatiatedStatus, 455),
+        (status.TandooriRoastChickenStatus, 456),
+        (status.UnmovableMountainStatus, 457),
+
+        #### 3.2 Shield Character Status 525 ####
+        (status.LithicGuardStatus, 525),
+        (status.LotusFlowerCrispStatus, 526),
+
+        #### 4 Character Specific Status 600 ####
+        #### 4.1 Cryo Character Status 600 ####
+        ## Ganyu 600 ##
+        (status.UndividedHeartStatus, 600),
+        (status.GanyuTalentStatus, 601),
+        (status.IceLotusStatus, 602),
+        ## Diona 620 ##
+        ## Kaeya 640 ##
+        (status.ColdBloodedStrikeStatus, 640),
+        (status.IcicleStatus, 641),
+        ## Chongyun 660 ##
+        ## KamisatoAyaka 680 ##
+        ## Eula 700 ##
+        ## Shenhe 720 ##
+        (status.MysticalAbandonStatus, 720),
+        (status.IcyQuillStatus, 721),
+        ## FatuiCryoCicinMage 740 ##
+        ## Qiqi 760 ##
+        (status.RiteOfResurrectionStatus, 760),
+        (status.FortunePreservingTalismanStatus, 761),
+        (status.QiqiTalentStatus, 762),
+
+        #### 4.2 Hydro Character Status 2600 ####
+        ## Barbara 2600 ##
+        ## Xingqiu 2620 ##
+        (status.TheScentRemainedStatus, 2620),
+        (status.RainSwordStatus, 2621),
+        (status.RainbowBladeworkStatus, 2622),
+        ## Mona 2640 ##
+        (status.ProphecyOfSubmersionStatus, 2640),
+        (status.IllusoryBubbleStatus, 2641),
+        (status.IllusoryTorrentStatus, 2642),
+        ## RhodeiaOfLoch 2660 ##
+        (status.StreamingSurgeStatus, 2660),
+        ## MirrorMaiden 2680 ##
+        ## SangonomiyaKokomi 2700 ##
+        (status.TamakushiCasketStatus, 2700),
+        (status.CeremonialGarmentStatus, 2701),
+        ## KamisatoAyato 2720 ##
+        ## Tartaglia 2740 ##
+        ## Candice 2760 ##
+        ## Nilou 2780 ##
+
+        #### 4.3 Pyro Character Status 4600 ####
+        ## Diluc 4600 ##
+        ## Xiangling 4620 ##
+        ## Bennett 4640 ##
+        (status.GrandExpectationStatus, 4640),
+        (status.InspirationFieldStatus, 4641),
+        (status.InspirationFieldEnhancedStatus, 4642),
+        ## Yoimiya 4660 ##
+        (status.NaganoharaMeteorSwarmStatus, 4660),
+        (status.AurousBlazeStatus, 4661),
+        (status.NiwabiEnshouStatus, 4662),
+        ## FatuiPyroAgent 4680 ##
+        (status.PaidInFullStatus, 4680),
+        (status.StealthMasterStatus, 4681),
+        (status.StealthStatus, 4682),
+        ## Klee 4700 ##
+        (status.PoundingSurpriseStatus, 4700),
+        (status.ExplosiveSparkStatus, 4701),
+        (status.SparksnSplashStatus, 4702),
+        ## Amber 4720 ##
+        ## HuTao 4740 ##
+        (status.SanguineRougeStatus, 4740),
+        (status.BloodBlossomStatus, 4741),
+        (status.ParamitaPapilioStatus, 4742),
+        ## AbyssLectorFathomlessFlames 4760 ##
+        ## Yanfei 4780 ##
+        ## Dehya 4800 ##
+        (status.StalwartAndTrueStatus, 4800),
+        (status.IncinerationDriveStatus, 4801),
+
+        #### 4.4 Electro Character Status 6600 ####
+        ## Fischl 6600 ##
+        (status.StellarPredatorStatus, 6600),
+        ## Keqing 6620 ##
+        (status.ThunderingPenanceStatus, 6620),
+        (status.KeqingElectroInfusionStatus, 6621),
+        (status.KeqingTalentStatus, 6622),
+        ## Razor 6640 ##
+        ## Cyno 6660 ##
+        ## Beidou 6680 ##
+        ## KujouSara 6700 ##
+        ## RaidenShogun 6720 ##
+        ## YaeMiko 6740 ##
+        (status.TheShrinesSacredShadeStatus, 6740),
+        (status.RiteOfDispatchStatus, 6741),
+        (status.TenkoThunderboltsStatus, 6742),
+        ## ElectroHypostasis 6760 ##
+        (status.ElectroCrystalCoreHiddenStatus, 6760),
+        (status.ElectroCrystalCoreStatus, 6761),
+        (status.RockPaperScissorsComboPaperStatus, 6762),
+        (status.RockPaperScissorsComboScissorsStatus, 6763),
+        ## Lisa 6780 ##
+        ## Dori 6800 ##
+
+        #### 4.5 Geo Character Status 8600 ####
+        ## Ningguang 8600 ##
+        (status.StrategicReserveStatus, 8600),
+        (status.JadeScreenStatus, 8601),
+        ## Noelle 8620 ##
+        (status.IGotYourBackStatus, 8620),
+        (status.FullPlateStatus, 8621),
+        (status.SweepingTimeStatus, 8622),
+        ## StonehideLawachurl 8640 ##
+        ## AratakiItto 8660 ##
+        (status.AratakiIchibanStatus, 8660),
+        (status.RagingOniKingStatus, 8661),
+        (status.SuperlativeSuperstrengthStatus, 8662),
+        ## Zhongli 8680 ##
+        ## Albedo 8700 ##
+        (status.DescentOfDivinityStatus, 8700),
+
+        #### 4.6 Dendro Character Status 10600 ####
+        ## Collei 10600 ##
+        (status.FloralSidewinderStatus, 10600),
+        (status.ColleiTalentStatus, 10601),
+        (status.FloralSidewinderStatus, 10602),
+        ## JadeplumeTerrorshroom 10620 ##
+        (status.ProliferatingSporesStatus, 10620),
+        (status.RadicalVitalityHiddenStatus, 10621),
+        (status.RadicalVitalityStatus, 10622),
+        ## Tighnari 10640 ##
+        (status.KeenSightStatus, 10640),
+        (status.VijnanaSuffusionStatus, 10641),
+        ## Nahida 10660 ##
+        (status.TheSeedOfStoredKnowledgeStatus, 10660),
+        (status.SeedOfSkandhaStatus, 10661),
+        (status.ShrineOfMayaStatus, 10662),
+        ## Yaoyao 10680 ##
+        ## Baizhu 10700 ##
+
+        #### 4.7 Anemo Character Status 12600 ####
+        ## Sucrose 12600 ##
+        ## Jean 12620 ##
+        (status.LandsOfDandelionStatus, 12620),
+        ## MaguuKenki 12640 ##
+        (status.TranscendentAutomatonStatus, 12640),
+        ## Venti 12660 ##
+        (status.EmbraceOfWindsStatus, 12660),
+        (status.StormzoneStatus, 12661),
+        (status.WindsOfHarmonyStatus, 12662),
+        ## Xiao 12680 ##
+        ## KaedeharaKazuha 12700 ##
+        (status.PoeticsOfFuubutsuStatus, 12700),
+        (status.PoeticsOfFuubutsuCryoStatus, 12701),
+        (status.PoeticsOfFuubutsuHydroStatus, 12702),
+        (status.PoeticsOfFuubutsuPyroStatus, 12703),
+        (status.PoeticsOfFuubutsuElectroStatus, 12704),
+        (status.MidareRanzanStatus, 12705),
+        (status.MidareRanzanCryoStatus, 12706),
+        (status.MidareRanzanHydroStatus, 12707),
+        (status.MidareRanzanPyroStatus, 12708),
+        (status.MidareRanzanElectroStatus, 12709),
+        ## Wanderer 12720 ##
+
+        #### End 14600 ####
+    )
+})
+
+SUMM_MAPPING: dict[type["Summon"], int] = HashableDict({
+    summ: 15000 + i
     for summ, i in (
         #### Cryo 0 ####
         (summon.SacredCryoPearlSummon, 0),
@@ -574,12 +846,56 @@ SUMM_MAPPING: dict[type["Summon"], int] = {
 
         #### End 700 ####
     )
-}
+})
 
-SUPP_MAPPING: dict[type["Support"], int] = {
-    supp: 7000 + i
-    for i, supp in enumerate([
-        getattr(support, supp)
-        for supp in support.__all__
-    ])
-}
+SUPP_MAPPING: dict[type["Support"], int] = HashableDict({
+    supp: 16000 + i
+    for supp, i in (
+        #### Location 000 ####
+        (support.LiyueHarborWharfSupport, 0),
+        (support.KnightsOfFavoniusLibrarySupport, 1),
+        # (support.JadeChamberSupport, 2),
+        # (support.DawnWinerySupport, 3),
+        # (support.WangshuInnSupport, 4),
+        # (support.FavoniusCathedralSupport, 5),
+        # (support.GrandNarukamiShrineSupport, 6),
+        (support.TenshukakuSupport, 7),
+        # (support.SangonomiyaShrineSupport, 8),
+        (support.SumeruCitySupport, 9),
+        (support.VanaranaSupport, 10),
+        # (support.ChinjuForestSupport, 11),
+        # (support.GoldenHouseSupport, 12),
+        # (support.GandharvaVilleSupport, 13),
+        # (support.StormterrorsLairSupport, 14),
+
+        #### Companion 100 ####
+        (support.PaimonSupport, 100),
+        # (support.KatheryneSupport, 101),
+        # (support.TimaeusSupport, 102),
+        # (support.WagnerSupport, 103),
+        # (support.ChefMaoSupport, 104),
+        # (support.TubbySupport, 105),
+        # (support.TimmieSupport, 106),
+        (support.LibenSupport, 107),
+        (support.ChangTheNinthSupport, 108),
+        # (support.EllinSupport, 109),
+        # (support.IronTongueTianSupport, 110),
+        # (support.LiuSuSupport, 111),
+        # (support.HanachirusatoSupport, 112),
+        # (support.KidKjiraiSupport, 113),
+        (support.XudongSupport, 114),
+        # (support.DunyarzadSupport, 115),
+        # (support.RanaSupport, 116),
+        # (support.MasterZhangSupport, 117),
+        # (support.SetariaSupport, 118),
+        # (support.YayoiNanatsukiSupport, 119),
+
+        #### Item 200 ####
+        (support.ParametricTransformerSupport, 200),
+        (support.NRESupport, 201),
+        # (support.RedFeatherFanSupport, 202),
+        # (support.TreasureSeekingSeelieSupport, 203),
+
+        #### End 300 ####
+    )
+})
