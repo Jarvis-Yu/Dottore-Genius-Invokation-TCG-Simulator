@@ -469,11 +469,8 @@ SUMM_MAPPING: dict[type["Summon"], int] = {
         (summon.AutumnWhirlwindSummon, 652),
 
         #### End 700 ####
-
     )
 }
-
-
 
 SUPP_MAPPING: dict[type["Support"], int] = {
     supp: 7000 + i
