@@ -297,8 +297,8 @@ CARD_MAPPING: dict[type["Card"], int] = {
         (card.LotusFlowerCrisp, 807),
         (card.TeyvatFriedEgg, 808),
         # (card.AdeptusTemptation, 809),
-        # (card.ButterCrab, 810),
-        (card.TandooriRoastChicken, 811),
+        (card.TandooriRoastChicken, 810),
+        # (card.ButterCrab, 811),
 
         #### 3.5 Character Event Card 0900 ####
         (card.LightningStiletto, 900),

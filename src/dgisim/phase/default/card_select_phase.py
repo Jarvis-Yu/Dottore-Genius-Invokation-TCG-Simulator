@@ -7,11 +7,12 @@ from .. import phase as ph
 from ...action.action import CardsSelectAction, PlayerAction, EndRoundAction
 from ...action.action_generator import ActionGenerator
 from ...action.enums import ActionType
-from ...helper.quality_of_life import just
+from ...helper.quality_of_life import BIG_INT, just
 from ...state.enums import Pid, Act
 
 if TYPE_CHECKING:
     from ...action.types import DecidedChoiceType, GivenChoiceType
+    from ...card.cards import Cards
     from ...state.game_state import GameState
     from ...state.player_state import PlayerState
 
@@ -26,8 +27,23 @@ class CardSelectPhase(ph.Phase):
     def _draw_cards_and_activate(self, game_state: GameState) -> GameState:
         p1: PlayerState = game_state.get_player1()
         p2: PlayerState = game_state.get_player2()
-        p1_deck, p1_hand = p1.get_deck_cards().pick_random_cards(self._NUM_CARDS)
-        p2_deck, p2_hand = p2.get_deck_cards().pick_random_cards(self._NUM_CARDS)
+        mode = game_state.get_mode()
+
+        from ...card.card import ArcaneLegendCard
+        def draw_random_cards(deck_cards: Cards) -> tuple[Cards, Cards]:
+            """
+            Draw some number of random cards, and prioritize Arcane Legend Cards.
+            """
+            deck_cards, arcane_cards = deck_cards.pick_random_cards_of_type(
+                mode.initial_cards_num(),
+                ArcaneLegendCard,
+            )
+            left_to_draw = mode.initial_cards_num() - arcane_cards.num_cards()
+            deck_cards, normal_cards = deck_cards.pick_random_cards(left_to_draw)
+            return deck_cards, arcane_cards + normal_cards
+
+        p1_deck, p1_hand = draw_random_cards(p1.get_deck_cards())
+        p2_deck, p2_hand = draw_random_cards(p2.get_deck_cards())
         mode = game_state.get_mode()
         return game_state.factory().f_player1(
             lambda p1: p1.factory()

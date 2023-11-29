@@ -42,6 +42,7 @@ class Mode(ABC):
     _DICE_LIMIT = 16
     _DICE_REROLL_CHANCES = 1
     _HAND_CARD_LIMIT = 10
+    _INITIAL_CARDS_NUM = 5
     _MAX_CARDS_PER_KIND = 2
     _ROUND_LIMIT = 15
     _SUMMONS_LIMIT = 4
@@ -99,6 +100,9 @@ class Mode(ABC):
 
     def round_limit(self) -> int:
         return self._ROUND_LIMIT
+
+    def initial_cards_num(self) -> int:
+        return self._INITIAL_CARDS_NUM
 
     def hand_card_limit(self) -> int:
         return self._HAND_CARD_LIMIT
