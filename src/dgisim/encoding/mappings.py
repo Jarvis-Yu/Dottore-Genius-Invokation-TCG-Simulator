@@ -403,79 +403,72 @@ STT_MAPPING: dict[type["Status"], int] = {
 SUMM_MAPPING: dict[type["Summon"], int] = {
     summ: 6000 + i
     for summ, i in (
-        #### Reaction 0 ####
-        (summon.BurningFlameSummon, 0),
-        ##(summon.BountifulCoreSummon, 1),
+        #### Cryo 0 ####
+        (summon.SacredCryoPearlSummon, 0),
+        # (summon.DrunkenMistSummon, 1),
+        # (summon.FrostflakeSekiNoToSummon, 2),
+        (summon.ShadowswordGallopingFrostSummon, 3),
+        ##(summon.CryoHilichurlShooterSummon, 4),
+        # (summon.LightfallSwordSummon, 5),
+        (summon.TalismanSpiritSummon, 6),
+        # (summon.CryoCicinsSummon, 7),
+        (summon.HeraldOfFrostSummon, 8),
 
-        #### Card 50 ####
-        ##(summon.CryoHilichurlShooterSummon, 50),
-        ##(summon.HydroSamachurlSummon, 51),
-        ##(summon.HilichurlBerserkerSummon, 52),
-        ##(summon.ElectroHilichurlShooterSummon, 53),
+        #### Hydro 100 ####
+        # (summon.MelodyLoopSummon, 100),
+        (summon.ReflectionSummon, 101),
+        (summon.OceanicMimicSquirrelSummon, 102),
+        (summon.OceanicMimicRaptorSummon, 103),
+        (summon.OceanicMimicFrogSummon, 104),
+        ##(summon.HydroSamachurlSummon, 105),
+        ##(summon.HealingRainSummon, 106),
+        (summon.BakeKurageSummon, 107),
+        # (summon.GardenOfPuritySummon, 108),
 
-        #### Cryo 100 ####
-        (summon.SacredCryoPearlSummon, 100),
-        # (summon.DrunkenMistSummon, 101),
-        # (summon.FrostflakeSekiNoToSummon, 102),
-        (summon.ShadowswordGallopingFrostSummon, 103),
-        # (summon.LightfallSwordSummon, 104),
-        (summon.TalismanSpiritSummon, 105),
-        # (summon.CryoCicinsSummon, 106),
-        (summon.HeraldOfFrostSummon, 107),
+        #### Pyro 200 ####
+        # (summon.GuobaSummon, 200),
+        (summon.BurningFlameSummon, 201),
+        ##(summon.HilichurlBerserkerSummon, 202),
+        # (summon.BaronBunnySummon, 203),
+        # (summon.DarkfireFurnaceSummon, 204),
+        (summon.FierySanctumFieldSummon, 205),
 
-        #### Hydro 200 ####
-        # (summon.MelodyLoopSummon, 200),
-        (summon.ReflectionSummon, 201),
-        (summon.OceanicMimicSquirrelSummon, 202),
-        (summon.OceanicMimicRaptorSummon, 203),
-        (summon.OceanicMimicFrogSummon, 204),
-        ##(summon.HealingRainSummon, 205),
-        (summon.BakeKurageSummon, 206),
-        # (summon.GardenOfPuritySummon, 207),
+        #### Electro 300 ####
+        (summon.OzSummon, 300),
+        ##(summon.ElectroHilichurlShooterSummon, 301),
+        ##(summon.TangleboltRingSummon, 302),
+        # (summon.TenguJuuraiAmbushSummon, 303),
+        # (summon.TenguJuuraiStormclusterSummon, 304),
+        # (summon.EyeOfStormyJudgmentSummon, 305),
+        (summon.SesshouSakuraSummon, 306),
+        (summon.ChainsOfWardingThunderSummon, 307),
+        # (summon.LightningRoseSummon, 308),
+        # (summon.AfterSalesServiceRoundsSummon, 309),
+        # (summon.JinniSummon, 310),
 
-        #### Pyro 300 ####
-        # (summon.GuobaSummon, 300),
-        # (summon.BaronBunnySummon, 301),
-        # (summon.DarkfireFurnaceSummon, 302),
-        (summon.FierySanctumFieldSummon, 303),
+        #### Geo 400 ####
+        (summon.UshiSummon, 400),
+        # (summon.StoneSteleSummon, 401),
+        (summon.SolarIsotomaSummon, 402),
 
-        #### Electro 400 ####
-        (summon.OzSummon, 400),
-        ##(summon.TangleboltRingSummon, 401),
-        # (summon.TenguJuuraiAmbushSummon, 402),
-        # (summon.TenguJuuraiStormclusterSummon, 403),
-        # (summon.EyeOfStormyJudgmentSummon, 404),
-        (summon.SesshouSakuraSummon, 405),
-        (summon.ChainsOfWardingThunderSummon, 406),
-        # (summon.LightningRoseSummon, 407),
-        # (summon.AfterSalesServiceRoundsSummon, 408),
-        # (summon.JinniSummon, 409),
+        #### Dendro 500 ####
+        (summon.CuileinAnbarSummon, 500),
+        ##(summon.BountifulCoreSummon, 501),
+        (summon.ClusterbloomArrowSummon, 502),
+        # (summon.YueguiThrowingModeSummon, 503),
+        # (summon.GossamerSpriteSummon, 504),
 
-        #### Geo 500 ####
-        (summon.UshiSummon, 500),
-        # (summon.StoneSteleSummon, 501),
-        (summon.SolarIsotomaSummon, 502),
+        #### Anemo(convertible) 600 ####
+        (summon.DandelionFieldSummon, 600),
+        (summon.ShadowswordLoneGaleSummon, 601),
+        ##(summon.WhirlwindSummon, 602),
 
-        #### Dendro 600 ####
-        (summon.CuileinAnbarSummon, 600),
-        (summon.ClusterbloomArrowSummon, 601),
-        # (summon.YueguiThrowingModeSummon, 602),
-        # (summon.GossamerSpriteSummon, 603),
+        #### Anemo(inconvertible) 650 ####
+        # (summon.LargeWindSpiritSummon, 650),
+        (summon.StormEyeSummon, 651),
+        (summon.AutumnWhirlwindSummon, 652),
 
-        #### Anemo(convertible) 700 ####
-        (summon.DandelionFieldSummon, 700),
-        (summon.ShadowswordLoneGaleSummon, 701),
-        ##(summon.WhirlwindSummon, 702),
-
-
-        #### Anemo(inconvertible) 750 ####
-        # (summon.LargeWindSpiritSummon, 750),
-        (summon.StormEyeSummon, 751),
-        (summon.AutumnWhirlwindSummon, 752),
-
-
-
-        #### End 800 ####
+        #### End 700 ####
 
     )
 }
