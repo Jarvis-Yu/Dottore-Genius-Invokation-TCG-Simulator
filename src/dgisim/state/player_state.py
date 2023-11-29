@@ -245,6 +245,7 @@ class PlayerState:
         """
         :returns: a random initial player state under the `mode`.
         """
+        from ..card.card import ArcaneLegendCard
         from ..deck import FrozenDeck
         from ..helper.hashable_dict import HashableDict
         cards = mode.all_cards()
@@ -252,11 +253,15 @@ class PlayerState:
         import random
         selected_chars = random.sample(list(chars), k=3)
         char_deck = FrozenDeck(chars=tuple(selected_chars), cards=HashableDict())
-        selected_cards = random.sample(list(
-            card
-            for card in cards
-            if card.valid_in_deck(char_deck)
-        ), k=15)
+        cards_pool = []
+        for card in cards:
+            if not card.valid_in_deck(char_deck):
+                continue
+            if isinstance(card, ArcaneLegendCard):
+                cards_pool.append(card)
+            else:
+                cards_pool.extend([card] * 2)
+        selected_cards = random.sample(cards_pool, k=30)
         return cls(
             phase=Act.PASSIVE_WAIT_PHASE,
             consec_action=False,

@@ -1112,6 +1112,11 @@ class LocationCard(SupportCard):
 class ArcaneLegendCard(Card):
     @override
     @classmethod
+    def valid_in_deck(cls, deck: Deck) -> bool:
+        return cls not in deck.cards or deck.cards[cls] == 0
+
+    @override
+    @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         return stt.ArcaneLegendUsedStatus not in game_state.get_player(pid).get_hidden_statuses()
 
