@@ -2144,7 +2144,7 @@ class QuickKnit(EventCard, _SummonTargetChoiceProvider):
     ) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.StaticTargetInstruction)
         return (
-            eft.OneSummonIncreaseUsage(
+            eft.OneSummonIncreaseUsageEffect(
                 target=instruction.target,
                 d_usages=1,
             ),
@@ -2165,7 +2165,7 @@ class SendOff(EventCard, _SummonTargetChoiceProvider):
     ) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.StaticTargetInstruction)
         return (
-            eft.OneSummonDecreaseUsage(
+            eft.OneSummonDecreaseUsageEffect(
                 target=instruction.target,
                 d_usages=2,
             ),

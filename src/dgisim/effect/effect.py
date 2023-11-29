@@ -56,7 +56,7 @@ __all__ = [
     # Triggerrable Effect
     "AllStatusTriggererEffect",
     "PlayerStatusTriggererEffect",
-    "PersonalStatusTriggerEffect",
+    "PersonalStatusTriggererEffect",
     "TriggerStatusEffect",
     "TriggerHiddenStatusEffect",
     "TriggerCombatStatusEffect",
@@ -115,15 +115,16 @@ __all__ = [
     "RemoveSummonEffect",
     "UpdateSummonEffect",
     "OverrideSummonEffect",
-    "AllSummonIncreaseUsage",
-    "OneSummonDecreaseUsage",
-    "OneSummonIncreaseUsage",
+    "AllSummonIncreaseUsageEffect",
+    "OneSummonDecreaseUsageEffect",
+    "OneSummonIncreaseUsageEffect",
     "AddSupportEffect",
     "RemoveSupportEffect",
     "UpdateSupportEffect",
     "OverrideSupportEffect",
     "CastSkillEffect",
-    "BroadCastPostSkillInfoEffect",
+    "BroadcastPreSkillInfoEffect",
+    "BroadcastPostSkillInfoEffect",
 ]
 
 ############################## base ##############################
@@ -269,7 +270,7 @@ class PlayerStatusTriggererEffect(TriggerrbleEffect):
 
 
 @dataclass(frozen=True, repr=False)
-class PersonalStatusTriggerEffect(TriggerrbleEffect):
+class PersonalStatusTriggererEffect(TriggerrbleEffect):
     target: StaticTarget
     signal: TriggeringSignal
 
@@ -1405,7 +1406,7 @@ class ReviveRecoverHPEffect(RecoverHPEffect):
                 ).build()
             ).build()
         ).f_effect_stack(
-            lambda es: es.push_one(PersonalStatusTriggerEffect(
+            lambda es: es.push_one(PersonalStatusTriggererEffect(
                 target=self.target,
                 signal=TriggeringSignal.GAME_START,
             ))
@@ -1866,7 +1867,7 @@ class OverrideSummonEffect(DirectEffect):
 
 
 @dataclass(frozen=True, kw_only=True, repr=False)
-class AllSummonIncreaseUsage(DirectEffect):
+class AllSummonIncreaseUsageEffect(DirectEffect):
     target_pid: Pid
     d_usages: int = 1
 
@@ -1886,7 +1887,7 @@ class AllSummonIncreaseUsage(DirectEffect):
 
 
 @dataclass(frozen=True, kw_only=True, repr=False)
-class OneSummonIncreaseUsage(DirectEffect):
+class OneSummonIncreaseUsageEffect(DirectEffect):
     target: StaticTarget
     d_usages: int = 1
 
@@ -1909,7 +1910,7 @@ class OneSummonIncreaseUsage(DirectEffect):
 
 
 @dataclass(frozen=True, kw_only=True, repr=False)
-class OneSummonDecreaseUsage(DirectEffect):
+class OneSummonDecreaseUsageEffect(DirectEffect):
     target: StaticTarget
     d_usages: int = 1
 
@@ -2007,7 +2008,7 @@ class CastSkillEffect(DirectEffect):
 
 
 @dataclass(frozen=True, repr=False)
-class BroadCastPostSkillInfoEffect(DirectEffect):
+class BroadcastPostSkillInfoEffect(DirectEffect):
     source: StaticTarget
     skill: CharacterSkill
 
@@ -2026,7 +2027,7 @@ class BroadCastPostSkillInfoEffect(DirectEffect):
         )
 
 @dataclass(frozen=True, repr=False)
-class BroadCastPreSkillInfoEffect(DirectEffect):
+class BroadcastPreSkillInfoEffect(DirectEffect):
     source: StaticTarget
     skill: CharacterSkill
 

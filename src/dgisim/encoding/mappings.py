@@ -383,8 +383,112 @@ CARD_MAPPING: dict[type["Card"], int] = {
 }
 
 EFFECT_MAPPING: dict[type["Effect"], int] = {
-    getattr(effect, eft): 4000 + i
-    for i, eft in enumerate(effect.__all__)
+    eft: 4000 + i
+    for eft, i in (
+        #### 0 Phase Effect 000 ####
+        (effect.DeathSwapPhaseStartEffect, 0),
+        (effect.DeathSwapPhaseEndEffect, 1),
+        (effect.EndPhaseCheckoutEffect, 2),
+        (effect.EndRoundEffect, 3),
+        (effect.RollPhaseStartEffect, 4),
+        (effect.SetBothPlayerPhaseEffect, 5),
+        (effect.TurnEndEffect, 6),
+    
+        #### 1 Checker Effect 050 ####
+        (effect.AliveMarkCheckerEffect, 50),
+        (effect.DefeatedMarkCheckerEffect, 51),
+        (effect.SwapCharacterCheckerEffect, 52),
+        (effect.DeathCheckCheckerEffect, 53),
+        (effect.DefeatedCheckerEffect, 54),
+
+        #### 2 Triggerrable Effect 075 ####
+        #### 2.1 Triggerer Effect 075 ####
+        (effect.AllStatusTriggererEffect, 75),
+        (effect.PlayerStatusTriggererEffect, 76),
+        (effect.PersonalStatusTriggererEffect, 77),
+
+        #### 2.3 Trigger Effect 085
+        (effect.TriggerStatusEffect, 85),
+        (effect.TriggerHiddenStatusEffect, 86),
+        (effect.TriggerCombatStatusEffect, 87),
+        (effect.TriggerSummonEffect, 88),
+        (effect.TriggerSupportEffect, 89),
+
+        #### 3 Status Update Effect 100 ####
+        #### 3.1 Character Status Update Effect 100 ####
+        (effect.AddCharacterStatusEffect, 100),
+        (effect.RemoveCharacterStatusEffect, 101),
+        (effect.UpdateCharacterStatusEffect, 102),
+        (effect.OverrideCharacterStatusEffect, 103),
+
+        #### 3.2 Hidden Status Update Effect 125 ####
+        (effect.AddHiddenStatusEffect, 125),
+        (effect.RemoveHiddenStatusEffect, 126),
+        (effect.UpdateHiddenStatusEffect, 127),
+        (effect.OverrideHiddenStatusEffect, 128),
+
+        #### 3.3 Combat Status Update Effect 150 ####
+        (effect.AddCombatStatusEffect, 150),
+        (effect.RemoveCombatStatusEffect, 151),
+        (effect.UpdateCombatStatusEffect, 152),
+        (effect.OverrideCombatStatusEffect, 153),
+
+        #### 3.4 Summon Status Update Effect 175 ####
+        (effect.AddSummonEffect, 175),
+        (effect.RemoveSummonEffect, 176),
+        (effect.UpdateSummonEffect, 177),
+        (effect.OverrideSummonEffect, 178),
+        (effect.AllSummonIncreaseUsageEffect, 179),
+        (effect.OneSummonDecreaseUsageEffect, 180),
+        (effect.OneSummonIncreaseUsageEffect, 181),
+
+        #### 3.5 Support Status Update Effect 200 ####
+        (effect.AddSupportEffect, 200),
+        (effect.RemoveSupportEffect, 201),
+        (effect.UpdateSupportEffect, 202),
+        (effect.OverrideSupportEffect, 203),
+
+        #### 4 Direct Effect 225 ####
+        #### 4.1 Swap Character Effect 225 ####
+        (effect.SwapCharacterEffect, 225),
+        (effect.BackwardSwapCharacterEffect, 226),
+        (effect.ForwardSwapCharacterEffect, 227),
+        (effect.ForwardSwapCharacterCheckEffect, 228),
+
+        #### 4.2 Damage Effect 250 ####
+        (effect.SpecificDamageEffect, 250),
+        (effect.ReferredDamageEffect, 251),
+
+        #### 4.3 Recover Effect 260 ####
+        (effect.RecoverHPEffect, 260),
+        (effect.ReviveRecoverHPEffect, 261),
+
+        #### 4.3 Energy Effect 270 ####
+        (effect.EnergyRechargeEffect, 270),
+        (effect.EnergyDrainEffect, 271),
+
+        #### 4.4 Card Effect 280 ####
+        (effect.DrawRandomCardEffect, 280),
+        (effect.DrawRandomCardOfTypeEffect, 281),
+        (effect.PublicAddCardEffect, 282),
+        (effect.PublicRemoveCardEffect, 283),
+        (effect.PublicRemoveAllCardEffect, 284),
+
+        #### 4.5 Dice Effect 290 ####
+        (effect.AddDiceEffect, 290),
+        (effect.RemoveDiceEffect, 291),
+
+        #### 4.5 Skill Effect 300 ####
+        (effect.CastSkillEffect, 300),
+        (effect.BroadcastPreSkillInfoEffect, 301),
+        (effect.BroadcastPostSkillInfoEffect, 302),
+
+        #### 4.6 Other Effect 310 ####
+        (effect.ConsecutiveActionEffect, 310),
+        (effect.ApplyElementalAuraEffect, 311),
+
+        #### End 400 ####
+    )
 }
 
 MODE_MAPPING: dict[type["Mode"], int] = {

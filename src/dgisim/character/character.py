@@ -307,7 +307,7 @@ class Character:
         Otherwise faulty effects may be generated.
         """
         return (
-            eft.BroadCastPreSkillInfoEffect(
+            eft.BroadcastPreSkillInfoEffect(
                 source=source,
                 skill=skill_type,
             ),
@@ -338,7 +338,7 @@ class Character:
     ) -> tuple[eft.Effect, ...]:
         return effects + (
             eft.DefeatedCheckerEffect(),
-            eft.BroadCastPostSkillInfoEffect(
+            eft.BroadcastPostSkillInfoEffect(
                 source=source,
                 skill=skill_type,
             ),
@@ -2770,7 +2770,7 @@ class RhodeiaOfLoch(Character):
         ]
 
         if self.talent_equipped():
-            effects.append(eft.AllSummonIncreaseUsage(target_pid=source.pid, d_usages=1))
+            effects.append(eft.AllSummonIncreaseUsageEffect(target_pid=source.pid, d_usages=1))
 
         return tuple(effects)
 
