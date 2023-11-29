@@ -429,8 +429,9 @@ SUMM_MAPPING: dict[type["Summon"], int] = {
         (summon.OceanicMimicSquirrelSummon, 202),
         (summon.OceanicMimicRaptorSummon, 203),
         (summon.OceanicMimicFrogSummon, 204),
-        (summon.BakeKurageSummon, 205),
-        # (summon.GardenOfPuritySummon, 206),
+        ##(summon.HealingRainSummon, 205),
+        (summon.BakeKurageSummon, 206),
+        # (summon.GardenOfPuritySummon, 207),
 
         #### Pyro 300 ####
         # (summon.GuobaSummon, 300),
@@ -440,14 +441,15 @@ SUMM_MAPPING: dict[type["Summon"], int] = {
 
         #### Electro 400 ####
         (summon.OzSummon, 400),
-        # (summon.TenguJuuraiAmbushSummon, 401),
-        # (summon.TenguJuuraiStormclusterSummon, 402),
-        # (summon.EyeOfStormyJudgmentSummon, 403),
-        (summon.SesshouSakuraSummon, 404),
-        (summon.ChainsOfWardingThunderSummon, 405),
-        # (summon.LightningRoseSummon, 406),
-        # (summon.AfterSalesServiceRoundsSummon, 407),
-        # (summon.JinniSummon, 408),
+        ##(summon.TangleboltRingSummon, 401),
+        # (summon.TenguJuuraiAmbushSummon, 402),
+        # (summon.TenguJuuraiStormclusterSummon, 403),
+        # (summon.EyeOfStormyJudgmentSummon, 404),
+        (summon.SesshouSakuraSummon, 405),
+        (summon.ChainsOfWardingThunderSummon, 406),
+        # (summon.LightningRoseSummon, 407),
+        # (summon.AfterSalesServiceRoundsSummon, 408),
+        # (summon.JinniSummon, 409),
 
         #### Geo 500 ####
         (summon.UshiSummon, 500),
@@ -460,19 +462,20 @@ SUMM_MAPPING: dict[type["Summon"], int] = {
         # (summon.YueguiThrowingModeSummon, 602),
         # (summon.GossamerSpriteSummon, 603),
 
-        #### Anemo 700 ####
-        # (summon.LargeWindSpiritSummon, 701),
-        (summon.DandelionFieldSummon, 702),
-        (summon.ShadowswordLoneGaleSummon, 703),
-        (summon.StormEyeSummon, 704),
-        (summon.AutumnWhirlwindSummon, 705),
+        #### Anemo(convertible) 700 ####
+        (summon.DandelionFieldSummon, 700),
+        (summon.ShadowswordLoneGaleSummon, 701),
+        ##(summon.WhirlwindSummon, 702),
 
-        #### Unobtainable 800 ####
-        ##(summon.HealingRainSummon, 800),
-        ##(summon.TangleboltRingSummon, 801),
-        ##(summon.WhirlwindSummon, 802),
 
-        #### End 900 ####
+        #### Anemo(inconvertible) 750 ####
+        # (summon.LargeWindSpiritSummon, 750),
+        (summon.StormEyeSummon, 751),
+        (summon.AutumnWhirlwindSummon, 752),
+
+
+
+        #### End 800 ####
 
     )
 }
