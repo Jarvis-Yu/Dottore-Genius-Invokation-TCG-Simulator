@@ -1,5 +1,7 @@
 __version__ = "0.3.3"
 
+from ._env_check import *
+
 from ..dgisim.cli import *
 from ..dgisim.deck import *
 from ..dgisim.dice import *
@@ -31,6 +33,8 @@ from ..dgisim.effect.enums import *
 from ..dgisim.effect.structs import *
 
 from ..dgisim.encoding.encoding_plan import *
+
+from ..dgisim.env.linear_env import *
 
 from ..dgisim.helper.hashable_dict import *
 

@@ -7,8 +7,10 @@
 - Subclasses of `Deck` now supports conversion to and from json by calling
   `.to_json()` and `.from_json()`.
 - Enables seeding when stepping `GameState`
-- Basic encoding for any `GameState`
+- Implements customizable encoding for any `GameState`
 - Smart dice selection that takes characters into account
+- Implements `LinearEnv`, a gym-like environment for RL
+- Implements `PlayerAction` encoding and decoding
 - New Cards:
   - Event Card:
     - Fresh Wind of Freedom

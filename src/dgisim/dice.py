@@ -178,6 +178,21 @@ class Dice:
             ret_val.extend((elem.value, self[elem]))
         return ret_val
 
+    @classmethod
+    def decoding(cls, encoding: list[int], encoding_plan: EncodingPlan) -> None | Self:
+        """
+        :returns: the Dice object decoded from `encoding`.
+        """
+        dice: dict[Element, int] = {}
+        for elem_code, num in zip(encoding[::2], encoding[1::2]):
+            if num == 0:
+                continue
+            if elem_code > len(Element):
+                return None
+            elem = Element(elem_code)
+            dice[elem] = num
+        return cls(dice)
+
     def dict_str(self) -> dict[str, Any]:
         existing_dice = dict([
             (dice.name, str(num))

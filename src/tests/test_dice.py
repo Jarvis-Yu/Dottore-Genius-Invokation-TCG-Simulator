@@ -4,6 +4,7 @@ from src.dgisim.character.character import *
 from src.dgisim.character.characters import Characters
 from src.dgisim.dice import *
 from src.dgisim.element import *
+from src.dgisim.encoding.encoding_plan import encoding_plan
 from src.dgisim.helper import just
 
 
@@ -675,3 +676,22 @@ class TestDice(unittest.TestCase):
         ), active_character_id=2))
         assert selected_dice is not None
         self.assertEqual(selected_dice, ActualDice({Element.OMNI: 3}))
+
+    def test_encoding_decoding(self):
+        dice = ActualDice({Element.OMNI: 3, Element.CRYO: 1, Element.ANEMO: 1})
+        self.assertEqual(
+            dice,
+            ActualDice.decoding(dice.encoding(encoding_plan), encoding_plan),
+        )
+
+        dice = ActualDice.from_empty()
+        self.assertEqual(
+            dice,
+            ActualDice.decoding(dice.encoding(encoding_plan), encoding_plan),
+        )
+
+        dice = ActualDice.from_all(3, Element.OMNI)
+        self.assertEqual(
+            dice,
+            ActualDice.decoding(dice.encoding(encoding_plan), encoding_plan),
+        )

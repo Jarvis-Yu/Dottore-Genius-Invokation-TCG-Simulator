@@ -31,6 +31,28 @@ class StaticTarget:
             self.id if isinstance(self.id, int) else encoding_plan.code_for(self.id),
         ]
 
+    @classmethod
+    def decoding(cls, encoding: list[int], encoding_plan: "EncodingPlan") -> None | Self:
+        pid_code = encoding[0]
+        zone_code = encoding[1]
+        if pid_code >= len(Pid) or zone_code >= len(Zone):
+            return None
+        zone = Zone(zone_code)
+        id: int | type["Summon"]
+        if zone is Zone.SUMMONS:
+            tmp_id = encoding_plan.type_for(encoding[2])
+            from ..summon.summon import Summon
+            if tmp_id is None or not issubclass(tmp_id, Summon):
+                return None
+            id = tmp_id
+        else:
+            id = encoding[2]
+        return cls(
+            Pid(pid_code),
+            zone,
+            id,
+        )
+
     def __repr__(self) -> str:
         return dataclass_repr(self)
 

@@ -87,12 +87,11 @@ class GameState:
         self._elem_tuning_checker = ElementalTuningChecker(self)
 
     @classmethod
-    def from_default(cls) -> Self:
+    def from_default(cls, mode: md.Mode = md.DefaultMode()) -> Self:
         """
         :returns: a random initial game state with default mode and random decks
                   for both players.
         """
-        mode = md.DefaultMode()
         return cls(
             mode=mode,
             phase=mode.first_phase(),

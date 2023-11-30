@@ -162,6 +162,22 @@ class Cards:
             ret_val.append((0, 0))
         return list(chain.from_iterable(ret_val))
 
+    @classmethod
+    def decoding(cls, encoding: list[int], encoding_plan: EncodingPlan) -> None | Cards:
+        """
+        :returns: the `Cards` object decoded from `encoding`.
+        """
+        from .card import Card
+        cards: dict[type[Card], int] = {}
+        for card_code, num in zip(encoding[::2], encoding[1::2]):
+            if card_code == 0 or num == 0:
+                break
+            card = encoding_plan.type_for(card_code)
+            if card is None or not issubclass(card, Card):
+                return None
+            cards[card] = num
+        return cls(cards)
+
     def __getitem__(self, card: type[Card]) -> int:
         return self._cards.get(card, 0)
 

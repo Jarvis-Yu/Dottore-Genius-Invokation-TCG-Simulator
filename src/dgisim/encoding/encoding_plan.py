@@ -69,6 +69,15 @@ class EncodingPlan:
         self.SUPPORTS_FIXED_LEN = supports_fixed_len
         self.EFFECT_FIXED_LEN = effect_fixed_len
         self.EFFECTS_FIXED_LEN = effects_fixed_len
+        from ..element import Element
+        self.ACTION_LOCAL_SIZE = 5 + self.CARDS_FIXED_LEN * 2
+        self.ACTION_FULL_SIZE = (
+            self.ACTION_LOCAL_SIZE  # size of cards
+            + len(Element) * 2  # dice of instruction
+            + 3  # StaticTarget of instruction
+            + 3  # StaticTarget of instruction
+        )
+        self.INSTRUCTION_SIZE = self.ACTION_FULL_SIZE - self.ACTION_LOCAL_SIZE
         from ..card.card import Card
         from ..character.character import Character
         from ..effect.effect import Effect
@@ -85,6 +94,11 @@ class EncodingPlan:
             Summon: self._summon_mapping,
             Support: self._support_mapping,
         }
+        self._id_item_mapping: dict[int, GameItemType] = {}
+        for d in self._TYPED_MAPPING.values():
+            assert isinstance(d, dict)
+            for item, code in d.items():
+                self._id_item_mapping[code] = item  # type: ignore
 
     def is_valid(self) -> bool:
         """
@@ -156,6 +170,12 @@ class EncodingPlan:
         else:
             return mapping[item]
 
+    def type_for(self, code: int) -> None | GameItemType:
+        """
+        :returns: the type of the item with the given code.
+        """
+        return self._id_item_mapping.get(code, None)
+
     def compatible_with(self, mode: "Mode") -> bool:
         """
         :returns: True if this encoding plan is compatible with the given mode.
@@ -170,6 +190,21 @@ class EncodingPlan:
 
     def encode(self, game_state: "GameState") -> list[int]:
         return game_state.encoding(self)
+
+    @property
+    def game_encoding_size(self) -> int:
+        """
+        :returns: the size of the vector of any encoded game state.
+        """
+        from ..state.game_state import GameState
+        return len(GameState.from_default().encoding(self))
+
+    @property
+    def action_encoding_size(self) -> int:
+        """
+        :returns: the size of the vector of any encoded action.
+        """
+        return self.ACTION_FULL_SIZE
 
 encoding_plan = EncodingPlan(
     card_mapping=CARD_MAPPING,
