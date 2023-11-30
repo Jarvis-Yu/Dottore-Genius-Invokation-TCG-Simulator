@@ -1,6 +1,7 @@
 from __future__ import annotations
 from abc import abstractmethod, ABC
 from dataclasses import dataclass
+from itertools import chain
 from typing import TYPE_CHECKING, Sequence
 
 from typing_extensions import override, Self
@@ -10,6 +11,7 @@ from .helper.hashable_dict import HashableDict
 if TYPE_CHECKING:
     from .character.character import Character
     from .card.card import Card
+    from .encoding.encoding_plan import EncodingPlan
 
 __all__ = [
     "Deck",
@@ -86,12 +88,46 @@ class Deck(ABC):
             print(e)
             return None
 
+    def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
+        from .card.cards import Cards
+        return list(chain(
+            [encoding_plan.code_for(char) for char in self.chars],
+            [0] * (3 - len(self.chars)),
+            Cards(self.cards).encoding(encoding_plan),
+        ))
+
+    @classmethod
+    @abstractmethod
+    def decoding(cls, encoding: list[int], encoding_plan: EncodingPlan) -> None | Self:
+        pass
+
+    @classmethod
+    def _decoding(
+            cls,
+            encoding: list[int],
+            encoding_plan: EncodingPlan
+    ) -> None | tuple[list[type[Character]], dict[type[Card], int]]:
+        from .character.character import Character
+        chars = [
+            char
+            for code in encoding[:3]
+            if (char := encoding_plan.type_for(code)) is not None
+        ]
+        if not all(issubclass(char, Character) for char in chars):
+            return None
+        from .card.cards import Cards
+        cards = Cards.decoding(encoding[3:], encoding_plan)
+        if cards is None:
+            return None
+        return chars, cards._cards  # type: ignore
+
     def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, Deck)
             and tuple(self.chars) == tuple(other.chars)
             and HashableDict(self.cards) == HashableDict(other.cards)
         )
+
 
 @dataclass(eq=False)
 class MutableDeck(Deck):
@@ -106,6 +142,16 @@ class MutableDeck(Deck):
     @classmethod
     def from_json(cls, data: str) -> None | Self:
         ret_val = cls._from_json(data)
+        if ret_val is None:
+            return None
+        return cls(
+            chars=ret_val[0],
+            cards=ret_val[1],
+        )
+
+    @classmethod
+    def decoding(cls, encoding: list[int], encoding_plan: EncodingPlan) -> None | Self:
+        ret_val = cls._decoding(encoding, encoding_plan)
         if ret_val is None:
             return None
         return cls(
@@ -130,6 +176,13 @@ class FrozenDeck(Deck):
     @classmethod
     def from_json(cls, data: str) -> None | Self:
         mutable_deck = MutableDeck.from_json(data)
+        if mutable_deck is None:
+            return None
+        return mutable_deck.to_frozen()  # type: ignore
+
+    @classmethod
+    def decoding(cls, encoding: list[int], encoding_plan: EncodingPlan) -> None | Self:
+        mutable_deck = MutableDeck.decoding(encoding, encoding_plan)
         if mutable_deck is None:
             return None
         return mutable_deck.to_frozen()  # type: ignore

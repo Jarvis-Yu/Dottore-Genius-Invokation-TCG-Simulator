@@ -2,7 +2,8 @@ import unittest
 
 from src.dgisim.card.card import *
 from src.dgisim.character.character import *
-from src.dgisim.deck import FrozenDeck, MutableDeck
+from src.dgisim.deck import Deck, FrozenDeck, MutableDeck
+from src.dgisim.encoding.encoding_plan import encoding_plan
 from src.dgisim.helper.hashable_dict import HashableDict
 from src.dgisim.mode import DefaultMode
 from src.dgisim.state.game_state import GameState
@@ -139,3 +140,33 @@ class TestDeck(unittest.TestCase):
         json_str = immutable_deck.to_json()
         deck_read = MutableDeck.from_json(json_str)
         self.assertEqual(immutable_deck, deck_read)
+
+    def test_encoding_decoding(self):
+        deck: Deck = MutableDeck(
+            chars=[
+                Klee,
+                KaedeharaKazuha,
+                Keqing,
+            ],
+            cards={
+                PoundingSurprise: 1,
+                GamblersEarrings: 2,
+            }
+        )
+        encoding = deck.encoding(encoding_plan)
+        deck_read: Deck | None = MutableDeck.decoding(encoding, encoding_plan)
+        self.assertEqual(deck, deck_read)
+
+        deck = FrozenDeck(
+            chars=(
+                Klee,
+                KaedeharaKazuha,
+            ),
+            cards=HashableDict({
+                PoundingSurprise: 1,
+                GamblersEarrings: 2,
+            })
+        )
+        encoding = deck.encoding(encoding_plan)
+        deck_read = FrozenDeck.decoding(encoding, encoding_plan)
+        self.assertEqual(deck, deck_read)

@@ -11,6 +11,7 @@
 - Smart dice selection that takes characters into account
 - Implements `LinearEnv`, a gym-like environment for RL
 - Implements `PlayerAction` encoding and decoding
+- Implements `MutableDeck`, `FrozenDeck` encoding and decoding
 - New Cards:
   - Event Card:
     - Fresh Wind of Freedom
