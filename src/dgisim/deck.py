@@ -21,6 +21,9 @@ __all__ = [
 
 
 class Deck(ABC):
+    """
+    An abstract class representing a deck of cards.
+    """
     chars: Sequence[type[Character]]
     cards: dict[type[Card], int]
 
@@ -31,15 +34,18 @@ class Deck(ABC):
         pass
 
     def to_frozen(self) -> FrozenDeck:
+        """ :returns: An immutable copy of the deck. """
         return FrozenDeck(chars=tuple(self.chars), cards=HashableDict.from_dict(self.cards))
 
     def to_mutable(self) -> MutableDeck:
+        """ :returns: A mutable copy of the deck. """
         return MutableDeck(chars=list(self.chars), cards=dict(self.cards))
 
     _JSON_CHARS = "chars"
     _JSON_CARDS = "cards"
 
     def to_json(self) -> str:
+        """ :returns: A JSON string representing the deck. """
         chars: list[str] = [
             char.__name__
             for char in self.chars
@@ -57,6 +63,7 @@ class Deck(ABC):
     @classmethod
     @abstractmethod
     def from_json(cls, data: str) -> None | Self:
+        """ :returns: A deck parsed from the given JSON string. """
         pass
 
     @classmethod
@@ -89,6 +96,7 @@ class Deck(ABC):
             return None
 
     def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
+        """ :returns: A list of integers representing the deck. """
         from .card.cards import Cards
         return list(chain(
             [encoding_plan.code_for(char) for char in self.chars],
@@ -99,6 +107,7 @@ class Deck(ABC):
     @classmethod
     @abstractmethod
     def decoding(cls, encoding: list[int], encoding_plan: EncodingPlan) -> None | Self:
+        """ :returns: A deck parsed from the given list of integers. """
         pass
 
     @classmethod

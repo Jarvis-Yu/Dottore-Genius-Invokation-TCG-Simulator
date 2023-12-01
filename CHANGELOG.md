@@ -15,6 +15,7 @@
 - New Cards:
   - Event Card:
     - Fresh Wind of Freedom
+    - When the Crane Returned
 
 ### Updated
 

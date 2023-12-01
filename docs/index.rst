@@ -23,6 +23,7 @@ Contents
    tutorials
    design-n-philosophy
    game-state
+   deck
    mode
    phase
    player-state
