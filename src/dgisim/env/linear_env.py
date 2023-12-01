@@ -25,11 +25,13 @@ class LinearEnv:
             self,
             mode: Mode = DefaultMode(),
             encoding_plan: EncodingPlan = encoding_plan,
-            reward_method: Callable[[GameState], int] = real_reward,
+            reward_method: Callable[[GameState], int | float] = real_reward,
+            invalid_action_penalty: int | float = -0.1,
     ):
         self._mode = mode
         self._encoding_plan = encoding_plan
         self._reward_method = reward_method
+        self._invalid_action_penalty = invalid_action_penalty
         self._last_deck1: None | Deck = None
         self._last_deck2: None | Deck = None
         self._curr_state: GameState
@@ -107,7 +109,11 @@ class LinearEnv:
                 return (
                     self._curr_state,
                     self._curr_state.encoding(self._encoding_plan),
-                    -1 if turn == 1 else 1,  # penalty for invalid action
+                    (
+                        self._invalid_action_penalty
+                        if turn == 1
+                        else -self._invalid_action_penalty
+                    ),  # penalty for invalid action
                     turn,
                     self._curr_state.game_end(),
                 )
@@ -122,7 +128,11 @@ class LinearEnv:
             return (
                 self._curr_state,
                 self._curr_state.encoding(self._encoding_plan),
-                -1 if turn == 1 else 1,  # penalty for invalid action
+                (
+                    self._invalid_action_penalty
+                    if turn == 1
+                    else -self._invalid_action_penalty
+                ),  # penalty for invalid action
                 turn,
                 self._curr_state.game_end(),
             )
