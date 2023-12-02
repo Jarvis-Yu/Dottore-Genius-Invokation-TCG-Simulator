@@ -30,3 +30,11 @@ class TestGameState(unittest.TestCase):
         self.assertEqual(game_state1, game_state2)
         self.assertEqual(hash(game_state1), hash(game_state2))
         self.assertNotEqual(game_state1, "game_state1")
+
+    def test_deck_extraction(self):
+        game_state = GameState.from_default()
+        deck1, deck2 = game_state.extract_decks()
+        self.assertEqual(len(deck1.chars), 3)
+        self.assertEqual(len(deck2.chars), 3)
+        self.assertEqual(sum(deck1.cards.values()), 30)
+        self.assertEqual(sum(deck2.cards.values()), 30)

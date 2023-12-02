@@ -1,4 +1,5 @@
 from __future__ import annotations
+from collections import Counter
 from itertools import chain
 from typing import Callable, Optional, Union, TYPE_CHECKING
 from typing_extensions import Self
@@ -10,6 +11,7 @@ from ..support import support as sp
 from ..card.cards import Cards
 from ..character.characters import Characters
 from ..dice import ActualDice
+from ..helper.hashable_dict import HashableDict
 from ..summon.summons import Summons
 from ..support.supports import Supports
 
@@ -240,6 +242,29 @@ class PlayerState:
             self._supports.encoding(encoding_plan),
         ))
 
+    def extract_deck(self) -> Deck:
+        """
+        :returns: the best estimation of the deck of the player.
+        """
+        from ..card.card import OmniCard
+        from ..deck import FrozenDeck, MutableDeck
+
+        empty_deck = FrozenDeck(
+            chars=tuple([type(char) for char in self._characters]),
+            cards=HashableDict()
+        )
+        cards = self._deck_cards + self._hand_cards + self._publicly_used_cards
+        return MutableDeck(
+            chars=[
+                type(char) for char in self._characters
+            ],
+            cards={
+                card: cards[card]
+                for card in cards
+                if card is not OmniCard and card.valid_in_deck(empty_deck)
+            },
+        )
+
     @classmethod
     def example_player(cls, mode: Mode) -> Self:
         """
@@ -261,7 +286,7 @@ class PlayerState:
                 cards_pool.append(card)
             else:
                 cards_pool.extend([card] * 2)
-        selected_cards = random.sample(cards_pool, k=30)
+        selected_cards = random.sample(cards_pool, k=mode.deck_cards_requirement())
         return cls(
             phase=Act.PASSIVE_WAIT_PHASE,
             consec_action=False,
@@ -276,8 +301,7 @@ class PlayerState:
             supports=Supports((), mode.supports_limit()),
             dice=ActualDice({}),
             hand_cards=Cards({}),
-            deck_cards=Cards(dict([(card, mode.deck_card_limit_per_kind())
-                             for card in selected_cards])),
+            deck_cards=Cards(Counter(selected_cards)),
             publicly_used_cards=Cards({}),
             publicly_gained_cards=Cards({}),
         )
