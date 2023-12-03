@@ -28,6 +28,12 @@ class LinearEnv:
             reward_method: Callable[[GameState], int | float] = real_reward,
             invalid_action_penalty: int | float = -0.1,
     ):
+        """
+        :param mode: the mode of the game.
+        :param encoding_plan: the encoding plan of the game.
+        :param reward_method: the reward method of the game.
+        :param invalid_action_penalty: the penalty for invalid action.
+        """
         self._mode = mode
         self._encoding_plan = encoding_plan
         self._reward_method = reward_method
@@ -56,9 +62,9 @@ class LinearEnv:
     def _reset_random(self) -> None:
         self._curr_state = GameState.from_default(self._mode)
 
-    def reset_by_decks(self, deck1: Deck, deck2: Deck) -> None:
+    def reset_with_decks(self, deck1: Deck, deck2: Deck) -> None:
         """
-        Resets the game state by the given decks.
+        Resets the game state with the given decks.
         """
         self._last_deck1 = deck1
         self._last_deck2 = deck2
@@ -70,18 +76,28 @@ class LinearEnv:
         assert self._last_deck2 is not None
         self._curr_state = GameState.from_decks(self._mode, self._last_deck1, self._last_deck2)
 
+    def full_state(self) -> GameState:
+        """
+        :returns: the game state without any perspective (all cards & dice visible).
+        """
+        return self._curr_state
+
     def view(self) -> tuple[GameState, list[int], int | float, int, bool]:
         """
         :returns: game state, encoded state, reward, turn, done
+
+        The game state is in the perspective view of the current player.
         """
         match self._curr_state.waiting_for():
             case Pid.P1:
                 turn = 1
+                perspective_state = self._curr_state.prespective_view(Pid.P1)
             case _:
                 turn = 2
+                perspective_state = self._curr_state.prespective_view(Pid.P2)
         return (
-            self._curr_state,
-            self._curr_state.encoding(self._encoding_plan),
+            perspective_state,
+            perspective_state.encoding(self._encoding_plan),
             0,
             turn,
             self._curr_state.game_end(),
@@ -93,6 +109,10 @@ class LinearEnv:
     ) -> tuple[GameState, list[int], int | float, int, bool]:
         """
         :returns: game state, encoded state, reward, turn, done
+
+        The game state is in the perspective view of the current player.
+
+        An invalid action will result-in the same state with a penalty.
         """
         assert not self._curr_state.game_end()
 
@@ -106,9 +126,12 @@ class LinearEnv:
         if isinstance(action, list):
             optional_action = PlayerAction.decoding(action, self._encoding_plan)
             if optional_action is None:
+                perspective_state = self._curr_state.prespective_view(
+                    Pid.P1 if turn == 1 else Pid.P2
+                )
                 return (
-                    self._curr_state,
-                    self._curr_state.encoding(self._encoding_plan),
+                    perspective_state,
+                    perspective_state.encoding(self._encoding_plan),
                     (
                         self._invalid_action_penalty
                         if turn == 1
@@ -125,9 +148,10 @@ class LinearEnv:
         try:
             state = self._curr_state.action_step(curr_player, action)
         except Exception as e:
+            perspective_state = self._curr_state.prespective_view(Pid.P1 if turn == 1 else Pid.P2)
             return (
-                self._curr_state,
-                self._curr_state.encoding(self._encoding_plan),
+                perspective_state,
+                perspective_state.encoding(self._encoding_plan),
                 (
                     self._invalid_action_penalty
                     if turn == 1
@@ -144,14 +168,17 @@ class LinearEnv:
         match self._curr_state.waiting_for():
             case None:
                 turn = 0
+                perspective_state = self._curr_state
             case Pid.P1:
                 turn = 1
+                perspective_state = self._curr_state.prespective_view(Pid.P1)
             case _:
                 turn = 2
+                perspective_state = self._curr_state.prespective_view(Pid.P2)
 
         return (
-            self._curr_state,
-            self._curr_state.encoding(encoding_plan),
+            perspective_state,
+            perspective_state.encoding(encoding_plan),
             self._reward_method(self._curr_state),
             turn,
             self._curr_state.game_end(),

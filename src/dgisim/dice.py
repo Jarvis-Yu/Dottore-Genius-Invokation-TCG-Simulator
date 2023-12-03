@@ -310,7 +310,7 @@ class ActualDice(Dice):
             return False
         return self._satisfy(requirement)
 
-    def basically_satisfy(
+    def basic_selection(
             self,
             requirement: AbstractDice,
     ) -> None | ActualDice:
@@ -407,6 +407,8 @@ class ActualDice(Dice):
         :returns: a way to fulfill the `requirement`, which tries to keep as many
                   useful dice as possible. If it is impossible to fulfill, then
                   `None` is returned.
+
+        This method is approximately 2 times slower than `basic_selection()`.
         """
 
         if requirement.num_dice() > self.num_dice():

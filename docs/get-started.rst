@@ -279,7 +279,7 @@ It is a class to help you generate valid actions.
             assert isinstance(choices, dg.AbstractDice)
             cost = choices
             dice = curr_game_state.get_player(pid).get_dice()
-            payment = dice.basically_satisfy(cost)
+            payment = dice.basic_selection(cost)
             assert payment is not None
 
             action_generator = action_generator.choose(payment)
@@ -371,7 +371,7 @@ So here we double check if normal attack is available.
         assert isinstance(choices, dg.AbstractDice)
         cost = choices
         dice = curr_game_state.get_player(pid).get_dice()
-        payment = dice.basically_satisfy(cost)
+        payment = dice.basic_selection(cost)
         assert payment is not None
 
         action_generator = action_generator.choose(payment)
@@ -394,7 +394,7 @@ Then we choose the dice to pay for the action, ``choices`` here is of type
 
 Given ``ActionGenerator`` *approves* normal attack action, we know there are
 enough dice to pay for the action.
-Here I use ``.basically_satisfy()`` to find a way to pay for the cost.
+Here I use ``.basic_selection()`` to find a way to pay for the cost.
 (if ``dice`` cannot fulfill the ``cost`` then ``None`` is returned,
 but we know this is not happening here)
 

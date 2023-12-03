@@ -379,7 +379,10 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.PoeticsOfFuubutsu, 1530),
         # Wanderer 1531
 
-        #### End 1625 ####
+        #### 5 Special Card 1625 ####
+        (card.OmniCard, 1625),
+
+        #### End 1630 ####
     )
 })
 

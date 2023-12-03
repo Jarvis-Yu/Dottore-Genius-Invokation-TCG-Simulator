@@ -22,6 +22,7 @@ Contents
    get-started
    tutorials
    design-n-philosophy
+   rl-env
    game-state
    deck
    mode
