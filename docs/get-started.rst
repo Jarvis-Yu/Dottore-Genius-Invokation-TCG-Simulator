@@ -86,10 +86,10 @@ It's now time to create the initial game state of a game.
 
 .. note::
 
-    The ``initial_game_state`` is of type ``GameState``,
+    The ``initial_game_state`` is of type |GameState|,
     which is a representation of a moment in an entire game.
     It contains all the information of the moment, and can be used to proceed
-    to the next ``GameState``.
+    to the next |GameState|.
 
     The ``dgisim.DefaultMode()`` defines the rules about how game should be run.
     ``DefaultMode`` is the usual mode where each player has 3 characters and 30
@@ -238,7 +238,7 @@ Let's try to build an agent that keeps normal attacking until there's no dice
 for it.
 
 There are many ways to implement such an agent, let's get started with the way
-which uses ``ActionGenerator``.
+which uses |ActionGenerator|.
 It is a class to help you generate valid actions.
 
 .. code-block:: python3
@@ -312,7 +312,7 @@ If it is in action phase, then we call ``handle_action_phase()`` to get the acti
         assert action_generator is not None
         ...
 
-As usual, we first get the latest ``GameState``, then try to get an ``ActionGenerator``
+As usual, we first get the latest |GameState|, then try to get an |ActionGenerator|
 object from it for player ``pid``.
 If the return value is ``None``, then the player doesn't have any valid action
 to take at the current state.
@@ -332,7 +332,7 @@ to take.
         ...
 
 First we get ``choices`` from the action generator, which is typically a ``tuple``.
-The first tuple of choices we get in action phase is a tuple of ``ActionType``.
+The first tuple of choices we get in action phase is a tuple of |ActionType|.
 The ``choices`` only contains feasible actions, so if ``ActionType.CAST_SKILL``
 is not in choices, then player is unable to cast skill for some reason.
 (being frozen, or simply doesn't have dice for the skill)
@@ -342,9 +342,9 @@ and get a new action generator to make the next choice.
 
 .. note::
 
-    ``ActionGenerator`` is an immutable class containing the choices you have made
+    |ActionGenerator| is an immutable class containing the choices you have made
     for a particular game state and player. This makes BFS significantly faster
-    and easier, as you can use previous ``ActionGenerator`` objects like parent
+    and easier, as you can use previous |ActionGenerator| objects like parent
     nodes in a tree.
 
 .. code-block:: python3
@@ -378,21 +378,21 @@ So here we double check if normal attack is available.
         ...
 
 Then we choose the dice to pay for the action, ``choices`` here is of type
-``AbstractDice``, a class to represent the cost of actions.
+|AbstractDice|, a class to represent the cost of actions.
 
 .. note::
 
-    ``ActionGenerator`` returns the cost post cost-reduction statuses,
+    |ActionGenerator| returns the cost post cost-reduction statuses,
     e.g. if your character had Northern Smoked Chicken, normal attack costs
     1 less ``Element.ANY`` die.
 
 .. note::
 
-    ``AbstractDice`` contains a private immutable dictionary representing the
+    |AbstractDice| contains a private immutable dictionary representing the
     cost. For a typical normal attack, the inner dictionary may look like
     ``{Element.PYRO: 1, Element.ANY: 2}``.
 
-Given ``ActionGenerator`` *approves* normal attack action, we know there are
+Given |ActionGenerator| *approves* normal attack action, we know there are
 enough dice to pay for the action.
 Here I use ``.basic_selection()`` to find a way to pay for the cost.
 (if ``dice`` cannot fulfill the ``cost`` then ``None`` is returned,
@@ -411,4 +411,36 @@ We get it by calling ``.generate_action()`` provided ``.filled()`` returns ``Tru
 
 The code above is just one way to code an agent.
 You could of course code in your own way, as long as you return a valid
-``PlayerAction``.
+|PlayerAction|.
+
+Reinforcement Learning Environment
+----------------------------------
+
+Currently |LinearEnv| is provided for RL environment for linear simulation process.
+
+A simple example of using |LinearEnv| is as follows:
+
+.. code-block:: python3
+
+    from dgisim import LinearEnv
+
+    env = LinearEnv()
+    rl_net = ...  # your RL network
+
+    for _ in range(100):
+        env.reset()
+        game_state, encoded_state, reward, turn, done = env.view()
+
+        while not done:
+            action = rl_net(encoded_state)  # this is just an example, your network
+                                            # doesn't have to directly generate an action
+            game_state, encoded_state, reward, turn, done = env.step(action)
+
+For more details please check :ref:`rl-tutorial`.
+
+.. |AbstractDice| replace:: :py:mod:`AbstractDice <dgisim.dice.AbstractDice>`
+.. |ActionGenerator| replace:: :py:mod:`ActionGenerator <dgisim.action.action_generator.ActionGenerator>`
+.. |ActionType| replace:: :py:mod:`ActionType <dgisim.action.enums.ActionType>`
+.. |GameState| replace:: :py:mod:`GameState <dgisim.state.game_state.GameState>`
+.. |LinearEnv| replace:: :py:mod:`LinearEnv <dgisim.env.linear_env.LinearEnv>`
+.. |PlayerAction| replace:: :py:mod:`PlayerAction <dgisim.action.action.PlayerAction>`

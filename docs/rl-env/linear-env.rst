@@ -1,5 +1,5 @@
-Linear Env
-==========
+Linear Environment
+==================
 
 .. code-block:: python3
 
@@ -28,4 +28,5 @@ An example of a simple set up is.
 
 .. autoclass:: dgisim.env.linear_env.LinearEnv
     :members:
-    :undoc-members:
+    
+    .. automethod:: __init__

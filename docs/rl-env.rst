@@ -5,3 +5,4 @@ Reinforcement Learning Environment
     :maxdepth: 1
 
     rl-env/linear-env
+    rl-env/encoding-plan

@@ -51,6 +51,26 @@ class EncodingPlan:
             effect_fixed_len: int = 25,
             effects_fixed_len: int = 40,
     ) -> None:
+        """
+        :param mode_mapping: a mapping from mode to code.
+        :param card_mapping: a mapping from card to code.
+        :param char_mapping: a mapping from character to code.
+        :param effect_mapping: a mapping from effect to code.
+        :param status_mapping: a mapping from status to code.
+        :param summon_mapping: a mapping from summon to code.
+        :param support_mapping: a mapping from support to code.
+        :param cards_fixed_len: the fixed length of any encoded cards vector.
+        :param status_fixed_len: the default fixed length of encoded status vector.
+        :param statuses_fixed_len: the default fixed length of encoded statuses vector.
+        :param char_hidden_fixed_len: the default fixed length of encoded character hidden statuses vector.
+        :param char_stt_fixed_len: the default fixed length of encoded character statuses vector.
+        :param player_hidden_fixed_len: the default fixed length of encoded player hidden statuses vector.
+        :param player_combat_fixed_len: the default fixed length of encoded player combat statuses vector.
+        :param summons_fixed_len: the default fixed length of encoded summons vector.
+        :param supports_fixed_len: the default fixed length of encoded supports vector.
+        :param effect_fixed_len: the default fixed length of encoded effect vector.
+        :param effects_fixed_len: the default fixed length of encoded effects vector.
+        """
         self._card_mapping = card_mapping
         self._char_mapping = char_mapping
         self._effect_mapping = effect_mapping

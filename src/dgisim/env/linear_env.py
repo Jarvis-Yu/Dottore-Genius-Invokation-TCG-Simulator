@@ -68,15 +68,15 @@ class LinearEnv:
         """
         self._last_deck1 = deck1
         self._last_deck2 = deck2
-        self._last_reset = self._reset_by_decks
+        self._last_reset = self._reset_with_decks
         self.reset()
 
-    def _reset_by_decks(self) -> None:
+    def _reset_with_decks(self) -> None:
         assert self._last_deck1 is not None
         assert self._last_deck2 is not None
         self._curr_state = GameState.from_decks(self._mode, self._last_deck1, self._last_deck2)
 
-    def full_state(self) -> GameState:
+    def full_view(self) -> GameState:
         """
         :returns: the game state without any perspective (all cards & dice visible).
         """
@@ -87,6 +87,8 @@ class LinearEnv:
         :returns: game state, encoded state, reward, turn, done
 
         The game state is in the perspective view of the current player.
+
+        The `turn` indicates the player that should take action next.
         """
         match self._curr_state.waiting_for():
             case Pid.P1:
@@ -108,9 +110,15 @@ class LinearEnv:
             action: list[int] | PlayerAction
     ) -> tuple[GameState, list[int], int | float, int, bool]:
         """
+        :param action: the action to take.
+                       It can either be a list of int as the encoded action,
+                       or a PlayerAction object.
+
         :returns: game state, encoded state, reward, turn, done
 
-        The game state is in the perspective view of the current player.
+        The `game state` is in the perspective view of the current player.
+
+        The `turn` indicates the player that should take action next.
 
         An invalid action will result-in the same state with a penalty.
         """
