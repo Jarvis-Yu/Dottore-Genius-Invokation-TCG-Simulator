@@ -31,6 +31,25 @@ Please make sure your Python version `>= 3.10` before installing.
 pip install dgisim
 ```
 
+## RL Environment Usage Example
+
+```python
+from dgisim import LinearEnv
+
+env = LinearEnv()
+rl_net = ...  # your RL network
+
+for episode range(100):
+    env.reset()
+    game_state, encoded_state, reward, turn, done = env.view()
+
+    while not done:
+        ...  # do the training on the encoded_state
+        game_state, encoded_state, reward, turn, done = env.step(action)
+```
+
+For more details please check the [documentation](https://dottore-genius-invokation-tcg-simulator.readthedocs.io/en/stable/tutorials/rl.html).
+
 ## Try the Simulator in Browser
 
 - Website: [https://jarvis-yu.github.io/Dottore-Genius-Invokation-TCG-PWA/](https://jarvis-yu.github.io/Dottore-Genius-Invokation-TCG-PWA/)
