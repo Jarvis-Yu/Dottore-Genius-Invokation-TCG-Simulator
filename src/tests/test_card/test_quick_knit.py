@@ -71,7 +71,7 @@ class TestQuickKnit(unittest.TestCase):
         choices = action_generator.choices()
         assert isinstance(choices, AbstractDice)
         action_generator = action_generator.choose(
-            just(action_generator.dice_available().basically_satisfy(choices))
+            just(action_generator.dice_available().basic_selection(choices))
         )
 
         # test right usage

@@ -19,7 +19,7 @@ class TestSendOff(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=SendOff,
             instruction=StaticTargetInstruction(
-                dice=ActualDice({Element.ANEMO: 1, Element.DENDRO: 1}),
+                dice=ActualDice({Element.ANEMO: 2}),
                 target=StaticTarget.from_summon(Pid.P2, ReflectionSummon),
             ),
         ))
@@ -32,7 +32,7 @@ class TestSendOff(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=SendOff,
             instruction=StaticTargetInstruction(
-                dice=ActualDice({Element.HYDRO: 1, Element.ELECTRO: 1}),
+                dice=ActualDice({Element.HYDRO: 2}),
                 target=StaticTarget.from_summon(Pid.P2, BurningFlameSummon),
             ),
         ))
@@ -43,7 +43,7 @@ class TestSendOff(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=SendOff,
             instruction=StaticTargetInstruction(
-                dice=ActualDice({Element.GEO: 1, Element.PYRO: 1}),
+                dice=ActualDice({Element.GEO: 2}),
                 target=StaticTarget.from_summon(Pid.P2, SesshouSakuraSummon),
             ),
         ))
@@ -66,7 +66,7 @@ class TestSendOff(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=SendOff,
             instruction=StaticTargetInstruction(
-                dice=ActualDice({Element.GEO: 1, Element.PYRO: 1}),
+                dice=ActualDice({Element.GEO: 2}),
                 target=StaticTarget.from_summon(Pid.P2, OceanicMimicFrogSummon),
             ),
         ))

@@ -2157,7 +2157,7 @@ class QuickKnit(EventCard, _SummonTargetChoiceProvider):
 
 
 class SendOff(EventCard, _SummonTargetChoiceProvider):
-    _DICE_COST = AbstractDice({Element.ANY: 2})
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
     _OPPO_SIDE = True
 
     @override

@@ -170,30 +170,30 @@ class TestDice(unittest.TestCase):
         self.assertFalse(payment4.just_satisfy(requirement))
         self.assertFalse(payment5.just_satisfy(requirement))
 
-    def test_basically_satisfy_successes(self):
+    def test_basic_selection_successes(self):
         requirement = AbstractDice({Element.OMNI: 3})
         payment = ActualDice({Element.CRYO: 3, Element.ANEMO: 1})
-        self.assertEqual(payment.basically_satisfy(requirement), ActualDice({Element.CRYO: 3}))
+        self.assertEqual(payment.basic_selection(requirement), ActualDice({Element.CRYO: 3}))
 
         requirement = AbstractDice({Element.OMNI: 3})
         payment = ActualDice({Element.CRYO: 2, Element.OMNI: 2})
-        self.assertEqual(payment.basically_satisfy(requirement),
+        self.assertEqual(payment.basic_selection(requirement),
                          ActualDice({Element.CRYO: 2, Element.OMNI: 1}))
 
         requirement = AbstractDice({Element.OMNI: 3})
         payment = ActualDice({Element.ANEMO: 1, Element.ELECTRO: 1,
                               Element.PYRO: 1, Element.OMNI: 2})
-        self.assertEqual(just(payment.basically_satisfy(requirement))[Element.OMNI], 2)
+        self.assertEqual(just(payment.basic_selection(requirement))[Element.OMNI], 2)
 
-    def test_basically_satisfy_failures(self):
+    def test_basic_selection_failures(self):
         requirement = AbstractDice({Element.ANY: 8})
         payment = ActualDice({Element.OMNI: 7})
-        self.assertIsNone(payment.basically_satisfy(requirement))
+        self.assertIsNone(payment.basic_selection(requirement))
 
         requirement = AbstractDice({Element.OMNI: 4})
         payment = ActualDice({Element.GEO: 3, Element.ELECTRO: 2,
                               Element.HYDRO: 1, Element.DENDRO: 3})
-        self.assertIsNone(payment.basically_satisfy(requirement))
+        self.assertIsNone(payment.basic_selection(requirement))
 
     def test_ordered_actual_dice(self):
         dice = ActualDice({
