@@ -40,13 +40,13 @@ A simple example of using |LinearEnv| is as follows:
 The default behaviour of |LinearEnv| is to generate a random game state at the
 beginning of each episode.
 You may also reset the environment with two specific decks for each player by
-calling ``.reset_with_deck(deck1, deck2)``.
+calling ``.reset_with_decks(deck1, deck2)``.
 
 .. note::
 
     ``.reset()`` follows the last way of resetting the environment.
     If you want to reset the environment with random deck after calling
-    ``.reset_with_deck()``, you should call ``.reset_random()``.
+    ``.reset_with_decks()``, you should call ``.reset_random()``.
 
 .. note::
 
