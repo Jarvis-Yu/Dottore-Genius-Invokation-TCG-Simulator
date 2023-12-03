@@ -178,7 +178,7 @@ Or if you don't bother to custom one, you can get a random one by running.
 
     game_state = dg.GameState.from_default()
 
-The easiest way to *run* the game is to use the ``GameStateMachine``.
+The easiest way to *run* the game is to use the |GameStateMachine|.
 
 .. code-block:: python3
 
@@ -192,10 +192,10 @@ The easiest way to *run* the game is to use the ``GameStateMachine``.
 
 .. note::
 
-    ``RandomAgent`` is an automatic player that makes random decisions on every
+    |RandomAgent| is an automatic player that makes random decisions on every
     single move.
 
-``GameStateMachine`` provides a number of methods to run a game.
+|GameStateMachine| provides a number of methods to run a game.
 What we could do here is to call ``.run()`` to run until the end of the game.
 
 .. code-block:: python3
@@ -214,7 +214,7 @@ Simplying having a running game is not enough, it is always fun to create
 agents to play the game better and better.
 
 In ``dgisim``, customizing the logics of an antomated player is simple.
-You need to inherit from the class ``PlayerAgent`` and override method
+You need to inherit from the class |PlayerAgent| and override method
 ``choose_action()``.
 
 .. code-block:: python3
@@ -301,7 +301,7 @@ This may look a bit overwhelming, but don't worry, let's go though it step by st
         return RandomAgent().choose_action(history, pid)
 
 This block of code gets the latest game state first, and then see if it is in action
-phase. If not, we let ``RandomAgent`` to handle situations we haven't covered yet.
+phase. If not, we let |RandomAgent| to handle situations we haven't covered yet.
 If it is in action phase, then we call ``handle_action_phase()`` to get the action.
 
 .. code-block:: python3
@@ -442,5 +442,8 @@ For more details please check :ref:`rl-tutorial`.
 .. |ActionGenerator| replace:: :py:mod:`ActionGenerator <dgisim.action.action_generator.ActionGenerator>`
 .. |ActionType| replace:: :py:mod:`ActionType <dgisim.action.enums.ActionType>`
 .. |GameState| replace:: :py:mod:`GameState <dgisim.state.game_state.GameState>`
+.. |GameStateMachine| replace:: :py:mod:`GameStateMachine <dgisim.game_state_machine.GameStateMachine>`
 .. |LinearEnv| replace:: :py:mod:`LinearEnv <dgisim.env.linear_env.LinearEnv>`
 .. |PlayerAction| replace:: :py:mod:`PlayerAction <dgisim.action.action.PlayerAction>`
+.. |PlayerAgent| replace:: :py:mod:`PlayerAgent <dgisim.player_agent.PlayerAgent>`
+.. |RandomAgent| replace:: :py:mod:`RandomAgent <dgisim.agents.RandomAgent>`
