@@ -67,7 +67,7 @@ that might be an output of a NN, or a |PlayerAction| object.
 If the action failed to be decoded or is invalid in other ways, the same
 game state will be returned with a customizable penalty (default to -0.1).
 
-The ``return`` is:
+The ``reward`` is:
 
 * If Game Ends:
     * ``1`` if player 1 wins

@@ -268,6 +268,9 @@ class GameState:
 
     def step(self, seed: int | float | None = None) -> GameState:
         """
+        :param seed: the seed for internal random number generation.
+                     Applying the same seed to the same game state will always
+                     result in the same next state.
         :returns: the next state of a state-transition from the current one without
                   any player action.
         """
