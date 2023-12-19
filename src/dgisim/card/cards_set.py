@@ -111,6 +111,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ChangTheNinth,
     Liben,
     Paimon,
+    Setaria,
     Xudong,
     ## Support Card / Item ##
     NRE,

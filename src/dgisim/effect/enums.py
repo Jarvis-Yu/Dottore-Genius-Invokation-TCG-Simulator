@@ -45,20 +45,22 @@ class TriggeringSignal(Enum):
     POST_DMG = 9
     #: triggers when "after ... character takes Elemental Reaction DMG"
     POST_REACTION = 10
+    #: triggers when "after any ..."
+    POST_ANY = 11
     #: triggers when "before ... choose their action"
-    PRE_ACTION = 11
+    PRE_ACTION = 12
     #: triggers when "End Phase"
-    ROUND_END = 12  # remove frozen etc.
+    ROUND_END = 13  # remove frozen etc.
     #: triggers when "when the Action Phase starts"
-    ROUND_START = 13
+    ROUND_START = 14
     #: triggers when "when you declare the end of your round"
-    SELF_DECLARE_END_ROUND = 14
+    SELF_DECLARE_END_ROUND = 15
     #: ABOUT TO BE DEPRECATED: triggers when player 1 switch a character
-    SWAP_EVENT_1 = 15  # P1's swap; TODO: make it relative
+    SWAP_EVENT_1 = 16  # P1's swap; TODO: make it relative
     #: ABOUT TO BE DEPRECATED: triggers when player 2 switch a character
-    SWAP_EVENT_2 = 16  # P2's swap; TODO: make it relative
+    SWAP_EVENT_2 = 17  # P2's swap; TODO: make it relative
     #: triggers when "when the character ... would be defeated"
-    TRIGGER_REVIVAL = 17
+    TRIGGER_REVIVAL = 18
 
     @classmethod
     def swap_event(cls, pid: Pid) -> TriggeringSignal:

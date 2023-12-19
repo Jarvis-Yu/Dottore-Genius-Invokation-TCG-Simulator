@@ -41,6 +41,7 @@ __all__ = [
     "ChangTheNinthSupport",
     "LibenSupport",
     "PaimonSupport",
+    "SetariaSupport",
     "XudongSupport",
     ## Item ##
     "NRESupport",
@@ -215,6 +216,29 @@ class PaimonSupport(Support, stt._UsageStatus):
             ], replace(self, usages=-1)
         return [], self
 
+
+@dataclass(frozen=True, kw_only=True)
+class SetariaSupport(Support, stt._UsageStatus):
+    usages: int = 3
+    MAX_USAGES: ClassVar[int] = 3
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_ANY,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.POST_ANY:
+            hand_cards = game_state.get_player(source.pid).get_hand_cards()
+            if hand_cards.num_cards() == 0:
+                return [
+                    eft.DrawRandomCardEffect(
+                        pid=source.pid,
+                        num=1,
+                    ),
+                ], replace(self, usages=-1)
+        return [], self
 
 @dataclass(frozen=True, kw_only=True)
 class XudongSupport(Support):

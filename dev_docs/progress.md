@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (30/60 implemented)](#character-3060-implemented)
-  - [Card (99/217 implemented)](#card-99217-implemented)
+  - [Card (100/217 implemented)](#card-100217-implemented)
 
 ## Character (30/60 implemented)
 
@@ -56,7 +56,7 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (99/217 implemented)
+## Card (100/217 implemented)
 
 - [ ] Equipment Card (51/117):
   - [ ] Talent Card:
@@ -125,7 +125,7 @@ all I need now is to implement each card and character.
     - [x] Instructor's Cap
     - [ ] Ornate Kabuto
     - [x] Tenacity of the Millelith
-- [ ] Support Card (11/39):
+- [ ] Support Card (12/39):
   - [ ] Companion Card:
     - [x] Chang the Ninth
     - [ ] Chef Mao
@@ -135,7 +135,7 @@ all I need now is to implement each card and character.
     - [ ] Master Zhang
     - [x] Paimon
     - [ ] Rana
-    - [ ] Setaria
+    - [x] Setaria
     - [ ] Timmie
     - [x] Xudong
     - [ ] Yayoi Nanatsuki
