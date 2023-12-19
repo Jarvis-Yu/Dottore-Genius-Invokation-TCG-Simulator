@@ -110,6 +110,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ## Support Card / Companion ##
     ChangTheNinth,
     Liben,
+    LiuSu,
     Paimon,
     Setaria,
     Xudong,

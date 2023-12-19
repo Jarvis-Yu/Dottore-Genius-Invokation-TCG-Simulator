@@ -23,13 +23,13 @@ from ..event import *
 from ..status import status as stt
 
 from ..effect.enums import TriggeringSignal, Zone
+from ..effect.structs import StaticTarget
 from ..element import Element
 from ..helper.quality_of_life import BIG_INT
 from ..status.enums import Informables, Preprocessables
 
 if TYPE_CHECKING:
     from ..state.game_state import GameState
-    from ..effect.structs import StaticTarget
     from ..encoding.encoding_plan import EncodingPlan
 
 __all__ = [
@@ -40,6 +40,7 @@ __all__ = [
     ## Companions ##
     "ChangTheNinthSupport",
     "LibenSupport",
+    "LiuSuSupport",
     "PaimonSupport",
     "SetariaSupport",
     "XudongSupport",
@@ -194,12 +195,31 @@ class LibenSupport(Support, stt._UsageLivingStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class LiusuSupport(Support, stt._UsageStatus):
+class LiuSuSupport(Support, stt._UsageStatus):
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2
+    activated: bool = True
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.SELF_SWAP,
+        TriggeringSignal.ROUND_END,
     ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.SELF_SWAP and self.activated:
+            active_char = game_state.get_player(source.pid).get_active_character()
+            if active_char is not None and active_char.get_energy() == 0:
+                return [
+                    eft.EnergyRechargeEffect(
+                        target=StaticTarget.from_char_id(source.pid, active_char.get_id()),
+                        recharge=1,
+                    )
+                ], replace(self, usages=-1, activated=False)
+        elif signal is TriggeringSignal.ROUND_END and not self.activated:
+            return [], replace(self, usages=0, activated=True)
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)
