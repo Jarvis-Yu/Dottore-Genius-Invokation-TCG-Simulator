@@ -195,3 +195,6 @@ class FrozenDeck(Deck):
         if mutable_deck is None:
             return None
         return mutable_deck.to_frozen()  # type: ignore
+
+    def __hash__(self) -> int:
+        return hash((self.chars, self.cards))

@@ -33,7 +33,7 @@ class TestGameState(unittest.TestCase):
 
     def test_deck_extraction(self):
         game_state = GameState.from_default()
-        deck1, deck2 = game_state.extract_decks()
+        deck1, deck2 = game_state.get_decks()
         self.assertEqual(len(deck1.chars), 3)
         self.assertEqual(len(deck2.chars), 3)
         self.assertEqual(sum(deck1.cards.values()), 30)

@@ -353,14 +353,13 @@ class GameState:
             self._effect_stack.encoding(encoding_plan),
         ))
 
-    def extract_decks(self) -> tuple[Deck, Deck]:
+    def get_decks(self) -> tuple[Deck, Deck]:
         """
-        :returns: the best estimation for the decks of player 1 and player 2
-                  under the current game state.
+        :returns: the decks used by both player 1 and 2 if known.
         """
         return (
-            self._player1.extract_deck(),
-            self._player2.extract_deck(),
+            self._player1.get_initial_deck(),
+            self._player2.get_initial_deck(),
         )
 
     def __copy__(self) -> Self:  # pragma: no cover

@@ -18,7 +18,7 @@ from ..support.supports import Supports
 from .enums import Act
 
 if TYPE_CHECKING:
-    from ..deck import Deck
+    from ..deck import Deck, FrozenDeck
     from ..encoding.encoding_plan import EncodingPlan
     from ..mode import Mode
 
@@ -48,6 +48,7 @@ class PlayerState:
         deck_cards: Cards,
         publicly_used_cards: Cards,
         publicly_gained_cards: Cards,
+        initial_deck: Deck,
     ):
         """
         :param phase: the phase the player is in.
@@ -80,6 +81,7 @@ class PlayerState:
         self._deck_cards = deck_cards
         self._publicly_used_cards = publicly_used_cards
         self._publicly_gained_cards = publicly_gained_cards
+        self._initial_deck = initial_deck.to_frozen()
 
     def factory(self) -> PlayerStateFactory:
         """ :returns: a factory for the current player state. """
@@ -153,6 +155,10 @@ class PlayerState:
     def get_publicly_gained_cards(self) -> Cards:
         """ :returns: the cards publicly gained by the player. """
         return self._publicly_gained_cards
+
+    def get_initial_deck(self) -> FrozenDeck:
+        """ :returns: the initial deck of the player. """
+        return self._initial_deck
 
     def get_active_character(self) -> None | chr.Character:
         """ :returns: the active character. `None` is returned if there isn't one. """
@@ -235,6 +241,7 @@ class PlayerState:
             self._deck_cards.encoding(encoding_plan),
             self._publicly_used_cards.encoding(encoding_plan),
             self._publicly_gained_cards.encoding(encoding_plan),
+            self._initial_deck.encoding(encoding_plan),
             self._characters.encoding(encoding_plan),
             self._hidden_statuses.encoding(encoding_plan, encoding_plan.PLAYER_HIDDEN_FIXED_LEN),
             self._combat_statuses.encoding(encoding_plan, encoding_plan.PLAYER_COMBAT_FIXED_LEN),
@@ -242,51 +249,29 @@ class PlayerState:
             self._supports.encoding(encoding_plan),
         ))
 
-    def extract_deck(self) -> Deck:
-        """
-        :returns: the best estimation of the deck of the player.
-        """
-        from ..card.card import OmniCard
-        from ..deck import FrozenDeck, MutableDeck
-
-        empty_deck = FrozenDeck(
-            chars=tuple([type(char) for char in self._characters]),
-            cards=HashableDict()
-        )
-        cards = self._deck_cards + self._hand_cards + self._publicly_used_cards
-        return MutableDeck(
-            chars=[
-                type(char) for char in self._characters
-            ],
-            cards={
-                card: cards[card]
-                for card in cards
-                if card is not OmniCard and card.valid_in_deck(empty_deck)
-            },
-        )
-
     @classmethod
     def example_player(cls, mode: Mode) -> Self:
         """
         :returns: a random initial player state under the `mode`.
         """
         from ..card.card import ArcaneLegendCard
-        from ..deck import FrozenDeck
+        from ..deck import MutableDeck
         from ..helper.hashable_dict import HashableDict
         cards = mode.all_cards()
         chars = mode.all_chars()
         import random
         selected_chars = random.sample(list(chars), k=3)
-        char_deck = FrozenDeck(chars=tuple(selected_chars), cards=HashableDict())
+        deck = MutableDeck(chars=selected_chars, cards={})
         cards_pool = []
         for card in cards:
-            if not card.valid_in_deck(char_deck):
+            if not card.valid_in_deck(deck):
                 continue
             if isinstance(card, ArcaneLegendCard):
                 cards_pool.append(card)
             else:
                 cards_pool.extend([card] * 2)
         selected_cards = random.sample(cards_pool, k=mode.deck_cards_requirement())
+        deck.cards = Counter(selected_cards)
         return cls(
             phase=Act.PASSIVE_WAIT_PHASE,
             consec_action=False,
@@ -304,6 +289,7 @@ class PlayerState:
             deck_cards=Cards(Counter(selected_cards)),
             publicly_used_cards=Cards({}),
             publicly_gained_cards=Cards({}),
+            initial_deck=deck,
         )
 
     @classmethod
@@ -311,6 +297,7 @@ class PlayerState:
         """
         :returns: the initial state of a player under `mode` with `characters` and `cards`.
         """
+        from ..deck import FrozenDeck
         return cls(
             phase=Act.PASSIVE_WAIT_PHASE,
             consec_action=False,
@@ -326,6 +313,16 @@ class PlayerState:
             deck_cards=cards,
             publicly_used_cards=Cards({}),
             publicly_gained_cards=Cards({}),
+            initial_deck=FrozenDeck(
+                chars=tuple([
+                    type(char)
+                    for char in characters
+                ]),
+                cards=HashableDict({
+                    card: cards[card]
+                    for card in cards
+                }),
+            ),
         )
 
     @classmethod
@@ -348,6 +345,7 @@ class PlayerState:
             deck_cards=Cards(deck.cards),
             publicly_used_cards=Cards({}),
             publicly_gained_cards=Cards({}),
+            initial_deck=deck,
         )
 
     def _all_unique_data(self) -> tuple:
@@ -366,6 +364,7 @@ class PlayerState:
             self._deck_cards,
             self._publicly_used_cards,
             self._publicly_gained_cards,
+            self._initial_deck,
         )
 
     def __eq__(self, other: object) -> bool:
@@ -416,6 +415,7 @@ class PlayerStateFactory:
         self._deck_cards = player_state.get_deck_cards()
         self._publicly_used_cards = player_state.get_publicly_used_cards()
         self._publicly_gained_cards = player_state.get_publicly_gained_cards()
+        self._initial_deck = player_state.get_initial_deck()
 
     def phase(self, phase: Act) -> PlayerStateFactory:
         self._phase = phase
@@ -513,6 +513,13 @@ class PlayerStateFactory:
     def f_publicly_gained_cards(self, f: Callable[[Cards], Cards]) -> PlayerStateFactory:
         return self.publicly_gained_cards(f(self._publicly_gained_cards))
 
+    def initial_deck(self, deck: Deck) -> PlayerStateFactory:
+        self._initial_deck = deck.to_frozen()
+        return self
+
+    def f_initial_deck(self, f: Callable[[FrozenDeck], Deck]) -> PlayerStateFactory:
+        return self.initial_deck(f(self._initial_deck).to_frozen())
+
     def build(self) -> PlayerState:
         return PlayerState(
             phase=self._phase,
@@ -529,4 +536,5 @@ class PlayerStateFactory:
             deck_cards=self._deck_cards,
             publicly_used_cards=self._publicly_used_cards,
             publicly_gained_cards=self._publicly_gained_cards,
+            initial_deck=self._initial_deck,
         )

@@ -170,3 +170,40 @@ class TestDeck(unittest.TestCase):
         encoding = deck.encoding(encoding_plan)
         deck_read = FrozenDeck.decoding(encoding, encoding_plan)
         self.assertEqual(deck, deck_read)
+
+    def test_frozen_hash(self):
+        deck1 = FrozenDeck(
+            chars=(
+                AratakiItto,
+                Bennett,
+                Dehya,
+            ),
+            cards=HashableDict({
+                GamblersEarrings: 2,
+                LeaveItToMe: 1,
+            }),
+        )
+        deck2 = FrozenDeck(
+            chars=(
+                AratakiItto,
+                Bennett,
+                Dehya,
+            ),
+            cards=HashableDict({
+                LeaveItToMe: 1,
+                GamblersEarrings: 2,
+            }),
+        )
+        deck3 = FrozenDeck(
+            chars=(
+                AratakiItto,
+                Dehya,
+                Bennett,
+            ),
+            cards=HashableDict({
+                LeaveItToMe: 1,
+                GamblersEarrings: 2,
+            }),
+        )
+        self.assertEqual(hash(deck1), hash(deck2))
+        self.assertNotEqual(hash(deck2), hash(deck3))
