@@ -22,6 +22,7 @@ from ..effect import effect as eft
 from ..event import *
 from ..status import status as stt
 
+from ..character.enums import CharacterSkillType
 from ..effect.enums import TriggeringSignal, Zone
 from ..effect.structs import StaticTarget
 from ..element import Element
@@ -42,6 +43,7 @@ __all__ = [
     "LibenSupport",
     "LiuSuSupport",
     "PaimonSupport",
+    "RanaSupport",
     "SetariaSupport",
     "XudongSupport",
     ## Item ##
@@ -243,6 +245,55 @@ class PaimonSupport(Support, stt._UsageStatus):
                     num=self.NUM_GENERATED,
                 ),
             ], replace(self, usages=-1)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class RanaSupport(Support, stt._UsageStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    AUTO_DESTROY: ClassVar[bool] = False
+    triggered: bool = False
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.POST_SKILL_USAGE and self.usages > 0 and not self.triggered:
+            assert isinstance(information, SkillIEvent)
+            if (
+                    information.source.pid is status_source.pid
+                    and information.skill_true_type is CharacterSkillType.ELEMENTAL_SKILL
+            ):
+                return replace(self, triggered=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.triggered:
+            next_char = game_state.get_player(
+                source.pid
+            ).get_characters().get_nth_next_alive_character_in_activity_order(1)
+            return [
+                eft.AddDiceEffect(
+                    pid=source.pid,
+                    element=next_char.ELEMENT(),
+                    num=1,
+                ),
+            ], replace(self, usages=-1, triggered=False)
+        elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
+            assert not self.triggered
+            return [], replace(self, usages=self.MAX_USAGES)
         return [], self
 
 

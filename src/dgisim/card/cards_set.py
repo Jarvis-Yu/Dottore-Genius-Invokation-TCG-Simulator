@@ -112,6 +112,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     Liben,
     LiuSu,
     Paimon,
+    Rana,
     Setaria,
     Xudong,
     ## Support Card / Item ##

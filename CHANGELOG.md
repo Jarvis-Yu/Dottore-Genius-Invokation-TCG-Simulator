@@ -16,6 +16,10 @@
   - Event Card:
     - Fresh Wind of Freedom
     - When the Crane Returned
+  - Support Card:
+    - Liusu
+    - Rana
+    - Setaria
 
 ### Updated
 

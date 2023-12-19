@@ -111,7 +111,7 @@ generate valid player actions.
 Currently a full game can be played with any combination of the characters and cards implemented.
 
 - [x] Implement all game phases (Action Phase, End Phase...)
-- [ ] Implement all cards (101/217 implemented)
+- [ ] Implement all cards (102/217 implemented)
       ([latest-details](https://dottore-genius-invokation-tcg-simulator.readthedocs.io/en/latest/card/available-cards.html))
       ([stable-details](https://dottore-genius-invokation-tcg-simulator.readthedocs.io/en/stable/card/available-cards.html))
 - [ ] Implement all characters with their talent cards (30/60 implemented)

@@ -138,6 +138,7 @@ __all__ = [
     "Liben",
     "LiuSu",
     "Paimon",
+    "Rana",
     "Setaria",
     "Xudong",
     ## Item ##
@@ -2339,6 +2340,11 @@ class LiuSu(CompanionCard):
 class Paimon(CompanionCard):
     _DICE_COST = AbstractDice({Element.OMNI: 3})
     _SUPPORT_STATUS = sp.PaimonSupport
+
+
+class Rana(CompanionCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
+    _SUPPORT_STATUS = sp.RanaSupport
 
 
 class Setaria(CompanionCard):

@@ -87,6 +87,21 @@ class Characters:
                 )
         return self._characters
 
+    def get_nth_next_alive_character_in_activity_order(self, n: int) -> Character:
+        """
+        :returns: the nth alive character after the active one.
+        """
+        chars = self.get_alive_character_in_activity_order()
+        return chars[n % len(chars)]
+
+    def get_nth_prev_alive_character_in_activity_order(self, n: int) -> Character:
+        """
+        :returns: the nth alive character before the active one.
+        """
+        chars = self.get_alive_character_in_activity_order()
+        index = n % len(chars)
+        return chars[0] if index == 0 else chars[-index]
+
     def get_character_ordered_from_id(self, char_id: int) -> tuple[Character, ...]:
         """
         :returns: the ordered characters starting from `char_id`. (left to right)

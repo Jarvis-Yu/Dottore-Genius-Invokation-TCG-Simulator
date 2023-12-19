@@ -511,7 +511,7 @@ def skip_action_round(game_state: GameState, pid: Pid) -> GameState:
 
 
 def skip_action_round_until(game_state: GameState, pid: Pid) -> GameState:
-    """ pid is the player that is skipped """
+    """ pid is the player that is skipped until. """
     while pid is not game_state.waiting_for():
         game_state = skip_action_round(game_state, just(game_state.waiting_for()))
     return game_state
