@@ -2287,7 +2287,7 @@ class WhereIsTheUnseenRazor(EventCard, _CharTargetChoiceProvider):
 
 
 class WindAndFreedom(EventCard, _DiceOnlyChoiceProvider):
-    _DICE_COST = AbstractDice({Element.OMNI: 1})
+    _DICE_COST = AbstractDice({})
 
     @override
     @classmethod

@@ -978,7 +978,7 @@ class Dehya(Character):
     _ELEMENT = Element.PYRO
     _WEAPON_TYPE = WeaponType.CLAYMORE
     _TALENT_STATUS = stt.StalwartAndTrueStatus
-    _FACTIONS = frozenset((Faction.SUMERU,))
+    _FACTIONS = frozenset((Faction.SUMERU, Faction.THE_EREMITES))
 
     _SKILL1_COST = AbstractDice({
         Element.PYRO: 1,
@@ -1195,8 +1195,8 @@ class FatuiPyroAgent(Character):
         return cls(
             id=id,
             alive=True,
-            hp=10,
-            max_hp=10,
+            hp=9,
+            max_hp=9,
             energy=0,
             max_energy=2,
             hiddens=stts.Statuses((stt.StealthMasterStatus(),)),
@@ -2650,6 +2650,7 @@ class Qiqi(Character):
         )
 
 
+# TODO: 4.3 update TBD
 class RhodeiaOfLoch(Character):
     # basic info
     _ELEMENT = Element.HYDRO

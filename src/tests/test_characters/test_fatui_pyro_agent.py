@@ -103,7 +103,7 @@ class TestFatuiPyroAgent(unittest.TestCase):
         game_state = add_damage_effect(self.BASE_GAME, 2, Element.ANEMO, Pid.P1, char_id=2)
         game_state = auto_step(game_state)
         p1ac = game_state.get_player1().just_get_active_character()
-        self.assertEqual(p1ac.get_hp(), 9)
+        self.assertEqual(p1ac.get_hp(), 8)
         self.assertEqual(p1ac.get_character_statuses().just_find(StealthStatus).usages, 1)
 
     def test_talent_card(self):
@@ -125,7 +125,7 @@ class TestFatuiPyroAgent(unittest.TestCase):
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         p1ac = game_state.get_player1().just_get_active_character()
         p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p1ac.get_hp(), 9)
+        self.assertEqual(p1ac.get_hp(), 8)
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
         self.assertEqual(p1ac.get_character_statuses().just_find(StealthStatus).usages, 2)
 

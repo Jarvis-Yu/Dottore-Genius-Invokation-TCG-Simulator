@@ -637,8 +637,8 @@ class HeraldOfFrostSummon(_DmgPerRoundSummon):
 
 @dataclass(frozen=True, kw_only=True)
 class OceanicMimicFrogSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
-    usages: int = 2
-    MAX_USAGES: ClassVar[int] = 2
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
     AUTO_DESTROY: ClassVar[bool] = False
     SHIELD_AMOUNT: ClassVar[int] = 1
     DMG: ClassVar[int] = 2

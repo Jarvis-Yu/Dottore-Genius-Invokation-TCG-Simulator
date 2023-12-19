@@ -58,3 +58,4 @@ class Faction(Enum):
     FATUI = 8
     MONSTER = 9
     HILICHURL = 10
+    THE_EREMITES = 11

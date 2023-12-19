@@ -10,7 +10,7 @@ class TestWindAndFreedom(unittest.TestCase):
 
         game_state = step_action(base_state, Pid.P1, CardAction(
             card=WindAndFreedom,
-            instruction=DiceOnlyInstruction(dice=ActualDice({Element.PYRO: 1})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({})),
         ))
         game_state = step_swap(game_state, Pid.P1, char_id=3)
         game_state = step_skill(game_state, Pid.P2, CharacterSkill.SKILL1)
