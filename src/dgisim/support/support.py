@@ -194,6 +194,15 @@ class LibenSupport(Support, stt._UsageLivingStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
+class LiusuSupport(Support, stt._UsageStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.SELF_SWAP,
+    ))
+
+
+@dataclass(frozen=True, kw_only=True)
 class PaimonSupport(Support, stt._UsageStatus):
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2

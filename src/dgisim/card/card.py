@@ -2330,6 +2330,11 @@ class Liben(CompanionCard):
     _SUPPORT_STATUS = sp.LibenSupport
 
 
+# class Liusu(CompanionCard):
+#     _DICE_COST = AbstractDice({Element.OMNI: 1})
+#     _SUPPORT_STATUS = ...
+
+
 class Paimon(CompanionCard):
     _DICE_COST = AbstractDice({Element.OMNI: 3})
     _SUPPORT_STATUS = sp.PaimonSupport

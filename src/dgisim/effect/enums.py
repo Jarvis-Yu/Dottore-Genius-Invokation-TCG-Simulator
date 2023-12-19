@@ -56,24 +56,11 @@ class TriggeringSignal(Enum):
     #: triggers when "when you declare the end of your round"
     SELF_DECLARE_END_ROUND = 15
     #: ABOUT TO BE DEPRECATED: triggers when player 1 switch a character
-    SWAP_EVENT_1 = 16  # P1's swap; TODO: make it relative
+    SELF_SWAP = 16  # swap of this player
     #: ABOUT TO BE DEPRECATED: triggers when player 2 switch a character
-    SWAP_EVENT_2 = 17  # P2's swap; TODO: make it relative
+    OPPO_SWAP = 17  # swap of the opposing playing
     #: triggers when "when the character ... would be defeated"
     TRIGGER_REVIVAL = 18
-
-    @classmethod
-    def swap_event(cls, pid: Pid) -> TriggeringSignal:
-        """
-        :returns: the corresponding swap event signal for `pid`.
-
-        aBOUT TO BE DEPRECATED.
-        """
-        if pid.is_player1():
-            return TriggeringSignal.SWAP_EVENT_1
-        elif pid.is_player2():
-            return TriggeringSignal.SWAP_EVENT_2
-        raise Exception("Not Reached!")
 
 
 class DynamicCharacterTarget(Enum):

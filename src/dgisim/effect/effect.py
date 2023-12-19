@@ -663,24 +663,20 @@ class SwapCharacterCheckerEffect(CheckerEffect):
             self.oppo_active.pid).just_get_active_character().get_id()
         my_pid = self.my_active.pid
         effects: list[Effect] = []
-        if my_pid.is_player1():
-            my_signal = TriggeringSignal.SWAP_EVENT_1
-            oppo_signal = TriggeringSignal.SWAP_EVENT_2
-        else:
-            my_signal = TriggeringSignal.SWAP_EVENT_2
-            oppo_signal = TriggeringSignal.SWAP_EVENT_1
         if my_ac_id != self.my_active.id:  # pragma: no cover
             effects += [
-                AllStatusTriggererEffect(
+                PlayerStatusTriggererEffect(
                     pid=my_pid,
-                    signal=my_signal,
+                    self_signal=TriggeringSignal.SELF_SWAP,
+                    other_signal=TriggeringSignal.OPPO_SWAP,
                 ),
             ]
         if oppo_ac_id != self.oppo_active.id:
             effects += [
-                AllStatusTriggererEffect(
+                PlayerStatusTriggererEffect(
                     pid=my_pid,
-                    signal=oppo_signal,
+                    self_signal=TriggeringSignal.OPPO_SWAP,
+                    other_signal=TriggeringSignal.SELF_SWAP,
                 ),
             ]
         if not effects:
@@ -776,9 +772,10 @@ class SwapCharacterEffect(DirectEffect):
             return game_state
 
         effects: list[Effect] = [
-            AllStatusTriggererEffect(
-                pid,
-                TriggeringSignal.swap_event(pid),
+            PlayerStatusTriggererEffect(
+                pid=pid,
+                self_signal=TriggeringSignal.SELF_SWAP,
+                other_signal=TriggeringSignal.OPPO_SWAP,
             ),
         ]
         return game_state.factory().f_player(
@@ -891,10 +888,11 @@ class ForwardSwapCharacterCheckEffect(DirectEffect):
             ).build()
         ).f_effect_stack(
             lambda es: es.push_one(
-                AllStatusTriggererEffect(
-                    self.target_player,
-                    TriggeringSignal.swap_event(self.target_player),
-                )
+                PlayerStatusTriggererEffect(
+                    pid=self.target_player,
+                    self_signal=TriggeringSignal.SELF_SWAP,
+                    other_signal=TriggeringSignal.OPPO_SWAP,
+                ),
             )
         ).build()
 

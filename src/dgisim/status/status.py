@@ -523,11 +523,6 @@ class Status:
         """
         return [], self  # pragma: no cover
 
-    def _is_swapping_source(self, source: StaticTarget, signal: TriggeringSignal) -> bool:
-        """ Returns True if characters of the source player is swapping """
-        return source.pid.is_player1() and signal is TriggeringSignal.SWAP_EVENT_1 \
-            or source.pid.is_player2() and signal is TriggeringSignal.SWAP_EVENT_2
-
     def update(self, other: Self) -> None | Self:
         """
         Defines how the status update itself with an incoming status of the same type.
@@ -995,8 +990,7 @@ class PlungeAttackStatus(PlayerHiddenStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.COMBAT_ACTION,
         TriggeringSignal.ROUND_END,
-        TriggeringSignal.SWAP_EVENT_1,
-        TriggeringSignal.SWAP_EVENT_2,
+        TriggeringSignal.SELF_SWAP,
     ))
 
     # @override
@@ -1022,7 +1016,7 @@ class PlungeAttackStatus(PlayerHiddenStatus):
             return [], replace(self, can_plunge=False)
         elif signal is TriggeringSignal.ROUND_END and self.can_plunge:
             return [], replace(self, can_plunge=False)
-        elif self._is_swapping_source(source, signal):
+        elif signal is TriggeringSignal.SELF_SWAP:
             if not self.can_plunge:
                 return [], replace(self, can_plunge=True)
         return [], self
@@ -2901,9 +2895,8 @@ class IncinerationDriveStatus(CharacterStatus, PrepareSkillStatus):
     DMG_ELEM: ClassVar[Element] = Element.PYRO
 
     REACTABLE_SIGNALS = frozenset({
-        TriggeringSignal.SWAP_EVENT_1,
-        TriggeringSignal.SWAP_EVENT_2,
         TriggeringSignal.ACT_PRE_SKILL,
+        TriggeringSignal.SELF_SWAP,
     })
 
     @override
@@ -2924,7 +2917,7 @@ class IncinerationDriveStatus(CharacterStatus, PrepareSkillStatus):
                     damage_type=DamageType(elemental_burst=True, status=True),
                 ),
             ], self
-        elif self._is_swapping_source(source, signal):
+        elif signal is TriggeringSignal.SELF_SWAP:
             return [], None
         return [], self
 
@@ -3020,9 +3013,8 @@ class RockPaperScissorsComboPaperStatus(CharacterStatus, PrepareSkillStatus):
     DAMAGE: ClassVar[int] = 3
 
     REACTABLE_SIGNALS = frozenset({
-        TriggeringSignal.SWAP_EVENT_1,
-        TriggeringSignal.SWAP_EVENT_2,
         TriggeringSignal.ACT_PRE_SKILL,
+        TriggeringSignal.SELF_SWAP,
     })
 
     @override
@@ -3043,7 +3035,7 @@ class RockPaperScissorsComboPaperStatus(CharacterStatus, PrepareSkillStatus):
                     damage_type=DamageType(elemental_skill=True, status=True),
                 ),
             ], self
-        elif self._is_swapping_source(source, signal):
+        elif signal is TriggeringSignal.SELF_SWAP:
             return [], None
         return [], self
 
@@ -3053,9 +3045,8 @@ class RockPaperScissorsComboScissorsStatus(CharacterStatus, PrepareSkillStatus):
     DAMAGE: ClassVar[int] = 2
 
     REACTABLE_SIGNALS = frozenset({
-        TriggeringSignal.SWAP_EVENT_1,
-        TriggeringSignal.SWAP_EVENT_2,
         TriggeringSignal.ACT_PRE_SKILL,
+        TriggeringSignal.SELF_SWAP,
     })
 
     @override
@@ -3080,7 +3071,7 @@ class RockPaperScissorsComboScissorsStatus(CharacterStatus, PrepareSkillStatus):
                     status=RockPaperScissorsComboPaperStatus,
                 ),
             ], self
-        elif self._is_swapping_source(source, signal):
+        elif signal is TriggeringSignal.SELF_SWAP:
             return [], None
         return [], self
 
@@ -3555,8 +3546,7 @@ _POETICS_OF_FUUBUTSU_MAP: dict[Element, type[_PoeticsOfFuubutsuElementStatus]] =
 class IcicleStatus(CombatStatus, _UsageStatus):
     usages: int = 3
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.SWAP_EVENT_1,
-        TriggeringSignal.SWAP_EVENT_2,
+        TriggeringSignal.SELF_SWAP,
     ))
 
     def _react_to_signal(
@@ -3565,7 +3555,7 @@ class IcicleStatus(CombatStatus, _UsageStatus):
             source: StaticTarget,
             signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | IcicleStatus]:
-        if self._is_swapping_source(source, signal):
+        if signal is TriggeringSignal.SELF_SWAP:
             effects: list[eft.Effect] = [
                 eft.ReferredDamageEffect(
                     source=source,
@@ -4668,8 +4658,7 @@ class StormzoneStatus(CombatStatus, _UsageStatus):
     triggered: bool = False
     COST_DEDUCTION: ClassVar[int] = 1
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.SWAP_EVENT_1,
-        TriggeringSignal.SWAP_EVENT_2,
+        TriggeringSignal.SELF_SWAP,
     ))
 
     @override
@@ -4694,7 +4683,7 @@ class StormzoneStatus(CombatStatus, _UsageStatus):
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
-        if self.triggered and self._is_swapping_source(source, signal):
+        if self.triggered and signal is TriggeringSignal.SELF_SWAP:
             from ..character.character import Venti
             has_talent = any(
                 char.talent_equipped()
