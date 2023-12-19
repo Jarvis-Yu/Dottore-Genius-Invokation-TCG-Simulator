@@ -58,6 +58,7 @@ __all__ = [
     "RhodeiaOfLoch",
     "SangonomiyaKokomi",
     "Shenhe",
+    "Tartaglia",
     "Tighnari",
     "Venti",
     "Xingqiu",
@@ -2959,6 +2960,117 @@ class Shenhe(Character):
             energy=0,
             max_energy=2,
             hiddens=stts.Statuses(()),
+            equipments=stts.EquipmentStatuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
+class Tartaglia(Character):
+    _ELEMENT = Element.HYDRO
+    _WEAPON_TYPE = WeaponType.BOW
+    _TALENT_STATUS = stt.AbyssalMayhemHydrospoutStatus
+    _FACTIONS = frozenset((Faction.FATUI,))
+
+    _SKILL1_COST = AbstractDice({
+        Element.HYDRO: 1,
+        Element.ANY: 2,
+    })
+    _SKILL2_COST = AbstractDice({
+        Element.HYDRO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDice({
+        Element.HYDRO: 3,
+    })
+
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        oppo_char = game_state.get_player(source.pid.other()).just_get_active_character()
+        pre_effects: list[eft.Effect] = []
+        # if stt.RiptideStatus in oppo_char.get_character_statuses():
+        #     pre_effects.append()
+        player = game_state.get_player(source.pid)
+        assert stt.ChargedAttackStatus in player.get_hidden_statuses()
+        charged_status = player.get_hidden_statuses().just_find(stt.ChargedAttackStatus)
+        follow_up_effects: list[eft.Effect] = []
+        if charged_status.can_charge:
+            follow_up_effects.append(eft.RelativeAddCharacterStatusEffect(
+                source_pid=source.pid,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                status=stt.RiptideStatus,
+            ))
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        ) + tuple(follow_up_effects)
+
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        effects: list[eft.Effect] = []
+        if stt.RangeStanceStatus in self._statuses:
+            effects.append(eft.RemoveCharacterStatusEffect(
+                target=source,
+                status=stt.RangeStanceStatus,
+            ))
+        effects.extend((
+            eft.AddCharacterStatusEffect(
+                target=source,
+                status=stt.MeleeStanceStatus,
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.HYDRO,
+                damage=2,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+            eft.RelativeAddCharacterStatusEffect(
+                source_pid=source.pid,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                status=stt.RiptideStatus,
+            ),
+        ))
+        return tuple(effects)
+
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        is_range = stt.RangeStanceStatus in self._statuses
+        effects: list[eft.Effect] = [
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=3,
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.HYDRO,
+                damage=5 if is_range else 7,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+        ]
+        if is_range:
+            effects.extend((
+                eft.EnergyRechargeEffect(
+                    target=source,
+                    recharge=2,
+                ),
+                eft.RelativeAddCharacterStatusEffect(
+                    source_pid=source.pid,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    status=stt.RiptideStatus,
+                ),
+            ))
+        return tuple(effects)
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Tartaglia:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=3,
+            hiddens=stts.Statuses((stt.TideWithholderStatus(),)),
             equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),

@@ -226,6 +226,14 @@ __all__ = [
     ## Shenhe ##
     "IcyQuillStatus",
     "MysticalAbandonStatus",
+    ## Tartaglia ##
+    "AbyssalMayhemHydrospoutStatus",
+    "MeleeStanceStatus",
+    "RangeStanceStatus",
+    "RiptideCounterStatus",
+    "RiptideTransferStatus",
+    "RiptideStatus",
+    "TideWithholderStatus",
     ## Tighnari ##
     "KeenSightStatus",
     "VijnanaSuffusionStatus",
@@ -3770,7 +3778,7 @@ class SparksnSplashStatus(CombatStatus, _UsageStatus):
             es.append(
                 eft.ReferredDamageEffect(
                     source=source,
-                    target=DynamicCharacterTarget.SELF_SELF,
+                    target=DynamicCharacterTarget.SELF_ACTIVE,
                     element=Element.PYRO,
                     damage=2,
                     damage_type=DamageType(status=True, no_boost=True)
@@ -4418,6 +4426,112 @@ class IcyQuillStatus(CombatStatus, _UsageStatus):
 @dataclass(frozen=True, kw_only=True)
 class MysticalAbandonStatus(TalentEquipmentStatus):
     pass
+
+
+#### Tartaglia ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class AbyssalMayhemHydrospoutStatus(TalentEquipmentStatus):
+    ...
+
+
+@dataclass(frozen=True, kw_only=True)
+class MeleeStanceStatus(CharacterStatus, _UsageStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+
+    REACTABLE_SIGNALS = frozenset({
+        TriggeringSignal.ROUND_END,
+    })
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
+            effects: list[eft.Effect] = []
+            if self.usages == 1:
+                effects.append(
+                    eft.AddCharacterStatusEffect(
+                        target=source,
+                        status=RangeStanceStatus,
+                    )
+                )
+            return effects, type(self)(usages=-1)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class RangeStanceStatus(CharacterStatus):
+    pass
+
+
+@dataclass(frozen=True, kw_only=True)
+class RiptideCounterStatus(HiddenStatus, _UsageStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+
+    REACTABLE_SIGNALS = frozenset({
+        TriggeringSignal.ROUND_END,
+    })
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
+            return [], type(self)()
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class RiptideTransferStatus(CombatStatus):
+    """ The intermediate status to add RiptideStatus to the next active character. """
+    ...
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is None:  # TODO: find the right signal
+            target = StaticTarget.from_player_active(game_state, source.pid.other())
+            return [
+                eft.AddCharacterStatusEffect(
+                    target=target,
+                    status=RiptideStatus,
+                ),
+            ], None
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class RiptideStatus(CharacterStatus):
+    pass
+
+
+@dataclass(frozen=True, kw_only=True)
+class TideWithholderStatus(HiddenStatus):
+    REACTABLE_SIGNALS = frozenset({
+        TriggeringSignal.GAME_START,
+    })
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.GAME_START:
+            return [
+                eft.AddCharacterStatusEffect(
+                    target=source,
+                    status=RangeStanceStatus,
+                ),
+                eft.AddCharacterStatusEffect(
+                    target=source,
+                    status=RiptideCounterStatus,
+                ),
+            ], None
+        return [], self
 
 
 #### Tighnari ####

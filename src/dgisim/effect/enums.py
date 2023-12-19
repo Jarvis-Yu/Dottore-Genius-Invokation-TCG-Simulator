@@ -3,7 +3,11 @@ from enum import Enum
 from typing import ClassVar, TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from ..character.character import Character
     from ..state.enums import Pid
+    from ..state.game_state import GameState
+
+    from .structs import StaticTarget
 
 __all__ = [
     "DynamicCharacterTarget",
@@ -71,10 +75,85 @@ class TriggeringSignal(Enum):
 
 
 class DynamicCharacterTarget(Enum):
-    SELF_SELF = 1
-    SELF_ACTIVE = 2
-    SELF_OFF_FIELD = 3
-    SELF_ALL = 4
-    SELF_ABS = 5
-    OPPO_ACTIVE = 6
-    OPPO_OFF_FIELD = 7
+    SELF_ACTIVE = 1
+    SELF_OFF_FIELD = 2
+    SELF_ALL = 3
+    SELF_ABS = 4
+    OPPO_ACTIVE = 5
+    OPPO_OFF_FIELD = 6
+
+    def get_targets(
+            self,
+            game_state: GameState,
+            pid: Pid,
+            ref_char_id: None | int = None,
+    ) -> list[StaticTarget]:
+        """
+        :param game_state: the current game state
+        :param pid: pid of this player
+        :param ref_char_id: the character id treated as centre if applicable
+        :returns: a list of static targets of the targets
+        """
+        from .structs import StaticTarget
+
+        targets: list[StaticTarget] = []
+        match self:
+            case DynamicCharacterTarget.OPPO_ACTIVE:
+                targets.append(StaticTarget.from_player_active(game_state, pid.other()))
+            case DynamicCharacterTarget.OPPO_OFF_FIELD:
+                oppo_chars = game_state.get_player(
+                    pid.other()
+                ).get_characters()
+                if ref_char_id is None:
+                    avoided_char_id = game_state.get_player(
+                        pid.other()
+                    ).just_get_active_character().get_id()
+                else:
+                    avoided_char_id = ref_char_id
+                targets.extend([
+                    StaticTarget.from_char_id(pid.other(), char.get_id())
+                    for char in oppo_chars
+                    if char.get_id() != avoided_char_id
+                ])
+            case DynamicCharacterTarget.SELF_ACTIVE:
+                targets.append(StaticTarget.from_player_active(game_state, pid))
+            case _:
+                raise NotImplementedError(f"get_targets for {self} is not implemented")
+        return targets
+
+    def get_target_chars(
+            self,
+            game_state: GameState,
+            pid: Pid,
+            ref_char_id: None | int = None,
+    ) -> list[Character]:
+        """
+        :param game_state: the current game state
+        :param pid: pid of this player
+        :param ref_char_id: the character id treated as centre if applicable
+        :returns: a list of characters
+        """
+        targets: list[Character] = []
+        match self:
+            case DynamicCharacterTarget.OPPO_ACTIVE:
+                targets.append(game_state.get_player(pid.other()).just_get_active_character())
+            case DynamicCharacterTarget.OPPO_OFF_FIELD:
+                oppo_chars = game_state.get_player(
+                    pid.other()
+                ).get_characters()
+                if ref_char_id is None:
+                    avoided_char_id = game_state.get_player(
+                        pid.other()
+                    ).just_get_active_character().get_id()
+                else:
+                    avoided_char_id = ref_char_id
+                targets.extend([
+                    char
+                    for char in oppo_chars
+                    if char.get_id() != avoided_char_id
+                ])
+            case DynamicCharacterTarget.SELF_ACTIVE:
+                targets.append(game_state.get_player(pid).just_get_active_character())
+            case _:
+                raise NotImplementedError(f"get_target_chars for {self} is not implemented")
+        return targets

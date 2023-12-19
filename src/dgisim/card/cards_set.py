@@ -8,6 +8,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     # Equipment Card
     ## Talents ##
     AbsorbingPrism,
+    AbyssalMayhemHydrospout,
     AratakiIchiban,
     ColdBloodedStrike,
     DescentOfDivinity,

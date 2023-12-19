@@ -200,6 +200,8 @@ __all__ = [
     "TamakushiCasket",
     ## Shenhe ##
     "MysticalAbandon",
+    ## Tartaglia ##
+    "AbyssalMayhemHydrospout",
     ## Tighnari ##
     "KeenSight",
     ## Venti ##
@@ -2723,6 +2725,16 @@ class MysticalAbandon(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDice({Element.CRYO: 3})
     _CHARACTER = chr.Shenhe
     _EQUIPMENT_STATUS = stt.MysticalAbandonStatus
+    _SKILL = CharacterSkill.SKILL2
+
+
+#### Tartaglia ####
+
+
+class AbyssalMayhemHydrospout(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDice({Element.HYDRO: 3})
+    _CHARACTER = chr.Tartaglia
+    _EQUIPMENT_STATUS = stt.AbyssalMayhemHydrospoutStatus
     _SKILL = CharacterSkill.SKILL2
 
 

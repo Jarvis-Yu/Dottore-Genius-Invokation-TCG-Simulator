@@ -103,6 +103,7 @@ __all__ = [
     "RemoveCharacterStatusEffect",
     "UpdateCharacterStatusEffect",
     "OverrideCharacterStatusEffect",
+    "RelativeAddCharacterStatusEffect",
     "AddHiddenStatusEffect",
     "RemoveHiddenStatusEffect",
     "UpdateHiddenStatusEffect",
@@ -692,7 +693,8 @@ class SwapCharacterCheckerEffect(CheckerEffect):
 @dataclass(frozen=True, repr=False)
 class DeathCheckCheckerEffect(CheckerEffect):
     """
-    Checks if Deah Swap Phase is required to be inserted or game should end.
+    Checks if Death Swap Phase is required to be inserted or game should end.
+    If death swap is required, then the Death Swap Phase is inserted to be executed.
     """
     def execute(self, game_state: GameState) -> GameState:
         p1_character = game_state.get_player1().get_characters().get_active_character()
@@ -1260,32 +1262,13 @@ class ReferredDamageEffect(DirectEffect):
     def execute(self, game_state: GameState) -> GameState:
         assert self.legal()
         from ..character.character import Character
-        targets: list[Optional[Character]] = []
+        targets: list[Character] = self.target.get_target_chars(
+            game_state,
+            self.source.pid,
+            ref_char_id=cast(int, self.target_ref.id) if self.target_ref is not None else None,
+        )
         effects: list[Effect] = []
         char: Optional[Character]
-
-        if self.target is DynamicCharacterTarget.OPPO_ACTIVE:
-            targets.append(
-                game_state.get_other_player(self.source.pid).get_characters().get_active_character()
-            )
-        elif self.target is DynamicCharacterTarget.OPPO_OFF_FIELD:
-            opponenet_characters = game_state.get_other_player(self.source.pid).get_characters()
-            avoided_id: int
-            if self.target_ref is None:
-                avoided_id = just(opponenet_characters.get_active_character_id())
-            else:
-                assert self.target_ref.pid is self.source.pid.other()
-                assert self.target_ref.zone is Zone.CHARACTERS
-                avoided_id = cast(int, self.target_ref.id)
-            for char in opponenet_characters.get_characters():
-                if char.get_id() != avoided_id and char.alive():
-                    targets.append(char)
-        elif self.target is DynamicCharacterTarget.SELF_SELF:
-            targets.append(
-                game_state.get_player(self.source.pid).get_characters().get_active_character()
-            )
-        else:  # pragma: no cover
-            raise Exception("Not implemented yet")
 
         for char in targets:
             if char is None:  # pragma: no cover
@@ -1696,6 +1679,22 @@ class OverrideCharacterStatusEffect(DirectEffect):
                 lambda cs: cs.factory().character(character).build()  # type: ignore
             ).build()
         ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class RelativeAddCharacterStatusEffect(DirectEffect):
+    source_pid: Pid
+    target: DynamicCharacterTarget
+    status: type[stt.CharacterStatus]
+
+    def execute(self, game_state: GameState) -> GameState:
+        targets = self.target.get_targets(game_state, self.source_pid)
+        for target in targets:
+            game_state = AddCharacterStatusEffect(
+                target=target,
+                status=self.status,
+            ).execute(game_state)
+        return game_state
 
 
 @dataclass(frozen=True, repr=False)

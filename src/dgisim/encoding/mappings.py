@@ -54,7 +54,7 @@ CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
         # (char.MirrorMaiden, 104),
         (char.SangonomiyaKokomi, 105),
         # (char.KamisatoAyato, 106),
-        # (char.Tartaglia, 107),
+        (char.Tartaglia, 107),
         # (char.Candice, 108),
         # (char.Nilou, 109),
 
@@ -324,7 +324,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         # MirrorMaiden 1029
         (card.TamakushiCasket, 1030),
         # KamisatoAyato 1031
-        # Tartaglia 1032
+        (card.AbyssalMayhemHydrospout, 1032),
         # Candice 1033
         # Nilou 1034
 
@@ -424,6 +424,7 @@ EFFECT_MAPPING: dict[type["Effect"], int] = HashableDict({
         (effect.RemoveCharacterStatusEffect, 101),
         (effect.UpdateCharacterStatusEffect, 102),
         (effect.OverrideCharacterStatusEffect, 103),
+        (effect.RelativeAddCharacterStatusEffect, 104),
 
         #### 3.2 Hidden Status Update Effect 125 ####
         (effect.AddHiddenStatusEffect, 125),
@@ -658,6 +659,13 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.CeremonialGarmentStatus, 2701),
         ## KamisatoAyato 2720 ##
         ## Tartaglia 2740 ##
+        (status.AbyssalMayhemHydrospoutStatus, 2740),
+        (status.MeleeStanceStatus, 2741),
+        (status.RangeStanceStatus, 2742),
+        (status.RiptideCounterStatus, 2743),
+        (status.RiptideTransferStatus, 2744),
+        (status.RiptideStatus, 2745),
+        (status.TideWithholderStatus, 2746),
         ## Candice 2760 ##
         ## Nilou 2780 ##
 
