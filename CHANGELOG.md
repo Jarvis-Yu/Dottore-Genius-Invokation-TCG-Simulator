@@ -1,6 +1,22 @@
 # Change Log
 
-## 0.3.4 (To be released)
+## 0.3.5 (To be released)
+
+### Added
+
+- New Cards:
+  - Support Card:
+    - Liu Su
+    - Rana
+    - Setaria
+
+### Updated
+
+- Adjusted encoding of PlayerState to support new card in game version 4.3
+- Version 4.3 balance patch applied
+- Improved swap signal handling
+
+## 0.3.4 (3 Dec 2023)
 
 ### Added
 
@@ -16,10 +32,6 @@
   - Event Card:
     - Fresh Wind of Freedom
     - When the Crane Returned
-  - Support Card:
-    - Liusu
-    - Rana
-    - Setaria
 
 ### Updated
 
