@@ -44,6 +44,9 @@ class _TempTestDmgListenerStatus(PlayerHiddenStatus):
                 return replace(self, dmgs=self.dmgs + (information.dmg,))
         return self
 
+    def __str__(self) -> str:
+        return super().__str__() + f"({len(self.dmgs)})"
+
 
 @dataclass(frozen=True, kw_only=True)
 class _TempTestInfiniteRevivalStatus(HiddenStatus, RevivalStatus):
@@ -605,3 +608,18 @@ def use_elemental_aura(
             ).build()
         ).build()
     ).build()
+
+def active_chars(game_state: GameState) -> tuple[Character, Character]:
+    """ Returns the active characters of both players (1 & 2) """
+    return (
+        game_state.get_player(Pid.P1).just_get_active_character(),
+        game_state.get_player(Pid.P2).just_get_active_character(),
+    )
+
+def p1_active_char(game_state: GameState) -> Character:
+    """ Returns the active character of player 1 """
+    return game_state.get_player(Pid.P1).just_get_active_character()
+
+def p2_active_char(game_state: GameState) -> Character:
+    """ Returns the active character of player 2 """
+    return game_state.get_player(Pid.P2).just_get_active_character()

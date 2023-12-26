@@ -860,7 +860,6 @@ class StackedShieldStatus(_ShieldStatus, _UsageStatus):
         if signal is Preprocessables.DMG_AMOUNT_MINUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
-            assert self.usages <= type(self).MAX_USAGES
             if dmg.damage > 0 and self.usages > 0 \
                     and dmg.element != Element.PIERCING \
                     and self._is_target(game_state, status_source, dmg):
@@ -4423,7 +4422,31 @@ class MysticalAbandonStatus(TalentEquipmentStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class AbyssalMayhemHydrospoutStatus(TalentEquipmentStatus):
-    ...
+    REACTABLE_SIGNALS = frozenset({
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    })
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            self_active_id = game_state.get_player(source.pid).just_get_active_character().get_id()
+            oppo_active = game_state.get_player(source.pid.other()).just_get_active_character()
+            if (
+                    self_active_id == source.id
+                    and RiptideStatus in oppo_active.get_character_statuses()
+            ):
+                return [
+                    eft.ReferredDamageEffect(
+                        source=source,
+                        target=DynamicCharacterTarget.OPPO_ACTIVE,
+                        element=Element.PIERCING,
+                        damage=1,
+                        damage_type=DamageType(status=True, no_boost=True),
+                    ),
+                ], self
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -4434,6 +4457,32 @@ class MeleeStanceStatus(CharacterStatus, _UsageStatus):
     REACTABLE_SIGNALS = frozenset({
         TriggeringSignal.ROUND_END,
     })
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            oppo_char = game_state.get_character_target(dmg.target)
+            assert oppo_char is not None
+            if (
+                    dmg.source == status_source
+                    and dmg.damage_type.directly_from_character()
+                    and RiptideStatus in oppo_char.get_character_statuses()
+            ):
+                return item.delta_damage(1), self
+        elif signal is Preprocessables.DMG_ELEMENT:
+            assert isinstance(item, DmgPEvent)
+            dmg = item.dmg
+            if (dmg.source == status_source and dmg.element is Element.PHYSICAL):
+                return item.convert_element(Element.HYDRO), self
+        return super()._preprocess(game_state, status_source, item, signal)
 
     @override
     def _react_to_signal(
@@ -4461,6 +4510,7 @@ class RangeStanceStatus(CharacterStatus):
 class RiptideCounterStatus(HiddenStatus, _UsageStatus):
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2
+    AUTO_DESTROY: ClassVar[bool] = False
 
     REACTABLE_SIGNALS = frozenset({
         TriggeringSignal.ROUND_END,
@@ -4478,14 +4528,28 @@ class RiptideCounterStatus(HiddenStatus, _UsageStatus):
 @dataclass(frozen=True, kw_only=True)
 class RiptideTransferStatus(CombatStatus):
     """ The intermediate status to add RiptideStatus to the next active character. """
-    ...
+    REACTABLE_SIGNALS = frozenset({
+        TriggeringSignal.DEATH_EVENT,
+        TriggeringSignal.SELF_SWAP,
+    })
 
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is None:  # TODO: find the right signal
-            target = StaticTarget.from_player_active(game_state, source.pid.other())
+        if signal is TriggeringSignal.DEATH_EVENT:
+            target = StaticTarget.from_player_active(game_state, source.pid)
+            target_char = game_state.get_character_target(target)
+            assert target_char is not None
+            if target_char.alive():
+                return [
+                    eft.AddCharacterStatusEffect(
+                        target=target,
+                        status=RiptideStatus,
+                    ),
+                ], None
+        elif signal is TriggeringSignal.SELF_SWAP:  # TODO: not necessarily accurate signal
+            target = StaticTarget.from_player_active(game_state, source.pid)
             return [
                 eft.AddCharacterStatusEffect(
                     target=target,
@@ -4497,7 +4561,19 @@ class RiptideTransferStatus(CombatStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class RiptideStatus(CharacterStatus):
-    pass
+    REACTABLE_SIGNALS = frozenset({
+        TriggeringSignal.DEATH_DECLARATION,
+    })
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.DEATH_DECLARATION:
+            return [
+                eft.AddCombatStatusEffect(source.pid, RiptideTransferStatus),
+            ], self
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)

@@ -4,8 +4,13 @@
 
 ### Added
 
+- New Characters:
+  - Tartaglia
 - New Cards:
-  - Support Card:
+  - Equipment Cards:
+    - Talent Cards:
+      - Abyssal Mayhem Hydrospout
+  - Support Cards:
     - Liu Su
     - Rana
     - Setaria

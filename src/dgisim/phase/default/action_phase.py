@@ -111,6 +111,10 @@ class ActionPhase(ph.Phase):
                 pid,
                 TriggeringSignal.COMBAT_ACTION,
             ),
+            AllStatusTriggererEffect(
+                pid,
+                TriggeringSignal.POST_ANY,
+            ),
             TurnEndEffect(),
         ]
         return game_state.factory().f_effect_stack(

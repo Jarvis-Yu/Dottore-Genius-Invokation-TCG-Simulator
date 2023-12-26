@@ -254,12 +254,14 @@ class GameState:
 
     def get_character_target(self, target: StaticTarget) -> None | Character:
         """ :returns: the character target that `target` specifies. """
+        if target.zone is not Zone.CHARACTERS:
+            return None
         character = self.get_target(target)
         if not isinstance(character, Character):  # pragma: no cover
             return None
         return character
 
-    def waiting_for(self) -> Optional[Pid]:
+    def waiting_for(self) -> None | Pid:
         """
         :returns: which player the current game state is waiting action from.
                   `None` is returned if the game state doesn't need any player action.

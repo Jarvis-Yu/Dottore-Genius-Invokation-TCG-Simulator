@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (30/60 implemented)](#character-3060-implemented)
-  - [Card (103/217 implemented)](#card-103217-implemented)
+  - [Character (31/71 implemented)](#character-3171-implemented)
+  - [Card (104/248 implemented)](#card-104248-implemented)
 
-## Character (30/60 implemented)
+## Character (31/71 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -20,7 +20,7 @@ all I need now is to implement each card and character.
   - [x] Mona
   - [x] Rhodeia of Loch
   - [x] Sangonomiya Kokomi
-  - [ ] Tartaglia
+  - [x] Tartaglia
   - [x] Xingqiu
 - [ ] Anemo:
   - [x] Jean
@@ -56,10 +56,11 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (103/217 implemented)
+## Card (104/248 implemented)
 
-- [ ] Equipment Card (51/117):
+- [ ] Equipment Card (52/137):
   - [ ] Talent Card:
+    - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
     - [x] Cold-Blooded Strike
     - [x] Descent of Divinity
@@ -125,7 +126,7 @@ all I need now is to implement each card and character.
     - [x] Instructor's Cap
     - [ ] Ornate Kabuto
     - [x] Tenacity of the Millelith
-- [ ] Support Card (14/39):
+- [ ] Support Card (14/44):
   - [ ] Companion Card:
     - [x] Chang the Ninth
     - [ ] Chef Mao
@@ -153,7 +154,7 @@ all I need now is to implement each card and character.
     - [x] Sumeru City
     - [x] Tenshukaku
     - [x] Vanarana
-- [ ] Event Card (38/61):
+- [ ] Event Card (38/67):
   - [ ] Talent Card:
     - [x] Absorbing Prism
     - [x] Lightning Stiletto

@@ -2968,6 +2968,10 @@ class Shenhe(Character):
 
 
 class Tartaglia(Character):
+    # Slight modification is made such that applying Riptide on charged attack
+    # is added directly to Tartaglia insdead of being on effect of his
+    # talent statuses. (because both statuses have this same effect)
+
     _ELEMENT = Element.HYDRO
     _WEAPON_TYPE = WeaponType.BOW
     _TALENT_STATUS = stt.AbyssalMayhemHydrospoutStatus
@@ -2999,7 +3003,7 @@ class Tartaglia(Character):
                 target=DynamicCharacterTarget.OPPO_ACTIVE,
                 status=stt.RiptideStatus,
             ))
-        return normal_attack_template(
+        return self._pre_skill(game_state, source) + normal_attack_template(
             game_state=game_state,
             source=source,
             element=Element.PHYSICAL,
@@ -3031,7 +3035,7 @@ class Tartaglia(Character):
                 status=stt.RiptideStatus,
             ),
         ))
-        return tuple(effects)
+        return self._pre_skill(game_state, source) + tuple(effects)
 
     def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         is_range = stt.RangeStanceStatus in self._statuses
@@ -3060,7 +3064,32 @@ class Tartaglia(Character):
                     status=stt.RiptideStatus,
                 ),
             ))
-        return tuple(effects)
+        return self._pre_skill(game_state, source) + tuple(effects)
+
+    def _pre_skill(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        is_melee = stt.MeleeStanceStatus in self._statuses
+        if not is_melee:
+            return ()
+        target_char = game_state.get_player(source.pid.other()).just_get_active_character()
+        counter = self._hiddens.just_find(stt.RiptideCounterStatus)
+        if (
+                counter.usages <= 0
+                or stt.RiptideStatus not in target_char.get_character_statuses()
+        ):
+            return ()
+        return (
+            eft.UpdateCharacterStatusEffect(
+                target=source,
+                status=replace(counter, usages=-1),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_NEXT_OFF,
+                element=Element.PIERCING,
+                damage=1,
+                damage_type=DamageType(status=True, no_boost=True),
+            ),
+        )
 
     @classmethod
     def from_default(cls, id: int = -1) -> Tartaglia:

@@ -634,6 +634,11 @@ class DefeatedMarkCheckerEffect(CheckerEffect):
                 if char.alive() or char.get_hp() >= 0:
                     continue
                 char_source = StaticTarget(pid, Zone.CHARACTERS, char.get_id())
+                on_death_effects = StatusProcessing.trigger_personal_statuses_effect(
+                    game_state, char_source, TriggeringSignal.DEATH_DECLARATION
+                )
+                for effect in on_death_effects:
+                    game_state = effect.execute(game_state)
                 game_state = StatusProcessing.inform_all_statuses(
                     game_state,
                     pid,
@@ -1725,6 +1730,9 @@ class RemoveHiddenStatusEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class UpdateHiddenStatusEffect(DirectEffect):
+    """
+    Updates the hidden status of a player
+    """
     target_pid: Pid
     status: stt.PlayerHiddenStatus
 

@@ -207,7 +207,7 @@ class StatusProcessing:
             game_state: GameState, target: StaticTarget, signal: TriggeringSignal
     ) -> list[eft.Effect]:
         """
-        Takes the current game_state, trigger all statuses in order of character target
+        Takes the current game_state, trigger all statuses of a particular character
         Returns the triggering effects in order (first to last)
         """
         effects: list[eft.Effect] = []

@@ -55,21 +55,33 @@ class TriggeringSignal(Enum):
     ROUND_START = 14
     #: triggers when "when you declare the end of your round"
     SELF_DECLARE_END_ROUND = 15
-    #: ABOUT TO BE DEPRECATED: triggers when player 1 switch a character
+    #: ABOUT TO BE DEPRECATED: triggers when this player switch a character
     SELF_SWAP = 16  # swap of this player
-    #: ABOUT TO BE DEPRECATED: triggers when player 2 switch a character
+    #: ABOUT TO BE DEPRECATED: triggers when the opponent switch a character
     OPPO_SWAP = 17  # swap of the opposing playing
     #: triggers when "when the character ... would be defeated"
     TRIGGER_REVIVAL = 18
+    #: triggers when "when the character to which this is attached is defeated"
+    # only triggers the character which is about to be defeated
+    DEATH_DECLARATION = 19
 
 
 class DynamicCharacterTarget(Enum):
     SELF_ACTIVE = 1
     SELF_OFF_FIELD = 2
     SELF_ALL = 3
-    SELF_ABS = 4
-    OPPO_ACTIVE = 5
-    OPPO_OFF_FIELD = 6
+    SELF_NEXT = 4
+    SELF_PREV = 5
+    SELF_NEXT_OFF = 6
+    SELF_PREV_OFF = 7
+
+    OPPO_ACTIVE = 11
+    OPPO_OFF_FIELD = 12
+    OPPO_ALL = 13
+    OPPO_NEXT = 14
+    OPPO_PREV = 15
+    OPPO_NEXT_OFF = 16
+    OPPO_PREV_OFF = 17
 
     def get_targets(
             self,
@@ -104,8 +116,22 @@ class DynamicCharacterTarget(Enum):
                     for char in oppo_chars
                     if char.get_id() != avoided_char_id
                 ])
+            case DynamicCharacterTarget.OPPO_NEXT_OFF:
+                off_field_chars = game_state.get_player(
+                    pid.other()
+                ).get_characters().get_alive_character_in_activity_order()[1:]
+                if len(off_field_chars) != 0:
+                    targets.append(
+                        StaticTarget.from_char_id(pid.other(), off_field_chars[0].get_id())
+                    )
             case DynamicCharacterTarget.SELF_ACTIVE:
                 targets.append(StaticTarget.from_player_active(game_state, pid))
+            case DynamicCharacterTarget.SELF_NEXT_OFF:
+                off_field_chars = game_state.get_player(
+                    pid
+                ).get_characters().get_alive_character_in_activity_order()[1:]
+                if len(off_field_chars) != 0:
+                    targets.append(StaticTarget.from_char_id(pid, off_field_chars[0].get_id()))
             case _:
                 raise NotImplementedError(f"get_targets for {self} is not implemented")
         return targets
@@ -141,8 +167,20 @@ class DynamicCharacterTarget(Enum):
                     for char in oppo_chars
                     if char.get_id() != avoided_char_id
                 ])
+            case DynamicCharacterTarget.OPPO_NEXT_OFF:
+                off_field_chars = game_state.get_player(
+                    pid.other()
+                ).get_characters().get_alive_character_in_activity_order()[1:]
+                if len(off_field_chars) != 0:
+                    targets.append(off_field_chars[0])
             case DynamicCharacterTarget.SELF_ACTIVE:
                 targets.append(game_state.get_player(pid).just_get_active_character())
+            case DynamicCharacterTarget.SELF_NEXT_OFF:
+                off_field_chars = game_state.get_player(
+                    pid
+                ).get_characters().get_alive_character_in_activity_order()[1:]
+                if len(off_field_chars) != 0:
+                    targets.append(off_field_chars[0])
             case _:
                 raise NotImplementedError(f"get_target_chars for {self} is not implemented")
         return targets
