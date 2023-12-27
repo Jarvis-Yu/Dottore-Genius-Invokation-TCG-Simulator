@@ -18,6 +18,7 @@
     - Arcane Legend Cards:
       - Ancient Courtyard
       - Covenant of Rock
+      - In Every House a Stove
 
 ### Updated
 

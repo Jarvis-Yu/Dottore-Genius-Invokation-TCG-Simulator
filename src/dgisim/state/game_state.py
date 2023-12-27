@@ -95,7 +95,7 @@ class GameState:
         return cls(
             mode=mode,
             phase=mode.first_phase(),
-            round=0,
+            round=1,
             active_player_id=Pid.P1,
             player1=ps.PlayerState.example_player(mode),
             player2=ps.PlayerState.example_player(mode),
@@ -110,7 +110,7 @@ class GameState:
         return cls(  # pragma: no cover
             mode=mode,
             phase=mode.first_phase(),
-            round=0,
+            round=1,
             active_player_id=Pid.P1,
             player1=player1,
             player2=player2,
@@ -131,7 +131,7 @@ class GameState:
         return cls(
             mode=mode,
             phase=mode.first_phase(),
-            round=0,
+            round=1,
             active_player_id=Pid.P1,
             player1=ps.PlayerState.from_deck(mode, p1_deck),
             player2=ps.PlayerState.from_deck(mode, p2_deck),

@@ -31,7 +31,7 @@ class ActionPhase(ph.Phase):
     def _start_up_phase(self, game_state: GameState) -> GameState:
         active_player_id = game_state.get_active_player_id()
         appended_effects: list[Effect] = []
-        if (game_state.get_round() == 0):
+        if (game_state.get_round() == 1):
             appended_effects.append(
                 AllStatusTriggererEffect(
                     active_player_id,

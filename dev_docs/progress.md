@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (31/71 implemented)](#character-3171-implemented)
-  - [Card (105/248 implemented)](#card-105248-implemented)
+  - [Card (106/248 implemented)](#card-106248-implemented)
 
 ## Character (31/71 implemented)
 
@@ -56,7 +56,7 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (105/248 implemented)
+## Card (106/248 implemented)
 
 - [ ] Equipment Card (52/137):
   - [ ] Talent Card:
@@ -154,7 +154,7 @@ all I need now is to implement each card and character.
     - [x] Sumeru City
     - [x] Tenshukaku
     - [x] Vanarana
-- [ ] Event Card (39/67):
+- [ ] Event Card (40/67):
   - [ ] Talent Card:
     - [x] Absorbing Prism
     - [x] Lightning Stiletto
@@ -190,6 +190,7 @@ all I need now is to implement each card and character.
     - [x] Ancient Courtyard
     - [x] Covenant of Rock
     - [x] Fresh Wind of Freedom
+    - [x] In Every House a Stove
     - [ ] Joyous Celebration
   - [ ] Other Card:
     - [ ] Abyssal Summons

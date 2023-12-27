@@ -108,6 +108,7 @@ __all__ = [
     "AncientCourtyard",
     "CovenantOfRock",
     "FreshWindOfFreedom",
+    "InEveryHouseAStove",
     ## Other ##
     "CalxsArts",
     "ChangingShifts",
@@ -1754,6 +1755,29 @@ class FreshWindOfFreedom(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
             eft.AddCombatStatusEffect(
                 target_pid=pid,
                 status=stt.FreshWindOfFreedomStatus,
+            ),
+        )
+
+
+class InEveryHouseAStove(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
+    _DICE_COST = AbstractDice.from_empty()
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return super().effects(
+            game_state,
+            pid,
+            instruction,
+        ) + (
+            eft.DrawRandomCardEffect(
+                pid=pid,
+                num=min(game_state.get_round(), 4),
             ),
         )
 

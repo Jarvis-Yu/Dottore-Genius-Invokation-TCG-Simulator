@@ -98,6 +98,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     AncientCourtyard,
     CovenantOfRock,
     FreshWindOfFreedom,
+    InEveryHouseAStove,
 
     ## Event Card / Food ##
     JueyunGuoba,

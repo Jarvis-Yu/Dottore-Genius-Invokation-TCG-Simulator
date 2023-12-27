@@ -1,7 +1,7 @@
 Available Cards
 ===============
 
-105 of 248 cards in Genius Invokation TCG are available in the simulator.
+106 of 248 cards in Genius Invokation TCG are available in the simulator.
 (excluding character cards which are not counted as cards in ``dgisim``)
 
 Equipment Cards
@@ -122,6 +122,7 @@ Arcane Legend Card
 * Ancient Courtyard
 * Covenant of Rock
 * Fresh Wind of Freedom
+* In Every House a Stove
 
 Food Card
 ^^^^^^^^^
