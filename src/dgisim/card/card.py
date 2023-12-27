@@ -27,8 +27,8 @@ from ..support import support as sp
 from ..character.enums import CharacterSkill, Faction, WeaponType
 from ..dice import AbstractDice, ActualDice
 from ..effect.enums import Zone
-from ..effect.structs import StaticTarget
-from ..element import Element, PURE_ELEMENTS
+from ..effect.structs import StaticTarget, DamageType
+from ..element import AURA_ELEMENTS, Element, PURE_ELEMENTS
 from ..event import CardPEvent
 from ..helper.quality_of_life import BIG_INT
 from ..state.enums import Pid
@@ -109,6 +109,7 @@ __all__ = [
     "CovenantOfRock",
     "FreshWindOfFreedom",
     "InEveryHouseAStove",
+    "JoyousCelebration",
     ## Other ##
     "CalxsArts",
     "ChangingShifts",
@@ -1780,6 +1781,46 @@ class InEveryHouseAStove(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
                 num=min(game_state.get_round(), 4),
             ),
         )
+
+
+class JoyousCelebration(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
+    _DICE_COST = AbstractDice.from_empty()
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        active_char = game_state.get_player(pid).get_active_character()
+        return (
+            active_char is not None
+            and active_char.alive()
+            and active_char.ELEMENT() in AURA_ELEMENTS
+        )
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        active_char = game_state.get_player(pid).just_get_active_character()
+        return super().effects(
+            game_state,
+            pid,
+            instruction,
+        ) + tuple([
+            eft.ApplyElementalAuraEffect(
+                source=StaticTarget(Pid.P1, Zone.HAND_CARD, -1),
+                target=StaticTarget.from_char_id(pid, char.get_id()),
+                element=active_char.ELEMENT(),
+                source_type=DamageType(),
+            )
+            for char in game_state.get_player(
+                pid
+            ).get_characters().get_alive_character_in_activity_order_last_active()
+            if char.get_elemental_aura().has_aura()
+        ])
 
 
 # >>>>>>>>>>>>>>>>>>>> Event Cards / Arcane Legend Cards >>>>>>>>>>>>>>>>>>>>

@@ -80,11 +80,27 @@ class Characters:
         """
         for i, character in enumerate(self._characters):
             if character.get_id() == self._active_character_id:
-                return tuple(
+                return tuple([
                     char
                     for char in (self._characters[i:] + self._characters[:i])
                     if char.alive()
-                )
+                ])
+        return self._characters
+
+    def get_alive_character_in_activity_order_last_active(self) -> tuple[Character, ...]:
+        """
+        :returns: the ordered tuple of alive characters based on their activity.
+
+        Same as `.get_alive_character_in_activity_order()` but the active character
+        is ranked the last.
+        """
+        for i, character in enumerate(self._characters):
+            if character.get_id() == self._active_character_id:
+                return tuple([
+                    char
+                    for char in (self._characters[i+1:] + self._characters[:i+1])
+                    if char.alive()
+                ])
         return self._characters
 
     def get_nth_next_alive_character_in_activity_order(self, n: int) -> Character:

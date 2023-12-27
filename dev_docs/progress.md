@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (31/71 implemented)](#character-3171-implemented)
-  - [Card (106/248 implemented)](#card-106248-implemented)
+  - [Card (107/248 implemented)](#card-107248-implemented)
 
 ## Character (31/71 implemented)
 
@@ -56,7 +56,7 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (106/248 implemented)
+## Card (107/248 implemented)
 
 - [ ] Equipment Card (52/137):
   - [ ] Talent Card:
@@ -191,7 +191,7 @@ all I need now is to implement each card and character.
     - [x] Covenant of Rock
     - [x] Fresh Wind of Freedom
     - [x] In Every House a Stove
-    - [ ] Joyous Celebration
+    - [x] Joyous Celebration
   - [ ] Other Card:
     - [ ] Abyssal Summons
     - [ ] Blessing of the Divine Relic's Installation

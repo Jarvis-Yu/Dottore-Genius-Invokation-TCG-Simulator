@@ -237,7 +237,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         #### 3.1 Arcane Legend Card 0550 ####
         (card.AncientCourtyard, 550),
         (card.CovenantOfRock, 551),
-        # (card.JoyousCelebration, 552),
+        (card.JoyousCelebration, 552),
         (card.FreshWindOfFreedom, 553),
         (card.InEveryHouseAStove, 554),
 

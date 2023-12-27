@@ -19,6 +19,7 @@
       - Ancient Courtyard
       - Covenant of Rock
       - In Every House a Stove
+      - Joyous Celebration
 
 ### Updated
 

@@ -99,6 +99,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     CovenantOfRock,
     FreshWindOfFreedom,
     InEveryHouseAStove,
+    JoyousCelebration,
 
     ## Event Card / Food ##
     JueyunGuoba,
