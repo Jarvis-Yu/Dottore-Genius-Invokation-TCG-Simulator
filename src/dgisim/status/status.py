@@ -100,6 +100,7 @@ __all__ = [
     "TenacityOfTheMillelithStatus",
 
     # combat status
+    "AncientCourtyardStatus",
     "CatalyzingFieldStatus",
     "ChangingShiftsStatus",
     "CrystallizeStatus",
@@ -1732,6 +1733,41 @@ class TenacityOfTheMillelithStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
 ############################## Combat Status ##############################
 
 
+@dataclass(frozen=True, kw_only=True)
+class AncientCourtyardStatus(CombatStatus):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.CARD:
+            assert isinstance(item, CardPEvent)
+            from ..card.card import WeaponEquipmentCard, ArtifactEquipmentCard
+            if (
+                    item.pid is status_source.pid
+                    and issubclass(item.card_type, WeaponEquipmentCard | ArtifactEquipmentCard)
+                    and item.dice_cost.can_cost_less_elem()
+            ):
+                new_cost = item.dice_cost.cost_less_elem(2)
+                return item.with_new_cost(new_cost), None
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], None
+        return [], self
+
+
 @dataclass(frozen=True)
 class CatalyzingFieldStatus(CombatStatus):
     damage_boost: ClassVar[int] = 1
@@ -1744,7 +1780,7 @@ class CatalyzingFieldStatus(CombatStatus):
             status_source: StaticTarget,
             item: PreprocessableEvent,
             signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, None | CatalyzingFieldStatus]:
+    ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, eft.DmgPEvent)
             dmg = item.dmg
@@ -1760,7 +1796,7 @@ class CatalyzingFieldStatus(CombatStatus):
                 if self.usages == 1:
                     return new_item, None
                 else:
-                    return new_item, CatalyzingFieldStatus(self.usages - 1)
+                    return new_item, type(self)(self.usages - 1)
         return super()._preprocess(game_state, status_source, item, signal)
 
     def __str__(self) -> str:
@@ -2181,15 +2217,12 @@ class WhereIsTheUnseenRazorStatus(CombatStatus):
         if signal is Preprocessables.CARD:
             assert isinstance(item, CardPEvent)
             from ..card.card import WeaponEquipmentCard
-            if not (
+            if (
                     item.pid is status_source.pid
                     and issubclass(item.card_type, WeaponEquipmentCard)
                     and item.dice_cost.can_cost_less_elem()
             ):
-                return replace(
-                    item,
-                    dice_cost=item.dice_cost.cost_less_elem(self.COST_DEDUCTION)
-                ), None
+                return item.with_new_cost(item.dice_cost.cost_less_elem(self.COST_DEDUCTION)), None
         return item, self
 
     @override

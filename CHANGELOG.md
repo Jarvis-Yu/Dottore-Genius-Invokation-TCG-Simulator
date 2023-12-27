@@ -14,6 +14,9 @@
     - Liu Su
     - Rana
     - Setaria
+  - Event Cards:
+    - Arcane Legend Cards:
+      - Ancient Courtyard
 
 ### Updated
 

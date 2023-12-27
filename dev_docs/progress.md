@@ -158,8 +158,6 @@ all I need now is to implement each card and character.
   - [ ] Talent Card:
     - [x] Absorbing Prism
     - [x] Lightning Stiletto
-  - [ ] Arcane Legend Card:
-    - [x] Fresh Wind of Freedom
   - [ ] Food Card:
     - [ ] Adeptus' Temptation
     - [ ] Butter Crab
@@ -189,7 +187,7 @@ all I need now is to implement each card and character.
     - [x] Elemental Resonance: Woven Weeds
     - [x] Elemental Resonance: Woven Winds
   - [ ] Arcane Legend:
-    - [ ] Ancient Courtyard
+    - [x] Ancient Courtyard
     - [ ] Covenant of Rock
     - [x] Fresh Wind of Freedom
     - [ ] Joyous Celebration

@@ -68,6 +68,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     TenacityOfTheMillelith,
 
     # Event Card
+    AncientCourtyard,
     CalxsArts,
     ChangingShifts,
     ElementalResonanceEnduringRock,

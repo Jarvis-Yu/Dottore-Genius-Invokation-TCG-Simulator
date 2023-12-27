@@ -105,6 +105,7 @@ __all__ = [
     "TandooriRoastChicken",
     "TeyvatFriedEgg",
     ## Other ##
+    "AncientCourtyard",
     "CalxsArts",
     "ChangingShifts",
     "ElementalResonanceEnduringRock",
@@ -1671,6 +1672,28 @@ class TeyvatFriedEgg(FoodCard, _CharTargetChoiceProvider):
 
 # >>>>>>>>>>>>>>>>>>>> Event Cards / Food Cards >>>>>>>>>>>>>>>>>>>>
 
+
+class AncientCourtyard(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
+    _DICE_COST = AbstractDice.from_empty()
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return super().effects(
+            game_state,
+            pid,
+            instruction,
+        ) + (
+            eft.AddCombatStatusEffect(
+                target_pid=pid,
+                status=stt.AncientCourtyardStatus,
+            ),
+        )
 
 class CalxsArts(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDice({Element.OMNI: 1})

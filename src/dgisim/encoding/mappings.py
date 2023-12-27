@@ -235,7 +235,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
 
         #### 3 Event Card 0550 ####
         #### 3.1 Arcane Legend Card 0550 ####
-        # (card.AncientCourtyard, 550),
+        (card.AncientCourtyard, 550),
         # (card.CovenantOfRock, 551),
         # (card.JoyousCelebration, 552),
         (card.FreshWindOfFreedom, 553),
@@ -599,6 +599,7 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.WhenTheCraneReturnedStatus, 312),
         (status.WhereIsTheUnseenRazorStatus, 313),
         (status.WindAndFreedomStatus, 314),
+        (status.AncientCourtyardStatus, 315),
 
         #### 2.2 Shield Combat Status 375 ####
         (status.CrystallizeStatus, 375),

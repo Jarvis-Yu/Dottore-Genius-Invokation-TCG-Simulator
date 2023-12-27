@@ -697,8 +697,8 @@ class AbstractDice(Dice):
         else:
             return any(
                 self[elem] > 0
-                for elem in _PURE_ELEMS
-            ) or self[Element.ANY] > 0
+                for elem in self._LEGAL_ELEMS
+            )
 
     def cost_less_elem(self, num: int, elem: None | Element = None) -> Self:
         """

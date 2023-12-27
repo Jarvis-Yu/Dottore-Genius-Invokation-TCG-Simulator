@@ -119,6 +119,7 @@ Event Card
 Arcane Legend Card
 ^^^^^^^^^^^^^^^^^^
 
+* Ancient Courtyard
 * Fresh Wind of Freedom
 
 Food Card
