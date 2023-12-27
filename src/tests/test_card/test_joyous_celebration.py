@@ -19,7 +19,7 @@ class TestJoyousCelebration(unittest.TestCase):
 
         # can be used if active character is of the other elements
         # and only apply element to characters with aura already
-        chars = (Yoimiya, RhodeiaOfLoch, Keqing, Nahida, Kaeya)
+        chars: tuple[type[Character], ...] = (Yoimiya, RhodeiaOfLoch, Keqing, Nahida, Kaeya)
         for char in chars:
             with self.subTest(char=char):
                 game_state = replace_character(base_state, Pid.P1, char, 1)
