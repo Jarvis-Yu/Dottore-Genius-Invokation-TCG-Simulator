@@ -17,6 +17,7 @@
   - Event Cards:
     - Arcane Legend Cards:
       - Ancient Courtyard
+      - Covenant of Rock
 
 ### Updated
 

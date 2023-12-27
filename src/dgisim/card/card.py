@@ -28,7 +28,7 @@ from ..character.enums import CharacterSkill, Faction, WeaponType
 from ..dice import AbstractDice, ActualDice
 from ..effect.enums import Zone
 from ..effect.structs import StaticTarget
-from ..element import Element
+from ..element import Element, PURE_ELEMENTS
 from ..event import CardPEvent
 from ..helper.quality_of_life import BIG_INT
 from ..state.enums import Pid
@@ -104,8 +104,11 @@ __all__ = [
     "SweetMadame",
     "TandooriRoastChicken",
     "TeyvatFriedEgg",
-    ## Other ##
+    ## Arcane Legend Card ##
     "AncientCourtyard",
+    "CovenantOfRock",
+    "FreshWindOfFreedom",
+    ## Other ##
     "CalxsArts",
     "ChangingShifts",
     "ElementalResonanceEnduringRock",
@@ -122,7 +125,6 @@ __all__ = [
     "ElementalResonanceWovenWaters",
     "ElementalResonanceWovenWeeds",
     "ElementalResonanceWovenWinds",
-    "FreshWindOfFreedom",
     "IHaventLostYet",
     "LeaveItToMe",
     "QuickKnit",
@@ -1672,6 +1674,7 @@ class TeyvatFriedEgg(FoodCard, _CharTargetChoiceProvider):
 
 # >>>>>>>>>>>>>>>>>>>> Event Cards / Food Cards >>>>>>>>>>>>>>>>>>>>
 
+# <<<<<<<<<<<<<<<<<<<< Event Cards / Arcane Legend Cards <<<<<<<<<<<<<<<<<<<<
 
 class AncientCourtyard(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
     _DICE_COST = AbstractDice.from_empty()
@@ -1694,6 +1697,68 @@ class AncientCourtyard(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
                 status=stt.AncientCourtyardStatus,
             ),
         )
+
+
+class CovenantOfRock(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
+    _DICE_COST = AbstractDice.from_empty()
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        return game_state.get_player(pid).get_dice().num_dice() == 0
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        import random
+        elem1, elem2 = random.sample(tuple(PURE_ELEMENTS), 2)
+        return super().effects(
+            game_state,
+            pid,
+            instruction,
+        ) + (
+            eft.AddDiceEffect(
+                pid=pid,
+                element=elem1,
+                num=1,
+            ),
+            eft.AddDiceEffect(
+                pid=pid,
+                element=elem2,
+                num=1,
+            ),
+        )
+
+
+class FreshWindOfFreedom(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
+    _DICE_COST = AbstractDice.from_empty()
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return super().effects(
+            game_state,
+            pid,
+            instruction,
+        ) + (
+            eft.AddCombatStatusEffect(
+                target_pid=pid,
+                status=stt.FreshWindOfFreedomStatus,
+            ),
+        )
+
+
+# >>>>>>>>>>>>>>>>>>>> Event Cards / Arcane Legend Cards >>>>>>>>>>>>>>>>>>>>
 
 class CalxsArts(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDice({Element.OMNI: 1})
@@ -2062,29 +2127,6 @@ class ElementalResonanceWovenWeeds(_ElementalResonanceDie):
 
 class ElementalResonanceWovenWinds(_ElementalResonanceDie):
     _ELEMENT = Element.ANEMO
-
-
-class FreshWindOfFreedom(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
-    _DICE_COST = AbstractDice({Element.OMNI: 0})
-
-    @override
-    @classmethod
-    def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
-    ) -> tuple[eft.Effect, ...]:
-        return super().effects(
-            game_state,
-            pid,
-            instruction,
-        ) + (
-            eft.AddCombatStatusEffect(
-                target_pid=pid,
-                status=stt.FreshWindOfFreedomStatus,
-            ),
-        )
 
 
 class IHaventLostYet(EventCard, _DiceOnlyChoiceProvider):

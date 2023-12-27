@@ -68,7 +68,6 @@ _DEFAULT_CARDS: list[type[Card]] = [
     TenacityOfTheMillelith,
 
     # Event Card
-    AncientCourtyard,
     CalxsArts,
     ChangingShifts,
     ElementalResonanceEnduringRock,
@@ -85,7 +84,6 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ElementalResonanceWovenWaters,
     ElementalResonanceWovenWeeds,
     ElementalResonanceWovenWinds,
-    FreshWindOfFreedom,
     IHaventLostYet,
     LeaveItToMe,
     QuickKnit,
@@ -95,6 +93,11 @@ _DEFAULT_CARDS: list[type[Card]] = [
     WhenTheCraneReturned,
     WhereIsTheUnseenRazor,
     WindAndFreedom,
+
+    ## Event Card / Arcane Legend ##
+    AncientCourtyard,
+    CovenantOfRock,
+    FreshWindOfFreedom,
 
     ## Event Card / Food ##
     JueyunGuoba,
