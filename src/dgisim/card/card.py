@@ -110,6 +110,7 @@ __all__ = [
     "FreshWindOfFreedom",
     "InEveryHouseAStove",
     "JoyousCelebration",
+    "PassingOfJudgment",
     ## Other ##
     "CalxsArts",
     "ChangingShifts",
@@ -285,6 +286,32 @@ class Card:
         return game_state, card_event.dice_cost
 
     @classmethod
+    def preprocessed_card_event(
+        cls,
+        game_state: gs.GameState,
+        pid: Pid,
+    ) ->  tuple[gs.GameState, CardPEvent]:
+        """
+        :returns: a tuple of `GameState` and `CardPEvent`.
+
+        The returned game_state is the game_state after preprocessing the usage of the card.
+
+        The returned CardPEvent is the preprocessed card event.
+        """
+        game_state, card_event = StatusProcessing.preprocess_by_all_statuses(
+            game_state=game_state,
+            pid=pid,
+            pp_type=Preprocessables.CARD,
+            item=CardPEvent(
+                pid=pid,
+                card_type=cls,
+                dice_cost=cls._DICE_COST,
+            ),
+        )
+        assert isinstance(card_event, CardPEvent)
+        return game_state, card_event
+
+    @classmethod
     def just_preprocessed_dice_cost(
             cls,
             game_state: gs.GameState,
@@ -336,9 +363,9 @@ class Card:
             game_state: gs.GameState,
             pid: Pid,
             instruction: act.Instruction
-    ) -> None | gs.GameState:
+    ) -> None | tuple[gs.GameState, CardPEvent]:
         """
-        :returns: the preprocessed game-state if instruction is valid,
+        :returns: the preprocessed game-state and card event if instruction is valid,
                   otherwise return None.
         """
         if not game_state.get_player(pid).get_hand_cards().contains(cls) \
@@ -346,9 +373,9 @@ class Card:
                 or not cls._valid_instruction(game_state, pid, instruction) \
                 or not (game_state.get_player(pid).get_dice() - instruction.dice).is_legal():
             return None
-        game_state, dice_cost = cls.preprocessed_dice_cost(game_state, pid)
-        if instruction.dice.just_satisfy(dice_cost):
-            return game_state
+        game_state, card_event = cls.preprocessed_card_event(game_state, pid)
+        if instruction.dice.just_satisfy(card_event.dice_cost):
+            return game_state, card_event
         else:
             return None
 
@@ -973,7 +1000,7 @@ class SupportCard(Card):
             game_state: gs.GameState,
             pid: Pid,
             instruction: act.Instruction
-    ) -> None | gs.GameState:
+    ) -> None | tuple[gs.GameState, CardPEvent]:
         supports = game_state.get_player(pid).get_supports()
         if supports.full():
             if not isinstance(instruction, act.StaticTargetInstruction):
@@ -1821,6 +1848,29 @@ class JoyousCelebration(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
             ).get_characters().get_alive_character_in_activity_order_last_active()
             if char.get_elemental_aura().has_aura()
         ])
+
+
+class PassingOfJudgment(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return super().effects(
+            game_state,
+            pid,
+            instruction,
+        ) + (
+            eft.AddCombatStatusEffect(
+                target_pid=pid.other(),
+                status=stt.PassingOfJudgmentStatus,
+            ),
+        )
 
 
 # >>>>>>>>>>>>>>>>>>>> Event Cards / Arcane Legend Cards >>>>>>>>>>>>>>>>>>>>

@@ -240,6 +240,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.JoyousCelebration, 552),
         (card.FreshWindOfFreedom, 553),
         (card.InEveryHouseAStove, 554),
+        (card.PassingOfJudgment, 555),
 
         #### 3.2 Elemental Resonance Card 0600 ####
         (card.ElementalResonanceShatteringIce, 600),
@@ -600,6 +601,7 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.WhereIsTheUnseenRazorStatus, 313),
         (status.WindAndFreedomStatus, 314),
         (status.AncientCourtyardStatus, 315),
+        (status.PassingOfJudgmentStatus, 316),
 
         #### 2.2 Shield Combat Status 375 ####
         (status.CrystallizeStatus, 375),

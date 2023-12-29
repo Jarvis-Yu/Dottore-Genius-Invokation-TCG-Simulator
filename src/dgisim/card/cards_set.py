@@ -100,6 +100,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     FreshWindOfFreedom,
     InEveryHouseAStove,
     JoyousCelebration,
+    PassingOfJudgment,
 
     ## Event Card / Food ##
     JueyunGuoba,

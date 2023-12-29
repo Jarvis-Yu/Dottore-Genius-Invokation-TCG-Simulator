@@ -306,11 +306,11 @@ class ActionPhase(ph.Phase):
         card = action.card
 
         # verify action validity
-        preprocessed_game_state = card.valid_instruction(game_state, pid, action.instruction)
-        if preprocessed_game_state is None:
+        card_ret = card.valid_instruction(game_state, pid, action.instruction)
+        if card_ret is None:
             raise Exception(f"{action.instruction} is not valid of the {card.name()} "
                             + f"in the game state:\n{game_state}")
-        game_state = preprocessed_game_state
+        game_state, card_event = card_ret
 
         #  setup
         player = game_state.get_player(pid)
@@ -329,7 +329,8 @@ class ActionPhase(ph.Phase):
                 target_pid=pid,
                 status=ChargedAttackStatus(can_charge=True),
             ))
-        new_effects += card.effects(game_state, pid, action.instruction)
+        if not card_event.invalidated:
+            new_effects += card.effects(game_state, pid, action.instruction)
         if card.is_combat_action():
             new_effects.append(AllStatusTriggererEffect(
                 pid,
@@ -343,7 +344,7 @@ class ActionPhase(ph.Phase):
             pid,
             TriggeringSignal.POST_ANY,
         ))
-        if card.is_combat_action():
+        if not card_event.invalidated and card.is_combat_action():
             new_effects.append(TurnEndEffect())
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(new_effects)

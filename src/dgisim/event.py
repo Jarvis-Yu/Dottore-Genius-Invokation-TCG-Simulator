@@ -130,9 +130,13 @@ class CardPEvent(PreprocessableEvent):
     pid: Pid
     card_type: type[Card]
     dice_cost: AbstractDice
+    invalidated: bool = False
 
     def with_new_cost(self, new_cost: AbstractDice) -> Self:
         return replace(self, dice_cost=new_cost)
+
+    def invalidate(self) -> Self:
+        return replace(self, invalidated=True)
 
 
 @dataclass(frozen=True, kw_only=True)

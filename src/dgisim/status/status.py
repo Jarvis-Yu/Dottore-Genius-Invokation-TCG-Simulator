@@ -113,6 +113,7 @@ __all__ = [
     "KingsSquireEffectStatus",
     "LeaveItToMeStatus",
     "IHaventLostYetOnCooldownStatus",
+    "PassingOfJudgmentStatus",
     "RebelliousShieldStatus",
     "ReviveOnCooldownStatus",
     "WhenTheCraneReturnedStatus",
@@ -2105,6 +2106,42 @@ class LeaveItToMeStatus(CombatStatus):
                     and item.event_speed is EventSpeed.COMBAT_ACTION:
                 return replace(item, event_speed=EventSpeed.FAST_ACTION), None
         return super()._preprocess(game_state, status_source, item, signal)
+
+
+@dataclass(frozen=True, kw_only=True)
+class PassingOfJudgmentStatus(CombatStatus, _UsageStatus):
+    usages: int = 3
+    MAX_USAGES: ClassVar[int] = 3
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.CARD:
+            assert isinstance(item, CardPEvent)
+            from ..card.card import EventCard
+            if (
+                    item.pid is status_source.pid
+                    and not item.invalidated
+                    and issubclass(item.card_type, EventCard)
+            ):
+                return item.invalidate(), replace(self, usages=self.usages - 1)
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], None
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)
