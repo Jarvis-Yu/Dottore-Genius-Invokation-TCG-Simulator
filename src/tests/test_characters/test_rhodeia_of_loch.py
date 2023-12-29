@@ -176,7 +176,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm.auto_step()
         game_state = gsm.get_game_state()
         p1_summons = game_state.get_player1().get_summons()
-        self.assertEqual(p1_summons.just_find(OceanicMimicFrogSummon).usages, 1)
+        self.assertNotIn(OceanicMimicFrogSummon, p1_summons)
         self.assertEqual(p1_summons.just_find(OceanicMimicRaptorSummon).usages, 3)
         self.assertEqual(p1_summons.just_find(OceanicMimicSquirrelSummon).usages, 2)
 
@@ -196,9 +196,11 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm.auto_step()
         game_state = gsm.get_game_state()
         p1_summons = game_state.get_player1().get_summons()
-        self.assertEqual(p1_summons.just_find(OceanicMimicFrogSummon).usages, 1)
         self.assertEqual(p1_summons.just_find(OceanicMimicRaptorSummon).usages, 3)
-        self.assertEqual(p1_summons.just_find(OceanicMimicSquirrelSummon).usages, 2)
+        self.assertEqual(
+            (OceanicMimicFrogSummon in p1_summons) + (OceanicMimicSquirrelSummon in p1_summons),
+            1,
+        )
 
     def test_elemental_burst(self):
         a1, a2 = PuppetAgent(), PuppetAgent()

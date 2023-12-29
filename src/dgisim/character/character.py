@@ -7,7 +7,7 @@ from abc import abstractmethod
 from dataclasses import replace
 from functools import lru_cache
 from itertools import chain
-from typing import Callable, Optional, TYPE_CHECKING, Union, cast
+from typing import Callable, Optional, Sequence, TYPE_CHECKING, Union, cast
 from typing_extensions import override, Self
 
 from ..effect import effect as eft
@@ -2699,51 +2699,65 @@ class RhodeiaOfLoch(Character):
             if summon not in summons
         )
 
+    def _make_summon_choice(self, self_summons: Sequence[type[sm.Summon]]) -> type[sm.Summon]:
+        from random import choice
+
+        choose_existing = len(self_summons) < 2
+        summon = choice([
+            s_type
+            for s_type in self._SUMMONS
+            if (s_type in self_summons) is not choose_existing
+        ])
+        return summon
+
     def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         from random import choice
-        summons_to_choose = self._not_summoned_types(game_state, source.pid)
-        summon: type[sm.Summon]
-        if summons_to_choose:
-            summon = choice(summons_to_choose)
-        else:  # if all kinds of summons have been summoned
-            summon = choice(self._SUMMONS)
+
+        existing_summons = game_state.get_player(source.pid).get_summons()
+        if existing_summons.full():
+            return ()
+
+        self_summons = [
+            type(summon)
+            for summon in existing_summons
+            if isinstance(
+                summon,
+                sm.OceanicMimicSquirrelSummon
+                | sm.OceanicMimicRaptorSummon
+                | sm.OceanicMimicFrogSummon
+            )
+        ]
         return (
             eft.AddSummonEffect(
                 target_pid=source.pid,
-                summon=summon,
+                summon=self._make_summon_choice(self_summons),
             ),
         )
 
     def _elemental_skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         from random import choice
 
-        # first choice
-        summons_to_choose = self._not_summoned_types(game_state, source.pid)
-        fst_summon: type[sm.Summon]
+        existing_summons = game_state.get_player(source.pid).get_summons()
+        if existing_summons.full():
+            return ()
 
-        if summons_to_choose:
-            fst_summon = choice(summons_to_choose)
-        else:  # if all kinds of summons have been summoned
-            fst_summon = choice(self._SUMMONS)
+        self_summons: list[type[sm.Summon]] = [
+            type(summon)
+            for summon in existing_summons
+            if isinstance(
+                summon,
+                sm.OceanicMimicSquirrelSummon
+                | sm.OceanicMimicRaptorSummon
+                | sm.OceanicMimicFrogSummon
+            )
+        ]
+        # first choice
+        fst_summon = self._make_summon_choice(self_summons)
+        self_summons.append(fst_summon)
 
         # second choice
-        summons_to_choose = tuple(
-            summon
-            for summon in summons_to_choose
-            if summon is not fst_summon
-        )
-        snd_summon: type[sm.Summon]
+        snd_summon = self._make_summon_choice(self_summons)
 
-        if summons_to_choose:
-            snd_summon = choice(summons_to_choose)
-        else:  # if all kinds of summons have been summoned, choose a random that is not chosen
-            snd_summon = choice([
-                summon
-                for summon in self._SUMMONS
-                if summon is not fst_summon
-            ])
-
-        assert fst_summon is not snd_summon
         return (
             eft.AddSummonEffect(
                 target_pid=source.pid,

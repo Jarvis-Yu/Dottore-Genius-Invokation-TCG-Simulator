@@ -119,13 +119,21 @@ all I need now is to implement each card and character.
       - [x] Sacrificial Sword
       - [x] Traveler's Handy Sword
   - [ ] Artifact Card:
+    - [ ] Crown of Watatsumi
+    - [ ] Echoes of an Offering
     - [ ] Emblem of Severed Fate
     - [ ] Exile's Circlet
+    - [ ] Flowing Rings
     - [x] Gambler's Earrings
     - [x] General's Ancient Helm
+    - [ ] Guilded Dreams
+    - [ ] Heart of Khvarena's Brilliance
     - [x] Instructor's Cap
+    - [ ] Ocean-Hued Clam
     - [ ] Ornate Kabuto
+    - [ ] Shadow of the Sand King
     - [x] Tenacity of the Millelith
+    - [ ] Vourukasha's Glow
 - [ ] Support Card (14/44):
   - [ ] Companion Card:
     - [x] Chang the Ninth
@@ -133,9 +141,12 @@ all I need now is to implement each card and character.
     - [ ] Dunyarzad
     - [x] Liben
     - [x] LiuSu
+    - [ ] Mamere
     - [ ] Master Zhang
+    - [ ] Memento Lens
     - [x] Paimon
     - [x] Rana
+    - [ ] Seed Dispensary
     - [x] Setaria
     - [ ] Timmie
     - [x] Xudong
@@ -151,9 +162,12 @@ all I need now is to implement each card and character.
     - [ ] Jade Chamber
     - [x] Knights of Favonius Library
     - [x] Liyue Harbor Wharf
+    - [ ] Opera Epiclese
+    - [ ] Stormterror's Lair
     - [x] Sumeru City
     - [x] Tenshukaku
     - [x] Vanarana
+    - [ ] Weeping Willow of the Lake
 - [ ] Event Card (41/67):
   - [ ] Talent Card:
     - [x] Absorbing Prism
@@ -161,6 +175,7 @@ all I need now is to implement each card and character.
   - [ ] Food Card:
     - [ ] Adeptus' Temptation
     - [ ] Butter Crab
+    - [ ] Fish and Chips
     - [x] Jueyun Guoba
     - [x] Lotus Flower Crisp
     - [x] Minty Meat Rolls
@@ -199,10 +214,12 @@ all I need now is to implement each card and character.
     - [x] Calxs Arts
     - [x] Changing Shifts
     - [ ] Fatui Conspiracy
+    - [ ] Flickering Four-Leaf Sigil
     - [ ] Guardian's Oath
     - [ ] Heavy Strike
     - [x] I Haven't Lost Yet!
     - [x] Leave It to Me!
+    - [ ] Lyresong
     - [ ] Master of Weaponry
     - [ ] Nature and Wisdom
     - [ ] Pankration!
@@ -213,6 +230,7 @@ all I need now is to implement each card and character.
     - [ ] Stone and Contracts
     - [ ] Strategize
     - [x] The Bestest Travel Companion!
+    - [ ] The Boar Princess
     - [ ] Thunder and Eternity
     - [ ] Toss-Up
     - [x] When the Crane Returned
