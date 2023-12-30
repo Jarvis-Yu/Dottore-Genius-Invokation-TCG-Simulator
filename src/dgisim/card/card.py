@@ -2422,6 +2422,11 @@ class WhenTheCraneReturned(EventCard, _DiceOnlyChoiceProvider):
 
     @override
     @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        return len(game_state.get_player(pid).get_characters().get_alive_characters()) > 1
+
+    @override
+    @classmethod
     def effects(
             cls,
             game_state: gs.GameState,
@@ -2478,6 +2483,11 @@ class WhereIsTheUnseenRazor(EventCard, _CharTargetChoiceProvider):
 
 class WindAndFreedom(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDice({})
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        return len(game_state.get_player(pid).get_characters().get_alive_characters()) > 1
 
     @override
     @classmethod
