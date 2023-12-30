@@ -65,6 +65,7 @@ __all__ = [
     # Weapon Card
     ## Bow ##
     "AmosBow",
+    "ElegyForTheEnd",
     "KingsSquire",
     "RavenBow",
     "SacrificialBow",
@@ -1317,6 +1318,12 @@ class AmosBow(WeaponEquipmentCard):
     _DICE_COST = AbstractDice({Element.OMNI: 3})
     WEAPON_TYPE = WeaponType.BOW
     WEAPON_STATUS = stt.AmosBowStatus
+
+
+class ElegyForTheEnd(WeaponEquipmentCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 3})
+    WEAPON_TYPE = WeaponType.BOW
+    WEAPON_STATUS = stt.ElegyForTheEndStatus
 
 
 class KingsSquire(WeaponEquipmentCard):

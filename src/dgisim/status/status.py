@@ -72,6 +72,7 @@ __all__ = [
     ## Weapon ##
     ### bow ###
     "AmosBowStatus",
+    "ElegyForTheEndStatus",
     "KingsSquireStatus",
     "RavenBowStatus",
     "SacrificialBowStatus",
@@ -105,6 +106,7 @@ __all__ = [
     "ChangingShiftsStatus",
     "CrystallizeStatus",
     "DendroCoreStatus",
+    "IHaventLostYetOnCooldownStatus",
     "ElementalResonanceEnduringRockStatus",
     "ElementalResonanceFerventFlamesStatus",
     "ElementalResonanceShatteringIceStatus",
@@ -112,7 +114,7 @@ __all__ = [
     "FreshWindOfFreedomStatus",
     "KingsSquireEffectStatus",
     "LeaveItToMeStatus",
-    "IHaventLostYetOnCooldownStatus",
+    "MillennialMovementFarewellSongStatus",
     "PassingOfJudgmentStatus",
     "RebelliousShieldStatus",
     "ReviveOnCooldownStatus",
@@ -1195,6 +1197,50 @@ class AmosBowStatus(WeaponEquipmentStatus, _UsageLivingStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
+class ElegyForTheEndStatus(WeaponEquipmentStatus):
+    WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.BOW
+    activated: bool = False
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+    ))
+
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        from ..card.card import ElegyForTheEnd
+        return ElegyForTheEnd
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if (
+                not self.activated
+                and isinstance(information, SkillIEvent)
+                and information.source == status_source
+                and information.skill_true_type.is_elemental_burst()
+        ):
+            return replace(self, activated=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+            return [
+                eft.AddCombatStatusEffect(
+                    target_pid=source.pid,
+                    status=MillennialMovementFarewellSongStatus,
+                ),
+            ], replace(self, activated=False)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
 class KingsSquireStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.BOW
 
@@ -1880,21 +1926,6 @@ class DendroCoreStatus(CombatStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class IHaventLostYetOnCooldownStatus(CombatStatus):
-    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.ROUND_END,
-    ))
-
-    @override
-    def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.ROUND_END:
-            return [], None
-        return [], self  # pragma: no cover
-
-
-@dataclass(frozen=True, kw_only=True)
 class ElementalResonanceEnduringRockStatus(CombatStatus):
     activated: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
@@ -2056,6 +2087,21 @@ class ElementalResonanceSprawlingGreeneryStatus(CombatStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
+class IHaventLostYetOnCooldownStatus(CombatStatus):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], None
+        return [], self  # pragma: no cover
+
+
+@dataclass(frozen=True, kw_only=True)
 class KingsSquireEffectStatus(CharacterStatus):
     COST_DEDUCTION: ClassVar[int] = 2
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
@@ -2106,6 +2152,40 @@ class LeaveItToMeStatus(CombatStatus):
                     and item.event_speed is EventSpeed.COMBAT_ACTION:
                 return replace(item, event_speed=EventSpeed.FAST_ACTION), None
         return super()._preprocess(game_state, status_source, item, signal)
+
+
+@dataclass(frozen=True, kw_only=True)
+class MillennialMovementFarewellSongStatus(CombatStatus, _UsageStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            if (
+                    item.dmg.source.pid is status_source.pid
+                    and item.dmg.damage_type.directly_from_character()
+            ):
+                return item.delta_damage(1), self
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], replace(self, usages=-1)
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)

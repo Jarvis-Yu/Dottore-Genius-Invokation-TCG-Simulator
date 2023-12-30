@@ -39,6 +39,15 @@ class CharacterSkillType(Enum):
     ELEMENTAL_SKILL = "Elemental-Skill"
     ELEMENTAL_BURST = "Elemental-Burst"
 
+    def is_normal_attack(self):
+        return self is CharacterSkillType.NORMAL_ATTACK
+    
+    def is_elemental_skill(self):
+        return self is CharacterSkillType.ELEMENTAL_SKILL
+
+    def is_elemental_burst(self):
+        return self is CharacterSkillType.ELEMENTAL_BURST
+
 class WeaponType(Enum):
     BOW = 1
     CATALYST = 2

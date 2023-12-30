@@ -129,7 +129,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.SacrificialBow, 26),
         # (card.SkywardHarp, 27),
         (card.AmosBow, 28),
-        # (card.ElegyForTheEnd, 29),
+        (card.ElegyForTheEnd, 29),
         (card.KingsSquire, 30),
 
         #### 0.3 Claymore 0050 ####
@@ -525,7 +525,7 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.SacrificialBowStatus, 76),
         # (status.SkywardHarpStatus, 77),
         (status.AmosBowStatus, 78),
-        # (status.ElegyForTheEndStatus, 79),
+        (status.ElegyForTheEndStatus, 79),
         (status.KingsSquireStatus, 80),
 
         #### 1.1.3 Claymore Status 100 ####
@@ -602,6 +602,7 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.WindAndFreedomStatus, 314),
         (status.AncientCourtyardStatus, 315),
         (status.PassingOfJudgmentStatus, 316),
+        (status.MillennialMovementFarewellSongStatus, 317),
 
         #### 2.2 Shield Combat Status 375 ####
         (status.CrystallizeStatus, 375),

@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (31/71 implemented)](#character-3171-implemented)
-  - [Card (108/248 implemented)](#card-108248-implemented)
+  - [Card (109/248 implemented)](#card-109248-implemented)
 
 ## Character (31/71 implemented)
 
@@ -56,9 +56,9 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (108/248 implemented)
+## Card (109/248 implemented)
 
-- [ ] Equipment Card (52/137):
+- [ ] Equipment Card (53/137):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
@@ -93,7 +93,7 @@ all I need now is to implement each card and character.
   - [ ] Weapon Card:
     - [ ] Bow:
       - [x] Amos' Bow
-      - [ ] Elegy for the End
+      - [x] Elegy for the End
       - [x] King's Squire
       - [x] Raven Bow
       - [x] Sacrificial Bow

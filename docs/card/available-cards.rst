@@ -1,7 +1,7 @@
 Available Cards
 ===============
 
-108 of 248 cards in Genius Invokation TCG are available in the simulator.
+109 of 248 cards in Genius Invokation TCG are available in the simulator.
 (excluding character cards which are not counted as cards in ``dgisim``)
 
 Equipment Cards
@@ -13,6 +13,7 @@ Weapon Card
 * Bow
 
   * Amos' Bow
+  * Elegy for the End
   * King's Squire
   * Raven Bow
   * Sacrificial Bow
