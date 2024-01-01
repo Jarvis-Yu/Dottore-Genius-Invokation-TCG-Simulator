@@ -15,7 +15,7 @@ class TestNahida(unittest.TestCase):
             lambda hcs: hcs.add(TheSeedOfStoredKnowledge)
         ).build()
     ).build()
-    assert type(BASE_GAME.get_player1().just_get_active_character()) is Nahida
+    assert type(BASE_GAME.player1.just_get_active_character()) is Nahida
 
     def test_normal_attack(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -24,14 +24,14 @@ class TestNahida(unittest.TestCase):
             skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 10)
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 10)
 
         gsm.player_step()
         gsm.auto_step()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 9)
-        self.assertIn(Element.DENDRO, p2ac.get_elemental_aura())
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 9)
+        self.assertIn(Element.DENDRO, p2ac.elemental_aura)
 
     def test_elemental_skill1(self):
         # without reaction and prior Seed of Skandha Status
@@ -41,25 +41,25 @@ class TestNahida(unittest.TestCase):
             skill=CharacterSkill.SKILL2,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 10)
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 10)
 
         gsm.player_step()
         gsm.auto_step(observe=False)
-        p2cs = gsm.get_game_state().get_player2().get_characters()
+        p2cs = gsm.get_game_state().player2.characters
         p2c1 = p2cs.just_get_character(1)
         p2c2 = p2cs.just_get_character(2)
         p2c3 = p2cs.just_get_character(3)
-        self.assertEqual(p2c1.get_hp(), 8)
-        self.assertEqual(p2c2.get_hp(), 10)
-        self.assertEqual(p2c3.get_hp(), 10)
-        self.assertIn(Element.DENDRO, p2c1.get_elemental_aura())
-        self.assertNotIn(Element.DENDRO, p2c2.get_elemental_aura())
-        self.assertNotIn(Element.DENDRO, p2c3.get_elemental_aura())
-        self.assertIn(SeedOfSkandhaStatus, p2c1.get_character_statuses())
-        self.assertNotIn(SeedOfSkandhaStatus, p2c2.get_character_statuses())
-        self.assertNotIn(SeedOfSkandhaStatus, p2c3.get_character_statuses())
-        p2c1_status = p2c1.get_character_statuses().just_find(SeedOfSkandhaStatus)
+        self.assertEqual(p2c1.hp, 8)
+        self.assertEqual(p2c2.hp, 10)
+        self.assertEqual(p2c3.hp, 10)
+        self.assertIn(Element.DENDRO, p2c1.elemental_aura)
+        self.assertNotIn(Element.DENDRO, p2c2.elemental_aura)
+        self.assertNotIn(Element.DENDRO, p2c3.elemental_aura)
+        self.assertIn(SeedOfSkandhaStatus, p2c1.character_statuses)
+        self.assertNotIn(SeedOfSkandhaStatus, p2c2.character_statuses)
+        self.assertNotIn(SeedOfSkandhaStatus, p2c3.character_statuses)
+        p2c1_status = p2c1.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c1_status.usages, 2)
         self.assertEqual(p2c1_status.activated_usages, 0)
 
@@ -67,20 +67,20 @@ class TestNahida(unittest.TestCase):
         game_state = oppo_aura_elem(self.BASE_GAME, Element.ELECTRO)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
 
-        p2cs = game_state.get_player2().get_characters()
+        p2cs = game_state.player2.characters
         p2c1 = p2cs.just_get_character(1)
         p2c2 = p2cs.just_get_character(2)
         p2c3 = p2cs.just_get_character(3)
-        self.assertEqual(p2c1.get_hp(), 6)
-        self.assertEqual(p2c2.get_hp(), 10)
-        self.assertEqual(p2c3.get_hp(), 10)
-        self.assertNotIn(Element.DENDRO, p2c1.get_elemental_aura())
-        self.assertNotIn(Element.DENDRO, p2c2.get_elemental_aura())
-        self.assertNotIn(Element.DENDRO, p2c3.get_elemental_aura())
-        self.assertIn(SeedOfSkandhaStatus, p2c1.get_character_statuses())
-        self.assertNotIn(SeedOfSkandhaStatus, p2c2.get_character_statuses())
-        self.assertNotIn(SeedOfSkandhaStatus, p2c3.get_character_statuses())
-        p2c1_status = p2c1.get_character_statuses().just_find(SeedOfSkandhaStatus)
+        self.assertEqual(p2c1.hp, 6)
+        self.assertEqual(p2c2.hp, 10)
+        self.assertEqual(p2c3.hp, 10)
+        self.assertNotIn(Element.DENDRO, p2c1.elemental_aura)
+        self.assertNotIn(Element.DENDRO, p2c2.elemental_aura)
+        self.assertNotIn(Element.DENDRO, p2c3.elemental_aura)
+        self.assertIn(SeedOfSkandhaStatus, p2c1.character_statuses)
+        self.assertNotIn(SeedOfSkandhaStatus, p2c2.character_statuses)
+        self.assertNotIn(SeedOfSkandhaStatus, p2c3.character_statuses)
+        p2c1_status = p2c1.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c1_status.usages, 1)
         self.assertEqual(p2c1_status.activated_usages, 0)
 
@@ -91,26 +91,26 @@ class TestNahida(unittest.TestCase):
         ).execute(self.BASE_GAME)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
 
-        p2cs = game_state.get_player2().get_characters()
+        p2cs = game_state.player2.characters
         p2c1 = p2cs.just_get_character(1)
         p2c2 = p2cs.just_get_character(2)
         p2c3 = p2cs.just_get_character(3)
-        self.assertEqual(p2c1.get_hp(), 8)
-        self.assertEqual(p2c2.get_hp(), 10)
-        self.assertEqual(p2c3.get_hp(), 10)
-        self.assertIn(Element.DENDRO, p2c1.get_elemental_aura())
-        self.assertNotIn(Element.DENDRO, p2c2.get_elemental_aura())
-        self.assertNotIn(Element.DENDRO, p2c3.get_elemental_aura())
-        self.assertIn(SeedOfSkandhaStatus, p2c1.get_character_statuses())
-        self.assertIn(SeedOfSkandhaStatus, p2c2.get_character_statuses())
-        self.assertIn(SeedOfSkandhaStatus, p2c3.get_character_statuses())
-        p2c1_status = p2c1.get_character_statuses().just_find(SeedOfSkandhaStatus)
+        self.assertEqual(p2c1.hp, 8)
+        self.assertEqual(p2c2.hp, 10)
+        self.assertEqual(p2c3.hp, 10)
+        self.assertIn(Element.DENDRO, p2c1.elemental_aura)
+        self.assertNotIn(Element.DENDRO, p2c2.elemental_aura)
+        self.assertNotIn(Element.DENDRO, p2c3.elemental_aura)
+        self.assertIn(SeedOfSkandhaStatus, p2c1.character_statuses)
+        self.assertIn(SeedOfSkandhaStatus, p2c2.character_statuses)
+        self.assertIn(SeedOfSkandhaStatus, p2c3.character_statuses)
+        p2c1_status = p2c1.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c1_status.usages, 2)
         self.assertEqual(p2c1_status.activated_usages, 0)
-        p2c2_status = p2c2.get_character_statuses().just_find(SeedOfSkandhaStatus)
+        p2c2_status = p2c2.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c2_status.usages, 2)
         self.assertEqual(p2c2_status.activated_usages, 0)
-        p2c3_status = p2c3.get_character_statuses().just_find(SeedOfSkandhaStatus)
+        p2c3_status = p2c3.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c3_status.usages, 2)
         self.assertEqual(p2c3_status.activated_usages, 0)
 
@@ -122,26 +122,26 @@ class TestNahida(unittest.TestCase):
         game_state = oppo_aura_elem(game_state, Element.PYRO)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
 
-        p2cs = game_state.get_player2().get_characters()
+        p2cs = game_state.player2.characters
         p2c1 = p2cs.just_get_character(1)
         p2c2 = p2cs.just_get_character(2)
         p2c3 = p2cs.just_get_character(3)
-        self.assertEqual(p2c1.get_hp(), 6)
-        self.assertEqual(p2c2.get_hp(), 9)
-        self.assertEqual(p2c3.get_hp(), 9)
-        self.assertNotIn(Element.DENDRO, p2c1.get_elemental_aura())
-        self.assertNotIn(Element.DENDRO, p2c2.get_elemental_aura())
-        self.assertNotIn(Element.DENDRO, p2c3.get_elemental_aura())
-        self.assertIn(SeedOfSkandhaStatus, p2c1.get_character_statuses())
-        self.assertIn(SeedOfSkandhaStatus, p2c2.get_character_statuses())
-        self.assertIn(SeedOfSkandhaStatus, p2c3.get_character_statuses())
-        p2c1_status = p2c1.get_character_statuses().just_find(SeedOfSkandhaStatus)
+        self.assertEqual(p2c1.hp, 6)
+        self.assertEqual(p2c2.hp, 9)
+        self.assertEqual(p2c3.hp, 9)
+        self.assertNotIn(Element.DENDRO, p2c1.elemental_aura)
+        self.assertNotIn(Element.DENDRO, p2c2.elemental_aura)
+        self.assertNotIn(Element.DENDRO, p2c3.elemental_aura)
+        self.assertIn(SeedOfSkandhaStatus, p2c1.character_statuses)
+        self.assertIn(SeedOfSkandhaStatus, p2c2.character_statuses)
+        self.assertIn(SeedOfSkandhaStatus, p2c3.character_statuses)
+        p2c1_status = p2c1.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c1_status.usages, 1)
         self.assertEqual(p2c1_status.activated_usages, 0)
-        p2c2_status = p2c2.get_character_statuses().just_find(SeedOfSkandhaStatus)
+        p2c2_status = p2c2.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c2_status.usages, 1)
         self.assertEqual(p2c2_status.activated_usages, 0)
-        p2c3_status = p2c3.get_character_statuses().just_find(SeedOfSkandhaStatus)
+        p2c3_status = p2c3.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c3_status.usages, 1)
         self.assertEqual(p2c3_status.activated_usages, 0)
 
@@ -154,26 +154,26 @@ class TestNahida(unittest.TestCase):
             ActualDice({Element.OMNI: 5}),
         )
 
-        p2cs = game_state.get_player2().get_characters()
+        p2cs = game_state.player2.characters
         p2c1 = p2cs.just_get_character(1)
         p2c2 = p2cs.just_get_character(2)
         p2c3 = p2cs.just_get_character(3)
-        self.assertEqual(p2c1.get_hp(), 7)
-        self.assertEqual(p2c2.get_hp(), 10)
-        self.assertEqual(p2c3.get_hp(), 10)
-        self.assertIn(Element.DENDRO, p2c1.get_elemental_aura())
-        self.assertNotIn(Element.DENDRO, p2c2.get_elemental_aura())
-        self.assertNotIn(Element.DENDRO, p2c3.get_elemental_aura())
-        self.assertIn(SeedOfSkandhaStatus, p2c1.get_character_statuses())
-        self.assertIn(SeedOfSkandhaStatus, p2c2.get_character_statuses())
-        self.assertIn(SeedOfSkandhaStatus, p2c3.get_character_statuses())
-        p2c1_status = p2c1.get_character_statuses().just_find(SeedOfSkandhaStatus)
+        self.assertEqual(p2c1.hp, 7)
+        self.assertEqual(p2c2.hp, 10)
+        self.assertEqual(p2c3.hp, 10)
+        self.assertIn(Element.DENDRO, p2c1.elemental_aura)
+        self.assertNotIn(Element.DENDRO, p2c2.elemental_aura)
+        self.assertNotIn(Element.DENDRO, p2c3.elemental_aura)
+        self.assertIn(SeedOfSkandhaStatus, p2c1.character_statuses)
+        self.assertIn(SeedOfSkandhaStatus, p2c2.character_statuses)
+        self.assertIn(SeedOfSkandhaStatus, p2c3.character_statuses)
+        p2c1_status = p2c1.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c1_status.usages, 2)
         self.assertEqual(p2c1_status.activated_usages, 0)
-        p2c2_status = p2c2.get_character_statuses().just_find(SeedOfSkandhaStatus)
+        p2c2_status = p2c2.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c2_status.usages, 2)
         self.assertEqual(p2c2_status.activated_usages, 0)
-        p2c3_status = p2c3.get_character_statuses().just_find(SeedOfSkandhaStatus)
+        p2c3_status = p2c3.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c3_status.usages, 2)
         self.assertEqual(p2c3_status.activated_usages, 0)
 
@@ -181,26 +181,26 @@ class TestNahida(unittest.TestCase):
         game_state = oppo_aura_elem(self.BASE_GAME, Element.HYDRO)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL3)
 
-        p2cs = game_state.get_player2().get_characters()
+        p2cs = game_state.player2.characters
         p2c1 = p2cs.just_get_character(1)
         p2c2 = p2cs.just_get_character(2)
         p2c3 = p2cs.just_get_character(3)
-        self.assertEqual(p2c1.get_hp(), 5)
-        self.assertEqual(p2c2.get_hp(), 9)
-        self.assertEqual(p2c3.get_hp(), 9)
-        self.assertNotIn(Element.DENDRO, p2c1.get_elemental_aura())
-        self.assertNotIn(Element.DENDRO, p2c2.get_elemental_aura())
-        self.assertNotIn(Element.DENDRO, p2c3.get_elemental_aura())
-        self.assertIn(SeedOfSkandhaStatus, p2c1.get_character_statuses())
-        self.assertIn(SeedOfSkandhaStatus, p2c2.get_character_statuses())
-        self.assertIn(SeedOfSkandhaStatus, p2c3.get_character_statuses())
-        p2c1_status = p2c1.get_character_statuses().just_find(SeedOfSkandhaStatus)
+        self.assertEqual(p2c1.hp, 5)
+        self.assertEqual(p2c2.hp, 9)
+        self.assertEqual(p2c3.hp, 9)
+        self.assertNotIn(Element.DENDRO, p2c1.elemental_aura)
+        self.assertNotIn(Element.DENDRO, p2c2.elemental_aura)
+        self.assertNotIn(Element.DENDRO, p2c3.elemental_aura)
+        self.assertIn(SeedOfSkandhaStatus, p2c1.character_statuses)
+        self.assertIn(SeedOfSkandhaStatus, p2c2.character_statuses)
+        self.assertIn(SeedOfSkandhaStatus, p2c3.character_statuses)
+        p2c1_status = p2c1.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c1_status.usages, 1)
         self.assertEqual(p2c1_status.activated_usages, 0)
-        p2c2_status = p2c2.get_character_statuses().just_find(SeedOfSkandhaStatus)
+        p2c2_status = p2c2.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c2_status.usages, 1)
         self.assertEqual(p2c2_status.activated_usages, 0)
-        p2c3_status = p2c3.get_character_statuses().just_find(SeedOfSkandhaStatus)
+        p2c3_status = p2c3.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c3_status.usages, 1)
         self.assertEqual(p2c3_status.activated_usages, 0)
 
@@ -213,12 +213,12 @@ class TestNahida(unittest.TestCase):
             ActualDice({Element.OMNI: 3}),
         )
 
-        p1 = game_state.get_player1()
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 6)
-        self.assertIn(Element.DENDRO, p2ac.get_elemental_aura())
-        self.assertIn(ShrineOfMayaStatus, p1.get_combat_statuses())
-        burst_status = p1.get_combat_statuses().just_find(ShrineOfMayaStatus)
+        p1 = game_state.player1
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 6)
+        self.assertIn(Element.DENDRO, p2ac.elemental_aura)
+        self.assertIn(ShrineOfMayaStatus, p1.combat_statuses)
+        burst_status = p1.combat_statuses.just_find(ShrineOfMayaStatus)
         self.assertEqual(burst_status.usages, 2)
 
     def test_talent_card(self):
@@ -234,37 +234,37 @@ class TestNahida(unittest.TestCase):
 
         # test with Electro and Hydro
         self.assertTrue(any(
-            char.ELEMENT() is Element.ELECTRO for char in base_state.get_player1().get_characters()
+            char.ELEMENT() is Element.ELECTRO for char in base_state.player1.characters
         ))
         self.assertTrue(any(
-            char.ELEMENT() is Element.HYDRO for char in base_state.get_player1().get_characters()
+            char.ELEMENT() is Element.HYDRO for char in base_state.player1.characters
         ))
         game_state = step_action(base_state, Pid.P1, CardAction(
             card=TheSeedOfStoredKnowledge,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
-        p1 = game_state.get_player1()
-        p2cs = game_state.get_player2().get_characters()
+        p1 = game_state.player1
+        p2cs = game_state.player2.characters
         p2c1 = p2cs.just_get_character(1)
         p2c2 = p2cs.just_get_character(2)
         p2c3 = p2cs.just_get_character(3)
-        self.assertEqual(p2c1.get_hp(), 6)
-        self.assertEqual(p2c2.get_hp(), 10)
-        self.assertEqual(p2c3.get_hp(), 10)
-        self.assertIn(Element.DENDRO, p2c1.get_elemental_aura())
-        self.assertNotIn(Element.DENDRO, p2c2.get_elemental_aura())
-        self.assertNotIn(Element.DENDRO, p2c3.get_elemental_aura())
-        self.assertIn(SeedOfSkandhaStatus, p2c1.get_character_statuses())
-        self.assertIn(SeedOfSkandhaStatus, p2c2.get_character_statuses())
-        self.assertNotIn(SeedOfSkandhaStatus, p2c3.get_character_statuses())
-        p2c1_status = p2c1.get_character_statuses().just_find(SeedOfSkandhaStatus)
+        self.assertEqual(p2c1.hp, 6)
+        self.assertEqual(p2c2.hp, 10)
+        self.assertEqual(p2c3.hp, 10)
+        self.assertIn(Element.DENDRO, p2c1.elemental_aura)
+        self.assertNotIn(Element.DENDRO, p2c2.elemental_aura)
+        self.assertNotIn(Element.DENDRO, p2c3.elemental_aura)
+        self.assertIn(SeedOfSkandhaStatus, p2c1.character_statuses)
+        self.assertIn(SeedOfSkandhaStatus, p2c2.character_statuses)
+        self.assertNotIn(SeedOfSkandhaStatus, p2c3.character_statuses)
+        p2c1_status = p2c1.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c1_status.usages, 3)
         self.assertEqual(p2c1_status.activated_usages, 0)
-        p2c2_status = p2c2.get_character_statuses().just_find(SeedOfSkandhaStatus)
+        p2c2_status = p2c2.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c2_status.usages, 2)
         self.assertEqual(p2c2_status.activated_usages, 0)
-        self.assertIn(ShrineOfMayaStatus, p1.get_combat_statuses())
-        self.assertEqual(p1.get_combat_statuses().just_find(ShrineOfMayaStatus).usages, 3)
+        self.assertIn(ShrineOfMayaStatus, p1.combat_statuses)
+        self.assertEqual(p1.combat_statuses.just_find(ShrineOfMayaStatus).usages, 3)
 
         # test with Pyro
         base_state = base_state.factory().f_player1(
@@ -278,31 +278,31 @@ class TestNahida(unittest.TestCase):
         ).build()
         base_state = oppo_aura_elem(base_state, Element.HYDRO)
         self.assertTrue(any(
-            char.ELEMENT() is Element.PYRO for char in base_state.get_player1().get_characters()
+            char.ELEMENT() is Element.PYRO for char in base_state.player1.characters
         ))
         game_state = step_action(base_state, Pid.P1, CardAction(
             card=TheSeedOfStoredKnowledge,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
-        p1 = game_state.get_player1()
-        p2cs = game_state.get_player2().get_characters()
+        p1 = game_state.player1
+        p2cs = game_state.player2.characters
         p2c1 = p2cs.just_get_character(1)
         p2c2 = p2cs.just_get_character(2)
         p2c3 = p2cs.just_get_character(3)
-        self.assertEqual(p2c1.get_hp(), 4)
-        self.assertEqual(p2c2.get_hp(), 9)
-        self.assertEqual(p2c3.get_hp(), 10)
-        self.assertIn(Element.DENDRO, p2c1.get_elemental_aura())
-        self.assertNotIn(Element.DENDRO, p2c2.get_elemental_aura())
-        self.assertNotIn(Element.DENDRO, p2c3.get_elemental_aura())
-        self.assertIn(SeedOfSkandhaStatus, p2c1.get_character_statuses())
-        self.assertNotIn(SeedOfSkandhaStatus, p2c2.get_character_statuses())
-        self.assertNotIn(SeedOfSkandhaStatus, p2c3.get_character_statuses())
-        p2c1_status = p2c1.get_character_statuses().just_find(SeedOfSkandhaStatus)
+        self.assertEqual(p2c1.hp, 4)
+        self.assertEqual(p2c2.hp, 9)
+        self.assertEqual(p2c3.hp, 10)
+        self.assertIn(Element.DENDRO, p2c1.elemental_aura)
+        self.assertNotIn(Element.DENDRO, p2c2.elemental_aura)
+        self.assertNotIn(Element.DENDRO, p2c3.elemental_aura)
+        self.assertIn(SeedOfSkandhaStatus, p2c1.character_statuses)
+        self.assertNotIn(SeedOfSkandhaStatus, p2c2.character_statuses)
+        self.assertNotIn(SeedOfSkandhaStatus, p2c3.character_statuses)
+        p2c1_status = p2c1.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c1_status.usages, 1)
         self.assertEqual(p2c1_status.activated_usages, 0)
-        self.assertIn(ShrineOfMayaStatus, p1.get_combat_statuses())
-        self.assertEqual(p1.get_combat_statuses().just_find(ShrineOfMayaStatus).usages, 2)
+        self.assertIn(ShrineOfMayaStatus, p1.combat_statuses)
+        self.assertEqual(p1.combat_statuses.just_find(ShrineOfMayaStatus).usages, 2)
 
     def test_seed_of_skandha_status(self):
         game_state = UpdateCharacterStatusEffect(
@@ -324,19 +324,19 @@ class TestNahida(unittest.TestCase):
         """
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
 
-        p2cs = game_state.get_player2().get_characters()
+        p2cs = game_state.player2.characters
         p2c1 = p2cs.just_get_character(1)
         p2c2 = p2cs.just_get_character(2)
         p2c3 = p2cs.just_get_character(3)
-        self.assertTrue(p2c1.defeated())
-        self.assertEqual(p2c2.get_hp(), 9)
-        self.assertEqual(p2c3.get_hp(), 10)
-        self.assertNotIn(Element.DENDRO, p2c1.get_elemental_aura())
-        self.assertNotIn(Element.DENDRO, p2c2.get_elemental_aura())
-        self.assertNotIn(Element.DENDRO, p2c3.get_elemental_aura())
-        self.assertNotIn(SeedOfSkandhaStatus, p2c1.get_character_statuses())
-        self.assertNotIn(SeedOfSkandhaStatus, p2c2.get_character_statuses())
-        self.assertNotIn(SeedOfSkandhaStatus, p2c3.get_character_statuses())
+        self.assertTrue(p2c1.is_defeated())
+        self.assertEqual(p2c2.hp, 9)
+        self.assertEqual(p2c3.hp, 10)
+        self.assertNotIn(Element.DENDRO, p2c1.elemental_aura)
+        self.assertNotIn(Element.DENDRO, p2c2.elemental_aura)
+        self.assertNotIn(Element.DENDRO, p2c3.elemental_aura)
+        self.assertNotIn(SeedOfSkandhaStatus, p2c1.character_statuses)
+        self.assertNotIn(SeedOfSkandhaStatus, p2c2.character_statuses)
+        self.assertNotIn(SeedOfSkandhaStatus, p2c3.character_statuses)
 
         """
         skill triggers reaction that kills opponent active character,
@@ -349,10 +349,10 @@ class TestNahida(unittest.TestCase):
             status=WolfsGravestoneStatus,
         ).execute(game_state)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
-        p2c1, p2c2, p2c3 = game_state.get_player2().get_characters().get_characters()
-        self.assertTrue(p2c1.defeated())
-        self.assertEqual(p2c2.get_hp(), 9)
-        self.assertEqual(p2c3.get_hp(), 10)
+        p2c1, p2c2, p2c3 = game_state.player2.characters.get_characters()
+        self.assertTrue(p2c1.is_defeated())
+        self.assertEqual(p2c2.hp, 9)
+        self.assertEqual(p2c3.hp, 10)
 
     def test_shine_of_maya_status(self):
         game_state = AddCombatStatusEffect(
@@ -363,19 +363,19 @@ class TestNahida(unittest.TestCase):
 
         # test character reaction dmg boosted
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 7)
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 7)
 
         # test usages disappear as round ends
         gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
         gsm.step_until_next_phase()
-        gsm.step_until_phase(game_state.get_mode().action_phase)
-        self.assertIn(ShrineOfMayaStatus, gsm.get_game_state().get_player1().get_combat_statuses())
-        shine_of_maya_status = gsm.get_game_state().get_player1().get_combat_statuses().just_find(
+        gsm.step_until_phase(game_state.mode.action_phase)
+        self.assertIn(ShrineOfMayaStatus, gsm.get_game_state().player1.combat_statuses)
+        shine_of_maya_status = gsm.get_game_state().player1.combat_statuses.just_find(
             ShrineOfMayaStatus
         )
         self.assertEqual(shine_of_maya_status.usages, 1)
         gsm.step_until_next_phase()
-        gsm.step_until_phase(game_state.get_mode().action_phase)
+        gsm.step_until_phase(game_state.mode.action_phase)
         self.assertNotIn(ShrineOfMayaStatus,
-                         gsm.get_game_state().get_player1().get_combat_statuses())
+                         gsm.get_game_state().player1.combat_statuses)

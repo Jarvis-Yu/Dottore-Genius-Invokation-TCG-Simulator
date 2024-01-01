@@ -30,12 +30,12 @@ class TestElementalResonanceSprawlingGreenery(unittest.TestCase):
         def get_statuses(
                 game_state: GameState
         ) -> tuple[BurningFlameSummon, CatalyzingFieldStatus, DendroCoreStatus]:
-            p1 = game_state.get_player1()
-            flame = p1.get_summons().just_find(BurningFlameSummon)
+            p1 = game_state.player1
+            flame = p1.summons.just_find(BurningFlameSummon)
             assert isinstance(flame, BurningFlameSummon)
-            cata = p1.get_combat_statuses().just_find(CatalyzingFieldStatus)
+            cata = p1.combat_statuses.just_find(CatalyzingFieldStatus)
             assert isinstance(cata, CatalyzingFieldStatus)
-            core = p1.get_combat_statuses().just_find(DendroCoreStatus)
+            core = p1.combat_statuses.just_find(DendroCoreStatus)
             assert isinstance(core, DendroCoreStatus)
             return flame, cata, core
 
@@ -50,7 +50,7 @@ class TestElementalResonanceSprawlingGreenery(unittest.TestCase):
         new_flame, new_cata, new_core = get_statuses(game_state)
         self.assertIn(
             ElementalResonanceSprawlingGreeneryStatus,
-            game_state.get_player1().get_combat_statuses()
+            game_state.player1.combat_statuses
         )
         self.assertEqual(new_flame.usages, old_flame.usages + 1)
         self.assertEqual(new_cata.usages, old_cata.usages + 1)
@@ -64,28 +64,28 @@ class TestElementalResonanceSprawlingGreenery(unittest.TestCase):
         # Reaction does boost the damage that triggers the reaction
         game_state = oppo_aura_elem(base_state, Element.ELECTRO)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
-        p1_combat_statuses = game_state.get_player1().get_combat_statuses()
-        p2ac = game_state.get_player2().just_get_active_character()
+        p1_combat_statuses = game_state.player1.combat_statuses
+        p2ac = game_state.player2.just_get_active_character()
         self.assertNotIn(ElementalResonanceSprawlingGreeneryStatus, p1_combat_statuses)
-        self.assertEqual(p2ac.get_hp(), 6)
+        self.assertEqual(p2ac.hp, 6)
 
         # None reaction damage doesn't trigger status
         game_state = step_skill(base_state, Pid.P1, CharacterSkill.SKILL1)
-        p1_combat_statuses = game_state.get_player1().get_combat_statuses()
-        p2ac = game_state.get_player2().just_get_active_character()
+        p1_combat_statuses = game_state.player1.combat_statuses
+        p2ac = game_state.player2.just_get_active_character()
         self.assertIn(ElementalResonanceSprawlingGreeneryStatus, p1_combat_statuses)
-        self.assertEqual(p2ac.get_hp(), 9)
+        self.assertEqual(p2ac.hp, 9)
 
         # Summon triggers
         game_state = oppo_aura_elem(base_state, Element.ELECTRO)
         game_state = AddSummonEffect(Pid.P1, OceanicMimicRaptorSummon).execute(game_state)
         game_state = next_round(game_state)
-        p1_combat_statuses = game_state.get_player1().get_combat_statuses()
-        p2ac = game_state.get_player2().just_get_active_character()
+        p1_combat_statuses = game_state.player1.combat_statuses
+        p2ac = game_state.player2.just_get_active_character()
         self.assertNotIn(ElementalResonanceSprawlingGreeneryStatus, p1_combat_statuses)
-        self.assertEqual(p2ac.get_hp(), 6)  # raptor 1 + electro-charged 1 + resonance 2
+        self.assertEqual(p2ac.hp, 6)  # raptor 1 + electro-charged 1 + resonance 2
 
         # status naturally disappears next round
         game_state = next_round(base_state)
-        p1_combat_statuses = game_state.get_player1().get_combat_statuses()
+        p1_combat_statuses = game_state.player1.combat_statuses
         self.assertNotIn(ElementalResonanceSprawlingGreeneryStatus, p1_combat_statuses)

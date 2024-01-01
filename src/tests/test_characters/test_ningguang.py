@@ -11,7 +11,7 @@ class TestNingguang(unittest.TestCase):
         char_id=2,
         card=StrategicReserve,
     )
-    assert type(BASE_GAME.get_player1().just_get_active_character()) is Ningguang
+    assert type(BASE_GAME.player1.just_get_active_character()) is Ningguang
 
     def test_normal_attack(self):
         game_state = add_dmg_listener(self.BASE_GAME, Pid.P1)
@@ -34,12 +34,12 @@ class TestNingguang(unittest.TestCase):
             CharacterSkill.SKILL2,
             dice=ActualDice({Element.GEO: 3}),
         )
-        p1 = game_state.get_player1()
+        p1 = game_state.player1
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertEqual(dmg.damage, 2)
         self.assertIs(dmg.element, Element.GEO)
-        self.assertIn(JadeScreenStatus, p1.get_combat_statuses())
-        self.assertEqual(p1.get_combat_statuses().just_find(JadeScreenStatus).usages, 2)
+        self.assertIn(JadeScreenStatus, p1.combat_statuses)
+        self.assertEqual(p1.combat_statuses.just_find(JadeScreenStatus).usages, 2)
 
     def test_elemental_burst(self):
         game_state = fill_energy_for_all(self.BASE_GAME)
@@ -80,7 +80,7 @@ class TestNingguang(unittest.TestCase):
                 dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
                 should_trigger = dmg_amount >= 2
                 self.assertEqual(dmg.damage, dmg_amount - (1 if should_trigger else 0))
-                jade_screen_status = game_state.get_player1().get_combat_statuses().just_find(
+                jade_screen_status = game_state.player1.combat_statuses.just_find(
                     JadeScreenStatus
                 )
                 self.assertEqual(jade_screen_status.usages, 1 if should_trigger else 2)

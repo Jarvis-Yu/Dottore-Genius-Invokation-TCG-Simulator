@@ -13,7 +13,7 @@ class TestJueyunGuoba(unittest.TestCase):
                 Cards({JueyunGuoba: 1})
             ).build()
         ).build()
-        char1 = base_game_state.get_player1().just_get_active_character()
+        char1 = base_game_state.player1.just_get_active_character()
         p1, p2 = PuppetAgent(), PuppetAgent()
 
         # without JueyunGuoba
@@ -24,7 +24,7 @@ class TestJueyunGuoba(unittest.TestCase):
         ))
         gsm.one_step()  # p1 normal attacks
         gsm.auto_step()  # process normal attack
-        hp_without_guoba = gsm.get_game_state().get_player2().just_get_active_character().get_hp()
+        hp_without_guoba = gsm.get_game_state().player2.just_get_active_character().hp
 
         # with JueyunGuoba
         gsm = GameStateMachine(base_game_state, p1, p2)
@@ -35,7 +35,7 @@ class TestJueyunGuoba(unittest.TestCase):
                 target=StaticTarget(
                     Pid.P1,
                     Zone.CHARACTERS,
-                    char1.get_id(),
+                    char1.id,
                 )
             )
         ))
@@ -48,29 +48,29 @@ class TestJueyunGuoba(unittest.TestCase):
         self.assertTrue(
             gsm
             .get_game_state()
-            .get_player1()
+            .player1
             .just_get_active_character()
-            .get_character_statuses()
+            .character_statuses
             .contains(JueyunGuobaStatus)
         )
         gsm.one_step()  # p1 normal attacks
         gsm.auto_step()  # process normal attack
         self.assertEqual(
-            gsm.get_game_state().get_player2().just_get_active_character().get_hp(),
+            gsm.get_game_state().player2.just_get_active_character().hp,
             hp_without_guoba - 1
         )
         self.assertFalse(
             gsm
             .get_game_state()
-            .get_player1()
+            .player1
             .just_get_active_character()
-            .get_character_statuses()
+            .character_statuses
             .contains(JueyunGuobaStatus)
         )
 
         # with JueyunGuoba on other character
         gsm = GameStateMachine(base_game_state, p1, p2)
-        guobaed_char_id = char1.get_id() % 3 + 1  # next character
+        guobaed_char_id = char1.id % 3 + 1  # next character
         p1.inject_action(CardAction(
             card=JueyunGuoba,
             instruction=StaticTargetInstruction(
@@ -91,25 +91,25 @@ class TestJueyunGuoba(unittest.TestCase):
         self.assertTrue(
             gsm
             .get_game_state()
-            .get_player1()
-            .get_characters()
+            .player1
+            .characters
             .just_get_character(guobaed_char_id)
-            .get_character_statuses()
+            .character_statuses
             .contains(JueyunGuobaStatus)
         )
         gsm.one_step()  # p1 normal attacks
         gsm.auto_step()  # process normal attack
         self.assertEqual(
-            gsm.get_game_state().get_player2().just_get_active_character().get_hp(),
+            gsm.get_game_state().player2.just_get_active_character().hp,
             hp_without_guoba
         )
         self.assertTrue(
             gsm
             .get_game_state()
-            .get_player1()
-            .get_characters()
+            .player1
+            .characters
             .just_get_character(guobaed_char_id)
-            .get_character_statuses()
+            .character_statuses
             .contains(JueyunGuobaStatus)
         )
 
@@ -136,14 +136,14 @@ class TestJueyunGuoba(unittest.TestCase):
         gsm.player_step()  # p1 normal attacks
         gsm.auto_step()  # process normal attack
         self.assertEqual(
-            gsm.get_game_state().get_player2().just_get_active_character().get_hp(),
+            gsm.get_game_state().player2.just_get_active_character().hp,
             7,
         )
         self.assertTrue(
             gsm
             .get_game_state()
-            .get_player1()
+            .player1
             .just_get_active_character()
-            .get_character_statuses()
+            .character_statuses
             .contains(JueyunGuobaStatus)
         )

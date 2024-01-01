@@ -15,7 +15,7 @@ class TestBennett(unittest.TestCase):
             lambda hcs: hcs.add(GrandExpectation)
         ).build()
     ).build()
-    assert type(BASE_GAME.get_player1().just_get_active_character()) is Bennett
+    assert type(BASE_GAME.player1.just_get_active_character()) is Bennett
 
     def test_normal_attack(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -24,14 +24,14 @@ class TestBennett(unittest.TestCase):
             skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 10)
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 10)
 
         gsm.player_step()
         gsm.auto_step()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 8)
-        self.assertFalse(p2ac.get_elemental_aura().elem_auras())
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 8)
+        self.assertFalse(p2ac.elemental_aura.elem_auras())
 
     def test_elemental_skill1(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -40,14 +40,14 @@ class TestBennett(unittest.TestCase):
             skill=CharacterSkill.SKILL2,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 10)
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 10)
 
         gsm.player_step()
         gsm.auto_step()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 7)
-        self.assertIn(Element.PYRO, p2ac.get_elemental_aura())
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 7)
+        self.assertIn(Element.PYRO, p2ac.elemental_aura)
 
     def test_elemental_burst(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -57,17 +57,17 @@ class TestBennett(unittest.TestCase):
             skill=CharacterSkill.ELEMENTAL_BURST,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 4})),
         ))
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 10)
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 10)
 
         gsm.player_step()
         gsm.auto_step()
-        p1 = gsm.get_game_state().get_player1()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 8)
-        self.assertIn(Element.PYRO, p2ac.get_elemental_aura())
-        self.assertIn(InspirationFieldStatus, p1.get_combat_statuses())
-        burst_status = p1.get_combat_statuses().just_find(InspirationFieldStatus)
+        p1 = gsm.get_game_state().player1
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 8)
+        self.assertIn(Element.PYRO, p2ac.elemental_aura)
+        self.assertIn(InspirationFieldStatus, p1.combat_statuses)
+        burst_status = p1.combat_statuses.just_find(InspirationFieldStatus)
         self.assertEqual(burst_status.usages, 2)
         self.assertEqual(burst_status.activated, False)
 
@@ -80,14 +80,14 @@ class TestBennett(unittest.TestCase):
             card=GrandExpectation,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 4}))
         ))
-        p1 = game_state.get_player1()
-        p1ac = game_state.get_player1().just_get_active_character()
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p1ac.get_hp(), 8)
-        self.assertEqual(p2ac.get_hp(), 8)
-        self.assertIn(Element.PYRO, p2ac.get_elemental_aura())
-        self.assertIn(InspirationFieldEnhancedStatus, p1.get_combat_statuses())
-        burst_status = p1.get_combat_statuses().just_find(InspirationFieldEnhancedStatus)
+        p1 = game_state.player1
+        p1ac = game_state.player1.just_get_active_character()
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p1ac.hp, 8)
+        self.assertEqual(p2ac.hp, 8)
+        self.assertIn(Element.PYRO, p2ac.elemental_aura)
+        self.assertIn(InspirationFieldEnhancedStatus, p1.combat_statuses)
+        burst_status = p1.combat_statuses.just_find(InspirationFieldEnhancedStatus)
         self.assertEqual(burst_status.usages, 2)
         self.assertEqual(burst_status.activated, False)
 
@@ -99,15 +99,15 @@ class TestBennett(unittest.TestCase):
             card=GrandExpectation,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 4}))
         ))
-        p1 = game_state.get_player1()
-        p1ac = game_state.get_player1().just_get_active_character()
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p1ac.get_hp(), 8)
-        self.assertEqual(p2ac.get_hp(), 8)
-        self.assertIn(Element.PYRO, p2ac.get_elemental_aura())
-        self.assertNotIn(InspirationFieldStatus, p1.get_combat_statuses())
-        self.assertIn(InspirationFieldEnhancedStatus, p1.get_combat_statuses())
-        burst_status = p1.get_combat_statuses().just_find(InspirationFieldEnhancedStatus)
+        p1 = game_state.player1
+        p1ac = game_state.player1.just_get_active_character()
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p1ac.hp, 8)
+        self.assertEqual(p2ac.hp, 8)
+        self.assertIn(Element.PYRO, p2ac.elemental_aura)
+        self.assertNotIn(InspirationFieldStatus, p1.combat_statuses)
+        self.assertIn(InspirationFieldEnhancedStatus, p1.combat_statuses)
+        burst_status = p1.combat_statuses.just_find(InspirationFieldEnhancedStatus)
         self.assertEqual(burst_status.usages, 2)
         self.assertEqual(burst_status.activated, False)
 
@@ -122,40 +122,40 @@ class TestBennett(unittest.TestCase):
 
                 # P1 normal attack
                 game_state = step_skill(base_game, Pid.P1, CharacterSkill.SKILL1)
-                p1ac = game_state.get_player1().just_get_active_character()
-                p2ac = game_state.get_player2().just_get_active_character()
-                self.assertEqual(p1ac.get_hp(), 6)
-                self.assertEqual(p2ac.get_hp(), 8 if status is InspirationFieldStatus else 6)
+                p1ac = game_state.player1.just_get_active_character()
+                p2ac = game_state.player2.just_get_active_character()
+                self.assertEqual(p1ac.hp, 6)
+                self.assertEqual(p2ac.hp, 8 if status is InspirationFieldStatus else 6)
 
                 # P2 normal attack
                 game_state = step_skill(game_state, Pid.P2, CharacterSkill.SKILL1)
-                p1ac = game_state.get_player1().just_get_active_character()
-                p2ac = game_state.get_player2().just_get_active_character()
-                self.assertEqual(p1ac.get_hp(), 5)  # because opponent AC is Rhodeia of Loch
-                self.assertEqual(p2ac.get_hp(), 8 if status is InspirationFieldStatus else 6)
+                p1ac = game_state.player1.just_get_active_character()
+                p2ac = game_state.player2.just_get_active_character()
+                self.assertEqual(p1ac.hp, 5)  # because opponent AC is Rhodeia of Loch
+                self.assertEqual(p2ac.hp, 8 if status is InspirationFieldStatus else 6)
 
                 game_state = kill_character(game_state, character_id=2, pid=Pid.P1, hp=7)
 
                 # P1 normal attack
                 game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
-                p1ac = game_state.get_player1().just_get_active_character()
-                p2ac = game_state.get_player2().just_get_active_character()
-                self.assertEqual(p1ac.get_hp(), 7)
-                self.assertEqual(p2ac.get_hp(), 4 if status is InspirationFieldStatus else 2)
+                p1ac = game_state.player1.just_get_active_character()
+                p2ac = game_state.player2.just_get_active_character()
+                self.assertEqual(p1ac.hp, 7)
+                self.assertEqual(p2ac.hp, 4 if status is InspirationFieldStatus else 2)
 
                 a1, a2 = LazyAgent(), LazyAgent()
                 gsm = GameStateMachine(game_state, a1, a2)
 
                 # test that the status disappears eventually
                 gsm.step_until_next_phase()
-                gsm.step_until_phase(game_state.get_mode().action_phase)
+                gsm.step_until_phase(game_state.mode.action_phase)
 
-                p1_combat_statuses = gsm.get_game_state().get_player1().get_combat_statuses()
+                p1_combat_statuses = gsm.get_game_state().player1.combat_statuses
                 self.assertIn(status, p1_combat_statuses)
                 self.assertEqual(p1_combat_statuses.just_find(status).usages, 1)
 
                 gsm.step_until_next_phase()
-                gsm.step_until_phase(game_state.get_mode().action_phase)
+                gsm.step_until_phase(game_state.mode.action_phase)
 
-                p1_combat_statuses = gsm.get_game_state().get_player1().get_combat_statuses()
+                p1_combat_statuses = gsm.get_game_state().player1.combat_statuses
                 self.assertNotIn(status, p1_combat_statuses)

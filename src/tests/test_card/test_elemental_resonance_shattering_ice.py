@@ -27,7 +27,7 @@ class TestElementalShatteringIce(unittest.TestCase):
         ))
         self.assertIn(
             ElementalResonanceShatteringIceStatus,
-            game_state.get_player1().get_combat_statuses()
+            game_state.player1.combat_statuses
         )
 
     def test_status_behaviour(self):
@@ -37,29 +37,29 @@ class TestElementalShatteringIce(unittest.TestCase):
 
         # Elemental skill (of Rhodeia of Loch) doesn't trigger or consume
         game_state = step_skill(base_state, Pid.P1, CharacterSkill.SKILL2)
-        p1_combat_statuses = game_state.get_player1().get_combat_statuses()
-        p2ac = game_state.get_player2().just_get_active_character()
+        p1_combat_statuses = game_state.player1.combat_statuses
+        p2ac = game_state.player2.just_get_active_character()
         self.assertIn(ElementalResonanceShatteringIceStatus, p1_combat_statuses)
-        self.assertEqual(p2ac.get_hp(), 10)
+        self.assertEqual(p2ac.hp, 10)
 
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
 
         # Normal attack (of Rhodeia of Loch) triggers
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
-        p1_combat_statuses = game_state.get_player1().get_combat_statuses()
-        p2ac = game_state.get_player2().just_get_active_character()
+        p1_combat_statuses = game_state.player1.combat_statuses
+        p2ac = game_state.player2.just_get_active_character()
         self.assertNotIn(ElementalResonanceShatteringIceStatus, p1_combat_statuses)
-        self.assertEqual(p2ac.get_hp(), 7)
+        self.assertEqual(p2ac.hp, 7)
 
         # Summon doesn't trigger
         game_state = AddSummonEffect(Pid.P1, OceanicMimicRaptorSummon).execute(base_state)
         game_state = next_round(game_state)
-        p1_combat_statuses = game_state.get_player1().get_combat_statuses()
-        p2ac = game_state.get_player2().just_get_active_character()
+        p1_combat_statuses = game_state.player1.combat_statuses
+        p2ac = game_state.player2.just_get_active_character()
         self.assertNotIn(ElementalResonanceShatteringIceStatus, p1_combat_statuses)
-        self.assertEqual(p2ac.get_hp(), 9)
+        self.assertEqual(p2ac.hp, 9)
 
         # status naturally disappears next round
         game_state = next_round(base_state)
-        p1_combat_statuses = game_state.get_player1().get_combat_statuses()
+        p1_combat_statuses = game_state.player1.combat_statuses
         self.assertNotIn(ElementalResonanceShatteringIceStatus, p1_combat_statuses)

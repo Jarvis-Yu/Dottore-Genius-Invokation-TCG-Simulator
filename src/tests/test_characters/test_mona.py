@@ -24,14 +24,14 @@ class TestMona(unittest.TestCase):
             skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 10)
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 10)
 
         gsm.player_step()
         gsm.auto_step()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 9)
-        self.assertIn(Element.HYDRO, p2ac.get_elemental_aura())
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 9)
+        self.assertIn(Element.HYDRO, p2ac.elemental_aura)
 
     def test_elemental_skill1(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -43,18 +43,18 @@ class TestMona(unittest.TestCase):
             skill=CharacterSkill.SKILL2,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 10)
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 10)
 
         # first skill
         gsm.player_step()
         gsm.auto_step()
-        p1 = gsm.get_game_state().get_player1()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 9)
-        self.assertIn(Element.HYDRO, p2ac.get_elemental_aura())
-        self.assertIn(ReflectionSummon, p1.get_summons())
-        self.assertEqual(p1.get_summons().just_find(ReflectionSummon).usages, 1)
+        p1 = gsm.get_game_state().player1
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 9)
+        self.assertIn(Element.HYDRO, p2ac.elemental_aura)
+        self.assertIn(ReflectionSummon, p1.summons)
+        self.assertEqual(p1.summons.just_find(ReflectionSummon).usages, 1)
 
     def test_elemental_burst(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -62,7 +62,7 @@ class TestMona(unittest.TestCase):
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().f_active_character(
                     lambda ac: ac.factory().energy(
-                        ac.get_max_energy()
+                        ac.max_energy
                     ).build()
                 ).build()
             ).build()
@@ -78,12 +78,12 @@ class TestMona(unittest.TestCase):
         )
         gsm.player_step()
         gsm.auto_step()
-        p1 = gsm.get_game_state().get_player1()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 6)
-        self.assertIn(Element.HYDRO, p2ac.get_elemental_aura())
-        self.assertIn(IllusoryBubbleStatus, p1.get_combat_statuses())
-        self.assertEqual(p1.just_get_active_character().get_energy(), 0)
+        p1 = gsm.get_game_state().player1
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 6)
+        self.assertIn(Element.HYDRO, p2ac.elemental_aura)
+        self.assertIn(IllusoryBubbleStatus, p1.combat_statuses)
+        self.assertEqual(p1.just_get_active_character().energy, 0)
 
     def test_passive_skill_illusory_torrent(self):
         active_is_mona_state = self.BASE_GAME
@@ -110,17 +110,17 @@ class TestMona(unittest.TestCase):
             gsm.player_step()
             gsm.auto_step()
             game_state = gsm.get_game_state()
-            mona = game_state.get_player1().get_characters().find_first_character(Mona)
+            mona = game_state.player1.characters.find_first_character(Mona)
             assert mona is not None
             if state is active_is_mona_state:
-                self.assertEqual(game_state.get_active_player_id(), Pid.P1)
+                self.assertEqual(game_state.active_player_id, Pid.P1)
                 self.assertFalse(
-                    mona.get_hidden_statuses().just_find(IllusoryTorrentStatus).available
+                    mona.hidden_statuses.just_find(IllusoryTorrentStatus).available
                 )
             elif state is active_not_mona:
-                self.assertEqual(game_state.get_active_player_id(), Pid.P2)
+                self.assertEqual(game_state.active_player_id, Pid.P2)
                 self.assertTrue(
-                    mona.get_hidden_statuses().just_find(IllusoryTorrentStatus).available
+                    mona.hidden_statuses.just_find(IllusoryTorrentStatus).available
                 )
 
     def test_reflection_summon(self):
@@ -130,7 +130,7 @@ class TestMona(unittest.TestCase):
 
         # case 1: p2 attack twice then end
         game_state = base_game
-        initial_hp = game_state.get_player1().just_get_active_character().get_hp()
+        initial_hp = game_state.player1.just_get_active_character().hp
 
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(game_state, a1, a2)
@@ -147,19 +147,19 @@ class TestMona(unittest.TestCase):
         ])
         gsm.player_step()
         gsm.auto_step()  # p2 normal attack
-        second_hp = gsm.get_game_state().get_player1().just_get_active_character().get_hp()
+        second_hp = gsm.get_game_state().player1.just_get_active_character().hp
         gsm.player_step()
         gsm.auto_step()  # p2 normal attack
-        third_hp = gsm.get_game_state().get_player1().just_get_active_character().get_hp()
+        third_hp = gsm.get_game_state().player1.just_get_active_character().hp
         self.assertEqual(initial_hp - second_hp + 1, second_hp - third_hp)
 
         gsm.player_step()
         gsm.auto_step()  # p2 end round
-        p1_summons = gsm.get_game_state().get_player1().get_summons()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
+        p1_summons = gsm.get_game_state().player1.summons
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
         self.assertNotIn(ReflectionSummon, p1_summons)
-        self.assertEqual(p2ac.get_hp(), 9)
-        self.assertIn(Element.HYDRO, p2ac.get_elemental_aura())
+        self.assertEqual(p2ac.hp, 9)
+        self.assertIn(Element.HYDRO, p2ac.elemental_aura)
 
         # case 2: p2 end directly
         game_state = base_game
@@ -168,11 +168,11 @@ class TestMona(unittest.TestCase):
         a2.inject_action(EndRoundAction())
         gsm.player_step()
         gsm.auto_step()  # p2 end round
-        p1_summons = gsm.get_game_state().get_player1().get_summons()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
+        p1_summons = gsm.get_game_state().player1.summons
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
         self.assertNotIn(ReflectionSummon, p1_summons)
-        self.assertEqual(p2ac.get_hp(), 9)
-        self.assertIn(Element.HYDRO, p2ac.get_elemental_aura())
+        self.assertEqual(p2ac.hp, 9)
+        self.assertIn(Element.HYDRO, p2ac.elemental_aura)
 
     def test_burst_status_illusory_bubble(self):
         base_game = AddCombatStatusEffect(Pid.P1, IllusoryBubbleStatus).execute(self.BASE_GAME)
@@ -183,35 +183,35 @@ class TestMona(unittest.TestCase):
             skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         ))
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 4)
-        self.assertNotIn(IllusoryBubbleStatus, game_state.get_player1().get_combat_statuses())
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 4)
+        self.assertNotIn(IllusoryBubbleStatus, game_state.player1.combat_statuses)
 
         # with reaction (Electro x Cryo)
         game_state = SwapCharacterEffect(
             StaticTarget(Pid.P1, Zone.CHARACTERS, 3)
         ).execute(base_game)
         game_state = auto_step(game_state)
-        assert isinstance(game_state.get_player1().just_get_active_character(), Keqing)
+        assert isinstance(game_state.player1.just_get_active_character(), Keqing)
         game_state = oppo_aura_elem(game_state, Element.CRYO)
         game_state = step_action(game_state, Pid.P1, SkillAction(
             skill=CharacterSkill.SKILL2,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         ))
-        p2cs = game_state.get_player2().get_characters()
-        self.assertEqual(p2cs.just_get_character(1).get_hp(), 2)
-        self.assertEqual(p2cs.just_get_character(2).get_hp(), 9)
-        self.assertEqual(p2cs.just_get_character(3).get_hp(), 9)
-        self.assertNotIn(IllusoryBubbleStatus, game_state.get_player1().get_combat_statuses())
+        p2cs = game_state.player2.characters
+        self.assertEqual(p2cs.just_get_character(1).hp, 2)
+        self.assertEqual(p2cs.just_get_character(2).hp, 9)
+        self.assertEqual(p2cs.just_get_character(3).hp, 9)
+        self.assertNotIn(IllusoryBubbleStatus, game_state.player1.combat_statuses)
 
         # test summon doesn't trigger
         game_state = AddSummonEffect(Pid.P1, OceanicMimicRaptorSummon).execute(base_game)
         game_state = step_action(game_state, Pid.P1, EndRoundAction())
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         game_state = auto_step(game_state)
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 9)
-        self.assertIn(IllusoryBubbleStatus, game_state.get_player1().get_combat_statuses())
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 9)
+        self.assertIn(IllusoryBubbleStatus, game_state.player1.combat_statuses)
 
         # test multiplying happens before shields
         game_state = oppo_aura_elem(base_game, Element.PYRO)
@@ -220,9 +220,9 @@ class TestMona(unittest.TestCase):
             skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         ))
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 5)  # (1 + 2) * 2 - 1
-        self.assertNotIn(IllusoryBubbleStatus, game_state.get_player1().get_combat_statuses())
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 5)  # (1 + 2) * 2 - 1
+        self.assertNotIn(IllusoryBubbleStatus, game_state.player1.combat_statuses)
 
     def test_talent_prophecy_of_submersion(self):
         base_game = AddCharacterStatusEffect(
@@ -236,11 +236,11 @@ class TestMona(unittest.TestCase):
             skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         ))
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 6)  # damage = 1 + 1 + 2
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 6)  # damage = 1 + 1 + 2
         self.assertIn(
             ProphecyOfSubmersionStatus,
-            game_state.get_player1().just_get_active_character().get_character_statuses(),
+            game_state.player1.just_get_active_character().character_statuses,
         )
 
         # test reaction (Hydro x Electro)
@@ -249,14 +249,14 @@ class TestMona(unittest.TestCase):
             skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         ))
-        p2ac = game_state.get_player2().just_get_active_character()
-        p2cs = game_state.get_player2().get_characters()
-        self.assertEqual(p2cs.just_get_character(1).get_hp(), 6)
-        self.assertEqual(p2cs.just_get_character(2).get_hp(), 9)
-        self.assertEqual(p2cs.just_get_character(3).get_hp(), 9)
+        p2ac = game_state.player2.just_get_active_character()
+        p2cs = game_state.player2.characters
+        self.assertEqual(p2cs.just_get_character(1).hp, 6)
+        self.assertEqual(p2cs.just_get_character(2).hp, 9)
+        self.assertEqual(p2cs.just_get_character(3).hp, 9)
         self.assertIn(
             ProphecyOfSubmersionStatus,
-            game_state.get_player1().just_get_active_character().get_character_statuses(),
+            game_state.player1.just_get_active_character().character_statuses,
         )
 
         # test summon can also benefit from this
@@ -265,11 +265,11 @@ class TestMona(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, EndRoundAction())
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         game_state = auto_step(game_state)
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 5)  # damage = 1 + 2 + 2
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 5)  # damage = 1 + 2 + 2
         self.assertIn(
             ProphecyOfSubmersionStatus,
-            game_state.get_player1().just_get_active_character().get_character_statuses(),
+            game_state.player1.just_get_active_character().character_statuses,
         )
 
         # test summon's swirled reaction can also benefit from this
@@ -278,13 +278,13 @@ class TestMona(unittest.TestCase):
         game_state = oppo_aura_elem(game_state, Element.HYDRO, char_id=2)
         game_state = oppo_aura_elem(game_state, Element.HYDRO, char_id=3)
         game_state = next_round(game_state)
-        p2cs = game_state.get_player2().get_characters()
-        self.assertEqual(p2cs.just_get_character(1).get_hp(), 9)
-        self.assertEqual(p2cs.just_get_character(2).get_hp(), 5)
-        self.assertEqual(p2cs.just_get_character(3).get_hp(), 5)
+        p2cs = game_state.player2.characters
+        self.assertEqual(p2cs.just_get_character(1).hp, 9)
+        self.assertEqual(p2cs.just_get_character(2).hp, 5)
+        self.assertEqual(p2cs.just_get_character(3).hp, 5)
         self.assertIn(
             ProphecyOfSubmersionStatus,
-            game_state.get_player1().just_get_active_character().get_character_statuses(),
+            game_state.player1.just_get_active_character().character_statuses,
         )
 
         # test none hydro reaction doesn't benefit from this
@@ -293,11 +293,11 @@ class TestMona(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, EndRoundAction())
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         game_state = auto_step(game_state)
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 7)  # damage = 1 + 2
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 7)  # damage = 1 + 2
         self.assertIn(
             ProphecyOfSubmersionStatus,
-            game_state.get_player1().just_get_active_character().get_character_statuses(),
+            game_state.player1.just_get_active_character().character_statuses,
         )
 
         # test not working if Mona is off field
@@ -305,13 +305,13 @@ class TestMona(unittest.TestCase):
             StaticTarget(Pid.P1, Zone.CHARACTERS, 3)
         ).execute(base_game)
         game_state = auto_step(game_state)
-        assert isinstance(game_state.get_player1().just_get_active_character(), Keqing)
+        assert isinstance(game_state.player1.just_get_active_character(), Keqing)
         game_state = oppo_aura_elem(game_state, Element.HYDRO)
         game_state = step_action(game_state, Pid.P1, SkillAction(
             skill=CharacterSkill.SKILL2,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         ))
-        p2cs = game_state.get_player2().get_characters()
-        self.assertEqual(p2cs.just_get_character(1).get_hp(), 6)
-        self.assertEqual(p2cs.just_get_character(2).get_hp(), 9)
-        self.assertEqual(p2cs.just_get_character(3).get_hp(), 9)
+        p2cs = game_state.player2.characters
+        self.assertEqual(p2cs.just_get_character(1).hp, 6)
+        self.assertEqual(p2cs.just_get_character(2).hp, 9)
+        self.assertEqual(p2cs.just_get_character(3).hp, 9)

@@ -33,7 +33,7 @@ class TestElementalResonanceFerventFlames(unittest.TestCase):
         ))
         self.assertIn(
             ElementalResonanceFerventFlamesStatus,
-            game_state.get_player1().get_combat_statuses()
+            game_state.player1.combat_statuses
         )
 
     def test_status_behaviour(self):
@@ -43,31 +43,31 @@ class TestElementalResonanceFerventFlames(unittest.TestCase):
         base_state = oppo_aura_elem(base_state, Element.PYRO)
         # None reaction damage doesn't trigger status
         game_state = step_skill(base_state, Pid.P1, CharacterSkill.SKILL1)
-        p1_combat_statuses = game_state.get_player1().get_combat_statuses()
-        p2ac = game_state.get_player2().just_get_active_character()
+        p1_combat_statuses = game_state.player1.combat_statuses
+        p2ac = game_state.player2.just_get_active_character()
         self.assertIn(ElementalResonanceFerventFlamesStatus, p1_combat_statuses)
-        self.assertEqual(p2ac.get_hp(), 8)
+        self.assertEqual(p2ac.hp, 8)
 
         game_state = step_skill(game_state, Pid.P2, CharacterSkill.SKILL1)
 
         # Reaction does boost the damage that triggers the reaction
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
-        p1_combat_statuses = game_state.get_player1().get_combat_statuses()
-        p2ac = game_state.get_player2().just_get_active_character()
+        p1_combat_statuses = game_state.player1.combat_statuses
+        p2ac = game_state.player2.just_get_active_character()
         self.assertNotIn(ElementalResonanceFerventFlamesStatus, p1_combat_statuses)
-        self.assertEqual(p2ac.get_hp(), 2)
+        self.assertEqual(p2ac.hp, 2)
 
         # Summon doesn't trigger
         game_state = AddSummonEffect(Pid.P1, OceanicMimicRaptorSummon).execute(base_state)
         game_state = next_round(game_state)
-        p1_combat_statuses = game_state.get_player1().get_combat_statuses()
-        p2ac = game_state.get_player2().just_get_active_character()
+        p1_combat_statuses = game_state.player1.combat_statuses
+        p2ac = game_state.player2.just_get_active_character()
         self.assertNotIn(ElementalResonanceFerventFlamesStatus, p1_combat_statuses)
-        self.assertEqual(p2ac.get_hp(), 7)  # raptor 1 + vaporize 2
+        self.assertEqual(p2ac.hp, 7)  # raptor 1 + vaporize 2
 
         # status naturally disappears next round
         game_state = next_round(base_state)
-        p1_combat_statuses = game_state.get_player1().get_combat_statuses()
+        p1_combat_statuses = game_state.player1.combat_statuses
         self.assertNotIn(ElementalResonanceFerventFlamesStatus, p1_combat_statuses)
 
         # swirled pyro reaction can be buffed
@@ -75,9 +75,9 @@ class TestElementalResonanceFerventFlames(unittest.TestCase):
         game_state = apply_elemental_aura(game_state, Element.HYDRO, Pid.P2)
         game_state = apply_elemental_aura(game_state, Element.PYRO, Pid.P2, char_id=3)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
-        p1_combat_statuses = game_state.get_player1().get_combat_statuses()
-        p2c1, p2c2, p2c3 = game_state.get_player2().get_characters().get_characters()
+        p1_combat_statuses = game_state.player1.combat_statuses
+        p2c1, p2c2, p2c3 = game_state.player2.characters.get_characters()
         self.assertNotIn(ElementalResonanceFerventFlamesStatus, p1_combat_statuses)
-        self.assertEqual(p2c1.get_hp(), 7)
-        self.assertEqual(p2c2.get_hp(), 9)
-        self.assertEqual(p2c3.get_hp(), 4)
+        self.assertEqual(p2c1.hp, 7)
+        self.assertEqual(p2c2.hp, 9)
+        self.assertEqual(p2c3.hp, 4)

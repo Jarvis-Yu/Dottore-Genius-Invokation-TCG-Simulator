@@ -20,12 +20,12 @@ class TestPassingOfJudgment(unittest.TestCase):
             card=PassingOfJudgment,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 1})),
         ))
-        p1dice_before = game_state.get_player1().get_dice()
+        p1dice_before = game_state.player1.dice
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=TheBestestTravelCompanion,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 2})),
         ))
-        p1dice_after = game_state.get_player1().get_dice()
+        p1dice_after = game_state.player1.dice
         self.assertEqual(p1dice_before.num_dice(), p1dice_after.num_dice())
         
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
@@ -33,12 +33,12 @@ class TestPassingOfJudgment(unittest.TestCase):
         
         ## P2 play all cards and only first "Three" "Event Card"s are affected ##
         # invalidate first event card
-        p2dice_before = game_state.get_player2().get_dice()
+        p2dice_before = game_state.player2.dice
         game_state = step_action(game_state, Pid.P2, CardAction(
             card=TheBestestTravelCompanion,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 2})),
         ))
-        p2dice_after = game_state.get_player2().get_dice()
+        p2dice_after = game_state.player2.dice
         self.assertNotEqual(p2dice_before.num_dice(), p2dice_after.num_dice())
 
         # checks that non-event cards are not affected
@@ -49,8 +49,8 @@ class TestPassingOfJudgment(unittest.TestCase):
                 dice=ActualDice({Element.OMNI: 2}),
             ),
         ))
-        _, _, p2c3 = game_state.get_player2().get_characters().get_characters()
-        self.assertIn(TravelersHandySwordStatus, p2c3.get_character_statuses())
+        _, _, p2c3 = game_state.player2.characters.get_characters()
+        self.assertIn(TravelersHandySwordStatus, p2c3.character_statuses)
 
         # checks that following two event cards are affected
         game_state = step_action(game_state, Pid.P2, CardAction(
@@ -60,8 +60,8 @@ class TestPassingOfJudgment(unittest.TestCase):
                 dice=ActualDice({Element.OMNI: 1}),
             ),
         ))
-        _, _, p2c3 = game_state.get_player2().get_characters().get_characters()
-        self.assertNotIn(LotusFlowerCrispStatus, p2c3.get_character_statuses())
+        _, _, p2c3 = game_state.player2.characters.get_characters()
+        self.assertNotIn(LotusFlowerCrispStatus, p2c3.character_statuses)
 
         game_state = step_action(game_state, Pid.P2, CardAction(
             card=LightningStiletto,
@@ -71,24 +71,24 @@ class TestPassingOfJudgment(unittest.TestCase):
             ),
         ))
         p2ac = p2_active_char(game_state)
-        self.assertEqual(p2ac.get_id(), 1)
+        self.assertEqual(p2ac.id, 1)
 
         # 4th event card works
-        p2dice_before = game_state.get_player2().get_dice()
+        p2dice_before = game_state.player2.dice
         game_state = step_action(game_state, Pid.P2, CardAction(
             card=TheBestestTravelCompanion,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 2})),
         ))
-        p2dice_after = game_state.get_player2().get_dice()
+        p2dice_after = game_state.player2.dice
         self.assertEqual(p2dice_before.num_dice(), p2dice_after.num_dice())
 
         # check that passing of judgment status doesn't live the next round
         game_state = next_round_with_great_omni(played_state)
         game_state = skip_action_round_until(game_state, Pid.P2)
-        p2dice_before = game_state.get_player2().get_dice()
+        p2dice_before = game_state.player2.dice
         game_state = step_action(game_state, Pid.P2, CardAction(
             card=TheBestestTravelCompanion,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 2})),
         ))
-        p2dice_after = game_state.get_player2().get_dice()
+        p2dice_after = game_state.player2.dice
         self.assertEqual(p2dice_before.num_dice(), p2dice_after.num_dice())

@@ -26,10 +26,10 @@ class TestElementalResonanceDieCard(unittest.TestCase):
 
     def test_card_adds_status(self):
         game_state = self.BASE_GAME
-        old_pyro_dice = game_state.get_player1().get_dice()[Element.PYRO]
+        old_pyro_dice = game_state.player1.dice[Element.PYRO]
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=ElementalResonanceWovenFlames,
             instruction=DiceOnlyInstruction(dice=ActualDice({}))
         ))
-        new_pyro_dice = game_state.get_player1().get_dice()[Element.PYRO]
+        new_pyro_dice = game_state.player1.dice[Element.PYRO]
         self.assertEqual(new_pyro_dice, old_pyro_dice + 1)

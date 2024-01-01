@@ -31,13 +31,13 @@ class TestJoyousCelebration(unittest.TestCase):
                     card=JoyousCelebration,
                     instruction=DiceOnlyInstruction(dice=ActualDice.from_empty()),
                 ))
-                c1, c2, c3 = game_state.get_player1().get_characters().get_characters()
-                self.assertFalse(c2.get_elemental_aura().has_aura())
+                c1, c2, c3 = game_state.player1.characters.get_characters()
+                self.assertFalse(c2.elemental_aura.has_aura())
                 self.assertIs(
-                    c1.get_elemental_aura().has_aura(),
+                    c1.elemental_aura.has_aura(),
                     c1.ELEMENT() is Element.PYRO,
                 )
                 self.assertIs(
-                    c3.get_elemental_aura().has_aura(),
+                    c3.elemental_aura.has_aura(),
                     c1.ELEMENT() is Element.PYRO,
                 )

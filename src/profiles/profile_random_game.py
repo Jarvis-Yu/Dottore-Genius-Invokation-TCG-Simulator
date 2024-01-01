@@ -13,7 +13,7 @@ def _random_play(repeats: int) -> None:
             RandomAgent(),
             RandomAgent(),
         )
-        game_end_phase = state_machine.get_game_state().get_mode().game_end_phase()
+        game_end_phase = state_machine.get_game_state().mode.game_end_phase()
         try:
             state_machine.step_until_phase(game_end_phase)
         except Exception:

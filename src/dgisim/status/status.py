@@ -553,7 +553,7 @@ class Status:
             and target.zone is Zone.CHARACTERS
             and status_source.id == game_state.get_player(
                 status_source.pid
-            ).get_characters().get_active_character_id()
+            ).characters.get_active_character_id()
         )
 
     def _some_char_equiped_talent(
@@ -562,7 +562,7 @@ class Status:
             pid: Pid,
             char_type: type[Character],
     ) -> bool:
-        alive_chars = game_state.get_player(pid).get_characters().get_alive_characters()
+        alive_chars = game_state.get_player(pid).characters.get_alive_characters()
         return any(
             char.talent_equipped()
             for char in alive_chars
@@ -720,7 +720,7 @@ class CombatStatus(Status):
         return StaticTarget(
             pid=status_source.pid,
             zone=Zone.CHARACTERS,
-            id=active_char.get_id(),
+            id=active_char.id,
         ) == target
 
 
@@ -788,7 +788,7 @@ class _ShieldStatus(Status):
             attached_active_character = StaticTarget(
                 status_source.pid,
                 zone=Zone.CHARACTERS,
-                id=game_state.get_player(status_source.pid).just_get_active_character().get_id(),
+                id=game_state.get_player(status_source.pid).just_get_active_character().id,
             )
             return item.target == attached_active_character
 
@@ -796,7 +796,7 @@ class _ShieldStatus(Status):
             attached_active_character = StaticTarget(
                 status_source.pid,
                 zone=Zone.CHARACTERS,
-                id=game_state.get_player(status_source.pid).just_get_active_character().get_id(),
+                id=game_state.get_player(status_source.pid).just_get_active_character().id,
             )
             return item.target == attached_active_character
 
@@ -1449,7 +1449,7 @@ class WolfsGravestoneStatus(WeaponEquipmentStatus):
             status_source.pid.other()
         ).just_get_active_character()
         final_dmg_boost = self.BASE_DAMAGE_BOOST
-        if oppo_active_char.get_hp() <= self.HP_THRESHOLD:
+        if oppo_active_char.hp <= self.HP_THRESHOLD:
             final_dmg_boost += self.ADDITIONAL_DMG_BOOST
         return dmg.delta_damage(final_dmg_boost), self
 
@@ -1489,12 +1489,12 @@ class VortexVanquisherStatus(WeaponEquipmentStatus):
         if (
                 any(
                     isinstance(status, StackedShieldStatus)
-                    for status in this_player.get_combat_statuses()
+                    for status in this_player.combat_statuses
                 )
                 or any(
                     isinstance(status, StackedShieldStatus)
-                    for status in active_char.get_character_statuses()
-                )
+                    for status in active_char.character_statuses
+        )
         ):
             final_dmg_boost += self.ADDITIONAL_DMG_BOOST
         return dmg.delta_damage(final_dmg_boost), self
@@ -1632,7 +1632,7 @@ class GamblersEarringsStatus(ArtifactEquipmentStatus):
         if signal is TriggeringSignal.DEATH_EVENT:
             if self.triggerable():
                 this_player = game_state.get_player(source.pid)
-                active_char_id = this_player.just_get_active_character().get_id()
+                active_char_id = this_player.just_get_active_character().id
                 if active_char_id is not source.id:
                     return [], replace(self, informed_num=0)
                 additions = self.informed_num * self.NUM_DICE_PER_TRIGGER
@@ -1836,7 +1836,7 @@ class CatalyzingFieldStatus(CombatStatus):
             legal_to_boost = status_source.pid is dmg.source.pid and dmg.damage_type.can_boost()
             target_is_active = dmg.target.id == game_state.get_player(
                 dmg.target.pid
-            ).just_get_active_character().get_id()
+            ).just_get_active_character().id
             if elem_can_boost and legal_to_boost and target_is_active:
                 new_damage = replace(dmg, damage=dmg.damage + CatalyzingFieldStatus.damage_boost)
                 new_item = DmgPEvent(dmg=new_damage)
@@ -1906,7 +1906,7 @@ class DendroCoreStatus(CombatStatus):
             legal_to_boost = status_source.pid is dmg.source.pid and dmg.damage_type.can_boost()
             target_is_active = dmg.target.id == game_state.get_player(
                 dmg.target.pid
-            ).just_get_active_character().get_id()
+            ).just_get_active_character().id
             if elem_can_boost and legal_to_boost and target_is_active:
                 new_damage = replace(dmg, damage=dmg.damage + DendroCoreStatus.damage_boost)
                 new_item = DmgPEvent(dmg=new_damage)
@@ -1960,7 +1960,7 @@ class ElementalResonanceEnduringRockStatus(CombatStatus):
         if signal is TriggeringSignal.COMBAT_ACTION:
             if not self.activated:
                 return [], self
-            combat_statuses = game_state.get_player(source.pid).get_combat_statuses()
+            combat_statuses = game_state.get_player(source.pid).combat_statuses
             stacked_shield_status = next((
                 status
                 for status in combat_statuses
@@ -2800,7 +2800,7 @@ class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
                 assert character is not None, f"source {status_source} in {game_state}"
                 dmg_boost = self.DAMAGE_BOOST
                 if character.talent_equipped():
-                    talent = character.get_character_statuses().just_find(AratakiIchibanStatus)
+                    talent = character.character_statuses.just_find(AratakiIchibanStatus)
                     if talent.activated():
                         dmg_boost += talent.dmg_boost
                 new_item = DmgPEvent(dmg=replace(dmg, damage=dmg.damage + dmg_boost))
@@ -2813,7 +2813,7 @@ class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
                     self.usages >= 2
                     and status_source == item.source
                     and item.event_type is EventType.SKILL1
-                    and player.get_dice().is_even()
+                    and player.dice.is_even()
                     and item.dice_cost[Element.ANY] > 0
             ):
                 item = replace(
@@ -2848,7 +2848,7 @@ class _InspirationFieldStatus(CombatStatus, _UsageStatus):
     })
 
     def _boostable(self, char: Character) -> bool:
-        return not self.BOOST_LOCK or char.get_hp() >= self.HP_CAP
+        return not self.BOOST_LOCK or char.hp >= self.HP_CAP
 
     @override
     def _inform(
@@ -2864,7 +2864,7 @@ class _InspirationFieldStatus(CombatStatus, _UsageStatus):
                 return self
             active_char_id = game_state.get_player(
                 status_source.pid
-            ).just_get_active_character().get_id()
+            ).just_get_active_character().id
             if information.source == StaticTarget(status_source.pid, Zone.CHARACTERS, active_char_id):
                 return replace(self, activated=True)
         return self
@@ -2883,7 +2883,7 @@ class _InspirationFieldStatus(CombatStatus, _UsageStatus):
             active_char_source = StaticTarget(
                 status_source.pid,
                 Zone.CHARACTERS,
-                active_char.get_id(),
+                active_char.id,
             )
             if not (
                     item.dmg.source == active_char_source
@@ -2904,11 +2904,11 @@ class _InspirationFieldStatus(CombatStatus, _UsageStatus):
             if not self.activated:
                 return [], self
             active_char = game_state.get_player(source.pid).just_get_active_character()
-            if active_char.get_hp() >= self.HP_CAP:
+            if active_char.hp >= self.HP_CAP:
                 return [], replace(self, usages=0, activated=False)
             return [
                 eft.RecoverHPEffect(
-                    target=StaticTarget(source.pid, Zone.CHARACTERS, active_char.get_id()),
+                    target=StaticTarget(source.pid, Zone.CHARACTERS, active_char.id),
                     recovery=self.RECOVERY,
                 )
             ], replace(self, usages=0, activated=False)
@@ -3085,8 +3085,8 @@ class StalwartAndTrueStatus(TalentEquipmentStatus):
             this_char = game_state.get_character_target(source)
             assert this_char is not None
             if (
-                    this_char.alive()
-                    and this_char.get_hp() <= 6
+                    this_char.is_alive()
+                    and this_char.hp <= 6
             ):
                 return [eft.RecoverHPEffect(
                     target=source,
@@ -3135,7 +3135,7 @@ class ElectroCrystalCoreStatus(CharacterStatus, RevivalStatus):
         if signal is TriggeringSignal.TRIGGER_REVIVAL:
             character = game_state.get_character_target(source)
             assert character is not None
-            assert character.get_hp() == 0
+            assert character.hp == 0
             return [], None
         return [], self
 
@@ -3389,7 +3389,7 @@ class SanguineRougeStatus(TalentEquipmentStatus):
                     item.dmg.source == status_source
                     and item.dmg.element is Element.PYRO
                     and item.dmg.damage_type.directly_from_character()
-                    and this_char.get_hp() <= 6
+                    and this_char.hp <= 6
             ):
                 return item.delta_damage(1), self
         return item, self
@@ -3508,7 +3508,7 @@ class RadicalVitalityStatus(CharacterStatus, _UsageLivingStatus):
                 return [
                     eft.EnergyDrainEffect(
                         target=source,
-                        drain=char.get_max_energy(),
+                        drain=char.max_energy,
                     ),
                 ], replace(self, usages=-self.usages)
         return [], self
@@ -3848,7 +3848,7 @@ class ExplosiveSparkStatus(CharacterStatus, _UsageStatus):
             if (
                     status_source == item.source
                     and item.event_type is EventType.SKILL1
-                    and player.get_dice().is_even()
+                    and player.dice.is_even()
                     and item.dice_cost[Element.ANY] + item.dice_cost[Element.PYRO] > 0
             ):
                 elems = [Element.PYRO, Element.ANY]
@@ -4018,9 +4018,9 @@ class ProphecyOfSubmersionStatus(TalentEquipmentStatus):
                     and dmg.reaction is not None
                     and dmg.reaction.elem_reaction(Element.HYDRO)
                     and (
-                        game_state.get_player(
+                    game_state.get_player(
                             status_source.pid
-                        ).just_get_active_character().get_id() == status_source.id
+                        ).just_get_active_character().id == status_source.id
                     )
             ):
                 dmg = replace(dmg, damage=dmg.damage + self.DMG_BOOST)
@@ -4057,16 +4057,16 @@ class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
                     or information.dmg.target != status_source
             ):
                 return game_state
-            chars = game_state.get_player(status_source.pid).get_characters()
+            chars = game_state.get_player(status_source.pid).characters
             this_char = chars.get_character(cast(int, status_source.id))
             assert this_char is not None
-            if type(self) not in this_char.get_character_statuses():
+            if type(self) not in this_char.character_statuses:
                 return game_state
             base_priority = 0
             for char in chars:
                 if char is this_char:
                     continue
-                if (status := char.get_character_statuses().find(type(self))) is not None:
+                if (status := char.character_statuses.find(type(self))) is not None:
                     assert isinstance(status, type(self))
                     base_priority = max(base_priority, status.priority)
             return eft.OverrideCharacterStatusEffect(
@@ -4085,11 +4085,11 @@ class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
                 return [], self
             dmg_element: Element
             oppo_player = game_state.get_player(source.pid.other())
-            oppo_chars = oppo_player.get_characters()
+            oppo_chars = oppo_player.characters
             from ..character.character import Nahida
             if (
                     any(char.talent_equipped() for char in oppo_chars if isinstance(char, Nahida))
-                    and ShrineOfMayaStatus in oppo_player.get_combat_statuses()
+                    and ShrineOfMayaStatus in oppo_player.combat_statuses
                     and any(char.ELEMENT() is Element.PYRO for char in oppo_chars)
             ):
                 dmg_element = Element.DENDRO
@@ -4115,14 +4115,14 @@ class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
         if signal is TriggeringSignal.POST_REACTION:
             if self.activated_usages == 0:
                 return effects
-            characters = game_state.get_player(source.pid).get_characters()
+            characters = game_state.get_player(source.pid).characters
             assert isinstance(source.id, int)
             ordered_chars = characters.get_character_ordered_from_id(source.id)
             for char in ordered_chars[1:]:
-                status = char.get_character_statuses().find(type(self))
+                status = char.character_statuses.find(type(self))
                 if status is not None:
                     assert isinstance(status, type(self))
-                    char_source = replace(source, id=char.get_id())
+                    char_source = replace(source, id=char.id)
                     effects += (
                         eft.SpecificDamageEffect(
                             source=char_source,
@@ -4280,10 +4280,10 @@ class FullPlateStatus(CombatStatus, StackedShieldStatus):
             if not char_self.talent_equipped():
                 return [], self
             effects: list[eft.Effect] = []
-            for char in this_player.get_characters().get_character_in_activity_order():
-                if char.alive():
+            for char in this_player.characters.get_character_in_activity_order():
+                if char.is_alive():
                     effects.append(eft.RecoverHPEffect(
-                        target=StaticTarget(source.pid, Zone.CHARACTERS, char.get_id()),
+                        target=StaticTarget(source.pid, Zone.CHARACTERS, char.id),
                         recovery=self.HEAL_AMOUNT,
                     ))
             return effects, replace(self, usages=0, heal_usages=self.heal_usages - 1)
@@ -4406,7 +4406,7 @@ class FortunePreservingTalismanStatus(CombatStatus, _UsageStatus):
                 return [], replace(self, usages=0, activated=False)
             return [
                 eft.RecoverHPEffect(
-                    target=StaticTarget.from_char_id(source.pid, active_char.get_id()),
+                    target=StaticTarget.from_char_id(source.pid, active_char.id),
                     recovery=self.HEAL_AMOUNT,
                 )
             ], replace(self, usages=-1, activated=False)
@@ -4475,10 +4475,10 @@ class CeremonialGarmentStatus(CharacterStatus, _UsageStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
-            self_chars = game_state.get_player(source.pid).get_characters()
+            self_chars = game_state.get_player(source.pid).characters
             return [
                 eft.RecoverHPEffect(
-                    target=StaticTarget.from_char_id(source.pid, char.get_id()),
+                    target=StaticTarget.from_char_id(source.pid, char.id),
                     recovery=1,
                 )
                 for char in self_chars.get_alive_character_in_activity_order()
@@ -4532,7 +4532,7 @@ class IcyQuillStatus(CombatStatus, _UsageStatus):
                 self.normal_attack_deduction_usages > 0
                 and any(
                     char.talent_equipped()
-                    for char in game_state.get_player(status_source.pid).get_characters()
+                    for char in game_state.get_player(status_source.pid).characters
                     if isinstance(char, Shenhe)
                 )
                 and dmg.damage_type.direct_normal_attack()
@@ -4581,11 +4581,11 @@ class AbyssalMayhemHydrospoutStatus(TalentEquipmentStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
-            self_active_id = game_state.get_player(source.pid).just_get_active_character().get_id()
+            self_active_id = game_state.get_player(source.pid).just_get_active_character().id
             oppo_active = game_state.get_player(source.pid.other()).just_get_active_character()
             if (
                     self_active_id == source.id
-                    and RiptideStatus in oppo_active.get_character_statuses()
+                    and RiptideStatus in oppo_active.character_statuses
             ):
                 return [
                     eft.ReferredDamageEffect(
@@ -4624,7 +4624,7 @@ class MeleeStanceStatus(CharacterStatus, _UsageStatus):
             if (
                     dmg.source == status_source
                     and dmg.damage_type.directly_from_character()
-                    and RiptideStatus in oppo_char.get_character_statuses()
+                    and RiptideStatus in oppo_char.character_statuses
             ):
                 return item.delta_damage(1), self
         elif signal is Preprocessables.DMG_ELEMENT:
@@ -4691,7 +4691,7 @@ class RiptideTransferStatus(CombatStatus):
             target = StaticTarget.from_player_active(game_state, source.pid)
             target_char = game_state.get_character_target(target)
             assert target_char is not None
-            if target_char.alive():
+            if target_char.is_alive():
                 return [
                     eft.AddCharacterStatusEffect(
                         target=target,
@@ -4768,14 +4768,14 @@ class KeenSightStatus(TalentEquipmentStatus):
         if signal is Preprocessables.SKILL:
             assert isinstance(item, ActionPEvent)
             player = game_state.get_player(status_source.pid)
-            characters = player.get_characters()
+            characters = player.characters
             if (
                     status_source == item.source
                     and item.event_sub_type is CharacterSkillType.NORMAL_ATTACK
-                    and player.get_dice().is_even()
+                    and player.dice.is_even()
                     and characters.just_get_character(
                         cast(int, status_source.id)
-                    ).get_character_statuses().contains(VijnanaSuffusionStatus)
+                    ).character_statuses.contains(VijnanaSuffusionStatus)
                     and item.dice_cost[Element.ANY] > 0
             ):
                 item = replace(
@@ -4913,7 +4913,7 @@ class StormzoneStatus(CombatStatus, _UsageStatus):
             from ..character.character import Venti
             has_talent = any(
                 char.talent_equipped()
-                for char in game_state.get_player(source.pid).get_characters()
+                for char in game_state.get_player(source.pid).characters
                 if isinstance(char, Venti)
             )
             effects: list[eft.Effect] = []
@@ -4982,7 +4982,7 @@ class RainSwordStatus(CombatStatus, FixedShieldStatus):
         from ..character.character import Xingqiu
         talent_equipped = any(
             True
-            for char in game_state.get_player(status_source.pid).get_characters()
+            for char in game_state.get_player(status_source.pid).characters
             if (
                 isinstance(char, Xingqiu)
                 and char.talent_equipped()
@@ -5109,7 +5109,7 @@ class TenkoThunderboltsStatus(CombatStatus):
             signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.PRE_ACTION:
-            if game_state.get_active_player_id() is source.pid:
+            if game_state.active_player_id is source.pid:
                 return [
                     eft.ReferredDamageEffect(
                         source=source,

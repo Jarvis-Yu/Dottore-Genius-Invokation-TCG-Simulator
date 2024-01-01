@@ -50,13 +50,13 @@ class LazyAgent(PlayerAgent):
 
     def choose_action(self, history: list[GameState], pid: Pid) -> PlayerAction:
         game_state = history[-1]
-        mode = game_state.get_mode()
-        curr_phase = game_state.get_phase()
+        mode = game_state.mode
+        curr_phase = game_state.phase
 
         if isinstance(curr_phase, mode.card_select_phase):
             _, selected_cards = game_state.get_player(
                 pid
-            ).get_hand_cards().pick_random_cards(self._NUM_PICKED_CARDS)
+            ).hand_cards.pick_random_cards(self._NUM_PICKED_CARDS)
             return CardsSelectAction(selected_cards=selected_cards)
 
         elif isinstance(curr_phase, mode.starting_hand_select_phase):
@@ -174,14 +174,14 @@ class RandomAgent(PlayerAgent):
             choice: DecidedChoiceType  # type: ignore
             if isinstance(choices, tuple):
                 game_state = action_generator.game_state
-                if game_state.get_phase() == game_state.get_mode().roll_phase() and random.random() < 0.8:
+                if game_state.phase == game_state.mode.roll_phase() and random.random() < 0.8:
                     choices = tuple(c for c in choices if c is not ActionType.END_ROUND)
                 choice = random.choice(choices)
                 action_generator = action_generator.choose(choice)
             elif isinstance(choices, AbstractDice):
                 optional_choice = action_generator.dice_available().smart_selection(
                     choices,
-                    action_generator.game_state.get_player(action_generator.pid).get_characters(),
+                    action_generator.game_state.get_player(action_generator.pid).characters,
                 )
                 if optional_choice is None:
                     raise Exception(f"There's not enough dice for {choices} from "  # pragma: no cover
@@ -196,8 +196,8 @@ class RandomAgent(PlayerAgent):
                 game_state = action_generator.game_state
                 wanted_elems = game_state.get_player(
                     action_generator.pid
-                ).get_characters().all_elems()
-                if game_state.get_phase() == game_state.get_mode().roll_phase():
+                ).characters.all_elems()
+                if game_state.phase == game_state.mode.roll_phase():
                     choice = ActualDice(dict(
                         (elem, choices[elem])
                         for elem in choices.elems()
@@ -226,8 +226,8 @@ class RandomAgent(PlayerAgent):
 
     def choose_action(self, history: list[GameState], pid: Pid) -> PlayerAction:
         game_state = history[-1]
-        mode = game_state.get_mode()
-        curr_phase = game_state.get_phase()
+        mode = game_state.mode
+        curr_phase = game_state.phase
 
         if isinstance(curr_phase, mode.card_select_phase):
             return self._card_select_phase(history, pid)
@@ -317,7 +317,7 @@ class CustomChoiceAgent(RandomAgent):  # pragma: no cover
             elif isinstance(choices, AbstractDice):
                 optional_choice = action_generator.dice_available().smart_selection(
                     choices,
-                    action_generator.game_state.get_player(action_generator.pid).get_characters(),
+                    action_generator.game_state.get_player(action_generator.pid).characters,
                 )
                 if optional_choice is None:
                     raise Exception(f"There's not enough dice for {repr(choices)} from "

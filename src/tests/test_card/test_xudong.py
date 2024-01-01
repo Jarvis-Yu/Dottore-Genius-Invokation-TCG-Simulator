@@ -34,7 +34,7 @@ class TestXudong(unittest.TestCase):
         assert game_state is not None
         buffed_game_state = auto_step(game_state)
 
-        xudong_support = buffed_game_state.get_player1().get_supports().just_find(XudongSupport, 1)
+        xudong_support = buffed_game_state.player1.supports.just_find(XudongSupport, 1)
         assert isinstance(xudong_support, XudongSupport)
         self.assertEqual(xudong_support.usages, 1)
 
@@ -58,11 +58,11 @@ class TestXudong(unittest.TestCase):
         assert game_state is not None
         game_state = auto_step(game_state)
 
-        xudong_support = game_state.get_player1().get_supports().just_find(XudongSupport, 1)
+        xudong_support = game_state.player1.supports.just_find(XudongSupport, 1)
         assert isinstance(xudong_support, XudongSupport)
         self.assertEqual(xudong_support.usages, 1)
         self.assertTrue(
-            game_state.get_player1().just_get_active_character().get_character_statuses()
+            game_state.player1.just_get_active_character().character_statuses
             .contains(SatiatedStatus)
         )
 
@@ -82,11 +82,11 @@ class TestXudong(unittest.TestCase):
         assert game_state is not None
         game_state = auto_step(game_state)
 
-        xudong_support = game_state.get_player1().get_supports().just_find(XudongSupport, 1)
+        xudong_support = game_state.player1.supports.just_find(XudongSupport, 1)
         assert isinstance(xudong_support, XudongSupport)
         self.assertEqual(xudong_support.usages, 0)
         self.assertTrue(
-            game_state.get_player1().just_get_active_character().get_character_statuses()
+            game_state.player1.just_get_active_character().character_statuses
             .contains(SatiatedStatus)
         )
 
@@ -99,6 +99,6 @@ class TestXudong(unittest.TestCase):
         gsm.player_step()  # P2 end
         gsm.auto_step()  # go through end phase
         game_state = gsm.get_game_state()
-        xudong_support = game_state.get_player1().get_supports().just_find(XudongSupport, 1)
+        xudong_support = game_state.player1.supports.just_find(XudongSupport, 1)
         assert isinstance(xudong_support, XudongSupport)
         self.assertEqual(xudong_support.usages, 1)

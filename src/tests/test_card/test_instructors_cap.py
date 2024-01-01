@@ -24,9 +24,9 @@ class TestInstructorsCap(unittest.TestCase):
             ))
 
         # test no reaction doesn't generate dice
-        old_dice = game_state.get_player1().get_dice()
+        old_dice = game_state.player1.dice
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
-        new_dice = game_state.get_player1().get_dice()
+        new_dice = game_state.player1.dice
         # here we assume step_skill() consumes OMNI dice
         self.assertEqual(new_dice[Element.GEO], old_dice[Element.GEO])
         self.assertEqual(new_dice[Element.CRYO], old_dice[Element.CRYO])
@@ -35,7 +35,7 @@ class TestInstructorsCap(unittest.TestCase):
         game_state = apply_elemental_aura(game_state, Element.HYDRO, Pid.P2)
         old_dice = new_dice
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
-        new_dice = game_state.get_player1().get_dice()
+        new_dice = game_state.player1.dice
         self.assertEqual(new_dice[Element.GEO], old_dice[Element.GEO] + 1)
         self.assertEqual(new_dice[Element.CRYO], old_dice[Element.CRYO])
 
@@ -43,33 +43,33 @@ class TestInstructorsCap(unittest.TestCase):
         game_state = apply_elemental_aura(game_state, Element.HYDRO, Pid.P2)
         old_dice = new_dice
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
-        new_dice = game_state.get_player1().get_dice()
+        new_dice = game_state.player1.dice
         self.assertEqual(new_dice[Element.GEO], old_dice[Element.GEO] + 1)
         self.assertEqual(new_dice[Element.CRYO], old_dice[Element.CRYO])
 
         game_state = apply_elemental_aura(game_state, Element.HYDRO, Pid.P2)
         old_dice = new_dice
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
-        new_dice = game_state.get_player1().get_dice()
+        new_dice = game_state.player1.dice
         self.assertEqual(new_dice[Element.GEO], old_dice[Element.GEO] + 1)
         self.assertEqual(new_dice[Element.CRYO], old_dice[Element.CRYO])
 
         game_state = apply_elemental_aura(game_state, Element.HYDRO, Pid.P2)
         old_dice = new_dice
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
-        new_dice = game_state.get_player1().get_dice()
+        new_dice = game_state.player1.dice
         self.assertEqual(new_dice[Element.GEO], old_dice[Element.GEO] + 0)
         self.assertEqual(new_dice[Element.CRYO], old_dice[Element.CRYO])
-        artifact = game_state.get_player1().just_get_active_character(
-        ).get_character_statuses().find(InstructorsCapStatus)
+        artifact = game_state.player1.just_get_active_character(
+        ).character_statuses.find(InstructorsCapStatus)
         self.assertIsNotNone(artifact)
         assert isinstance(artifact, InstructorsCapStatus)
         self.assertEqual(artifact.usages, 0)
 
         # test usages restore the next round
         game_state = next_round(game_state)
-        artifact = game_state.get_player1().just_get_active_character(
-        ).get_character_statuses().find(InstructorsCapStatus)
+        artifact = game_state.player1.just_get_active_character(
+        ).character_statuses.find(InstructorsCapStatus)
         self.assertIsNotNone(artifact)
         assert isinstance(artifact, InstructorsCapStatus)
         self.assertEqual(artifact.usages, 3)

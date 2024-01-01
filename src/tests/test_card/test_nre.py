@@ -20,8 +20,8 @@ class TestNRE(unittest.TestCase):
             card=NRE,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.PYRO: 1})),
         ))
-        deck_cards = game_state.get_player1().get_deck_cards()
-        hand_cards = game_state.get_player1().get_hand_cards()
+        deck_cards = game_state.player1.deck_cards
+        hand_cards = game_state.player1.hand_cards
         self.assertEqual(deck_cards[SweetMadame], 1)
         self.assertEqual(hand_cards[SweetMadame], 1)
         nre_played_state = game_state
@@ -34,8 +34,8 @@ class TestNRE(unittest.TestCase):
                 target=StaticTarget.from_char_id(Pid.P1, 1),
             ),
         ))
-        deck_cards = game_state.get_player1().get_deck_cards()
-        hand_cards = game_state.get_player1().get_hand_cards()
+        deck_cards = game_state.player1.deck_cards
+        hand_cards = game_state.player1.hand_cards
         self.assertEqual(deck_cards[SweetMadame], 0)
         self.assertEqual(hand_cards[SweetMadame], 2)
 
@@ -53,8 +53,8 @@ class TestNRE(unittest.TestCase):
                 target=StaticTarget.from_char_id(Pid.P1, 2),
             ),
         ))
-        deck_cards = game_state.get_player1().get_deck_cards()
-        hand_cards = game_state.get_player1().get_hand_cards()
+        deck_cards = game_state.player1.deck_cards
+        hand_cards = game_state.player1.hand_cards
         self.assertEqual(deck_cards[MondstadtHashBrown], 1)
         self.assertEqual(hand_cards[MondstadtHashBrown], 0)
 
@@ -84,8 +84,8 @@ class TestNRE(unittest.TestCase):
                 target=StaticTarget.from_char_id(Pid.P1, 2),
             ),
         ))
-        deck_cards = game_state.get_player1().get_deck_cards()
-        hand_cards = game_state.get_player1().get_hand_cards()
+        deck_cards = game_state.player1.deck_cards
+        hand_cards = game_state.player1.hand_cards
         self.assertEqual(deck_cards[MondstadtHashBrown], 1)
         self.assertEqual(hand_cards[MondstadtHashBrown], 0)
 
@@ -100,7 +100,7 @@ class TestNRE(unittest.TestCase):
                 target=StaticTarget.from_char_id(Pid.P1, 2),
             ),
         ))
-        deck_cards = game_state.get_player1().get_deck_cards()
-        hand_cards = game_state.get_player1().get_hand_cards()
+        deck_cards = game_state.player1.deck_cards
+        hand_cards = game_state.player1.hand_cards
         self.assertEqual(deck_cards[MondstadtHashBrown], 0)
         self.assertEqual(hand_cards[MondstadtHashBrown], 1)

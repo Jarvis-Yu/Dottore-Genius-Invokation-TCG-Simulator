@@ -126,7 +126,8 @@ class Character:
     def _talent_status(cls) -> None | type[stt.TalentEquipmentStatus]:
         return cls._TALENT_STATUS
 
-    def get_id(self) -> int:
+    @property
+    def id(self) -> int:
         """
         :returns: the id as an unique identifier for a character of a player.
 
@@ -135,7 +136,8 @@ class Character:
         """
         return self._id
 
-    def get_alive(self) -> bool:
+    @property
+    def alive(self) -> bool:
         """
         :returns: the boolean value indicating if the character is actually defeated.
                   This is different from hp being 0.
@@ -148,23 +150,28 @@ class Character:
         """
         return self._alive
 
-    def get_hp(self) -> int:
+    @property
+    def hp(self) -> int:
         """ :returns: the current hp.  """
         return self._hp
 
-    def get_max_hp(self) -> int:
+    @property
+    def max_hp(self) -> int:
         """ :returns: the maximum hp.  """
         return self._max_hp
 
-    def get_energy(self) -> int:
+    @property
+    def energy(self) -> int:
         """ :returns: the current energy. """
         return self._energy
 
-    def get_max_energy(self) -> int:
+    @property
+    def max_energy(self) -> int:
         """ :returns: the maximum energy. """
         return self._max_energy
 
-    def get_hidden_statuses(self) -> stts.Statuses:
+    @property
+    def hidden_statuses(self) -> stts.Statuses:
         """
         :returns: the hidden statuses.
 
@@ -176,11 +183,13 @@ class Character:
         """
         return self._hiddens
 
-    def get_character_statuses(self) -> stts.Statuses:
+    @property
+    def character_statuses(self) -> stts.Statuses:
         """ :returns: the character statuses. """
         return self._statuses
 
-    def get_elemental_aura(self) -> ElementalAura:
+    @property
+    def elemental_aura(self) -> ElementalAura:
         """ :returns: the elemental aura. """
         return self._aura
 
@@ -341,7 +350,7 @@ class Character:
                 oppo_active=StaticTarget(
                     pid=source.pid.other(),
                     zone=Zone.CHARACTERS,
-                    id=game_state.get_other_player(source.pid).just_get_active_character().get_id()
+                    id=game_state.get_other_player(source.pid).just_get_active_character().id
                 )
             ),
             eft.AllStatusTriggererEffect(
@@ -472,13 +481,13 @@ class Character:
         talent_status = self._talent_status()
         if talent_status is None:
             return False
-        return self.get_character_statuses().contains(talent_status)
+        return self.character_statuses.contains(talent_status)
 
-    def alive(self) -> bool:
+    def is_alive(self) -> bool:
         """ Same as `.get_alive()`. """
         return self._alive
 
-    def defeated(self) -> bool:
+    def is_defeated(self) -> bool:
         """ Negation of `.alive()`. """
         return not self._alive
 
@@ -494,7 +503,7 @@ class Character:
         A character cannot cast skill when it is frozen, petrified or defeated.
         """
         from ..status.status import FrozenStatus
-        return not self._statuses.contains(FrozenStatus) and not self.defeated()
+        return not self._statuses.contains(FrozenStatus) and not self.is_defeated()
 
     def name(self) -> str:
         """ :returns: name of the character (without breaks). """
@@ -566,15 +575,15 @@ class Character:
 class CharacterFactory:
     def __init__(self, character: Character, char_type: type[Character]) -> None:
         self._char = char_type
-        self._id = character.get_id()
-        self._alive = character.get_alive()
-        self._hp = character.get_hp()
-        self._max_hp = character.get_max_hp()
-        self._energy = character.get_energy()
-        self._max_energy = character.get_max_energy()
-        self._hiddens = character.get_hidden_statuses()
-        self._statuses = character.get_character_statuses()
-        self._aura = character.get_elemental_aura()
+        self._id = character.id
+        self._alive = character.alive
+        self._hp = character.hp
+        self._max_hp = character.max_hp
+        self._energy = character.energy
+        self._max_energy = character.max_energy
+        self._hiddens = character.hidden_statuses
+        self._statuses = character.character_statuses
+        self._aura = character.elemental_aura
 
     def alive(self, alive: bool) -> CharacterFactory:
         self._alive = alive
@@ -658,12 +667,12 @@ class Albedo(Character):
     @override
     def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         final_dmg = 4
-        if sm.SolarIsotomaSummon in game_state.get_player(source.pid).get_summons():
+        if sm.SolarIsotomaSummon in game_state.get_player(source.pid).summons:
             final_dmg += 2
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -740,7 +749,7 @@ class AratakiItto(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -811,7 +820,7 @@ class Bennett(Character):
         effects: list[eft.Effect] = [
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -823,7 +832,7 @@ class Bennett(Character):
         ]
         this_player = game_state.get_player(source.pid)
         talent_equiped = self.talent_equipped()
-        if stt.InspirationFieldStatus in this_player.get_combat_statuses() and talent_equiped:
+        if stt.InspirationFieldStatus in this_player.combat_statuses and talent_equiped:
             effects.append(
                 eft.RemoveCombatStatusEffect(
                     target_pid=source.pid,
@@ -890,13 +899,13 @@ class Collei(Character):
         if self.talent_equipped():
             talent_status = cast(
                 stt.ColleiTalentStatus,
-                self.get_hidden_statuses().find(stt.ColleiTalentStatus)
+                self.hidden_statuses.find(stt.ColleiTalentStatus)
             )
             assert talent_status is not None
             if not talent_status.elemental_skill_used:
                 oppo_active = game_state.get_player(source.pid.other()).just_get_active_character()
                 trigger_sprout = \
-                    oppo_active.get_elemental_aura().consult_reaction(Element.DENDRO) is not None
+                    oppo_active.elemental_aura.consult_reaction(Element.DENDRO) is not None
         return (
             eft.ReferredDamageEffect(
                 source=source,
@@ -921,7 +930,7 @@ class Collei(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -980,7 +989,7 @@ class Dehya(Character):
     @override
     def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         effects: list[eft.Effect] = []
-        summons = game_state.get_player(source.pid).get_summons()
+        summons = game_state.get_player(source.pid).summons
         if sm.FierySanctumFieldSummon in summons:
             effects.append(eft.ReferredDamageEffect(
                 source=source,
@@ -1000,7 +1009,7 @@ class Dehya(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -1077,7 +1086,7 @@ class ElectroHypostasis(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -1154,7 +1163,7 @@ class FatuiPyroAgent(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -1227,7 +1236,7 @@ class Fischl(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -1311,7 +1320,7 @@ class Ganyu(Character):
     def _elemental_skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         piercing_dmg = 2
         if self.talent_equipped():
-            talent_status = self.get_hidden_statuses().find(stt.GanyuTalentStatus)
+            talent_status = self.hidden_statuses.find(stt.GanyuTalentStatus)
             assert isinstance(talent_status, stt.GanyuTalentStatus)
             if talent_status.elemental_skill2ed:
                 piercing_dmg = 3
@@ -1336,7 +1345,7 @@ class Ganyu(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -1393,10 +1402,10 @@ class HuTao(Character):
     @override
     def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         effects: list[eft.Effect] = []
-        if stt.ParamitaPapilioStatus in self.get_character_statuses():
+        if stt.ParamitaPapilioStatus in self.character_statuses:
             charged_status = game_state.get_player(
                 source.pid
-            ).get_hidden_statuses().just_find(stt.ChargedAttackStatus)
+            ).hidden_statuses.just_find(stt.ChargedAttackStatus)
             if charged_status.can_charge:
                 effects.append(eft.AddCharacterStatusEffect(
                     target=StaticTarget.from_player_active(game_state, source.pid.other()),
@@ -1422,13 +1431,13 @@ class HuTao(Character):
     def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         dmg = 4
         heal = 2
-        if self.get_hp() <= 6:
+        if self.hp <= 6:
             dmg += 1
             heal += 1
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -1501,7 +1510,7 @@ class JadeplumeTerrorshroom(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -1573,13 +1582,13 @@ class Jean(Character):
         effects: list[eft.Effect] = [
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
         ]
-        self_characters = game_state.get_player(source.pid).get_characters()
+        self_characters = game_state.get_player(source.pid).characters
         for character in self_characters.get_alive_character_in_activity_order():
             effects.append(eft.RecoverHPEffect(
-                target=StaticTarget.from_char_id(source.pid, character.get_id()),
+                target=StaticTarget.from_char_id(source.pid, character.id),
                 recovery=2,
             ))
         effects.append(
@@ -1645,7 +1654,7 @@ class KaedeharaKazuha(Character):
             game_state
             .get_player(source.pid.other())
             .just_get_active_character()
-            .get_elemental_aura()
+            .elemental_aura
         )
         reaction = Reaction.consult_reaction_with_aura(oppo_active_character_aura, Element.ANEMO)
         if reaction is not None and reaction.first_elem in stt._MIDARE_RANZAN_MAP:
@@ -1701,7 +1710,7 @@ class KaedeharaKazuha(Character):
             game_state
             .get_player(source.pid.other())
             .just_get_active_character()
-            .get_elemental_aura()
+            .elemental_aura
         )
         reaction = Reaction.consult_reaction_with_aura(oppo_active_character_aura, Element.ANEMO)
         summon_element: None | Element = None
@@ -1711,7 +1720,7 @@ class KaedeharaKazuha(Character):
         effects: tuple[eft.Effect, ...] = (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -1797,7 +1806,7 @@ class Kaeya(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -1870,7 +1879,7 @@ class Keqing(Character):
         # check if can gain ElectroInfusionStatus
         can_infuse = False
 
-        intrinsic_talent = self.get_hidden_statuses().just_find(stt.KeqingTalentStatus)
+        intrinsic_talent = self.hidden_statuses.just_find(stt.KeqingTalentStatus)
         if intrinsic_talent.can_infuse:
             can_infuse = True
             effects.append(
@@ -1880,7 +1889,7 @@ class Keqing(Character):
                 )
             )
 
-        cards = game_state.get_player(source.pid).get_hand_cards()
+        cards = game_state.get_player(source.pid).hand_cards
         from ..card.card import LightningStiletto
         if not can_infuse and cards.contains(LightningStiletto):
             effects.append(
@@ -1922,11 +1931,11 @@ class Keqing(Character):
         return tuple(effects)
 
     def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
-        assert self.get_energy() == self.get_max_energy()
+        assert self.energy == self.max_energy
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -2005,7 +2014,7 @@ class Klee(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -2103,7 +2112,7 @@ class MaguuKenki(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -2173,7 +2182,7 @@ class Mona(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -2243,7 +2252,7 @@ class Nahida(Character):
         oppo_pid = source.pid.other()
         oppo_active_character = game_state.get_player(oppo_pid).just_get_active_character()
         has_reaction = \
-            oppo_active_character.get_elemental_aura().consult_reaction(self.ELEMENT()) is not None
+            oppo_active_character.elemental_aura.consult_reaction(self.ELEMENT()) is not None
         effects: list[eft.Effect] = [
             eft.ReferredDamageEffect(
                 source=source,
@@ -2254,13 +2263,13 @@ class Nahida(Character):
             ),
         ]
         char_ids = (
-            (oppo_active_character.get_id(),)
+            (oppo_active_character.id,)
             if single_target
             else tuple(
-                char.get_id()
+                char.id
                 for char in game_state.get_player(
                     oppo_pid
-                ).get_characters().get_character_in_activity_order()
+                ).characters.get_character_in_activity_order()
             )
         )
         for id in char_ids:
@@ -2269,9 +2278,9 @@ class Nahida(Character):
                 status=stt.SeedOfSkandhaStatus(activated_usages=(
                     1
                     if (
-                        id == oppo_active_character.get_id()
+                        id == oppo_active_character.id
                         and has_reaction
-                        and oppo_active_character.get_character_statuses().find(
+                        and oppo_active_character.character_statuses.find(
                             stt.SeedOfSkandhaStatus
                         ) is None
                     )
@@ -2289,7 +2298,7 @@ class Nahida(Character):
             game_state,
             source,
             dmg_amount=SKILL_DMG,
-            single_target=stt.SeedOfSkandhaStatus not in oppo_active_character.get_character_statuses(),
+            single_target=stt.SeedOfSkandhaStatus not in oppo_active_character.character_statuses,
         )
 
     def _elemental_skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
@@ -2299,22 +2308,22 @@ class Nahida(Character):
     def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         effects: list[eft.Effect] = [eft.EnergyDrainEffect(
             target=source,
-            drain=self.get_max_energy(),
+            drain=self.max_energy,
         )]
         if (
                 self.talent_equipped()
                 and any(
                     char.ELEMENT() is Element.ELECTRO
-                    for char in game_state.get_player(source.pid).get_characters()
-                )
+                    for char in game_state.get_player(source.pid).characters
+        )
         ):
             # talent card effect for electro
-            for char in game_state.get_player(source.pid.other()).get_characters():
-                original_status = char.get_character_statuses().find(stt.SeedOfSkandhaStatus)
+            for char in game_state.get_player(source.pid.other()).characters:
+                original_status = char.character_statuses.find(stt.SeedOfSkandhaStatus)
                 if original_status is not None:
                     assert isinstance(original_status, stt.SeedOfSkandhaStatus)
                     effects.append(eft.OverrideCharacterStatusEffect(
-                        target=StaticTarget(source.pid.other(), Zone.CHARACTERS, char.get_id()),
+                        target=StaticTarget(source.pid.other(), Zone.CHARACTERS, char.id),
                         status=replace(original_status, usages=original_status.usages + 1),
                     ))
         effects.append(eft.ReferredDamageEffect(
@@ -2328,8 +2337,8 @@ class Nahida(Character):
                 self.talent_equipped()
                 and any(
                     char.ELEMENT() is Element.HYDRO
-                    for char in game_state.get_player(source.pid).get_characters()
-                )
+                    for char in game_state.get_player(source.pid).characters
+        )
         ):
             # talent card effect for hydro
             effects.append(eft.UpdateCombatStatusEffect(
@@ -2403,12 +2412,12 @@ class Ningguang(Character):
     @override
     def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         final_dmg = 6
-        if stt.JadeScreenStatus in game_state.get_player(source.pid).get_combat_statuses():
+        if stt.JadeScreenStatus in game_state.get_player(source.pid).combat_statuses:
             final_dmg += 2
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -2481,7 +2490,7 @@ class Noelle(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -2550,15 +2559,15 @@ class Qiqi(Character):
     def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         effects: tuple[eft.Effect, ...] = ()
         if self.talent_equipped():
-            hidden_status = self.get_hidden_statuses().just_find(stt.QiqiTalentStatus)
+            hidden_status = self.hidden_statuses.just_find(stt.QiqiTalentStatus)
             if hidden_status.revivable():
                 self_chars = game_state.get_player(
                     source.pid
-                ).get_characters().get_character_in_activity_order()
+                ).characters.get_character_in_activity_order()
                 defeated_chars = [
                     char
                     for char in self_chars
-                    if char.defeated()
+                    if char.is_defeated()
                 ]
                 if defeated_chars:
                     effects = (
@@ -2571,7 +2580,7 @@ class Qiqi(Character):
                         ),
                     ) + tuple(
                         eft.ReviveRecoverHPEffect(
-                            target=StaticTarget.from_char_id(source.pid, char.get_id()),
+                            target=StaticTarget.from_char_id(source.pid, char.id),
                             recovery=2,
                         )
                         for char in defeated_chars
@@ -2579,7 +2588,7 @@ class Qiqi(Character):
         return effects + (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -2651,7 +2660,7 @@ class RhodeiaOfLoch(Character):
             game_state: GameState,
             pid: Pid
     ) -> tuple[type[sm.Summon], ...]:
-        summons = game_state.get_player(pid).get_summons()
+        summons = game_state.get_player(pid).summons
         return tuple(
             summon
             for summon in self._SUMMONS
@@ -2672,7 +2681,7 @@ class RhodeiaOfLoch(Character):
     def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         from random import choice
 
-        existing_summons = game_state.get_player(source.pid).get_summons()
+        existing_summons = game_state.get_player(source.pid).summons
         if existing_summons.full():
             return ()
 
@@ -2696,7 +2705,7 @@ class RhodeiaOfLoch(Character):
     def _elemental_skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         from random import choice
 
-        existing_summons = game_state.get_player(source.pid).get_summons()
+        existing_summons = game_state.get_player(source.pid).summons
         if existing_summons.full():
             return ()
 
@@ -2729,11 +2738,11 @@ class RhodeiaOfLoch(Character):
         )
 
     def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
-        summons = game_state.get_player(source.pid).get_summons()
+        summons = game_state.get_player(source.pid).summons
         effects: list[eft.Effect] = [
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -2810,7 +2819,7 @@ class SangonomiyaKokomi(Character):
         effects: list[eft.Effect] = [
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -2820,10 +2829,10 @@ class SangonomiyaKokomi(Character):
                 damage_type=DamageType(elemental_burst=True),
             ),
         ]
-        self_characters = game_state.get_player(source.pid).get_characters()
+        self_characters = game_state.get_player(source.pid).characters
         for character in self_characters.get_alive_character_in_activity_order():
             effects.append(eft.RecoverHPEffect(
-                target=StaticTarget.from_char_id(source.pid, character.get_id()),
+                target=StaticTarget.from_char_id(source.pid, character.id),
                 recovery=1,
             ))
         effects.append(
@@ -2834,7 +2843,7 @@ class SangonomiyaKokomi(Character):
         )
         if self.talent_equipped():
             usages = 1
-            summon = game_state.get_player(source.pid).get_summons().find(sm.BakeKurageSummon)
+            summon = game_state.get_player(source.pid).summons.find(sm.BakeKurageSummon)
             if summon is not None:
                 usages = summon.usages + 1
             effects.append(
@@ -2907,7 +2916,7 @@ class Shenhe(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -2964,8 +2973,8 @@ class Tartaglia(Character):
         # if stt.RiptideStatus in oppo_char.get_character_statuses():
         #     pre_effects.append()
         player = game_state.get_player(source.pid)
-        assert stt.ChargedAttackStatus in player.get_hidden_statuses()
-        charged_status = player.get_hidden_statuses().just_find(stt.ChargedAttackStatus)
+        assert stt.ChargedAttackStatus in player.hidden_statuses
+        charged_status = player.hidden_statuses.just_find(stt.ChargedAttackStatus)
         follow_up_effects: list[eft.Effect] = []
         if charged_status.can_charge:
             follow_up_effects.append(eft.RelativeAddCharacterStatusEffect(
@@ -3044,7 +3053,7 @@ class Tartaglia(Character):
         counter = self._hiddens.just_find(stt.RiptideCounterStatus)
         if (
                 counter.usages <= 0
-                or stt.RiptideStatus not in target_char.get_character_statuses()
+                or stt.RiptideStatus not in target_char.character_statuses
         ):
             return ()
         return (
@@ -3200,7 +3209,7 @@ class Venti(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -3280,7 +3289,7 @@ class Xingqiu(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -3356,7 +3365,7 @@ class YaeMiko(Character):
         effects: list[eft.Effect] = [
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -3366,7 +3375,7 @@ class YaeMiko(Character):
                 damage_type=DamageType(elemental_burst=True),
             ),
         ]
-        if game_state.get_player(source.pid).get_summons().find(self._SUMMON_TYPE) is not None:
+        if game_state.get_player(source.pid).summons.find(self._SUMMON_TYPE) is not None:
             if self.talent_equipped():
                 effects.append(
                     eft.AddCharacterStatusEffect(
@@ -3449,7 +3458,7 @@ class Yoimiya(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.get_max_energy(),
+                drain=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,

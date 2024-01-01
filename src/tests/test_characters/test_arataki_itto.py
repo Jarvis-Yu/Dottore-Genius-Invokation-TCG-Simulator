@@ -21,7 +21,7 @@ class TestAratakiItto(unittest.TestCase):
             Act.END_PHASE
         ).build()
     ).build()
-    assert type(BASE_GAME.get_player1().just_get_active_character()) is AratakiItto
+    assert type(BASE_GAME.player1.just_get_active_character()) is AratakiItto
 
     def test_normal_attack(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -30,14 +30,14 @@ class TestAratakiItto(unittest.TestCase):
             skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 10)
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 10)
 
         gsm.player_step()
         gsm.auto_step()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 8)
-        self.assertFalse(p2ac.get_elemental_aura().elem_auras())
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 8)
+        self.assertFalse(p2ac.elemental_aura.elem_auras())
 
     def test_elemental_skill1(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -46,24 +46,24 @@ class TestAratakiItto(unittest.TestCase):
             skill=CharacterSkill.SKILL2,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 10)
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 10)
 
         # first skill
         gsm.player_step()
         gsm.auto_step()
-        p1 = gsm.get_game_state().get_player1()
+        p1 = gsm.get_game_state().player1
         p1ac = p1.just_get_active_character()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 9)
-        self.assertFalse(p2ac.get_elemental_aura().has_aura())
-        self.assertIn(SuperlativeSuperstrengthStatus, p1ac.get_character_statuses())
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 9)
+        self.assertFalse(p2ac.elemental_aura.has_aura())
+        self.assertIn(SuperlativeSuperstrengthStatus, p1ac.character_statuses)
         self.assertEqual(
-            p1ac.get_character_statuses().just_find(SuperlativeSuperstrengthStatus).usages,
+            p1ac.character_statuses.just_find(SuperlativeSuperstrengthStatus).usages,
             1
         )
-        self.assertIn(UshiSummon, p1.get_summons())
-        ushi = p1.get_summons().just_find(UshiSummon)
+        self.assertIn(UshiSummon, p1.summons)
+        ushi = p1.summons.just_find(UshiSummon)
         assert isinstance(ushi, UshiSummon)
         self.assertEqual(ushi.usages, 1)
         self.assertEqual(ushi.status_gaining_usages, 1)
@@ -75,7 +75,7 @@ class TestAratakiItto(unittest.TestCase):
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().f_active_character(
                     lambda ac: ac.factory().energy(
-                        ac.get_max_energy()
+                        ac.max_energy
                     ).build()
                 ).build()
             ).build()
@@ -91,12 +91,12 @@ class TestAratakiItto(unittest.TestCase):
         gsm.player_step()
         gsm.auto_step()
         game_state = gsm.get_game_state()
-        p1ac = game_state.get_player1().just_get_active_character()
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 5)
-        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+        p1ac = game_state.player1.just_get_active_character()
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 5)
+        self.assertFalse(p2ac.elemental_aura.has_aura())
         self.assertEqual(
-            p1ac.get_character_statuses().just_find(RagingOniKingStatus).usages,
+            p1ac.character_statuses.just_find(RagingOniKingStatus).usages,
             2
         )
 
@@ -113,7 +113,7 @@ class TestAratakiItto(unittest.TestCase):
                         ).build()
                     ).build()
                 ).build()
-                assert game_state.get_player1().get_dice().is_even()
+                assert game_state.player1.dice.is_even()
                 a1, a2 = PuppetAgent(), PuppetAgent()
                 gsm = GameStateMachine(game_state, a1, a2)
 
@@ -127,15 +127,15 @@ class TestAratakiItto(unittest.TestCase):
                 gsm.player_step()  # charged attack
                 gsm.auto_step()
 
-                p1ac = gsm.get_game_state().get_player1().just_get_active_character()
-                p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-                self.assertEqual(p2ac.get_hp(), 7)
+                p1ac = gsm.get_game_state().player1.just_get_active_character()
+                p2ac = gsm.get_game_state().player2.just_get_active_character()
+                self.assertEqual(p2ac.hp, 7)
                 if i == 1:
-                    self.assertNotIn(SuperlativeSuperstrengthStatus, p1ac.get_character_statuses())
+                    self.assertNotIn(SuperlativeSuperstrengthStatus, p1ac.character_statuses)
                 else:
-                    self.assertIn(SuperlativeSuperstrengthStatus, p1ac.get_character_statuses())
+                    self.assertIn(SuperlativeSuperstrengthStatus, p1ac.character_statuses)
                     self.assertEqual(
-                        p1ac.get_character_statuses().just_find(
+                        p1ac.character_statuses.just_find(
                             SuperlativeSuperstrengthStatus
                         ).usages,
                         i - 1,
@@ -159,17 +159,17 @@ class TestAratakiItto(unittest.TestCase):
         ))
         game_state = auto_step(just(game_state))
 
-        p1 = game_state.get_player1()
+        p1 = game_state.player1
         p1ac = p1.just_get_active_character()
-        self.assertIn(SuperlativeSuperstrengthStatus, p1ac.get_character_statuses())
+        self.assertIn(SuperlativeSuperstrengthStatus, p1ac.character_statuses)
         self.assertEqual(
-            p1ac.get_character_statuses().just_find(
+            p1ac.character_statuses.just_find(
                 SuperlativeSuperstrengthStatus
             ).usages,
             1,
         )
-        self.assertIn(UshiSummon, p1.get_summons())
-        self.assertEqual(p1.get_summons().just_find(UshiSummon).usages, 0)
+        self.assertIn(UshiSummon, p1.summons)
+        self.assertEqual(p1.summons.just_find(UshiSummon).usages, 0)
 
         # second character damage doesn't trigger ushi
         game_state = game_state.action_step(Pid.P2, SkillAction(
@@ -178,17 +178,17 @@ class TestAratakiItto(unittest.TestCase):
         ))
         game_state = auto_step(just(game_state))
 
-        p1 = game_state.get_player1()
-        p1ac = game_state.get_player1().just_get_active_character()
-        self.assertIn(SuperlativeSuperstrengthStatus, p1ac.get_character_statuses())
+        p1 = game_state.player1
+        p1ac = game_state.player1.just_get_active_character()
+        self.assertIn(SuperlativeSuperstrengthStatus, p1ac.character_statuses)
         self.assertEqual(
-            p1ac.get_character_statuses().just_find(
+            p1ac.character_statuses.just_find(
                 SuperlativeSuperstrengthStatus
             ).usages,
             1,
         )
-        self.assertIn(UshiSummon, p1.get_summons())
-        self.assertEqual(p1.get_summons().just_find(UshiSummon).usages, 0)
+        self.assertIn(UshiSummon, p1.summons)
+        self.assertEqual(p1.summons.just_find(UshiSummon).usages, 0)
 
     def test_ushi_summon_triggered_by_end_phase_summon(self):
         base_game = self.BASE_GAME.factory().f_phase(
@@ -210,16 +210,16 @@ class TestAratakiItto(unittest.TestCase):
         ).build()
 
         game_state = auto_step(base_game)
-        p1 = game_state.get_player1()
+        p1 = game_state.player1
         p1ac = p1.just_get_active_character()
-        self.assertIn(SuperlativeSuperstrengthStatus, p1ac.get_character_statuses())
+        self.assertIn(SuperlativeSuperstrengthStatus, p1ac.character_statuses)
         self.assertEqual(
-            p1ac.get_character_statuses().just_find(
+            p1ac.character_statuses.just_find(
                 SuperlativeSuperstrengthStatus
             ).usages,
             1,
         )
-        self.assertNotIn(UshiSummon, p1.get_summons())
+        self.assertNotIn(UshiSummon, p1.summons)
 
     def test_ushi_summon_not_triggered_if_dmg_kill_active_char(self):
         """ This is a test for existing bug in the official game """
@@ -253,11 +253,11 @@ class TestAratakiItto(unittest.TestCase):
         game_state = game_state.action_step(Pid.P1, DeathSwapAction(char_id=2))
         game_state = auto_step(just(game_state))
 
-        p1 = game_state.get_player1()
+        p1 = game_state.player1
         p1ac = p1.just_get_active_character()
-        self.assertNotIn(SuperlativeSuperstrengthStatus, p1ac.get_character_statuses())
-        self.assertIn(UshiSummon, p1.get_summons())
-        ushi = p1.get_summons().just_find(UshiSummon)
+        self.assertNotIn(SuperlativeSuperstrengthStatus, p1ac.character_statuses)
+        self.assertIn(UshiSummon, p1.summons)
+        ushi = p1.summons.just_find(UshiSummon)
         assert isinstance(ushi, UshiSummon)
         self.assertEqual(ushi.status_gaining_usages, 1)
         self.assertEqual(ushi.status_gaining_available, False)
@@ -267,55 +267,55 @@ class TestAratakiItto(unittest.TestCase):
             target=StaticTarget.from_player_active(self.BASE_GAME, Pid.P1),
             status=RagingOniKingStatus,
         ).execute(self.BASE_GAME)
-        assert game_state.get_player1().get_dice().is_even()
+        assert game_state.player1.dice.is_even()
 
         # first normal attack
         game_state = oppo_aura_elem(game_state, Element.CRYO)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
-        p1ac = game_state.get_player1().just_get_active_character()
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 6)
-        self.assertIn(CrystallizeStatus, game_state.get_player1().get_combat_statuses())
-        self.assertIn(SuperlativeSuperstrengthStatus, p1ac.get_character_statuses())
+        p1ac = game_state.player1.just_get_active_character()
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 6)
+        self.assertIn(CrystallizeStatus, game_state.player1.combat_statuses)
+        self.assertIn(SuperlativeSuperstrengthStatus, p1ac.character_statuses)
         self.assertEqual(
-            p1ac.get_character_statuses().just_find(SuperlativeSuperstrengthStatus).usages,
+            p1ac.character_statuses.just_find(SuperlativeSuperstrengthStatus).usages,
             1
         )
-        self.assertIn(RagingOniKingStatus, p1ac.get_character_statuses())
+        self.assertIn(RagingOniKingStatus, p1ac.character_statuses)
         self.assertEqual(
-            p1ac.get_character_statuses().just_find(RagingOniKingStatus).usages,
+            p1ac.character_statuses.just_find(RagingOniKingStatus).usages,
             2
         )
 
         # second normal attack, not charged
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         game_state = auto_step(game_state)
-        p1ac = game_state.get_player1().just_get_active_character()
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 3)
-        self.assertIn(RagingOniKingStatus, p1ac.get_character_statuses())
+        p1ac = game_state.player1.just_get_active_character()
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 3)
+        self.assertIn(RagingOniKingStatus, p1ac.character_statuses)
         self.assertEqual(
-            p1ac.get_character_statuses().just_find(RagingOniKingStatus).usages,
+            p1ac.character_statuses.just_find(RagingOniKingStatus).usages,
             2
         )
 
         # going to next phase reduces the usages (duration)
         gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
-        gsm.step_until_phase(game_state.get_mode().end_phase())
-        gsm.step_until_phase(game_state.get_mode().action_phase())
+        gsm.step_until_phase(game_state.mode.end_phase())
+        gsm.step_until_phase(game_state.mode.action_phase())
 
-        p1ac = gsm.get_game_state().get_player1().just_get_active_character()
-        self.assertIn(RagingOniKingStatus, p1ac.get_character_statuses())
+        p1ac = gsm.get_game_state().player1.just_get_active_character()
+        self.assertIn(RagingOniKingStatus, p1ac.character_statuses)
         self.assertEqual(
-            p1ac.get_character_statuses().just_find(RagingOniKingStatus).usages,
+            p1ac.character_statuses.just_find(RagingOniKingStatus).usages,
             1
         )
 
-        gsm.step_until_phase(game_state.get_mode().end_phase())
-        gsm.step_until_phase(game_state.get_mode().action_phase())
+        gsm.step_until_phase(game_state.mode.end_phase())
+        gsm.step_until_phase(game_state.mode.action_phase())
 
-        p1ac = gsm.get_game_state().get_player1().just_get_active_character()
-        self.assertNotIn(RagingOniKingStatus, p1ac.get_character_statuses())
+        p1ac = gsm.get_game_state().player1.just_get_active_character()
+        self.assertNotIn(RagingOniKingStatus, p1ac.character_statuses)
 
     def test_talent_card(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -338,27 +338,27 @@ class TestAratakiItto(unittest.TestCase):
         ])
         gsm.step_until_next_phase()
         game_state = gsm.get_game_state()
-        p1ac = game_state.get_player1().just_get_active_character()
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 3)
-        self.assertNotIn(SuperlativeSuperstrengthStatus, p1ac.get_character_statuses())
-        self.assertIn(AratakiIchibanStatus, p1ac.get_character_statuses())
-        talent = p1ac.get_character_statuses().just_find(AratakiIchibanStatus)
+        p1ac = game_state.player1.just_get_active_character()
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 3)
+        self.assertNotIn(SuperlativeSuperstrengthStatus, p1ac.character_statuses)
+        self.assertIn(AratakiIchibanStatus, p1ac.character_statuses)
+        talent = p1ac.character_statuses.just_find(AratakiIchibanStatus)
         self.assertTrue(talent.activated())
         self.assertEqual(talent.usages, 1)
 
         # getting to next phase resets talent equipement statics
         gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
-        gsm.step_until_phase(game_state.get_mode().action_phase())
-        p1ac = gsm.get_game_state().get_player1().just_get_active_character()
-        self.assertIn(AratakiIchibanStatus, p1ac.get_character_statuses())
-        talent = p1ac.get_character_statuses().just_find(AratakiIchibanStatus)
+        gsm.step_until_phase(game_state.mode.action_phase())
+        p1ac = gsm.get_game_state().player1.just_get_active_character()
+        self.assertIn(AratakiIchibanStatus, p1ac.character_statuses)
+        talent = p1ac.character_statuses.just_find(AratakiIchibanStatus)
         self.assertFalse(talent.activated())
         self.assertEqual(talent.usages, 0)
 
         # test telant card normal attack can correctly be (charged)
         game_state = self.BASE_GAME
-        p1_dice = game_state.get_player1().get_dice()
+        p1_dice = game_state.player1.dice
         assert p1_dice.is_even()
         game_state = add_dmg_listener(game_state, Pid.P1)
         game_state = grant_all_thick_shield(game_state)

@@ -308,9 +308,9 @@ class TriggerStatusEffect(TriggerrbleEffect):
 
         statuses: Statuses
         if issubclass(self.status, stt.HiddenStatus):
-            statuses = character.get_hidden_statuses()
+            statuses = character.hidden_statuses
         elif issubclass(self.status, stt.EquipmentStatus | stt.CharacterStatus):
-            statuses = character.get_character_statuses()
+            statuses = character.character_statuses
         else:  # pragma: no cover
             raise Exception("Unexpected Status Type to Trigger", self.status)
         status = statuses.find(self.status)
@@ -336,7 +336,7 @@ class TriggerHiddenStatusEffect(TriggerrbleEffect):
 
     @override
     def new_effects(self, game_state: GameState) -> Sequence[Effect]:
-        statuses = game_state.get_player(self.target_pid).get_hidden_statuses()
+        statuses = game_state.get_player(self.target_pid).hidden_statuses
         status = statuses.find(self.status)
         if status is None:
             return []
@@ -367,7 +367,7 @@ class TriggerCombatStatusEffect(TriggerrbleEffect):
 
     @override
     def new_effects(self, game_state: GameState) -> Sequence[Effect]:
-        statuses = game_state.get_player(self.target_pid).get_combat_statuses()
+        statuses = game_state.get_player(self.target_pid).combat_statuses
         status = statuses.find(self.status)
         if status is None:
             return []
@@ -398,7 +398,7 @@ class TriggerSummonEffect(TriggerrbleEffect):
 
     @override
     def new_effects(self, game_state: GameState) -> Sequence[Effect]:
-        summons = game_state.get_player(self.target_pid).get_summons()
+        summons = game_state.get_player(self.target_pid).summons
         summon = summons.find(self.summon)
         if summon is None:
             return []
@@ -430,7 +430,7 @@ class TriggerSupportEffect(TriggerrbleEffect):
 
     @override
     def new_effects(self, game_state: GameState) -> Sequence[Effect]:
-        supports = game_state.get_player(self.target_pid).get_supports()
+        supports = game_state.get_player(self.target_pid).supports
         support = supports.find(self.support_type, self.sid)
         if support is None:
             return []
@@ -488,7 +488,7 @@ class EndPhaseCheckoutEffect(PhaseEffect):
     """
 
     def execute(self, game_state: GameState) -> GameState:
-        active_id = game_state.get_active_player_id()
+        active_id = game_state.active_player_id
         # active_player = game_state.get_player(active_id)
         effects = [
             AllStatusTriggererEffect(
@@ -509,7 +509,7 @@ class EndRoundEffect(PhaseEffect):
     """
 
     def execute(self, game_state: GameState) -> GameState:
-        active_id = game_state.get_active_player_id()
+        active_id = game_state.active_player_id
         active_player = game_state.get_player(active_id)
         effects = [
             AllStatusTriggererEffect(
@@ -543,16 +543,16 @@ class SetBothPlayerPhaseEffect(PhaseEffect):
 @dataclass(frozen=True, repr=False)
 class TurnEndEffect(PhaseEffect):
     def execute(self, game_state: GameState) -> GameState:
-        active_player_id = game_state.get_active_player_id()
+        active_player_id = game_state.active_player_id
         player = game_state.get_player(active_player_id)
         other_player = game_state.get_other_player(active_player_id)
-        assert player.get_phase() is Act.ACTION_PHASE
+        assert player.phase is Act.ACTION_PHASE
         if player.get_consec_action():
             game_state = game_state.factory().f_player(
                 active_player_id,
                 lambda p: p.factory().consec_action(False).build()
             ).build()
-        elif other_player.get_phase() is not Act.END_PHASE:
+        elif other_player.phase is not Act.END_PHASE:
             game_state = game_state.factory().active_player_id(
                 active_player_id.other()
             ).player(
@@ -562,7 +562,7 @@ class TurnEndEffect(PhaseEffect):
                 active_player_id,
                 other_player.factory().phase(Act.ACTION_PHASE).build()
             ).build()
-        active_player_id = game_state.get_active_player_id()
+        active_player_id = game_state.active_player_id
         return game_state.factory().f_effect_stack(
             lambda es: es.push_one(
                 AllStatusTriggererEffect(
@@ -581,13 +581,13 @@ class AliveMarkCheckerEffect(CheckerEffect):
     """ Revive all revivable characters.  """
 
     def execute(self, game_state: GameState) -> GameState:
-        active_pid = game_state.get_active_player_id()
+        active_pid = game_state.active_player_id
         revival_effects: list[Effect] = []
         for pid in (active_pid, active_pid.other()):
-            for char in game_state.get_player(pid).get_characters().get_character_in_activity_order():
-                if not char.alive() or char.get_hp() > 0:
+            for char in game_state.get_player(pid).characters.get_character_in_activity_order():
+                if not char.is_alive() or char.hp > 0:
                     continue
-                char_source = StaticTarget(pid, Zone.CHARACTERS, char.get_id())
+                char_source = StaticTarget(pid, Zone.CHARACTERS, char.id)
                 revival_status = next((
                     status
                     for status in char.get_all_statuses_ordered_flattened()
@@ -610,7 +610,7 @@ class AliveMarkCheckerEffect(CheckerEffect):
                         pid,
                         lambda p: p.factory().f_characters(
                             lambda cs: cs.factory().f_character(
-                                char.get_id(),
+                                char.id,
                                 lambda c: c.factory().hp(-BIG_INT).alive(False).build()
                             ).build()
                         ).build()
@@ -626,12 +626,12 @@ class DefeatedMarkCheckerEffect(CheckerEffect):
     """ Mark all defeated characters as defeated.  """
 
     def execute(self, game_state: GameState) -> GameState:
-        active_pid = game_state.get_active_player_id()
+        active_pid = game_state.active_player_id
         for pid in (active_pid, active_pid.other()):
-            for char in game_state.get_player(pid).get_characters().get_character_in_activity_order():
-                if char.alive() or char.get_hp() >= 0:
+            for char in game_state.get_player(pid).characters.get_character_in_activity_order():
+                if char.is_alive() or char.hp >= 0:
                     continue
-                char_source = StaticTarget(pid, Zone.CHARACTERS, char.get_id())
+                char_source = StaticTarget(pid, Zone.CHARACTERS, char.id)
                 on_death_effects = StatusProcessing.trigger_personal_statuses_effect(
                     game_state, char_source, TriggeringSignal.DEATH_DECLARATION
                 )
@@ -646,8 +646,8 @@ class DefeatedMarkCheckerEffect(CheckerEffect):
                     pid,
                     lambda p: p.factory().f_characters(
                         lambda cs: cs.factory().f_character(
-                            char.get_id(),
-                            lambda c: type(c).from_default(c.get_id()).factory()
+                            char.id,
+                            lambda c: type(c).from_default(c.id).factory()
                             .hp(0).alive(False).build()
                         ).build()
                     ).build()
@@ -661,9 +661,9 @@ class SwapCharacterCheckerEffect(CheckerEffect):
     oppo_active: StaticTarget
 
     def execute(self, game_state: GameState) -> GameState:
-        my_ac_id = game_state.get_player(self.my_active.pid).just_get_active_character().get_id()
+        my_ac_id = game_state.get_player(self.my_active.pid).just_get_active_character().id
         oppo_ac_id = game_state.get_player(
-            self.oppo_active.pid).just_get_active_character().get_id()
+            self.oppo_active.pid).just_get_active_character().id
         my_pid = self.my_active.pid
         effects: list[Effect] = []
         if my_ac_id != self.my_active.id:  # pragma: no cover
@@ -696,13 +696,13 @@ class DeathCheckCheckerEffect(CheckerEffect):
     If death swap is required, then the Death Swap Phase is inserted to be executed.
     """
     def execute(self, game_state: GameState) -> GameState:
-        p1_character = game_state.get_player1().get_characters().get_active_character()
-        p2_character = game_state.get_player2().get_characters().get_active_character()
+        p1_character = game_state.player1.characters.get_active_character()
+        p2_character = game_state.player2.characters.get_active_character()
         assert p1_character is not None and p2_character is not None
         pid: Pid
-        if p1_character.defeated():
+        if p1_character.is_defeated():
             pid = Pid.P1
-        elif p2_character.defeated():
+        elif p2_character.is_defeated():
             pid = Pid.P2
         else:  # if no one defeated, continue
             return game_state
@@ -716,11 +716,11 @@ class DeathCheckCheckerEffect(CheckerEffect):
         effects.append(DeathSwapPhaseStartEffect())
         effects.append(DeathSwapPhaseEndEffect(
             pid,
-            death_swap_player.get_phase(),
-            waiting_player.get_phase(),
+            death_swap_player.phase,
+            waiting_player.phase,
         ))
         return game_state.factory().effect_stack(
-            game_state.get_effect_stack().push_many_fl(tuple(effects))
+            game_state.effect_stack.push_many_fl(tuple(effects))
         ).player(
             pid,
             game_state.get_player(pid).factory().phase(
@@ -743,9 +743,9 @@ class DefeatedCheckerEffect(CheckerEffect):
     have 0 hp, then the game should end.
     """
     def execute(self, game_state: GameState) -> GameState:
-        if game_state.get_player1().defeated() \
-                or game_state.get_player2().defeated():
-            return game_state.factory().phase(game_state.get_mode().game_end_phase()).build()
+        if game_state.player1.defeated() \
+                or game_state.player2.defeated():
+            return game_state.factory().phase(game_state.mode.game_end_phase()).build()
         return game_state
 
 ############################## Direct Effect ##############################
@@ -771,7 +771,7 @@ class SwapCharacterEffect(DirectEffect):
         pid = self.target.pid
         player = game_state.get_player(pid)
         active_character = player.get_active_character()
-        if active_character is not None and active_character.get_id() == self.target.id:
+        if active_character is not None and active_character.id == self.target.id:
             return game_state
 
         effects: list[Effect] = [
@@ -801,7 +801,7 @@ class BackwardSwapCharacterEffect(DirectEffect):
     target_player: Pid
 
     def execute(self, game_state: GameState) -> GameState:
-        characters = game_state.get_player(self.target_player).get_characters()
+        characters = game_state.get_player(self.target_player).characters
         # oredered chars without active character
         ordered_chars = characters.get_character_in_activity_order()[:0:-1]
         from ..character.character import Character
@@ -809,7 +809,7 @@ class BackwardSwapCharacterEffect(DirectEffect):
             (
                 char
                 for char in ordered_chars
-                if char.alive()
+                if char.is_alive()
             ),
             None
         )
@@ -819,7 +819,7 @@ class BackwardSwapCharacterEffect(DirectEffect):
             self.target_player,
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().active_character_id(
-                    next_char.get_id()  # type: ignore
+                    next_char.id  # type: ignore
                 ).build()
             ).build()
         ).build()
@@ -835,7 +835,7 @@ class ForwardSwapCharacterEffect(DirectEffect):
     target_player: Pid
 
     def execute(self, game_state: GameState) -> GameState:
-        characters = game_state.get_player(self.target_player).get_characters()
+        characters = game_state.get_player(self.target_player).characters
         # oredered chars without active character
         ordered_chars = characters.get_character_in_activity_order()[1:]
         from ..character.character import Character
@@ -843,7 +843,7 @@ class ForwardSwapCharacterEffect(DirectEffect):
             (
                 char
                 for char in ordered_chars
-                if char.alive()
+                if char.is_alive()
             ),
             None
         )
@@ -853,7 +853,7 @@ class ForwardSwapCharacterEffect(DirectEffect):
             self.target_player,
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().active_character_id(
-                    next_char.get_id()  # type: ignore
+                    next_char.id  # type: ignore
                 ).build()
             ).build()
         ).build()
@@ -869,14 +869,14 @@ class ForwardSwapCharacterCheckEffect(DirectEffect):
     target_player: Pid
 
     def execute(self, game_state: GameState) -> GameState:
-        characters = game_state.get_player(self.target_player).get_characters()
+        characters = game_state.get_player(self.target_player).characters
         ordered_chars = characters.get_character_in_activity_order()
         from ..character.character import Character
         next_char: Optional[Character] = next(
             (
                 char
                 for char in ordered_chars[1:]
-                if char.alive()
+                if char.is_alive()
             ),
             None
         )
@@ -886,7 +886,7 @@ class ForwardSwapCharacterCheckEffect(DirectEffect):
             self.target_player,
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().active_character_id(
-                    next_char.get_id()  # type: ignore
+                    next_char.id  # type: ignore
                 ).build()
             ).build()
         ).f_effect_stack(
@@ -923,8 +923,8 @@ class ApplyElementalAuraEffect(DirectEffect):
     def execute(self, game_state: GameState) -> GameState:
         target_char = game_state.get_character_target(self.target)
         assert target_char is not None
-        all_aura = target_char.get_elemental_aura()
-        if target_char.defeated() or (all_aura.aurable(self.element) and self.element in all_aura):
+        all_aura = target_char.elemental_aura
+        if target_char.is_defeated() or (all_aura.aurable(self.element) and self.element in all_aura):
             return game_state
         reaction_detail = all_aura.consult_reaction(self.element)
         new_aura = all_aura
@@ -966,7 +966,7 @@ class ApplyElementalAuraEffect(DirectEffect):
                 oppo_active_id = game_state \
                     .get_player(self.target.pid) \
                     .just_get_active_character() \
-                    .get_id()
+                    .id
                 assert self.target.zone is Zone.CHARACTERS
                 if self.target.id is oppo_active_id:
                     effects.append(
@@ -1057,7 +1057,7 @@ class SpecificDamageEffect(DirectEffect):
 
         # try to identify the reaction
         second_elem = damage.element
-        all_aura = target_char.get_elemental_aura()
+        all_aura = target_char.elemental_aura
         reaction_detail = all_aura.consult_reaction(second_elem)
 
         # generate & update new aura
@@ -1097,7 +1097,7 @@ class SpecificDamageEffect(DirectEffect):
     def execute(self, game_state: GameState) -> GameState:
         # Check damage target
         target = game_state.get_character_target(self.target)
-        if target is None or target.defeated():  # pragma: no cover
+        if target is None or target.is_defeated():  # pragma: no cover
             return game_state
 
         # Preprocessing
@@ -1124,13 +1124,13 @@ class SpecificDamageEffect(DirectEffect):
         assert target is not None
 
         # Damage Calculation
-        hp = target.get_hp()
+        hp = target.hp
         hp = max(0, hp - actual_damage.damage)
 
         target_pid = self.target.pid
         effects: list[Effect] = []
 
-        if hp != target.get_hp():
+        if hp != target.hp:
             target = target.factory().hp(hp).build()
 
         if reaction is None:
@@ -1144,7 +1144,7 @@ class SpecificDamageEffect(DirectEffect):
             oppo_active_id = game_state \
                 .get_player(actual_damage.target.pid) \
                 .just_get_active_character() \
-                .get_id()
+                .id
             assert actual_damage.target.zone is Zone.CHARACTERS
             if actual_damage.target.id is oppo_active_id:
                 effects.append(
@@ -1283,7 +1283,7 @@ class ReferredDamageEffect(DirectEffect):
                     target=StaticTarget(
                         pid=pid,
                         zone=Zone.CHARACTERS,
-                        id=char.get_id(),
+                        id=char.id,
                     ),
                     element=self.element,
                     damage=self.damage,
@@ -1307,12 +1307,12 @@ class EnergyRechargeEffect(DirectEffect):
         from ..character.character import Character
         if not isinstance(character, Character):  # pragma: no cover
             return game_state
-        energy = min(character.get_energy() + self.recharge, character.get_max_energy())
-        if energy == character.get_energy():
+        energy = min(character.energy + self.recharge, character.max_energy)
+        if energy == character.energy:
             return game_state
         character = character.factory().energy(energy).build()
         player = game_state.get_player(self.target.pid)
-        characters = player.get_characters().factory().character(character).build()
+        characters = player.characters.factory().character(character).build()
         player = player.factory().characters(characters).build()
         return game_state.factory().player(
             self.target.pid,
@@ -1330,12 +1330,12 @@ class EnergyDrainEffect(DirectEffect):
         from ..character.character import Character
         if not isinstance(character, Character):  # pragma: no cover
             return game_state
-        energy = max(character.get_energy() - self.drain, 0)
-        if energy == character.get_energy():
+        energy = max(character.energy - self.drain, 0)
+        if energy == character.energy:
             return game_state
         character = character.factory().energy(energy).build()
         player = game_state.get_player(self.target.pid)
-        characters = player.get_characters().factory().character(character).build()
+        characters = player.characters.factory().character(character).build()
         player = player.factory().characters(characters).build()
         return game_state.factory().player(
             self.target.pid,
@@ -1353,16 +1353,16 @@ class RecoverHPEffect(DirectEffect):
         from ..character.character import Character
         if not isinstance(character, Character):  # pragma: no cover
             return game_state
-        if character.defeated():
+        if character.is_defeated():
             return game_state
-        hp = min(character.get_hp() + self.recovery, character.get_max_hp())
-        if hp == character.get_hp():
+        hp = min(character.hp + self.recovery, character.max_hp)
+        if hp == character.hp:
             return game_state
         return game_state.factory().f_player(
             self.target.pid,
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().f_character(
-                    character.get_id(),  # type: ignore
+                    character.id,  # type: ignore
                     lambda c: c.factory().hp(hp).build()
                 ).build()
             ).build()
@@ -1377,15 +1377,15 @@ class ReviveRecoverHPEffect(RecoverHPEffect):
         from ..character.character import Character
         if not isinstance(character, Character):  # pragma: no cover
             return game_state
-        assert character.get_hp() == 0, game_state
-        hp = min(self.recovery, character.get_max_hp())
+        assert character.hp == 0, game_state
+        hp = min(self.recovery, character.max_hp)
         if hp == 0:
             return game_state
         return game_state.factory().f_player(
             self.target.pid,
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().f_character(
-                    character.get_id(),  # type: ignore
+                    character.id,  # type: ignore
                     lambda c: c.factory().alive(True).hp(hp).build()
                 ).build()
             ).build()
@@ -1403,7 +1403,7 @@ class DrawRandomCardEffect(DirectEffect):
     num: int
 
     def execute(self, game_state: GameState) -> GameState:
-        deck_cards = game_state.get_player(self.pid).get_deck_cards()
+        deck_cards = game_state.get_player(self.pid).deck_cards
         left_cards, chosen_cards = deck_cards.pick_random_cards(self.num)
         if chosen_cards.num_cards() == 0:
             return game_state
@@ -1414,7 +1414,7 @@ class DrawRandomCardEffect(DirectEffect):
             ).f_hand_cards(
                 lambda cards: cards.extend(
                     chosen_cards,
-                    limit=game_state.get_mode().hand_card_limit()
+                    limit=game_state.mode.hand_card_limit()
                 )
             ).build()
         ).build()
@@ -1427,7 +1427,7 @@ class DrawRandomCardOfTypeEffect(DirectEffect):
     card_type: type[Card]
 
     def execute(self, game_state: GameState) -> GameState:
-        deck_cards = game_state.get_player(self.pid).get_deck_cards()
+        deck_cards = game_state.get_player(self.pid).deck_cards
         left_cards, chosen_cards = deck_cards.pick_random_cards_of_type(self.num, self.card_type)
         if chosen_cards.num_cards() == 0:
             return game_state
@@ -1438,7 +1438,7 @@ class DrawRandomCardOfTypeEffect(DirectEffect):
             ).f_hand_cards(
                 lambda cards: cards.extend(
                     chosen_cards,
-                    limit=game_state.get_mode().hand_card_limit()
+                    limit=game_state.mode.hand_card_limit()
                 )
             ).build()
         ).build()
@@ -1450,8 +1450,8 @@ class PublicAddCardEffect(DirectEffect):
     card: type[Card]
 
     def execute(self, game_state: GameState) -> GameState:
-        hand_card_limit = game_state.get_mode().hand_card_limit()
-        if game_state.get_player(self.pid).get_hand_cards().num_cards() >= hand_card_limit:
+        hand_card_limit = game_state.mode.hand_card_limit()
+        if game_state.get_player(self.pid).hand_cards.num_cards() >= hand_card_limit:
             return game_state
         return game_state.factory().f_player(
             self.pid,
@@ -1471,7 +1471,7 @@ class PublicRemoveCardEffect(DirectEffect):
     def execute(self, game_state: GameState) -> GameState:
         pid = self.pid
         card = self.card
-        hand_cards = game_state.get_player(pid).get_hand_cards()
+        hand_cards = game_state.get_player(pid).hand_cards
         if not hand_cards.contains(card):  # pragma: no cover
             return game_state
         return game_state.factory().f_player(
@@ -1492,7 +1492,7 @@ class PublicRemoveAllCardEffect(DirectEffect):
     def execute(self, game_state: GameState) -> GameState:
         pid = self.pid
         card = self.card
-        hand_cards = game_state.get_player(pid).get_hand_cards()
+        hand_cards = game_state.get_player(pid).hand_cards
         if not hand_cards.contains(card) or hand_cards[card] <= 0:  # pragma: no cover
             return game_state
         return game_state.factory().f_player(
@@ -1513,8 +1513,8 @@ class AddDiceEffect(DirectEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         pid = self.pid
-        curr_dice = game_state.get_player(pid).get_dice()
-        addable_num = min(self.num, game_state.get_mode().dice_limit() - curr_dice.num_dice())
+        curr_dice = game_state.get_player(pid).dice
+        addable_num = min(self.num, game_state.mode.dice_limit() - curr_dice.num_dice())
         if addable_num <= 0:
             return game_state
         dice = ActualDice({self.element: addable_num})
@@ -1533,10 +1533,10 @@ class RemoveDiceEffect(DirectEffect):
     def execute(self, game_state: GameState) -> GameState:
         pid = self.pid
         dice = self.dice
-        new_dice = game_state.get_player(pid).get_dice() - dice
+        new_dice = game_state.get_player(pid).dice - dice
         if not new_dice.is_legal():
             raise Exception(f"Not enough dice for this effect "
-                            + f"{game_state.get_player(pid).get_dice()} - {dice}")
+                            + f"{game_state.get_player(pid).dice} - {dice}")
         return game_state.factory().f_player(
             pid,
             lambda p: p.factory().dice(new_dice).build()
@@ -1876,7 +1876,7 @@ class AllSummonIncreaseUsageEffect(DirectEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         effects: list[Effect] = []
-        summons = game_state.get_player(self.target_pid).get_summons()
+        summons = game_state.get_player(self.target_pid).summons
         for summon in summons:
             effects.append(
                 OverrideSummonEffect(
@@ -1896,7 +1896,7 @@ class OneSummonIncreaseUsageEffect(DirectEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         effects: list[Effect] = []
-        summons = game_state.get_player(self.target.pid).get_summons()
+        summons = game_state.get_player(self.target.pid).summons
         summon = summons.find(summon_type=cast(type[sm.Summon], self.target.id))
         if summon is None:  # pragma: no cover
             return game_state
@@ -1919,7 +1919,7 @@ class OneSummonDecreaseUsageEffect(DirectEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         effects: list[Effect] = []
-        summons = game_state.get_player(self.target.pid).get_summons()
+        summons = game_state.get_player(self.target.pid).summons
         summon = summons.find(summon_type=cast(type[sm.Summon], self.target.id))
         if summon is None:  # pragma: no cover
             return game_state

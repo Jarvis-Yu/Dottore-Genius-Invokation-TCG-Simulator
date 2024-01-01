@@ -22,14 +22,14 @@ class TestTheBestestTravelCompanion(unittest.TestCase):
 
         # test behaviour
         game_state = base_state
-        dice_before = game_state.get_player1().get_dice()
+        dice_before = game_state.player1.dice
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=TheBestestTravelCompanion,
             instruction=DiceOnlyInstruction(dice=ActualDice(
                 {Element.PYRO: 1, Element.HYDRO: 1}
             )),
         ))
-        dice_after = game_state.get_player1().get_dice()
+        dice_after = game_state.player1.dice
         self.assertEqual(dice_after.num_dice(), dice_before.num_dice())
         self.assertEqual(dice_after[Element.OMNI], dice_before[Element.OMNI] + 2)
 
@@ -40,6 +40,6 @@ class TestTheBestestTravelCompanion(unittest.TestCase):
                 {Element.OMNI: 1, Element.GEO: 1}
             )),
         ))
-        dice_after = game_state.get_player1().get_dice()
+        dice_after = game_state.player1.dice
         self.assertEqual(dice_after.num_dice(), dice_before.num_dice())
         self.assertEqual(dice_after[Element.OMNI], dice_before[Element.OMNI] + 1)

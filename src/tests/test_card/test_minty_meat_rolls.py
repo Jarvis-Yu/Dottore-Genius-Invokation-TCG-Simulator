@@ -28,15 +28,15 @@ class TestMintyMeatRolls(unittest.TestCase):
 
         self.assertEqual(
             buffed_game_state
-            .get_player1()
+            .player1
             .just_get_active_character()
-            .get_character_statuses()
+            .character_statuses
             .just_find(MintyMeatRollsStatus)
             .usages,
             3
         )
         self.assertTrue(
-            buffed_game_state.get_player1().just_get_active_character().get_character_statuses()
+            buffed_game_state.player1.just_get_active_character().character_statuses
             .contains(SatiatedStatus)
         )
 
@@ -59,10 +59,10 @@ class TestMintyMeatRolls(unittest.TestCase):
         assert game_state is not None
         game_state = auto_step(game_state)
 
-        p1ac = game_state.get_player1().just_get_active_character()
+        p1ac = game_state.player1.just_get_active_character()
         self.assertEqual(
             p1ac
-            .get_character_statuses()
+            .character_statuses
             .just_find(MintyMeatRollsStatus)
             .usages,
             2
@@ -83,10 +83,10 @@ class TestMintyMeatRolls(unittest.TestCase):
         gsm.player_step()  # P1 normal attack
         gsm.player_step()  # P1 normal attack
         gsm.auto_step()
-        p1ac = gsm.get_game_state().get_player1().just_get_active_character()
+        p1ac = gsm.get_game_state().player1.just_get_active_character()
         self.assertFalse(
             p1ac
-            .get_character_statuses()
+            .character_statuses
             .contains(MintyMeatRollsStatus)
         )
 
@@ -98,7 +98,7 @@ class TestMintyMeatRolls(unittest.TestCase):
         a1.inject_action(DiceSelectAction(selected_dice=ActualDice({}))) # skip roll phase
         a2.inject_action(DiceSelectAction(selected_dice=ActualDice({})))
         gsm.step_until_next_phase()
-        gsm.step_until_phase(buffed_game_state.get_mode().action_phase())
+        gsm.step_until_phase(buffed_game_state.mode.action_phase())
         game_state = gsm.get_game_state()
-        p1ac = game_state.get_player1().just_get_active_character()
-        self.assertFalse(p1ac.get_character_statuses().contains(MintyMeatRollsStatus))
+        p1ac = game_state.player1.just_get_active_character()
+        self.assertFalse(p1ac.character_statuses.contains(MintyMeatRollsStatus))

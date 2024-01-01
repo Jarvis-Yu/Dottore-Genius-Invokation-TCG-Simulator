@@ -19,7 +19,7 @@ class TestWhereIsTheUnseenRazor(unittest.TestCase):
             )
         ))
 
-        self.assertNotIn(RavenBow, game_state.get_player1().get_hand_cards())
+        self.assertNotIn(RavenBow, game_state.player1.hand_cards)
 
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=WhereIsTheUnseenRazor,
@@ -29,7 +29,7 @@ class TestWhereIsTheUnseenRazor(unittest.TestCase):
             )
         ))
 
-        self.assertIn(RavenBow, game_state.get_player1().get_hand_cards())
+        self.assertIn(RavenBow, game_state.player1.hand_cards)
 
         # test use with King's Squire
         game_state = PublicAddCardEffect(Pid.P1, KingsSquire).execute(base_state)

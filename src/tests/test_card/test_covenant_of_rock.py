@@ -7,7 +7,7 @@ class TestCovenantOfRock(unittest.TestCase):
         base_state = ACTION_TEMPLATE
         base_state = PublicAddCardEffect(Pid.P1, CovenantOfRock).execute(base_state)
 
-        assert base_state.get_player1().get_dice().num_dice() > 0
+        assert base_state.player1.dice.num_dice() > 0
         self.assertFalse(CovenantOfRock.loosely_usable(base_state, Pid.P1))
 
         game_state = replace_dice(base_state, Pid.P1, ActualDice.from_empty())
@@ -16,7 +16,7 @@ class TestCovenantOfRock(unittest.TestCase):
             card=CovenantOfRock,
             instruction=DiceOnlyInstruction(dice=ActualDice.from_empty()),
         ))
-        dice = game_state.get_player1().get_dice()
+        dice = game_state.player1.dice
         self.assertEqual(dice.num_dice(), 2)
         self.assertTrue(all(
             dice[elem] <= 1

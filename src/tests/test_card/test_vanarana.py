@@ -43,10 +43,10 @@ class TestVanaranan(unittest.TestCase):
                     DiceSelectAction(selected_dice=ActualDice({})),  # roll phase
                 ])
                 gsm.step_until_next_phase()
-                gsm.step_until_phase(base_game.get_mode().action_phase(), observe=False)
-                p1_dice_before = gsm.get_game_state().get_player1().get_dice()
+                gsm.step_until_phase(base_game.mode.action_phase(), observe=False)
+                p1_dice_before = gsm.get_game_state().player1.dice
                 gsm.auto_step()
-                p1_dice_after = gsm.get_game_state().get_player1().get_dice()
+                p1_dice_after = gsm.get_game_state().player1.dice
                 self.assertEqual(p1_dice_before + expected_dice, p1_dice_after)
 
     def test_perspective(self) -> None:

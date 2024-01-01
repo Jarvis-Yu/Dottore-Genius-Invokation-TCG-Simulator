@@ -30,10 +30,10 @@ class TestPlayerState(unittest.TestCase):
             Characters.from_iterable([Keqing, RhodeiaOfLoch, Tighnari, Kaeya, Keqing]),
             Cards({Starsigns: 1, MondstadtHashBrown: 6}),
         )
-        self.assertTrue(player_state.get_characters().num_characters(), 5)
+        self.assertTrue(player_state.characters.num_characters(), 5)
         for i in range(1, 6):
-            self.assertIsNotNone(player_state.get_characters().get_by_id(i))
-        self.assertTrue(player_state.get_deck_cards().num_cards(), 7)
+            self.assertIsNotNone(player_state.characters.get_by_id(i))
+        self.assertTrue(player_state.deck_cards.num_cards(), 7)
 
     def test_eq_and_hash(self):
         player_state1 = PlayerState.from_chars_cards(

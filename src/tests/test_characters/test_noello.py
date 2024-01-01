@@ -15,7 +15,7 @@ class TestNoelle(unittest.TestCase):
             lambda hcs: hcs.add(IGotYourBack)
         ).build()
     ).build()
-    assert type(BASE_GAME.get_player1().just_get_active_character()) is Noelle
+    assert type(BASE_GAME.player1.just_get_active_character()) is Noelle
 
     def test_normal_attack(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -24,14 +24,14 @@ class TestNoelle(unittest.TestCase):
             skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 10)
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 10)
 
         gsm.player_step()
         gsm.auto_step()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 8)
-        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 8)
+        self.assertFalse(p2ac.elemental_aura.has_aura())
 
     def test_elemental_skill1(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -41,21 +41,21 @@ class TestNoelle(unittest.TestCase):
             skill=CharacterSkill.SKILL2,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 10)
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 10)
 
         # first skill
         gsm.player_step()
         gsm.auto_step()
-        p1 = gsm.get_game_state().get_player1()
+        p1 = gsm.get_game_state().player1
         p1ac = p1.just_get_active_character()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 8)
-        self.assertFalse(p2ac.get_elemental_aura().has_aura())
-        self.assertIn(FullPlateStatus, p1.get_combat_statuses())
-        self.assertIn(CrystallizeStatus, p1.get_combat_statuses())
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 8)
+        self.assertFalse(p2ac.elemental_aura.has_aura())
+        self.assertIn(FullPlateStatus, p1.combat_statuses)
+        self.assertIn(CrystallizeStatus, p1.combat_statuses)
         self.assertEqual(
-            p1.get_combat_statuses().just_find(FullPlateStatus).usages,
+            p1.combat_statuses.just_find(FullPlateStatus).usages,
             2
         )
 
@@ -69,14 +69,14 @@ class TestNoelle(unittest.TestCase):
             ActualDice({Element.OMNI: 4}),
         )
 
-        p1 = game_state.get_player1()
+        p1 = game_state.player1
         p1ac = p1.just_get_active_character()
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 5)
-        self.assertFalse(p2ac.get_elemental_aura().has_aura())
-        self.assertIn(CrystallizeStatus, p1.get_combat_statuses())
-        self.assertIn(SweepingTimeStatus, p1ac.get_character_statuses())
-        burst_status = p1ac.get_character_statuses().just_find(SweepingTimeStatus)
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 5)
+        self.assertFalse(p2ac.elemental_aura.has_aura())
+        self.assertIn(CrystallizeStatus, p1.combat_statuses)
+        self.assertIn(SweepingTimeStatus, p1ac.character_statuses)
+        burst_status = p1ac.character_statuses.just_find(SweepingTimeStatus)
         self.assertEqual(burst_status.usages, 2)
 
     def test_full_plate_status(self):
@@ -88,17 +88,17 @@ class TestNoelle(unittest.TestCase):
                 game_state = add_damage_effect(base_state, dmg_amount, Element.PHYSICAL, Pid.P1)
                 game_state = auto_step(game_state)
 
-                p1 = game_state.get_player1()
+                p1 = game_state.player1
                 p1ac = p1.just_get_active_character()
                 actual_dmg = ceil(dmg_amount / 2)
                 post_shield_dmg = max(0, actual_dmg - 2)
-                self.assertEqual(p1ac.get_hp(), 10 - post_shield_dmg)
+                self.assertEqual(p1ac.hp, 10 - post_shield_dmg)
                 if actual_dmg >= 2:
-                    self.assertNotIn(FullPlateStatus, p1.get_combat_statuses())
+                    self.assertNotIn(FullPlateStatus, p1.combat_statuses)
                 else:
-                    self.assertIn(FullPlateStatus, p1.get_combat_statuses())
+                    self.assertIn(FullPlateStatus, p1.combat_statuses)
                     self.assertEqual(
-                        p1.get_combat_statuses().just_find(FullPlateStatus).usages,
+                        p1.combat_statuses.just_find(FullPlateStatus).usages,
                         2 - actual_dmg
                     )
 
@@ -114,8 +114,8 @@ class TestNoelle(unittest.TestCase):
             CharacterSkill.SKILL1,
             dice=ActualDice({Element.PYRO: 1, Element.CRYO: 1}),
         )
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 6)
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 6)
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         game_state = step_skill(
             game_state,
@@ -123,13 +123,13 @@ class TestNoelle(unittest.TestCase):
             CharacterSkill.SKILL1,
             dice=ActualDice({Element.GEO: 1, Element.DENDRO: 1, Element.ANEMO: 1}),
         )
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 2)
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 2)
 
         # test next round as well
         game_state = next_round(game_state)
         p1ac_character_statuses = \
-            game_state.get_player1().just_get_active_character().get_character_statuses()
+            game_state.player1.just_get_active_character().character_statuses
         self.assertIn(SweepingTimeStatus, p1ac_character_statuses)
         self.assertEqual(p1ac_character_statuses.just_find(SweepingTimeStatus).usages, 1)
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
@@ -151,7 +151,7 @@ class TestNoelle(unittest.TestCase):
         # disappears eventually after two rounds
         game_state = next_round(game_state)
         p1ac_character_statuses = \
-            game_state.get_player1().just_get_active_character().get_character_statuses()
+            game_state.player1.just_get_active_character().character_statuses
         self.assertNotIn(SweepingTimeStatus, p1ac_character_statuses)
 
     def test_talent_card(self):
@@ -172,28 +172,28 @@ class TestNoelle(unittest.TestCase):
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         # first normal attack heals with shield on
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
-        p1_cs = game_state.get_player1().get_characters()
+        p1_cs = game_state.player1.characters
         for char in p1_cs:
-            self.assertEqual(char.get_hp(), 6)
+            self.assertEqual(char.hp, 6)
 
         # second normal attack doesn't heal
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
-        p1_cs = game_state.get_player1().get_characters()
+        p1_cs = game_state.player1.characters
         for char in p1_cs:
-            self.assertEqual(char.get_hp(), 6)
+            self.assertEqual(char.hp, 6)
 
         # healing is back the next round
         game_state = next_round(game_state)
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         game_state = fill_dice_with_omni(game_state)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
-        p1_cs = game_state.get_player1().get_characters()
+        p1_cs = game_state.player1.characters
         for char in p1_cs:
-            self.assertEqual(char.get_hp(), 7)
+            self.assertEqual(char.hp, 7)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
-        p1_cs = game_state.get_player1().get_characters()
+        p1_cs = game_state.player1.characters
         for char in p1_cs:
-            self.assertEqual(char.get_hp(), 7)
+            self.assertEqual(char.hp, 7)
 
         # healing doesn't work without the shield
         game_state = next_round(game_state)
@@ -202,6 +202,6 @@ class TestNoelle(unittest.TestCase):
         game_state = auto_step(add_damage_effect(game_state, 2, Element.ELECTRO, Pid.P1, char_id=2))
         game_state = kill_character(game_state, character_id=1, hp=10)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
-        p1_cs = game_state.get_player1().get_characters()
+        p1_cs = game_state.player1.characters
         for char in p1_cs:
-            self.assertEqual(char.get_hp(), 7)
+            self.assertEqual(char.hp, 7)

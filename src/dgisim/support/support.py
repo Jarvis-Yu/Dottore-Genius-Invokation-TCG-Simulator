@@ -77,7 +77,7 @@ class Support(stt.Status):
         return StaticTarget(
             pid=status_source.pid,
             zone=Zone.CHARACTERS,
-            id=active_char.get_id(),
+            id=active_char.id,
         ) == target
 
     def __str__(self) -> str:  # pragma: no cover
@@ -160,7 +160,7 @@ class LibenSupport(Support, stt._UsageLivingStatus):
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             this_player = game_state.get_player(source.pid)
-            dice = this_player.get_dice()
+            dice = this_player.dice
             if dice.is_empty():
                 return [], self
             curr_size = 0
@@ -215,10 +215,10 @@ class LiuSuSupport(Support, stt._UsageStatus):
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.SELF_SWAP and self.activated:
             active_char = game_state.get_player(source.pid).get_active_character()
-            if active_char is not None and active_char.get_energy() == 0:
+            if active_char is not None and active_char.energy == 0:
                 return [
                     eft.EnergyRechargeEffect(
-                        target=StaticTarget.from_char_id(source.pid, active_char.get_id()),
+                        target=StaticTarget.from_char_id(source.pid, active_char.id),
                         recharge=1,
                     )
                 ], replace(self, usages=-1, activated=False)
@@ -286,7 +286,7 @@ class RanaSupport(Support, stt._UsageStatus):
         if signal is TriggeringSignal.COMBAT_ACTION and self.triggered:
             next_char = game_state.get_player(
                 source.pid
-            ).get_characters().get_nth_next_alive_character_in_activity_order(1)
+            ).characters.get_nth_next_alive_character_in_activity_order(1)
             return [
                 eft.AddDiceEffect(
                     pid=source.pid,
@@ -313,7 +313,7 @@ class SetariaSupport(Support, stt._UsageStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.POST_ANY:
-            hand_cards = game_state.get_player(source.pid).get_hand_cards()
+            hand_cards = game_state.get_player(source.pid).hand_cards
             if hand_cards.num_cards() == 0:
                 return [
                     eft.DrawRandomCardEffect(
@@ -550,7 +550,7 @@ class SumeruCitySupport(Support, stt._UsageLivingStatus):
             ):
                 return item, self
             this_player = game_state.get_player(status_source.pid)
-            if this_player.get_dice().num_dice() <= this_player.get_hand_cards().num_cards():
+            if this_player.dice.num_dice() <= this_player.hand_cards.num_cards():
                 return (
                     item.with_new_cost(item.dice_cost.cost_less_elem(1)),
                     replace(self, usages=self.usages - 1),
@@ -569,7 +569,7 @@ class SumeruCitySupport(Support, stt._UsageLivingStatus):
             ):
                 return item, self
             this_player = game_state.get_player(status_source.pid)
-            if this_player.get_dice().num_dice() <= this_player.get_hand_cards().num_cards():
+            if this_player.dice.num_dice() <= this_player.hand_cards.num_cards():
                 return (
                     item.with_new_cost(item.dice_cost.cost_less_elem(1)),
                     replace(self, usages=self.usages - 1),
@@ -589,7 +589,7 @@ class TenshukakuSupport(Support):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_START:
-            this_player_dice = game_state.get_player(source.pid).get_dice()
+            this_player_dice = game_state.get_player(source.pid).dice
             num_kinds = sum([
                 1 if elem is not Element.OMNI else this_player_dice[elem]
                 for elem in this_player_dice
@@ -621,7 +621,7 @@ class VanaranaSupport(Support):
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             this_player = game_state.get_player(source.pid)
-            dice = this_player.get_dice()
+            dice = this_player.dice
             if dice.is_empty():
                 return [], self
             curr_size = 0

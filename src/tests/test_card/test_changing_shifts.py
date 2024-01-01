@@ -30,7 +30,7 @@ class TestChangingShifts(unittest.TestCase):
         buffed_game_state = auto_step(game_state)
 
         self.assertTrue(
-            buffed_game_state.get_player1().get_combat_statuses().contains(ChangingShiftsStatus)
+            buffed_game_state.player1.combat_statuses.contains(ChangingShiftsStatus)
         )
 
         # test swap with dice fails
@@ -53,7 +53,7 @@ class TestChangingShifts(unittest.TestCase):
         game_state = auto_step(game_state)
 
         self.assertFalse(
-            game_state.get_player1().get_combat_statuses().contains(ChangingShiftsStatus)
+            game_state.player1.combat_statuses.contains(ChangingShiftsStatus)
         )
 
         # test opponent cannot use this

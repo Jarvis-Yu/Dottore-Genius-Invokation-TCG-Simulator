@@ -410,8 +410,8 @@ So the workflow to use an `ActionGenerator` is like this:
 game_state: GameState = ...  # you should have the game state to generate action from
 # suppose you are making a choice for player 1
 action_generator = game_state.action_generator(Pid.P1)  # this is an 'alias' of
-                                                        # game_state.get_phase(
-                                                        # ).action_generator(game_state)
+                                                        # game_state.phase
+                                                        # .action_generator(game_state)
 while not action_generator.filled():
    choices = action_generator.choices()
    choice = ...  # write some code to make a wise choice

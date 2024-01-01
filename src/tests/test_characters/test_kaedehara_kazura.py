@@ -22,7 +22,7 @@ class TestKaedeharaKazuha(unittest.TestCase):
             Act.END_PHASE
         ).build()
     ).build()
-    assert type(BASE_GAME.get_player1().just_get_active_character()) is KaedeharaKazuha
+    assert type(BASE_GAME.player1.just_get_active_character()) is KaedeharaKazuha
 
     def test_normal_attack(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -31,14 +31,14 @@ class TestKaedeharaKazuha(unittest.TestCase):
             skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 10)
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 10)
 
         gsm.player_step()
         gsm.auto_step()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 8)
-        self.assertFalse(p2ac.get_elemental_aura().elem_auras())
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 8)
+        self.assertFalse(p2ac.elemental_aura.elem_auras())
 
     def test_elemental_skill1(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -58,23 +58,23 @@ class TestKaedeharaKazuha(unittest.TestCase):
                     skill=CharacterSkill.SKILL2,
                     instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
                 ))
-                p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-                self.assertEqual(p2ac.get_hp(), 10)
+                p2ac = gsm.get_game_state().player2.just_get_active_character()
+                self.assertEqual(p2ac.hp, 10)
 
                 # first skill
                 gsm.player_step()
                 gsm.auto_step()
-                p2cs = gsm.get_game_state().get_player2().get_characters()
+                p2cs = gsm.get_game_state().player2.characters
                 p2c1, p2c2, p2c3 = (p2cs.just_get_character(i) for i in range(1, 4))
-                self.assertEqual(p2c1.get_hp(), 7)
-                self.assertFalse(p2c1.get_elemental_aura().has_aura())
+                self.assertEqual(p2c1.hp, 7)
+                self.assertFalse(p2c1.elemental_aura.has_aura())
                 if elem is not None:
-                    self.assertEqual(p2c2.get_hp(), 9)
-                    self.assertEqual(p2c3.get_hp(), 9)
-                    self.assertTrue(p2c2.get_elemental_aura().has_aura())
-                    self.assertTrue(p2c3.get_elemental_aura().has_aura())
-                p1ac = gsm.get_game_state().get_player1().just_get_active_character()
-                self.assertEqual(p1ac.get_id(), 3)
+                    self.assertEqual(p2c2.hp, 9)
+                    self.assertEqual(p2c3.hp, 9)
+                    self.assertTrue(p2c2.elemental_aura.has_aura())
+                    self.assertTrue(p2c3.elemental_aura.has_aura())
+                p1ac = gsm.get_game_state().player1.just_get_active_character()
+                self.assertEqual(p1ac.id, 3)
 
                 # swap back and plunge attack
                 a1.inject_actions([
@@ -89,22 +89,22 @@ class TestKaedeharaKazuha(unittest.TestCase):
                     EndRoundAction(),
                 ])
                 gsm.step_until_next_phase()
-                p2cs = gsm.get_game_state().get_player2().get_characters()
+                p2cs = gsm.get_game_state().player2.characters
                 p2c1, p2c2, p2c3 = (p2cs.just_get_character(i) for i in range(1, 4))
-                self.assertEqual(p2c1.get_hp(), 4)
+                self.assertEqual(p2c1.hp, 4)
                 if elem is None:
-                    self.assertFalse(p2c1.get_elemental_aura().has_aura())
+                    self.assertFalse(p2c1.elemental_aura.has_aura())
                 else:
-                    self.assertIn(elem, p2c1.get_elemental_aura())
+                    self.assertIn(elem, p2c1.elemental_aura)
                 if elem is not None:
-                    self.assertEqual(p2c2.get_hp(), 9)
-                    self.assertEqual(p2c3.get_hp(), 9)
-                    self.assertTrue(p2c2.get_elemental_aura().has_aura())
-                    self.assertTrue(p2c3.get_elemental_aura().has_aura())
-                p1ac = gsm.get_game_state().get_player1().just_get_active_character()
-                self.assertEqual(p1ac.get_id(), 2)
+                    self.assertEqual(p2c2.hp, 9)
+                    self.assertEqual(p2c3.hp, 9)
+                    self.assertTrue(p2c2.elemental_aura.has_aura())
+                    self.assertTrue(p2c3.elemental_aura.has_aura())
+                p1ac = gsm.get_game_state().player1.just_get_active_character()
+                self.assertEqual(p1ac.id, 2)
                 from src.dgisim.status.status import _MIDARE_RANZAN_MAP
-                for status in p1ac.get_character_statuses():
+                for status in p1ac.character_statuses:
                     self.assertNotIn(type(status), _MIDARE_RANZAN_MAP.values())
 
     def test_midare_ranzan_status(self):
@@ -136,14 +136,14 @@ class TestKaedeharaKazuha(unittest.TestCase):
                     skill=CharacterSkill.SKILL2,
                     instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
                 ))
-                p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-                self.assertEqual(p2ac.get_hp(), 10)
+                p2ac = gsm.get_game_state().player2.just_get_active_character()
+                self.assertEqual(p2ac.hp, 10)
 
                 # first skill
                 gsm.player_step()
                 gsm.auto_step()
-                p1_kazuha = gsm.get_game_state().get_player1().get_characters().just_get_character(2)
-                p1_kazuha_stts = p1_kazuha.get_character_statuses()
+                p1_kazuha = gsm.get_game_state().player1.characters.just_get_character(2)
+                p1_kazuha_stts = p1_kazuha.character_statuses
                 for midare in _MIDARE_RANZAN_MAP.values():
                     if midare is new_midare_status:
                         self.assertIn(midare, p1_kazuha_stts)
@@ -156,7 +156,7 @@ class TestKaedeharaKazuha(unittest.TestCase):
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().f_active_character(
                     lambda ac: ac.factory().energy(
-                        ac.get_max_energy()
+                        ac.max_energy
                     ).build()
                 ).build()
             ).build()
@@ -172,20 +172,20 @@ class TestKaedeharaKazuha(unittest.TestCase):
         )
         gsm.player_step()
         gsm.auto_step()
-        p2cs = gsm.get_game_state().get_player2().get_characters()
+        p2cs = gsm.get_game_state().player2.characters
         p2c1, p2c2, p2c3 = (p2cs.just_get_character(i) for i in range(1, 4))
-        self.assertEqual(p2c1.get_hp(), 7)
-        self.assertEqual(p2c2.get_hp(), 10)
-        self.assertEqual(p2c3.get_hp(), 10)
-        self.assertFalse(p2c1.get_elemental_aura().has_aura())
-        self.assertFalse(p2c2.get_elemental_aura().has_aura())
-        self.assertFalse(p2c3.get_elemental_aura().has_aura())
+        self.assertEqual(p2c1.hp, 7)
+        self.assertEqual(p2c2.hp, 10)
+        self.assertEqual(p2c3.hp, 10)
+        self.assertFalse(p2c1.elemental_aura.has_aura())
+        self.assertFalse(p2c2.elemental_aura.has_aura())
+        self.assertFalse(p2c3.elemental_aura.has_aura())
         self.assertEqual(
-            gsm.get_game_state().get_player1().just_get_active_character().get_energy(),
+            gsm.get_game_state().player1.just_get_active_character().energy,
             0
         )
-        p1 = gsm.get_game_state().get_player1()
-        p1_burst_summon = p1.get_summons().just_find(AutumnWhirlwindSummon)
+        p1 = gsm.get_game_state().player1
+        p1_burst_summon = p1.summons.just_find(AutumnWhirlwindSummon)
         assert isinstance(p1_burst_summon, AutumnWhirlwindSummon)
         self.assertEqual(p1_burst_summon.usages, 2)
         self.assertEqual(p1_burst_summon.curr_elem, Element.ANEMO)
@@ -205,30 +205,30 @@ class TestKaedeharaKazuha(unittest.TestCase):
                 )
                 gsm.player_step()
                 gsm.step_until_holds(
-                    lambda gs: gs.get_effect_stack().peek() == DeathCheckCheckerEffect()
+                    lambda gs: gs.effect_stack.peek() == DeathCheckCheckerEffect()
                 )
-                p1 = gsm.get_game_state().get_player1()
-                p1_burst_summon = p1.get_summons().just_find(AutumnWhirlwindSummon)
+                p1 = gsm.get_game_state().player1
+                p1_burst_summon = p1.summons.just_find(AutumnWhirlwindSummon)
                 assert isinstance(p1_burst_summon, AutumnWhirlwindSummon)
                 self.assertEqual(p1_burst_summon.usages, 2)
                 self.assertEqual(p1_burst_summon.curr_elem, Element.ANEMO)
                 self.assertEqual(p1_burst_summon.ready_elem, elem)
 
                 gsm.auto_step()
-                p2cs = gsm.get_game_state().get_player2().get_characters()
+                p2cs = gsm.get_game_state().player2.characters
                 p2c1, p2c2, p2c3 = (p2cs.just_get_character(i) for i in range(1, 4))
-                self.assertEqual(p2c1.get_hp(), 7)
-                self.assertEqual(p2c2.get_hp(), 9)
-                self.assertEqual(p2c3.get_hp(), 9)
-                self.assertFalse(p2c1.get_elemental_aura().has_aura())
-                self.assertIn(elem, p2c2.get_elemental_aura())
-                self.assertIn(elem, p2c3.get_elemental_aura())
+                self.assertEqual(p2c1.hp, 7)
+                self.assertEqual(p2c2.hp, 9)
+                self.assertEqual(p2c3.hp, 9)
+                self.assertFalse(p2c1.elemental_aura.has_aura())
+                self.assertIn(elem, p2c2.elemental_aura)
+                self.assertIn(elem, p2c3.elemental_aura)
                 self.assertEqual(
-                    gsm.get_game_state().get_player1().just_get_active_character().get_energy(),
+                    gsm.get_game_state().player1.just_get_active_character().energy,
                     0
                 )
-                p1 = gsm.get_game_state().get_player1()
-                p1_burst_summon = p1.get_summons().just_find(AutumnWhirlwindSummon)
+                p1 = gsm.get_game_state().player1
+                p1_burst_summon = p1.summons.just_find(AutumnWhirlwindSummon)
                 assert isinstance(p1_burst_summon, AutumnWhirlwindSummon)
                 self.assertEqual(p1_burst_summon.usages, 2)
                 self.assertEqual(p1_burst_summon.curr_elem, elem)
@@ -250,7 +250,7 @@ class TestKaedeharaKazuha(unittest.TestCase):
                     instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
                 )))
                 game_state = auto_step(game_state)
-                p1_summons = game_state.get_player1().get_summons()
+                p1_summons = game_state.player1.summons
                 self.assertIn(AutumnWhirlwindSummon, p1_summons)
                 summon = p1_summons.just_find(AutumnWhirlwindSummon)
                 assert isinstance(summon, AutumnWhirlwindSummon)
@@ -276,7 +276,7 @@ class TestKaedeharaKazuha(unittest.TestCase):
             with self.subTest(elem=elem):
                 game_state = oppo_aura_elem(base_game_state, elem)
                 game_state = auto_step(game_state)
-                p1_summons = game_state.get_player1().get_summons()
+                p1_summons = game_state.player1.summons
                 self.assertIn(AutumnWhirlwindSummon, p1_summons)
                 summon = p1_summons.just_find(AutumnWhirlwindSummon)
                 assert isinstance(summon, AutumnWhirlwindSummon)
@@ -284,16 +284,16 @@ class TestKaedeharaKazuha(unittest.TestCase):
                 self.assertEqual(summon.curr_elem, elem)
                 self.assertEqual(summon.ready_elem, None)
 
-                p2_chars = game_state.get_player2().get_characters()
+                p2_chars = game_state.player2.characters
                 p2_c1 = p2_chars.just_get_character(1)
                 p2_c2 = p2_chars.just_get_character(2)
                 p2_c3 = p2_chars.just_get_character(3)
-                self.assertEqual(p2_c1.get_hp(), 9)
-                self.assertEqual(p2_c2.get_hp(), 9)
-                self.assertEqual(p2_c3.get_hp(), 9)
-                self.assertFalse(p2_c1.get_elemental_aura().has_aura())
-                self.assertIn(elem, p2_c2.get_elemental_aura())
-                self.assertIn(elem, p2_c3.get_elemental_aura())
+                self.assertEqual(p2_c1.hp, 9)
+                self.assertEqual(p2_c2.hp, 9)
+                self.assertEqual(p2_c3.hp, 9)
+                self.assertFalse(p2_c1.elemental_aura.has_aura())
+                self.assertIn(elem, p2_c2.elemental_aura)
+                self.assertIn(elem, p2_c3.elemental_aura)
 
     def test_autumn_whirlwind_summon_on_summon_swirl(self):
         from src.dgisim.summon.summon import _DmgPerRoundSummon
@@ -320,7 +320,7 @@ class TestKaedeharaKazuha(unittest.TestCase):
             with self.subTest(elem=elem):
                 game_state = oppo_aura_elem(base_game_state, elem)
                 game_state = auto_step(game_state)
-                p1_summons = game_state.get_player1().get_summons()
+                p1_summons = game_state.player1.summons
                 self.assertIn(AutumnWhirlwindSummon, p1_summons)
                 summon = p1_summons.just_find(AutumnWhirlwindSummon)
                 assert isinstance(summon, AutumnWhirlwindSummon)
@@ -328,16 +328,16 @@ class TestKaedeharaKazuha(unittest.TestCase):
                 self.assertEqual(summon.curr_elem, elem)
                 self.assertEqual(summon.ready_elem, None)
 
-                p2_chars = game_state.get_player2().get_characters()
+                p2_chars = game_state.player2.characters
                 p2_c1 = p2_chars.just_get_character(1)
                 p2_c2 = p2_chars.just_get_character(2)
                 p2_c3 = p2_chars.just_get_character(3)
-                self.assertEqual(p2_c1.get_hp(), 8)
-                self.assertEqual(p2_c2.get_hp(), 9)
-                self.assertEqual(p2_c3.get_hp(), 9)
-                self.assertIn(elem, p2_c1.get_elemental_aura())
-                self.assertIn(elem, p2_c2.get_elemental_aura())
-                self.assertIn(elem, p2_c3.get_elemental_aura())
+                self.assertEqual(p2_c1.hp, 8)
+                self.assertEqual(p2_c2.hp, 9)
+                self.assertEqual(p2_c3.hp, 9)
+                self.assertIn(elem, p2_c1.elemental_aura)
+                self.assertIn(elem, p2_c2.elemental_aura)
+                self.assertIn(elem, p2_c3.elemental_aura)
 
     def test_talent_card(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -353,13 +353,13 @@ class TestKaedeharaKazuha(unittest.TestCase):
             EndRoundAction(),
         ])
         gsm.step_until_next_phase()
-        p1ac = gsm.get_game_state().get_player1().just_get_active_character()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        p1_kazuha = gsm.get_game_state().get_player1().get_characters().just_get_character(2)
-        self.assertEqual(p2ac.get_hp(), 7)
-        self.assertFalse(p2ac.get_elemental_aura().has_aura())
-        self.assertEqual(p1ac.get_id(), 3)
-        self.assertIn(PoeticsOfFuubutsuStatus, p1_kazuha.get_character_statuses())
+        p1ac = gsm.get_game_state().player1.just_get_active_character()
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        p1_kazuha = gsm.get_game_state().player1.characters.just_get_character(2)
+        self.assertEqual(p2ac.hp, 7)
+        self.assertFalse(p2ac.elemental_aura.has_aura())
+        self.assertEqual(p1ac.id, 3)
+        self.assertIn(PoeticsOfFuubutsuStatus, p1_kazuha.character_statuses)
 
     def test_poetics_of_fuubutsu_status(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -385,9 +385,9 @@ class TestKaedeharaKazuha(unittest.TestCase):
         gsm.player_step()
         gsm.auto_step()
 
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 7)
-        p1_combat_statuses = gsm.get_game_state().get_player1().get_combat_statuses()
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 7)
+        p1_combat_statuses = gsm.get_game_state().player1.combat_statuses
         self.assertEqual(p1_combat_statuses.just_find(PoeticsOfFuubutsuElectroStatus).usages, 2)
         self.assertNotIn(PoeticsOfFuubutsuPyroStatus, p1_combat_statuses)
         self.assertNotIn(PoeticsOfFuubutsuHydroStatus, p1_combat_statuses)
@@ -403,9 +403,9 @@ class TestKaedeharaKazuha(unittest.TestCase):
         )
         game_state = auto_step(game_state)
 
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 5)
-        p1_combat_statuses = game_state.get_player1().get_combat_statuses()
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 5)
+        p1_combat_statuses = game_state.player1.combat_statuses
         self.assertEqual(p1_combat_statuses.just_find(PoeticsOfFuubutsuElectroStatus).usages, 1)
         self.assertNotIn(PoeticsOfFuubutsuPyroStatus, p1_combat_statuses)
         self.assertNotIn(PoeticsOfFuubutsuHydroStatus, p1_combat_statuses)
@@ -421,8 +421,8 @@ class TestKaedeharaKazuha(unittest.TestCase):
         )
         game_state = auto_step(game_state)
 
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 4)
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 4)
 
         game_state = kill_character(game_state, 1, hp=10)
         game_state = oppo_aura_elem(game_state, Element.PYRO)
@@ -441,7 +441,7 @@ class TestKaedeharaKazuha(unittest.TestCase):
         gsm.player_step()
         gsm.player_step()
         gsm.auto_step()
-        p1_combat_statuses = gsm.get_game_state().get_player1().get_combat_statuses()
+        p1_combat_statuses = gsm.get_game_state().player1.combat_statuses
         self.assertEqual(p1_combat_statuses.just_find(PoeticsOfFuubutsuPyroStatus).usages, 2)
         self.assertEqual(p1_combat_statuses.just_find(PoeticsOfFuubutsuElectroStatus).usages, 1)
         self.assertNotIn(PoeticsOfFuubutsuHydroStatus, p1_combat_statuses)

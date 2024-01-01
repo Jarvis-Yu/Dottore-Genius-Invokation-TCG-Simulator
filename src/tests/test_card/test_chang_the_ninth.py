@@ -18,7 +18,7 @@ class TestChangTheNinth(unittest.TestCase):
         ))
 
         def get_chang(game_state: GameState) -> ChangTheNinthSupport:
-            chang = game_state.get_player1().get_supports().find(ChangTheNinthSupport, 1)
+            chang = game_state.player1.supports.find(ChangTheNinthSupport, 1)
             self.assertIsNotNone(chang)
             assert isinstance(chang, ChangTheNinthSupport)
             return chang
@@ -43,14 +43,14 @@ class TestChangTheNinth(unittest.TestCase):
         game_state = next_round_with_great_omni(game_state)
         self.assertEqual(get_chang(game_state).usages, 2)
         game_state = skip_action_round_until(game_state, Pid.P1)
-        assert not game_state.get_player2().just_get_active_character().get_elemental_aura().has_aura()
+        assert not game_state.player2.just_get_active_character().elemental_aura.has_aura()
         game_state = replace_character(game_state, Pid.P1, Ganyu, char_id=1)
-        old_deck_cards = game_state.get_player1().get_deck_cards()
-        old_hand_cards = game_state.get_player1().get_hand_cards()
+        old_deck_cards = game_state.player1.deck_cards
+        old_hand_cards = game_state.player1.hand_cards
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL3)
-        new_deck_cards = game_state.get_player1().get_deck_cards()
-        new_hand_cards = game_state.get_player1().get_hand_cards()
-        optional_chang = game_state.get_player1().get_supports().find(ChangTheNinthSupport, 1)
+        new_deck_cards = game_state.player1.deck_cards
+        new_hand_cards = game_state.player1.hand_cards
+        optional_chang = game_state.player1.supports.find(ChangTheNinthSupport, 1)
         self.assertIsNone(optional_chang)
         self.assertEqual(new_hand_cards + new_deck_cards, old_hand_cards + old_deck_cards)
         self.assertEqual(new_hand_cards.num_cards(), old_hand_cards.num_cards() + 2)

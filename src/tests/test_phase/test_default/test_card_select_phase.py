@@ -7,7 +7,7 @@ from src.tests.helpers.game_state_templates import ACTION_TEMPLATE
 
 class TestCardSelectPhase(unittest.TestCase):
     BASE_GAME_STATE = ACTION_TEMPLATE.factory().phase(
-        ACTION_TEMPLATE.get_mode().card_select_phase()
+        ACTION_TEMPLATE.mode.card_select_phase()
     ).f_player1(
         lambda p1: p1.factory().phase(Act.ACTION_PHASE).build()
     ).f_player2(
@@ -26,7 +26,7 @@ class TestCardSelectPhase(unittest.TestCase):
             Pid.P1,
             CardsSelectAction(selected_cards=Cards({}))
         )
-        self.assertIs(game_state.get_player1().get_phase(), Act.ACTION_PHASE)
+        self.assertIs(game_state.player1.phase, Act.ACTION_PHASE)
 
         self.assertRaises(
             Exception,
@@ -34,5 +34,5 @@ class TestCardSelectPhase(unittest.TestCase):
         )
 
         self.assertIsNone(
-            game_state.get_phase().action_generator(game_state, Pid.P2)
+            game_state.phase.action_generator(game_state, Pid.P2)
         )

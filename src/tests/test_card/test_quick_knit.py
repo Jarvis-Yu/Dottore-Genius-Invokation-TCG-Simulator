@@ -82,13 +82,13 @@ class TestQuickKnit(unittest.TestCase):
                 dice=ActualDice({Element.OMNI: 1}),
             ),
         )
-        usages_before = base_game.get_player1().get_summons().just_find(
+        usages_before = base_game.player1.summons.just_find(
             OceanicMimicFrogSummon
         ).usages
         game_state = base_game.action_step(Pid.P1, card_action)
         assert game_state is not None
         game_state = auto_step(game_state)
-        usages_after = game_state.get_player1().get_summons().just_find(
+        usages_after = game_state.player1.summons.just_find(
             OceanicMimicFrogSummon
         ).usages
         self.assertEqual(usages_before + 1, usages_after)
@@ -100,13 +100,13 @@ class TestQuickKnit(unittest.TestCase):
                 dice=ActualDice({Element.OMNI: 1}),
             ),
         )
-        usages_before = base_game.get_player1().get_summons().just_find(
+        usages_before = base_game.player1.summons.just_find(
             BurningFlameSummon
         ).usages
         game_state = base_game.action_step(Pid.P1, card_action)
         assert game_state is not None
         game_state = auto_step(game_state)
-        usages_after = game_state.get_player1().get_summons().just_find(
+        usages_after = game_state.player1.summons.just_find(
             BurningFlameSummon
         ).usages
         self.assertEqual(usages_before + 1, usages_after)

@@ -78,7 +78,7 @@ class Summon(stt.Status):
         return StaticTarget(
             pid=status_source.pid,
             zone=Zone.CHARACTERS,
-            id=active_char.get_id(),
+            id=active_char.id,
         ) == target
 
     def __str__(self) -> str:  # pragma: no cover
@@ -258,7 +258,7 @@ class _ConvertableAnemoSummon(_DestroyOnNumSummon):
                     game_state
                     .get_player(source.pid.other())
                     .just_get_active_character()
-                    .get_elemental_aura()
+                    .elemental_aura
                 )
                 reaction = Reaction.consult_reaction_with_aura(opponent_aura, Element.ANEMO)
                 if reaction is not None and reaction.first_elem in stt._MIDARE_RANZAN_MAP:
@@ -338,10 +338,10 @@ class BakeKurageSummon(_DestroyOnNumSummon):
         # if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
         #     return [], replace(self, usages=self.MAX_USAGES, activated=False)
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
-            self_chars = game_state.get_player(source.pid).get_characters()
+            self_chars = game_state.get_player(source.pid).characters
             activate_additional_dmg_boost = any(
                 (
-                    stt.CeremonialGarmentStatus in char.get_character_statuses()
+                    stt.CeremonialGarmentStatus in char.character_statuses
                     and char.talent_equipped()
                 )
                 for char in self_chars
@@ -475,7 +475,7 @@ class DandelionFieldSummon(_DestroyOnNumSummon):
                     and dmg.damage_type.directly_from_character()
             ):
                 return item, self
-            self_chars = game_state.get_player(status_source.pid).get_characters()
+            self_chars = game_state.get_player(status_source.pid).characters
             from ..character.character import Jean
             if any(
                 isinstance(char, Jean) and char.talent_equipped()
@@ -561,11 +561,11 @@ class FierySanctumFieldSummon(_DmgPerRoundSummon, stt._ShieldStatus):
             new_self = replace(new_self, shield_usages=1)
         elif signal is TriggeringSignal.POST_DMG and self.activated:
             from ..character.character import Dehya
-            dehya = game_state.get_player(source.pid).get_characters().find_first_character(Dehya)
-            if dehya is not None and dehya.get_hp() >= 7:
+            dehya = game_state.get_player(source.pid).characters.find_first_character(Dehya)
+            if dehya is not None and dehya.hp >= 7:
                 es.append(eft.SpecificDamageEffect(
                     source=source,
-                    target=StaticTarget.from_char_id(source.pid, dehya.get_id()),
+                    target=StaticTarget.from_char_id(source.pid, dehya.id),
                     element=Element.PIERCING,
                     damage=1,
                     damage_type=DamageType(summon=True),
@@ -617,7 +617,7 @@ class HeraldOfFrostSummon(_DmgPerRoundSummon):
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
             self_alive_chars = game_state.get_player(
                 source.pid
-            ).get_characters().get_alive_character_in_activity_order()
+            ).characters.get_alive_character_in_activity_order()
             most_damage = max(char.hp_lost() for char in self_alive_chars)
             if most_damage == 0:
                 return [], replace(self, usages=0, activated=False)
@@ -628,7 +628,7 @@ class HeraldOfFrostSummon(_DmgPerRoundSummon):
             )
             return [
                 eft.RecoverHPEffect(
-                    target=StaticTarget.from_char_id(source.pid, char_to_heal.get_id()),
+                    target=StaticTarget.from_char_id(source.pid, char_to_heal.id),
                     recovery=self.HEAL_AMOUNT,
                 )
             ], replace(self, usages=0, activated=False)
@@ -924,7 +924,7 @@ class SolarIsotomaSummon(_DmgPerRoundSummon):
                 return item, self
             plunge_status = game_state.get_player(
                 status_source.pid
-            ).get_hidden_statuses().just_find(stt.PlungeAttackStatus)
+            ).hidden_statuses.just_find(stt.PlungeAttackStatus)
             if plunge_status.can_plunge:
                 new_item = replace(
                     item,
@@ -972,10 +972,10 @@ class StormEyeSummon(_ConvertableAnemoSummon):
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             oppo_active_char_id = game_state.get_player(
                 source.pid.other()
-            ).just_get_active_character().get_id()
+            ).just_get_active_character().id
             self_active_char_id = game_state.get_player(
                 source.pid
-            ).just_get_active_character().get_id()
+            ).just_get_active_character().id
             id_diff = self_active_char_id - oppo_active_char_id
             if id_diff < 0:
                 es.append(eft.BackwardSwapCharacterEffect(
@@ -1058,7 +1058,7 @@ class UshiSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
             my_active_character_ref = StaticTarget(
                 pid=status_source.pid,
                 zone=Zone.CHARACTERS,
-                id=game_state.get_player(status_source.pid).just_get_active_character().get_id()
+                id=game_state.get_player(status_source.pid).just_get_active_character().id
             )
             if information.target == my_active_character_ref:
                 return replace(self, status_gaining_available=False)
@@ -1088,14 +1088,14 @@ class UshiSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
             assert self.status_gaining_usages > 0
             from ..character.character import AratakiItto
             itto = game_state.get_player(
-                source.pid).get_characters().find_first_character(AratakiItto)
+                source.pid).characters.find_first_character(AratakiItto)
             assert itto is not None
             return [
                 eft.AddCharacterStatusEffect(
                     target=StaticTarget(
                         pid=source.pid,
                         zone=Zone.CHARACTERS,
-                        id=itto.get_id(),
+                        id=itto.id,
                     ),
                     status=stt.SuperlativeSuperstrengthStatus
                 )

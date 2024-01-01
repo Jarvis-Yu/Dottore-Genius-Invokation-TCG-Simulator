@@ -19,8 +19,8 @@ class TestSetaria(unittest.TestCase):
                 card=Setaria,
                 instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 1}))
             ))
-        sups = game_state.get_player1().get_supports()
-        hands = game_state.get_player1().get_hand_cards()
+        sups = game_state.player1.supports
+        hands = game_state.player1.hand_cards
         set1, set2 = sups.just_find(SetariaSupport, 1), sups.just_find(SetariaSupport, 2)
         assert isinstance(set1, SetariaSupport) and isinstance(set2, SetariaSupport)
         self.assertEqual(set1.usages, 2)
@@ -33,8 +33,8 @@ class TestSetaria(unittest.TestCase):
         )
         game_state = replace_hand_cards(game_state, Pid.P1, Cards({LightningStiletto: 1}))
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
-        sups = game_state.get_player1().get_supports()
-        hands = game_state.get_player1().get_hand_cards()
+        sups = game_state.player1.supports
+        hands = game_state.player1.hand_cards
         set1, set2 = sups.just_find(SetariaSupport, 1), sups.just_find(SetariaSupport, 2)
         assert isinstance(set1, SetariaSupport) and isinstance(set2, SetariaSupport)
         self.assertEqual(set1.usages, 1)
@@ -46,8 +46,8 @@ class TestSetaria(unittest.TestCase):
             card=IHaventLostYet,
             dice_elem=Element.ANEMO,
         ))
-        sups = game_state.get_player1().get_supports()
-        hands = game_state.get_player1().get_hand_cards()
+        sups = game_state.player1.supports
+        hands = game_state.player1.hand_cards
         set1, set2 = sups.find(SetariaSupport, 1), sups.just_find(SetariaSupport, 2)  # type: ignore
         assert set1 is None and isinstance(set2, SetariaSupport)
         self.assertEqual(set2.usages, 3)

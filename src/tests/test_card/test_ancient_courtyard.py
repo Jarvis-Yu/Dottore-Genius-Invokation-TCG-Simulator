@@ -16,7 +16,7 @@ class TestAncientCourtyard(unittest.TestCase):
             card=AncientCourtyard,
             instruction=DiceOnlyInstruction(dice=ActualDice.from_empty()),
         ))
-        self.assertIn(AncientCourtyardStatus, base_state.get_player1().get_combat_statuses())
+        self.assertIn(AncientCourtyardStatus, base_state.player1.combat_statuses)
 
         test_cards = (
             IGotYourBack,
@@ -58,7 +58,7 @@ class TestAncientCourtyard(unittest.TestCase):
                     instruction=instr(costs[0]),
                 ))
                 self.assertIs(
-                    AncientCourtyardStatus not in game_state.get_player1().get_combat_statuses(),
+                    AncientCourtyardStatus not in game_state.player1.combat_statuses,
                     issubclass(card, WeaponEquipmentCard | ArtifactEquipmentCard) and costs[1] > 0,
                 )
 
@@ -80,7 +80,7 @@ class TestAncientCourtyard(unittest.TestCase):
             card=AncientCourtyard,
             instruction=DiceOnlyInstruction(dice=ActualDice.from_empty()),
         ))
-        self.assertIn(AncientCourtyardStatus, base_state.get_player1().get_combat_statuses())
+        self.assertIn(AncientCourtyardStatus, base_state.player1.combat_statuses)
 
         game_state = next_round(base_state)
-        self.assertNotIn(AncientCourtyardStatus, game_state.get_player1().get_combat_statuses())
+        self.assertNotIn(AncientCourtyardStatus, game_state.player1.combat_statuses)

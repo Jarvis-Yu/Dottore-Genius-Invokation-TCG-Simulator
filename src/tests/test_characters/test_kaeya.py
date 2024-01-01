@@ -19,8 +19,8 @@ class TestKaeya(unittest.TestCase):
             ).build()
         ).build()
     ).build()
-    assert type(BASE_GAME.get_player1().just_get_active_character()) is Kaeya
-    assert type(BASE_GAME.get_player2().just_get_active_character()) is Keqing
+    assert type(BASE_GAME.player1.just_get_active_character()) is Kaeya
+    assert type(BASE_GAME.player2.just_get_active_character()) is Keqing
 
     def test_normal_attack(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -29,14 +29,14 @@ class TestKaeya(unittest.TestCase):
             skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 10)
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 10)
 
         gsm.player_step()
         gsm.auto_step()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 8)
-        self.assertFalse(p2ac.get_elemental_aura().elem_auras())
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 8)
+        self.assertFalse(p2ac.elemental_aura.elem_auras())
 
     def test_elemental_skill1(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -45,14 +45,14 @@ class TestKaeya(unittest.TestCase):
             skill=CharacterSkill.SKILL2,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 10)
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 10)
 
         gsm.player_step()
         gsm.auto_step()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 7)
-        self.assertTrue(p2ac.get_elemental_aura().contains(Element.CRYO))
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 7)
+        self.assertTrue(p2ac.elemental_aura.contains(Element.CRYO))
 
     def test_elemental_burst(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -60,7 +60,7 @@ class TestKaeya(unittest.TestCase):
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().f_active_character(
                     lambda ac: ac.factory().energy(
-                        ac.get_max_energy()
+                        ac.max_energy
                     ).build()
                 ).build()
             ).build()
@@ -75,12 +75,12 @@ class TestKaeya(unittest.TestCase):
         gsm.player_step()
         gsm.auto_step()
         game_state = gsm.get_game_state()
-        p2ac = game_state.get_player2().just_get_active_character()
-        p1 = game_state.get_player1()
-        self.assertEqual(p2ac.get_hp(), 9)
-        self.assertTrue(p2ac.get_elemental_aura().contains(Element.CRYO))
+        p2ac = game_state.player2.just_get_active_character()
+        p1 = game_state.player1
+        self.assertEqual(p2ac.hp, 9)
+        self.assertTrue(p2ac.elemental_aura.contains(Element.CRYO))
         self.assertEqual(
-            p1.get_combat_statuses().just_find(IcicleStatus).usages,
+            p1.combat_statuses.just_find(IcicleStatus).usages,
             3
         )
 
@@ -90,7 +90,7 @@ class TestKaeya(unittest.TestCase):
                 lambda hcs: hcs.add(LightningStiletto)
             ).build()
         ).player2(
-            self.BASE_GAME.get_player2().factory().f_combat_statuses(
+            self.BASE_GAME.player2.factory().f_combat_statuses(
                 lambda cs: cs.update_status(IcicleStatus())
             ).build()
         ).build()
@@ -103,12 +103,12 @@ class TestKaeya(unittest.TestCase):
         gsm.player_step()
         gsm.auto_step()
         game_state = gsm.get_game_state()
-        p1 = game_state.get_player1()
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 8)
-        self.assertTrue(p2ac.get_elemental_aura().contains(Element.CRYO))
+        p1 = game_state.player1
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 8)
+        self.assertTrue(p2ac.elemental_aura.contains(Element.CRYO))
         self.assertEqual(
-            p1.get_combat_statuses().just_find(IcicleStatus).usages,
+            p1.combat_statuses.just_find(IcicleStatus).usages,
             2
         )
 
@@ -123,24 +123,24 @@ class TestKaeya(unittest.TestCase):
         gsm = GameStateMachine(game_state_p1_move, a1, a2)
         gsm.player_step()
         gsm.step_until_holds(
-            lambda gs: gs.get_player1().get_combat_statuses().just_find(IcicleStatus).usages == 2
+            lambda gs: gs.player1.combat_statuses.just_find(IcicleStatus).usages == 2
         )
         game_state = gsm.get_game_state()
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 8)
-        self.assertTrue(p2ac.get_elemental_aura().contains(Element.CRYO))
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 8)
+        self.assertTrue(p2ac.elemental_aura.contains(Element.CRYO))
 
         gsm.auto_step()
         game_state = gsm.get_game_state()
-        p1 = game_state.get_player1()
-        p2cs = game_state.get_player2().get_characters()
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2cs.just_get_character(1).get_hp(), 9)
-        self.assertEqual(p2cs.just_get_character(2).get_hp(), 9)
-        self.assertEqual(p2cs.just_get_character(3).get_hp(), 4)
-        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+        p1 = game_state.player1
+        p2cs = game_state.player2.characters
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2cs.just_get_character(1).hp, 9)
+        self.assertEqual(p2cs.just_get_character(2).hp, 9)
+        self.assertEqual(p2cs.just_get_character(3).hp, 4)
+        self.assertFalse(p2ac.elemental_aura.has_aura())
         self.assertEqual(
-            p1.get_combat_statuses().just_find(IcicleStatus).usages,
+            p1.combat_statuses.just_find(IcicleStatus).usages,
             2
         )
 
@@ -169,12 +169,12 @@ class TestKaeya(unittest.TestCase):
         gsm.player_step()
         gsm.auto_step()
         game_state = gsm.get_game_state()
-        p1 = game_state.get_player1()
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 8)
-        self.assertTrue(p2ac.get_elemental_aura().contains(Element.CRYO))
+        p1 = game_state.player1
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 8)
+        self.assertTrue(p2ac.elemental_aura.contains(Element.CRYO))
         self.assertEqual(
-            p1.get_combat_statuses().just_find(IcicleStatus).usages,
+            p1.combat_statuses.just_find(IcicleStatus).usages,
             2
         )
 
@@ -195,19 +195,19 @@ class TestKaeya(unittest.TestCase):
         gsm.player_step()  # a2 death swap character because Icicle killed their active character
         gsm.auto_step()
         game_state = gsm.get_game_state()
-        p1 = game_state.get_player1()
-        p2 = game_state.get_player2()
-        p2cs = game_state.get_player2().get_characters()
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2cs.just_get_character(3).get_hp(), 0)
-        self.assertEqual(p2ac.get_hp(), 10)
-        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+        p1 = game_state.player1
+        p2 = game_state.player2
+        p2cs = game_state.player2.characters
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2cs.just_get_character(3).hp, 0)
+        self.assertEqual(p2ac.hp, 10)
+        self.assertFalse(p2ac.elemental_aura.has_aura())
         self.assertEqual(
-            p1.get_combat_statuses().just_find(IcicleStatus).usages,
+            p1.combat_statuses.just_find(IcicleStatus).usages,
             2
         )
         self.assertEqual(
-            p2.get_combat_statuses().just_find(IcicleStatus).usages,
+            p2.combat_statuses.just_find(IcicleStatus).usages,
             2
         )
 
@@ -242,22 +242,22 @@ class TestKaeya(unittest.TestCase):
         # equiping the talent card casts elemental skill and heals
         gsm.player_step()  # p1 equip talent card
         gsm.auto_step()
-        p1ac = gsm.get_game_state().get_player1().just_get_active_character()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p1ac.get_hp(), initial_hp + 2)
-        self.assertEqual(p2ac.get_hp(), 7)
+        p1ac = gsm.get_game_state().player1.just_get_active_character()
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p1ac.hp, initial_hp + 2)
+        self.assertEqual(p2ac.hp, 7)
 
         # second elemtnal skill in same round doesn't heal
         gsm.player_step()  # p1 elemental skill 1
         gsm.auto_step()
-        p1ac = gsm.get_game_state().get_player1().just_get_active_character()
-        self.assertEqual(p1ac.get_hp(), initial_hp + 2)
+        p1ac = gsm.get_game_state().player1.just_get_active_character()
+        self.assertEqual(p1ac.hp, initial_hp + 2)
 
         gsm.player_step()  # p1 end round, go to next round
         gsm.auto_step()
         a1.inject_front_action(DiceSelectAction(selected_dice=ActualDice({})))
         a2.inject_front_action(DiceSelectAction(selected_dice=ActualDice({})))
-        gsm.step_until_phase(base_game_state.get_mode().action_phase())
+        gsm.step_until_phase(base_game_state.mode.action_phase())
 
         gsm.player_step()  # p2 end round, let p1 play
         gsm.auto_step()
@@ -265,5 +265,5 @@ class TestKaeya(unittest.TestCase):
         # elemtnal skill in next round heals
         gsm.player_step()
         gsm.auto_step()
-        p1ac = gsm.get_game_state().get_player1().just_get_active_character()
-        self.assertEqual(p1ac.get_hp(), initial_hp + 4)
+        p1ac = gsm.get_game_state().player1.just_get_active_character()
+        self.assertEqual(p1ac.hp, initial_hp + 4)

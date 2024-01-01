@@ -23,7 +23,7 @@ class TestLithicSpear(unittest.TestCase):
         ))
 
         p1ac_char_stts = \
-            game_state.get_player1().just_get_active_character().get_character_statuses()
+            game_state.player1.just_get_active_character().character_statuses
         self.assertIn(LithicGuardStatus, p1ac_char_stts)
         self.assertEqual(p1ac_char_stts.just_find(LithicGuardStatus).usages, 1)
 
@@ -39,7 +39,7 @@ class TestLithicSpear(unittest.TestCase):
         ))
 
         p1ac_char_stts = \
-            game_state.get_player1().just_get_active_character().get_character_statuses()
+            game_state.player1.just_get_active_character().character_statuses
         self.assertIn(LithicGuardStatus, p1ac_char_stts)
         self.assertEqual(p1ac_char_stts.just_find(LithicGuardStatus).usages, 2)
 
@@ -56,7 +56,7 @@ class TestLithicSpear(unittest.TestCase):
         ))
 
         p1ac_char_stts = \
-            game_state.get_player1().just_get_active_character().get_character_statuses()
+            game_state.player1.just_get_active_character().character_statuses
         self.assertIn(LithicGuardStatus, p1ac_char_stts)
         self.assertEqual(p1ac_char_stts.just_find(LithicGuardStatus).usages, 3)
 
@@ -69,7 +69,7 @@ class TestLithicSpear(unittest.TestCase):
             )
         ))
         p1ac_char_stts = \
-            game_state.get_player1().just_get_active_character().get_character_statuses()
+            game_state.player1.just_get_active_character().character_statuses
         self.assertIn(LithicGuardStatus, p1ac_char_stts)
         self.assertEqual(p1ac_char_stts.just_find(LithicGuardStatus).usages, 3)
 

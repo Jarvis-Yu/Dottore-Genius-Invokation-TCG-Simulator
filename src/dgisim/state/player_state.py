@@ -87,7 +87,8 @@ class PlayerState:
         """ :returns: a factory for the current player state. """
         return PlayerStateFactory(self)
 
-    def get_phase(self) -> Act:
+    @property
+    def phase(self) -> Act:
         """ :returns: the (player) phase the player is in. """
         return self._phase
 
@@ -98,65 +99,78 @@ class PlayerState:
         """
         return self._consec_action
 
-    def get_card_redraw_chances(self) -> int:
+    @property
+    def card_redraw_chances(self) -> int:
         """
         :returns: if the player can make consecutive actions before the opponent
                   makes a move.
         """
         return self._card_redraw_chances
 
-    def get_dice_reroll_chances(self) -> int:
+    @property
+    def dice_reroll_chances(self) -> int:
         """
         :returns: the number of chances to reroll dices.
         """
         return self._dice_reroll_chances
 
-    def get_characters(self) -> Characters:
+    @property
+    def characters(self) -> Characters:
         """
         :returns: the characters the player have.
         """
         return self._characters
 
-    def get_hidden_statuses(self) -> sts.Statuses:
+    @property
+    def hidden_statuses(self) -> sts.Statuses:
         """
         :returns: the hidden statuses of the player. Typically holds information
                   that are invisible but useful in the game.
         """
         return self._hidden_statuses
 
-    def get_combat_statuses(self) -> sts.Statuses:
+    @property
+    def combat_statuses(self) -> sts.Statuses:
         """ :returns: the combat statuses of the player.  """
         return self._combat_statuses
 
-    def get_summons(self) -> Summons:
+    @property
+    def summons(self) -> Summons:
         """ :returns: the summons of the player.  """
         return self._summons
 
-    def get_supports(self) -> Supports:
+    @property
+    def supports(self) -> Supports:
         """ :returns: the supports of the player.  """
         return self._supports
 
-    def get_dice(self) -> ActualDice:
+    @property
+    def dice(self) -> ActualDice:
         """ :returns: the dice of the player.  """
         return self._dice
 
-    def get_hand_cards(self) -> Cards:
+    @property
+    def hand_cards(self) -> Cards:
         """ :returns: the hand cards of the player.  """
         return self._hand_cards
 
-    def get_deck_cards(self) -> Cards:
+    @property
+    def deck_cards(self) -> Cards:
         """ :returns: the deck cards that will be drawn in the future.  """
         return self._deck_cards
 
-    def get_publicly_used_cards(self) -> Cards:
+    @property
+    def publicly_used_cards(self) -> Cards:
         """ :returns: the cards publicly used by the player. """
         return self._publicly_used_cards
 
-    def get_publicly_gained_cards(self) -> Cards:
+    @property
+    def publicly_gained_cards(self) -> Cards:
         """ :returns: the cards publicly gained by the player. """
         return self._publicly_gained_cards
 
-    def get_initial_deck(self) -> FrozenDeck:
+    @property
+    def initial_deck(self) -> FrozenDeck:
         """ :returns: the initial deck of the player. """
         return self._initial_deck
 
@@ -401,21 +415,21 @@ class PlayerState:
 
 class PlayerStateFactory:
     def __init__(self, player_state: PlayerState) -> None:
-        self._phase = player_state.get_phase()
+        self._phase = player_state.phase
         self._consec_action = player_state.get_consec_action()
-        self._card_redraw_chances = player_state.get_card_redraw_chances()
-        self._dice_reroll_chances = player_state.get_dice_reroll_chances()
-        self._characters = player_state.get_characters()
-        self._hidden_statuses = player_state.get_hidden_statuses()
-        self._combat_statuses = player_state.get_combat_statuses()
-        self._summons = player_state.get_summons()
-        self._supports = player_state.get_supports()
-        self._dice = player_state.get_dice()
-        self._hand_cards = player_state.get_hand_cards()
-        self._deck_cards = player_state.get_deck_cards()
-        self._publicly_used_cards = player_state.get_publicly_used_cards()
-        self._publicly_gained_cards = player_state.get_publicly_gained_cards()
-        self._initial_deck = player_state.get_initial_deck()
+        self._card_redraw_chances = player_state.card_redraw_chances
+        self._dice_reroll_chances = player_state.dice_reroll_chances
+        self._characters = player_state.characters
+        self._hidden_statuses = player_state.hidden_statuses
+        self._combat_statuses = player_state.combat_statuses
+        self._summons = player_state.summons
+        self._supports = player_state.supports
+        self._dice = player_state.dice
+        self._hand_cards = player_state.hand_cards
+        self._deck_cards = player_state.deck_cards
+        self._publicly_used_cards = player_state.publicly_used_cards
+        self._publicly_gained_cards = player_state.publicly_gained_cards
+        self._initial_deck = player_state.initial_deck
 
     def phase(self, phase: Act) -> PlayerStateFactory:
         self._phase = phase

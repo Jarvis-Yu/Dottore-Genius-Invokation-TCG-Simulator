@@ -44,7 +44,7 @@ class TestElementalSoothingWater(unittest.TestCase):
                 else:
                     expected_hp = 9
                 self.assertEqual(
-                    game_state.get_player1().get_characters().just_get_character(i).get_hp(),
+                    game_state.player1.characters.just_get_character(i).hp,
                     expected_hp
                 )
 
@@ -56,7 +56,7 @@ class TestElementalSoothingWater(unittest.TestCase):
             card=ElementalResonanceSoothingWater,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.HYDRO: 1}))
         ))
-        p1cs = game_state.get_player1().get_characters()
-        self.assertEqual(p1cs.just_get_character(1).get_hp(), 10)
-        self.assertEqual(p1cs.just_get_character(2).get_hp(), 9)
-        self.assertEqual(p1cs.just_get_character(3).get_hp(), 9)
+        p1cs = game_state.player1.characters
+        self.assertEqual(p1cs.just_get_character(1).hp, 10)
+        self.assertEqual(p1cs.just_get_character(2).hp, 9)
+        self.assertEqual(p1cs.just_get_character(3).hp, 9)

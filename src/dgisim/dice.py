@@ -587,7 +587,7 @@ class ActualDice(Dice):
             if player_state is None
             else frozenset(
                 char.ELEMENT()
-                for char in player_state.get_characters().get_alive_characters()
+                for char in player_state.characters.get_alive_characters()
             )
         )
 

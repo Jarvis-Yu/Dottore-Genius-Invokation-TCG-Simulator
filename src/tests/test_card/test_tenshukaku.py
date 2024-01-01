@@ -13,7 +13,7 @@ class TestTenshukaku(unittest.TestCase):
             card=Tenshukaku,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.CRYO: 2})),
         ))
-        base_state = step_until_phase(base_state, phase=base_state.get_mode().action_phase)
+        base_state = step_until_phase(base_state, phase=base_state.mode.action_phase)
 
         # test triggered when types of dice == 5
         pre_dice = ActualDice({
@@ -26,7 +26,7 @@ class TestTenshukaku(unittest.TestCase):
         game_state = replace_dice(base_state, Pid.P1, pre_dice)
         game_state = auto_step(game_state)
         self.assertEqual(
-            game_state.get_player1().get_dice(),
+            game_state.player1.dice,
             pre_dice + {Element.OMNI: 1},
         )
 
@@ -42,7 +42,7 @@ class TestTenshukaku(unittest.TestCase):
         game_state = replace_dice(base_state, Pid.P1, pre_dice)
         game_state = auto_step(game_state)
         self.assertEqual(
-            game_state.get_player1().get_dice(),
+            game_state.player1.dice,
             pre_dice + {Element.OMNI: 1},
         )
 
@@ -56,7 +56,7 @@ class TestTenshukaku(unittest.TestCase):
         game_state = replace_dice(base_state, Pid.P1, pre_dice)
         game_state = auto_step(game_state)
         self.assertEqual(
-            game_state.get_player1().get_dice(),
+            game_state.player1.dice,
             pre_dice,
         )
 
@@ -69,6 +69,6 @@ class TestTenshukaku(unittest.TestCase):
         game_state = replace_dice(base_state, Pid.P1, pre_dice)
         game_state = auto_step(game_state)
         self.assertEqual(
-            game_state.get_player1().get_dice(),
+            game_state.player1.dice,
             pre_dice + {Element.OMNI: 1},
         )

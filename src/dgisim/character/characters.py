@@ -68,7 +68,7 @@ class Characters:
         If among characters (1, 2, 3), 2 is the active character, (2, 3, 1) is returned.
         """
         for i, character in enumerate(self._characters):
-            if character.get_id() == self._active_character_id:
+            if character.id == self._active_character_id:
                 return self._characters[i:] + self._characters[:i]
         return self._characters
 
@@ -79,11 +79,11 @@ class Characters:
         Same as `.get_character_in_activity_order()` but filters out defeated characters.
         """
         for i, character in enumerate(self._characters):
-            if character.get_id() == self._active_character_id:
+            if character.id == self._active_character_id:
                 return tuple([
                     char
                     for char in (self._characters[i:] + self._characters[:i])
-                    if char.alive()
+                    if char.is_alive()
                 ])
         return self._characters
 
@@ -95,11 +95,11 @@ class Characters:
         is ranked the last.
         """
         for i, character in enumerate(self._characters):
-            if character.get_id() == self._active_character_id:
+            if character.id == self._active_character_id:
                 return tuple([
                     char
                     for char in (self._characters[i+1:] + self._characters[:i+1])
-                    if char.alive()
+                    if char.is_alive()
                 ])
         return self._characters
 
@@ -123,7 +123,7 @@ class Characters:
         :returns: the ordered characters starting from `char_id`. (left to right)
         """
         for i, character in enumerate(self._characters):
-            if character.get_id() == char_id:
+            if character.id == char_id:
                 return self._characters[i:] + self._characters[:i]
         raise Exception("Not Reached! Invalid char_id {char_id} not found in {self}")
 
@@ -134,7 +134,7 @@ class Characters:
         return tuple(
             char
             for char in self._characters
-            if char.get_id() != self.get_active_character_id()
+            if char.id != self.get_active_character_id()
         )
 
     def get_alive_characters(self) -> tuple[Character, ...]:
@@ -144,13 +144,13 @@ class Characters:
         return tuple(
             char
             for char in self._characters
-            if char.alive()
+            if char.is_alive()
         )
 
     def get_character(self, id: int) -> None | Character:
         """ :returns: character with `id`. `None` is returned if `id` is not found. """
         for character in self._characters:
-            if id == character.get_id():
+            if id == character.id:
                 return character
         return None
 
@@ -195,7 +195,7 @@ class Characters:
         """
         for c in self._characters:
             if character is c:
-                return c.get_id()
+                return c.id
         return None
 
     def get_by_id(self, id: int) -> None | Character:  # pragma: no cover
@@ -204,7 +204,7 @@ class Characters:
 
     def all_defeated(self) -> bool:
         """ :returns: `True` if all characters are defeated. """
-        return all([c.defeated() for c in self._characters])
+        return all([c.is_defeated() for c in self._characters])
 
     def char_id_valid(self, char_id: int) -> bool:
         """ :returns: `True` if the `char_id` is legal. """
@@ -270,7 +270,7 @@ class Characters:
         return {
             "Active Character": f"{self.get_active_character_id()}-{self.get_active_character_name()}",
             "Characters": dict([
-                (f"{char.get_id()}-{char.name()}", char.dict_str())
+                (f"{char.id}-{char.name()}", char.dict_str())
                 for char in self._characters
             ]),
         }
@@ -285,7 +285,7 @@ class CharactersFactory:
     def character(self, char: Character) -> CharactersFactory:
         chars = list(self._characters)
         for i, c in enumerate(chars):
-            if c.get_id() == char.get_id():
+            if c.id == char.id:
                 chars[i] = char
                 break
         self._characters = tuple(chars)
@@ -294,7 +294,7 @@ class CharactersFactory:
     def f_character(self, id: int, f: Callable[[Character], Character]) -> CharactersFactory:
         chars = list(self._characters)
         for i, c in enumerate(chars):
-            if c.get_id() == id:
+            if c.id == id:
                 chars[i] = f(c)
                 break
         self._characters = tuple(chars)

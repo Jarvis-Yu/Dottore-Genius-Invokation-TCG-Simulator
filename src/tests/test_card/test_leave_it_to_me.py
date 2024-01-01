@@ -31,7 +31,7 @@ class TestLeaveItToMe(unittest.TestCase):
         buffed_game_state = auto_step(game_state)
 
         self.assertTrue(
-            buffed_game_state.get_player1().get_combat_statuses().contains(LeaveItToMeStatus)
+            buffed_game_state.player1.combat_statuses.contains(LeaveItToMeStatus)
         )
 
         # test swap with no dice fails
@@ -54,9 +54,9 @@ class TestLeaveItToMe(unittest.TestCase):
         game_state = auto_step(game_state)
 
         self.assertFalse(
-            game_state.get_player1().get_combat_statuses().contains(LeaveItToMeStatus)
+            game_state.player1.combat_statuses.contains(LeaveItToMeStatus)
         )
-        self.assertEqual(game_state.get_active_player_id(), Pid.P1)
+        self.assertEqual(game_state.active_player_id, Pid.P1)
 
         # test opponent cannot use this
         game_state = buffed_game_state.action_step(Pid.P1, SkillAction(
@@ -68,4 +68,4 @@ class TestLeaveItToMe(unittest.TestCase):
         game_state = game_state.action_step(Pid.P2, swap_action)
         assert game_state is not None
         game_state = auto_step(game_state)
-        self.assertEqual(game_state.get_active_player_id(), Pid.P1)
+        self.assertEqual(game_state.active_player_id, Pid.P1)

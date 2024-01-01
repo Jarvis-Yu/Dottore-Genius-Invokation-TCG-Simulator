@@ -58,7 +58,7 @@ class CardActGenGenerator(ABC):
         from ..card.card import Card
         assert not action_generator.filled()
         assert issubclass(player_choice, Card)  # type: ignore
-        assert action_generator.game_state.card_checker().usable(
+        assert action_generator.game_state.card_checker.usable(
             action_generator.pid,
             player_choice,  # type: ignore
         )
@@ -73,7 +73,7 @@ class CardActGenGenerator(ABC):
             game_state: GameState,
             pid: Pid,
     ) -> None | ActionGenerator:
-        if not game_state.card_checker().playable(pid):  # pragma: no cover
+        if not game_state.card_checker.playable(pid):  # pragma: no cover
             return None
         return ActionGenerator(
             game_state=game_state,
@@ -97,8 +97,8 @@ class CardsSelectionActGenGenerator(ABC):
         from ..card.card import OmniCard
         if hand_cards.contains(OmniCard):
             # TODO: further filter available cards
-            publicly_used_cards = game_state.get_player(pid).get_publicly_used_cards()
-            mode = game_state.get_mode()
+            publicly_used_cards = game_state.get_player(pid).publicly_used_cards
+            mode = game_state.mode
             return tuple(
                 card
                 for card in mode.all_cards()
@@ -149,7 +149,7 @@ class DiceSelectionActGenGenerator(ABC):
         assert type(action_generator.action) is DiceSelectAction
         game_state = action_generator.game_state
         pid = action_generator.pid
-        return game_state.get_player(pid).get_dice()
+        return game_state.get_player(pid).dice
 
     @classmethod
     def _fill_helper(
@@ -204,7 +204,7 @@ class ElemTuningActGenGenerator(ABC):
         if action.dice_elem is None:
             return tuple(
                 elem
-                for elem in game_state.get_player(pid).get_dice()
+                for elem in game_state.get_player(pid).dice
                 if elem is not Element.OMNI and elem is not active_character.ELEMENT()
             )
 
@@ -245,7 +245,7 @@ class ElemTuningActGenGenerator(ABC):
             game_state: GameState,
             pid: Pid,
     ) -> None | ActionGenerator:
-        if not game_state.elem_tuning_checker().usable(pid):  # pragma: no cover
+        if not game_state.elem_tuning_checker.usable(pid):  # pragma: no cover
             return None
 
         return ActionGenerator(
@@ -278,8 +278,8 @@ class SkillActGenGenerator(ABC):
             return tuple(
                 skill
                 for skill in skills
-                if game_state.skill_checker().usable(
-                    pid, active_character.get_id(), skill
+                if game_state.skill_checker.usable(
+                    pid, active_character.id, skill
                 ) is not None
             )
 
@@ -287,7 +287,7 @@ class SkillActGenGenerator(ABC):
         instruction = action_generator.instruction
         assert type(instruction) is DiceOnlyInstruction
         if instruction.dice is None:
-            retval = game_state.skill_checker().usable(pid, active_character.get_id(), action.skill)
+            retval = game_state.skill_checker.usable(pid, active_character.id, action.skill)
             assert retval is not None
             _, dice = retval
             return dice
@@ -319,10 +319,10 @@ class SkillActGenGenerator(ABC):
             game_state = action_generator.game_state
             pid = action_generator.pid
             # assert that dice player provided does satisfy the requirement and is legal
-            assert (game_state.get_player(pid).get_dice() - player_choice).is_legal()
-            assert player_choice.just_satisfy(just(game_state.skill_checker().usable(
+            assert (game_state.get_player(pid).dice - player_choice).is_legal()
+            assert player_choice.just_satisfy(just(game_state.skill_checker.usable(
                 pid,
-                game_state.get_player(pid).just_get_active_character().get_id(),
+                game_state.get_player(pid).just_get_active_character().id,
                 action.skill,
             ))[1])
             return replace(
@@ -343,7 +343,7 @@ class SkillActGenGenerator(ABC):
             return None
 
         has_castable_skill = any(
-            game_state.skill_checker().usable(pid, active_character.get_id(), skill) is not None
+            game_state.skill_checker.usable(pid, active_character.id, skill) is not None
             for skill in active_character.skills()
         )
         if not has_castable_skill:
@@ -380,9 +380,9 @@ class SwapActGenGenerator(ABC):
             assert type(action) is SwapAction \
                 or type(action) is DeathSwapAction
             swappable_char_ids = [
-                char.get_id()
-                for char in game_state.get_player(pid).get_characters()
-                if game_state.swap_checker().swap_details(pid, char.get_id()) is not None
+                char.id
+                for char in game_state.get_player(pid).characters
+                if game_state.swap_checker.swap_details(pid, char.id) is not None
             ]
             return tuple(
                 char_id
@@ -393,7 +393,7 @@ class SwapActGenGenerator(ABC):
         instruction = action_generator.instruction
         assert type(instruction) is DiceOnlyInstruction
         if instruction.dice is None:
-            swap_details = game_state.swap_checker().swap_details(pid, action.char_id)
+            swap_details = game_state.swap_checker.swap_details(pid, action.char_id)
             assert swap_details is not None
             _, dice_cost = swap_details
             assert dice_cost is not None
@@ -440,9 +440,9 @@ class SwapActGenGenerator(ABC):
             game_state: GameState,
             pid: Pid,
     ) -> None | ActionGenerator:
-        if not game_state.swap_checker().swappable(pid):
+        if not game_state.swap_checker.swappable(pid):
             return None
-        if game_state.swap_checker().should_death_swap():
+        if game_state.swap_checker.should_death_swap():
             return ActionGenerator(
                 game_state=game_state,
                 pid=pid,

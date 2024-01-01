@@ -14,7 +14,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
     ).f_player2(
         lambda p: p.factory().phase(Act.END_PHASE).build()
     ).build()
-    assert type(BASE_GAME.get_player1().just_get_active_character()) is RhodeiaOfLoch
+    assert type(BASE_GAME.player1.just_get_active_character()) is RhodeiaOfLoch
 
     def test_frog_summon(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -27,25 +27,25 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         # first hit
         game_state = add_damage_effect(base_game, 2, Element.PHYSICAL)
         game_state = auto_step(game_state)
-        ac = game_state.get_player2().just_get_active_character()
-        frog = game_state.get_player2().get_summons().just_find(OceanicMimicFrogSummon)
-        self.assertEqual(ac.get_hp(), 9)
+        ac = game_state.player2.just_get_active_character()
+        frog = game_state.player2.summons.just_find(OceanicMimicFrogSummon)
+        self.assertEqual(ac.hp, 9)
         self.assertEqual(frog.usages, 0)
 
         # second hit
         game_state = add_damage_effect(game_state, 2, Element.PHYSICAL)
         game_state = auto_step(game_state)
-        ac = game_state.get_player2().just_get_active_character()
-        frog = game_state.get_player2().get_summons().just_find(OceanicMimicFrogSummon)
-        self.assertEqual(ac.get_hp(), 7)
+        ac = game_state.player2.just_get_active_character()
+        frog = game_state.player2.summons.just_find(OceanicMimicFrogSummon)
+        self.assertEqual(ac.hp, 7)
         self.assertEqual(frog.usages, 0)
 
         # third hit
         game_state = add_damage_effect(game_state, 2, Element.PHYSICAL)
         game_state = auto_step(game_state)
-        ac = game_state.get_player2().just_get_active_character()
-        frog = game_state.get_player2().get_summons().just_find(OceanicMimicFrogSummon)
-        self.assertEqual(ac.get_hp(), 5)
+        ac = game_state.player2.just_get_active_character()
+        frog = game_state.player2.summons.just_find(OceanicMimicFrogSummon)
+        self.assertEqual(ac.hp, 5)
         self.assertEqual(frog.usages, 0)
 
         # end round and frog attacks & disappears
@@ -54,10 +54,10 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm.player_step()
         gsm.auto_step()
         game_state = gsm.get_game_state()
-        ac = game_state.get_player1().just_get_active_character()
-        optional_frog = game_state.get_player2().get_summons().find(OceanicMimicFrogSummon)
-        self.assertEqual(ac.get_hp(), 8)
-        self.assertTrue(ac.get_elemental_aura().contains(Element.HYDRO))
+        ac = game_state.player1.just_get_active_character()
+        optional_frog = game_state.player2.summons.find(OceanicMimicFrogSummon)
+        self.assertEqual(ac.hp, 8)
+        self.assertTrue(ac.elemental_aura.contains(Element.HYDRO))
         self.assertTrue(optional_frog is None)
 
         # end round with frog(1) keeps frog untouched
@@ -66,10 +66,10 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm.player_step()
         gsm.auto_step()
         game_state = gsm.get_game_state()
-        ac = game_state.get_player1().just_get_active_character()
-        frog = game_state.get_player2().get_summons().just_find(OceanicMimicFrogSummon)
-        self.assertEqual(ac.get_hp(), 10)
-        self.assertFalse(ac.get_elemental_aura().contains(Element.HYDRO))
+        ac = game_state.player1.just_get_active_character()
+        frog = game_state.player2.summons.just_find(OceanicMimicFrogSummon)
+        self.assertEqual(ac.hp, 10)
+        self.assertFalse(ac.elemental_aura.contains(Element.HYDRO))
         self.assertTrue(frog.usages, 1)
 
     def test_raptor_and_squirrel_summons(self):
@@ -96,33 +96,33 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm.auto_step()
         a1.inject_action(DiceSelectAction(selected_dice=ActualDice({})))  # skip roll phase
         a2.inject_action(DiceSelectAction(selected_dice=ActualDice({})))
-        gsm.step_until_phase(base_game.get_mode().action_phase())
+        gsm.step_until_phase(base_game.mode.action_phase())
 
         game_state = gsm.get_game_state()
-        p1_summons = game_state.get_player1().get_summons()
-        p2_ac = game_state.get_player2().just_get_active_character()
-        p2_c1 = game_state.get_player2().get_characters().just_get_character(1)
+        p1_summons = game_state.player1.summons
+        p2_ac = game_state.player2.just_get_active_character()
+        p2_c1 = game_state.player2.characters.just_get_character(1)
         self.assertEqual(p1_summons.just_find(OceanicMimicRaptorSummon).usages, 2)
         self.assertEqual(p1_summons.just_find(OceanicMimicSquirrelSummon).usages, 1)
-        self.assertEqual(p2_ac.get_hp(), 8)
-        self.assertTrue(p2_ac.get_elemental_aura().contains(Element.HYDRO))
-        self.assertEqual(p2_c1.get_hp(), 0)
+        self.assertEqual(p2_ac.hp, 8)
+        self.assertTrue(p2_ac.elemental_aura.contains(Element.HYDRO))
+        self.assertEqual(p2_c1.hp, 0)
 
         # after second end round
         a1.inject_action(EndRoundAction())  # skip action phase
         a2.inject_action(EndRoundAction())
-        gsm.step_until_phase(game_state.get_mode().end_phase())
+        gsm.step_until_phase(game_state.mode.end_phase())
         a1.inject_action(DiceSelectAction(selected_dice=ActualDice({})))  # skip roll phase
         a2.inject_action(DiceSelectAction(selected_dice=ActualDice({})))
-        gsm.step_until_phase(game_state.get_mode().action_phase())
+        gsm.step_until_phase(game_state.mode.action_phase())
 
         game_state = gsm.get_game_state()
-        p1_summons = game_state.get_player1().get_summons()
-        p2_ac = game_state.get_player2().just_get_active_character()
+        p1_summons = game_state.player1.summons
+        p2_ac = game_state.player2.just_get_active_character()
         self.assertEqual(p1_summons.just_find(OceanicMimicRaptorSummon).usages, 1)
         self.assertFalse(p1_summons.contains(OceanicMimicSquirrelSummon))
-        self.assertEqual(p2_ac.get_hp(), 5)
-        self.assertTrue(p2_ac.get_elemental_aura().contains(Element.HYDRO))
+        self.assertEqual(p2_ac.hp, 5)
+        self.assertTrue(p2_ac.elemental_aura.contains(Element.HYDRO))
 
         # after third end round
         a1.inject_action(EndRoundAction())
@@ -133,12 +133,12 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm.auto_step()
 
         game_state = gsm.get_game_state()
-        p1_summons = game_state.get_player1().get_summons()
-        p2_ac = game_state.get_player2().just_get_active_character()
+        p1_summons = game_state.player1.summons
+        p2_ac = game_state.player2.just_get_active_character()
         self.assertFalse(p1_summons.contains(OceanicMimicRaptorSummon))
         self.assertFalse(p1_summons.contains(OceanicMimicSquirrelSummon))
-        self.assertEqual(p2_ac.get_hp(), 4)
-        self.assertTrue(p2_ac.get_elemental_aura().contains(Element.HYDRO))
+        self.assertEqual(p2_ac.hp, 4)
+        self.assertTrue(p2_ac.elemental_aura.contains(Element.HYDRO))
 
     def test_normal_attack(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -147,14 +147,14 @@ class TestRohdeiaOfLoch(unittest.TestCase):
             skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 10)
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 10)
 
         gsm.player_step()
         gsm.auto_step()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 9)
-        self.assertTrue(p2ac.get_elemental_aura().contains(Element.HYDRO))
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 9)
+        self.assertTrue(p2ac.elemental_aura.contains(Element.HYDRO))
 
     def test_elemental_skill1(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -175,7 +175,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm.player_step()
         gsm.auto_step()
         game_state = gsm.get_game_state()
-        p1_summons = game_state.get_player1().get_summons()
+        p1_summons = game_state.player1.summons
         self.assertNotIn(OceanicMimicFrogSummon, p1_summons)
         self.assertEqual(p1_summons.just_find(OceanicMimicRaptorSummon).usages, 3)
         self.assertEqual(p1_summons.just_find(OceanicMimicSquirrelSummon).usages, 2)
@@ -195,7 +195,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm.player_step()
         gsm.auto_step()
         game_state = gsm.get_game_state()
-        p1_summons = game_state.get_player1().get_summons()
+        p1_summons = game_state.player1.summons
         self.assertEqual(p1_summons.just_find(OceanicMimicRaptorSummon).usages, 3)
         self.assertEqual(
             (OceanicMimicFrogSummon in p1_summons) + (OceanicMimicSquirrelSummon in p1_summons),
@@ -211,7 +211,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
                 )
             ).f_characters(
                 lambda cs: cs.factory().f_active_character(
-                    lambda ac: ac.factory().energy(ac.get_max_energy()).build()
+                    lambda ac: ac.factory().energy(ac.max_energy).build()
                 ).build()
             ).build()
         ).build()
@@ -225,9 +225,9 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm.player_step()
         gsm.auto_step()
         game_state = gsm.get_game_state()
-        p2_ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2_ac.get_hp(), 5)
-        self.assertTrue(p2_ac.get_elemental_aura().contains(Element.HYDRO))
+        p2_ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2_ac.hp, 5)
+        self.assertTrue(p2_ac.elemental_aura.contains(Element.HYDRO))
 
         # burst with two summons
         game_state = base_game.factory().f_player1(
@@ -245,9 +245,9 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm.player_step()
         gsm.auto_step()
         game_state = gsm.get_game_state()
-        p2_ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2_ac.get_hp(), 4)
-        self.assertTrue(p2_ac.get_elemental_aura().contains(Element.HYDRO))
+        p2_ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2_ac.hp, 4)
+        self.assertTrue(p2_ac.elemental_aura.contains(Element.HYDRO))
 
     def test_talent_card(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -260,7 +260,7 @@ class TestRohdeiaOfLoch(unittest.TestCase):
                 )
             ).f_characters(
                 lambda cs: cs.factory().f_active_character(
-                    lambda ac: ac.factory().energy(ac.get_max_energy()).build()
+                    lambda ac: ac.factory().energy(ac.max_energy).build()
                 ).build()
             ).build()
         ).build()
@@ -275,9 +275,9 @@ class TestRohdeiaOfLoch(unittest.TestCase):
         gsm.player_step()
         gsm.auto_step()
         game_state = gsm.get_game_state()
-        p2_ac = game_state.get_player2().just_get_active_character()
-        p1_summons = game_state.get_player1().get_summons()
-        self.assertEqual(p2_ac.get_hp(), 4)
-        self.assertTrue(p2_ac.get_elemental_aura().contains(Element.HYDRO))
+        p2_ac = game_state.player2.just_get_active_character()
+        p1_summons = game_state.player1.summons
+        self.assertEqual(p2_ac.hp, 4)
+        self.assertTrue(p2_ac.elemental_aura.contains(Element.HYDRO))
         self.assertEqual(p1_summons.just_find(OceanicMimicRaptorSummon).usages, 4)
         self.assertEqual(p1_summons.just_find(BurningFlameSummon).usages, 3)

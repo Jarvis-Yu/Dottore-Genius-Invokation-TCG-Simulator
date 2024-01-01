@@ -93,7 +93,7 @@ class ActionGenerator:
 
         A shortcut method to quickly get the player's dice.
         """
-        return self.game_state.get_player(self.pid).get_dice()
+        return self.game_state.get_player(self.pid).dice
 
     def hand_cards_available(self) -> Cards:
         """
@@ -101,7 +101,7 @@ class ActionGenerator:
 
         A shortcut method to quickly get the player's hand cards.
         """
-        return self.game_state.get_player(self.pid).get_hand_cards()
+        return self.game_state.get_player(self.pid).hand_cards
 
     def choose(self, choice: DecidedChoiceType) -> ActionGenerator:
         """

@@ -55,9 +55,9 @@ class Phase(ABC):
         :returns: which player's action is required to perform the next state transition.
                   `None` is returned if no player action is required.
         """
-        players = [game_state.get_player1(), game_state.get_player2()]
+        players = [game_state.player1, game_state.player2]
         for player in players:
-            if player.get_phase().is_action_phase():
+            if player.phase.is_action_phase():
                 return game_state.get_pid(player)
         return None
 

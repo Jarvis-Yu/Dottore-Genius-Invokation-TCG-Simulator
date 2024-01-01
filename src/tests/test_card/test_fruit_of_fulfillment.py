@@ -10,8 +10,8 @@ class TestFruitOfFullfillment(unittest.TestCase):
         base_state = add_dmg_listener(base_state, Pid.P1)
 
         # equip amos bow for Fischl (off-field)
-        deck_cards_before = base_state.get_player1().get_deck_cards()
-        hand_cards_before = base_state.get_player1().get_hand_cards()
+        deck_cards_before = base_state.player1.deck_cards
+        hand_cards_before = base_state.player1.hand_cards
         game_state = step_action(base_state, Pid.P1, CardAction(
             card=FruitOfFulfillment,
             instruction=StaticTargetInstruction(
@@ -19,8 +19,8 @@ class TestFruitOfFullfillment(unittest.TestCase):
                 target=StaticTarget.from_char_id(Pid.P1, 1),
             )
         ))
-        deck_cards_after = game_state.get_player1().get_deck_cards()
-        hand_cards_after = game_state.get_player1().get_hand_cards()
+        deck_cards_after = game_state.player1.deck_cards
+        hand_cards_after = game_state.player1.hand_cards
         self.assertEqual(deck_cards_after.num_cards(), deck_cards_before.num_cards() - 2)
         self.assertEqual(hand_cards_after.num_cards(), hand_cards_before.num_cards() + 1)
         self.assertEqual(

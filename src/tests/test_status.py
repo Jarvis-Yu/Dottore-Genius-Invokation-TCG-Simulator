@@ -28,10 +28,10 @@ class TestStatus(unittest.TestCase):
         self.assertFalse(
             gsm
             .get_game_state()
-            .get_player1()
-            .get_characters()
+            .player1
+            .characters
             .just_get_character(2)
-            .get_character_statuses()
+            .character_statuses
             .contains(SatiatedStatus)
         )
 
@@ -52,13 +52,13 @@ class TestStatus(unittest.TestCase):
         gsm.step_until_next_phase()
         character = gsm \
             .get_game_state() \
-            .get_player1() \
-            .get_characters() \
+            .player1 \
+            .characters \
             .just_get_character(2)
-        self.assertEqual(character.get_hp(), 3)
+        self.assertEqual(character.hp, 3)
         self.assertFalse(
             character
-            .get_character_statuses()
+            .character_statuses
             .contains(MushroomPizzaStatus)
         )
 
@@ -79,12 +79,12 @@ class TestStatus(unittest.TestCase):
         gsm.step_until_next_phase()
         character = gsm \
             .get_game_state() \
-            .get_player1() \
-            .get_characters() \
+            .player1 \
+            .characters \
             .just_get_character(2)
         status = character \
-            .get_character_statuses() \
+            .character_statuses \
             .just_find(MushroomPizzaStatus)
         assert isinstance(status, MushroomPizzaStatus)
-        self.assertEqual(character.get_hp(), 3)
+        self.assertEqual(character.hp, 3)
         self.assertEqual(status.usages, 1)

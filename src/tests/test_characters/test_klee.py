@@ -26,14 +26,14 @@ class TestKlee(unittest.TestCase):
             skill=CharacterSkill.SKILL1,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 10)
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 10)
 
         gsm.player_step()
         gsm.auto_step()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 9)
-        self.assertIn(Element.PYRO, p2ac.get_elemental_aura())
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 9)
+        self.assertIn(Element.PYRO, p2ac.elemental_aura)
 
     def test_elemental_skill1(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -45,16 +45,16 @@ class TestKlee(unittest.TestCase):
             skill=CharacterSkill.SKILL2,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 10)
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 10)
 
         # first skill
         gsm.player_step()
         gsm.auto_step()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 7)
-        self.assertTrue(p2ac.get_elemental_aura().contains(Element.PYRO))
-        self.assertFalse(gsm.get_game_state().get_player1().get_dice().is_even())
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 7)
+        self.assertTrue(p2ac.elemental_aura.contains(Element.PYRO))
+        self.assertFalse(gsm.get_game_state().player1.dice.is_even())
 
         # first normal attack
         a1.inject_action(SkillAction(
@@ -63,21 +63,21 @@ class TestKlee(unittest.TestCase):
         ))
         gsm.player_step()
         gsm.auto_step()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        p1 = gsm.get_game_state().get_player1()
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        p1 = gsm.get_game_state().player1
         p1ac = p1.just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 6)
-        self.assertTrue(p2ac.get_elemental_aura().contains(Element.PYRO))
-        self.assertTrue(p1.get_dice().is_even())
+        self.assertEqual(p2ac.hp, 6)
+        self.assertTrue(p2ac.elemental_aura.contains(Element.PYRO))
+        self.assertTrue(p1.dice.is_even())
         self.assertEqual(
-            p1ac.get_character_statuses().just_find(ExplosiveSparkStatus).usages,
+            p1ac.character_statuses.just_find(ExplosiveSparkStatus).usages,
             1
         )
 
         # second normal attack (charged)
         self.assertEqual(
             just(
-                gsm.get_game_state().skill_checker().usable(Pid.P1, 2, CharacterSkill.SKILL1)
+                gsm.get_game_state().skill_checker.usable(Pid.P1, 2, CharacterSkill.SKILL1)
             )[1],
             AbstractDice({Element.ANY: 2})
         )
@@ -87,12 +87,12 @@ class TestKlee(unittest.TestCase):
         ))
         gsm.player_step()
         gsm.auto_step()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        p1 = gsm.get_game_state().get_player1()
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        p1 = gsm.get_game_state().player1
         p1ac = p1.just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 4)
-        self.assertTrue(p2ac.get_elemental_aura().contains(Element.PYRO))
-        self.assertNotIn(ExplosiveSparkStatus, p1ac.get_character_statuses())
+        self.assertEqual(p2ac.hp, 4)
+        self.assertTrue(p2ac.elemental_aura.contains(Element.PYRO))
+        self.assertNotIn(ExplosiveSparkStatus, p1ac.character_statuses)
 
     def test_elemental_burst(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -100,7 +100,7 @@ class TestKlee(unittest.TestCase):
             lambda p: p.factory().f_characters(
                 lambda cs: cs.factory().f_active_character(
                     lambda ac: ac.factory().energy(
-                        ac.get_max_energy()
+                        ac.max_energy
                     ).build()
                 ).build()
             ).build()
@@ -116,13 +116,13 @@ class TestKlee(unittest.TestCase):
         )
         gsm.player_step()
         gsm.auto_step()
-        p2 = gsm.get_game_state().get_player2()
+        p2 = gsm.get_game_state().player2
         p2ac = p2.just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 7)
-        self.assertTrue(p2ac.get_elemental_aura().contains(Element.PYRO))
-        self.assertEqual(p2.get_combat_statuses().just_find(SparksnSplashStatus).usages, 2)
+        self.assertEqual(p2ac.hp, 7)
+        self.assertTrue(p2ac.elemental_aura.contains(Element.PYRO))
+        self.assertEqual(p2.combat_statuses.just_find(SparksnSplashStatus).usages, 2)
         self.assertEqual(
-            gsm.get_game_state().get_player1().just_get_active_character().get_energy(),
+            gsm.get_game_state().player1.just_get_active_character().energy,
             0
         )
 
@@ -137,11 +137,11 @@ class TestKlee(unittest.TestCase):
         )
         gsm.player_step()
         gsm.auto_step()
-        p2 = gsm.get_game_state().get_player2()
+        p2 = gsm.get_game_state().player2
         p2ac = p2.just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 5)
-        self.assertTrue(p2ac.get_elemental_aura().contains(Element.PYRO))
-        self.assertEqual(p2.get_combat_statuses().just_find(SparksnSplashStatus).usages, 1)
+        self.assertEqual(p2ac.hp, 5)
+        self.assertTrue(p2ac.elemental_aura.contains(Element.PYRO))
+        self.assertEqual(p2.combat_statuses.just_find(SparksnSplashStatus).usages, 1)
 
         # p1 end
         a1.inject_action(EndRoundAction())
@@ -156,11 +156,11 @@ class TestKlee(unittest.TestCase):
         )
         gsm.player_step()
         gsm.auto_step()
-        p2 = gsm.get_game_state().get_player2()
+        p2 = gsm.get_game_state().player2
         p2ac = p2.just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 10)
-        self.assertNotIn(Element.PYRO, p2ac.get_elemental_aura())
-        self.assertEqual(p2.get_combat_statuses().just_find(SparksnSplashStatus).usages, 1)
+        self.assertEqual(p2ac.hp, 10)
+        self.assertNotIn(Element.PYRO, p2ac.elemental_aura)
+        self.assertEqual(p2.combat_statuses.just_find(SparksnSplashStatus).usages, 1)
 
         # p2 skill again
         a2.inject_action(
@@ -171,11 +171,11 @@ class TestKlee(unittest.TestCase):
         )
         gsm.player_step()
         gsm.auto_step()
-        p2 = gsm.get_game_state().get_player2()
+        p2 = gsm.get_game_state().player2
         p2ac = p2.just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 8)
-        self.assertIn(Element.PYRO, p2ac.get_elemental_aura())
-        self.assertNotIn(SparksnSplashStatus, p2.get_combat_statuses())
+        self.assertEqual(p2ac.hp, 8)
+        self.assertIn(Element.PYRO, p2ac.elemental_aura)
+        self.assertNotIn(SparksnSplashStatus, p2.combat_statuses)
 
     def test_talent_card(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -207,8 +207,8 @@ class TestKlee(unittest.TestCase):
             EndRoundAction(),
         ])
         gsm.step_until_next_phase()
-        p1ac = gsm.get_game_state().get_player1().just_get_active_character()
-        p2ac = gsm.get_game_state().get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 1)
-        self.assertIn(Element.PYRO, p2ac.get_elemental_aura())
-        self.assertNotIn(ExplosiveSparkStatus, p1ac.get_character_statuses())
+        p1ac = gsm.get_game_state().player1.just_get_active_character()
+        p2ac = gsm.get_game_state().player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 1)
+        self.assertIn(Element.PYRO, p2ac.elemental_aura)
+        self.assertNotIn(ExplosiveSparkStatus, p1ac.character_statuses)

@@ -33,10 +33,10 @@ class TestDehya(unittest.TestCase):
             CharacterSkill.SKILL2,
             dice=ActualDice({Element.PYRO: 3}),
         )
-        p1 = game_state.get_player1()
+        p1 = game_state.player1
         self.assertEqual(len(get_dmg_listener_data(game_state, Pid.P1)), 0)
-        self.assertIn(FierySanctumFieldSummon, p1.get_summons())
-        self.assertEqual(p1.get_summons().just_find(FierySanctumFieldSummon).usages, 3)
+        self.assertIn(FierySanctumFieldSummon, p1.summons)
+        self.assertEqual(p1.summons.just_find(FierySanctumFieldSummon).usages, 3)
 
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         game_state = step_skill(
@@ -78,20 +78,20 @@ class TestDehya(unittest.TestCase):
 
         # dmg to Dehya doesn't trigger
         game_state = simulate_status_dmg(base_state, 3, Element.PYRO, Pid.P1)
-        p1ac = game_state.get_player1().just_get_active_character()
-        self.assertEqual(p1ac.get_hp(), 7)
+        p1ac = game_state.player1.just_get_active_character()
+        self.assertEqual(p1ac.hp, 7)
 
         # dmg to Ally trigger
         game_state = silent_fast_swap(game_state, Pid.P1, 1)
         game_state = simulate_status_dmg(game_state, 3, Element.PYRO, Pid.P1)
-        p1c1, p1c2, _ = game_state.get_player1().get_characters().get_characters()
-        self.assertEqual(p1c1.get_hp(), 8)
-        self.assertEqual(p1c2.get_hp(), 6)
+        p1c1, p1c2, _ = game_state.player1.characters.get_characters()
+        self.assertEqual(p1c1.hp, 8)
+        self.assertEqual(p1c2.hp, 6)
 
         # once per round
         game_state = simulate_status_dmg(game_state, 1, Element.PYRO, Pid.P1)
-        p1ac = game_state.get_player1().just_get_active_character()
-        self.assertEqual(p1ac.get_hp(), 7)
+        p1ac = game_state.player1.just_get_active_character()
+        self.assertEqual(p1ac.hp, 7)
 
         # check dmg by the end
         game_state = add_dmg_listener(game_state, Pid.P1)
@@ -102,17 +102,17 @@ class TestDehya(unittest.TestCase):
 
         # check hp deduction limit is 7
         game_state = simulate_status_dmg(game_state, 3, Element.PYRO, Pid.P1)
-        p1c1, p1c2, _ = game_state.get_player1().get_characters().get_characters()
-        self.assertEqual(p1c1.get_hp(), 5)
-        self.assertEqual(p1c2.get_hp(), 6)
+        p1c1, p1c2, _ = game_state.player1.characters.get_characters()
+        self.assertEqual(p1c1.hp, 5)
+        self.assertEqual(p1c2.hp, 6)
 
     def test_stalwart_and_true_talent_card(self):
         game_state = step_action(self.BASE_GAME, Pid.P1, CardAction(
             card=StalwartAndTrue,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.PYRO: 4}))
         ))
-        self.assertIn(FierySanctumFieldSummon, game_state.get_player1().get_summons())
+        self.assertIn(FierySanctumFieldSummon, game_state.player1.summons)
         game_state = simulate_status_dmg(game_state, 4, Element.PYRO, Pid.P1)
         game_state = next_round(game_state)
-        p1ac = game_state.get_player1().just_get_active_character()
-        self.assertEqual(p1ac.get_hp(), 8)
+        p1ac = game_state.player1.just_get_active_character()
+        self.assertEqual(p1ac.hp, 8)

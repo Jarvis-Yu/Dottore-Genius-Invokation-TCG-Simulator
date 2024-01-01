@@ -31,62 +31,62 @@ class TestSacrificialWeaponEquipmentCard(unittest.TestCase):
             ),
         )))
         game_state = auto_step(game_state)
-        p1ac = game_state.get_player1().just_get_active_character()
-        self.assertIn(SacrificialSwordStatus, p1ac.get_character_statuses())
+        p1ac = game_state.player1.just_get_active_character()
+        self.assertIn(SacrificialSwordStatus, p1ac.character_statuses)
 
-        dice_before = game_state.get_player1().get_dice()
+        dice_before = game_state.player1.dice
 
         # Normal attacks doesn't give dice
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
-        p1 = game_state.get_player1()
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 7)
-        self.assertEqual(p1.get_dice()[Element.ELECTRO], dice_before[Element.ELECTRO])
+        p1 = game_state.player1
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 7)
+        self.assertEqual(p1.dice[Element.ELECTRO], dice_before[Element.ELECTRO])
 
         # Burst attacks doesn't give dice
         game_state = fill_energy_for_all(game_state)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_BURST)
-        p1 = game_state.get_player1()
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 2)
-        self.assertEqual(p1.get_dice()[Element.ELECTRO], dice_before[Element.ELECTRO])
+        p1 = game_state.player1
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 2)
+        self.assertEqual(p1.dice[Element.ELECTRO], dice_before[Element.ELECTRO])
 
         # First Elemental Skill attacks gives dice
         game_state = kill_character(game_state, character_id=1, hp=10)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
-        p1 = game_state.get_player1()
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 6)
-        self.assertEqual(p1.get_dice()[Element.ELECTRO], dice_before[Element.ELECTRO] + 1)
+        p1 = game_state.player1
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 6)
+        self.assertEqual(p1.dice[Element.ELECTRO], dice_before[Element.ELECTRO] + 1)
 
         # Second Elemental Skill attacks doesn't give dice
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
-        p1 = game_state.get_player1()
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 2)
-        self.assertEqual(p1.get_dice()[Element.ELECTRO], dice_before[Element.ELECTRO] + 1)
+        p1 = game_state.player1
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 2)
+        self.assertEqual(p1.dice[Element.ELECTRO], dice_before[Element.ELECTRO] + 1)
 
         # Proceed to next round
         gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
         gsm.step_until_next_phase()
-        gsm.step_until_phase(game_state.get_mode().action_phase)
+        gsm.step_until_phase(game_state.mode.action_phase)
 
         game_state = auto_step(gsm.get_game_state())
         game_state = auto_step(just(game_state.action_step(Pid.P2, EndRoundAction())))
         game_state = kill_character(game_state, character_id=1, hp=10)
         game_state = fill_dice_with_omni(game_state)
-        dice_before = game_state.get_player1().get_dice()
+        dice_before = game_state.player1.dice
 
         # First Elemental Skill attacks gives dice
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
-        p1 = game_state.get_player1()
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 6)
-        self.assertEqual(p1.get_dice()[Element.ELECTRO], dice_before[Element.ELECTRO] + 1)
+        p1 = game_state.player1
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 6)
+        self.assertEqual(p1.dice[Element.ELECTRO], dice_before[Element.ELECTRO] + 1)
 
         # Second Elemental Skill attacks doesn't give dice
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
-        p1 = game_state.get_player1()
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 2)
-        self.assertEqual(p1.get_dice()[Element.ELECTRO], dice_before[Element.ELECTRO] + 1)
+        p1 = game_state.player1
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 2)
+        self.assertEqual(p1.dice[Element.ELECTRO], dice_before[Element.ELECTRO] + 1)

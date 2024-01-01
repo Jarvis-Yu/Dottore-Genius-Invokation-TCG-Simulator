@@ -27,10 +27,10 @@ def normal_attack_template(
         damage: int,
 ) -> tuple[eft.Effect, ...]:
     player = game_state.get_player(source.pid)
-    assert stt.ChargedAttackStatus in player.get_hidden_statuses()
-    charged_status = player.get_hidden_statuses().just_find(stt.ChargedAttackStatus)
-    assert stt.PlungeAttackStatus in player.get_hidden_statuses()
-    plunge_status = player.get_hidden_statuses().just_find(stt.PlungeAttackStatus)
+    assert stt.ChargedAttackStatus in player.hidden_statuses
+    charged_status = player.hidden_statuses.just_find(stt.ChargedAttackStatus)
+    assert stt.PlungeAttackStatus in player.hidden_statuses
+    plunge_status = player.hidden_statuses.just_find(stt.PlungeAttackStatus)
     effects: list[eft.Effect] = []
     effects.append(eft.ReferredDamageEffect(
         source=source,
@@ -62,13 +62,13 @@ def standard_post_effects(
                 my_active=StaticTarget(
                     pid=priorized_pid,
                     zone=Zone.CHARACTERS,
-                    id=game_state.get_player(priorized_pid).just_get_active_character().get_id(),
+                    id=game_state.get_player(priorized_pid).just_get_active_character().id,
                 ),
                 oppo_active=StaticTarget(
                     pid=priorized_pid.other(),
                     zone=Zone.CHARACTERS,
                     id=game_state.get_player(
-                        priorized_pid.other()).just_get_active_character().get_id(),
+                        priorized_pid.other()).just_get_active_character().id,
                 ),
             )
         )

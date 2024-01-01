@@ -9,7 +9,7 @@ class TestTeyvatFriedEgg(unittest.TestCase):
             lambda hcs: hcs.add(TeyvatFriedEgg).add(TeyvatFriedEgg)
         ).f_characters(
             lambda cs: cs.factory().f_active_character(
-                lambda ac: Mona.from_default(ac.get_id())
+                lambda ac: Mona.from_default(ac.id)
             ).build()
         ).build()
     ).build()
@@ -22,8 +22,8 @@ class TestTeyvatFriedEgg(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, DeathSwapAction(char_id=2))
 
         # check player 1's character 1 is defeated
-        p1c1 = game_state.get_player1().get_characters().just_get_character(1)
-        self.assertTrue(p1c1.defeated())
+        p1c1 = game_state.player1.characters.just_get_character(1)
+        self.assertTrue(p1c1.is_defeated())
 
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=TeyvatFriedEgg,
@@ -34,10 +34,10 @@ class TestTeyvatFriedEgg(unittest.TestCase):
         ))
 
         # check player 1's character 1 is alive again
-        p1c1 = game_state.get_player1().get_characters().just_get_character(1)
-        self.assertTrue(p1c1.alive())
-        self.assertEqual(p1c1.get_hp(), 1)
-        self.assertIn(ReviveOnCooldownStatus, game_state.get_player1().get_combat_statuses())
+        p1c1 = game_state.player1.characters.just_get_character(1)
+        self.assertTrue(p1c1.is_alive())
+        self.assertEqual(p1c1.hp, 1)
+        self.assertIn(ReviveOnCooldownStatus, game_state.player1.combat_statuses)
 
         # check cannot use twice per round
         game_state = kill_character(game_state, character_id=1, pid=Pid.P1, hp=0)
@@ -51,7 +51,7 @@ class TestTeyvatFriedEgg(unittest.TestCase):
 
         # proceed to next round
         gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
-        gsm.step_until_phase(game_state.get_mode().action_phase())
+        gsm.step_until_phase(game_state.mode.action_phase())
         gsm.auto_step()
         game_state = fill_dice_with_omni(gsm.get_game_state())
         game_state = step_action(game_state, Pid.P1, CardAction(
@@ -63,10 +63,10 @@ class TestTeyvatFriedEgg(unittest.TestCase):
         ))
 
         # check player 1's character 1 is alive again the next round
-        p1c1 = game_state.get_player1().get_characters().just_get_character(1)
-        self.assertTrue(p1c1.alive())
-        self.assertEqual(p1c1.get_hp(), 1)
-        self.assertIn(ReviveOnCooldownStatus, game_state.get_player1().get_combat_statuses())
+        p1c1 = game_state.player1.characters.just_get_character(1)
+        self.assertTrue(p1c1.is_alive())
+        self.assertEqual(p1c1.hp, 1)
+        self.assertIn(ReviveOnCooldownStatus, game_state.player1.combat_statuses)
 
     def test_revival_resets_character_statuses(self):
         base_game = kill_character(self.BASE_GAME, character_id=1, pid=Pid.P1, hp=1)
@@ -84,8 +84,8 @@ class TestTeyvatFriedEgg(unittest.TestCase):
         game_state = step_action(game_state, Pid.P1, DeathSwapAction(char_id=2))
 
         # check player 1's character 1 is defeated
-        p1c1 = game_state.get_player1().get_characters().just_get_character(1)
-        self.assertTrue(p1c1.defeated())
+        p1c1 = game_state.player1.characters.just_get_character(1)
+        self.assertTrue(p1c1.is_defeated())
 
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=TeyvatFriedEgg,
@@ -96,7 +96,7 @@ class TestTeyvatFriedEgg(unittest.TestCase):
         ))
 
         # check player 1's character 1 is alive again
-        p1c1 = game_state.get_player1().get_characters().just_get_character(1)
-        self.assertTrue(p1c1.alive())
-        self.assertEqual(p1c1.get_hp(), 1)
-        self.assertTrue(p1c1.get_hidden_statuses().just_find(IllusoryTorrentStatus).available)
+        p1c1 = game_state.player1.characters.just_get_character(1)
+        self.assertTrue(p1c1.is_alive())
+        self.assertEqual(p1c1.hp, 1)
+        self.assertTrue(p1c1.hidden_statuses.just_find(IllusoryTorrentStatus).available)

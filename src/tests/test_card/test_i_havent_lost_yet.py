@@ -34,7 +34,7 @@ class TestIHaventLostYet(unittest.TestCase):
         ))
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(game_state, a1, a2)
-        p2_old_dice = game_state.get_player2().get_dice()
+        p2_old_dice = game_state.player2.dice
         a1.inject_action(
             SkillAction(
                 skill=CharacterSkill.SKILL1,
@@ -55,10 +55,10 @@ class TestIHaventLostYet(unittest.TestCase):
         gsm.player_step()
         gsm.auto_step()
         game_state = gsm.get_game_state()
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_energy(), 1)
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.energy, 1)
         self.assertEqual(
-            game_state.get_player2().get_dice()[Element.OMNI],
+            game_state.player2.dice[Element.OMNI],
             p2_old_dice[Element.OMNI] + 1,
         )
 

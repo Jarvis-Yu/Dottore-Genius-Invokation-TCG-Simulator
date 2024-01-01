@@ -64,7 +64,7 @@ class StaticTarget:
         return cls(
             pid,
             Zone.CHARACTERS,
-            game_state.get_player(pid).just_get_active_character().get_id()
+            game_state.get_player(pid).just_get_active_character().id
         )
 
     @classmethod

@@ -32,37 +32,37 @@ class TestCharacters(unittest.TestCase):
                 lambda cs: cs.factory().active_character_id(2).build()
             ).build()
         ).build()
-        ordered_chars = base_game.get_player1().get_characters().get_character_in_activity_order()
-        self.assertEqual(ordered_chars[0].get_id(), 2)
-        self.assertEqual(ordered_chars[1].get_id(), 3)
-        self.assertEqual(ordered_chars[2].get_id(), 1)
+        ordered_chars = base_game.player1.characters.get_character_in_activity_order()
+        self.assertEqual(ordered_chars[0].id, 2)
+        self.assertEqual(ordered_chars[1].id, 3)
+        self.assertEqual(ordered_chars[2].id, 1)
 
         base_game = ACTION_TEMPLATE.factory().f_player1(
             lambda p1: p1.factory().f_characters(
                 lambda cs: cs.factory().active_character_id(1).build()
             ).build()
         ).build()
-        ordered_chars = base_game.get_player1().get_characters().get_character_in_activity_order()
-        self.assertEqual(ordered_chars[0].get_id(), 1)
-        self.assertEqual(ordered_chars[1].get_id(), 2)
-        self.assertEqual(ordered_chars[2].get_id(), 3)
+        ordered_chars = base_game.player1.characters.get_character_in_activity_order()
+        self.assertEqual(ordered_chars[0].id, 1)
+        self.assertEqual(ordered_chars[1].id, 2)
+        self.assertEqual(ordered_chars[2].id, 3)
 
         base_game = ACTION_TEMPLATE.factory().f_player1(
             lambda p1: p1.factory().f_characters(
                 lambda cs: cs.factory().active_character_id(3).build()
             ).build()
         ).build()
-        ordered_chars = base_game.get_player1().get_characters().get_character_in_activity_order()
-        self.assertEqual(ordered_chars[0].get_id(), 3)
-        self.assertEqual(ordered_chars[1].get_id(), 1)
-        self.assertEqual(ordered_chars[2].get_id(), 2)
+        ordered_chars = base_game.player1.characters.get_character_in_activity_order()
+        self.assertEqual(ordered_chars[0].id, 3)
+        self.assertEqual(ordered_chars[1].id, 1)
+        self.assertEqual(ordered_chars[2].id, 2)
 
         base_game = ACTION_TEMPLATE.factory().f_player1(
             lambda p1: p1.factory().f_characters(
                 lambda cs: cs.factory().active_character_id(None).build()  # type: ignore
             ).build()
         ).build()
-        characters = base_game.get_player1().get_characters()
+        characters = base_game.player1.characters
         ordered_chars = characters.get_character_in_activity_order()
         self.assertEqual(ordered_chars, characters._characters)
 
@@ -74,8 +74,8 @@ class TestCharacters(unittest.TestCase):
 
         characters = characters.factory().active_character_id(2).build()
         ordered_chars = characters.get_none_active_characters()
-        self.assertEqual(ordered_chars[0].get_id(), 1)
-        self.assertEqual(ordered_chars[1].get_id(), 3)
+        self.assertEqual(ordered_chars[0].id, 1)
+        self.assertEqual(ordered_chars[1].id, 3)
 
     def test_get_character(self):
         characters = Characters.from_iterable([Kaeya, RhodeiaOfLoch, Tighnari])
@@ -94,10 +94,10 @@ class TestCharacters(unittest.TestCase):
         characters = Characters.from_iterable([Kaeya, Tighnari, Tighnari])
         char = characters.find_first_character(Tighnari)
         assert char is not None
-        self.assertEqual(char.get_id(), 2)
+        self.assertEqual(char.id, 2)
         char = characters.find_first_character(Kaeya)
         assert char is not None
-        self.assertEqual(char.get_id(), 1)
+        self.assertEqual(char.id, 1)
         char = characters.find_first_character(Keqing)
         self.assertIsNone(char)
 
@@ -158,7 +158,7 @@ class TestCharacters(unittest.TestCase):
         self.assertIn(Kaeya, chars)
         self.assertIn(Tighnari, chars)
         chars = chars.factory().f_characters(
-            lambda cs: tuple(c.factory().hp(c.get_id()**2).build() for c in cs)
+            lambda cs: tuple(c.factory().hp(c.id ** 2).build() for c in cs)
         ).build()
-        self.assertEqual(chars.just_get_character(2).get_hp(), 4)
-        self.assertEqual(chars.just_get_character(3).get_hp(), 9)
+        self.assertEqual(chars.just_get_character(2).hp, 4)
+        self.assertEqual(chars.just_get_character(3).hp, 9)

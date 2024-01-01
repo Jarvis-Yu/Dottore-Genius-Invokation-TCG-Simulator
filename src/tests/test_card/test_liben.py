@@ -39,39 +39,39 @@ class TestLiben(unittest.TestCase):
                 gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
                 gsm.step_until_holds(
                     lambda gs: (
-                        gs.get_effect_stack().is_not_empty()
-                        and gs.get_effect_stack().peek() == AllStatusTriggererEffect(
+                            gs.effect_stack.is_not_empty()
+                            and gs.effect_stack.peek() == AllStatusTriggererEffect(
                             pid=Pid.P1,
                             signal=TriggeringSignal.ROUND_END,
                         )
                     )
                 )
                 game_state = gsm.get_game_state()
-                post_liben_dice = game_state.get_player1().get_dice()
+                post_liben_dice = game_state.player1.dice
                 self.assertEqual(post_liben_dice, expected_dice)
-                liben = game_state.get_player1().get_supports().just_find(LibenSupport, sid=1)
+                liben = game_state.player1.supports.just_find(LibenSupport, sid=1)
                 assert isinstance(liben, LibenSupport)
                 expected_fill = min(3, dice.num_dice()-expected_dice.num_dice())
                 self.assertEqual(liben.usages, expected_fill)
 
                 gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
-                gsm.step_until_phase(game_state.get_mode().action_phase)
+                gsm.step_until_phase(game_state.mode.action_phase)
                 game_state = gsm.get_game_state()
-                pre_dice = game_state.get_player1().get_dice()
-                pre_deck_cards = game_state.get_player1().get_deck_cards()
-                pre_hand_cards = game_state.get_player1().get_hand_cards()
+                pre_dice = game_state.player1.dice
+                pre_deck_cards = game_state.player1.deck_cards
+                pre_hand_cards = game_state.player1.hand_cards
                 game_state = auto_step(game_state)
-                post_dice = game_state.get_player1().get_dice()
-                post_deck_cards = game_state.get_player1().get_deck_cards()
-                post_hand_cards = game_state.get_player1().get_hand_cards()
+                post_dice = game_state.player1.dice
+                post_deck_cards = game_state.player1.deck_cards
+                post_hand_cards = game_state.player1.hand_cards
 
                 if expected_fill == 3:
-                    self.assertNotIn(LibenSupport, game_state.get_player1().get_supports())
+                    self.assertNotIn(LibenSupport, game_state.player1.supports)
                     self.assertEqual(post_dice, pre_dice + {Element.OMNI: 2})
                     self.assertEqual(pre_deck_cards + pre_hand_cards, post_deck_cards + post_hand_cards)
                     self.assertEqual(post_hand_cards.num_cards(), pre_hand_cards.num_cards() + 2)
                 else:
-                    self.assertIn(LibenSupport, game_state.get_player1().get_supports())
+                    self.assertIn(LibenSupport, game_state.player1.supports)
                     self.assertEqual(post_dice, pre_dice)
                     self.assertEqual(pre_deck_cards + pre_hand_cards, post_deck_cards + post_hand_cards)
                     self.assertEqual(post_hand_cards.num_cards(), pre_hand_cards.num_cards())

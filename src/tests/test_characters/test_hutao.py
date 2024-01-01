@@ -32,8 +32,8 @@ class TestHuTao(unittest.TestCase):
             CharacterSkill.SKILL2,
             dice=ActualDice({Element.PYRO: 2}),
         )
-        p1ac = game_state.get_player1().just_get_active_character()
-        self.assertIn(ParamitaPapilioStatus, p1ac.get_character_statuses())
+        p1ac = game_state.player1.just_get_active_character()
+        self.assertIn(ParamitaPapilioStatus, p1ac.character_statuses)
 
     def test_elemental_burst(self):
         base_state = fill_energy_for_all(self.BASE_GAME)
@@ -51,8 +51,8 @@ class TestHuTao(unittest.TestCase):
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertEqual(dmg.damage, 4)
         self.assertIs(dmg.element, Element.PYRO)
-        p1ac = game_state.get_player1().just_get_active_character()
-        self.assertEqual(p1ac.get_hp(), 9)
+        p1ac = game_state.player1.just_get_active_character()
+        self.assertEqual(p1ac.hp, 9)
 
         # <= 6 hp
         game_state = simulate_status_dmg(base_state, 4, pid=Pid.P1)
@@ -66,8 +66,8 @@ class TestHuTao(unittest.TestCase):
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertEqual(dmg.damage, 5)
         self.assertIs(dmg.element, Element.PYRO)
-        p1ac = game_state.get_player1().just_get_active_character()
-        self.assertEqual(p1ac.get_hp(), 9)
+        p1ac = game_state.player1.just_get_active_character()
+        self.assertEqual(p1ac.hp, 9)
 
     def test_paramita_papilio_status(self):
         base_state = AddCharacterStatusEffect(
@@ -82,8 +82,8 @@ class TestHuTao(unittest.TestCase):
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertEqual(dmg.damage, 3)
         self.assertIs(dmg.element, Element.PYRO)
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertNotIn(BloodBlossomStatus, p2ac.get_character_statuses())
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertNotIn(BloodBlossomStatus, p2ac.character_statuses)
 
         # charged attack applies BloodBlossomStatus
         game_state = replace_dice(base_state, Pid.P1, ActualDice({Element.OMNI: 10}))
@@ -91,8 +91,8 @@ class TestHuTao(unittest.TestCase):
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertEqual(dmg.damage, 3)
         self.assertIs(dmg.element, Element.PYRO)
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertIn(BloodBlossomStatus, p2ac.get_character_statuses())
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertIn(BloodBlossomStatus, p2ac.character_statuses)
 
     def test_blood_blossom_status(self):
         base_state = AddCharacterStatusEffect(
@@ -101,10 +101,10 @@ class TestHuTao(unittest.TestCase):
         ).execute(self.BASE_GAME)
 
         game_state = next_round(base_state)
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertNotIn(BloodBlossomStatus, p2ac.get_character_statuses())
-        self.assertEqual(p2ac.get_hp(), 9)
-        self.assertIn(Element.PYRO, p2ac.get_elemental_aura())
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertNotIn(BloodBlossomStatus, p2ac.character_statuses)
+        self.assertEqual(p2ac.hp, 9)
+        self.assertIn(Element.PYRO, p2ac.elemental_aura)
 
     def test_sanguine_rouge_status(self):
         game_state = step_action(self.BASE_GAME, Pid.P1, CardAction(
@@ -112,8 +112,8 @@ class TestHuTao(unittest.TestCase):
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.PYRO: 2}))
         ))
         game_state = add_dmg_listener(game_state, Pid.P1)
-        p1ac = game_state.get_player1().just_get_active_character()
-        self.assertIn(ParamitaPapilioStatus, p1ac.get_character_statuses())
+        p1ac = game_state.player1.just_get_active_character()
+        self.assertIn(ParamitaPapilioStatus, p1ac.character_statuses)
 
         game_state = replace_dice(game_state, Pid.P1, ActualDice({Element.OMNI: 11}))
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)

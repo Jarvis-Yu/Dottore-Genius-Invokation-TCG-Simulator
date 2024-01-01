@@ -60,12 +60,12 @@ class StatusProcessing:
         player = game_state.get_player(pid)
 
         # characters first
-        characters = player.get_characters()
+        characters = player.characters
         ordered_characters = characters.get_character_in_activity_order()
         for character in ordered_characters:
             # get character's private statuses and add triggerStatusEffect to global effect_stack
             statuses = character.get_all_statuses_ordered_flattened()
-            character_id = character.get_id()
+            character_id = character.id
             target = StaticTarget(
                 pid,
                 Zone.CHARACTERS,
@@ -75,7 +75,7 @@ class StatusProcessing:
                 game_state = f(game_state, status, target)
 
         # hidden status
-        hidden_statuses = player.get_hidden_statuses()
+        hidden_statuses = player.hidden_statuses
         target = StaticTarget(
             pid,
             Zone.HIDDEN_STATUSES,
@@ -85,7 +85,7 @@ class StatusProcessing:
             game_state = f(game_state, status, target)
 
         # combat status
-        combat_statuses = player.get_combat_statuses()
+        combat_statuses = player.combat_statuses
         target = StaticTarget(
             pid,
             Zone.COMBAT_STATUSES,
@@ -95,7 +95,7 @@ class StatusProcessing:
             game_state = f(game_state, status, target)
 
         # summons
-        summons = player.get_summons()
+        summons = player.summons
         target = StaticTarget(
             pid,
             Zone.SUMMONS,
@@ -105,7 +105,7 @@ class StatusProcessing:
             game_state = f(game_state, summon, target)
 
         # supports
-        supports = player.get_supports()
+        supports = player.supports
         for support in supports:
             target = StaticTarget(
                 pid,

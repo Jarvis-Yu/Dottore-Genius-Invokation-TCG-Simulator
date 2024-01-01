@@ -328,7 +328,7 @@ class Card:
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         """ doesn't check if player has the card in hand """
-        return game_state.get_active_player_id() is pid
+        return game_state.active_player_id is pid
 
     @classmethod
     def loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
@@ -336,7 +336,7 @@ class Card:
         :returns: `True` if the card can be played by the player `pid` provided they
                   have the card.
         """
-        return cls._loosely_usable(game_state, pid) and game_state.get_effect_stack().is_empty()
+        return cls._loosely_usable(game_state, pid) and game_state.effect_stack.is_empty()
 
     @classmethod
     def usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
@@ -344,7 +344,7 @@ class Card:
         :returns: `True` if the card can be played by the player `pid` and they
                   have the card.
         """
-        return game_state.get_player(pid).get_hand_cards().contains(cls) \
+        return game_state.get_player(pid).hand_cards.contains(cls) \
             and cls.loosely_usable(game_state, pid)
 
     @classmethod
@@ -353,7 +353,7 @@ class Card:
         :returns: `True` if the card can be played by the player `pid`, and they
                   have the card and they have the dice to pay for the card.
         """
-        dice_satisfy = game_state.get_player(pid).get_dice().loosely_satisfy(
+        dice_satisfy = game_state.get_player(pid).dice.loosely_satisfy(
             cls.just_preprocessed_dice_cost(game_state, pid)
         )
         return dice_satisfy and cls.usable(game_state, pid)
@@ -369,10 +369,10 @@ class Card:
         :returns: the preprocessed game-state and card event if instruction is valid,
                   otherwise return None.
         """
-        if not game_state.get_player(pid).get_hand_cards().contains(cls) \
-                or not game_state.get_active_player_id() is pid \
+        if not game_state.get_player(pid).hand_cards.contains(cls) \
+                or not game_state.active_player_id is pid \
                 or not cls._valid_instruction(game_state, pid, instruction) \
-                or not (game_state.get_player(pid).get_dice() - instruction.dice).is_legal():
+                or not (game_state.get_player(pid).dice - instruction.dice).is_legal():
             return None
         game_state, card_event = cls.preprocessed_card_event(game_state, pid)
         if instruction.dice.just_satisfy(card_event.dice_cost):
@@ -458,7 +458,7 @@ class _UsableFuncs:
         if active_character is None:  # pragma: no cover
             return False
         return _UsableFuncs.active_combat_talent_skill_card_usable(game_state, pid, char) \
-            and active_character.get_energy() == active_character.get_max_energy()
+               and active_character.energy == active_character.max_energy
 
 
 class _DiceOnlyChoiceProvider(Card):
@@ -539,7 +539,7 @@ class _CharTargetChoiceProvider(Card):
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         return any(
             cls._valid_char(game_state, pid, char)
-            for char in game_state.get_player(pid).get_characters()
+            for char in game_state.get_player(pid).characters
         ) and super()._loosely_usable(game_state, pid)
 
     @override
@@ -563,7 +563,7 @@ class _CharTargetChoiceProvider(Card):
 
     @classmethod
     def _valid_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:  # pragma: no cover
-        return not char.defeated()
+        return not char.is_defeated()
 
     @classmethod
     def _choices_helper(
@@ -578,14 +578,14 @@ class _CharTargetChoiceProvider(Card):
         instruction = action_generator.instruction
         assert type(instruction) is act.StaticTargetInstruction
         if instruction.target is None:
-            chars = game_state.get_player(pid).get_characters()
+            chars = game_state.get_player(pid).characters
             chars = [char for char in chars if cls._valid_char(
                 game_state, pid, char)]
             return tuple(
                 StaticTarget(
                     pid=pid,
                     zone=Zone.CHARACTERS,
-                    id=char.get_id(),
+                    id=char.id,
                 )
                 for char in chars
             )
@@ -664,7 +664,7 @@ class _SummonTargetChoiceProvider(Card):
                 not cls._MY_SIDE
                 or (
                     not (summons := game_state.get_player(
-                        pid).get_summons()).empty()
+                        pid).summons).empty()
                     and any(
                         cls._valid_summon(summon)
                         for summon in summons
@@ -674,7 +674,7 @@ class _SummonTargetChoiceProvider(Card):
                 not cls._OPPO_SIDE
                 or (
                     not (summons := game_state.get_other_player(
-                        pid).get_summons()).empty()
+                        pid).summons).empty()
                     and any(
                         cls._valid_summon(summon)
                         for summon in summons
@@ -722,7 +722,7 @@ class _SummonTargetChoiceProvider(Card):
                 pids.append(pid.other())
             choices = []
             for this_pid in pids:
-                summons = game_state.get_player(this_pid).get_summons()
+                summons = game_state.get_player(this_pid).summons
                 choices += [
                     StaticTarget(
                         pid=this_pid,
@@ -906,7 +906,7 @@ class _TalentEquipmentSkillCard(TalentEquipmentCard, _CombatActionCard, _DiceOnl
         target = StaticTarget(
             pid=pid,
             zone=Zone.CHARACTERS,
-            id=game_state.get_player(pid).just_get_active_character().get_id(),
+            id=game_state.get_player(pid).just_get_active_character().id,
         )
         return (
             eft.AddCharacterStatusEffect(
@@ -928,7 +928,7 @@ class WeaponEquipmentCard(EquipmentCard, _CharTargetChoiceProvider):
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         chars = game_state.get_player(
-            pid).get_characters().get_alive_characters()
+            pid).characters.get_alive_characters()
         return any(cls._valid_char(game_state, pid, char) for char in chars) \
             and super()._loosely_usable(game_state, pid)
 
@@ -970,7 +970,7 @@ class ArtifactEquipmentCard(EquipmentCard, _CharTargetChoiceProvider):
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         chars = game_state.get_player(
-            pid).get_characters().get_alive_characters()
+            pid).characters.get_alive_characters()
         return any(cls._valid_char(game_state, pid, char) for char in chars) \
             and super()._loosely_usable(game_state, pid)
 
@@ -1002,7 +1002,7 @@ class SupportCard(Card):
             pid: Pid,
             instruction: act.Instruction
     ) -> None | tuple[gs.GameState, CardPEvent]:
-        supports = game_state.get_player(pid).get_supports()
+        supports = game_state.get_player(pid).supports
         if supports.full():
             if not isinstance(instruction, act.StaticTargetInstruction):
                 return None
@@ -1056,7 +1056,7 @@ class SupportCard(Card):
         instruction = action_generator.instruction
         if type(instruction) is act.StaticTargetInstruction \
                 and instruction.target is None:
-            supports = game_state.get_player(pid).get_supports()
+            supports = game_state.get_player(pid).supports
             return tuple(
                 StaticTarget(
                     pid=pid,
@@ -1115,7 +1115,7 @@ class SupportCard(Card):
     ) -> None | acg.ActionGenerator:
         if not cls.strictly_usable(game_state, pid):  # pragma: no cover
             return None
-        if game_state.get_player(pid).get_supports().full():
+        if game_state.get_player(pid).supports.full():
             return acg.ActionGenerator(
                 game_state=game_state,
                 pid=pid,
@@ -1156,7 +1156,7 @@ class ArcaneLegendCard(Card):
     @override
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        return stt.ArcaneLegendUsedStatus not in game_state.get_player(pid).get_hidden_statuses()
+        return stt.ArcaneLegendUsedStatus not in game_state.get_player(pid).hidden_statuses
 
     @override
     @classmethod
@@ -1188,7 +1188,7 @@ class FoodCard(EventCard):
     @override
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        characters = game_state.get_player(pid).get_characters()
+        characters = game_state.get_player(pid).characters
         if all(not cls._valid_char(game_state, pid, char) for char in characters):
             return False
         return super()._loosely_usable(game_state, pid)
@@ -1209,12 +1209,12 @@ class FoodCard(EventCard):
         return (
             isinstance(target, chr.Character)
             and not target.satiated()
-            and target.alive()
+            and target.is_alive()
         )
 
     @classmethod
     def _valid_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:
-        return not char.satiated() and not char.defeated()
+        return not char.satiated() and not char.is_defeated()
 
     @override
     @classmethod
@@ -1262,8 +1262,8 @@ class _RangedFoodCard(FoodCard, _DiceOnlyChoiceProvider):
     ) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.DiceOnlyInstruction)
         targets = [
-            StaticTarget.from_char_id(pid, char.get_id())
-            for char in game_state.get_player(pid).get_characters()
+            StaticTarget.from_char_id(pid, char.id)
+            for char in game_state.get_player(pid).characters
             if cls._valid_char(game_state, pid, char)
         ]
         return sum([
@@ -1306,8 +1306,8 @@ class _DirectHealCard(FoodCard):
     @override
     @classmethod
     def _valid_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:
-        return char.get_hp() < char.get_max_hp() \
-            and super()._valid_char(game_state, pid, char)
+        return char.hp < char.max_hp \
+               and super()._valid_char(game_state, pid, char)
 
 # <<<<<<<<<<<<<<<<<<<< Equipment Cards <<<<<<<<<<<<<<<<<<<<
 ########## Weapon Card ##########
@@ -1443,7 +1443,7 @@ class LithicSpear(WeaponEquipmentCard):
     ) -> tuple[eft.Effect, ...]:
         stacks = len([
             None
-            for char in game_state.get_player(pid).get_characters()
+            for char in game_state.get_player(pid).characters
             if char.of_faction(Faction.LIYUE)
         ])
         if stacks == 0:
@@ -1642,7 +1642,7 @@ class TeyvatFriedEgg(FoodCard, _CharTargetChoiceProvider):
 
     @classmethod
     def revive_on_cooldown(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        return stt.ReviveOnCooldownStatus in game_state.get_player(pid).get_combat_statuses()
+        return stt.ReviveOnCooldownStatus in game_state.get_player(pid).combat_statuses
 
     @override
     @classmethod
@@ -1668,14 +1668,14 @@ class TeyvatFriedEgg(FoodCard, _CharTargetChoiceProvider):
         return (
             isinstance(target, chr.Character)
             and not target.satiated()
-            and target.defeated()
+            and target.is_defeated()
             and not cls.revive_on_cooldown(game_state, pid)
         )
 
     @override
     @classmethod
     def _valid_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:
-        return not char.satiated() and char.defeated()
+        return not char.satiated() and char.is_defeated()
 
     @override
     @classmethod
@@ -1741,7 +1741,7 @@ class CovenantOfRock(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
     @override
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        return game_state.get_player(pid).get_dice().num_dice() == 0
+        return game_state.get_player(pid).dice.num_dice() == 0
 
     @override
     @classmethod
@@ -1812,7 +1812,7 @@ class InEveryHouseAStove(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
         ) + (
             eft.DrawRandomCardEffect(
                 pid=pid,
-                num=min(game_state.get_round(), 4),
+                num=min(game_state.round, 4),
             ),
         )
 
@@ -1826,7 +1826,7 @@ class JoyousCelebration(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
         active_char = game_state.get_player(pid).get_active_character()
         return (
             active_char is not None
-            and active_char.alive()
+            and active_char.is_alive()
             and active_char.ELEMENT() in AURA_ELEMENTS
         )
 
@@ -1846,14 +1846,14 @@ class JoyousCelebration(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
         ) + tuple([
             eft.ApplyElementalAuraEffect(
                 source=StaticTarget(Pid.P1, Zone.HAND_CARD, -1),
-                target=StaticTarget.from_char_id(pid, char.get_id()),
+                target=StaticTarget.from_char_id(pid, char.id),
                 element=active_char.ELEMENT(),
                 source_type=DamageType(),
             )
             for char in game_state.get_player(
                 pid
-            ).get_characters().get_alive_character_in_activity_order_last_active()
-            if char.get_elemental_aura().has_aura()
+            ).characters.get_alive_character_in_activity_order_last_active()
+            if char.elemental_aura.has_aura()
         ])
 
 
@@ -1890,11 +1890,11 @@ class CalxsArts(EventCard, _DiceOnlyChoiceProvider):
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         """ Check active character doesn't have full energy and teammates have energy """
         ac = game_state.get_player(pid).get_active_character()
-        cs = game_state.get_player(pid).get_characters()
-        if ac is None or ac.get_energy() >= ac.get_max_energy():
+        cs = game_state.get_player(pid).characters
+        if ac is None or ac.energy >= ac.max_energy:
             return False
         has_teammate_with_energy = any(
-            char.get_energy() > 0
+            char.energy > 0
             for char in cs.get_none_active_characters()
         )
         if not has_teammate_with_energy:
@@ -1921,12 +1921,12 @@ class CalxsArts(EventCard, _DiceOnlyChoiceProvider):
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         player = game_state.get_player(pid)
-        none_active_chars = player.get_characters().get_none_active_characters()
-        active_char_id = player.just_get_active_character().get_id()
+        none_active_chars = player.characters.get_none_active_characters()
+        active_char_id = player.just_get_active_character().id
         effects: list[eft.Effect] = [
             eft.EnergyDrainEffect(
                 target=StaticTarget(
-                    Pid.P1, Zone.CHARACTERS, char.get_id()
+                    Pid.P1, Zone.CHARACTERS, char.id
                 ),
                 drain=1,
             )
@@ -1938,7 +1938,7 @@ class CalxsArts(EventCard, _DiceOnlyChoiceProvider):
                     Pid.P1, Zone.CHARACTERS, active_char_id
                 ),
                 recharge=sum(
-                    1 for char in none_active_chars if char.get_energy() > 0),
+                    1 for char in none_active_chars if char.energy > 0),
             )
         )
         return tuple(effects)
@@ -1951,9 +1951,9 @@ class ChangingShifts(EventCard, _DiceOnlyChoiceProvider):
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         chars = game_state.get_player(
-            pid).get_characters().get_none_active_characters()
+            pid).characters.get_none_active_characters()
         return any(
-            char.alive()
+            char.is_alive()
             for char in chars
         ) and super()._loosely_usable(game_state, pid)
 
@@ -2035,8 +2035,8 @@ class ElementalResonanceHighVoltage(_ElementalResonanceCard, _DiceOnlyChoiceProv
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         """ Check active character doesn't have full energy """
         characters = game_state.get_player(
-            pid).get_characters().get_alive_character_in_activity_order()
-        if not any(char.get_energy() < char.get_max_energy() for char in characters):
+            pid).characters.get_alive_character_in_activity_order()
+        if not any(char.energy < char.max_energy for char in characters):
             return False
         return super()._loosely_usable(game_state, pid)
 
@@ -2049,12 +2049,11 @@ class ElementalResonanceHighVoltage(_ElementalResonanceCard, _DiceOnlyChoiceProv
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         characters = \
-            game_state.get_player(pid).get_characters(
-            ).get_alive_character_in_activity_order()
+            game_state.get_player(pid).characters.get_alive_character_in_activity_order()
         char_id = next(
-            char.get_id()
+            char.id
             for char in characters
-            if char.get_energy() < char.get_max_energy()
+            if char.energy < char.max_energy
         )
         return (
             eft.EnergyRechargeEffect(
@@ -2072,15 +2071,15 @@ class ElementalResonanceImpetuousWinds(_ElementalResonanceCard, _CharTargetChoic
     @classmethod
     def _valid_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:
         return (
-            char.alive()
-            and char.get_id() != game_state.get_player(pid).just_get_active_character().get_id()
+                char.is_alive()
+                and char.id != game_state.get_player(pid).just_get_active_character().id
         )
 
     @override
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        cs = game_state.get_player(pid).get_characters()
-        return any(char.alive() for char in cs.get_none_active_characters())
+        cs = game_state.get_player(pid).characters
+        return any(char.is_alive() for char in cs.get_none_active_characters())
 
     @override
     @classmethod
@@ -2127,8 +2126,8 @@ class ElementalResonanceSoothingWater(_ElementalResonanceCard, _DiceOnlyChoicePr
     @override
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        chars = game_state.get_player(pid).get_characters()
-        return any(char.get_hp() < char.get_max_hp() for char in chars)
+        chars = game_state.get_player(pid).characters
+        return any(char.hp < char.max_hp for char in chars)
 
     @override
     @classmethod
@@ -2138,15 +2137,14 @@ class ElementalResonanceSoothingWater(_ElementalResonanceCard, _DiceOnlyChoicePr
             pid: Pid,
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
-        chars = game_state.get_player(pid).get_characters(
-        ).get_alive_character_in_activity_order()
+        chars = game_state.get_player(pid).characters.get_alive_character_in_activity_order()
         effects: list[eft.Effect] = [eft.RecoverHPEffect(
-            target=StaticTarget.from_char_id(pid, chars[0].get_id()),
+            target=StaticTarget.from_char_id(pid, chars[0].id),
             recovery=cls._MAIN_RECOVERY,
         )]
         for char in chars[1:]:
             effects.append(eft.RecoverHPEffect(
-                target=StaticTarget.from_char_id(pid, char.get_id()),
+                target=StaticTarget.from_char_id(pid, char.id),
                 recovery=cls._SUB_RECOVERY,
             ))
         return tuple(effects)
@@ -2170,7 +2168,7 @@ class ElementalResonanceSprawlingGreenery(_ElementalResonanceCard, _DiceOnlyChoi
         )]
 
         this_player = game_state.get_player(pid)
-        burning_flame_summon = this_player.get_summons().find(sm.BurningFlameSummon)
+        burning_flame_summon = this_player.summons.find(sm.BurningFlameSummon)
         if burning_flame_summon is not None:
             effects.append(eft.OverrideSummonEffect(
                 target_pid=pid,
@@ -2178,7 +2176,7 @@ class ElementalResonanceSprawlingGreenery(_ElementalResonanceCard, _DiceOnlyChoi
                                usages=burning_flame_summon.usages + 1),
             ))
 
-        combat_statuses = this_player.get_combat_statuses()
+        combat_statuses = this_player.combat_statuses
         catalyzing_field_status = combat_statuses.find(
             stt.CatalyzingFieldStatus)
         if catalyzing_field_status is not None:
@@ -2260,12 +2258,12 @@ class IHaventLostYet(EventCard, _DiceOnlyChoiceProvider):
         return (
             (
                 game_state.get_player(pid)
-                .get_hidden_statuses()
+                .hidden_statuses
                 .just_find(stt.DeathThisRoundStatus).activated
             ) and (
                 stt.IHaventLostYetOnCooldownStatus not in
-                game_state.get_player(pid).get_combat_statuses()
-            )
+                game_state.get_player(pid).combat_statuses
+        )
         )
 
     @override
@@ -2279,7 +2277,7 @@ class IHaventLostYet(EventCard, _DiceOnlyChoiceProvider):
         target = StaticTarget(
             pid,
             Zone.CHARACTERS,
-            game_state.get_player(pid).just_get_active_character().get_id(),
+            game_state.get_player(pid).just_get_active_character().id,
         )
         return (
             eft.AddDiceEffect(
@@ -2305,9 +2303,9 @@ class LeaveItToMe(EventCard, _DiceOnlyChoiceProvider):
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         chars = game_state.get_player(
-            pid).get_characters().get_none_active_characters()
+            pid).characters.get_none_active_characters()
         return any(
-            char.alive()
+            char.is_alive()
             for char in chars
         ) and super()._loosely_usable(game_state, pid)
 
@@ -2377,7 +2375,7 @@ class Starsigns(EventCard, _DiceOnlyChoiceProvider):
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         """ Check active character doesn't have full energy """
         active_character = game_state.get_player(pid).get_active_character()
-        if active_character is None or active_character.get_energy() >= active_character.get_max_energy():
+        if active_character is None or active_character.energy >= active_character.max_energy:
             return False
         return super()._loosely_usable(game_state, pid)
 
@@ -2423,7 +2421,7 @@ class WhenTheCraneReturned(EventCard, _DiceOnlyChoiceProvider):
     @override
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        return len(game_state.get_player(pid).get_characters().get_alive_characters()) > 1
+        return len(game_state.get_player(pid).characters.get_alive_characters()) > 1
 
     @override
     @classmethod
@@ -2448,7 +2446,7 @@ class WhereIsTheUnseenRazor(EventCard, _CharTargetChoiceProvider):
     def _valid_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:
         return any(
             isinstance(status, stt.WeaponEquipmentStatus)
-            for status in char.get_character_statuses()
+            for status in char.character_statuses
         ) and super()._valid_char(game_state, pid, char)
 
     @override
@@ -2462,8 +2460,7 @@ class WhereIsTheUnseenRazor(EventCard, _CharTargetChoiceProvider):
         assert isinstance(instruction, act.StaticTargetInstruction)
         char_target = game_state.get_character_target(instruction.target)
         assert char_target is not None
-        weapon = char_target.get_character_statuses(
-        ).just_find_type(stt.WeaponEquipmentStatus)
+        weapon = char_target.character_statuses.just_find_type(stt.WeaponEquipmentStatus)
         card = weapon.WEAPON_CARD
         return (
             eft.RemoveCharacterStatusEffect(
@@ -2487,7 +2484,7 @@ class WindAndFreedom(EventCard, _DiceOnlyChoiceProvider):
     @override
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        return len(game_state.get_player(pid).get_characters().get_alive_characters()) > 1
+        return len(game_state.get_player(pid).characters.get_alive_characters()) > 1
 
     @override
     @classmethod
@@ -2689,7 +2686,7 @@ class AbsorbingPrism(TalentEventCard, _CombatActionCard, _DiceOnlyChoiceProvider
         target = StaticTarget(
             pid=pid,
             zone=Zone.CHARACTERS,
-            id=game_state.get_player(pid).just_get_active_character().get_id(),
+            id=game_state.get_player(pid).just_get_active_character().id,
         )
         return (
             eft.RecoverHPEffect(
@@ -2796,7 +2793,7 @@ class LightningStiletto(TalentEventCard, _CombatActionCard, _CharTargetChoicePro
     @override
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        cs = game_state.get_player(pid).get_characters()
+        cs = game_state.get_player(pid).characters
         keqings = [char for char in cs if type(char) is chr.Keqing]
         if not keqings:  # pragma: no cover
             return False

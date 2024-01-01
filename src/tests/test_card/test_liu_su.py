@@ -20,9 +20,9 @@ class TestLiuSu(unittest.TestCase):
         # swap to no energy gives energy
         game_state = silent_fast_swap(game_state, Pid.P1, 1)
         game_state = step_swap(game_state, Pid.P1, 2)
-        ac = game_state.get_player1().just_get_active_character()
-        self.assertEqual(ac.get_energy(), 1)
-        sups = game_state.get_player1().get_supports()
+        ac = game_state.player1.just_get_active_character()
+        self.assertEqual(ac.energy, 1)
+        sups = game_state.player1.supports
         liu1, liu2 = sups.just_find(LiuSuSupport, 1), sups.just_find(LiuSuSupport, 2)
         assert isinstance(liu1, LiuSuSupport) and isinstance(liu2, LiuSuSupport)
         self.assertEqual(liu1.usages, 1)
@@ -33,9 +33,9 @@ class TestLiuSu(unittest.TestCase):
         # swapping to character with energy doesn't charage
         game_state = silent_fast_swap(game_state, Pid.P1, 1)
         game_state = step_swap(game_state, Pid.P1, 2)
-        ac = game_state.get_player1().just_get_active_character()
-        self.assertEqual(ac.get_energy(), 1)
-        sups = game_state.get_player1().get_supports()
+        ac = game_state.player1.just_get_active_character()
+        self.assertEqual(ac.energy, 1)
+        sups = game_state.player1.supports
         liu1, liu2 = sups.just_find(LiuSuSupport, 1), sups.just_find(LiuSuSupport, 2)
         assert isinstance(liu1, LiuSuSupport) and isinstance(liu2, LiuSuSupport)
         self.assertEqual(liu1.usages, 1)
@@ -45,9 +45,9 @@ class TestLiuSu(unittest.TestCase):
 
         # LiuSu can only be triggered once per round
         game_state = step_swap(game_state, Pid.P1, 3)
-        ac = game_state.get_player1().just_get_active_character()
-        self.assertEqual(ac.get_energy(), 1)
-        sups = game_state.get_player1().get_supports()
+        ac = game_state.player1.just_get_active_character()
+        self.assertEqual(ac.energy, 1)
+        sups = game_state.player1.supports
         liu1, liu2 = sups.just_find(LiuSuSupport, 1), sups.just_find(LiuSuSupport, 2)
         assert isinstance(liu1, LiuSuSupport) and isinstance(liu2, LiuSuSupport)
         self.assertEqual(liu1.usages, 1)
@@ -59,9 +59,9 @@ class TestLiuSu(unittest.TestCase):
         game_state = next_round_with_great_omni(game_state)
         game_state = skip_action_round_until(game_state, Pid.P1)
         game_state = step_swap(game_state, Pid.P1, 1)
-        ac = game_state.get_player1().just_get_active_character()
-        self.assertEqual(ac.get_energy(), 1)
-        sups = game_state.get_player1().get_supports()
+        ac = game_state.player1.just_get_active_character()
+        self.assertEqual(ac.energy, 1)
+        sups = game_state.player1.supports
         liu1, liu2 = sups.find(LiuSuSupport, 1), sups.just_find(LiuSuSupport, 2)  # type: ignore
         assert isinstance(liu2, LiuSuSupport)
         self.assertIsNone(liu1)

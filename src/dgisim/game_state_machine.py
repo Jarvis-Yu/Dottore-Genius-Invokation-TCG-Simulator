@@ -168,9 +168,9 @@ class GameStateMachine:
         """
         if isinstance(phase, Phase):
             phase = type(phase)
-        while isinstance(self._game_state.get_phase(), phase):
+        while isinstance(self._game_state.phase, phase):
             self.one_step(observe=observe)
-        while not isinstance(self._game_state.get_phase(), phase):
+        while not isinstance(self._game_state.phase, phase):
             self.one_step(observe=observe)
 
     def step_until_next_phase(self, observe=False) -> None:
@@ -180,8 +180,8 @@ class GameStateMachine:
 
         Keeps making state transitions until next phase is reached.
         """
-        phase = self._game_state.get_phase()
-        while self._game_state.get_phase() == phase:
+        phase = self._game_state.phase
+        while self._game_state.phase == phase:
             self.one_step(observe=observe)
 
     def step_until_holds(self, predicate: Callable[[GameState], bool], observe=False) -> None:

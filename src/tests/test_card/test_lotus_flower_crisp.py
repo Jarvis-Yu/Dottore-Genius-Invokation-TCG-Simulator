@@ -39,15 +39,15 @@ class TestLotusFlowerCrisps(unittest.TestCase):
 
         self.assertEqual(
             buffed_game_state
-            .get_player1()
+            .player1
             .just_get_active_character()
-            .get_character_statuses()
+            .character_statuses
             .just_find(LotusFlowerCrispStatus)
             .usages,
             1
         )
         self.assertTrue(
-            buffed_game_state.get_player1().just_get_active_character().get_character_statuses()
+            buffed_game_state.player1.just_get_active_character().character_statuses
             .contains(SatiatedStatus)
         )
 
@@ -61,10 +61,10 @@ class TestLotusFlowerCrisps(unittest.TestCase):
             char_id=1,
         )
         game_state = auto_step(game_state)
-        p1ac = game_state.get_player1().just_get_active_character()
-        self.assertEqual(p1ac.get_hp(), 4)
-        self.assertTrue(p1ac.get_elemental_aura().contains(Element.PYRO))
-        self.assertIsNone(p1ac.get_character_statuses().find(LotusFlowerCrispStatus))
+        p1ac = game_state.player1.just_get_active_character()
+        self.assertEqual(p1ac.hp, 4)
+        self.assertTrue(p1ac.elemental_aura.contains(Element.PYRO))
+        self.assertIsNone(p1ac.character_statuses.find(LotusFlowerCrispStatus))
 
         # test when shield takes 2 damage
         game_state = add_damage_effect(
@@ -75,10 +75,10 @@ class TestLotusFlowerCrisps(unittest.TestCase):
             char_id=1,
         )
         game_state = auto_step(game_state)
-        p1ac = game_state.get_player1().just_get_active_character()
-        self.assertEqual(p1ac.get_hp(), 5)
-        self.assertTrue(p1ac.get_elemental_aura().contains(Element.PYRO))
-        self.assertIsNone(p1ac.get_character_statuses().find(LotusFlowerCrispStatus))
+        p1ac = game_state.player1.just_get_active_character()
+        self.assertEqual(p1ac.hp, 5)
+        self.assertTrue(p1ac.elemental_aura.contains(Element.PYRO))
+        self.assertIsNone(p1ac.character_statuses.find(LotusFlowerCrispStatus))
 
         # test shield disappears after round ends
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -89,7 +89,7 @@ class TestLotusFlowerCrisps(unittest.TestCase):
         a1.inject_action(DiceSelectAction(selected_dice=ActualDice({}))) # skip roll phase
         a2.inject_action(DiceSelectAction(selected_dice=ActualDice({})))
         gsm.step_until_next_phase()
-        gsm.step_until_phase(low_health_game_state.get_mode().action_phase())
+        gsm.step_until_phase(low_health_game_state.mode.action_phase())
         game_state = gsm.get_game_state()
-        p1ac = game_state.get_player1().just_get_active_character()
-        self.assertIsNone(p1ac.get_character_statuses().find(LotusFlowerCrispStatus))
+        p1ac = game_state.player1.just_get_active_character()
+        self.assertIsNone(p1ac.character_statuses.find(LotusFlowerCrispStatus))

@@ -11,7 +11,7 @@ class TestAlbedo(unittest.TestCase):
         char_id=2,
         card=DescentOfDivinity,
     )
-    assert type(BASE_GAME.get_player1().just_get_active_character()) is Albedo
+    assert type(BASE_GAME.player1.just_get_active_character()) is Albedo
 
     def test_normal_attack(self):
         game_state = step_skill(
@@ -20,9 +20,9 @@ class TestAlbedo(unittest.TestCase):
             CharacterSkill.SKILL1,
             dice=ActualDice({Element.GEO: 1, Element.HYDRO: 1, Element.DENDRO: 1}),
         )
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 8)
-        self.assertFalse(p2ac.get_elemental_aura().has_aura())
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 8)
+        self.assertFalse(p2ac.elemental_aura.has_aura())
 
     def test_elemental_skill1(self):
         # test elemental skill generate summon
@@ -32,12 +32,12 @@ class TestAlbedo(unittest.TestCase):
             CharacterSkill.SKILL2,
             dice=ActualDice({Element.GEO: 3}),
         )
-        p1 = game_state.get_player1()
-        p2ac = game_state.get_player2().just_get_active_character()
-        self.assertEqual(p2ac.get_hp(), 10)
-        self.assertFalse(p2ac.get_elemental_aura().has_aura())
-        self.assertIn(SolarIsotomaSummon, p1.get_summons())
-        self.assertEqual(p1.get_summons().just_find(SolarIsotomaSummon).usages, 3)
+        p1 = game_state.player1
+        p2ac = game_state.player2.just_get_active_character()
+        self.assertEqual(p2ac.hp, 10)
+        self.assertFalse(p2ac.elemental_aura.has_aura())
+        self.assertIn(SolarIsotomaSummon, p1.summons)
+        self.assertEqual(p1.summons.just_find(SolarIsotomaSummon).usages, 3)
 
     def test_elemental_burst(self):
         # burst without summon deals 4 damage
@@ -91,7 +91,7 @@ class TestAlbedo(unittest.TestCase):
         game_state = remove_all_thick_shield(game_state)
         game_state = next_round_with_great_omni(game_state)
         game_state = grant_all_thick_shield(game_state)
-        p1_summons = game_state.get_player1().get_summons()
+        p1_summons = game_state.player1.summons
         self.assertIn(SolarIsotomaSummon, p1_summons)
         self.assertEqual(p1_summons.just_find(SolarIsotomaSummon).usages, 2)
         last_summon_dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
@@ -112,19 +112,19 @@ class TestAlbedo(unittest.TestCase):
         # test non-plunge doesn't get reduction
         game_state = next_round_with_great_omni(game_state)
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
-        assert SolarIsotomaSummon in game_state.get_player1().get_summons()
+        assert SolarIsotomaSummon in game_state.player1.summons
         game_state = step_skill(
             game_state, Pid.P1, CharacterSkill.SKILL1, dice=ActualDice({Element.OMNI: 3})
         )
 
         # check summon usages decreases as expected
-        p1_summons = game_state.get_player1().get_summons()
+        p1_summons = game_state.player1.summons
         self.assertIn(SolarIsotomaSummon, p1_summons)
         self.assertEqual(p1_summons.just_find(SolarIsotomaSummon).usages, 1)
 
         # check summon disappears eventually
         game_state = next_round(game_state)
-        p1_summons = game_state.get_player1().get_summons()
+        p1_summons = game_state.player1.summons
         self.assertNotIn(SolarIsotomaSummon, p1_summons)
 
     def test_talent_card(self):

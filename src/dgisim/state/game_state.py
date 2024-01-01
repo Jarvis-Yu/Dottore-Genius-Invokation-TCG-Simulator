@@ -142,31 +142,38 @@ class GameState:
         """ :returns: a factory for the current game state. """
         return GameStateFactory(self)
 
-    def get_mode(self) -> md.Mode:
+    @property
+    def mode(self) -> md.Mode:
         """ :returns: the game mode of the game. """
         return self._mode
 
-    def get_phase(self) -> ph.Phase:
-        """ :returns: the current phase the game is in in the mode. """
+    @property
+    def phase(self) -> ph.Phase:
+        """ :returns: the current phase the game is in the mode. """
         return self._phase
 
-    def get_round(self) -> int:
+    @property
+    def round(self) -> int:
         """ :returns: the current round number. """
         return self._round
 
-    def get_active_player_id(self) -> Pid:
+    @property
+    def active_player_id(self) -> Pid:
         """ :returns: the current active player which should be the first player to take actions. """
         return self._active_player_id
 
-    def get_effect_stack(self) -> EffectStack:
+    @property
+    def effect_stack(self) -> EffectStack:
         """ :returns: the stack of pending effects to be executed. """
         return self._effect_stack
 
-    def get_player1(self) -> ps.PlayerState:
+    @property
+    def player1(self) -> ps.PlayerState:
         """ :returns: all information about player 1. """
         return self._player1
 
-    def get_player2(self) -> ps.PlayerState:
+    @property
+    def player2(self) -> ps.PlayerState:
         """ :returns: all information about player 2. """
         return self._player2
 
@@ -211,22 +218,26 @@ class GameState:
             and isinstance(self._effect_stack.peek(), DeathSwapPhaseStartEffect)
             and (
                 player_id is None
-                or self.get_player(player_id).get_phase().is_action_phase()
+                or self.get_player(player_id).phase.is_action_phase()
             )
         )
 
+    @property
     def card_checker(self) -> CardChecker:
         """ :returns: a validity checker for playing cards.  """
         return self._card_checker
 
+    @property
     def swap_checker(self) -> SwapChecker:
         """ :returns: a validity checker for performing character swaps.  """
         return self._swap_checker
 
+    @property
     def skill_checker(self) -> SkillChecker:
         """ :returns: a validity checker for casting character skills.  """
         return self._skill_checker
 
+    @property
     def elem_tuning_checker(self) -> ElementalTuningChecker:
         """ :returns: a validity checker for performing elemental tuning. """
         return self._elem_tuning_checker
@@ -244,11 +255,11 @@ class GameState:
         """ :returns: the target that `target` specifies. """
         player = self.get_player(target.pid)
         if target.zone is Zone.CHARACTERS:
-            return player.get_characters().get_character(cast(int, target.id))
+            return player.characters.get_character(cast(int, target.id))
         elif target.zone is Zone.SUMMONS:
-            return player.get_summons().find(cast(type[Summon], target.id))
+            return player.summons.find(cast(type[Summon], target.id))
         elif target.zone is Zone.SUPPORTS:
-            return player.get_supports().find_by_sid(cast(int, target.id))
+            return player.supports.find_by_sid(cast(int, target.id))
         else:
             raise Exception("Not Reached!")
 
@@ -312,9 +323,9 @@ class GameState:
         There'll be an assertion error if the game hasn't ended yet.
         """
         assert self.game_end()
-        if self.get_player1().defeated():
+        if self.player1.defeated():
             return Pid.P2
-        elif self.get_player2().defeated():
+        elif self.player2.defeated():
             return Pid.P1
         else:
             return None
@@ -360,8 +371,8 @@ class GameState:
         :returns: the decks used by both player 1 and 2 if known.
         """
         return (
-            self._player1.get_initial_deck(),
-            self._player2.get_initial_deck(),
+            self._player1.initial_deck,
+            self._player2.initial_deck,
         )
 
     def __copy__(self) -> Self:  # pragma: no cover
@@ -407,13 +418,13 @@ class GameState:
 
 class GameStateFactory:
     def __init__(self, game_state: GameState):
-        self._mode = game_state.get_mode()
-        self._phase = game_state.get_phase()
-        self._round = game_state.get_round()
-        self._active_player = game_state.get_active_player_id()
-        self._player1 = game_state.get_player1()
-        self._player2 = game_state.get_player2()
-        self._effect_stack = game_state.get_effect_stack()
+        self._mode = game_state.mode
+        self._phase = game_state.phase
+        self._round = game_state.round
+        self._active_player = game_state.active_player_id
+        self._player1 = game_state.player1
+        self._player2 = game_state.player2
+        self._effect_stack = game_state.effect_stack
 
     def mode(self, new_mode: md.Mode) -> GameStateFactory:
         self._mode = new_mode
@@ -513,7 +524,7 @@ class CardChecker:
         """ Returns true if any card is playable """
         return any(
             card_type.strictly_usable(self._game_state, pid)
-            for card_type in self._game_state.get_player(pid).get_hand_cards()
+            for card_type in self._game_state.get_player(pid).hand_cards
         )
 
 
@@ -522,7 +533,7 @@ class SwapChecker:
         self._game_state = game_state
 
     def should_death_swap(self) -> bool:
-        effect_stack = self._game_state.get_effect_stack()
+        effect_stack = self._game_state.effect_stack
         return effect_stack.is_not_empty() \
             and isinstance(effect_stack.peek(), eft.DeathSwapPhaseStartEffect)
 
@@ -532,8 +543,8 @@ class SwapChecker:
     ) -> bool:
         """ Returns true if a swap to any character is available """
         return any(
-            self.swap_details(pid, char.get_id()) is not None
-            for char in self._game_state.get_player(pid).get_characters()
+            self.swap_details(pid, char.id) is not None
+            for char in self._game_state.get_player(pid).characters
         )
 
     def swap_details(
@@ -542,12 +553,12 @@ class SwapChecker:
             char_id: int,
     ) -> None | tuple[EventSpeed, None | AbstractDice]:
         game_state = self._game_state
-        selected_char = game_state.get_player(pid).get_characters().get_character(char_id)
-        active_character_id = game_state.get_player(pid).get_characters().get_active_character_id()
+        selected_char = game_state.get_player(pid).characters.get_character(char_id)
+        active_character_id = game_state.get_player(pid).characters.get_active_character_id()
         assert active_character_id is not None
         if selected_char is None \
-                or selected_char.defeated() \
-                or selected_char.get_id() == active_character_id:
+                or selected_char.is_defeated() \
+                or selected_char.id == active_character_id:
             return None
 
         if self.should_death_swap():
@@ -570,12 +581,12 @@ class SwapChecker:
                     id=char_id,
                 ),
                 event_type=EventType.SWAP,
-                event_speed=game_state.get_mode().swap_speed(),
-                dice_cost=game_state.get_mode().swap_cost(),
+                event_speed=game_state.mode.swap_speed(),
+                dice_cost=game_state.mode.swap_cost(),
             ),
         )
         assert isinstance(swap_action, ActionPEvent)
-        if game_state.get_player(pid).get_dice().loosely_satisfy(swap_action.dice_cost):
+        if game_state.get_player(pid).dice.loosely_satisfy(swap_action.dice_cost):
             return swap_action.event_speed, swap_action.dice_cost
         else:
             return None
@@ -592,12 +603,12 @@ class SwapChecker:
         game_state = self._game_state
         selected_char = game_state.get_player(
             pid
-        ).get_characters().get_character(action.char_id)
-        active_character_id = game_state.get_player(pid).get_characters().get_active_character_id()
+        ).characters.get_character(action.char_id)
+        active_character_id = game_state.get_player(pid).characters.get_active_character_id()
         assert active_character_id is not None
         if selected_char is None \
-                or selected_char.defeated() \
-                or selected_char.get_id() == active_character_id:
+                or selected_char.is_defeated() \
+                or selected_char.id == active_character_id:
             return None
         if isinstance(action, act.DeathSwapAction):
             swap_details = self.swap_details(
@@ -626,13 +637,13 @@ class SwapChecker:
                         id=action.char_id,
                     ),
                     event_type=EventType.SWAP,
-                    event_speed=game_state.get_mode().swap_speed(),
-                    dice_cost=game_state.get_mode().swap_cost(),
+                    event_speed=game_state.mode.swap_speed(),
+                    dice_cost=game_state.mode.swap_cost(),
                 ),
             )
             assert isinstance(swap_action, ActionPEvent)
             instruction_dice = action.instruction.dice
-            player_dice = game_state.get_player(pid).get_dice()
+            player_dice = game_state.get_player(pid).dice
             return case_val(
                 (player_dice - instruction_dice).is_legal()
                 and instruction_dice.just_satisfy(swap_action.dice_cost),
@@ -653,13 +664,13 @@ class SkillChecker:
             skill_type: CharacterSkill,
     ) -> None | tuple[GameState, AbstractDice]:
         game_state = self._game_state
-        character = game_state.get_player(pid).get_characters().get_character(char_id)
+        character = game_state.get_player(pid).characters.get_character(char_id)
         if character is None \
                 or not character.can_cast_skill() \
                 or skill_type not in character.skills():
             return None
         if skill_type is CharacterSkill.ELEMENTAL_BURST \
-                and character.get_energy() < character.get_max_energy():
+                and character.energy < character.max_energy:
             return None
         new_game_state, skill_event = StatusProcessing.preprocess_by_all_statuses(
             game_state=game_state,
@@ -678,7 +689,7 @@ class SkillChecker:
             ),
         )
         assert isinstance(skill_event, ActionPEvent)
-        if game_state.get_player(pid).get_dice().loosely_satisfy(skill_event.dice_cost):
+        if game_state.get_player(pid).dice.loosely_satisfy(skill_event.dice_cost):
             return new_game_state, skill_event.dice_cost
         else:
             return None
@@ -687,7 +698,7 @@ class SkillChecker:
             self,
             pid: Pid
     ) -> bool:
-        active_character_id = self._game_state.get_player(pid).just_get_active_character().get_id()
+        active_character_id = self._game_state.get_player(pid).just_get_active_character().id
         return any(
             self.usable(pid, active_character_id, skill_type)
             for skill_type in CharacterSkill
@@ -706,7 +717,7 @@ class SkillChecker:
                 or skill_type not in character.skills():  # pragma: no cover
             return None
         if skill_type is CharacterSkill.ELEMENTAL_BURST \
-                and character.get_energy() < character.get_max_energy():  # pragma: no cover
+                and character.energy < character.max_energy:  # pragma: no cover
             return None
         game_state, skill_event = StatusProcessing.preprocess_by_all_statuses(
             game_state=game_state,
@@ -716,7 +727,7 @@ class SkillChecker:
                 source=StaticTarget(
                     pid=pid,
                     zone=Zone.CHARACTERS,
-                    id=character.get_id(),
+                    id=character.id,
                 ),
                 event_type=skill_type.to_event_type(),
                 event_sub_type=character.skill_actual_type(skill_type),
@@ -727,7 +738,7 @@ class SkillChecker:
         assert isinstance(skill_event, ActionPEvent)
         paid_dice = action.instruction.dice
         if paid_dice.just_satisfy(skill_event.dice_cost) \
-                and (game_state.get_player(pid).get_dice() - paid_dice).is_legal():
+                and (game_state.get_player(pid).dice - paid_dice).is_legal():
             return game_state
         else:
             return None
@@ -739,16 +750,16 @@ class ElementalTuningChecker:
 
     def usable(self, pid: Pid, elem: None | Element = None) -> bool:
         game_state = self._game_state
-        if not (type(game_state.get_phase()) == type(game_state.get_mode().action_phase())
-                or game_state.get_active_player_id() is pid):  # pragma: no cover
+        if not (type(game_state.phase) == type(game_state.mode.action_phase())
+                or game_state.active_player_id is pid):  # pragma: no cover
             return False
         player = game_state.get_player(pid)
         active_character = player.get_active_character()
         assert active_character is not None
         active_character_elem = active_character.ELEMENT()
-        dice = player.get_dice()
+        dice = player.dice
         return (
-            player.get_hand_cards().not_empty()
+            player.hand_cards.not_empty()
             and dice[Element.OMNI] + dice[active_character_elem] < dice.num_dice()
             and (elem is None or dice[elem] > 0)
         )

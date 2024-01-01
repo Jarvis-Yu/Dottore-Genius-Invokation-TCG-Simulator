@@ -25,9 +25,9 @@ class CardSelectPhase(ph.Phase):
     _NUM_CARDS: int = 5
 
     def _draw_cards_and_activate(self, game_state: GameState) -> GameState:
-        p1: PlayerState = game_state.get_player1()
-        p2: PlayerState = game_state.get_player2()
-        mode = game_state.get_mode()
+        p1: PlayerState = game_state.player1
+        p2: PlayerState = game_state.player2
+        mode = game_state.mode
 
         from ...card.card import ArcaneLegendCard
         def draw_random_cards(deck_cards: Cards) -> tuple[Cards, Cards]:
@@ -42,20 +42,20 @@ class CardSelectPhase(ph.Phase):
             deck_cards, normal_cards = deck_cards.pick_random_cards(left_to_draw)
             return deck_cards, arcane_cards + normal_cards
 
-        p1_deck, p1_hand = draw_random_cards(p1.get_deck_cards())
-        p2_deck, p2_hand = draw_random_cards(p2.get_deck_cards())
-        mode = game_state.get_mode()
+        p1_deck, p1_hand = draw_random_cards(p1.deck_cards)
+        p2_deck, p2_hand = draw_random_cards(p2.deck_cards)
+        mode = game_state.mode
         return game_state.factory().f_player1(
             lambda p1: p1.factory()
             .phase(Act.ACTION_PHASE)
-            .card_redraw_chances(game_state.get_mode().card_redraw_chances())
+            .card_redraw_chances(game_state.mode.card_redraw_chances())
             .deck_cards(p1_deck)
             .hand_cards(p1_hand)
             .build()
         ).f_player2(
             lambda p2: p2.factory()
             .phase(Act.ACTION_PHASE)
-            .card_redraw_chances(game_state.get_mode().card_redraw_chances())
+            .card_redraw_chances(game_state.mode.card_redraw_chances())
             .deck_cards(p2_deck)
             .hand_cards(p2_hand)
             .build()
@@ -71,26 +71,26 @@ class CardSelectPhase(ph.Phase):
         ).build()
 
     def step(self, game_state: GameState) -> GameState:
-        p1: PlayerState = game_state.get_player1()
-        p2: PlayerState = game_state.get_player2()
+        p1: PlayerState = game_state.player1
+        p2: PlayerState = game_state.player2
         # If both players just entered waiting, assign them cards and make them take actions
-        if p1.get_phase() is Act.PASSIVE_WAIT_PHASE and p2.get_phase() is Act.PASSIVE_WAIT_PHASE:
+        if p1.phase is Act.PASSIVE_WAIT_PHASE and p2.phase is Act.PASSIVE_WAIT_PHASE:
             return self._draw_cards_and_activate(game_state)
-        elif p1.get_phase() is Act.END_PHASE and p2.get_phase() is Act.END_PHASE:
+        elif p1.phase is Act.END_PHASE and p2.phase is Act.END_PHASE:
             return self._to_starting_hand_select_phase(game_state)
         else:
             raise Exception("Unknown Game State to process")
 
     def _handle_card_drawing(self, game_state: GameState, pid: Pid, action: CardsSelectAction) -> GameState:
         player: PlayerState = game_state.get_player(pid)
-        new_deck, new_cards = player.get_deck_cards().pick_random_cards(action.selected_cards.num_cards())
+        new_deck, new_cards = player.deck_cards.pick_random_cards(action.selected_cards.num_cards())
         new_deck = new_deck + action.selected_cards
-        new_hand = player.get_hand_cards() - action.selected_cards
+        new_hand = player.hand_cards - action.selected_cards
         new_hand = new_hand + new_cards
-        new_redraw_chances: int = player.get_card_redraw_chances() - 1
+        new_redraw_chances: int = player.card_redraw_chances - 1
         new_player_phase: Act
         if new_redraw_chances > 0:
-            new_player_phase = player.get_phase()
+            new_player_phase = player.phase
         else:
             new_player_phase = Act.END_PHASE
         return game_state.factory().player(

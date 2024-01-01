@@ -23,7 +23,7 @@ class TestSendOff(unittest.TestCase):
                 target=StaticTarget.from_summon(Pid.P2, ReflectionSummon),
             ),
         ))
-        p2_summons = game_state.get_player2().get_summons()
+        p2_summons = game_state.player2.summons
         self.assertIn(ReflectionSummon, p2_summons)
         summon = p2_summons.just_find(ReflectionSummon)
         self.assertEqual(summon.usages, 0)
@@ -36,7 +36,7 @@ class TestSendOff(unittest.TestCase):
                 target=StaticTarget.from_summon(Pid.P2, BurningFlameSummon),
             ),
         ))
-        p2_summons = game_state.get_player2().get_summons()
+        p2_summons = game_state.player2.summons
         self.assertNotIn(BurningFlameSummon, p2_summons)
 
         # test can properly remove Sesshou Sakura Summon
@@ -47,7 +47,7 @@ class TestSendOff(unittest.TestCase):
                 target=StaticTarget.from_summon(Pid.P2, SesshouSakuraSummon),
             ),
         ))
-        p2_summons = game_state.get_player2().get_summons()
+        p2_summons = game_state.player2.summons
         self.assertIn(SesshouSakuraSummon, p2_summons)
         summon = p2_summons.just_find(SesshouSakuraSummon)
         self.assertEqual(summon.usages, 1)
@@ -59,7 +59,7 @@ class TestSendOff(unittest.TestCase):
                 target=StaticTarget.from_summon(Pid.P2, SesshouSakuraSummon),
             ),
         ))
-        p2_summons = game_state.get_player2().get_summons()
+        p2_summons = game_state.player2.summons
         self.assertNotIn(SesshouSakuraSummon, p2_summons)
 
         # test on Rhodeia's Frog Summon cannot be removed
@@ -70,7 +70,7 @@ class TestSendOff(unittest.TestCase):
                 target=StaticTarget.from_summon(Pid.P2, OceanicMimicFrogSummon),
             ),
         ))
-        p2_summons = game_state.get_player2().get_summons()
+        p2_summons = game_state.player2.summons
         self.assertIn(OceanicMimicFrogSummon, p2_summons)
         summon = p2_summons.just_find(OceanicMimicFrogSummon)
         self.assertEqual(summon.usages, 0)

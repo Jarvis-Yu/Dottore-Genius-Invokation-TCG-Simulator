@@ -40,12 +40,12 @@ class TestNorthernSmokedChicken(unittest.TestCase):
         self.assertIn(
             NorthernSmokedChickenStatus,
             buffed_game_state
-            .get_player1()
+            .player1
             .just_get_active_character()
-            .get_character_statuses()
+            .character_statuses
         )
         self.assertTrue(
-            buffed_game_state.get_player1().just_get_active_character().get_character_statuses()
+            buffed_game_state.player1.just_get_active_character().character_statuses
             .contains(SatiatedStatus)
         )
 
@@ -70,9 +70,9 @@ class TestNorthernSmokedChicken(unittest.TestCase):
 
         self.assertFalse(
             game_state
-            .get_player1()
+            .player1
             .just_get_active_character()
-            .get_character_statuses()
+            .character_statuses
             .contains(NorthernSmokedChickenStatus)
         )
 

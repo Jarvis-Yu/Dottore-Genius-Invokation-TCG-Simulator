@@ -170,10 +170,10 @@ print("Analyzing game states...")
 for game_state in tqdm(all_states):
     game_state_encoding = game_state.encoding(encoding_plan)
     encoding_length.add(len(game_state_encoding))
-    data.max_effects_num[len(game_state.get_effect_stack()._effects)] += 1
+    data.max_effects_num[len(game_state.effect_stack._effects)] += 1
 
     # Effects
-    for effect in game_state.get_effect_stack()._effects:
+    for effect in game_state.effect_stack._effects:
         effect_size = 0
         for field_val in [
             effect.__getattribute__(field.name)
@@ -199,12 +199,12 @@ for game_state in tqdm(all_states):
         data.max_effect_size[effect_size] += 1
 
     # Statuses
-    for char in chain(game_state.get_player1().get_characters(), game_state.get_player2().get_characters()):
-        data.max_char_hidden_size[len(char.get_hidden_statuses()._statuses)] += 1
-        data.max_char_stt_size[len(char.get_character_statuses()._statuses)] += 1
-    for player in (game_state.get_player1(), game_state.get_player2()):
-        data.max_combat_hidden_size[len(player.get_hidden_statuses()._statuses)] += 1
-        data.max_combat_stt_size[len(player.get_combat_statuses()._statuses)] += 1
+    for char in chain(game_state.player1.characters, game_state.player2.characters):
+        data.max_char_hidden_size[len(char.hidden_statuses._statuses)] += 1
+        data.max_char_stt_size[len(char.character_statuses._statuses)] += 1
+    for player in (game_state.player1, game_state.player2):
+        data.max_combat_hidden_size[len(player.hidden_statuses._statuses)] += 1
+        data.max_combat_stt_size[len(player.combat_statuses._statuses)] += 1
 
 data.total_runs += runs
 

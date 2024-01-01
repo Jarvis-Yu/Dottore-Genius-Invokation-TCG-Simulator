@@ -10,30 +10,30 @@ class TestPaimon(unittest.TestCase):
 
         def skip_round(game_state: GameState) -> GameState:
             gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
-            gsm.step_until_phase(game_state.get_mode().end_phase)
-            gsm.step_until_phase(game_state.get_mode().action_phase)
+            gsm.step_until_phase(game_state.mode.end_phase)
+            gsm.step_until_phase(game_state.mode.action_phase)
             return gsm.get_game_state()
 
-        old_dice = base_state.get_player1().get_dice()
+        old_dice = base_state.player1.dice
         game_state = step_action(base_state, Pid.P1, CardAction(
             card=Paimon,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.HYDRO: 3})),
         ))
-        new_dice = game_state.get_player1().get_dice()
+        new_dice = game_state.player1.dice
         self.assertEqual(new_dice, old_dice - {Element.HYDRO: 3})
 
         # first trigger time
         game_state = skip_round(game_state)
-        old_dice = game_state.get_player1().get_dice()
+        old_dice = game_state.player1.dice
         game_state = auto_step(game_state)
-        new_dice = game_state.get_player1().get_dice()
+        new_dice = game_state.player1.dice
         self.assertEqual(new_dice, old_dice + {Element.OMNI: 2})
-        self.assertIn(PaimonSupport, game_state.get_player1().get_supports())
+        self.assertIn(PaimonSupport, game_state.player1.supports)
 
         # second trigger time
         game_state = skip_round(game_state)
-        old_dice = game_state.get_player1().get_dice()
+        old_dice = game_state.player1.dice
         game_state = auto_step(game_state)
-        new_dice = game_state.get_player1().get_dice()
+        new_dice = game_state.player1.dice
         self.assertEqual(new_dice, old_dice + {Element.OMNI: 2})
-        self.assertNotIn(PaimonSupport, game_state.get_player1().get_supports())
+        self.assertNotIn(PaimonSupport, game_state.player1.supports)

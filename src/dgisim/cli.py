@@ -312,7 +312,7 @@ class CLISession:
         self._print_action(action, game_state)
 
     def _print_action(self, action: PlayerAction, game_state: GameState) -> None:
-        waiting_for = game_state.get_phase().waiting_for(game_state)
+        waiting_for = game_state.phase.waiting_for(game_state)
         assert waiting_for is not None
         p1_active = waiting_for is Pid.P1
         print(f"#### Player{'1' if p1_active else '2'} Action:", action)

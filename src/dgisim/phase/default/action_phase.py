@@ -29,9 +29,9 @@ __all__ = [
 
 class ActionPhase(ph.Phase):
     def _start_up_phase(self, game_state: GameState) -> GameState:
-        active_player_id = game_state.get_active_player_id()
+        active_player_id = game_state.active_player_id
         appended_effects: list[Effect] = []
-        if (game_state.get_round() == 1):
+        if (game_state.round == 1):
             appended_effects.append(
                 AllStatusTriggererEffect(
                     active_player_id,
@@ -54,7 +54,7 @@ class ActionPhase(ph.Phase):
         ).build()
 
     def _begin_action_phase(self, game_state: GameState) -> GameState:
-        active_player_id = game_state.get_active_player_id()
+        active_player_id = game_state.active_player_id
         return game_state.factory().f_player(
             active_player_id,
             lambda p: p.factory().phase(
@@ -70,9 +70,9 @@ class ActionPhase(ph.Phase):
         ).build()
 
     def _to_end_phase(self, game_state: GameState) -> GameState:
-        active_player_id = game_state.get_active_player_id()
+        active_player_id = game_state.active_player_id
         return game_state.factory().phase(
-            game_state.get_mode().end_phase()
+            game_state.mode.end_phase()
         ).player(
             active_player_id,
             game_state.get_player(active_player_id).factory().phase(
@@ -86,7 +86,7 @@ class ActionPhase(ph.Phase):
         ).build()
 
     def _execute_effect(self, game_state: GameState) -> GameState:
-        effect_stack, effect = game_state.get_effect_stack().pop()
+        effect_stack, effect = game_state.effect_stack.pop()
         new_game_state = game_state.factory().effect_stack(effect_stack).build()
         return effect.execute(new_game_state)
 
@@ -98,7 +98,7 @@ class ActionPhase(ph.Phase):
         status_source = StaticTarget(
             pid,
             Zone.CHARACTERS,
-            game_state.get_player(pid).just_get_active_character().get_id(),
+            game_state.get_player(pid).just_get_active_character().id,
         )
         assert isinstance(prepare_skill_status, PersonalStatus), prepare_skill_status
         effects = [
@@ -122,7 +122,7 @@ class ActionPhase(ph.Phase):
         ).build()
 
     def _is_executing_effects(self, game_state: GameState) -> bool:
-        effect_stack = game_state.get_effect_stack()
+        effect_stack = game_state.effect_stack
         return not effect_stack.is_empty() \
             and not isinstance(effect_stack.peek(), DeathSwapPhaseStartEffect)
 
@@ -140,8 +140,8 @@ class ActionPhase(ph.Phase):
         return prepare_skill_status
 
     def step(self, game_state: GameState) -> GameState:
-        p1 = game_state.get_player1()
-        p2 = game_state.get_player2()
+        p1 = game_state.player1
+        p2 = game_state.player2
         if p1.in_action_phase() or p2.in_action_phase():
             if self._is_executing_effects(game_state):
                 return self._execute_effect(game_state)
@@ -164,7 +164,7 @@ class ActionPhase(ph.Phase):
             pid: Pid,
             action: EndRoundAction
     ) -> GameState:
-        active_player_id = game_state.get_active_player_id()
+        active_player_id = game_state.active_player_id
         assert active_player_id == pid
         active_player = game_state.get_player(active_player_id)
         other_player = game_state.get_other_player(active_player_id)
@@ -179,9 +179,9 @@ class ActionPhase(ph.Phase):
                 signal=TriggeringSignal.POST_ANY,
             ),
         ]
-        if other_player.get_phase() is Act.END_PHASE:
+        if other_player.phase is Act.END_PHASE:
             other_player_new_phase = Act.END_PHASE
-        elif other_player.get_phase() is Act.PASSIVE_WAIT_PHASE:
+        elif other_player.phase is Act.PASSIVE_WAIT_PHASE:
             other_player_new_phase = Act.ACTION_PHASE
             effects.append(AllStatusTriggererEffect(
                 active_player_id.other(),
@@ -189,7 +189,7 @@ class ActionPhase(ph.Phase):
             ))
         else:  # pragma: no cover
             print(f"ERROR pid={pid}\n {game_state}")
-            raise Exception(f"Unknown Game State to process {other_player.get_phase()}")
+            raise Exception(f"Unknown Game State to process {other_player.phase}")
         return game_state.factory().active_player_id(
             active_player_id.other()
         ).player(
@@ -213,7 +213,7 @@ class ActionPhase(ph.Phase):
             action: SkillAction
     ) -> None | GameState:
         # Check action validity
-        result = game_state.skill_checker().valid_action(pid, action)
+        result = game_state.skill_checker.valid_action(pid, action)
         if result is None:
             raise Exception(f"{action} from {pid} is invalid for gamestate:\n{game_state}")
         game_state = result
@@ -222,11 +222,11 @@ class ActionPhase(ph.Phase):
         instruction = action.instruction
         new_effects: list[Effect] = []
         # Costs
-        dice = player.get_dice()
+        dice = player.dice
         new_dice = dice - instruction.dice
         assert new_dice.is_legal()
         # Skill Effect
-        active_character = player.get_characters().get_active_character()
+        active_character = player.characters.get_active_character()
         assert active_character is not None
         assert active_character.can_cast_skill()
         if dice.is_even():
@@ -236,7 +236,7 @@ class ActionPhase(ph.Phase):
                 status=ChargedAttackStatus(can_charge=True),
             ))
         new_effects.append(CastSkillEffect(
-            target=StaticTarget.from_char_id(pid, active_character.get_id()),
+            target=StaticTarget.from_char_id(pid, active_character.id),
             skill=action.skill,
         ))
         new_effects.append(AllStatusTriggererEffect(
@@ -263,7 +263,7 @@ class ActionPhase(ph.Phase):
             action: SwapAction
     ) -> None | GameState:
         # Check action validity
-        result = game_state.swap_checker().valid_action(pid, action)
+        result = game_state.swap_checker.valid_action(pid, action)
         if result is None:
             raise Exception(f"{action} from {pid} is invalid for gamestate:\n{game_state}")
         game_state, action_speed = result
@@ -272,11 +272,11 @@ class ActionPhase(ph.Phase):
         new_effects: list[Effect] = []
 
         # Costs
-        new_dice = player.get_dice() - action.instruction.dice
+        new_dice = player.dice - action.instruction.dice
         assert new_dice.is_legal()
 
         # Add Effects
-        active_character = player.get_characters().get_active_character()
+        active_character = player.characters.get_active_character()
         assert active_character is not None
         new_effects.append(SwapCharacterEffect(
             StaticTarget(pid, Zone.CHARACTERS, action.char_id)
@@ -290,7 +290,7 @@ class ActionPhase(ph.Phase):
             new_effects.append(TurnEndEffect())
 
         return game_state.factory().effect_stack(
-            game_state.get_effect_stack().push_many_fl(new_effects)
+            game_state.effect_stack.push_many_fl(new_effects)
         ).player(
             pid,
             player.factory().dice(new_dice).build()
@@ -317,7 +317,7 @@ class ActionPhase(ph.Phase):
         new_effects: list[Effect] = []
 
         # Costs
-        dice = player.get_dice()
+        dice = player.dice
         new_dice = dice - paid_dice
         assert new_dice.is_legal()
 
@@ -360,8 +360,8 @@ class ActionPhase(ph.Phase):
             action: ElementalTuningAction
     ) -> None | GameState:
         player = game_state.get_player(pid)
-        cards = player.get_hand_cards()
-        dice = player.get_dice()
+        cards = player.hand_cards
+        dice = player.dice
         active_character = player.get_active_character()
         assert active_character is not None
         active_character_elem = active_character.ELEMENT()
@@ -399,16 +399,16 @@ class ActionPhase(ph.Phase):
             action: DeathSwapAction
     ) -> None | GameState:
         # Check action validity
-        result = game_state.swap_checker().valid_action(pid, action)
+        result = game_state.swap_checker.valid_action(pid, action)
         if result is None:
             raise Exception(f"{action} from {pid} is invalid for gamestate:\n{game_state}")
         game_state, _ = result
 
         game_state = game_state.factory().f_effect_stack(lambda es: es.pop()[0]).build()
         player = game_state.get_player(pid)
-        effect_stack = game_state.get_effect_stack()
+        effect_stack = game_state.effect_stack
         # Add Effects
-        active_character = player.get_characters().get_active_character()
+        active_character = player.characters.get_active_character()
         assert active_character is not None
         effect_stack = effect_stack.push_many_fl([
             SwapCharacterEffect(
@@ -457,18 +457,18 @@ class ActionPhase(ph.Phase):
             ).build()
 
         player = game_state.get_player(pid)
-        dice = player.get_dice()
+        dice = player.dice
         kept_dice = dice - action.selected_dice
         assert kept_dice.is_legal()
         replacement_dice = ActualDice.from_random(action.selected_dice.num_dice())
         new_dice = kept_dice + replacement_dice
-        new_reroll_chances = player.get_dice_reroll_chances() - 1
+        new_reroll_chances = player.dice_reroll_chances - 1
         new_effect_stack: EffectStack
         if new_reroll_chances > 0:
-            new_effect_stack = game_state.get_effect_stack()
+            new_effect_stack = game_state.effect_stack
         else:
             # removes rolling phase effect
-            new_effect_stack = game_state.get_effect_stack().pop()[0]
+            new_effect_stack = game_state.effect_stack.pop()[0]
         return game_state.factory().f_player(
             pid,
             lambda p: p.factory()
@@ -508,14 +508,14 @@ class ActionPhase(ph.Phase):
 
     @classmethod
     def _rolling(cls, game_state: GameState) -> bool:
-        effect_stack = game_state.get_effect_stack()
+        effect_stack = game_state.effect_stack
         return (
             effect_stack.is_not_empty()
             and isinstance(effect_stack.peek(), RollPhaseStartEffect)
         )
 
     def waiting_for(self, game_state: GameState) -> None | Pid:
-        effect_stack = game_state.get_effect_stack()
+        effect_stack = game_state.effect_stack
         # if no effects are to be executed or death swap phase is inserted
         if effect_stack.is_empty():
             pid = super().waiting_for(game_state)
@@ -551,19 +551,19 @@ class ActionPhase(ph.Phase):
         choices: list[ActionType] = []
 
         # cards
-        if game_state.card_checker().playable(pid):
+        if game_state.card_checker.playable(pid):
             choices.append(ActionType.PLAY_CARD)
 
         # skills
-        if game_state.skill_checker().skillable(pid):
+        if game_state.skill_checker.skillable(pid):
             choices.append(ActionType.CAST_SKILL)
 
         # swaps
-        if game_state.swap_checker().swappable(pid):
+        if game_state.swap_checker.swappable(pid):
             choices.append(ActionType.SWAP_CHARACTER)
 
         # elemental tuning
-        if game_state.elem_tuning_checker().usable(pid):
+        if game_state.elem_tuning_checker.usable(pid):
             choices.append(ActionType.ELEMENTAL_TUNING)
 
         # unconditional end round
@@ -592,19 +592,19 @@ class ActionPhase(ph.Phase):
             return just(DiceSelectionActGenGenerator.action_generator(game_state, pid))
 
         if player_choice is ActionType.PLAY_CARD:
-            assert game_state.card_checker().playable(pid)
+            assert game_state.card_checker.playable(pid)
             from ...action.action_generator_generator import CardActGenGenerator
             return just(CardActGenGenerator.action_generator(game_state, pid))
         elif player_choice is ActionType.SWAP_CHARACTER:
-            assert game_state.swap_checker().swappable(pid)
+            assert game_state.swap_checker.swappable(pid)
             from ...action.action_generator_generator import SwapActGenGenerator
             return just(SwapActGenGenerator.action_generator(game_state, pid))
         elif player_choice is ActionType.CAST_SKILL:
-            assert game_state.skill_checker().skillable(pid)
+            assert game_state.skill_checker.skillable(pid)
             from ...action.action_generator_generator import SkillActGenGenerator
             return just(SkillActGenGenerator.action_generator(game_state, pid))
         elif player_choice is ActionType.ELEMENTAL_TUNING:
-            assert game_state.elem_tuning_checker().usable(pid)
+            assert game_state.elem_tuning_checker.usable(pid)
             from ...action.action_generator_generator import ElemTuningActGenGenerator
             return just(ElemTuningActGenGenerator.action_generator(game_state, pid))
         elif player_choice is ActionType.END_ROUND:

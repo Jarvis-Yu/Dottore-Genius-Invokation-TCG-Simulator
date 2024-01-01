@@ -26,7 +26,7 @@ class RollPhase(ph.Phase):
     _NUM_DICE = 8
 
     def _get_all_dice_and_activate(self, game_state: GameState) -> GameState:
-        base_roll_chances = game_state.get_mode().dice_reroll_chances()
+        base_roll_chances = game_state.mode.dice_reroll_chances()
         game_state, p1_chances = StatusProcessing.preprocess_by_all_statuses(
             game_state, Pid.P1, Preprocessables.ROLL_CHANCES,
             RollChancePEvent(pid=Pid.P1, chances=base_roll_chances)
@@ -61,11 +61,11 @@ class RollPhase(ph.Phase):
         ).build()
 
     def step(self, game_state: GameState) -> GameState:
-        p1 = game_state.get_player1()
-        p2 = game_state.get_player2()
-        if p1.get_phase().is_passive_wait_phase() and p2.get_phase().is_passive_wait_phase():
+        p1 = game_state.player1
+        p2 = game_state.player2
+        if p1.phase.is_passive_wait_phase() and p2.phase.is_passive_wait_phase():
             return self._get_all_dice_and_activate(game_state)
-        elif p1.get_phase().is_end_phase() and p2.get_phase().is_end_phase():
+        elif p1.phase.is_end_phase() and p2.phase.is_end_phase():
             return self._to_action_phase(game_state)
         else:
             raise ValueError(f"Given game_state has undefined next state for"
@@ -81,15 +81,15 @@ class RollPhase(ph.Phase):
             return self._handle_end_round(game_state, pid)
 
         player = game_state.get_player(pid)
-        dice = player.get_dice()
+        dice = player.dice
         kept_dice = dice - action.selected_dice
         assert kept_dice.is_legal()
         replacement_dice = ActualDice.from_random(action.selected_dice.num_dice())
         new_dice = kept_dice + replacement_dice
-        new_reroll_chances = player.get_dice_reroll_chances() - 1
+        new_reroll_chances = player.dice_reroll_chances - 1
         new_player_phase: Act
         if new_reroll_chances > 0:
-            new_player_phase = player.get_phase()
+            new_player_phase = player.phase
         else:
             new_player_phase = Act.END_PHASE
         return game_state.factory().f_player(

@@ -12,7 +12,7 @@ class TestParametricTransformer(unittest.TestCase):
         base_state = grant_all_thick_shield(base_state)
 
         def transformer_support(game_state: GameState) -> ParametricTransformerSupport:
-            support = game_state.get_player1().get_supports().just_find(
+            support = game_state.player1.supports.just_find(
                 ParametricTransformerSupport, sid=1,
             )
             assert isinstance(support, ParametricTransformerSupport)
@@ -38,10 +38,10 @@ class TestParametricTransformer(unittest.TestCase):
         self.assertEqual(transformer.usages, 2)
 
         # test skill wihtout elemental damage but has elemental follow-up from status triggers
-        pre_dice = game_state.get_player1().get_dice()
+        pre_dice = game_state.player1.dice
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
-        post_dice = game_state.get_player1().get_dice()
-        self.assertNotIn(ParametricTransformerSupport, game_state.get_player1().get_supports())
+        post_dice = game_state.player1.dice
+        self.assertNotIn(ParametricTransformerSupport, game_state.player1.supports)
         self.assertEqual(
             post_dice.num_dice() - post_dice[Element.OMNI],
             pre_dice.num_dice() - pre_dice[Element.OMNI] + 3,

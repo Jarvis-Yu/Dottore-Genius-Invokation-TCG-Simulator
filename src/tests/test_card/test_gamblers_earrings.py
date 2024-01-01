@@ -11,7 +11,7 @@ class TestGamblersEarrings(unittest.TestCase):
                     3
                 ).f_active_character(
                     lambda ac: ac.factory().energy(
-                        ac.get_max_energy()
+                        ac.max_energy
                     ).build()
                 ).build()  # Keqing
             ).f_hand_cards(
@@ -35,10 +35,10 @@ class TestGamblersEarrings(unittest.TestCase):
                 )
             )))
             base_game = auto_step(base_game)
-        assert isinstance(base_game.get_player1().just_get_active_character(), Keqing)
-        p1ac = base_game.get_player1().just_get_active_character()
-        self.assertIn(GamblersEarringsStatus, p1ac.get_character_statuses())
-        gamblers = p1ac.get_character_statuses().just_find(GamblersEarringsStatus)
+        assert isinstance(base_game.player1.just_get_active_character(), Keqing)
+        p1ac = base_game.player1.just_get_active_character()
+        self.assertIn(GamblersEarringsStatus, p1ac.character_statuses)
+        gamblers = p1ac.character_statuses.just_find(GamblersEarringsStatus)
         self.assertEqual(gamblers.informed_num, 0)
         self.assertEqual(gamblers.triggered_num, 0)
 
@@ -51,16 +51,16 @@ class TestGamblersEarrings(unittest.TestCase):
                 instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
             )
         ))
-        num_dice = game_state.get_player1().get_dice().num_dice()
+        num_dice = game_state.player1.dice.num_dice()
         gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
         gsm.step_until_holds(
             lambda gs:
-            gs.get_player1().just_get_active_character().get_elemental_aura().contains(Element.CRYO),
+            gs.player1.just_get_active_character().elemental_aura.contains(Element.CRYO),
         )
-        self.assertEqual(gsm.get_game_state().get_player1().get_dice().num_dice(), num_dice)
+        self.assertEqual(gsm.get_game_state().player1.dice.num_dice(), num_dice)
 
         gsm.auto_step(observe=False)
-        self.assertEqual(gsm.get_game_state().get_player1().get_dice().num_dice(), num_dice + 2)
+        self.assertEqual(gsm.get_game_state().player1.dice.num_dice(), num_dice + 2)
 
         # multiple kill rewards correctly
         game_state = oppo_aura_elem(base_game, Element.PYRO)  # overload, so P2 doesn't need to swap
@@ -71,7 +71,7 @@ class TestGamblersEarrings(unittest.TestCase):
                 instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 4}))
             )
         ))
-        num_dice = game_state.get_player1().get_dice().num_dice()
+        num_dice = game_state.player1.dice.num_dice()
         gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
         gsm.auto_step(observe=False)
-        self.assertEqual(gsm.get_game_state().get_player1().get_dice().num_dice(), num_dice + 4)
+        self.assertEqual(gsm.get_game_state().player1.dice.num_dice(), num_dice + 4)

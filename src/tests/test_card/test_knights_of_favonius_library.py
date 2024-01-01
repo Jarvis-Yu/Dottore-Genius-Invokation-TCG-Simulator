@@ -48,11 +48,11 @@ class TestKnightsOfFavoniusLibrary(unittest.TestCase):
             ),
             EndRoundAction(),
         ])
-        gsm.step_until_phase(base_game.get_mode().roll_phase())
+        gsm.step_until_phase(base_game.mode.roll_phase())
         gsm.auto_step()
         game_state = gsm.get_game_state()
-        p1, p2 = game_state.get_player1(), game_state.get_player2()
-        self.assertEqual(p1.get_dice_reroll_chances(), 2)
-        self.assertEqual(p2.get_dice_reroll_chances(), 3)
-        self.assertIn(KnightsOfFavoniusLibrarySupport, p1.get_supports())
-        self.assertIn(KnightsOfFavoniusLibrarySupport, p2.get_supports())
+        p1, p2 = game_state.player1, game_state.player2
+        self.assertEqual(p1.dice_reroll_chances, 2)
+        self.assertEqual(p2.dice_reroll_chances, 3)
+        self.assertIn(KnightsOfFavoniusLibrarySupport, p1.supports)
+        self.assertIn(KnightsOfFavoniusLibrarySupport, p2.supports)

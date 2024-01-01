@@ -250,7 +250,7 @@ It is a class to help you generate valid actions.
         def choose_action(self, history: list[dg.GameState], pid: dg.Pid) -> dg.PlayerAction:
             curr_game_state = history[-1]
 
-            if isinstance(curr_game_state.get_phase(), curr_game_state.get_mode().action_phase):
+            if isinstance(curr_game_state.phase, curr_game_state.mode.action_phase):
                 return self.handle_action_phase(history, pid)
 
             return RandomAgent().choose_action(history, pid)
@@ -278,7 +278,7 @@ It is a class to help you generate valid actions.
             choices = action_generator.choices()
             assert isinstance(choices, dg.AbstractDice)
             cost = choices
-            dice = curr_game_state.get_player(pid).get_dice()
+            dice = curr_game_state.get_player(pid).dice
             payment = dice.basic_selection(cost)
             assert payment is not None
 
@@ -295,7 +295,7 @@ This may look a bit overwhelming, but don't worry, let's go though it step by st
     def choose_action(self, history: list[dg.GameState], pid: dg.Pid) -> dg.PlayerAction:
         curr_game_state = history[-1]
 
-        if isinstance(curr_game_state.get_phase(), curr_game_state.get_mode().action_phase):
+        if isinstance(curr_game_state.phase, curr_game_state.mode.action_phase):
             return self.handle_action_phase(history, pid)
 
         return RandomAgent().choose_action(history, pid)
@@ -370,7 +370,7 @@ So here we double check if normal attack is available.
         choices = action_generator.choices()
         assert isinstance(choices, dg.AbstractDice)
         cost = choices
-        dice = curr_game_state.get_player(pid).get_dice()
+        dice = curr_game_state.get_player(pid).dice
         payment = dice.basic_selection(cost)
         assert payment is not None
 

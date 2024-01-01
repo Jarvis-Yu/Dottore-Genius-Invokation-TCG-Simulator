@@ -69,7 +69,7 @@ class TestCard(unittest.TestCase):
         assert game_state is not None
         gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
         gsm.auto_step()
-        supports = gsm.get_game_state().get_player1().get_supports().get_supports()
+        supports = gsm.get_game_state().player1.supports.get_supports()
         self.assertEqual(
             (1, 2, 4, 3),
             tuple(support.sid for support in supports)

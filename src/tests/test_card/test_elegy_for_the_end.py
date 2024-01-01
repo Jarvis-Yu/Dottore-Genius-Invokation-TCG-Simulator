@@ -21,7 +21,7 @@ class TestElegyForTheEnd(unittest.TestCase):
                 dice=ActualDice({Element.OMNI: 3}),
             ),
         ))
-        self.assertIn(ElegyForTheEndStatus, p1_active_char(game_state).get_character_statuses())
+        self.assertIn(ElegyForTheEndStatus, p1_active_char(game_state).character_statuses)
 
         # test normal attack deals +1 dmg
         game_state = add_dmg_listener(game_state, Pid.P1)
@@ -40,10 +40,10 @@ class TestElegyForTheEnd(unittest.TestCase):
         # test brust triggers weapon
         game_state = fill_energy_for_all(game_state)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_BURST)
-        p1 = game_state.get_player1()
-        self.assertIn(MillennialMovementFarewellSongStatus, p1.get_combat_statuses())
+        p1 = game_state.player1
+        self.assertIn(MillennialMovementFarewellSongStatus, p1.combat_statuses)
         self.assertEqual(
-            p1.get_combat_statuses().just_find(MillennialMovementFarewellSongStatus).usages,
+            p1.combat_statuses.just_find(MillennialMovementFarewellSongStatus).usages,
             2,
         )
         
@@ -73,9 +73,9 @@ class TestElegyForTheEnd(unittest.TestCase):
         dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertEqual(dmg.damage, 1)
         self.assertIs(dmg.element, Element.ELECTRO)
-        p1 = game_state.get_player1()
-        self.assertIn(MillennialMovementFarewellSongStatus, p1.get_combat_statuses())
+        p1 = game_state.player1
+        self.assertIn(MillennialMovementFarewellSongStatus, p1.combat_statuses)
         self.assertEqual(
-            p1.get_combat_statuses().just_find(MillennialMovementFarewellSongStatus).usages,
+            p1.combat_statuses.just_find(MillennialMovementFarewellSongStatus).usages,
             1,
         )
