@@ -2800,7 +2800,7 @@ class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
                 assert character is not None, f"source {status_source} in {game_state}"
                 dmg_boost = self.DAMAGE_BOOST
                 if character.talent_equipped():
-                    talent = character.get_equipment_statuses().just_find(AratakiIchibanStatus)
+                    talent = character.get_character_statuses().just_find(AratakiIchibanStatus)
                     if talent.activated():
                         dmg_boost += talent.dmg_boost
                 new_item = DmgPEvent(dmg=replace(dmg, damage=dmg.damage + dmg_boost))

@@ -97,7 +97,6 @@ class Character:
         energy: int,
         max_energy: int,
         hiddens: stts.Statuses,
-        equipments: stts.EquipmentStatuses,
         statuses: stts.Statuses,
         elemental_aura: ElementalAura,
     ):
@@ -108,7 +107,6 @@ class Character:
         :param max_hp: maximum hp.
         :param energy: current energy.
         :param hiddens: hidden statuses.
-        :param equipments: equipment statuses.
         :param statuses: character statuses.
         :param aura: elemental aura.
 
@@ -121,7 +119,6 @@ class Character:
         self._energy = energy
         self._max_energy = max_energy
         self._hiddens = hiddens
-        self._equipments = equipments
         self._statuses = statuses
         self._aura = elemental_aura
 
@@ -179,10 +176,6 @@ class Character:
         """
         return self._hiddens
 
-    def get_equipment_statuses(self) -> stts.EquipmentStatuses:
-        """ :returns: the equipment statuses. """
-        return self._equipments
-
     def get_character_statuses(self) -> stts.Statuses:
         """ :returns: the character statuses. """
         return self._statuses
@@ -196,7 +189,7 @@ class Character:
         :returns: a list of Statuses that are ordered so that those that should be
                   executed first has a lower index.
         """
-        return [self._hiddens, self._equipments, self._statuses]
+        return [self._hiddens, self._statuses]
 
     def get_all_statuses_ordered_flattened(self) -> tuple[stt.Status, ...]:
         """
@@ -479,7 +472,7 @@ class Character:
         talent_status = self._talent_status()
         if talent_status is None:
             return False
-        return self.get_equipment_statuses().contains(talent_status)
+        return self.get_character_statuses().contains(talent_status)
 
     def alive(self) -> bool:
         """ Same as `.get_alive()`. """
@@ -516,7 +509,6 @@ class Character:
             self._energy,
             self._max_energy,
             self._hiddens,
-            self._equipments,
             self._statuses,
             self._aura,
         )
@@ -554,7 +546,6 @@ class Character:
             basics,
             self._aura.encoding(),
             self._hiddens.encoding(encoding_plan, encoding_plan.CHAR_HIDDEN_FIXED_LEN),
-            self._equipments.encoding(encoding_plan),
             self._statuses.encoding(encoding_plan, encoding_plan.CHAR_STT_FIXED_LEN),
         ))
 
@@ -568,7 +559,6 @@ class Character:
             "Energy": str(self._energy),
             "Max Energy": str(self._max_energy),
             "Hiddens": self._hiddens.dict_str(),
-            "Equipments": self._equipments.dict_str(),
             "Statuses": self._statuses.dict_str(),
         }
 
@@ -583,7 +573,6 @@ class CharacterFactory:
         self._energy = character.get_energy()
         self._max_energy = character.get_max_energy()
         self._hiddens = character.get_hidden_statuses()
-        self._equipments = character.get_equipment_statuses()
         self._statuses = character.get_character_statuses()
         self._aura = character.get_elemental_aura()
 
@@ -606,13 +595,6 @@ class CharacterFactory:
     def f_hiddens(self, f: Callable[[stts.Statuses], stts.Statuses]) -> CharacterFactory:
         return self.hiddens(f(self._hiddens))
 
-    def equipments(self, equipments: stts.EquipmentStatuses) -> CharacterFactory:
-        self._equipments = equipments
-        return self
-
-    def f_equipments(self, f: Callable[[stts.EquipmentStatuses], stts.EquipmentStatuses]) -> CharacterFactory:
-        return self.equipments(f(self._equipments))
-
     def character_statuses(self, statuses: stts.Statuses) -> CharacterFactory:
         self._statuses = statuses
         return self
@@ -633,7 +615,6 @@ class CharacterFactory:
             energy=self._energy,
             max_energy=self._max_energy,
             hiddens=self._hiddens,
-            equipments=self._equipments,
             statuses=self._statuses,
             elemental_aura=self._aura,
         )
@@ -703,7 +684,6 @@ class Albedo(Character):
             energy=0,
             max_energy=2,
             hiddens=stts.Statuses(()),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -785,7 +765,6 @@ class AratakiItto(Character):
             energy=0,
             max_energy=3,
             hiddens=stts.Statuses(()),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -873,7 +852,6 @@ class Bennett(Character):
             energy=0,
             max_energy=2,
             hiddens=stts.Statuses(()),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -968,7 +946,6 @@ class Collei(Character):
             energy=0,
             max_energy=2,
             hiddens=stts.Statuses((stt.ColleiTalentStatus(),)),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -1048,7 +1025,6 @@ class Dehya(Character):
             energy=0,
             max_energy=2,
             hiddens=stts.Statuses(()),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -1126,7 +1102,6 @@ class ElectroHypostasis(Character):
             energy=0,
             max_energy=2,
             hiddens=stts.Statuses((stt.ElectroCrystalCoreHiddenStatus(),)),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -1200,7 +1175,6 @@ class FatuiPyroAgent(Character):
             energy=0,
             max_energy=2,
             hiddens=stts.Statuses((stt.StealthMasterStatus(),)),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -1282,7 +1256,6 @@ class Fischl(Character):
             max_energy=3,
             statuses=stts.Statuses(()),
             hiddens=stts.Statuses(()),
-            equipments=stts.EquipmentStatuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
 
@@ -1395,7 +1368,6 @@ class Ganyu(Character):
             energy=0,
             max_energy=3,
             hiddens=stts.Statuses((stt.GanyuTalentStatus(),)),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -1481,7 +1453,6 @@ class HuTao(Character):
             energy=0,
             max_energy=3,
             hiddens=stts.Statuses(()),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -1551,7 +1522,6 @@ class JadeplumeTerrorshroom(Character):
             energy=0,
             max_energy=2,
             hiddens=stts.Statuses((stt.RadicalVitalityHiddenStatus(),)),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -1630,7 +1600,6 @@ class Jean(Character):
             energy=0,
             max_energy=2,
             hiddens=stts.Statuses(()),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -1782,7 +1751,6 @@ class KaedeharaKazuha(Character):
             energy=0,
             max_energy=2,
             hiddens=stts.Statuses(()),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -1854,7 +1822,6 @@ class Kaeya(Character):
             energy=0,
             max_energy=2,
             hiddens=stts.Statuses(()),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -1990,7 +1957,6 @@ class Keqing(Character):
             hiddens=stts.Statuses((
                 stt.KeqingTalentStatus(can_infuse=False),
             )),
-            equipments=stts.EquipmentStatuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
 
@@ -2064,7 +2030,6 @@ class Klee(Character):
             energy=0,
             max_energy=3,
             hiddens=stts.Statuses(()),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -2159,7 +2124,6 @@ class MaguuKenki(Character):
             energy=0,
             max_energy=3,
             hiddens=stts.Statuses(()),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -2236,7 +2200,6 @@ class Mona(Character):
             hiddens=stts.Statuses((
                 stt.IllusoryTorrentStatus(),
             )),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -2390,7 +2353,6 @@ class Nahida(Character):
             energy=0,
             max_energy=2,
             hiddens=stts.Statuses(()),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -2467,7 +2429,6 @@ class Ningguang(Character):
             energy=0,
             max_energy=3,
             hiddens=stts.Statuses(()),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -2545,7 +2506,6 @@ class Noelle(Character):
             energy=0,
             max_energy=2,
             hiddens=stts.Statuses(()),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -2644,7 +2604,6 @@ class Qiqi(Character):
             energy=0,
             max_energy=3,
             hiddens=stts.Statuses((stt.QiqiTalentStatus(),)),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -2800,7 +2759,6 @@ class RhodeiaOfLoch(Character):
             energy=0,
             max_energy=3,
             hiddens=stts.Statuses(()),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -2897,7 +2855,6 @@ class SangonomiyaKokomi(Character):
             energy=0,
             max_energy=2,
             hiddens=stts.Statuses(()),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -2975,7 +2932,6 @@ class Shenhe(Character):
             energy=0,
             max_energy=2,
             hiddens=stts.Statuses(()),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -3115,7 +3071,6 @@ class Tartaglia(Character):
             energy=0,
             max_energy=3,
             hiddens=stts.Statuses((stt.TideWithholderStatus(),)),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -3193,7 +3148,6 @@ class Tighnari(Character):
             energy=0,
             max_energy=2,
             hiddens=stts.Statuses(()),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -3271,7 +3225,6 @@ class Venti(Character):
             energy=0,
             max_energy=2,
             hiddens=stts.Statuses(()),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -3358,7 +3311,6 @@ class Xingqiu(Character):
             energy=0,
             max_energy=2,
             hiddens=stts.Statuses(()),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -3444,7 +3396,6 @@ class YaeMiko(Character):
             energy=0,
             max_energy=2,
             hiddens=stts.Statuses(()),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
@@ -3535,7 +3486,6 @@ class Yoimiya(Character):
             energy=0,
             max_energy=3,
             hiddens=stts.Statuses(()),
-            equipments=stts.EquipmentStatuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )

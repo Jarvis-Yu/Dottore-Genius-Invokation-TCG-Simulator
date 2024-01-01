@@ -8,7 +8,7 @@ class TestStatuses(unittest.TestCase):
 
 class TestEquipmentStatuses(unittest.TestCase):
     def test_replacing_same_category(self):
-        equipments = EquipmentStatuses(())
+        equipments = Statuses(())
         equipments = equipments.update_status(RavenBowStatus())
         self.assertIn(RavenBowStatus, equipments)
         equipments = equipments.update_status(GamblersEarringsStatus())

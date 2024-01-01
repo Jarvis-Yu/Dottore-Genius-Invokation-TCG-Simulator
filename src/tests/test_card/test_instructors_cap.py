@@ -61,7 +61,7 @@ class TestInstructorsCap(unittest.TestCase):
         self.assertEqual(new_dice[Element.GEO], old_dice[Element.GEO] + 0)
         self.assertEqual(new_dice[Element.CRYO], old_dice[Element.CRYO])
         artifact = game_state.get_player1().just_get_active_character(
-        ).get_equipment_statuses().find(InstructorsCapStatus)
+        ).get_character_statuses().find(InstructorsCapStatus)
         self.assertIsNotNone(artifact)
         assert isinstance(artifact, InstructorsCapStatus)
         self.assertEqual(artifact.usages, 0)
@@ -69,7 +69,7 @@ class TestInstructorsCap(unittest.TestCase):
         # test usages restore the next round
         game_state = next_round(game_state)
         artifact = game_state.get_player1().just_get_active_character(
-        ).get_equipment_statuses().find(InstructorsCapStatus)
+        ).get_character_statuses().find(InstructorsCapStatus)
         self.assertIsNotNone(artifact)
         assert isinstance(artifact, InstructorsCapStatus)
         self.assertEqual(artifact.usages, 3)

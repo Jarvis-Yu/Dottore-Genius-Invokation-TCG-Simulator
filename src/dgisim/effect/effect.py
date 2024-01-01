@@ -309,9 +309,7 @@ class TriggerStatusEffect(TriggerrbleEffect):
         statuses: Statuses
         if issubclass(self.status, stt.HiddenStatus):
             statuses = character.get_hidden_statuses()
-        elif issubclass(self.status, stt.EquipmentStatus):
-            statuses = character.get_equipment_statuses()
-        elif issubclass(self.status, stt.CharacterStatus):
+        elif issubclass(self.status, stt.EquipmentStatus | stt.CharacterStatus):
             statuses = character.get_character_statuses()
         else:  # pragma: no cover
             raise Exception("Unexpected Status Type to Trigger", self.status)
@@ -1573,7 +1571,7 @@ class AddCharacterStatusEffect(DirectEffect):
                 lambda ts: ts.update_status(self.status())
             ).build()
         elif issubclass(self.status, stt.EquipmentStatus):
-            character = character.factory().f_equipments(
+            character = character.factory().f_character_statuses(
                 lambda es: es.update_status(self.status())
             ).build()
         elif issubclass(self.status, stt.CharacterStatus):
@@ -1605,7 +1603,7 @@ class RemoveCharacterStatusEffect(DirectEffect):
                 lambda ts: ts.remove(self.status)
             ).build()
         elif issubclass(self.status, stt.EquipmentStatus):
-            new_character = character.factory().f_equipments(
+            new_character = character.factory().f_character_statuses(
                 lambda es: es.remove(self.status)
             ).build()
         elif issubclass(self.status, stt.CharacterStatus):
@@ -1636,7 +1634,7 @@ class UpdateCharacterStatusEffect(DirectEffect):
                 lambda ts: ts.update_status(self.status)
             ).build()
         elif isinstance(self.status, stt.EquipmentStatus):
-            character = character.factory().f_equipments(
+            character = character.factory().f_character_statuses(
                 lambda es: es.update_status(self.status)
             ).build()
         elif isinstance(self.status, stt.CharacterStatus):
@@ -1667,7 +1665,7 @@ class OverrideCharacterStatusEffect(DirectEffect):
                 lambda ts: ts.update_status(self.status, override=True)
             ).build()
         elif isinstance(self.status, stt.EquipmentStatus):
-            character = character.factory().f_equipments(
+            character = character.factory().f_character_statuses(
                 lambda es: es.update_status(self.status, override=True)
             ).build()
         elif isinstance(self.status, stt.CharacterStatus):

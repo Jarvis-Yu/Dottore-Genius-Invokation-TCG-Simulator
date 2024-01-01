@@ -113,8 +113,7 @@ The encoding for a ``Character`` object is ordered as follows:
 * ``9`` ints for basic information (character type, character element, weapon type...)
 * ``10`` ints for elemental application / aura
 * ``28`` ints for hidden statuses (empty for most characters, but a few need this)
-* ``21`` ints for equipment statuses
-* ``70`` ints for character statuses
+* ``91`` ints for character statuses
 
 The 1000 ints for pending effects can encoding a maximum of 40 effects, which
 is enough for most cases.

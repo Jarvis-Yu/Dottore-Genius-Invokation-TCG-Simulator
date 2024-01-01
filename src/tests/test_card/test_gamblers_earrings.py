@@ -37,8 +37,8 @@ class TestGamblersEarrings(unittest.TestCase):
             base_game = auto_step(base_game)
         assert isinstance(base_game.get_player1().just_get_active_character(), Keqing)
         p1ac = base_game.get_player1().just_get_active_character()
-        self.assertIn(GamblersEarringsStatus, p1ac.get_equipment_statuses())
-        gamblers = p1ac.get_equipment_statuses().just_find(GamblersEarringsStatus)
+        self.assertIn(GamblersEarringsStatus, p1ac.get_character_statuses())
+        gamblers = p1ac.get_character_statuses().just_find(GamblersEarringsStatus)
         self.assertEqual(gamblers.informed_num, 0)
         self.assertEqual(gamblers.triggered_num, 0)
 

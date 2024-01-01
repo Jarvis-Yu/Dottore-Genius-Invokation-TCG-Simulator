@@ -32,7 +32,7 @@ class TestSacrificialWeaponEquipmentCard(unittest.TestCase):
         )))
         game_state = auto_step(game_state)
         p1ac = game_state.get_player1().just_get_active_character()
-        self.assertIn(SacrificialSwordStatus, p1ac.get_equipment_statuses())
+        self.assertIn(SacrificialSwordStatus, p1ac.get_character_statuses())
 
         dice_before = game_state.get_player1().get_dice()
 

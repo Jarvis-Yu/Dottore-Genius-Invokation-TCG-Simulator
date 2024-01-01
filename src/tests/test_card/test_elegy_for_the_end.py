@@ -21,7 +21,7 @@ class TestElegyForTheEnd(unittest.TestCase):
                 dice=ActualDice({Element.OMNI: 3}),
             ),
         ))
-        self.assertIn(ElegyForTheEndStatus, p1_active_char(game_state).get_equipment_statuses())
+        self.assertIn(ElegyForTheEndStatus, p1_active_char(game_state).get_character_statuses())
 
         # test normal attack deals +1 dmg
         game_state = add_dmg_listener(game_state, Pid.P1)

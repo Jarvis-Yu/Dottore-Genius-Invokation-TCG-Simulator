@@ -28,6 +28,10 @@
 - Version 4.3 balance patch applied
 - Improved swap signal handling
 
+### Removed
+
+- equipment statuses methods in PlayerState
+
 ## 0.3.4 (3 Dec 2023)
 
 ### Added

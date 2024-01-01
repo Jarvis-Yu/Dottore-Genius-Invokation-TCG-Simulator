@@ -43,7 +43,7 @@ class EncodingPlan:
             status_fixed_len: int = 7,
             statuses_fixed_len: int = 10,
             char_hidden_fixed_len: int = 4,
-            char_stt_fixed_len: int = 10,
+            char_stt_fixed_len: int = 13,
             player_hidden_fixed_len: int = 10,
             player_combat_fixed_len: int = 10,
             summons_fixed_len: int = 4,

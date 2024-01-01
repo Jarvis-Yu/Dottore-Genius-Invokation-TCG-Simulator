@@ -265,15 +265,10 @@ class TestAratakiItto(unittest.TestCase):
     def test_triggering_electro_crystal_core_status(self):
         """ Test Electro Crystal Core Status does revive the character """
         base_game = kill_character(self.BASE_GAME, character_id=2, pid=Pid.P1, hp=1)
-        base_game = base_game.factory().f_player2(
-            lambda p2: p2.factory().f_characters(
-                lambda cs: cs.factory().f_active_character(
-                    lambda ac: ac.factory().f_equipments(
-                        lambda eqs: eqs.update_status(GamblersEarringsStatus())
-                    ).build()
-                ).build()
-            ).build()
-        ).build()
+        base_game = AddCharacterStatusEffect(
+            target=StaticTarget.from_player_active(base_game, Pid.P1),
+            status=GamblersEarringsStatus,
+        ).execute(base_game)
         a1, a2 = PuppetAgent(), PuppetAgent()
         gsm = GameStateMachine(base_game, a1, a2)
         a1.inject_action(SkillAction(

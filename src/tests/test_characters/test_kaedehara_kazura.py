@@ -359,14 +359,14 @@ class TestKaedeharaKazuha(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 7)
         self.assertFalse(p2ac.get_elemental_aura().has_aura())
         self.assertEqual(p1ac.get_id(), 3)
-        self.assertIn(PoeticsOfFuubutsuStatus, p1_kazuha.get_equipment_statuses())
+        self.assertIn(PoeticsOfFuubutsuStatus, p1_kazuha.get_character_statuses())
 
     def test_poetics_of_fuubutsu_status(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
         base_game = self.BASE_GAME.factory().f_player1(
             lambda p1: p1.factory().f_characters(
                 lambda cs: cs.factory().f_active_character(
-                    lambda ac: ac.factory().f_equipments(
+                    lambda ac: ac.factory().f_character_statuses(
                         lambda eqs: eqs.update_status(PoeticsOfFuubutsuStatus())
                     ).build()
                 ).build()

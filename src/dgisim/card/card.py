@@ -2448,7 +2448,7 @@ class WhereIsTheUnseenRazor(EventCard, _CharTargetChoiceProvider):
     def _valid_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:
         return any(
             isinstance(status, stt.WeaponEquipmentStatus)
-            for status in char.get_equipment_statuses()
+            for status in char.get_character_statuses()
         ) and super()._valid_char(game_state, pid, char)
 
     @override
@@ -2462,7 +2462,7 @@ class WhereIsTheUnseenRazor(EventCard, _CharTargetChoiceProvider):
         assert isinstance(instruction, act.StaticTargetInstruction)
         char_target = game_state.get_character_target(instruction.target)
         assert char_target is not None
-        weapon = char_target.get_equipment_statuses(
+        weapon = char_target.get_character_statuses(
         ).just_find_type(stt.WeaponEquipmentStatus)
         card = weapon.WEAPON_CARD
         return (

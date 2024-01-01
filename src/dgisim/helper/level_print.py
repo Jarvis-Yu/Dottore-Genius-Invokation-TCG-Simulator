@@ -118,10 +118,6 @@ class GamePrinter:
         )
         board.insert_board_at_nextline(
             2,
-            GamePrinter._insert_str_list("Equipments", character["Equipments"])
-        )
-        board.insert_board_at_nextline(
-            2,
             GamePrinter._insert_str_list("Statuses", character["Statuses"])
         )
         return board

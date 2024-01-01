@@ -127,7 +127,6 @@ class Data:
     max_effect_size: dict[int, int] = field(default_factory=lambda: defaultdict(int))
     max_effects_num: dict[int, int] = field(default_factory=lambda: defaultdict(int))
     max_char_hidden_size: dict[int, int] = field(default_factory=lambda: defaultdict(int))
-    max_char_eq_size: dict[int, int] = field(default_factory=lambda: defaultdict(int))
     max_char_stt_size: dict[int, int] = field(default_factory=lambda: defaultdict(int))
     max_combat_hidden_size: dict[int, int] = field(default_factory=lambda: defaultdict(int))
     max_combat_stt_size: dict[int, int] = field(default_factory=lambda: defaultdict(int))
@@ -150,10 +149,6 @@ if os.path.exists("scripts/py/encoding_limit/encoding_limit.pickle"):
             pass
         try:
             data.max_char_hidden_size = saved_data.max_char_hidden_size
-        except Exception:
-            pass
-        try:
-            data.max_char_eq_size = saved_data.max_char_eq_size
         except Exception:
             pass
         try:
@@ -206,7 +201,6 @@ for game_state in tqdm(all_states):
     # Statuses
     for char in chain(game_state.get_player1().get_characters(), game_state.get_player2().get_characters()):
         data.max_char_hidden_size[len(char.get_hidden_statuses()._statuses)] += 1
-        data.max_char_eq_size[len(char.get_equipment_statuses()._statuses)] += 1
         data.max_char_stt_size[len(char.get_character_statuses()._statuses)] += 1
     for player in (game_state.get_player1(), game_state.get_player2()):
         data.max_combat_hidden_size[len(player.get_hidden_statuses()._statuses)] += 1
@@ -225,7 +219,6 @@ print(f"Support max size: {sps_size_list[0][0]}")
 print(f"Max effect size: {max(data.max_effect_size.keys())}")
 print(f"Max effects num: {max(data.max_effects_num.keys())}")
 print(f"Max char hidden size: {max(data.max_char_hidden_size.keys())}")
-print(f"Max char eq size: {max(data.max_char_eq_size.keys())}")
 print(f"Max char stt size: {max(data.max_char_stt_size.keys())}")
 print(f"Max combat hidden size: {max(data.max_combat_hidden_size.keys())}")
 print(f"Max combat stt size: {max(data.max_combat_stt_size.keys())}")
@@ -256,7 +249,6 @@ def plot_dict(d: dict[int, int], title: str):
 plot_dict(data.max_effect_size, "Effect size distribution")
 plot_dict(data.max_effects_num, "Effects num distribution")
 plot_dict(data.max_char_hidden_size, "Character hidden statuses size distribution")
-plot_dict(data.max_char_eq_size, "Character equipment statuses size distribution")
 plot_dict(data.max_char_stt_size, "Character statuses size distribution")
 plot_dict(data.max_combat_hidden_size, "Combat hidden statuses size distribution")
 plot_dict(data.max_combat_stt_size, "Combat statuses size distribution")

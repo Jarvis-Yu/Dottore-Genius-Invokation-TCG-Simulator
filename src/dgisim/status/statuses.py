@@ -12,7 +12,6 @@ if TYPE_CHECKING:
 
 __all__ = [
     "Statuses",
-    "EquipmentStatuses",
 ]
 
 _U = TypeVar('_U')
@@ -22,6 +21,9 @@ class Statuses:
     """
     A container for easy statuses managing.
     """
+
+    _EQUIPMENT_CATEGORIES = (stt.TalentEquipmentStatus, stt.WeaponEquipmentStatus,
+                   stt.ArtifactEquipmentStatus)
 
     def __init__(self, statuses: tuple[stt.Status, ...]):
         self._statuses = statuses
@@ -35,12 +37,17 @@ class Statuses:
         Updates existing status of the same type with the `incoming_status`,
         or append the new_status to the end of current statuses.
         """
+        if isinstance(incoming_status, stt.EquipmentStatus):
+            return self._update_equipment_status(incoming_status, override)
+        return self._update_status(incoming_status, override)
+
+    def _update_status(self, incoming_status: stt.Status, override: bool) -> Self:
         cls = type(self)
         statuses = list(self._statuses)
         for i, status in enumerate(statuses):
             if type(status) is not type(incoming_status):
                 continue
-            new_status: Optional[stt.Status]
+            new_status: None | stt.Status
             if override:
                 new_status = incoming_status
             else:
@@ -48,6 +55,32 @@ class Statuses:
             if status == new_status:
                 return self
             if new_status is None:
+                return self.remove(type(status))
+            statuses[i] = new_status
+            return cls(tuple(statuses))
+        statuses.append(incoming_status)
+        return cls(tuple(statuses))
+
+    def _update_equipment_status(self, incoming_status: stt.EquipmentStatus, override: bool) -> Self:
+        cls = type(self)
+        statuses = list(self._statuses)
+        for i, status in enumerate(statuses):
+            if not any(
+                isinstance(incoming_status, category) and isinstance(status, category)
+                for category in self._EQUIPMENT_CATEGORIES
+            ):
+                continue
+            if type(status) is not type(incoming_status):
+                return self.remove(type(status)).update_status(incoming_status)
+            new_status: None | stt.Status
+            if override:
+                new_status = incoming_status
+            else:
+                assert type(status) is type(incoming_status)
+                new_status = status.update(incoming_status)  # type: ignore
+            if status == new_status:
+                return self
+            if new_status is None:  # pragma: no cover
                 return self.remove(type(status))
             statuses[i] = new_status
             return cls(tuple(statuses))
@@ -126,59 +159,3 @@ class Statuses:
             str(status)
             for status in self._statuses
         ]
-
-
-class EquipmentStatuses(Statuses):
-    _CATEGORIES = (stt.TalentEquipmentStatus, stt.WeaponEquipmentStatus,
-                   stt.ArtifactEquipmentStatus)
-
-    def update_status(self, incoming_status: stt.Status, override: bool = False) -> Self:
-        """
-        :param override: set to `True` if the `incoming_status` unconditionally overrides the
-                         existing status of the same category. (or simple add to statuses if
-                         there's not one)
-
-        Updates existing status of the same category with the `incoming_status`,
-        or append the new_status to the end of current statuses.
-
-        Unlike `Statuses`, only one status of the same category (talent, weapon, artifact) can exist.
-        """
-        cls = type(self)
-        statuses = list(self._statuses)
-        for i, status in enumerate(statuses):
-            if not any(
-                isinstance(incoming_status, category) and isinstance(status, category)
-                for category in self._CATEGORIES
-            ):
-                continue
-            if type(status) is not type(incoming_status):
-                return self.remove(type(status)).update_status(incoming_status)
-            new_status: Optional[stt.Status]
-            if override:
-                new_status = incoming_status
-            else:
-                assert type(status) is type(incoming_status)
-                new_status = status.update(incoming_status)  # type: ignore
-            if status == new_status:
-                return self
-            if new_status is None:  # pragma: no cover
-                return self.remove(type(status))
-            statuses[i] = new_status
-            return cls(tuple(statuses))
-        statuses.append(incoming_status)
-        return cls(tuple(statuses))
-
-    @override
-    def encoding(self, encoding_plan: EncodingPlan, fixed_len: None | int = 3) -> list[int]:
-        """
-        :returns: the encoding of this `Statuses` object.
-        """
-        statuses_encoding: list[list[int]] = [
-            status.encoding(encoding_plan)
-            for status in self._statuses
-        ]
-        assert fixed_len is not None
-        fillings = fixed_len - len(statuses_encoding)
-        for _ in range(fillings):
-            statuses_encoding.append([0] * encoding_plan.STATUS_FIXED_LEN)
-        return list(chain.from_iterable(statuses_encoding))

@@ -342,8 +342,8 @@ class TestAratakiItto(unittest.TestCase):
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 3)
         self.assertNotIn(SuperlativeSuperstrengthStatus, p1ac.get_character_statuses())
-        self.assertIn(AratakiIchibanStatus, p1ac.get_equipment_statuses())
-        talent = p1ac.get_equipment_statuses().just_find(AratakiIchibanStatus)
+        self.assertIn(AratakiIchibanStatus, p1ac.get_character_statuses())
+        talent = p1ac.get_character_statuses().just_find(AratakiIchibanStatus)
         self.assertTrue(talent.activated())
         self.assertEqual(talent.usages, 1)
 
@@ -351,8 +351,8 @@ class TestAratakiItto(unittest.TestCase):
         gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
         gsm.step_until_phase(game_state.get_mode().action_phase())
         p1ac = gsm.get_game_state().get_player1().just_get_active_character()
-        self.assertIn(AratakiIchibanStatus, p1ac.get_equipment_statuses())
-        talent = p1ac.get_equipment_statuses().just_find(AratakiIchibanStatus)
+        self.assertIn(AratakiIchibanStatus, p1ac.get_character_statuses())
+        talent = p1ac.get_character_statuses().just_find(AratakiIchibanStatus)
         self.assertFalse(talent.activated())
         self.assertEqual(talent.usages, 0)
 

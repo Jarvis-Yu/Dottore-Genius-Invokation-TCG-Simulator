@@ -240,7 +240,7 @@ class TestMona(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 6)  # damage = 1 + 1 + 2
         self.assertIn(
             ProphecyOfSubmersionStatus,
-            game_state.get_player1().just_get_active_character().get_equipment_statuses(),
+            game_state.get_player1().just_get_active_character().get_character_statuses(),
         )
 
         # test reaction (Hydro x Electro)
@@ -256,7 +256,7 @@ class TestMona(unittest.TestCase):
         self.assertEqual(p2cs.just_get_character(3).get_hp(), 9)
         self.assertIn(
             ProphecyOfSubmersionStatus,
-            game_state.get_player1().just_get_active_character().get_equipment_statuses(),
+            game_state.get_player1().just_get_active_character().get_character_statuses(),
         )
 
         # test summon can also benefit from this
@@ -269,7 +269,7 @@ class TestMona(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 5)  # damage = 1 + 2 + 2
         self.assertIn(
             ProphecyOfSubmersionStatus,
-            game_state.get_player1().just_get_active_character().get_equipment_statuses(),
+            game_state.get_player1().just_get_active_character().get_character_statuses(),
         )
 
         # test summon's swirled reaction can also benefit from this
@@ -284,7 +284,7 @@ class TestMona(unittest.TestCase):
         self.assertEqual(p2cs.just_get_character(3).get_hp(), 5)
         self.assertIn(
             ProphecyOfSubmersionStatus,
-            game_state.get_player1().just_get_active_character().get_equipment_statuses(),
+            game_state.get_player1().just_get_active_character().get_character_statuses(),
         )
 
         # test none hydro reaction doesn't benefit from this
@@ -297,7 +297,7 @@ class TestMona(unittest.TestCase):
         self.assertEqual(p2ac.get_hp(), 7)  # damage = 1 + 2
         self.assertIn(
             ProphecyOfSubmersionStatus,
-            game_state.get_player1().just_get_active_character().get_equipment_statuses(),
+            game_state.get_player1().just_get_active_character().get_character_statuses(),
         )
 
         # test not working if Mona is off field

@@ -50,7 +50,7 @@ class TestPassingOfJudgment(unittest.TestCase):
             ),
         ))
         _, _, p2c3 = game_state.get_player2().get_characters().get_characters()
-        self.assertIn(TravelersHandySwordStatus, p2c3.get_equipment_statuses())
+        self.assertIn(TravelersHandySwordStatus, p2c3.get_character_statuses())
 
         # checks that following two event cards are affected
         game_state = step_action(game_state, Pid.P2, CardAction(

@@ -34,4 +34,4 @@ class TestWeaponEquipmentCard(unittest.TestCase):
         p1ac = game_state.get_player1().just_get_active_character()
         p2ac = game_state.get_player2().just_get_active_character()
         self.assertEqual(p2ac.get_hp(), 7)
-        self.assertIn(TravelersHandySwordStatus, p1ac.get_equipment_statuses())
+        self.assertIn(TravelersHandySwordStatus, p1ac.get_character_statuses())
