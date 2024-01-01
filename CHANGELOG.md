@@ -10,6 +10,9 @@
   - Equipment Cards:
     - Talent Cards:
       - Abyssal Mayhem Hydrospout
+    - Weapon Cards:
+      - Bow:
+        - Elegy of the End
   - Support Cards:
     - Liu Su
     - Rana
@@ -27,6 +30,7 @@
 - Adjusted encoding of PlayerState to support new card in game version 4.3
 - Version 4.3 balance patch applied
 - Improved swap signal handling
+- Refactored some get methods in GameState, PlayerState and Character into property methods
 
 ### Removed
 
