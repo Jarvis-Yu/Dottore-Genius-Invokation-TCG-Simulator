@@ -4572,31 +4572,7 @@ class MysticalAbandonStatus(TalentEquipmentStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class AbyssalMayhemHydrospoutStatus(TalentEquipmentStatus):
-    REACTABLE_SIGNALS = frozenset({
-        TriggeringSignal.END_ROUND_CHECK_OUT,
-    })
-
-    @override
-    def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
-            self_active_id = game_state.get_player(source.pid).just_get_active_character().id
-            oppo_active = game_state.get_player(source.pid.other()).just_get_active_character()
-            if (
-                    self_active_id == source.id
-                    and RiptideStatus in oppo_active.character_statuses
-            ):
-                return [
-                    eft.ReferredDamageEffect(
-                        source=source,
-                        target=DynamicCharacterTarget.OPPO_ACTIVE,
-                        element=Element.PIERCING,
-                        damage=1,
-                        damage_type=DamageType(status=True, no_boost=True),
-                    ),
-                ], self
-        return [], self
+    pass
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -4713,6 +4689,7 @@ class RiptideTransferStatus(CombatStatus):
 class RiptideStatus(CharacterStatus):
     REACTABLE_SIGNALS = frozenset({
         TriggeringSignal.DEATH_DECLARATION,
+        TriggeringSignal.END_ROUND_CHECK_OUT,
     })
 
     @override
@@ -4723,6 +4700,22 @@ class RiptideStatus(CharacterStatus):
             return [
                 eft.AddCombatStatusEffect(source.pid, RiptideTransferStatus),
             ], self
+        elif signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            self_active_id = game_state.get_player(source.pid).just_get_active_character().id
+            oppo_active = game_state.get_player(source.pid.other()).just_get_active_character()
+            if (
+                    self_active_id == source.id
+                    and AbyssalMayhemHydrospoutStatus in oppo_active.character_statuses
+            ):
+                return [
+                    eft.SpecificDamageEffect(
+                        source=StaticTarget.from_char_id(source.pid.other(), oppo_active.id),
+                        target=source,
+                        element=Element.PIERCING,
+                        damage=1,
+                        damage_type=DamageType(status=True, no_boost=True),
+                    ),
+                ], self
         return [], self
 
 
