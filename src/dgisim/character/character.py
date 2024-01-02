@@ -61,6 +61,7 @@ __all__ = [
     "Tartaglia",
     "Tighnari",
     "Venti",
+    "Wanderer",
     "Xingqiu",
     "YaeMiko",
     "Yoimiya",
@@ -3233,6 +3234,96 @@ class Venti(Character):
             max_hp=10,
             energy=0,
             max_energy=2,
+            hiddens=stts.Statuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
+class Wanderer(Character):
+    _ELEMENT = Element.ANEMO
+    _WEAPON_TYPE = WeaponType.CATALYST
+    _TALENT_STATUS = stt.GalesOfReverieStatus
+    _FACTIONS = frozenset()
+
+    _SKILL1_COST = AbstractDice({
+        Element.ANEMO: 1,
+        Element.ANY: 2,
+    })
+    _SKILL2_COST = AbstractDice({
+        Element.ANEMO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDice({
+        Element.ANEMO: 3,
+    })
+
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        effects: list[eft.Effect] = []
+        if self.talent_equipped():
+            charged_status = game_state.get_player(
+                source.pid
+            ).hidden_statuses.just_find(stt.ChargedAttackStatus)
+            if charged_status.can_charge:
+                effects.append(eft.AddCharacterStatusEffect(
+                    target=StaticTarget.from_player_active(game_state, source.pid.other()),
+                    status=stt.DescentStatus,
+                ))
+        return tuple(effects) + normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.ANEMO,
+            damage=1,
+        )
+
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.ANEMO,
+                damage=2,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+            eft.AddCharacterStatusEffect(
+                target=source,
+                status=stt.WindfavoredStatus,
+            ),
+        )
+
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        effects: list[eft.Effect] = [
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.max_energy,
+            ),
+        ]
+        if stt.WindfavoredStatus in self._statuses:
+            effects.append(
+                eft.RemoveCharacterStatusEffect(
+                    target=source,
+                    status=stt.WindfavoredStatus,
+                )
+            )
+        effects.append(
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.ANEMO,
+                damage=8 if stt.WindfavoredStatus in self._statuses else 7,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+        )
+        return tuple(effects)
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=3,
             hiddens=stts.Statuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),

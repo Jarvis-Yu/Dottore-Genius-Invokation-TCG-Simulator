@@ -150,6 +150,9 @@ class DmgPEvent(PreprocessableEvent):
     def convert_element(self, element: Element) -> Self:
         return replace(self, dmg=replace(self.dmg, element=element))
 
+    def change_target(self, target: StaticTarget) -> Self:
+        return replace(self, dmg=replace(self.dmg, target=target))
+
 
 @dataclass(frozen=True, kw_only=True)
 class RollChancePEvent(PreprocessableEvent):

@@ -1,7 +1,7 @@
 Available Characters
 ====================
 
-31 of 71 characters in Genius Invokation TCG are available in the simulator.
+32 of 71 characters in Genius Invokation TCG are available in the simulator.
 
 Pyro
 ------
@@ -28,6 +28,7 @@ Anemo
 * Kaedehara Kazuha
 * Maguu Kenki
 * Venti
+* Wanderer
 
 Electro
 -------

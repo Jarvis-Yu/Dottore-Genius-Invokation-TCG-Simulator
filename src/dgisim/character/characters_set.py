@@ -35,6 +35,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     Tartaglia,
     Tighnari,
     Venti,
+    Wanderer,
     Xingqiu,
     YaeMiko,
     Yoimiya,

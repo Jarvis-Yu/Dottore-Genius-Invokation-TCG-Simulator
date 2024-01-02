@@ -6,10 +6,12 @@
 
 - New Characters:
   - Tartaglia
+  - Wanderer
 - New Cards:
   - Equipment Cards:
     - Talent Cards:
       - Abyssal Mayhem Hydrospout
+      - Gales of Reverie
     - Weapon Cards:
       - Bow:
         - Elegy of the End

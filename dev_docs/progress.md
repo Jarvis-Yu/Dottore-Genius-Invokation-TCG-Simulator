@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (31/71 implemented)](#character-3171-implemented)
-  - [Card (109/248 implemented)](#card-109248-implemented)
+  - [Character (32/71 implemented)](#character-3271-implemented)
+  - [Card (110/248 implemented)](#card-110248-implemented)
 
-## Character (31/71 implemented)
+## Character (32/71 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -27,7 +27,7 @@ all I need now is to implement each card and character.
   - [x] Kaedehara Kazuha
   - [x] Maguu Kenki
   - [x] Venti
-  - [ ] Wanderer
+  - [x] Wanderer
 - [ ] Electro:
   - [x] Electro Hypostasis
   - [x] Fischl
@@ -56,9 +56,9 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (109/248 implemented)
+## Card (110/248 implemented)
 
-- [ ] Equipment Card (53/137):
+- [ ] Equipment Card (54/137):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
@@ -66,6 +66,7 @@ all I need now is to implement each card and character.
     - [x] Descent of Divinity
     - [x] Embrace of Winds
     - [x] Floral Sidewinder
+    - [x] Gales of Reverie
     - [x] Grand Expectation
     - [x] I Got Your Back
     - [x] Keen Sight

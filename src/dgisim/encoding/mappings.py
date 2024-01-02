@@ -107,7 +107,7 @@ CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
         (char.Venti, 603),
         # (char.Xiao, 604),
         (char.KaedeharaKazuha, 605),
-        # (char.Wanderer, 606),
+        (char.Wanderer, 606),
 
         #### End 700 ####
     )
@@ -378,7 +378,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.EmbraceOfWinds, 1528),
         # Xiao 1529
         (card.PoeticsOfFuubutsu, 1530),
-        # Wanderer 1531
+        (card.GalesOfReverie, 1531),
 
         #### 5 Special Card 1625 ####
         (card.OmniCard, 1625),
@@ -786,6 +786,9 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.MidareRanzanPyroStatus, 12708),
         (status.MidareRanzanElectroStatus, 12709),
         ## Wanderer 12720 ##
+        (status.DescentStatus, 12720),
+        (status.GalesOfReverieStatus, 12721),
+        (status.WindfavoredStatus, 12722),
 
         #### End 14600 ####
     )

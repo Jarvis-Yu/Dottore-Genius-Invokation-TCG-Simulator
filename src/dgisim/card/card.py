@@ -216,6 +216,8 @@ __all__ = [
     "KeenSight",
     ## Venti ##
     "EmbraceOfWinds",
+    ## Wanderer ##
+    "GalesOfReverie",
     ## Xingqiu ##
     "TheScentRemained",
     ## Yae Miko ##
@@ -2967,6 +2969,15 @@ class EmbraceOfWinds(_TalentEquipmentSkillCard):
     _CHARACTER = chr.Venti
     _EQUIPMENT_STATUS = stt.EmbraceOfWindsStatus
     _SKILL = CharacterSkill.SKILL2
+
+#### Wanderer ####
+
+class GalesOfReverie(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDice({Element.ANEMO: 4})
+    _CHARACTER = chr.Wanderer
+    _EQUIPMENT_STATUS = stt.GalesOfReverieStatus
+    _SKILL = CharacterSkill.SKILL2
+
 
 #### Xingqiu ####
 

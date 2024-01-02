@@ -25,6 +25,7 @@ def normal_attack_template(
         source: StaticTarget,
         element: eft.Element,
         damage: int,
+        target: DynamicCharacterTarget = DynamicCharacterTarget.OPPO_ACTIVE,
 ) -> tuple[eft.Effect, ...]:
     player = game_state.get_player(source.pid)
     assert stt.ChargedAttackStatus in player.hidden_statuses
@@ -34,7 +35,7 @@ def normal_attack_template(
     effects: list[eft.Effect] = []
     effects.append(eft.ReferredDamageEffect(
         source=source,
-        target=DynamicCharacterTarget.OPPO_ACTIVE,
+        target=target,
         element=element,
         damage=damage,
         damage_type=DamageType(

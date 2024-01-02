@@ -117,14 +117,17 @@ class DynamicCharacterTarget(Enum):
                     for char in oppo_chars
                     if char.id != avoided_char_id
                 ])
+            case DynamicCharacterTarget.OPPO_NEXT:
+                selected_char = game_state.get_player(
+                    pid.other()
+                ).characters.get_nth_next_alive_character_in_activity_order(1)
+                targets.append(StaticTarget.from_char_id(pid.other(), selected_char.id))
             case DynamicCharacterTarget.OPPO_NEXT_OFF:
                 off_field_chars = game_state.get_player(
                     pid.other()
                 ).characters.get_alive_character_in_activity_order()[1:]
                 if len(off_field_chars) != 0:
-                    targets.append(
-                        StaticTarget.from_char_id(pid.other(), off_field_chars[0].id)
-                    )
+                    targets.append(StaticTarget.from_char_id(pid.other(), off_field_chars[0].id))
             case DynamicCharacterTarget.SELF_ACTIVE:
                 targets.append(StaticTarget.from_player_active(game_state, pid))
             case DynamicCharacterTarget.SELF_NEXT_OFF:
@@ -168,6 +171,11 @@ class DynamicCharacterTarget(Enum):
                     for char in oppo_chars
                     if char.id != avoided_char_id
                 ])
+            case DynamicCharacterTarget.OPPO_NEXT:
+                selected_char = game_state.get_player(
+                    pid.other()
+                ).characters.get_nth_next_alive_character_in_activity_order(1)
+                targets.append(selected_char)
             case DynamicCharacterTarget.OPPO_NEXT_OFF:
                 off_field_chars = game_state.get_player(
                     pid.other()

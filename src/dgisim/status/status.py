@@ -245,6 +245,10 @@ __all__ = [
     "EmbraceOfWindsStatus",
     "StormzoneStatus",
     "WindsOfHarmonyStatus",
+    ## Wanderer##
+    "DescentStatus",
+    "GalesOfReverieStatus",
+    "WindfavoredStatus",
     ## Xingqiu ##
     "RainSwordStatus",
     "RainbowBladeworkStatus",
@@ -4953,6 +4957,96 @@ class WindsOfHarmonyStatus(CombatStatus):
         if signal is TriggeringSignal.ROUND_END:
             return [], None
         return [], self
+
+#### Wanderer ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class DescentStatus(CharacterStatus):
+    activated: bool = False
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.SELF_SWAP,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.SWAP:
+            assert isinstance(item, ActionPEvent) and item.event_type is EventType.SWAP
+            if item.source == status_source and item.dice_cost.can_cost_less_elem():
+                return (
+                    item.with_new_cost(item.dice_cost.cost_less_elem(1)),
+                    replace(self, activated=True),
+                )
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.SELF_SWAP and self.activated:
+            return [
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=Element.ANEMO,
+                    damage=1,
+                    damage_type=DamageType(status=True),
+                )
+            ], None
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class GalesOfReverieStatus(TalentEquipmentStatus):
+    pass
+
+
+@dataclass(frozen=True, kw_only=True)
+class WindfavoredStatus(CharacterStatus, _UsageStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_ELEMENT:
+            assert isinstance(item, DmgPEvent)
+            if not (
+                    item.dmg.source == status_source
+                    and item.dmg.damage_type.direct_normal_attack()
+            ):
+                return item, self
+            oppo_player = game_state.get_player(status_source.pid.other())
+            alive_chars = oppo_player.characters.get_alive_character_in_activity_order()
+            if len(alive_chars) > 1:
+                return (
+                    item.change_target(StaticTarget.from_char_id(
+                        status_source.pid,
+                        alive_chars[1].id,
+                    )),
+                    self,
+                )
+        elif signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            if not (
+                    item.dmg.source == status_source
+                    and item.dmg.damage_type.direct_normal_attack()
+            ):
+                return item, self
+            return item.delta_damage(2), replace(self, usages=self.usages - 1)
+        return item, self
+
 
 #### Xingqiu ####
 
