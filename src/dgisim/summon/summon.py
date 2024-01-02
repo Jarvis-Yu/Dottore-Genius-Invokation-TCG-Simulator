@@ -57,6 +57,8 @@ __all__ = [
     "SolarIsotomaSummon",
     "StormEyeSummon",
     "TalismanSpiritSummon",
+    "TenguJuuraiAmbushSummon",
+    "TenguJuuraiStormclusterSummon",
     "UshiSummon",
 ]
 
@@ -1018,6 +1020,42 @@ class TalismanSpiritSummon(_DmgPerRoundSummon):
             dmg = replace(dmg, damage=dmg.damage + self.DMG_BOOST)
             return DmgPEvent(dmg=dmg), self
         return super()._preprocess(game_state, status_source, item, signal)
+
+
+@dataclass(frozen=True, kw_only=True)
+class _TenguJuuraiSummon(_DmgPerRoundSummon):
+    ELEMENT: ClassVar[Element] = Element.ELECTRO
+
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        es, new_self = super()._react_to_signal(game_state, source, signal)
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            es.append(
+                eft.RelativeAddCharacterStatusEffect(
+                    source_pid=source.pid,
+                    target=DynamicCharacterTarget.SELF_ACTIVE,
+                    status=stt.CrowfeatherCoverStatus,
+                ),
+            )
+        return es, new_self
+
+
+@dataclass(frozen=True, kw_only=True)
+class TenguJuuraiAmbushSummon(_TenguJuuraiSummon):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    DMG: ClassVar[int] = 1
+
+
+@dataclass(frozen=True, kw_only=True)
+class TenguJuuraiStormclusterSummon(_TenguJuuraiSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 2
 
 
 @dataclass(frozen=True, kw_only=True)

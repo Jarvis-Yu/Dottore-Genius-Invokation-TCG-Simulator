@@ -5,6 +5,7 @@
 ### Added
 
 - New Characters:
+  - Kujou Sara
   - Tartaglia
   - Wanderer
 - New Cards:
@@ -12,6 +13,7 @@
     - Talent Cards:
       - Abyssal Mayhem Hydrospout
       - Gales of Reverie
+      - Sin of Pride
     - Weapon Cards:
       - Bow:
         - Elegy of the End

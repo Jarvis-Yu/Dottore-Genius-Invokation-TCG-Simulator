@@ -49,6 +49,7 @@ __all__ = [
     "Kaeya",
     "Keqing",
     "Klee",
+    "KujouSara",
     "MaguuKenki",
     "Mona",
     "Nahida",
@@ -2043,6 +2044,84 @@ class Klee(Character):
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
+
+
+class KujouSara(Character):
+    _ELEMENT = Element.ELECTRO
+    _WEAPON_TYPE = WeaponType.BOW
+    _TALENT_STATUS = stt.SinOfPrideStatus
+    _FACTIONS = frozenset((Faction.INAZUMA,))
+
+    _SKILL1_COST = AbstractDice({
+        Element.ELECTRO: 1,
+        Element.ANY: 2,
+    })
+    _SKILL2_COST = AbstractDice({
+        Element.ELECTRO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDice({
+        Element.ELECTRO: 4,
+    })
+
+    @override
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        )
+
+    @override
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.ELECTRO,
+                damage=1,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=sm.TenguJuuraiAmbushSummon,
+            ),
+        )
+
+    @override
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.max_energy,
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.ELECTRO,
+                damage=1,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=sm.TenguJuuraiStormclusterSummon,
+            ),
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=2,
+            hiddens=stts.Statuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
 
 
 class MaguuKenki(Character):

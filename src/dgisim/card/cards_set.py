@@ -27,6 +27,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ProphecyOfSubmersion,
     RiteOfResurrection,
     SanguineRouge,
+    SinOfPride,
     StalwartAndTrue,
     StellarPredator,
     StrategicReserve,

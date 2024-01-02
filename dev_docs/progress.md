@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (32/71 implemented)](#character-3271-implemented)
-  - [Card (110/248 implemented)](#card-110248-implemented)
+  - [Character (33/71 implemented)](#character-3371-implemented)
+  - [Card (111/248 implemented)](#card-111248-implemented)
 
-## Character (32/71 implemented)
+## Character (33/71 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -32,7 +32,7 @@ all I need now is to implement each card and character.
   - [x] Electro Hypostasis
   - [x] Fischl
   - [x] Keqing
-  - [ ] Kujou Sara
+  - [x] Kujou Sara
   - [ ] Lisa
   - [x] Yae Miko
 - [ ] Dendro:
@@ -56,9 +56,9 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (110/248 implemented)
+## Card (111/248 implemented)
 
-- [ ] Equipment Card (54/137):
+- [ ] Equipment Card (55/137):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
@@ -80,6 +80,7 @@ all I need now is to implement each card and character.
     - [x] Prophecy of Submersion
     - [x] Rite of Resurrection
     - [x] Sanguine Rouge
+    - [x] Sin of Pride
     - [x] Stalwart and True
     - [x] Stellar Predator
     - [x] Strategic Reserve

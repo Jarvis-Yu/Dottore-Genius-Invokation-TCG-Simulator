@@ -77,7 +77,7 @@ CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
         # (char.Razor, 302),
         # (char.Cyno, 303),
         # (char.Beidou, 304),
-        # (char.KujouSara, 305),
+        (char.KujouSara, 305),
         # (char.RaidenShogun, 306),
         (char.YaeMiko, 307),
         (char.ElectroHypostasis, 308),
@@ -348,7 +348,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         # Razor 1227
         # Cyno 1228
         # Beidou 1229
-        # KujouSara 1230
+        (card.SinOfPride, 1230),
         # RaidenShogun 1231
         (card.TheShrinesSacredShade, 1232),
         (card.AbsorbingPrism, 1233),
@@ -714,6 +714,8 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         ## Cyno 6660 ##
         ## Beidou 6680 ##
         ## KujouSara 6700 ##
+        (status.CrowfeatherCoverStatus, 6700),
+        (status.SinOfPrideStatus, 6701),
         ## RaidenShogun 6720 ##
         ## YaeMiko 6740 ##
         (status.TheShrinesSacredShadeStatus, 6740),
@@ -831,8 +833,8 @@ SUMM_MAPPING: dict[type["Summon"], int] = HashableDict({
         (summon.OzSummon, 300),
         ##(summon.ElectroHilichurlShooterSummon, 301),
         ##(summon.TangleboltRingSummon, 302),
-        # (summon.TenguJuuraiAmbushSummon, 303),
-        # (summon.TenguJuuraiStormclusterSummon, 304),
+        (summon.TenguJuuraiAmbushSummon, 303),
+        (summon.TenguJuuraiStormclusterSummon, 304),
         # (summon.EyeOfStormyJudgmentSummon, 305),
         (summon.SesshouSakuraSummon, 306),
         (summon.ChainsOfWardingThunderSummon, 307),

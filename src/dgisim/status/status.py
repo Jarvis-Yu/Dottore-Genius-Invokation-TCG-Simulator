@@ -201,6 +201,9 @@ __all__ = [
     "ExplosiveSparkStatus",
     "PoundingSurpriseStatus",
     "SparksnSplashStatus",
+    ## Kujou Sara ##
+    "CrowfeatherCoverStatus",
+    "SinOfPrideStatus",
     ## Maguu Kenki ##
     "TranscendentAutomatonStatus",
     ## Mona ##
@@ -3934,6 +3937,51 @@ class SparksnSplashStatus(CombatStatus, _UsageStatus):
             new_self = replace(new_self, usages=-1, activated=False)
 
         return es, new_self
+
+
+#### Kujou Sara ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class CrowfeatherCoverStatus(CharacterStatus, _UsageStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            if not (
+                    item.dmg.source == status_source
+                    and (
+                        item.dmg.damage_type.direct_elemental_skill()
+                        or item.dmg.damage_type.direct_elemental_burst()
+                    )
+            ):
+                return item, self
+            dmg_boost = 1
+            source_char = game_state.get_character_target(status_source)
+            if source_char is not None and source_char.ELEMENT() is Element.ELECTRO:
+                dmg_boost += len([
+                    char
+                    for char in game_state.get_player(
+                        status_source.pid
+                    ).characters.get_alive_characters()
+                    if SinOfPrideStatus in char.character_statuses
+                ])
+            return item.delta_damage(dmg_boost), replace(self, usages=self.usages - 1)
+        return item, self
+
+
+@dataclass(frozen=True, kw_only=True)
+class SinOfPrideStatus(TalentEquipmentStatus):
+    pass
 
 
 #### Maguu Kenki ####

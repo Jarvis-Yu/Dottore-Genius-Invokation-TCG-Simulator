@@ -192,6 +192,8 @@ __all__ = [
     "ThunderingPenance",
     ## Klee ##
     "PoundingSurprise",
+    ## Kujou Sara ##
+    "SinOfPride",
     ## Maguu Kenki ##
     "TranscendentAutomaton",
     ## Mona ##
@@ -2853,6 +2855,15 @@ class PoundingSurprise(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDice({Element.PYRO: 3})
     _CHARACTER = chr.Klee
     _EQUIPMENT_STATUS = stt.PoundingSurpriseStatus
+    _SKILL = CharacterSkill.SKILL2
+
+
+#### Kujou Sara ####
+
+class SinOfPride(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDice({Element.ELECTRO: 3})
+    _CHARACTER = chr.KujouSara
+    _EQUIPMENT_STATUS = stt.SinOfPrideStatus
     _SKILL = CharacterSkill.SKILL2
 
 
