@@ -35,7 +35,7 @@ class ActionPhase(ph.Phase):
             appended_effects.append(
                 AllStatusTriggererEffect(
                     active_player_id,
-                    TriggeringSignal.GAME_START,
+                    TriggeringSignal.INIT_GAME_START,
                 )
             )
         appended_effects.append(

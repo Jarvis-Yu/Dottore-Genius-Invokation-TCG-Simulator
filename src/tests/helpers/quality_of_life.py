@@ -69,7 +69,7 @@ class _TempTestInfiniteRevivalStatus(HiddenStatus, RevivalStatus):
                 ReviveRecoverHPEffect(
                     target=source,
                     recovery=BIG_INT,
-                )
+                ),
             )
         return effects
 
@@ -80,13 +80,13 @@ class _TempTestStatus(CharacterStatus):
     elem: Element
     target: StaticTarget
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.GAME_START,
+        TriggeringSignal.COMBAT_ACTION,
     ))
 
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[Effect], None | Self]:
-        if signal is TriggeringSignal.GAME_START:
+        if signal is TriggeringSignal.COMBAT_ACTION:
             return [
                 SpecificDamageEffect(
                     source=source,
@@ -421,10 +421,18 @@ def replace_character(
             ).build()
         ).build()
     ).build()
-    game_state = ReviveRecoverHPEffect(
-        target=StaticTarget.from_char_id(pid, char_id),
-        recovery=character_instance.max_hp,
-    ).execute(game_state)
+    game_state = game_state.factory().f_effect_stack(
+        lambda es: es.push_many_fl((
+            ReviveRecoverHPEffect(
+                target=StaticTarget.from_char_id(pid, char_id),
+                recovery=character_instance.max_hp,
+            ),
+            PersonalStatusTriggererEffect(
+                target=StaticTarget.from_char_id(pid, char_id),
+                signal=TriggeringSignal.INIT_GAME_START,
+            ),
+        ))
+    ).build()
     return auto_step(game_state)
 
 
@@ -501,7 +509,7 @@ def simulate_status_dmg(
         lambda es: es.push_one(TriggerStatusEffect(
             target=target,
             status=_TempTestStatus,
-            signal=TriggeringSignal.GAME_START,
+            signal=TriggeringSignal.COMBAT_ACTION,
         ))
     ).build()
     return auto_step(game_state, observe=observe)

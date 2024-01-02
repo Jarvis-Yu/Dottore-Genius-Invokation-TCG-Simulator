@@ -1392,7 +1392,7 @@ class ReviveRecoverHPEffect(RecoverHPEffect):
         ).f_effect_stack(
             lambda es: es.push_one(PersonalStatusTriggererEffect(
                 target=self.target,
-                signal=TriggeringSignal.GAME_START,
+                signal=TriggeringSignal.REVIVAL_GAME_START,
             ))
         ).build()
 

@@ -36,8 +36,8 @@ class TriggeringSignal(Enum):
     END_ROUND_CHECK_OUT = 4
     #: triggers when a fast action is performed, unused signal.
     FAST_ACTION = 5
-    #: triggers when "when the battle begins"
-    GAME_START = 6
+    #: triggers when "when the battle begins" for the first time
+    INIT_GAME_START = 6
     #: triggers when "when your opponent declare the end of their round"
     OPPO_DECLARE_END_ROUND = 7
     #: triggers when "when ... play a ... card"
@@ -65,6 +65,8 @@ class TriggeringSignal(Enum):
     #: triggers when "when the character to which this is attached is defeated"
     # only triggers the character which is about to be defeated
     DEATH_DECLARATION = 19
+    #: triggers when "when the battle begins" character is being revived
+    REVIVAL_GAME_START = 20
 
 
 class DynamicCharacterTarget(Enum):

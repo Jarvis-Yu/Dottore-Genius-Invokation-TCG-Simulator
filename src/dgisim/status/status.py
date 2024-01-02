@@ -3104,14 +3104,14 @@ class StalwartAndTrueStatus(TalentEquipmentStatus):
 @dataclass(frozen=True, kw_only=True)
 class ElectroCrystalCoreHiddenStatus(HiddenStatus):
     REACTABLE_SIGNALS = frozenset({
-        TriggeringSignal.GAME_START,
+        TriggeringSignal.INIT_GAME_START,
     })
 
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.GAME_START:
+        if signal is TriggeringSignal.INIT_GAME_START:
             return [
                 eft.AddCharacterStatusEffect(
                     target=source,
@@ -3239,14 +3239,14 @@ class PaidInFullStatus(TalentEquipmentStatus):
 @dataclass(frozen=True, kw_only=True)
 class StealthMasterStatus(HiddenStatus):
     REACTABLE_SIGNALS = frozenset({
-        TriggeringSignal.GAME_START,
+        TriggeringSignal.INIT_GAME_START,
     })
 
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.GAME_START:
+        if signal is TriggeringSignal.INIT_GAME_START:
             return [
                 eft.AddCharacterStatusEffect(
                     target=source,
@@ -3409,14 +3409,18 @@ class ProliferatingSporesStatus(TalentEquipmentStatus):
 @dataclass(frozen=True, kw_only=True)
 class RadicalVitalityHiddenStatus(HiddenStatus):
     REACTABLE_SIGNALS = frozenset({
-        TriggeringSignal.GAME_START,
+        TriggeringSignal.INIT_GAME_START,
+        TriggeringSignal.REVIVAL_GAME_START,
     })
 
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.GAME_START:
+        if (
+                signal is TriggeringSignal.INIT_GAME_START
+                or signal is TriggeringSignal.REVIVAL_GAME_START
+        ):
             return [
                 eft.AddCharacterStatusEffect(
                     target=source,
@@ -4726,14 +4730,18 @@ class RiptideStatus(CharacterStatus):
 @dataclass(frozen=True, kw_only=True)
 class TideWithholderStatus(HiddenStatus):
     REACTABLE_SIGNALS = frozenset({
-        TriggeringSignal.GAME_START,
+        TriggeringSignal.INIT_GAME_START,
+        TriggeringSignal.REVIVAL_GAME_START,
     })
 
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.GAME_START:
+        if (
+                signal is TriggeringSignal.INIT_GAME_START
+                or signal is TriggeringSignal.REVIVAL_GAME_START
+        ):
             return [
                 eft.AddCharacterStatusEffect(
                     target=source,
