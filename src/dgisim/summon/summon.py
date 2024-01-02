@@ -519,7 +519,7 @@ class FierySanctumFieldSummon(_DmgPerRoundSummon, stt._ShieldStatus):
     ELEMENT: ClassVar[Element] = Element.PYRO
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.POST_DMG,
+        TriggeringSignal.POST_REACTION,
     ) + tuple(_DmgPerRoundSummon.REACTABLE_SIGNALS))
 
     @override
@@ -559,7 +559,7 @@ class FierySanctumFieldSummon(_DmgPerRoundSummon, stt._ShieldStatus):
         es, new_self = super()._react_to_signal(game_state, source, signal)
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT and new_self is not None:
             new_self = replace(new_self, shield_usages=1)
-        elif signal is TriggeringSignal.POST_DMG and self.activated:
+        elif signal is TriggeringSignal.POST_REACTION and self.activated:
             from ..character.character import Dehya
             dehya = game_state.get_player(source.pid).characters.find_first_character(Dehya)
             if dehya is not None and dehya.hp >= 7:

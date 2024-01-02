@@ -1729,7 +1729,7 @@ class TenacityOfTheMillelithStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
     activated: bool = False
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.POST_DMG,
+        TriggeringSignal.POST_REACTION,
         TriggeringSignal.ROUND_START,
         TriggeringSignal.ROUND_END,
     ))
@@ -1757,7 +1757,7 @@ class TenacityOfTheMillelithStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.POST_DMG and self.activated:
+        if signal is TriggeringSignal.POST_REACTION and self.activated:
             if not self._target_is_self_active(game_state, source, source):
                 return [], replace(self, activated=False)
             this_char = game_state.get_character_target(source)
