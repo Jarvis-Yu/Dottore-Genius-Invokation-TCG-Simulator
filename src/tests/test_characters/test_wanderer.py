@@ -121,12 +121,12 @@ class TestWanderer(unittest.TestCase):
         self.assertIn(GalesOfReverieStatus, p1_active_char(game_state).character_statuses)
 
         # test talent doesn't trigger when not charged attack
-        game_state = replace_dice(game_state, Pid.P1, ActualDice({Element.ANEMO: 5}))
+        game_state = replace_dice(game_state, Pid.P1, ActualDice({Element.OMNI: 5}))
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         self.assertNotIn(DescentStatus, p1_active_char(game_state).character_statuses)
 
         # test talent triggers when charged attack
-        game_state = replace_dice(game_state, Pid.P1, ActualDice({Element.ANEMO: 6}))
+        game_state = replace_dice(game_state, Pid.P1, ActualDice({Element.OMNI: 6}))
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         self.assertIn(DescentStatus, p1_active_char(game_state).character_statuses)
 
@@ -136,9 +136,13 @@ class TestWanderer(unittest.TestCase):
             target=StaticTarget.from_player_active(self.BASE_GAME, Pid.P1),
             status=DescentStatus,
         ).execute(self.BASE_GAME)
-        game_state = silent_fast_swap(game_state, Pid.P1, 2)
-        game_state = step_swap(game_state, Pid.P1, 1, cost=1)
-        game_state = step_swap(game_state, Pid.P1, 2, cost=0)
+        game_state = add_dmg_listener(game_state, Pid.P1)
+        game_state = silent_fast_swap(game_state, Pid.P1, 1)
+        game_state = step_swap(game_state, Pid.P1, 2, cost=1)
+        game_state = step_swap(game_state, Pid.P1, 1, cost=0)
+        dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
+        self.assertEqual(dmg.damage, 1)
+        self.assertIs(dmg.element, Element.ANEMO)
         self.assertNotIn(
             DescentStatus,
             game_state.player1.characters.just_get_character(1).character_statuses,

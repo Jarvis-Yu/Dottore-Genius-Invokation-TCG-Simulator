@@ -5133,7 +5133,7 @@ class WindfavoredStatus(CharacterStatus, _UsageStatus):
             if len(alive_chars) > 1:
                 return (
                     item.change_target(StaticTarget.from_char_id(
-                        status_source.pid,
+                        status_source.pid.other(),
                         alive_chars[1].id,
                     )),
                     self,

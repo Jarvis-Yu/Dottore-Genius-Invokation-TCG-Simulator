@@ -3463,7 +3463,7 @@ class Wanderer(Character):
             ).hidden_statuses.just_find(stt.ChargedAttackStatus)
             if charged_status.can_charge:
                 effects.append(eft.AddCharacterStatusEffect(
-                    target=StaticTarget.from_player_active(game_state, source.pid.other()),
+                    target=StaticTarget.from_player_active(game_state, source.pid),
                     status=stt.DescentStatus,
                 ))
         return tuple(effects) + normal_attack_template(
