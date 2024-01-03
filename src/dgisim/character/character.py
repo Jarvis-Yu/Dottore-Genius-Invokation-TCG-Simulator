@@ -252,11 +252,11 @@ class Character:
     def skills(cls) -> tuple[CharacterSkill, ...]:
         """ :returns: the skill types the character supports """
         my_skills: list[CharacterSkill] = []
-        if cls._normal_attack is not Character._normal_attack:
+        if cls._skill1 is not Character._skill1:
             my_skills.append(CharacterSkill.SKILL1)
-        if cls._elemental_skill1 is not Character._elemental_skill1:
+        if cls._skill2 is not Character._skill2:
             my_skills.append(CharacterSkill.SKILL2)
-        if cls._elemental_skill2 is not Character._elemental_skill2:
+        if cls._skill3 is not Character._skill3:
             my_skills.append(CharacterSkill.SKILL3)
         if cls._elemental_burst is not Character._elemental_burst:
             my_skills.append(CharacterSkill.ELEMENTAL_BURST)
@@ -326,11 +326,11 @@ class Character:
 
     def _skill(self, game_state: GameState, source: StaticTarget, skill_type: CharacterSkill) -> tuple[eft.Effect, ...]:
         if skill_type is CharacterSkill.SKILL1:
-            return self.normal_attack(game_state, source)
+            return self.skill1(game_state, source)
         elif skill_type is CharacterSkill.SKILL2:
-            return self.elemental_skill1(game_state, source)
+            return self.skill2(game_state, source)
         elif skill_type is CharacterSkill.SKILL3:
-            return self.elemental_skill2(game_state, source)
+            return self.skill3(game_state, source)
         elif skill_type is CharacterSkill.ELEMENTAL_BURST:
             return self.elemental_burst(game_state, source)
         raise Exception(f"Not Overriden, skill_type={skill_type}")
@@ -372,22 +372,22 @@ class Character:
             ),
         )
 
-    def normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
-        return self._post_normal_attack(
+    def skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return self._post_skill1(
             game_state,
             source,
-            self._normal_attack(
-                self._pre_normal_attack(game_state, source), source
+            self._skill1(
+                self._pre_skill1(game_state, source), source
             )
         )
 
-    def _pre_normal_attack(self, game_state: GameState, source: StaticTarget) -> GameState:
+    def _pre_skill1(self, game_state: GameState, source: StaticTarget) -> GameState:
         return game_state
 
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         raise Exception("Not Overriden")
 
-    def _post_normal_attack(
+    def _post_skill1(
             self,
             game_state: GameState,
             source: StaticTarget,
@@ -401,22 +401,22 @@ class Character:
             ),
         )
 
-    def elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
-        return self._post_elemental_skill1(
+    def skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return self._post_skill2(
             game_state,
             source,
-            self._elemental_skill1(
-                self._pre_elemental_skill1(game_state, source), source
+            self._skill2(
+                self._pre_skill2(game_state, source), source
             )
         )
 
-    def _pre_elemental_skill1(self, game_state: GameState, source: StaticTarget) -> GameState:
+    def _pre_skill2(self, game_state: GameState, source: StaticTarget) -> GameState:
         return game_state
 
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         raise Exception("Not Overriden")
 
-    def _post_elemental_skill1(
+    def _post_skill2(
             self,
             game_state: GameState,
             source: StaticTarget,
@@ -430,22 +430,22 @@ class Character:
             ),
         )
 
-    def elemental_skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
-        return self._post_elemental_skill2(
+    def skill3(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return self._post_skill3(
             game_state,
             source,
-            self._elemental_skill2(
-                self._pre_elemental_skill2(game_state, source), source
+            self._skill3(
+                self._pre_skill3(game_state, source), source
             )
         )
 
-    def _pre_elemental_skill2(self, game_state: GameState, source: StaticTarget) -> GameState:
+    def _pre_skill3(self, game_state: GameState, source: StaticTarget) -> GameState:
         return game_state
 
-    def _elemental_skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill3(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         raise Exception("Not Overriden")
 
-    def _post_elemental_skill2(self, game_state: GameState, source: StaticTarget, effects: tuple[eft.Effect, ...]) -> tuple[eft.Effect, ...]:
+    def _post_skill3(self, game_state: GameState, source: StaticTarget, effects: tuple[eft.Effect, ...]) -> tuple[eft.Effect, ...]:
         return effects + (
             eft.AliveMarkCheckerEffect(),
             eft.EnergyRechargeEffect(
@@ -650,7 +650,7 @@ class Albedo(Character):
     })
 
     @override
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -659,7 +659,7 @@ class Albedo(Character):
         )
 
     @override
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.AddSummonEffect(
                 target_pid=source.pid,
@@ -719,7 +719,7 @@ class AratakiItto(Character):
     })
 
     @override
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -728,7 +728,7 @@ class AratakiItto(Character):
         )
 
     @override
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ReferredDamageEffect(
                 source=source,
@@ -800,7 +800,7 @@ class Bennett(Character):
         Element.PYRO: 4,
     })
 
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -808,7 +808,7 @@ class Bennett(Character):
             damage=2,
         )
 
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ReferredDamageEffect(
                 source=source,
@@ -887,7 +887,7 @@ class Collei(Character):
     })
 
     @override
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -896,7 +896,7 @@ class Collei(Character):
         )
 
     @override
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         talent_status: None | stt.ColleiTalentStatus = None
         trigger_sprout: bool = False
         if self.talent_equipped():
@@ -981,7 +981,7 @@ class Dehya(Character):
     })
 
     @override
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -990,7 +990,7 @@ class Dehya(Character):
         )
 
     @override
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         effects: list[eft.Effect] = []
         summons = game_state.get_player(source.pid).summons
         if sm.FierySanctumFieldSummon in summons:
@@ -1060,7 +1060,7 @@ class ElectroHypostasis(Character):
     })
 
     @override
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -1069,7 +1069,7 @@ class ElectroHypostasis(Character):
         )
 
     @override
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ReferredDamageEffect(
                 source=source,
@@ -1137,7 +1137,7 @@ class Eula(Character):
     })
 
     @override
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -1146,7 +1146,7 @@ class Eula(Character):
         )
 
     @override
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         effects: list[eft.Effect] = [
             eft.ReferredDamageEffect(
                 source=source,
@@ -1185,7 +1185,7 @@ class Eula(Character):
         return effects + tuple(post_effects)
 
     @override
-    def _post_normal_attack(
+    def _post_skill1(
             self,
             game_state: GameState,
             source: StaticTarget,
@@ -1194,7 +1194,7 @@ class Eula(Character):
         return self._post_basic_skill(game_state, source, effects)
 
     @override
-    def _post_elemental_skill1(
+    def _post_skill2(
             self,
             game_state: GameState,
             source: StaticTarget,
@@ -1255,7 +1255,7 @@ class FatuiPyroAgent(Character):
     })
 
     @override
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -1264,7 +1264,7 @@ class FatuiPyroAgent(Character):
         )
 
     @override
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ReferredDamageEffect(
                 source=source,
@@ -1328,7 +1328,7 @@ class Fischl(Character):
     })
 
     @override
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -1337,7 +1337,7 @@ class Fischl(Character):
         )
 
     @override
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ReferredDamageEffect(
                 source=source,
@@ -1413,7 +1413,7 @@ class Ganyu(Character):
     _SKILL3_ACTUAL_TYPE = CharacterSkillType.NORMAL_ATTACK
 
     @override
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -1422,7 +1422,7 @@ class Ganyu(Character):
         )
 
     @override
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ReferredDamageEffect(
                 source=source,
@@ -1438,7 +1438,7 @@ class Ganyu(Character):
         )
 
     @override
-    def _elemental_skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill3(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         piercing_dmg = 2
         if self.talent_equipped():
             talent_status = self.hidden_statuses.find(stt.GanyuTalentStatus)
@@ -1521,7 +1521,7 @@ class HuTao(Character):
     })
 
     @override
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         effects: list[eft.Effect] = []
         if stt.ParamitaPapilioStatus in self.character_statuses:
             charged_status = game_state.get_player(
@@ -1540,7 +1540,7 @@ class HuTao(Character):
         )
 
     @override
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.AddCharacterStatusEffect(
                 target=source,
@@ -1606,7 +1606,7 @@ class JadeplumeTerrorshroom(Character):
     })
 
     @override
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -1615,7 +1615,7 @@ class JadeplumeTerrorshroom(Character):
         )
 
     @override
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ReferredDamageEffect(
                 source=source,
@@ -1675,7 +1675,7 @@ class Jean(Character):
     })
 
     @override
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -1684,7 +1684,7 @@ class Jean(Character):
         )
 
     @override
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ReferredDamageEffect(
                 source=source,
@@ -1753,7 +1753,7 @@ class KaedeharaKazuha(Character):
     })
 
     @override
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         # POTENTIAL BUG: if there's some ANEMO infusion in the future, normal attack cannot
         #                trigger talent.
         #                may need some redesigning in the future.
@@ -1765,7 +1765,7 @@ class KaedeharaKazuha(Character):
         )
 
     @override
-    def _elemental_skill1(
+    def _skill2(
             self,
             game_state: GameState,
             source: StaticTarget
@@ -1904,7 +1904,7 @@ class Kaeya(Character):
         Element.CRYO: 4,
     })
 
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -1912,7 +1912,7 @@ class Kaeya(Character):
             damage=2,
         )
 
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ReferredDamageEffect(
                 source=source,
@@ -1978,7 +1978,7 @@ class Keqing(Character):
     # consts
     BASE_ELECTRO_INFUSION_DURATION: int = 2
 
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -1986,7 +1986,7 @@ class Keqing(Character):
             damage=2,
         )
 
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         effects: list[eft.Effect] = [
             eft.ReferredDamageEffect(
                 source=source,
@@ -2108,7 +2108,7 @@ class Klee(Character):
         Element.PYRO: 3,
     })
 
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -2116,7 +2116,7 @@ class Klee(Character):
             damage=1,
         )
 
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ReferredDamageEffect(
                 source=source,
@@ -2183,7 +2183,7 @@ class KujouSara(Character):
     })
 
     @override
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -2192,7 +2192,7 @@ class KujouSara(Character):
         )
 
     @override
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ReferredDamageEffect(
                 source=source,
@@ -2264,7 +2264,7 @@ class MaguuKenki(Character):
     })
 
     @override
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -2273,7 +2273,7 @@ class MaguuKenki(Character):
         )
 
     @override
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.AddSummonEffect(
                 target_pid=source.pid,
@@ -2290,7 +2290,7 @@ class MaguuKenki(Character):
         )
 
     @override
-    def _elemental_skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill3(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.AddSummonEffect(
                 target_pid=source.pid,
@@ -2354,7 +2354,7 @@ class Mona(Character):
         Element.HYDRO: 3,
     })
 
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -2362,7 +2362,7 @@ class Mona(Character):
             damage=1,
         )
 
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ReferredDamageEffect(
                 source=source,
@@ -2433,7 +2433,7 @@ class Nahida(Character):
         Element.DENDRO: 3,
     })
 
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -2488,7 +2488,7 @@ class Nahida(Character):
             ))
         return tuple(effects)
 
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         oppo_active_character = game_state.get_player(
             source.pid.other()
         ).just_get_active_character()
@@ -2500,7 +2500,7 @@ class Nahida(Character):
             single_target=stt.SeedOfSkandhaStatus not in oppo_active_character.character_statuses,
         )
 
-    def _elemental_skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill3(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         SKILL_DMG = 3
         return self._elemental_skill_template(game_state, source, SKILL_DMG)
 
@@ -2584,7 +2584,7 @@ class Ningguang(Character):
     })
 
     @override
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -2593,7 +2593,7 @@ class Ningguang(Character):
         )
 
     @override
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ReferredDamageEffect(
                 source=source,
@@ -2660,7 +2660,7 @@ class Noelle(Character):
     })
 
     @override
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -2669,7 +2669,7 @@ class Noelle(Character):
         )
 
     @override
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ReferredDamageEffect(
                 source=source,
@@ -2737,7 +2737,7 @@ class Qiqi(Character):
     })
 
     @override
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -2746,7 +2746,7 @@ class Qiqi(Character):
         )
 
     @override
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.AddSummonEffect(
                 target_pid=source.pid,
@@ -2846,7 +2846,7 @@ class RhodeiaOfLoch(Character):
         sm.OceanicMimicFrogSummon,
     )
 
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -2877,7 +2877,7 @@ class RhodeiaOfLoch(Character):
         ])
         return summon
 
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         from random import choice
 
         existing_summons = game_state.get_player(source.pid).summons
@@ -2901,7 +2901,7 @@ class RhodeiaOfLoch(Character):
             ),
         )
 
-    def _elemental_skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill3(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         from random import choice
 
         existing_summons = game_state.get_player(source.pid).summons
@@ -2990,7 +2990,7 @@ class SangonomiyaKokomi(Character):
     })
 
     @override
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -2999,7 +2999,7 @@ class SangonomiyaKokomi(Character):
         )
 
     @override
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ApplyElementalAuraEffect(
                 source=source,
@@ -3086,7 +3086,7 @@ class Shenhe(Character):
     })
 
     @override
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -3095,7 +3095,7 @@ class Shenhe(Character):
         )
 
     @override
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ReferredDamageEffect(
                 source=source,
@@ -3166,7 +3166,7 @@ class Tartaglia(Character):
         Element.HYDRO: 3,
     })
 
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         oppo_char = game_state.get_player(source.pid.other()).just_get_active_character()
         pre_effects: list[eft.Effect] = []
         # if stt.RiptideStatus in oppo_char.get_character_statuses():
@@ -3188,7 +3188,7 @@ class Tartaglia(Character):
             damage=2,
         ) + tuple(follow_up_effects)
 
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         effects: list[eft.Effect] = []
         if stt.RangeStanceStatus in self._statuses:
             effects.append(eft.RemoveCharacterStatusEffect(
@@ -3301,7 +3301,7 @@ class Tighnari(Character):
         Element.DENDRO: 3,
     })
 
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -3309,7 +3309,7 @@ class Tighnari(Character):
             damage=2,
         )
 
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ReferredDamageEffect(
                 source=source,
@@ -3379,7 +3379,7 @@ class Venti(Character):
     })
 
     @override
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -3388,7 +3388,7 @@ class Venti(Character):
         )
 
     @override
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ReferredDamageEffect(
                 source=source,
@@ -3455,7 +3455,7 @@ class Wanderer(Character):
         Element.ANEMO: 3,
     })
 
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         effects: list[eft.Effect] = []
         if self.talent_equipped():
             charged_status = game_state.get_player(
@@ -3473,7 +3473,7 @@ class Wanderer(Character):
             damage=1,
         )
 
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ReferredDamageEffect(
                 source=source,
@@ -3545,7 +3545,7 @@ class Xingqiu(Character):
         Element.HYDRO: 3,
     })
 
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -3553,7 +3553,7 @@ class Xingqiu(Character):
             damage=2,
         )
 
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.ReferredDamageEffect(
                 source=source,
@@ -3634,7 +3634,7 @@ class YaeMiko(Character):
     # constants
     _SUMMON_TYPE = sm.SesshouSakuraSummon
 
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -3642,7 +3642,7 @@ class YaeMiko(Character):
             damage=1,
         )
 
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return (
             eft.AddSummonEffect(
                 target_pid=source.pid,
@@ -3717,7 +3717,7 @@ class Yoimiya(Character):
     })
 
     @override
-    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
@@ -3726,7 +3726,7 @@ class Yoimiya(Character):
         )
 
     @override
-    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         if self.talent_equipped():
             return (
                 eft.UpdateCharacterStatusEffect(
@@ -3763,7 +3763,7 @@ class Yoimiya(Character):
         )
 
     @override
-    def _post_elemental_skill1(
+    def _post_skill2(
             self,
             game_state: GameState,
             source: StaticTarget,
