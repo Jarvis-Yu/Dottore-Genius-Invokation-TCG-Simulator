@@ -185,6 +185,20 @@ class TestDice(unittest.TestCase):
                               Element.PYRO: 1, Element.OMNI: 2})
         self.assertEqual(just(payment.basic_selection(requirement))[Element.OMNI], 2)
 
+        requirement = AbstractDice({Element.PYRO: 3})
+        payment = ActualDice({Element.PYRO: 2, Element.ELECTRO: 1,
+                              Element.CRYO: 1, Element.OMNI: 2})
+        self.assertEqual(just(payment.basic_selection(requirement))[Element.OMNI], 1)
+        self.assertEqual(just(payment.basic_selection(requirement))[Element.PYRO], 2)
+
+        requirement = AbstractDice({Element.ANY: 4})
+        payment = ActualDice({Element.PYRO: 1, Element.ELECTRO: 1,
+                              Element.CRYO: 1, Element.OMNI: 2})
+        self.assertEqual(
+            payment.basic_selection(requirement),
+            ActualDice({Element.PYRO: 1, Element.ELECTRO: 1, Element.CRYO: 1, Element.OMNI: 1})
+        )
+
     def test_basic_selection_failures(self):
         requirement = AbstractDice({Element.ANY: 8})
         payment = ActualDice({Element.OMNI: 7})

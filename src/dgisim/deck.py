@@ -137,6 +137,15 @@ class Deck(ABC):
             and HashableDict(self.cards) == HashableDict(other.cards)
         )
 
+    def __str__(self) -> str:
+        return (
+            "Deck:Chars{"
+            + ", ".join([char.__name__ for char in self.chars])
+            + "}Cards{"
+            + ", ".join([f"{card.__name__}:{count}" for card, count in self.cards.items()])
+            + '}'
+        )
+
 
 @dataclass(eq=False)
 class MutableDeck(Deck):

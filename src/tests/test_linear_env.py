@@ -23,7 +23,7 @@ class TestLinearEnv(unittest.TestCase):
 
         self.assertEqual(game_state, env.step(DeathSwapAction(char_id=1))[0])
 
-    def through_test(self):
+    def test_through(self):
         agent = RandomAgent()
         env = LinearEnv()
         game_state, _, _, turn, done = env.view()
@@ -44,3 +44,18 @@ class TestLinearEnv(unittest.TestCase):
                 game_state, _, _, turn, done = env.step(action.encoding(encoding_plan))
             else:
                 game_state, _, reward, turn, done = env.step(action)
+
+    def test_resets(self):
+        # random reset does create some random new initial game state
+        env = LinearEnv()
+        game_state = env.full_view()
+        env.reset_random()
+        new_game_state = env.full_view()
+        self.assertNotEqual(game_state, new_game_state)
+
+        deck1, deck2 = new_game_state.get_decks()
+        env.reset_with_decks(deck1, deck2)
+        self.assertEqual(
+            env.full_view().get_decks(),
+            (deck1, deck2),
+        )

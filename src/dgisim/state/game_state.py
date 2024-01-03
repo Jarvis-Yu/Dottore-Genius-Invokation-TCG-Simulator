@@ -126,8 +126,8 @@ class GameState:
             p1_deck = p1_deck.to_frozen()
         if not p2_deck.immutable:
             p2_deck = p2_deck.to_frozen()
-        assert mode.valid_deck(p1_deck)
-        assert mode.valid_deck(p2_deck)
+        assert mode.valid_deck(p1_deck), p1_deck
+        assert mode.valid_deck(p2_deck), p2_deck
         return cls(
             mode=mode,
             phase=mode.first_phase(),

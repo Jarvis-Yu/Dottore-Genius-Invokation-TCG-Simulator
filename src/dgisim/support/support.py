@@ -691,6 +691,8 @@ class VanaranaSupport(Support):
             elif isinstance(value, ActualDice):
                 fill_up = self._CAPACITY
                 for elem in value.elems():
+                    if value[elem] == 0:
+                        continue
                     fill_up -= 1
                     ret_val.extend((elem.value, value[elem]))
                 for _ in range(fill_up):

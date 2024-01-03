@@ -255,7 +255,7 @@ class Card:
     @classmethod
     def valid_in_deck(cls, deck: Deck) -> bool:
         """
-        :returns: if this card can be added to the `deck`.
+        :returns: if this card can exist in the `deck`.
         """
         return True
 
@@ -1157,7 +1157,7 @@ class ArcaneLegendCard(Card):
     @override
     @classmethod
     def valid_in_deck(cls, deck: Deck) -> bool:
-        return cls not in deck.cards or deck.cards[cls] == 0
+        return cls not in deck.cards or deck.cards[cls] <= 1
 
     @override
     @classmethod

@@ -268,7 +268,7 @@ class PlayerState:
         """
         :returns: a random initial player state under the `mode`.
         """
-        from ..card.card import ArcaneLegendCard
+        from ..card.card import ArcaneLegendCard, Card
         from ..deck import MutableDeck
         from ..helper.hashable_dict import HashableDict
         cards = mode.all_cards()
@@ -276,11 +276,11 @@ class PlayerState:
         import random
         selected_chars = random.sample(list(chars), k=3)
         deck = MutableDeck(chars=selected_chars, cards={})
-        cards_pool = []
+        cards_pool: list[type[Card]] = []
         for card in cards:
             if not card.valid_in_deck(deck):
                 continue
-            if isinstance(card, ArcaneLegendCard):
+            if issubclass(card, ArcaneLegendCard):
                 cards_pool.append(card)
             else:
                 cards_pool.extend([card] * 2)
