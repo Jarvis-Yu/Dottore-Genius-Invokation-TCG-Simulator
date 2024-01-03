@@ -5,6 +5,7 @@
 ### Added
 
 - New Characters:
+  - Eula
   - Kujou Sara
   - Tartaglia
   - Wanderer
@@ -14,6 +15,7 @@
       - Abyssal Mayhem Hydrospout
       - Gales of Reverie
       - Sin of Pride
+      - Wellspring of War-Lust
     - Weapon Cards:
       - Bow:
         - Elegy of the End

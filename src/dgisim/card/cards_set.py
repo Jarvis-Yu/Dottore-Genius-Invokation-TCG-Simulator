@@ -39,6 +39,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ThunderingPenance,
     TranscendentAutomaton,
     UndividedHeart,
+    WellspingOfWarLust,
     ## Weapons ##
     ### Bow ###
     AmosBow,

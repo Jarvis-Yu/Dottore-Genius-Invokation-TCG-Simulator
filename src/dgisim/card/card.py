@@ -171,6 +171,8 @@ __all__ = [
     "StalwartAndTrue",
     ## Electro Hypostasis ##
     "AbsorbingPrism",
+    ## Eula ##
+    "WellspingOfWarLust",
     ## Fatui Pyro Agent ##
     "PaidInFull",
     ## Fischl ##
@@ -2702,6 +2704,16 @@ class AbsorbingPrism(TalentEventCard, _CombatActionCard, _DiceOnlyChoiceProvider
                 status=stt.ElectroCrystalCoreStatus,
             ),
         )
+
+
+#### Eula ####
+
+
+class WellspingOfWarLust(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDice({Element.CRYO: 3})
+    _CHARACTER = chr.Eula
+    _EQUIPMENT_STATUS = stt.WellspingOfWarLustStatus
+    _SKILL = CharacterSkill.ELEMENTAL_BURST
 
 
 #### Fatui Pyro Agent ####

@@ -13,6 +13,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     Collei,
     Dehya,
     ElectroHypostasis,
+    Eula,
     FatuiPyroAgent,
     Fischl,
     Ganyu,

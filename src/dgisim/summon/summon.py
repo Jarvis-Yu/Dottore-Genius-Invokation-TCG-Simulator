@@ -45,6 +45,7 @@ __all__ = [
     "DandelionFieldSummon",
     "FierySanctumFieldSummon",
     "HeraldOfFrostSummon",
+    "LightfallSwordSummon",
     "OceanicMimicFrogSummon",
     "OceanicMimicRaptorSummon",
     "OceanicMimicSquirrelSummon",
@@ -638,6 +639,67 @@ class HeraldOfFrostSummon(_DmgPerRoundSummon):
 
 
 @dataclass(frozen=True, kw_only=True)
+class LightfallSwordSummon(Summon, stt._UsageStatus):
+    usages: int = 0
+    delta_usages: int = 0
+    AUTO_DESTROY: ClassVar[bool] = False
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    ))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.POST_SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if not (
+                    information.source.pid is status_source.pid
+                    and (
+                        information.skill_true_type.is_normal_attack()
+                        or information.skill_true_type.is_elemental_skill()
+                    )
+            ):
+                return self
+            source_char = game_state.get_character_target(information.source)
+            if source_char is None:
+                return self
+            from ..character.character import Eula
+            if isinstance(source_char, Eula):
+                if (
+                        information.skill_true_type.is_elemental_skill()
+                        and source_char.talent_equipped()
+                ):
+                    return replace(self, delta_usages=3)
+                else:
+                    return replace(self, delta_usages=2)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.delta_usages > 0:
+            return [], replace(self, usages=self.delta_usages, delta_usages=0)
+        elif signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            return [
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=Element.PHYSICAL,
+                    damage=3 + self.usages,
+                    damage_type=DamageType(summon=True),
+                )
+            ], None
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
 class OceanicMimicFrogSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 1
@@ -650,10 +712,7 @@ class OceanicMimicFrogSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         es: list[eft.Effect] = []
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT \

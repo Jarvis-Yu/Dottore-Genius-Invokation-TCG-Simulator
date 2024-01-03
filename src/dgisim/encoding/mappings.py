@@ -41,7 +41,7 @@ CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
         (char.Kaeya, 2),
         # (char.Chongyun, 3),
         # (char.KamisatoAyaka, 4),
-        # (char.Eula, 5),
+        (char.Eula, 5),
         (char.Shenhe, 6),
         # (char.FatuiCryoCicinMage, 7),
         (char.Qiqi, 8),
@@ -312,7 +312,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.ColdBloodedStrike, 927),
         # Chongyun 928
         # KamisatoAyaka 929
-        # Eula 930
+        (card.WellspingOfWarLust, 930),
         (card.MysticalAbandon, 931),
         # FatuiCryoCicinMage 932
         (card.RiteOfResurrection, 933),
@@ -636,6 +636,8 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         ## Chongyun 660 ##
         ## KamisatoAyaka 680 ##
         ## Eula 700 ##
+        (status.GrimheartStatus, 700),
+        (status.WellspingOfWarLustStatus, 701),
         ## Shenhe 720 ##
         (status.MysticalAbandonStatus, 720),
         (status.IcyQuillStatus, 721),
@@ -805,7 +807,7 @@ SUMM_MAPPING: dict[type["Summon"], int] = HashableDict({
         # (summon.FrostflakeSekiNoToSummon, 2),
         (summon.ShadowswordGallopingFrostSummon, 3),
         ##(summon.CryoHilichurlShooterSummon, 4),
-        # (summon.LightfallSwordSummon, 5),
+        (summon.LightfallSwordSummon, 5),
         (summon.TalismanSpiritSummon, 6),
         # (summon.CryoCicinsSummon, 7),
         (summon.HeraldOfFrostSummon, 8),

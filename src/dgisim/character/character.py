@@ -39,8 +39,9 @@ __all__ = [
     "Collei",
     "Dehya",
     "ElectroHypostasis",
-    "Fischl",
+    "Eula",
     "FatuiPyroAgent",
+    "Fischl",
     "Ganyu",
     "HuTao",
     "JadeplumeTerrorshroom",
@@ -1114,6 +1115,124 @@ class ElectroHypostasis(Character):
             max_energy=2,
             hiddens=stts.Statuses((stt.ElectroCrystalCoreHiddenStatus(),)),
             statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
+class Eula(Character):
+    _ELEMENT = Element.CRYO
+    _WEAPON_TYPE = WeaponType.CLAYMORE
+    _TALENT_STATUS = stt.WellspingOfWarLustStatus
+    _FACTIONS = frozenset((Faction.MONDSTADT,))
+
+    _SKILL1_COST = AbstractDice({
+        Element.CRYO: 1,
+        Element.ANY: 2,
+    })
+    _SKILL2_COST = AbstractDice({
+        Element.CRYO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDice({
+        Element.CRYO: 3,
+    })
+
+    @override
+    def _normal_attack(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        )
+
+    @override
+    def _elemental_skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        effects: list[eft.Effect] = [
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.CRYO,
+                damage=2,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+        ]
+        if stt.GrimheartStatus not in self.character_statuses:
+            effects.append(
+                eft.AddCharacterStatusEffect(
+                    target=source,
+                    status=stt.GrimheartStatus,
+                )
+            )
+        return tuple(effects)
+
+    def _post_basic_skill(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            effects: tuple[eft.Effect, ...]
+    ) -> tuple[eft.Effect, ...]:
+        """ Removes ER when summon is on field """
+        post_effects: list[eft.Effect] = [
+            eft.AliveMarkCheckerEffect(),
+        ]
+        if sm.LightfallSwordSummon not in game_state.get_player(source.pid).summons:
+            post_effects.append(
+                eft.EnergyRechargeEffect(
+                    target=source,
+                    recharge=1,
+                )
+            )
+        return effects + tuple(post_effects)
+
+    @override
+    def _post_normal_attack(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            effects: tuple[eft.Effect, ...]
+    ) -> tuple[eft.Effect, ...]:
+        return self._post_basic_skill(game_state, source, effects)
+
+    @override
+    def _post_elemental_skill1(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            effects: tuple[eft.Effect, ...]
+    ) -> tuple[eft.Effect, ...]:
+        return self._post_basic_skill(game_state, source, effects)
+
+    @override
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.max_energy,
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.CRYO,
+                damage=2,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=sm.LightfallSwordSummon,
+            ),
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=2,
+            statuses=stts.Statuses(()),
+            hiddens=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
 

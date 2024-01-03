@@ -159,6 +159,9 @@ __all__ = [
     "ElectroCrystalCoreStatus",
     "RockPaperScissorsComboPaperStatus",
     "RockPaperScissorsComboScissorsStatus",
+    ## Eula ##
+    "GrimheartStatus",
+    "WellspingOfWarLustStatus",
     ## Fatui Pyro Agent ##
     "PaidInFullStatus",
     "StealthMasterStatus",
@@ -3230,6 +3233,48 @@ class RockPaperScissorsComboScissorsStatus(CharacterStatus, PrepareSkillStatus):
         elif signal is TriggeringSignal.SELF_SWAP:
             return [], None
         return [], self
+
+
+
+#### Eula ####
+
+@dataclass(frozen=True, kw_only=True)
+class GrimheartStatus(CharacterStatus):
+    activated: bool = False
+    REACTABLE_SIGNALS = frozenset({
+        TriggeringSignal.COMBAT_ACTION,
+    })
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            if (
+                    item.dmg.source == status_source
+                    and item.dmg.damage_type.direct_elemental_skill()
+                    and not self.activated
+            ):
+                return item.delta_damage(3), replace(self, activated=True)
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+            return [], None
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class WellspingOfWarLustStatus(TalentEquipmentStatus):
+    pass
 
 
 #### Fatui Pyro Agent ####
