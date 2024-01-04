@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (34/71 implemented)](#character-3471-implemented)
-  - [Card (112/248 implemented)](#card-112248-implemented)
+  - [Character (35/71 implemented)](#character-3571-implemented)
+  - [Card (113/248 implemented)](#card-113248-implemented)
 
-## Character (34/71 implemented)
+## Character (35/71 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -45,7 +45,7 @@ all I need now is to implement each card and character.
   - [x] Eula
   - [ ] Fatui Cryo Cicin Mage
   - [x] Kaeya
-  - [ ] Kamisato Ayaka
+  - [x] Kamisato Ayaka
   - [x] Ganyu
   - [x] Qiqi
   - [x] Shenhe
@@ -56,7 +56,7 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (112/248 implemented)
+## Card (113/248 implemented)
 
 - [ ] Equipment Card (56/137):
   - [ ] Talent Card:
@@ -69,6 +69,7 @@ all I need now is to implement each card and character.
     - [x] Gales of Reverie
     - [x] Grand Expectation
     - [x] I Got Your Back
+    - [x] KantenSenmyouBlessing,
     - [x] Keen Sight
     - [x] Lands of Dandelion
     - [x] Mystical Abandon

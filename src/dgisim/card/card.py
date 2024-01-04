@@ -189,6 +189,8 @@ __all__ = [
     "PoeticsOfFuubutsu",
     ## Kaeya ##
     "ColdBloodedStrike",
+    ## KamiSato Ayaka ##
+    "KantenSenmyouBlessing",
     ## Keqing ##
     "LightningStiletto",
     "ThunderingPenance",
@@ -836,6 +838,11 @@ class TalentEventCard(EventCard, TalentCard):
                     game_state, pid, cls._CHARACTER
                 )
             )
+        if issubclass(cls, _CharTargetChoiceProvider):
+            ret_val = ret_val and any(
+                isinstance(char, cls._CHARACTER)
+                for char in game_state.get_player(pid).characters.get_alive_characters()
+            )
         return ret_val and super()._loosely_usable(game_state, pid)
 
     @override
@@ -848,8 +855,15 @@ class TalentEventCard(EventCard, TalentCard):
     ) -> bool:
         ret_val = True
         if issubclass(cls, _DiceOnlyChoiceProvider):
-            ret_val = ret_val and isinstance(
-                instruction, act.DiceOnlyInstruction)
+            ret_val = ret_val and isinstance(instruction, act.DiceOnlyInstruction)
+        elif issubclass(cls, _CharTargetChoiceProvider):
+            ret_val = (
+                ret_val
+                and isinstance(instruction, act.StaticTargetInstruction)
+                and (target_char := game_state.get_character_target(instruction.target)) is not None
+                and target_char.is_alive()
+                and isinstance(target_char, cls._CHARACTER)
+            )
         return ret_val and cls._loosely_usable(game_state, pid)
 
 
@@ -2788,6 +2802,36 @@ class ColdBloodedStrike(_TalentEquipmentSkillCard):
     _CHARACTER = chr.Kaeya
     _EQUIPMENT_STATUS = stt.ColdBloodedStrikeStatus
     _SKILL = CharacterSkill.SKILL2
+
+#### Kamisato Ayaka ####
+
+class KantenSenmyouBlessing(TalentEventCard, _CharTargetChoiceProvider):
+    _DICE_COST = AbstractDice({Element.CRYO: 2})
+    _CHARACTER = chr.KamisatoAyaka
+
+    @override
+    @classmethod
+    def _valid_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:
+        return isinstance(char, chr.KamisatoAyaka) \
+            and super()._valid_char(game_state, pid, char)
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.StaticTargetInstruction)
+        assert isinstance(game_state.get_character_target(instruction.target), chr.KamisatoAyaka)
+        return (
+            eft.AddCharacterStatusEffect(
+                target=instruction.target,
+                status=stt.KantenSenmyouBlessingStatus,
+            ),
+        )
+
 
 #### Keqing ####
 

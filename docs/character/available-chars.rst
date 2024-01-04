@@ -1,7 +1,7 @@
 Available Characters
 ====================
 
-34 of 71 characters in Genius Invokation TCG are available in the simulator.
+35 of 71 characters in Genius Invokation TCG are available in the simulator.
 
 Pyro
 ------
@@ -52,6 +52,7 @@ Cryo
 
 * Eula
 * Kaeya
+* Kamisato Ayaka
 * Ganyu
 * Qiqi
 * Shenhe

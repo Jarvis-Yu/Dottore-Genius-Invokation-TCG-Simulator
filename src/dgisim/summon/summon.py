@@ -44,6 +44,7 @@ __all__ = [
     "CuileinAnbarSummon",
     "DandelionFieldSummon",
     "FierySanctumFieldSummon",
+    "FrostflakeSekiNoToSummon",
     "HeraldOfFrostSummon",
     "LightfallSwordSummon",
     "OceanicMimicFrogSummon",
@@ -576,6 +577,14 @@ class FierySanctumFieldSummon(_DmgPerRoundSummon, stt._ShieldStatus):
                 if new_self is not None:
                     new_self = replace(new_self, activated=False)
         return es, new_self
+
+@dataclass(frozen=True, kw_only=True)
+class FrostflakeSekiNoToSummon(_DmgPerRoundSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 2
+    ELEMENT: ClassVar[Element] = Element.CRYO
+
 
 @dataclass(frozen=True, kw_only=True)
 class HeraldOfFrostSummon(_DmgPerRoundSummon):

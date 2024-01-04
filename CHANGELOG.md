@@ -6,6 +6,7 @@
 
 - New Characters:
   - Eula
+  - Kamisato Ayaka
   - Kujou Sara
   - Tartaglia
   - Wanderer
@@ -14,6 +15,7 @@
     - Talent Cards:
       - Abyssal Mayhem Hydrospout
       - Gales of Reverie
+      - Kanten Senmyou Blessing
       - Sin of Pride
       - Wellspring of War-Lust
     - Weapon Cards:

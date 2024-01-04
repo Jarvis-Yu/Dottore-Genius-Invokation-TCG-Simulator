@@ -16,6 +16,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     GalesOfReverie,
     GrandExpectation,
     IGotYourBack,
+    KantenSenmyouBlessing,
     KeenSight,
     LandsOfDandelion,
     MysticalAbandon,

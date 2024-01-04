@@ -196,6 +196,11 @@ __all__ = [
     ## Kaeya ##
     "ColdBloodedStrikeStatus",
     "IcicleStatus",
+    ## Kamisato Ayaka ##
+    "KamisatoArtSenhoStatus",
+    "KamisatoAyakaCryoInfusionEnhancedStatus",
+    "KamisatoAyakaCryoInfusionStatus",
+    "KantenSenmyouBlessingStatus",
     ## Keqing ##
     "KeqingElectroInfusionStatus",
     "KeqingTalentStatus",
@@ -3835,6 +3840,103 @@ class ColdBloodedStrikeStatus(TalentEquipmentStatus):
 
     def __str__(self) -> str:
         return super().__str__() + case_val(self.activated, "(*)", '')
+
+
+#### Kamisato Ayaka ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class KamisatoArtSenhoStatus(HiddenStatus):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.SELF_SWAP,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.SELF_SWAP:
+            if StaticTarget.from_player_active(game_state, source.pid) == source:
+                source_char = game_state.get_character_target(source)
+                assert source_char is not None
+                effects: list[eft.Effect] = []
+                if (
+                        source_char.talent_equipped()
+                        and KamisatoAyakaCryoInfusionStatus in source_char.character_statuses
+                ):
+                    effects.append(
+                        eft.RemoveCharacterStatusEffect(
+                            target=source,
+                            status=KamisatoAyakaCryoInfusionStatus,
+                        )
+                    )
+                effects.append(
+                    eft.AddCharacterStatusEffect(
+                        target=source,
+                        status=(
+                            KamisatoAyakaCryoInfusionEnhancedStatus
+                            if source_char.talent_equipped()
+                            else KamisatoAyakaCryoInfusionStatus
+                        ),
+                    )
+                )
+                return effects, self
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class KamisatoAyakaCryoInfusionEnhancedStatus(CharacterStatus, _InfusionStatus):
+    ELEMENT: ClassVar[Element] = Element.CRYO
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    damage_boost: int = 1
+
+
+@dataclass(frozen=True, kw_only=True)
+class KamisatoAyakaCryoInfusionStatus(CharacterStatus, _InfusionStatus):
+    ELEMENT: ClassVar[Element] = Element.CRYO
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+
+
+@dataclass(frozen=True, kw_only=True)
+class KantenSenmyouBlessingStatus(TalentEquipmentStatus, _UsageStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    AUTO_DESTROY: ClassVar[bool] = False
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.SWAP:
+            assert isinstance(item, ActionPEvent)
+            if (
+                    item.target == status_source
+                    and item.dice_cost.can_cost_less_elem()
+                    and self.usages > 0
+            ):
+                return (
+                    item.with_new_cost(item.dice_cost.cost_less_elem(1)),
+                    replace(self, usages=self.usages - 1),
+                )
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
+            return [], replace(self, usages=self.MAX_USAGES)
+        return [], self
+
 
 #### Keqing ####
 
