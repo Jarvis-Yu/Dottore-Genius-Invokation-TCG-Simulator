@@ -606,7 +606,8 @@ class Status:
                 ret_val.append(1 if value else 0)
             elif isinstance(value, int):
                 ret_val.append(value)
-            elif isinstance(value, Element):
+            elif isinstance(value, Enum):
+                assert isinstance(value.value, int), value
                 ret_val.append(value.value)
             elif value is None:
                 ret_val.append(0)

@@ -13,6 +13,7 @@ ordered alphabetically.
 """
 from __future__ import annotations
 from dataclasses import dataclass, fields, replace
+from enum import Enum
 from itertools import chain
 from typing import ClassVar, TYPE_CHECKING
 from typing_extensions import Self, override
@@ -686,7 +687,8 @@ class VanaranaSupport(Support):
                 ret_val.append(1 if value else 0)
             elif isinstance(value, int):
                 ret_val.append(value)
-            elif isinstance(value, Element):
+            elif isinstance(value, Enum):
+                assert isinstance(value.value, int), value
                 ret_val.append(value.value)
             elif isinstance(value, ActualDice):
                 fill_up = self._CAPACITY

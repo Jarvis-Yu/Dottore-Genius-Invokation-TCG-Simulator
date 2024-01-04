@@ -641,7 +641,8 @@ class HeraldOfFrostSummon(_DmgPerRoundSummon):
 @dataclass(frozen=True, kw_only=True)
 class LightfallSwordSummon(Summon, stt._UsageStatus):
     usages: int = 0
-    delta_usages: int = 0
+    skill_used: None | CharacterSkillType = None
+    skill_source: None | StaticTarget = None
     AUTO_DESTROY: ClassVar[bool] = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.COMBAT_ACTION,
@@ -671,21 +672,30 @@ class LightfallSwordSummon(Summon, stt._UsageStatus):
                 return self
             from ..character.character import Eula
             if isinstance(source_char, Eula):
-                if (
-                        information.skill_true_type.is_elemental_skill()
-                        and source_char.talent_equipped()
-                ):
-                    return replace(self, delta_usages=3)
-                else:
-                    return replace(self, delta_usages=2)
+                return replace(
+                    self,
+                    skill_used=information.skill_true_type,
+                    skill_source=information.source,
+                )
         return self
 
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.delta_usages > 0:
-            return [], replace(self, usages=self.delta_usages, delta_usages=0)
+        if signal is TriggeringSignal.COMBAT_ACTION and self.skill_used is not None:
+            assert self.skill_source is not None
+            source_char = game_state.get_character_target(self.skill_source)
+            from ..character.character import Eula
+            if not (
+                    source_char is not None
+                    and source_char.is_alive()
+                    and isinstance(source_char, Eula)
+            ):
+                return [], self
+            if self.skill_used is CharacterSkillType.ELEMENTAL_SKILL and source_char.talent_equipped():
+                return [], replace(self, usages=3, skill_used=None, skill_source=None)
+            return [], replace(self, usages=2, skill_used=None, skill_source=None)
         elif signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             return [
                 eft.ReferredDamageEffect(

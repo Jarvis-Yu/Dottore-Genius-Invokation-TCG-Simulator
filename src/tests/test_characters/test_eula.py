@@ -77,6 +77,18 @@ class TestEula(unittest.TestCase):
         self.assertIs(dmg.element, Element.PHYSICAL)
         self.assertNotIn(LightfallSwordSummon, game_state.player1.summons)
 
+    def test_lightfall_sword_summon_extreme_case(self):
+        game_state = AddSummonEffect(Pid.P1, LightfallSwordSummon).execute(self.BASE_GAME)
+        game_state = AddCombatStatusEffect(Pid.P2, IcicleStatus).execute(game_state)
+        game_state = kill_character(game_state, 1, Pid.P2, hp=1)
+        game_state = kill_character(game_state, 2, Pid.P1, hp=1)
+        self.assertEqual(game_state.player1.summons.just_find(LightfallSwordSummon).usages, 0)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
+        game_state = step_action(game_state, Pid.P2, DeathSwapAction(char_id=2))
+        game_state = step_action(game_state, Pid.P1, DeathSwapAction(char_id=1))
+        assert game_state.waiting_for() is Pid.P1
+        self.assertEqual(game_state.player1.summons.just_find(LightfallSwordSummon).usages, 0)
+
     def test_talent_card(self):
         game_state = grant_all_infinite_revival(self.BASE_GAME)
         game_state = add_dmg_listener(game_state, Pid.P1)
