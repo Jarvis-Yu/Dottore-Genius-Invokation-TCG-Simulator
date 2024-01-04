@@ -202,6 +202,7 @@ __all__ = [
     "KamisatoAyakaCryoInfusionStatus",
     "KantenSenmyouBlessingStatus",
     ## Keqing ##
+    "KeqingElectroInfusionEnhancedStatus",
     "KeqingElectroInfusionStatus",
     "KeqingTalentStatus",
     "ThunderingPenanceStatus",
@@ -3968,11 +3969,19 @@ class ThunderingPenanceStatus(TalentEquipmentStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
+class KeqingElectroInfusionEnhancedStatus(CharacterStatus, _InfusionStatus):
+    usages: int = 3
+    MAX_USAGES: ClassVar[int] = 3
+    ELEMENT: ClassVar[Element] = Element.ELECTRO
+    damage_boost: int = 1
+
+
+@dataclass(frozen=True, kw_only=True)
 class KeqingElectroInfusionStatus(CharacterStatus, _InfusionStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
     ELEMENT: ClassVar[Element] = Element.ELECTRO
 
-    def __str__(self) -> str:
-        return super().__str__() + f"({self.damage_boost})"
 
 #### Klee ####
 

@@ -714,8 +714,9 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.StellarPredatorStatus, 6600),
         ## Keqing 6620 ##
         (status.ThunderingPenanceStatus, 6620),
-        (status.KeqingElectroInfusionStatus, 6621),
-        (status.KeqingTalentStatus, 6622),
+        (status.KeqingTalentStatus, 6621),
+        (status.KeqingElectroInfusionStatus, 6622),
+        (status.KeqingElectroInfusionEnhancedStatus, 6623),
         ## Razor 6640 ##
         ## Cyno 6660 ##
         ## Beidou 6680 ##

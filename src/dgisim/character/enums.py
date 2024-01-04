@@ -35,9 +35,9 @@ class CharacterSkill(Enum):
         return self is CharacterSkill.ELEMENTAL_BURST
 
 class CharacterSkillType(Enum):
-    NORMAL_ATTACK = "Normal-Attack"
-    ELEMENTAL_SKILL = "Elemental-Skill"
-    ELEMENTAL_BURST = "Elemental-Burst"
+    NORMAL_ATTACK = 1
+    ELEMENTAL_SKILL = 2
+    ELEMENTAL_BURST = 3
 
     def is_normal_attack(self):
         return self is CharacterSkillType.NORMAL_ATTACK
