@@ -1,7 +1,7 @@
 Available Cards
 ===============
 
-113 of 248 cards in Genius Invokation TCG are available in the simulator.
+114 of 248 cards in Genius Invokation TCG are available in the simulator.
 (excluding character cards which are not counted as cards in ``dgisim``)
 
 Equipment Cards
@@ -35,6 +35,7 @@ Weapon Card
 * Polearm
 
   * Lithic Spear
+  * Moonpiercer
   * Vortex Vanquisher
   * White Tassel
 

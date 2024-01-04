@@ -81,6 +81,7 @@ __all__ = [
     "WolfsGravestone",
     ## Polearm ##
     "LithicSpear",
+    "Moonpiercer",
     "VortexVanquisher",
     "WhiteTassel",
     ## Sword ##
@@ -1448,6 +1449,12 @@ class WolfsGravestone(WeaponEquipmentCard):
 
 #### Polearm ####
 
+class EngulfingLightning(WeaponEquipmentCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 3})
+    WEAPON_TYPE = WeaponType.POLEARM
+    WEAPON_STATUS = stt.EngulfingLightningStatus
+
+
 class LithicSpear(WeaponEquipmentCard):
     _DICE_COST = AbstractDice({Element.OMNI: 3})
     WEAPON_TYPE = WeaponType.POLEARM
@@ -1472,6 +1479,27 @@ class LithicSpear(WeaponEquipmentCard):
             eft.UpdateCharacterStatusEffect(
                 target=instruction.target,
                 status=stt.LithicGuardStatus(usages=stacks),
+            ),
+        )
+
+
+class Moonpiercer(WeaponEquipmentCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
+    WEAPON_TYPE = WeaponType.POLEARM
+    WEAPON_STATUS = stt.MoonpiercerStatus
+
+    @override
+    @classmethod
+    def on_enter_effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.StaticTargetInstruction
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddCharacterStatusEffect(
+                target=instruction.target,
+                status=stt.MoonpiercerEffectStatus,
             ),
         )
 

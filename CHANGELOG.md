@@ -21,6 +21,8 @@
     - Weapon Cards:
       - Bow:
         - Elegy of the End
+      - Polearm:
+        - Moonpiercer
   - Support Cards:
     - Liu Su
     - Rana

@@ -145,7 +145,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         # (card.SkywardSpine, 77),
         (card.VortexVanquisher, 78),
         # (card.EngulfingLightning, 79),
-        # (card.Moonpiercer, 80),
+        (card.Moonpiercer, 80),
 
         #### 0.5 Sword 0100 ####
         (card.TravelersHandySword, 100),
@@ -541,7 +541,7 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         # (status.SkywardSpineStatus, 127),
         (status.VortexVanquisherStatus, 128),
         # (status.EngulfingLightningStatus, 129),
-        # (status.MoonpiercerStatus, 130),
+        (status.MoonpiercerStatus, 130),
 
         #### 1.1.5 Sword Status 150 ####
         (status.TravelersHandySwordStatus, 150),
@@ -593,7 +593,7 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.ElementalResonanceShatteringIceStatus, 305),
         (status.ElementalResonanceSprawlingGreeneryStatus, 306),
         (status.FreshWindOfFreedomStatus, 307),
-        (status.KingsSquireEffectStatus, 308),
+        # 308 available
         (status.LeaveItToMeStatus, 309),
         (status.IHaventLostYetOnCooldownStatus, 310),
         (status.ReviveOnCooldownStatus, 311),
@@ -618,6 +618,8 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.SatiatedStatus, 455),
         (status.TandooriRoastChickenStatus, 456),
         (status.UnmovableMountainStatus, 457),
+        (status.KingsSquireEffectStatus, 458),
+        (status.MoonpiercerEffectStatus, 459),
 
         #### 3.2 Shield Character Status 525 ####
         (status.LithicGuardStatus, 525),

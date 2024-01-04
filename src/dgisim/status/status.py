@@ -87,7 +87,9 @@ __all__ = [
     "WhiteIronGreatswordStatus",
     "WolfsGravestoneStatus",
     ### polearm ###
+    "EngulfingLightningStatus",
     "LithicSpearStatus",
+    "MoonpiercerStatus",
     "VortexVanquisherStatus",
     "WhiteTasselStatus",
     ### sword ###
@@ -112,7 +114,6 @@ __all__ = [
     "ElementalResonanceShatteringIceStatus",
     "ElementalResonanceSprawlingGreeneryStatus",
     "FreshWindOfFreedomStatus",
-    "KingsSquireEffectStatus",
     "LeaveItToMeStatus",
     "MillennialMovementFarewellSongStatus",
     "PassingOfJudgmentStatus",
@@ -125,9 +126,11 @@ __all__ = [
     # character status
     "FrozenStatus",
     "JueyunGuobaStatus",
+    "KingsSquireEffectStatus",
     "LithicGuardStatus",
     "LotusFlowerCrispStatus",
     "MintyMeatRollsStatus",
+    "MoonpiercerEffectStatus",
     "MushroomPizzaStatus",
     "NorthernSmokedChickenStatus",
     "SatiatedStatus",
@@ -977,6 +980,43 @@ class _InfusionStatus(_UsageStatus):
         return [], replace(self, usages=d_usages)
 
 
+@dataclass(frozen=True, kw_only=True)
+class _SkillCostReductionStatus(Status):
+    COST_DEDUCTION: ClassVar[int] = 2
+    DISCOUNTED_SKILL_TYPES: ClassVar[frozenset[CharacterSkillType]] = frozenset((
+        CharacterSkillType.ELEMENTAL_SKILL,
+    ))
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.SKILL:
+            assert isinstance(item, ActionPEvent)
+            if (
+                    item.source == status_source
+                    and item.event_sub_type in self.DISCOUNTED_SKILL_TYPES
+                    and item.dice_cost.can_cost_less_elem()
+            ):
+                new_cost = item.dice_cost.cost_less_elem(self.COST_DEDUCTION)
+                return replace(item, dice_cost=new_cost), None
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], None
+        return [], self  # pragma: no cover
+
 ############################## Hidden Status ##############################
 
 
@@ -1474,6 +1514,16 @@ class WolfsGravestoneStatus(WeaponEquipmentStatus):
 #### Polearm ####
 
 @dataclass(frozen=True, kw_only=True)
+class EngulfingLightningStatus(WeaponEquipmentStatus):
+    WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.POLEARM
+
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        from ..card.card import EngulfingLightning
+        return EngulfingLightning
+
+
+@dataclass(frozen=True, kw_only=True)
 class LithicSpearStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.POLEARM
 
@@ -1481,6 +1531,16 @@ class LithicSpearStatus(WeaponEquipmentStatus):
     def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import LithicSpear
         return LithicSpear
+
+
+@dataclass(frozen=True, kw_only=True)
+class MoonpiercerStatus(WeaponEquipmentStatus):
+    WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.POLEARM
+
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        from ..card.card import Moonpiercer
+        return Moonpiercer
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -2119,41 +2179,6 @@ class IHaventLostYetOnCooldownStatus(CombatStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class KingsSquireEffectStatus(CharacterStatus):
-    COST_DEDUCTION: ClassVar[int] = 2
-    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.ROUND_END,
-    ))
-
-    @override
-    def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: PreprocessableEvent,
-            signal: Preprocessables,
-    ) -> tuple[PreprocessableEvent, None | Self]:
-        if signal is Preprocessables.SKILL:
-            assert isinstance(item, ActionPEvent)
-            if (
-                    item.source == status_source
-                    and item.event_sub_type is CharacterSkillType.ELEMENTAL_SKILL
-                    and item.dice_cost.can_cost_less_elem()
-            ):
-                new_cost = item.dice_cost.cost_less_elem(self.COST_DEDUCTION)
-                return replace(item, dice_cost=new_cost), None
-        return item, self
-
-    @override
-    def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
-    ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.ROUND_END:
-            return [], None
-        return [], self  # pragma: no cover
-
-
-@dataclass(frozen=True, kw_only=True)
 class LeaveItToMeStatus(CombatStatus):
     @override
     def _preprocess(
@@ -2476,6 +2501,14 @@ class JueyunGuobaStatus(CharacterStatus, _UsageStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
+class KingsSquireEffectStatus(CharacterStatus, _SkillCostReductionStatus):
+    COST_DEDUCTION: ClassVar[int] = 2
+    DISCOUNTED_SKILL_TYPES: ClassVar[frozenset[CharacterSkillType]] = frozenset((
+        CharacterSkillType.ELEMENTAL_SKILL,
+    ))
+
+
+@dataclass(frozen=True, kw_only=True)
 class LithicGuardStatus(CharacterStatus, StackedShieldStatus):
     MAX_USAGES: ClassVar[int] = 3
 
@@ -2539,6 +2572,14 @@ class MintyMeatRollsStatus(CharacterStatus, _UsageStatus):
         if signal is TriggeringSignal.ROUND_END:
             d_usages = -BIG_INT
         return [], replace(self, usages=d_usages)
+
+
+@dataclass(frozen=True, kw_only=True)
+class MoonpiercerEffectStatus(CharacterStatus, _SkillCostReductionStatus):
+    COST_DEDUCTION: ClassVar[int] = 2
+    DISCOUNTED_SKILL_TYPES: ClassVar[frozenset[CharacterSkillType]] = frozenset((
+        CharacterSkillType.ELEMENTAL_SKILL,
+    ))
 
 
 @dataclass(frozen=True)
