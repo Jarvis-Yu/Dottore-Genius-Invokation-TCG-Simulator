@@ -42,7 +42,7 @@ class TestFatuiPyroAgent(unittest.TestCase):
         self.assertEqual(p1ac.character_statuses.just_find(StealthStatus).usages, 2)
 
     def test_elemental_burst(self):
-        game_state = fill_energy_for_all(self.BASE_NO_STEALTH)
+        game_state = recharge_energy_for_all(self.BASE_NO_STEALTH)
         game_state = step_skill(
             game_state,
             Pid.P1,
@@ -86,7 +86,7 @@ class TestFatuiPyroAgent(unittest.TestCase):
         self.assertEqual(p1ac.character_statuses.just_find(StealthStatus).usages, 2)
 
         # boost elemental burst
-        game_state = fill_energy_for_all(self.BASE_GAME)
+        game_state = recharge_energy_for_all(self.BASE_GAME)
         game_state = step_skill(
             game_state,
             Pid.P1,

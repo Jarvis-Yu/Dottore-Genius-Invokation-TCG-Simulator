@@ -39,7 +39,7 @@ class TestEula(unittest.TestCase):
 
     def test_burst(self):
         game_state = add_dmg_listener(self.BASE_GAME, Pid.P1)
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = step_skill(
             game_state,
             Pid.P1,
@@ -92,7 +92,7 @@ class TestEula(unittest.TestCase):
     def test_talent_card(self):
         game_state = grant_all_infinite_revival(self.BASE_GAME)
         game_state = add_dmg_listener(game_state, Pid.P1)
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=WellspingOfWarLust,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.CRYO: 3})),

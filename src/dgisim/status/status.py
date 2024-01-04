@@ -94,6 +94,7 @@ __all__ = [
     "WhiteTasselStatus",
     ### sword ###
     "AquilaFavoniaStatus",
+    "FavoniusSwordStatus",
     "SacrificialSwordStatus",
     "TravelersHandySwordStatus",
     ## Artifact ##
@@ -1639,6 +1640,58 @@ class AquilaFavoniaStatus(WeaponEquipmentStatus, _UsageLivingStatus):
                 ], replace(self, usages=-1, activated=False)
             else:
                 return [], replace(self, usages=0, activated=False)
+        elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
+            return [], replace(self, usages=self.MAX_USAGES)
+        return [], self  # pragma: no cover
+
+
+@dataclass(frozen=True, kw_only=True)
+class FavoniusSwordStatus(WeaponEquipmentStatus, _UsageLivingStatus):
+    WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.SWORD
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    activated: bool = False
+    ENERGY_RECHARGE_AMOUNT: ClassVar[int] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @classproperty
+    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+        from ..card.card import FavoniusSword
+        return FavoniusSword
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.POST_SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if (
+                    self.usages > 0
+                    and not self.activated
+                    and information.source == status_source
+                    and information.skill_true_type is CharacterSkillType.ELEMENTAL_SKILL
+            ):
+                return replace(self, activated=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+            return [
+                eft.EnergyRechargeEffect(
+                    target=source,
+                    recharge=self.ENERGY_RECHARGE_AMOUNT,
+                ),
+            ], replace(self, usages=-1, activated=False)
         elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
             return [], replace(self, usages=self.MAX_USAGES)
         return [], self  # pragma: no cover

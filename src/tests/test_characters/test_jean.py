@@ -47,7 +47,7 @@ class TestJean(unittest.TestCase):
 
     def test_elemental_burst(self):
         # test burst has correct amount of damage and generates status
-        game_state = fill_energy_for_all(self.BASE_GAME)
+        game_state = recharge_energy_for_all(self.BASE_GAME)
         game_state = simulate_status_dmg(game_state, 4, pid=Pid.P1, char_id=1)
         game_state = simulate_status_dmg(game_state, 3, pid=Pid.P1, char_id=2)
         game_state = simulate_status_dmg(game_state, 2, pid=Pid.P1, char_id=3)
@@ -94,7 +94,7 @@ class TestJean(unittest.TestCase):
         self.assertNotIn(DandelionFieldSummon, p1.summons)
 
     def test_talent_card(self):
-        base_state = fill_energy_for_all(self.BASE_GAME)
+        base_state = recharge_energy_for_all(self.BASE_GAME)
         base_state = step_action(base_state, Pid.P1, CardAction(
             card=LandsOfDandelion,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.ANEMO: 4}))

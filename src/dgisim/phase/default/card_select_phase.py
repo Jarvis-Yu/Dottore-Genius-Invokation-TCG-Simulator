@@ -79,7 +79,7 @@ class CardSelectPhase(ph.Phase):
         elif p1.phase is Act.END_PHASE and p2.phase is Act.END_PHASE:
             return self._to_starting_hand_select_phase(game_state)
         else:
-            raise Exception("Unknown Game State to process")
+            raise Exception(f"Unknown Game State to process: {game_state}")
 
     def _handle_card_drawing(self, game_state: GameState, pid: Pid, action: CardsSelectAction) -> GameState:
         player: PlayerState = game_state.get_player(pid)

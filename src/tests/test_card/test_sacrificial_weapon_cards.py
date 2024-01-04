@@ -44,7 +44,7 @@ class TestSacrificialWeaponEquipmentCard(unittest.TestCase):
         self.assertEqual(p1.dice[Element.ELECTRO], dice_before[Element.ELECTRO])
 
         # Burst attacks doesn't give dice
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_BURST)
         p1 = game_state.player1
         p2ac = game_state.player2.just_get_active_character()

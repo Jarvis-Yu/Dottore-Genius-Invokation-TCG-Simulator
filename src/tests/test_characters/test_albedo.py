@@ -41,7 +41,7 @@ class TestAlbedo(unittest.TestCase):
 
     def test_elemental_burst(self):
         # burst without summon deals 4 damage
-        game_state = fill_energy_for_all(self.BASE_GAME)
+        game_state = recharge_energy_for_all(self.BASE_GAME)
         game_state = add_dmg_listener(game_state, Pid.P1)
         game_state = step_skill(
             game_state,
@@ -56,7 +56,7 @@ class TestAlbedo(unittest.TestCase):
 
         # burst with summon
         game_state = AddSummonEffect(Pid.P1, SolarIsotomaSummon).execute(self.BASE_GAME)
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = add_dmg_listener(game_state, Pid.P1)
         game_state = step_skill(
             game_state,

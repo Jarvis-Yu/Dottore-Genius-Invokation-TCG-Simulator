@@ -48,7 +48,7 @@ class TestVenti(unittest.TestCase):
         self.assertEqual(p1.combat_statuses.just_find(StormzoneStatus).usages, 2)
 
     def test_elemental_burst(self):
-        game_state = fill_energy_for_all(self.BASE_GAME)
+        game_state = recharge_energy_for_all(self.BASE_GAME)
         game_state = oppo_aura_elem(game_state, Element.CRYO)
         game_state = step_skill(
             game_state,

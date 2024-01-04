@@ -49,7 +49,7 @@ class TestTenacityOfTheMillelith(unittest.TestCase):
 
         # test klee's burst can trigger
         game_state = skip_action_round(base_state, Pid.P1)
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = silent_fast_swap(game_state, Pid.P2, char_id=2)
         game_state = step_skill(game_state, Pid.P2, CharacterSkill.ELEMENTAL_BURST)
         game_state = step_action(game_state, Pid.P1, CardAction(

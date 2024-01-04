@@ -41,7 +41,7 @@ class TestWanderer(unittest.TestCase):
 
     def test_burst(self):
         game_state = add_dmg_listener(self.BASE_GAME, Pid.P1)
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = step_skill(
             game_state,
             Pid.P1,
@@ -96,7 +96,7 @@ class TestWanderer(unittest.TestCase):
             target=StaticTarget.from_player_active(game_state, Pid.P1),
             status=WindfavoredStatus,
         ).execute(game_state)
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = step_skill(
             game_state,
             Pid.P1,

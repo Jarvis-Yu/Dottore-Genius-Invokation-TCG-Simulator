@@ -38,7 +38,7 @@ class TestKamisatoAyaka(unittest.TestCase):
 
     def test_burst(self):
         game_state = add_dmg_listener(self.BASE_GAME, Pid.P1)
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = step_skill(
             game_state,
             Pid.P1,
@@ -54,8 +54,15 @@ class TestKamisatoAyaka(unittest.TestCase):
         # create random game state with Ayaka
         game_state = GameState.from_default()
         if KamisatoAyaka not in game_state.player1.characters:
-            game_state = replace_character(game_state, Pid.P1, KamisatoAyaka, char_id=1)
+            game_state = game_state.factory().f_player1(
+                lambda p1: p1.factory().f_characters(
+                    lambda chars: chars.factory().character(
+                        KamisatoAyaka.from_default(id=1),
+                    ).build()
+                ).build()
+            ).build()
         ayaka_id = just(game_state.player1.characters.find_first_character(KamisatoAyaka)).id
+        game_state = auto_step(game_state)
 
         game_state = step_action(game_state, Pid.P1, CardsSelectAction(selected_cards=Cards({})))
         game_state = step_action(game_state, Pid.P2, CardsSelectAction(selected_cards=Cards({})))
@@ -147,7 +154,7 @@ class TestKamisatoAyaka(unittest.TestCase):
     def test_kamisato_ayaka_cryo_infusion_status(self):
         game_state = add_dmg_listener(self.BASE_GAME, Pid.P1)
         game_state = grant_all_infinite_revival(game_state)
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = AddCharacterStatusEffect(
             target=StaticTarget.from_player_active(self.BASE_GAME, Pid.P1),
             status=KamisatoAyakaCryoInfusionStatus,
@@ -171,7 +178,7 @@ class TestKamisatoAyaka(unittest.TestCase):
     def test_kamisato_ayaka_cryo_infusion_enhanced_status(self):
         game_state = add_dmg_listener(self.BASE_GAME, Pid.P1)
         game_state = grant_all_infinite_revival(game_state)
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = AddCharacterStatusEffect(
             target=StaticTarget.from_player_active(self.BASE_GAME, Pid.P1),
             status=KamisatoAyakaCryoInfusionEnhancedStatus,

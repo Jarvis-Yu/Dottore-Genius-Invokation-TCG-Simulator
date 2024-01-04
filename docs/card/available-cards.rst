@@ -1,7 +1,7 @@
 Available Cards
 ===============
 
-114 of 248 cards in Genius Invokation TCG are available in the simulator.
+115 of 248 cards in Genius Invokation TCG are available in the simulator.
 (excluding character cards which are not counted as cards in ``dgisim``)
 
 Equipment Cards
@@ -42,6 +42,7 @@ Weapon Card
 * Sword
 
   * Aquila Favonia
+  * Favonius Sword
   * Sacrificial Sword
   * Traveler's Handy Sword
 

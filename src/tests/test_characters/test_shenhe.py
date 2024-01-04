@@ -44,7 +44,7 @@ class TestShenhe(unittest.TestCase):
         self.assertEqual(p1.combat_statuses.just_find(IcyQuillStatus).usages, 2)
 
     def test_elemental_burst(self):
-        game_state = fill_energy_for_all(self.BASE_GAME)
+        game_state = recharge_energy_for_all(self.BASE_GAME)
         game_state = step_skill(
             game_state,
             Pid.P1,

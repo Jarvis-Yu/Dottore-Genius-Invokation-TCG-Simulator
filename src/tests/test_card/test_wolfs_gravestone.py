@@ -39,7 +39,7 @@ class TestWolfsGravestone(unittest.TestCase):
         self.assertIs(last_dmg.element, Element.GEO)
 
         # test burst's boost (as usual)
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_BURST)
         last_dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertEqual(last_dmg.damage, 7)

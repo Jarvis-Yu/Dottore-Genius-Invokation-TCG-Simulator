@@ -56,7 +56,7 @@ class TestMaguuKenki(unittest.TestCase):
 
     def test_elemental_burst(self):
         # test burst has correct amount of damage and triggers summon
-        game_state = fill_energy_for_all(self.BASE_GAME)
+        game_state = recharge_energy_for_all(self.BASE_GAME)
         game_state = UpdateSummonEffect(
             Pid.P1, ShadowswordGallopingFrostSummon(usages=1)
         ).execute(game_state)

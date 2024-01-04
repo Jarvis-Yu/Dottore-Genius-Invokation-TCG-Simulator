@@ -37,7 +37,7 @@ class TestJadeplumeTerrorshroom(unittest.TestCase):
         self.assertIn(Element.DENDRO, p2ac.elemental_aura)
 
     def test_elemental_burst(self):
-        game_state = fill_energy_for_all(self.BASE_GAME)
+        game_state = recharge_energy_for_all(self.BASE_GAME)
         game_state = step_skill(
             game_state,
             Pid.P1,
@@ -100,7 +100,7 @@ class TestJadeplumeTerrorshroom(unittest.TestCase):
                     target=StaticTarget.from_char_id(Pid.P1, char_id=2),
                     status=RadicalVitalityStatus(usages=usages),
                 ).execute(self.BASE_GAME)
-                game_state = fill_energy_for_all(game_state)
+                game_state = recharge_energy_for_all(game_state)
                 game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_BURST)
                 p1ac = game_state.player1.just_get_active_character()
                 p2ac = game_state.player2.just_get_active_character()
@@ -118,7 +118,7 @@ class TestJadeplumeTerrorshroom(unittest.TestCase):
                     target=StaticTarget.from_char_id(Pid.P1, char_id=2),
                     status=RadicalVitalityStatus(usages=usages),
                 ).execute(self.BASE_GAME)
-                game_state = fill_energy_for_all(game_state)
+                game_state = recharge_energy_for_all(game_state)
                 game_state = next_round(game_state)
                 p1ac = game_state.player1.just_get_active_character()
                 expected_energy = 0 if usages == 3 else 2

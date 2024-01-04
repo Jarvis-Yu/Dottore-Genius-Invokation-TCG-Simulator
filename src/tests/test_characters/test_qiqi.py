@@ -41,7 +41,7 @@ class TestQiqi(unittest.TestCase):
 
     def test_elemental_burst(self):
         # test burst has correct amount of damage and generates status
-        game_state = fill_energy_for_all(self.BASE_GAME)
+        game_state = recharge_energy_for_all(self.BASE_GAME)
         game_state = step_skill(
             game_state,
             Pid.P1,
@@ -147,7 +147,7 @@ class TestQiqi(unittest.TestCase):
         self.assertIn(FortunePreservingTalismanStatus, p1_combat_statuses)
         self.assertEqual(p1_combat_statuses.just_find(FortunePreservingTalismanStatus).usages, 1)
 
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_BURST)
         p1ac = game_state.player1.just_get_active_character()
         p1_combat_statuses = game_state.player1.combat_statuses
@@ -169,7 +169,7 @@ class TestQiqi(unittest.TestCase):
         self.assertEqual(p1c3.hp, 0)
 
         # test talent card burst revives teammates
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=RiteOfResurrection,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.CRYO: 5}))
@@ -187,7 +187,7 @@ class TestQiqi(unittest.TestCase):
         # test burst can revive teammates a second time
         game_state = simulate_status_dmg(game_state, BIG_INT, pid=Pid.P1, char_id=1)
         game_state = simulate_status_dmg(game_state, BIG_INT, pid=Pid.P1, char_id=3)
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_BURST)
         p1c1, p1c2, p1c3 = game_state.player1.characters.get_characters()
         self.assertTrue(p1c1.is_alive())
@@ -200,7 +200,7 @@ class TestQiqi(unittest.TestCase):
         # test burst cannot revive teammates a third time
         game_state = simulate_status_dmg(game_state, BIG_INT, pid=Pid.P1, char_id=1)
         game_state = simulate_status_dmg(game_state, BIG_INT, pid=Pid.P1, char_id=3)
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_BURST)
         p1c1, p1c2, p1c3 = game_state.player1.characters.get_characters()
         self.assertTrue(p1c1.is_defeated())
@@ -212,7 +212,7 @@ class TestQiqi(unittest.TestCase):
         revival_consumed_state = game_state
 
         # re-equiping talent card doesn't reset revival chances
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=RiteOfResurrection,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.CRYO: 5}))
@@ -226,7 +226,7 @@ class TestQiqi(unittest.TestCase):
         self.assertEqual(p1c3.hp, 0)
 
         # no revival burst doesn't consume revival chances
-        game_state = fill_energy_for_all(revive_once_state)
+        game_state = recharge_energy_for_all(revive_once_state)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_BURST)
         p1c1, p1c2, p1c3 = game_state.player1.characters.get_characters()
         self.assertTrue(p1c1.is_alive())
@@ -238,7 +238,7 @@ class TestQiqi(unittest.TestCase):
 
         game_state = simulate_status_dmg(game_state, BIG_INT, pid=Pid.P1, char_id=1)
         game_state = simulate_status_dmg(game_state, BIG_INT, pid=Pid.P1, char_id=3)
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_BURST)
         p1c1, p1c2, p1c3 = game_state.player1.characters.get_characters()
         self.assertTrue(p1c1.is_alive())
@@ -263,7 +263,7 @@ class TestQiqi(unittest.TestCase):
         game_state = silent_fast_swap(game_state, Pid.P1, char_id=2)
         game_state = simulate_status_dmg(game_state, BIG_INT, pid=Pid.P1, char_id=1)
         game_state = simulate_status_dmg(game_state, BIG_INT, pid=Pid.P1, char_id=3)
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=RiteOfResurrection,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.CRYO: 5}))

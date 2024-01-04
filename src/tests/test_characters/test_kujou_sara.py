@@ -39,7 +39,7 @@ class TestKujouSara(unittest.TestCase):
 
     def test_burst(self):
         game_state = add_dmg_listener(self.BASE_GAME, Pid.P1)
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = step_skill(
             game_state,
             Pid.P1,
@@ -102,7 +102,7 @@ class TestKujouSara(unittest.TestCase):
         status = p1_active_char(game_state).character_statuses.just_find(CrowfeatherCoverStatus)
         self.assertEqual(status.usages, 1)
 
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = step_skill(
             game_state,
             Pid.P1,

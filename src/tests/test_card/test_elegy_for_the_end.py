@@ -38,7 +38,7 @@ class TestElegyForTheEnd(unittest.TestCase):
         self.assertIs(dmg.element, Element.PHYSICAL)
 
         # test brust triggers weapon
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_BURST)
         p1 = game_state.player1
         self.assertIn(MillennialMovementFarewellSongStatus, p1.combat_statuses)

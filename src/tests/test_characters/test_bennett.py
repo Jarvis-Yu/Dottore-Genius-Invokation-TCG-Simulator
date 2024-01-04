@@ -51,7 +51,7 @@ class TestBennett(unittest.TestCase):
 
     def test_elemental_burst(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
-        base_game = fill_energy_for_all(self.BASE_GAME)
+        base_game = recharge_energy_for_all(self.BASE_GAME)
         gsm = GameStateMachine(base_game, a1, a2)
         a1.inject_action(SkillAction(
             skill=CharacterSkill.ELEMENTAL_BURST,
@@ -72,7 +72,7 @@ class TestBennett(unittest.TestCase):
         self.assertEqual(burst_status.activated, False)
 
     def test_talent_card(self):
-        base_game = fill_energy_for_all(self.BASE_GAME)
+        base_game = recharge_energy_for_all(self.BASE_GAME)
         base_game = kill_character(base_game, character_id=2, pid=Pid.P1, hp=6)
 
         # play card directly

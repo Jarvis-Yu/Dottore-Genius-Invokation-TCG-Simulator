@@ -23,6 +23,8 @@
         - Elegy of the End
       - Polearm:
         - Moonpiercer
+      - Sword:
+        - Favonius Sword
   - Support Cards:
     - Liu Su
     - Rana

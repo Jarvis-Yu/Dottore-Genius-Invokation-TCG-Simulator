@@ -27,7 +27,7 @@ class TestRana(unittest.TestCase):
         curr_dice_num = game_state.player1.dice[next_char_elem]
         self.assertEqual(curr_dice_num, prev_dice_num)
 
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_BURST)
         curr_dice_num = game_state.player1.dice[next_char_elem]
         self.assertEqual(curr_dice_num, prev_dice_num)

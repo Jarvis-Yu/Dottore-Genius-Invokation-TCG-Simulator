@@ -42,7 +42,7 @@ class TestYoimiya(unittest.TestCase):
 
     def test_elemental_burst(self):
         # test burst has correct amount of damage and generates status
-        game_state = fill_energy_for_all(self.BASE_GAME)
+        game_state = recharge_energy_for_all(self.BASE_GAME)
         game_state = step_skill(
             game_state,
             Pid.P1,
@@ -159,7 +159,7 @@ class TestYoimiya(unittest.TestCase):
         self.assertEqual(p1ac.character_statuses.just_find(NiwabiEnshouStatus).usages, 2)
 
         # elemental burst doesn't trigger the status
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = skip_action_round(game_state, Pid.P2)
         game_state = step_skill(
             game_state,

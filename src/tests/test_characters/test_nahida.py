@@ -205,7 +205,7 @@ class TestNahida(unittest.TestCase):
         self.assertEqual(p2c3_status.activated_usages, 0)
 
     def test_elemental_burst(self):
-        game_state = fill_energy_for_all(self.BASE_GAME)
+        game_state = recharge_energy_for_all(self.BASE_GAME)
         game_state = step_skill(
             game_state,
             Pid.P1,
@@ -222,7 +222,7 @@ class TestNahida(unittest.TestCase):
         self.assertEqual(burst_status.usages, 2)
 
     def test_talent_card(self):
-        base_state = fill_energy_for_all(self.BASE_GAME)
+        base_state = recharge_energy_for_all(self.BASE_GAME)
         base_state = UpdateCharacterStatusEffect(
             target=StaticTarget(Pid.P2, Zone.CHARACTERS, 1),
             status=SeedOfSkandhaStatus(usages=2),

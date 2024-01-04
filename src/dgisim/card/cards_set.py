@@ -65,6 +65,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     WhiteTassel,
     ### Sword ###
     AquilaFavonia,
+    FavoniusSword,
     SacrificialSword,
     TravelersHandySword,
     ## Artifact ##

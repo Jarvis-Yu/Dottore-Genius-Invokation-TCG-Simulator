@@ -86,6 +86,7 @@ __all__ = [
     "WhiteTassel",
     ## Sword ##
     "AquilaFavonia",
+    "FavoniusSword",
     "SacrificialSword",
     "TravelersHandySword",
 
@@ -1522,6 +1523,12 @@ class AquilaFavonia(WeaponEquipmentCard):
     _DICE_COST = AbstractDice({Element.OMNI: 3})
     WEAPON_TYPE = WeaponType.SWORD
     WEAPON_STATUS = stt.AquilaFavoniaStatus
+
+
+class FavoniusSword(WeaponEquipmentCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 3})
+    WEAPON_TYPE = WeaponType.SWORD
+    WEAPON_STATUS = stt.FavoniusSwordStatus
 
 
 class SacrificialSword(WeaponEquipmentCard):

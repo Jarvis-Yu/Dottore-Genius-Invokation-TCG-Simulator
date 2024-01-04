@@ -37,7 +37,7 @@ class TestCollei(unittest.TestCase):
         self.assertIn(Element.DENDRO, p2ac.elemental_aura)
 
     def test_elemental_burst(self):
-        game_state = fill_energy_for_all(self.BASE_GAME)
+        game_state = recharge_energy_for_all(self.BASE_GAME)
         game_state = step_skill(
             game_state,
             Pid.P1,

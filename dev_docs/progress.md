@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (35/71 implemented)](#character-3571-implemented)
-  - [Card (114/248 implemented)](#card-114248-implemented)
+  - [Card (115/248 implemented)](#card-115248-implemented)
 
 ## Character (35/71 implemented)
 
@@ -56,9 +56,9 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (114/248 implemented)
+## Card (115/248 implemented)
 
-- [ ] Equipment Card (59/137):
+- [ ] Equipment Card (60/137):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
@@ -119,7 +119,7 @@ all I need now is to implement each card and character.
       - [x] White Tassel
     - [ ] Sword:
       - [x] Aquila Favonia
-      - [ ] Favonius Sword
+      - [x] Favonius Sword
       - [x] Sacrificial Sword
       - [x] Traveler's Handy Sword
   - [ ] Artifact Card:

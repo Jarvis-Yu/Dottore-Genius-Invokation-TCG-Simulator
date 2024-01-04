@@ -43,7 +43,7 @@ class TestSangonomiyaKokomi(unittest.TestCase):
 
     def test_elemental_burst(self):
         # test burst has correct amount of damage and generates status
-        game_state = fill_energy_for_all(self.BASE_GAME)
+        game_state = recharge_energy_for_all(self.BASE_GAME)
         game_state = step_skill(
             game_state,
             Pid.P1,
@@ -127,7 +127,7 @@ class TestSangonomiyaKokomi(unittest.TestCase):
 
     def test_talent_card(self):
         # test talent burst increases summon usages
-        game_state = fill_energy_for_all(self.BASE_GAME)
+        game_state = recharge_energy_for_all(self.BASE_GAME)
         game_state = OverrideSummonEffect(Pid.P1, BakeKurageSummon(usages=2)).execute(game_state)
         game_state = simulate_status_dmg(game_state, dmg_amount=5, pid=Pid.P1)
         game_state = step_action(game_state, Pid.P1, CardAction(
@@ -174,7 +174,7 @@ class TestSangonomiyaKokomi(unittest.TestCase):
         self.assertEqual(p1.summons.just_find(BakeKurageSummon).usages, 2)
 
         # test talent burst increases summon usages for all cases
-        game_state = fill_energy_for_all(self.BASE_GAME)
+        game_state = recharge_energy_for_all(self.BASE_GAME)
         game_state = OverrideSummonEffect(Pid.P1, BakeKurageSummon(usages=1)).execute(game_state)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=TamakushiCasket,
@@ -184,7 +184,7 @@ class TestSangonomiyaKokomi(unittest.TestCase):
         self.assertIn(BakeKurageSummon, p1.summons)
         self.assertEqual(p1.summons.just_find(BakeKurageSummon).usages, 2)
 
-        game_state = fill_energy_for_all(self.BASE_GAME)
+        game_state = recharge_energy_for_all(self.BASE_GAME)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=TamakushiCasket,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.HYDRO: 3}))

@@ -42,7 +42,7 @@ class TestNingguang(unittest.TestCase):
         self.assertEqual(p1.combat_statuses.just_find(JadeScreenStatus).usages, 2)
 
     def test_elemental_burst(self):
-        game_state = fill_energy_for_all(self.BASE_GAME)
+        game_state = recharge_energy_for_all(self.BASE_GAME)
         game_state = add_dmg_listener(game_state, Pid.P1)
         game_state = grant_all_infinite_revival(game_state)
 
@@ -60,7 +60,7 @@ class TestNingguang(unittest.TestCase):
 
         # test burst with jade screen
         game_state = AddCombatStatusEffect(Pid.P1, JadeScreenStatus).execute(game_state)
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = step_skill(
             game_state,
             Pid.P1,

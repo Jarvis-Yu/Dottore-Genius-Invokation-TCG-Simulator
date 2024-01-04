@@ -189,7 +189,7 @@ def auto_step(game_state: GameState, observe: bool = False) -> GameState:
     return gsm.get_game_state()
 
 
-def fill_energy_for_all(game_state: GameState) -> GameState:
+def recharge_energy_for_all(game_state: GameState) -> GameState:
     return game_state.factory().f_player1(
         lambda p1: p1.factory().f_characters(
             lambda cs: cs.factory().f_characters(
@@ -204,6 +204,28 @@ def fill_energy_for_all(game_state: GameState) -> GameState:
             lambda cs: cs.factory().f_characters(
                 lambda chars: tuple(
                     char.factory().energy(char.max_energy).build()
+                    for char in chars
+                )
+            ).build()
+        ).build()
+    ).build()
+
+
+def drain_energy_for_all(game_state: GameState) -> GameState:
+    return game_state.factory().f_player1(
+        lambda p1: p1.factory().f_characters(
+            lambda cs: cs.factory().f_characters(
+                lambda chars: tuple(
+                    char.factory().energy(0).build()
+                    for char in chars
+                )
+            ).build()
+        ).build()
+    ).f_player2(
+        lambda p2: p2.factory().f_characters(
+            lambda cs: cs.factory().f_characters(
+                lambda chars: tuple(
+                    char.factory().energy(0).build()
                     for char in chars
                 )
             ).build()

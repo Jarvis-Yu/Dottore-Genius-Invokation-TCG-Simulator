@@ -82,7 +82,7 @@ class TestYaeMiko(unittest.TestCase):
 
     def test_elemental_burst(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
-        base_game_state = fill_energy_for_all(self.BASE_GAME)
+        base_game_state = recharge_energy_for_all(self.BASE_GAME)
 
         # burst with no Sesshou Sakura
         gsm = GameStateMachine(base_game_state, a1, a2)
@@ -173,7 +173,7 @@ class TestYaeMiko(unittest.TestCase):
 
     def test_talent_card(self):
         a1, a2 = PuppetAgent(), LazyAgent()
-        base_state = fill_energy_for_all(self.BASE_GAME)
+        base_state = recharge_energy_for_all(self.BASE_GAME)
 
         # test burst generates no character status if no Sesshou Sakura destroyed
         gsm = GameStateMachine(base_state, a1, a2)

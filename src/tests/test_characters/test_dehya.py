@@ -50,7 +50,7 @@ class TestDehya(unittest.TestCase):
         self.assertIs(dmg.element, Element.PYRO)
 
     def test_elemental_burst(self):
-        game_state = fill_energy_for_all(self.BASE_GAME)
+        game_state = recharge_energy_for_all(self.BASE_GAME)
         game_state = add_dmg_listener(game_state, Pid.P1)
         game_state = grant_all_infinite_revival(game_state)
 

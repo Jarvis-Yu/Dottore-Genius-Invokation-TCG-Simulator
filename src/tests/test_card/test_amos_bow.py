@@ -35,14 +35,14 @@ class TestAmosBow(unittest.TestCase):
         self.assertIs(last_dmg.element, Element.ELECTRO)
 
         # test fischl burst (dice-energy cost of 6) triggers
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_BURST)
         last_dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertEqual(last_dmg.damage, 7)
         self.assertIs(last_dmg.element, Element.ELECTRO)
 
         # test second burst cannot trigger again in the same round
-        game_state = fill_energy_for_all(game_state)
+        game_state = recharge_energy_for_all(game_state)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.ELEMENTAL_BURST)
         last_dmg = get_dmg_listener_data(game_state, Pid.P1)[-1]
         self.assertEqual(last_dmg.damage, 5)

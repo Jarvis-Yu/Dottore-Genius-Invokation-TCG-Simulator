@@ -60,7 +60,7 @@ class TestNoelle(unittest.TestCase):
         )
 
     def test_elemental_burst(self):
-        game_state = fill_energy_for_all(self.BASE_GAME)
+        game_state = recharge_energy_for_all(self.BASE_GAME)
         game_state = oppo_aura_elem(game_state, Element.PYRO)
         game_state = step_skill(
             game_state,

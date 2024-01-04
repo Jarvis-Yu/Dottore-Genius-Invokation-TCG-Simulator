@@ -36,7 +36,7 @@ class TestHuTao(unittest.TestCase):
         self.assertIn(ParamitaPapilioStatus, p1ac.character_statuses)
 
     def test_elemental_burst(self):
-        base_state = fill_energy_for_all(self.BASE_GAME)
+        base_state = recharge_energy_for_all(self.BASE_GAME)
         base_state = add_dmg_listener(base_state, Pid.P1)
 
         # > 6 hp

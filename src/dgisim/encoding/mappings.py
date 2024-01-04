@@ -152,7 +152,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.SacrificialSword, 101),
         # (card.SkywardBlade, 102),
         (card.AquilaFavonia, 103),
-        # (card.FavoniusSword, 104),
+        (card.FavoniusSword, 104),
 
         #### 1 Artifact Card 0125 ####
         # (card.AdventurersBandana, 125),
@@ -548,7 +548,7 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.SacrificialSwordStatus, 151),
         # (status.SkywardBladeStatus, 152),
         (status.AquilaFavoniaStatus, 153),
-        # (status.FavoniusSwordStatus, 154),
+        (status.FavoniusSwordStatus, 154),
 
         #### 1.2 Artifact Status 175 ####
         # (status.AdventurersBandanaStatus, 175),

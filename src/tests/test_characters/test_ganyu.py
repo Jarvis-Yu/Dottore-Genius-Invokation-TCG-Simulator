@@ -72,7 +72,7 @@ class TestGanyu(unittest.TestCase):
         self.assertEqual(p2ac.hp, 3)  # skill 2 + guoba 1 + rainbow 1 + frozen 1
 
     def test_elemental_burst(self):
-        game_state = fill_energy_for_all(self.BASE_GAME)
+        game_state = recharge_energy_for_all(self.BASE_GAME)
         game_state = step_skill(
             game_state,
             Pid.P1,

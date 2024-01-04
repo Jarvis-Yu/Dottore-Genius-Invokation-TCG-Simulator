@@ -40,7 +40,7 @@ class TestFischl(unittest.TestCase):
         self.assertEqual(p1.summons.just_find(OzSummon).usages, 2)
 
     def test_elemental_burst(self):
-        game_state = fill_energy_for_all(self.BASE_GAME)
+        game_state = recharge_energy_for_all(self.BASE_GAME)
         game_state = step_skill(
             game_state,
             Pid.P1,
