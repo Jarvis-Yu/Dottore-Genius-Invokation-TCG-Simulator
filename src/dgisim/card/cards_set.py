@@ -59,6 +59,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     WhiteIronGreatsword,
     WolfsGravestone,
     ### Polearm ###
+    EngulfingLightning,
     LithicSpear,
     Moonpiercer,
     VortexVanquisher,

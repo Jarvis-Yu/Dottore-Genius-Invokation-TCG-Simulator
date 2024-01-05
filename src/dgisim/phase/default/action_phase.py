@@ -155,7 +155,10 @@ class ActionPhase(ph.Phase):
                 return self._execute_effect(game_state)
             return self._begin_action_phase(game_state)
         elif p1.in_end_phase() and p2.in_end_phase():
-            return self._to_end_phase(game_state)
+            if self._is_executing_effects(game_state):
+                return self._execute_effect(game_state)
+            else:
+                return self._to_end_phase(game_state)
         raise Exception("Not Reached! Unknown Game State to process")
 
     def _handle_end_round(

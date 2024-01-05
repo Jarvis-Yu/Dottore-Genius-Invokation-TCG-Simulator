@@ -34,6 +34,7 @@ Weapon Card
 
 * Polearm
 
+  * Engulfing Lightning
   * Lithic Spear
   * Moonpiercer
   * Vortex Vanquisher

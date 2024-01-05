@@ -1519,13 +1519,44 @@ class WolfsGravestoneStatus(WeaponEquipmentStatus):
 #### Polearm ####
 
 @dataclass(frozen=True, kw_only=True)
-class EngulfingLightningStatus(WeaponEquipmentStatus):
+class EngulfingLightningStatus(WeaponEquipmentStatus, _UsageLivingStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.POLEARM
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_START,
+        TriggeringSignal.POST_ANY,
+        TriggeringSignal.ROUND_END,
+    ))
 
     @classproperty
     def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import EngulfingLightning
         return EngulfingLightning
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if (
+                (
+                    signal is TriggeringSignal.ROUND_START
+                    or signal is TriggeringSignal.POST_ANY
+                )
+                and self.usages > 0
+        ):
+            attached_char = game_state.get_character_target(source)
+            assert attached_char is not None
+            if attached_char.energy == 0:
+                return [
+                    eft.EnergyRechargeEffect(
+                        target=source,
+                        recharge=1,
+                    ),
+                ], replace(self, usages=-1)
+        elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
+            return [], replace(self, usages=self.MAX_USAGES)
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1690,12 +1721,17 @@ class FavoniusSwordStatus(WeaponEquipmentStatus, _UsageLivingStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
-            return [
-                eft.EnergyRechargeEffect(
-                    target=source,
-                    recharge=self.ENERGY_RECHARGE_AMOUNT,
-                ),
-            ], replace(self, usages=-1, activated=False)
+            attached_char = game_state.get_character_target(source)
+            assert attached_char is not None
+            if attached_char.energy < attached_char.max_energy:
+                return [
+                    eft.EnergyRechargeEffect(
+                        target=source,
+                        recharge=self.ENERGY_RECHARGE_AMOUNT,
+                    ),
+                ], replace(self, usages=-1, activated=False)
+            else:
+                return [], replace(self, usages=0, activated=False)
         elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
             return [], replace(self, usages=self.MAX_USAGES)
         return [], self  # pragma: no cover

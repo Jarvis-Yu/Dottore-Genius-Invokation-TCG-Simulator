@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, replace
-from typing import ClassVar, cast
+from typing import ClassVar, cast, Iterable
 
 from typing_extensions import Self
 

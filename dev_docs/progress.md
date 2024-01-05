@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (35/71 implemented)](#character-3571-implemented)
-  - [Card (116/248 implemented)](#card-116248-implemented)
+  - [Card (117/248 implemented)](#card-117248-implemented)
 
 ## Character (35/71 implemented)
 
@@ -56,9 +56,9 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (116/248 implemented)
+## Card (117/248 implemented)
 
-- [ ] Equipment Card (61/137):
+- [ ] Equipment Card (62/137):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
@@ -112,7 +112,7 @@ all I need now is to implement each card and character.
       - [x] White Iron Greatsword
       - [x] Wolf's Gravestone
     - [ ] Polearm:
-      - [ ] Engulfing Lightning
+      - [x] Engulfing Lightning
       - [x] Lithic Spear
       - [x] Moonpiercer
       - [x] Vortex Vanquisher

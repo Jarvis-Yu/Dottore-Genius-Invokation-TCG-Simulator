@@ -22,6 +22,7 @@
       - Bow:
         - Elegy of the End
       - Polearm:
+        - Engulfing Lightning
         - Moonpiercer
       - Sword:
         - Favonius Sword

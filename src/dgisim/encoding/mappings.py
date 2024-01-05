@@ -144,7 +144,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.LithicSpear, 76),
         # (card.SkywardSpine, 77),
         (card.VortexVanquisher, 78),
-        # (card.EngulfingLightning, 79),
+        (card.EngulfingLightning, 79),
         (card.Moonpiercer, 80),
 
         #### 0.5 Sword 0100 ####
@@ -541,7 +541,7 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.LithicSpearStatus, 126),
         # (status.SkywardSpineStatus, 127),
         (status.VortexVanquisherStatus, 128),
-        # (status.EngulfingLightningStatus, 129),
+        (status.EngulfingLightningStatus, 129),
         (status.MoonpiercerStatus, 130),
 
         #### 1.1.5 Sword Status 150 ####
