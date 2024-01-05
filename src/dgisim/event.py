@@ -29,6 +29,7 @@ __all__ = [
     "InformableEvent",
     "DmgIEvent",
     "CharacterDeathIEvent",
+    "HealIEvent",
     "ReactionIEvent",
     "SkillIEvent",
 
@@ -70,6 +71,12 @@ class DmgIEvent(InformableEvent):
 @dataclass(frozen=True, kw_only=True)
 class CharacterDeathIEvent(InformableEvent):
     target: StaticTarget
+
+
+@dataclass(frozen=True, kw_only=True)
+class HealIEvent(InformableEvent):
+    target: StaticTarget
+    heal_amount: int
 
 
 @dataclass(frozen=True, kw_only=True)

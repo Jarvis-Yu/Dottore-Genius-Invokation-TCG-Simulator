@@ -98,6 +98,8 @@ __all__ = [
     "SacrificialSwordStatus",
     "TravelersHandySwordStatus",
     ## Artifact ##
+    "CrownOfWatatsumiStatus",
+    "FlowingRingsStatus",
     "GamblersEarringsStatus",
     "GeneralsAncientHelmStatus",
     "InstructorsCapStatus",
@@ -709,7 +711,9 @@ class WeaponEquipmentStatus(EquipmentStatus):
 
 @dataclass(frozen=True)
 class ArtifactEquipmentStatus(EquipmentStatus):
-    pass
+    @classproperty
+    def ARTIFACT_CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        raise NotImplementedError(cls)
 
 
 @dataclass(frozen=True)
@@ -1721,6 +1725,77 @@ class TravelersHandySwordStatus(WeaponEquipmentStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
+class CrownOfWatatsumiStatus(ArtifactEquipmentStatus):
+    @classproperty
+    def ARTIFACT_CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import CrownOfWatatsumi
+        return CrownOfWatatsumi
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.HEALING:
+            assert isinstance(information, HealIEvent)
+        return self
+
+
+@dataclass(frozen=True, kw_only=True)
+class FlowingRingsStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
+    usages: int = 1
+    activated: bool = False
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @classproperty
+    def ARTIFACT_CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import FlowingRings
+        return FlowingRings
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.POST_SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if (
+                    information.source == status_source
+                    and information.skill_true_type.is_normal_attack()
+                    and not self.activated
+                    and self.usages > 0
+            ):
+                return replace(self, activated=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+            assert self.usages > 0
+            return [
+                eft.DrawRandomCardEffect(pid=source.pid, num=1),
+            ], replace(self, usages=-1, activated=False)
+        elif signal is TriggeringSignal.ROUND_END and self.usages < 1:
+            assert not self.activated
+            return [], replace(self, usages=1)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
 class GamblersEarringsStatus(ArtifactEquipmentStatus):
     informed_num: int = 0
     triggered_num: int = 0
@@ -1730,6 +1805,11 @@ class GamblersEarringsStatus(ArtifactEquipmentStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.DEATH_EVENT,
     ))
+
+    @classproperty
+    def ARTIFACT_CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import GamblersEarrings
+        return GamblersEarrings
 
     def triggerable(self) -> bool:
         return self.triggered_num < self.MAX_TRIGGER_NUM and self.informed_num > 0
@@ -1785,6 +1865,11 @@ class GeneralsAncientHelmStatus(ArtifactEquipmentStatus):
         TriggeringSignal.ROUND_START,
     ))
 
+    @classproperty
+    def ARTIFACT_CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import GeneralsAncientHelm
+        return GeneralsAncientHelm
+
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
@@ -1809,6 +1894,11 @@ class InstructorsCapStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
         TriggeringSignal.COMBAT_ACTION,
         TriggeringSignal.ROUND_END,
     ))
+
+    @classproperty
+    def ARTIFACT_CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import InstructorsCap
+        return InstructorsCap
 
     @override
     def _inform(
@@ -1859,6 +1949,11 @@ class TenacityOfTheMillelithStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
         TriggeringSignal.ROUND_START,
         TriggeringSignal.ROUND_END,
     ))
+
+    @classproperty
+    def ARTIFACT_CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import TenacityOfTheMillelith
+        return TenacityOfTheMillelith
 
     @override
     def _inform(

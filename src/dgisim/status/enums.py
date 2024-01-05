@@ -27,6 +27,7 @@ class Preprocessables(Enum):
 
 class Informables(Enum):
     DMG_DELT = "DmgDelt"
+    HEALING = "Healing"
     REACTION_TRIGGERED = "ReactionTriggered"
     PRE_SKILL_USAGE = "PreSkillUsage"
     POST_SKILL_USAGE = "PostSkillUsage"

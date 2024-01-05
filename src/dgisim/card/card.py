@@ -91,6 +91,8 @@ __all__ = [
     "TravelersHandySword",
 
     # Artifact Card
+    "CrownOfWatatsumi",
+    "FlowingRings",
     "GamblersEarrings",
     "GeneralsAncientHelm",
     "InstructorsCap",
@@ -1543,6 +1545,16 @@ class TravelersHandySword(WeaponEquipmentCard):
     WEAPON_STATUS = stt.TravelersHandySwordStatus
 
 ########## Artifact Card ##########
+
+
+class CrownOfWatatsumi(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
+    ARTIFACT_STATUS = stt.CrownOfWatatsumiStatus
+
+
+class FlowingRings(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDice.from_empty()
+    ARTIFACT_STATUS = stt.FlowingRingsStatus
 
 
 class GamblersEarrings(ArtifactEquipmentCard):

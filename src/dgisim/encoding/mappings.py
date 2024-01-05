@@ -186,6 +186,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         # (card.CrownOfWatatsumi, 153),
         # (card.OceanHuedClam, 154),
         # (card.ShadowOfTheSandKing, 155),
+        (card.FlowingRings, 156),
 
         #### 2 Support Card 0250 ####
         #### 2.1 Location Card 0250 ####
@@ -582,6 +583,7 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         # (status.CrownOfWatatsumiStatus, 203),
         # (status.OceanHuedClamStatus, 204),
         # (status.ShadowOfTheSandKingStatus, 205),
+        (status.FlowingRingsStatus, 206),
 
         #### 2 Combat Status 300 ####
         #### 2.1 General Combat Status 300 ####

@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (35/71 implemented)](#character-3571-implemented)
-  - [Card (115/248 implemented)](#card-115248-implemented)
+  - [Card (116/248 implemented)](#card-116248-implemented)
 
 ## Character (35/71 implemented)
 
@@ -56,9 +56,9 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (115/248 implemented)
+## Card (116/248 implemented)
 
-- [ ] Equipment Card (60/137):
+- [ ] Equipment Card (61/137):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
@@ -127,10 +127,10 @@ all I need now is to implement each card and character.
     - [ ] Echoes of an Offering
     - [ ] Emblem of Severed Fate
     - [ ] Exile's Circlet
-    - [ ] Flowing Rings
+    - [x] Flowing Rings
     - [x] Gambler's Earrings
     - [x] General's Ancient Helm
-    - [ ] Guilded Dreams
+    - [ ] Gilded Dreams
     - [ ] Heart of Khvarena's Brilliance
     - [x] Instructor's Cap
     - [ ] Ocean-Hued Clam

@@ -25,6 +25,8 @@
         - Moonpiercer
       - Sword:
         - Favonius Sword
+    - Artifact Cards:
+      - Flowing Rings
   - Support Cards:
     - Liu Su
     - Rana

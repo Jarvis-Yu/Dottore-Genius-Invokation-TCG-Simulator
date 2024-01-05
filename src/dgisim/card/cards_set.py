@@ -69,6 +69,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     SacrificialSword,
     TravelersHandySword,
     ## Artifact ##
+    FlowingRings,
     GamblersEarrings,
     GeneralsAncientHelm,
     InstructorsCap,
