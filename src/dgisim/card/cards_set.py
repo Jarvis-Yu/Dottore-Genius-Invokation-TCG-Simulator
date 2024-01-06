@@ -127,6 +127,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ChangTheNinth,
     Liben,
     LiuSu,
+    Mamere,
     Paimon,
     Rana,
     Setaria,

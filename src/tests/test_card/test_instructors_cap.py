@@ -67,9 +67,43 @@ class TestInstructorsCap(unittest.TestCase):
         self.assertEqual(artifact.usages, 0)
 
         # test usages restore the next round
-        game_state = next_round(game_state)
+        game_state = next_round_with_great_omni(game_state)
         artifact = game_state.player1.just_get_active_character(
         ).character_statuses.find(InstructorsCapStatus)
         self.assertIsNotNone(artifact)
         assert isinstance(artifact, InstructorsCapStatus)
         self.assertEqual(artifact.usages, 3)
+
+    def test_self_reaction(self):
+        base_state = ONE_ACTION_TEMPLATE
+        base_state = PublicAddCardEffect(Pid.P1, InstructorsCap).execute(base_state)
+        base_state = replace_character(base_state, Pid.P1, Xingqiu, char_id=1)
+
+        # test Xingqiu self reaction triggers
+        game_state = base_state
+        game_state = apply_elemental_aura(game_state, Element.PYRO, Pid.P1)
+        game_state = step_action(game_state, Pid.P1, CardAction(
+            card=InstructorsCap,
+            instruction=StaticTargetInstruction(
+                dice=ActualDice({Element.PYRO: 1, Element.HYDRO: 1}),
+                target=StaticTarget.from_char_id(Pid.P1, 1),
+            ),
+        ))
+        dice_before = game_state.player1.dice
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)  # uses OMNI
+        dice_after = game_state.player1.dice
+        self.assertEqual((dice_after - dice_before)[Element.HYDRO], 1)
+
+        # test card reaction cannot cause delayed trigger
+        game_state = apply_elemental_aura(game_state, Element.PYRO, Pid.P1)
+        game_state = PublicAddCardEffect(Pid.P1, JoyousCelebration).execute(game_state)
+        dice_before = game_state.player1.dice
+        game_state = step_action(game_state, Pid.P1, CardAction(
+            card=JoyousCelebration,
+            instruction=DiceOnlyInstruction(dice=ActualDice.from_empty()),
+        ))
+        dice_after = game_state.player1.dice
+        self.assertEqual(dice_before, dice_after)
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
+        dice_before, dice_after = dice_after, game_state.player1.dice
+        self.assertEqual((dice_after - dice_before)[Element.HYDRO], 0)

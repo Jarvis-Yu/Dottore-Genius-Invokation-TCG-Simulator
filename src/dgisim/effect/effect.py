@@ -97,6 +97,7 @@ __all__ = [
     "PublicAddCardEffect",
     "PublicRemoveCardEffect",
     "PublicRemoveAllCardEffect",
+    "PrivateAddCardEffect",
     "AddDiceEffect",
     "RemoveDiceEffect",
     "AddCharacterStatusEffect",
@@ -1501,6 +1502,27 @@ class PublicRemoveAllCardEffect(DirectEffect):
                 lambda cs: cs.remove_all(card)
             ).f_publicly_used_cards(
                 lambda cs: cs + {card: hand_cards[card]}
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class PrivateAddCardEffect(DirectEffect):
+    """
+    Add a card to the hand cards of the player such that the opponent cannot see
+    which exact card is added.
+    """
+    pid: Pid
+    card: type[Card]
+
+    def execute(self, game_state: GameState) -> GameState:
+        hand_card_limit = game_state.mode.hand_card_limit()
+        if game_state.get_player(self.pid).hand_cards.num_cards() >= hand_card_limit:
+            return game_state
+        return game_state.factory().f_player(
+            self.pid,
+            lambda p: p.factory().f_hand_cards(
+                lambda cs: cs.add(self.card)
             ).build()
         ).build()
 

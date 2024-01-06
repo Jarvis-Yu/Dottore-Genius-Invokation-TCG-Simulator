@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (35/71 implemented)](#character-3571-implemented)
-  - [Card (117/248 implemented)](#card-117248-implemented)
+  - [Card (118/248 implemented)](#card-118248-implemented)
 
 ## Character (35/71 implemented)
 
@@ -56,7 +56,7 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (117/248 implemented)
+## Card (118/248 implemented)
 
 - [ ] Equipment Card (62/137):
   - [ ] Talent Card:
@@ -138,14 +138,14 @@ all I need now is to implement each card and character.
     - [ ] Shadow of the Sand King
     - [x] Tenacity of the Millelith
     - [ ] Vourukasha's Glow
-- [ ] Support Card (14/44):
+- [ ] Support Card (15/44):
   - [ ] Companion Card:
     - [x] Chang the Ninth
     - [ ] Chef Mao
     - [ ] Dunyarzad
     - [x] Liben
     - [x] LiuSu
-    - [ ] Mamere
+    - [x] Mamere
     - [ ] Master Zhang
     - [ ] Memento Lens
     - [x] Paimon

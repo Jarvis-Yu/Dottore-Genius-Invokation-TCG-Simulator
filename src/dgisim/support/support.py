@@ -27,12 +27,13 @@ from ..character.enums import CharacterSkillType
 from ..effect.enums import TriggeringSignal, Zone
 from ..effect.structs import StaticTarget
 from ..element import Element
-from ..helper.quality_of_life import BIG_INT
+from ..helper.quality_of_life import BIG_INT, classproperty
 from ..status.enums import Informables, Preprocessables
 
 if TYPE_CHECKING:
-    from ..state.game_state import GameState
+    from ..card.card import Card
     from ..encoding.encoding_plan import EncodingPlan
+    from ..state.game_state import GameState
 
 __all__ = [
     # base
@@ -43,6 +44,7 @@ __all__ = [
     "ChangTheNinthSupport",
     "LibenSupport",
     "LiuSuSupport",
+    "MamereSupport",
     "PaimonSupport",
     "RanaSupport",
     "SetariaSupport",
@@ -224,6 +226,71 @@ class LiuSuSupport(Support, stt._UsageStatus):
                     )
                 ], replace(self, usages=-1, activated=False)
         elif signal is TriggeringSignal.ROUND_END and not self.activated:
+            return [], replace(self, usages=0, activated=True)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class MamereSupport(Support, stt._UsageStatus):
+    usages: int = 3
+    MAX_USAGES: ClassVar[int] = 3
+    activated: bool = True  # whether the effect can be triggered this round
+    triggered: bool = False  # whether the effect has been triggered by card playing
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_CARD,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @classproperty
+    def _card_categories(cls) -> tuple[type[Card], ...]:
+        from ..card.card import FoodCard, LocationCard, CompanionCard, ItemCard
+        return (
+            FoodCard,
+            LocationCard,
+            CompanionCard,
+            ItemCard,
+        )
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.CARD and self.activated:
+            from ..card.card import Mamere
+            assert isinstance(item, CardPEvent)
+            if (
+                    item.pid is status_source.pid
+                    and issubclass(item.card_type, self._card_categories)
+                    and item.card_type is not Mamere
+            ):
+                return item, replace(self, triggered=True)
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.POST_CARD and self.triggered:
+            from random import choice
+            from ..card.card import Mamere
+            assert self.activated
+            card_pool = [
+                card
+                for card in game_state.mode.all_cards()
+                if issubclass(card, self._card_categories) and card is not Mamere
+            ]
+            return [
+                eft.PrivateAddCardEffect(
+                    pid=source.pid,
+                    card=choice(card_pool),
+                )
+            ], replace(self, usages=-1, triggered=False, activated=False)
+        elif signal is TriggeringSignal.ROUND_END and not self.activated:
+            assert not self.triggered
             return [], replace(self, usages=0, activated=True)
         return [], self
 

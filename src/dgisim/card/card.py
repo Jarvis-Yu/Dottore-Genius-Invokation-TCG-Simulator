@@ -149,6 +149,7 @@ __all__ = [
     "ChangTheNinth",
     "Liben",
     "LiuSu",
+    "Mamere",
     "Paimon",
     "Rana",
     "Setaria",
@@ -2597,6 +2598,11 @@ class Liben(CompanionCard):
 class LiuSu(CompanionCard):
     _DICE_COST = AbstractDice({Element.OMNI: 1})
     _SUPPORT_STATUS = sp.LiuSuSupport
+
+
+class Mamere(CompanionCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
+    _SUPPORT_STATUS = sp.MamereSupport
 
 
 class Paimon(CompanionCard):

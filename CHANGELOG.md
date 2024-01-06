@@ -30,6 +30,7 @@
       - Flowing Rings
   - Support Cards:
     - Liu Su
+    - Mamere
     - Rana
     - Setaria
   - Event Cards:
