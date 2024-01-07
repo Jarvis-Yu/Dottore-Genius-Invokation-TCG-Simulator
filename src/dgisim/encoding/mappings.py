@@ -288,7 +288,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         # (card.RhythmOfTheGreatDream, 674),
         (card.WhereIsTheUnseenRazor, 675),
         # (card.Pankration, 676),
-        # (card.Lyresong, 677),
+        (card.Lyresong, 677),
 
         #### 3.4 Food Card 0800 ####
         (card.JueyunGuoba, 800),
@@ -596,7 +596,7 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.ElementalResonanceShatteringIceStatus, 305),
         (status.ElementalResonanceSprawlingGreeneryStatus, 306),
         (status.FreshWindOfFreedomStatus, 307),
-        # 308 available
+        (status.LyresongStatus, 308),
         (status.LeaveItToMeStatus, 309),
         (status.IHaventLostYetOnCooldownStatus, 310),
         (status.ReviveOnCooldownStatus, 311),

@@ -95,6 +95,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ElementalResonanceWovenWinds,
     IHaventLostYet,
     LeaveItToMe,
+    Lyresong,
     QuickKnit,
     SendOff,
     Starsigns,

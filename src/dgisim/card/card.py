@@ -136,6 +136,7 @@ __all__ = [
     "ElementalResonanceWovenWinds",
     "IHaventLostYet",
     "LeaveItToMe",
+    "Lyresong",
     "QuickKnit",
     "SendOff",
     "Starsigns",
@@ -2390,6 +2391,46 @@ class LeaveItToMe(EventCard, _DiceOnlyChoiceProvider):
             eft.AddCombatStatusEffect(
                 target_pid=pid,
                 status=stt.LeaveItToMeStatus,
+            ),
+        )
+
+
+class Lyresong(EventCard, _CharTargetChoiceProvider):
+    _DICE_COST = AbstractDice.from_empty()
+
+    @override
+    @classmethod
+    def _valid_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:
+        return any(
+            isinstance(status, stt.ArtifactEquipmentStatus)
+            for status in char.character_statuses
+        ) and super()._valid_char(game_state, pid, char)
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.StaticTargetInstruction)
+        char_target = game_state.get_character_target(instruction.target)
+        assert char_target is not None
+        artifact = char_target.character_statuses.just_find_type(stt.ArtifactEquipmentStatus)
+        card = artifact.ARTIFACT_CARD
+        return (
+            eft.RemoveCharacterStatusEffect(
+                target=instruction.target,
+                status=type(artifact),
+            ),
+            eft.PublicAddCardEffect(
+                pid=instruction.target.pid,
+                card=card,
+            ),
+            eft.AddCombatStatusEffect(
+                target_pid=instruction.target.pid,
+                status=stt.LyresongStatus,
             ),
         )
 

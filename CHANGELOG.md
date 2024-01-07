@@ -40,6 +40,8 @@
       - In Every House a Stove
       - Joyous Celebration
       - Passing of Judgment
+    - Other Cards:
+      - Lyresong
 
 ### Updated
 
