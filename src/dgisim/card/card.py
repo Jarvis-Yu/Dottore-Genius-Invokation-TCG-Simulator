@@ -143,6 +143,7 @@ __all__ = [
     "SendOff",
     "Starsigns",
     "TheBestestTravelCompanion",
+    "ThunderAndEternity",
     "WhenTheCraneReturned",
     "WhereIsTheUnseenRazor",
     "WindAndFreedom",
@@ -2589,6 +2590,40 @@ class TheBestestTravelCompanion(EventCard, _DiceOnlyChoiceProvider):
                 pid=pid,
                 element=Element.OMNI,
                 num=2,
+            ),
+        )
+
+
+class ThunderAndEternity(EventCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDice.from_empty()
+
+    @override
+    @classmethod
+    def valid_in_deck(cls, deck: Deck) -> bool:
+        return 2 <= sum(
+            1
+            for char in deck.chars
+            if char.of_faction(Faction.INAZUMA)
+        )
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        dice = game_state.get_player(pid).dice
+        return (
+            eft.RemoveDiceEffect(
+                pid=pid,
+                dice=dice,
+            ),
+            eft.AddDiceEffect(
+                pid=pid,
+                element=Element.OMNI,
+                num=dice.num_dice(),
             ),
         )
 

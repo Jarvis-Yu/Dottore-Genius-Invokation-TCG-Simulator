@@ -283,7 +283,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         # (card.PlungingStrike, 668),
         (card.WindAndFreedom, 669),
         # (card.StoneAndContracts, 670),
-        # (card.ThunderAndEternity, 671),
+        (card.ThunderAndEternity, 671),
         # (card.NatureAndWisdom, 672),
         # (card.TheLegendOfVennessa, 673),
         # (card.RhythmOfTheGreatDream, 674),
