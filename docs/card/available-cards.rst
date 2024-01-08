@@ -1,7 +1,7 @@
 Available Cards
 ===============
 
-125 of 248 cards in Genius Invokation TCG are available in the simulator.
+126 of 248 cards in Genius Invokation TCG are available in the simulator.
 (excluding character cards which are not counted as cards in ``dgisim``)
 
 Equipment Cards
@@ -185,6 +185,7 @@ Other Event Card
 * Quick Knit
 * Send Off
 * Starsigns
+* Stone and Contracts
 * The Bestest Travel Companion!
 * Thunder and Eternity
 * When the Crane Returned

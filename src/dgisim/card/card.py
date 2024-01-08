@@ -142,6 +142,7 @@ __all__ = [
     "QuickKnit",
     "SendOff",
     "Starsigns",
+    "StoneAndContracts",
     "TheBestestTravelCompanion",
     "ThunderAndEternity",
     "WhenTheCraneReturned",
@@ -2574,6 +2575,35 @@ class Starsigns(EventCard, _DiceOnlyChoiceProvider):
         )
 
 
+class StoneAndContracts(EventCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDice({Element.ANY: 3})
+
+    @override
+    @classmethod
+    def valid_in_deck(cls, deck: Deck) -> bool:
+        return 2 <= sum(
+            1
+            for char in deck.chars
+            if char.of_faction(Faction.LIYUE)
+        )
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.DiceOnlyInstruction)
+        return (
+            eft.AddCombatStatusEffect(
+                target_pid=pid,
+                status=stt.StoneAndContractsStatus,
+            ),
+        )
+
+
 class TheBestestTravelCompanion(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDice({Element.ANY: 2})
 
@@ -2614,6 +2644,7 @@ class ThunderAndEternity(EventCard, _DiceOnlyChoiceProvider):
             pid: Pid,
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.DiceOnlyInstruction)
         dice = game_state.get_player(pid).dice
         return (
             eft.RemoveDiceEffect(

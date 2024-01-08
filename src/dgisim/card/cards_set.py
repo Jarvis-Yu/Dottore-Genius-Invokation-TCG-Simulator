@@ -101,6 +101,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     QuickKnit,
     SendOff,
     Starsigns,
+    StoneAndContracts,
     TheBestestTravelCompanion,
     ThunderAndEternity,
     WhenTheCraneReturned,

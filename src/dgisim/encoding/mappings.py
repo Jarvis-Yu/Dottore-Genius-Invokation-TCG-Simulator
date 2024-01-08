@@ -282,7 +282,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         # (card.HeavyStrike, 667),
         # (card.PlungingStrike, 668),
         (card.WindAndFreedom, 669),
-        # (card.StoneAndContracts, 670),
+        (card.StoneAndContracts, 670),
         (card.ThunderAndEternity, 671),
         # (card.NatureAndWisdom, 672),
         # (card.TheLegendOfVennessa, 673),
@@ -608,6 +608,7 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.AncientCourtyardStatus, 315),
         (status.PassingOfJudgmentStatus, 316),
         (status.MillennialMovementFarewellSongStatus, 317),
+        (status.StoneAndContractsStatus, 318),
 
         #### 2.2 Shield Combat Status 375 ####
         (status.CrystallizeStatus, 375),

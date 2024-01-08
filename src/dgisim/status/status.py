@@ -125,6 +125,7 @@ __all__ = [
     "PassingOfJudgmentStatus",
     "RebelliousShieldStatus",
     "ReviveOnCooldownStatus",
+    "StoneAndContractsStatus",
     "WhenTheCraneReturnedStatus",
     "WhereIsTheUnseenRazorStatus",
     "WindAndFreedomStatus",
@@ -2608,6 +2609,31 @@ class FreshWindOfFreedomStatus(CombatStatus):
                 return [eft.ConsecutiveActionEffect(target_pid=source.pid)], None
         elif signal is TriggeringSignal.ROUND_END:
             return [], None
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class StoneAndContractsStatus(CombatStatus):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_START,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_START:
+            return [
+                eft.AddDiceEffect(
+                    pid=source.pid,
+                    element=Element.OMNI,
+                    num=3,
+                ),
+                eft.DrawRandomCardEffect(
+                    pid=source.pid,
+                    num=1,
+                ),
+            ], None
         return [], self
 
 

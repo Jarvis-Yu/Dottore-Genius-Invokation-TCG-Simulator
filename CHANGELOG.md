@@ -47,6 +47,7 @@
       - Passing of Judgment
     - Other Cards:
       - Lyresong
+      - Stone and Contracts
       - Thunder and Eternity
 
 ### Updated
