@@ -42,6 +42,7 @@ __all__ = [
     # concrete implementations
     ## Companions ##
     "ChangTheNinthSupport",
+    "DunyarzadSupport",
     "LibenSupport",
     "LiuSuSupport",
     "MamereSupport",
@@ -149,6 +150,59 @@ class ChangTheNinthSupport(Support, stt._UsageLivingStatus):
     @override
     def content_str(self) -> str:
         return f"{self.usages}|{self.listening}|{self.activated}"
+
+
+@dataclass(frozen=True, kw_only=True)
+class DunyarzadSupport(Support, stt._UsageLivingStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    can_draw: bool = False  # should draw on POST_CARD signal
+    drawed: bool = False  # drawed this match
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_CARD,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.CARD:
+            assert isinstance(item, CardPEvent)
+            from ..card.card import CompanionCard
+            if (
+                    item.pid is status_source.pid
+                    and issubclass(item.card_type, CompanionCard)
+            ):
+                new_item, new_self = item, self
+                if self.usages > 0 and item.dice_cost.can_cost_less_elem():
+                    new_item = new_item.with_new_cost(new_item.dice_cost.cost_less_elem(1))
+                    new_self = replace(new_self, usages=new_self.usages - 1)
+                if not self.drawed and not self.can_draw:
+                    new_self = replace(new_self, can_draw=True)
+                return new_item, new_self
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.POST_CARD and self.can_draw:
+            from ..card.card import CompanionCard
+            return [
+                eft.DrawRandomCardOfTypeEffect(
+                    pid=source.pid,
+                    num=1,
+                    card_type=CompanionCard,
+                )
+            ], replace(self, usages=0, can_draw=False, drawed=True)
+        elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
+            return [], replace(self, usages=self.MAX_USAGES)
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)

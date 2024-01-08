@@ -128,6 +128,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     # Support Card
     ## Support Card / Companion ##
     ChangTheNinth,
+    Dunyarzad,
     Liben,
     LiuSu,
     Mamere,

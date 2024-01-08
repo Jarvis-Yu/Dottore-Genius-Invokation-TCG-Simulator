@@ -10,6 +10,7 @@ from src.dgisim.card.card import Card
 from src.dgisim.card.cards import Cards
 from src.dgisim.character.character import Character
 from src.dgisim.character.enums import CharacterSkill
+from src.dgisim.deck import Deck
 from src.dgisim.dice import ActualDice
 from src.dgisim.effect.effect import *
 from src.dgisim.effect.enums import DynamicCharacterTarget, TriggeringSignal, Zone
@@ -427,6 +428,30 @@ def replace_hand_cards(game_state: GameState, pid: Pid, cards: Cards) -> GameSta
         lambda p: p.factory().hand_cards(cards).build()
     ).build()
 
+
+def replace_deck_cards(game_state: GameState, pid: Pid, cards: Cards) -> GameState:
+    return game_state.factory().f_player(
+        pid,
+        lambda p: p.factory().deck_cards(cards).build()
+    ).build()
+
+def replace_init_deck(game_state: GameState, pid: Pid, cards: Cards) -> GameState:
+    new_deck: Deck = game_state.get_player(pid).initial_deck.to_mutable()
+    new_deck.cards = cards.to_dict()
+    new_deck = new_deck.to_frozen()
+    return game_state.factory().f_player(
+        pid,
+        lambda p: p.factory().initial_deck(new_deck).build()
+    ).build()
+
+def replace_entire_deck(game_state: GameState, pid: Pid, cards: Cards) -> GameState:
+    new_deck: Deck = game_state.get_player(pid).initial_deck.to_mutable()
+    new_deck.cards = cards.to_dict()
+    new_deck = new_deck.to_frozen()
+    return game_state.factory().f_player(
+        pid,
+        lambda p: p.factory().deck_cards(cards).initial_deck(new_deck).build()
+    ).build()
 
 def replace_character(
         game_state: GameState,

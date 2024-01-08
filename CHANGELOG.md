@@ -31,6 +31,7 @@
       - Gilded Dreams
       - Shadow of the Sand King
   - Support Cards:
+    - Dunyarzad
     - Liu Su
     - Mamere
     - Master Zhang
