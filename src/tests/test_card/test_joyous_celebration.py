@@ -35,9 +35,9 @@ class TestJoyousCelebration(unittest.TestCase):
                 self.assertFalse(c2.elemental_aura.has_aura())
                 self.assertIs(
                     c1.elemental_aura.has_aura(),
-                    c1.ELEMENT() is Element.PYRO,
+                    c1.ELEMENT is Element.PYRO,
                 )
                 self.assertIs(
                     c3.elemental_aura.has_aura(),
-                    c1.ELEMENT() is Element.PYRO,
+                    c1.ELEMENT is Element.PYRO,
                 )

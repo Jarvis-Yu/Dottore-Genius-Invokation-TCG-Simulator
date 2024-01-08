@@ -73,7 +73,9 @@ _DEFAULT_CARDS: list[type[Card]] = [
     FlowingRings,
     GamblersEarrings,
     GeneralsAncientHelm,
+    GildedDreams,
     InstructorsCap,
+    ShadowOfTheSandKing,
     TenacityOfTheMillelith,
 
     # Event Card

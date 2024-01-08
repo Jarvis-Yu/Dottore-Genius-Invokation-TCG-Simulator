@@ -20,7 +20,7 @@ from ..effect.effects_template import *
 from ..effect.enums import Zone, DynamicCharacterTarget, TriggeringSignal
 from ..effect.structs import StaticTarget, DamageType
 from ..element import *
-from ..helper.quality_of_life import case_val
+from ..helper.quality_of_life import case_val, classproperty
 from ..state.enums import Pid
 from .enums import CharacterSkill, CharacterSkillType, Faction, WeaponType
 
@@ -219,7 +219,7 @@ class Character:
         """ :returns: the lost hp. """
         return self._max_hp - self._hp
 
-    @classmethod
+    @classproperty
     def FACTIONS(cls) -> frozenset[Faction]:
         """ :returns: the set of factions the character belongs to. """
         return cls._FACTIONS
@@ -229,12 +229,12 @@ class Character:
         """ :returns: if this character belongs to the `faction`. """
         return faction in cls._FACTIONS
 
-    @classmethod
+    @classproperty
     def ELEMENT(cls) -> Element:
         """ :returns: the element of the character. """
         return cls._ELEMENT
 
-    @classmethod
+    @classproperty
     def WEAPON_TYPE(cls) -> WeaponType:
         """ :returns: the type of weapon the character wields. """
         return cls._WEAPON_TYPE
@@ -2524,12 +2524,12 @@ class Nahida(Character):
         oppo_pid = source.pid.other()
         oppo_active_character = game_state.get_player(oppo_pid).just_get_active_character()
         has_reaction = \
-            oppo_active_character.elemental_aura.consult_reaction(self.ELEMENT()) is not None
+            oppo_active_character.elemental_aura.consult_reaction(self.ELEMENT) is not None
         effects: list[eft.Effect] = [
             eft.ReferredDamageEffect(
                 source=source,
                 target=DynamicCharacterTarget.OPPO_ACTIVE,
-                element=self.ELEMENT(),
+                element=self.ELEMENT,
                 damage=dmg_amount,
                 damage_type=DamageType(elemental_skill=True),
             ),
@@ -2585,7 +2585,7 @@ class Nahida(Character):
         if (
                 self.talent_equipped()
                 and any(
-                    char.ELEMENT() is Element.ELECTRO
+                    char.ELEMENT is Element.ELECTRO
                     for char in game_state.get_player(source.pid).characters
         )
         ):
@@ -2601,14 +2601,14 @@ class Nahida(Character):
         effects.append(eft.ReferredDamageEffect(
             source=source,
             target=DynamicCharacterTarget.OPPO_ACTIVE,
-            element=self.ELEMENT(),
+            element=self.ELEMENT,
             damage=4,
             damage_type=DamageType(elemental_burst=True),
         ))
         if (
                 self.talent_equipped()
                 and any(
-                    char.ELEMENT() is Element.HYDRO
+                    char.ELEMENT is Element.HYDRO
                     for char in game_state.get_player(source.pid).characters
         )
         ):

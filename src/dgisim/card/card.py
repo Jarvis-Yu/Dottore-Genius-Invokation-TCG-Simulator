@@ -96,7 +96,9 @@ __all__ = [
     "FlowingRings",
     "GamblersEarrings",
     "GeneralsAncientHelm",
+    "GildedDreams",
     "InstructorsCap",
+    "ShadowOfTheSandKing",
     "TenacityOfTheMillelith",
 
     # Event Card
@@ -964,7 +966,7 @@ class WeaponEquipmentCard(EquipmentCard, _CharTargetChoiceProvider):
     @override
     @classmethod
     def _valid_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:
-        return char.WEAPON_TYPE() is cls.WEAPON_TYPE
+        return char.WEAPON_TYPE is cls.WEAPON_TYPE
 
     @override
     @classmethod
@@ -1017,7 +1019,16 @@ class ArtifactEquipmentCard(EquipmentCard, _CharTargetChoiceProvider):
                 target=instruction.target,
                 status=cls.ARTIFACT_STATUS,
             ),
-        )
+        ) + cls.on_enter_effects(game_state, pid, instruction)
+
+    @classmethod
+    def on_enter_effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.StaticTargetInstruction
+    ) -> tuple[eft.Effect, ...]:
+        return ()
 
 
 class SupportCard(Card):
@@ -1572,9 +1583,63 @@ class GeneralsAncientHelm(ArtifactEquipmentCard):
     ARTIFACT_STATUS = stt.GeneralsAncientHelmStatus
 
 
+class GildedDreams(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDice({Element.ANY: 3})
+    ARTIFACT_STATUS = stt.GildedDreamsStatus
+
+    @override
+    @classmethod
+    def on_enter_effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.StaticTargetInstruction
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.StaticTargetInstruction)
+        attached_char = game_state.get_character_target(instruction.target)
+        assert attached_char is not None
+        effects: list[eft.Effect] = [
+            eft.AddDiceEffect(
+                pid=instruction.target.pid,
+                element=attached_char.ELEMENT,
+                num=1,
+            ),
+        ]
+        team_elems = game_state.get_player(instruction.target.pid).characters.all_elems()
+        if len(team_elems) >= 3:
+            effects.append(
+                eft.AddDiceEffect(
+                    pid=instruction.target.pid,
+                    element=Element.OMNI,
+                    num=1,
+                ),
+            )
+        return tuple(effects)
+
+
 class InstructorsCap(ArtifactEquipmentCard):
     _DICE_COST = AbstractDice({Element.ANY: 2})
     ARTIFACT_STATUS = stt.InstructorsCapStatus
+
+
+class ShadowOfTheSandKing(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
+    ARTIFACT_STATUS = stt.ShadowOfTheSandKingStatus
+
+    @override
+    @classmethod
+    def on_enter_effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.StaticTargetInstruction
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.DrawRandomCardEffect(
+                pid=pid,
+                num=1,
+            ),
+        )
 
 
 class TenacityOfTheMillelith(ArtifactEquipmentCard):
@@ -1899,7 +1964,7 @@ class JoyousCelebration(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
         return (
             active_char is not None
             and active_char.is_alive()
-            and active_char.ELEMENT() in AURA_ELEMENTS
+            and active_char.ELEMENT in AURA_ELEMENTS
         )
 
     @override
@@ -1919,7 +1984,7 @@ class JoyousCelebration(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
             eft.ApplyElementalAuraEffect(
                 source=StaticTarget(Pid.P1, Zone.HAND_CARD, -1),
                 target=StaticTarget.from_char_id(pid, char.id),
-                element=active_char.ELEMENT(),
+                element=active_char.ELEMENT,
                 source_type=DamageType(),
             )
             for char in game_state.get_player(
@@ -2054,7 +2119,7 @@ class _ElementalResonanceCard(EventCard):
         return 2 <= sum(
             1
             for char in deck.chars
-            if char.ELEMENT() is cls._ELEMENT
+            if char.ELEMENT is cls._ELEMENT
         )
 
 

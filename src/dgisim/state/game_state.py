@@ -756,7 +756,7 @@ class ElementalTuningChecker:
         player = game_state.get_player(pid)
         active_character = player.get_active_character()
         assert active_character is not None
-        active_character_elem = active_character.ELEMENT()
+        active_character_elem = active_character.ELEMENT
         dice = player.dice
         return (
             player.hand_cards.not_empty()

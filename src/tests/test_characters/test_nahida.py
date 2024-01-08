@@ -234,10 +234,10 @@ class TestNahida(unittest.TestCase):
 
         # test with Electro and Hydro
         self.assertTrue(any(
-            char.ELEMENT() is Element.ELECTRO for char in base_state.player1.characters
+            char.ELEMENT is Element.ELECTRO for char in base_state.player1.characters
         ))
         self.assertTrue(any(
-            char.ELEMENT() is Element.HYDRO for char in base_state.player1.characters
+            char.ELEMENT is Element.HYDRO for char in base_state.player1.characters
         ))
         game_state = step_action(base_state, Pid.P1, CardAction(
             card=TheSeedOfStoredKnowledge,
@@ -278,7 +278,7 @@ class TestNahida(unittest.TestCase):
         ).build()
         base_state = oppo_aura_elem(base_state, Element.HYDRO)
         self.assertTrue(any(
-            char.ELEMENT() is Element.PYRO for char in base_state.player1.characters
+            char.ELEMENT is Element.PYRO for char in base_state.player1.characters
         ))
         game_state = step_action(base_state, Pid.P1, CardAction(
             card=TheSeedOfStoredKnowledge,

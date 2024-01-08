@@ -411,7 +411,7 @@ class RanaSupport(Support, stt._UsageStatus):
             return [
                 eft.AddDiceEffect(
                     pid=source.pid,
-                    element=next_char.ELEMENT(),
+                    element=next_char.ELEMENT,
                     num=1,
                 ),
             ], replace(self, usages=-1, triggered=False)

@@ -217,7 +217,7 @@ class Characters:
     def all_elems(self) -> set[Element]:
         """ :returns: the set of elements its characters belongs to. """
         return set(
-            char.ELEMENT()
+            char.ELEMENT
             for char in self._characters
         )
 

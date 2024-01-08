@@ -185,8 +185,9 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         # (card.VermillionHereafter, 152),
         # (card.CrownOfWatatsumi, 153),
         # (card.OceanHuedClam, 154),
-        # (card.ShadowOfTheSandKing, 155),
-        (card.FlowingRings, 156),
+        (card.ShadowOfTheSandKing, 155),
+        (card.GildedDreams, 156),
+        (card.FlowingRings, 157),
 
         #### 2 Support Card 0250 ####
         #### 2.1 Location Card 0250 ####
@@ -583,8 +584,9 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         # (status.VermillionHereafterStatus, 202),
         # (status.CrownOfWatatsumiStatus, 203),
         # (status.OceanHuedClamStatus, 204),
-        # (status.ShadowOfTheSandKingStatus, 205),
-        (status.FlowingRingsStatus, 206),
+        (status.ShadowOfTheSandKingStatus, 205),
+        (status.GildedDreamsStatus, 206),
+        (status.FlowingRingsStatus, 207),
 
         #### 2 Combat Status 300 ####
         #### 2.1 General Combat Status 300 ####

@@ -430,12 +430,12 @@ class ActualDice(Dice):
             else:
                 chars = characters.get_characters()
                 active_char = characters.get_active_character()
-                char_elems = {char.ELEMENT() for char in chars}
+                char_elems = {char.ELEMENT for char in chars}
                 if active_char is None:
                     local_precedence = [char_elems]
                 else:
                     local_precedence = [
-                        active_elem := {active_char.ELEMENT()},
+                        active_elem := {active_char.ELEMENT},
                         char_elems - active_elem,
                     ]
                 local_precedence.append(set(_PURE_ELEMS) - char_elems)
@@ -586,7 +586,7 @@ class ActualDice(Dice):
             None
             if player_state is None
             else frozenset(
-                char.ELEMENT()
+                char.ELEMENT
                 for char in player_state.characters.get_alive_characters()
             )
         )

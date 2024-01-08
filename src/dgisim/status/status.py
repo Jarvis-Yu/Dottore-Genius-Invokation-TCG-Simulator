@@ -102,7 +102,9 @@ __all__ = [
     "FlowingRingsStatus",
     "GamblersEarringsStatus",
     "GeneralsAncientHelmStatus",
+    "GildedDreamsStatus",
     "InstructorsCapStatus",
+    "ShadowOfTheSandKingStatus",
     "TenacityOfTheMillelithStatus",
 
     # combat status
@@ -1179,7 +1181,7 @@ class _SacrificialWeaponStatus(WeaponEquipmentStatus, _UsageLivingStatus):
                 return [
                     eft.AddDiceEffect(
                         pid=source.pid,
-                        element=equiper.ELEMENT(),
+                        element=equiper.ELEMENT,
                         num=self.DICE_GAIN_NUM,
                     )
                 ], replace(self, activated=False, usages=-1)
@@ -1922,11 +1924,63 @@ class GeneralsAncientHelmStatus(ArtifactEquipmentStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
+class _ShadowOfTheSandKingLikeStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
+    triggered: bool = False
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_REACTION,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.DMG_DELT:
+            assert isinstance(information, DmgIEvent)
+            if (
+                    not self.triggered
+                    and self.usages > 0
+                    and self._target_is_self_active(game_state, status_source)
+                    and information.dmg.target.pid is status_source.pid.other()
+                    and information.dmg.reaction is not None
+            ):
+                return replace(self, triggered=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.POST_REACTION and self.triggered:
+            return [
+                eft.DrawRandomCardEffect(pid=source.pid, num=1),
+            ], replace(self, usages=-1, triggered=False)
+        elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
+            assert not self.triggered
+            return [], replace(self, usages=self.MAX_USAGES)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class GildedDreamsStatus(_ShadowOfTheSandKingLikeStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+
+    @classproperty
+    def ARTIFACT_CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import GildedDreams
+        return GildedDreams
+
+
+@dataclass(frozen=True, kw_only=True)
 class InstructorsCapStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
     usages: int = 3
     MAX_USAGES: ClassVar[int] = 3
     activated: bool = False
-
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.COMBAT_ACTION,
         TriggeringSignal.ROUND_END,
@@ -1966,13 +2020,24 @@ class InstructorsCapStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
             return [
                 eft.AddDiceEffect(
                     pid=source.pid,
-                    element=this_char.ELEMENT(),
+                    element=this_char.ELEMENT,
                     num=1,
                 ),
             ], replace(self, usages=-1, activated=False)
         elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
             return [], replace(self, usages=self.MAX_USAGES)
         return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class ShadowOfTheSandKingStatus(_ShadowOfTheSandKingLikeStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+
+    @classproperty
+    def ARTIFACT_CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import ShadowOfTheSandKing
+        return ShadowOfTheSandKing
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -2023,7 +2088,7 @@ class TenacityOfTheMillelithStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
             return [
                 eft.AddDiceEffect(
                     pid=source.pid,
-                    element=this_char.ELEMENT(),
+                    element=this_char.ELEMENT,
                     num=1,
                 ),
             ], replace(self, usages=-1, activated=False)
@@ -4385,7 +4450,7 @@ class CrowfeatherCoverStatus(CharacterStatus, _UsageStatus):
                 return item, self
             dmg_boost = 1
             source_char = game_state.get_character_target(status_source)
-            if source_char is not None and source_char.ELEMENT() is Element.ELECTRO:
+            if source_char is not None and source_char.ELEMENT is Element.ELECTRO:
                 dmg_boost += len([
                     char
                     for char in game_state.get_player(
@@ -4564,7 +4629,7 @@ class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
             if (
                     any(char.talent_equipped() for char in oppo_chars if isinstance(char, Nahida))
                     and ShrineOfMayaStatus in oppo_player.combat_statuses
-                    and any(char.ELEMENT() is Element.PYRO for char in oppo_chars)
+                    and any(char.ELEMENT is Element.PYRO for char in oppo_chars)
             ):
                 dmg_element = Element.DENDRO
             else:

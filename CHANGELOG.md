@@ -28,6 +28,8 @@
         - Favonius Sword
     - Artifact Cards:
       - Flowing Rings
+      - Gilded Dreams
+      - Shadow of the Sand King
   - Support Cards:
     - Liu Su
     - Mamere

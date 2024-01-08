@@ -17,7 +17,7 @@ class TestRana(unittest.TestCase):
         ))
         game_state = grant_all_infinite_revival(game_state)
 
-        next_char_elem = game_state.player1.characters.get_nth_next_alive_character_in_activity_order(1).ELEMENT()
+        next_char_elem = game_state.player1.characters.get_nth_next_alive_character_in_activity_order(1).ELEMENT
         prev_dice_num = game_state.player1.dice[next_char_elem]
 
         game_state = replace_character(game_state, Pid.P1, Albedo, 1)
