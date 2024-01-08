@@ -133,6 +133,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     Rana,
     Setaria,
     Xudong,
+    YayoiNanatsuki,
     ## Support Card / Item ##
     NRE,
     ParametricTransformer,

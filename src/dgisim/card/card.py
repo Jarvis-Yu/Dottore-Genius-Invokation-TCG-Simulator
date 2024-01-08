@@ -155,6 +155,7 @@ __all__ = [
     "Rana",
     "Setaria",
     "Xudong",
+    "YayoiNanatsuki",
     ## Item ##
     "NRE",
     "ParametricTransformer",
@@ -2664,6 +2665,10 @@ class Setaria(CompanionCard):
 class Xudong(CompanionCard):
     _DICE_COST = AbstractDice({Element.ANY: 2})
     _SUPPORT_STATUS = sp.XudongSupport
+
+class YayoiNanatsuki(CompanionCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
+    _SUPPORT_STATUS = sp.YayoiNanatsukiSupport
 
 # >>>>>>>>>>>>>>>>>>>> Support Cards / Companion Cards >>>>>>>>>>>>>>>>>>>>
 

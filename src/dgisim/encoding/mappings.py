@@ -226,7 +226,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.Rana, 366),
         # (card.MasterZhang, 367),
         (card.Setaria, 368),
-        # (card.YayoiNanatsuki, 369),
+        (card.YayoiNanatsuki, 369),
         (card.Mamere, 370),
 
         #### 2.3 Item Card 0450 ####
@@ -920,7 +920,7 @@ SUPP_MAPPING: dict[type["Support"], int] = HashableDict({
         (support.RanaSupport, 116),
         # (support.MasterZhangSupport, 117),
         (support.SetariaSupport, 118),
-        # (support.YayoiNanatsukiSupport, 119),
+        (support.YayoiNanatsukiSupport, 119),
         (support.MamereSupport, 120),
 
         #### Item 200 ####

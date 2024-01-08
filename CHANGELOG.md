@@ -1,6 +1,6 @@
 # Change Log
 
-## 0.3.5 (To be released)
+## 0.4.0 (To be released)
 
 ### Added
 
@@ -33,6 +33,7 @@
     - Mamere
     - Rana
     - Setaria
+    - Yayoi Nanatsuki
   - Event Cards:
     - Arcane Legend Cards:
       - Ancient Courtyard
