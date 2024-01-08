@@ -45,6 +45,7 @@ __all__ = [
     "LibenSupport",
     "LiuSuSupport",
     "MamereSupport",
+    "MasterZhangSupport",
     "PaimonSupport",
     "RanaSupport",
     "SetariaSupport",
@@ -295,6 +296,56 @@ class MamereSupport(Support, stt._UsageStatus):
             assert not self.triggered
             return [], replace(self, usages=0, activated=True)
         return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class MasterZhangSupport(Support, stt._UsageLivingStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    COST_DEDUCTION: ClassVar[int] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.CARD:
+            assert isinstance(item, CardPEvent)
+            from ..card.card import WeaponEquipmentCard
+            if (
+                    item.pid is status_source.pid
+                    and issubclass(item.card_type, WeaponEquipmentCard)
+                    and item.dice_cost.can_cost_less_elem()
+                    and self.usages > 0
+            ):
+                self_chars = game_state.get_player(status_source.pid).characters
+                additional_deduction = sum([
+                    1
+                    for char in self_chars
+                    if char.character_statuses.find_type(stt.WeaponEquipmentStatus) is not None
+                ])
+                return (
+                    item.with_new_cost(item.dice_cost.cost_less_elem(
+                        self.COST_DEDUCTION + additional_deduction
+                    )),
+                    replace(self, usages=self.usages - 1),
+                )
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
+            return [], replace(self, usages=self.MAX_USAGES)
+        return [], self
+
 
 
 @dataclass(frozen=True, kw_only=True)

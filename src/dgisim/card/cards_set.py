@@ -129,6 +129,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     Liben,
     LiuSu,
     Mamere,
+    MasterZhang,
     Paimon,
     Rana,
     Setaria,

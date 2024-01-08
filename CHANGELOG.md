@@ -31,6 +31,7 @@
   - Support Cards:
     - Liu Su
     - Mamere
+    - Master Zhang
     - Rana
     - Setaria
     - Yayoi Nanatsuki
