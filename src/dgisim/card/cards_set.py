@@ -74,9 +74,11 @@ _DEFAULT_CARDS: list[type[Card]] = [
     GamblersEarrings,
     GeneralsAncientHelm,
     GildedDreams,
+    HeartOfKhvarenasBrilliance,
     InstructorsCap,
     ShadowOfTheSandKing,
     TenacityOfTheMillelith,
+    VourukashasGlow,
 
     # Event Card
     CalxsArts,

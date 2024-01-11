@@ -97,9 +97,11 @@ __all__ = [
     "GamblersEarrings",
     "GeneralsAncientHelm",
     "GildedDreams",
+    "HeartOfKhvarenasBrilliance",
     "InstructorsCap",
     "ShadowOfTheSandKing",
     "TenacityOfTheMillelith",
+    "VourukashasGlow",
 
     # Event Card
     ## Food Card ##
@@ -1620,6 +1622,11 @@ class GildedDreams(ArtifactEquipmentCard):
         return tuple(effects)
 
 
+class HeartOfKhvarenasBrilliance(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDice.from_empty()
+    ARTIFACT_STATUS = stt.HeartOfKhvarenasBrillianceStatus
+
+
 class InstructorsCap(ArtifactEquipmentCard):
     _DICE_COST = AbstractDice({Element.ANY: 2})
     ARTIFACT_STATUS = stt.InstructorsCapStatus
@@ -1648,6 +1655,11 @@ class ShadowOfTheSandKing(ArtifactEquipmentCard):
 class TenacityOfTheMillelith(ArtifactEquipmentCard):
     _DICE_COST = AbstractDice({Element.OMNI: 3})
     ARTIFACT_STATUS = stt.TenacityOfTheMillelithStatus
+
+
+class VourukashasGlow(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
+    ARTIFACT_STATUS = stt.VourukashasGlowStatus
 
 # <<<<<<<<<<<<<<<<<<<< Event Cards <<<<<<<<<<<<<<<<<<<<
 # <<<<<<<<<<<<<<<<<<<< Event Cards / Food Cards <<<<<<<<<<<<<<<<<<<<

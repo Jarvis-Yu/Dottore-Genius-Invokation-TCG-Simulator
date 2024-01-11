@@ -29,7 +29,9 @@
     - Artifact Cards:
       - Flowing Rings
       - Gilded Dreams
+      - Heart of Khvarena's Brilliance
       - Shadow of the Sand King
+      - Vourukasha's Glow
   - Support Cards:
     - Dunyarzad
     - Liu Su

@@ -188,6 +188,9 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.ShadowOfTheSandKing, 155),
         (card.GildedDreams, 156),
         (card.FlowingRings, 157),
+        # 158 for enhanced Flowing Rings
+        (card.HeartOfKhvarenasBrilliance, 159),
+        (card.VourukashasGlow, 160),
 
         #### 2 Support Card 0250 ####
         #### 2.1 Location Card 0250 ####
@@ -587,6 +590,9 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.ShadowOfTheSandKingStatus, 205),
         (status.GildedDreamsStatus, 206),
         (status.FlowingRingsStatus, 207),
+        # 208 for enhanced Flowing Rings
+        (status.HeartOfKhvarenasBrillianceStatus, 209),
+        (status.VourukashasGlowStatus, 210),
 
         #### 2 Combat Status 300 ####
         #### 2.1 General Combat Status 300 ####

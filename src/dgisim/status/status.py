@@ -103,9 +103,11 @@ __all__ = [
     "GamblersEarringsStatus",
     "GeneralsAncientHelmStatus",
     "GildedDreamsStatus",
+    "HeartOfKhvarenasBrillianceStatus",
     "InstructorsCapStatus",
     "ShadowOfTheSandKingStatus",
     "TenacityOfTheMillelithStatus",
+    "VourukashasGlowStatus",
 
     # combat status
     "AncientCourtyardStatus",
@@ -1978,6 +1980,59 @@ class GildedDreamsStatus(_ShadowOfTheSandKingLikeStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
+class _HeartOfKhvarenasBrillianceLikeStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    triggered: bool = False
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_REACTION,
+        TriggeringSignal.ROUND_END,
+    ))
+
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.DMG_DELT:
+            assert isinstance(information, DmgIEvent)
+            if (
+                    not self.triggered
+                    and self.usages > 0
+                    and information.dmg.target == status_source
+            ):
+                return replace(self, triggered=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.POST_REACTION and self.triggered:
+            if not self._target_is_self_active(game_state, source, source):
+                return [], replace(self, triggered=False)
+            return [
+                eft.DrawRandomCardEffect(pid=source.pid, num=1),
+            ], replace(self, usages=-1, triggered=False)
+        elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
+            assert not self.triggered
+            return [], replace(self, usages=self.MAX_USAGES)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class HeartOfKhvarenasBrillianceStatus(_HeartOfKhvarenasBrillianceLikeStatus):
+    @classproperty
+    def ARTIFACT_CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import HeartOfKhvarenasBrilliance
+        return HeartOfKhvarenasBrilliance
+
+
+@dataclass(frozen=True, kw_only=True)
 class InstructorsCapStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
     usages: int = 3
     MAX_USAGES: ClassVar[int] = 3
@@ -2103,6 +2158,32 @@ class TenacityOfTheMillelithStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
         elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
             return [], replace(self, usages=self.MAX_USAGES)
         return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class VourukashasGlowStatus(_HeartOfKhvarenasBrillianceLikeStatus):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        *_HeartOfKhvarenasBrillianceLikeStatus.REACTABLE_SIGNALS,
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    ))
+
+    @classproperty
+    def ARTIFACT_CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import VourukashasGlow
+        return VourukashasGlow
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            return [
+                eft.RecoverHPEffect(
+                    target=source,
+                    recovery=1,
+                ),
+            ], self
+        return super()._react_to_signal(game_state, source, signal)
 
 
 ############################## Combat Status ##############################

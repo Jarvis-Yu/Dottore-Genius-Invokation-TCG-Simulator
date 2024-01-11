@@ -390,12 +390,10 @@ class ChainsOfWardingThunderSummon(_DmgPerRoundSummon):
     ELEMENT: ClassVar[Element] = Element.ELECTRO
     COST_RAISE: ClassVar[int] = 1
 
-    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset(
-        tuple(_DmgPerRoundSummon.REACTABLE_SIGNALS) +
-        (
-            TriggeringSignal.ROUND_END,
-        )
-    )
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        *_DmgPerRoundSummon.REACTABLE_SIGNALS,
+        TriggeringSignal.ROUND_END,
+    ))
 
     @override
     def _preprocess(
@@ -523,8 +521,9 @@ class FierySanctumFieldSummon(_DmgPerRoundSummon, stt._ShieldStatus):
     ELEMENT: ClassVar[Element] = Element.PYRO
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        *_DmgPerRoundSummon.REACTABLE_SIGNALS,
         TriggeringSignal.POST_REACTION,
-    ) + tuple(_DmgPerRoundSummon.REACTABLE_SIGNALS))
+    ))
 
     @override
     def _preprocess(
@@ -596,8 +595,9 @@ class HeraldOfFrostSummon(_DmgPerRoundSummon):
     HEAL_AMOUNT: ClassVar[int] = 1
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        *_DmgPerRoundSummon.REACTABLE_SIGNALS,
         TriggeringSignal.COMBAT_ACTION,
-    ) + tuple(_DmgPerRoundSummon.REACTABLE_SIGNALS))
+    ))
 
     @override
     def _inform(
@@ -775,8 +775,9 @@ class OzSummon(_DmgPerRoundSummon):
     ACTIVATED_DMG: ClassVar[int] = 2
     ELEMENT: ClassVar[Element] = Element.ELECTRO
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        *_DmgPerRoundSummon.REACTABLE_SIGNALS,
         TriggeringSignal.COMBAT_ACTION,
-    ) + tuple(_DmgPerRoundSummon.REACTABLE_SIGNALS))
+    ))
 
     @override
     def _inform(
@@ -917,8 +918,9 @@ class _ShadowswordBaseSummon(_DmgPerRoundSummon):
     MAX_USAGES: ClassVar[int] = 2
     DMG: ClassVar[int] = 1
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        *_DmgPerRoundSummon.REACTABLE_SIGNALS,
         TriggeringSignal.COMBAT_ACTION,
-    ) + tuple(_DmgPerRoundSummon.REACTABLE_SIGNALS))
+    ))
 
     @override
     def _inform(
@@ -983,8 +985,9 @@ class SolarIsotomaSummon(_DmgPerRoundSummon):
     DMG_BOOST: ClassVar[int] = 1
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        *_DmgPerRoundSummon.REACTABLE_SIGNALS,
         TriggeringSignal.ROUND_END,
-    ) + tuple(_DmgPerRoundSummon.REACTABLE_SIGNALS))
+    ))
 
     @override
     def _preprocess(
