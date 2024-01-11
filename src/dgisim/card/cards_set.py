@@ -104,6 +104,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     SendOff,
     Starsigns,
     StoneAndContracts,
+    Strategize,
     TheBestestTravelCompanion,
     ThunderAndEternity,
     WhenTheCraneReturned,

@@ -145,6 +145,7 @@ __all__ = [
     "SendOff",
     "Starsigns",
     "StoneAndContracts",
+    "Strategize",
     "TheBestestTravelCompanion",
     "ThunderAndEternity",
     "WhenTheCraneReturned",
@@ -2612,6 +2613,26 @@ class StoneAndContracts(EventCard, _DiceOnlyChoiceProvider):
             eft.AddCombatStatusEffect(
                 target_pid=pid,
                 status=stt.StoneAndContractsStatus,
+            ),
+        )
+
+
+class Strategize(EventCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.DiceOnlyInstruction)
+        return (
+            eft.DrawRandomCardEffect(
+                pid=pid,
+                num=2,
             ),
         )
 
