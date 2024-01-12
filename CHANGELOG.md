@@ -51,6 +51,7 @@
     - Food Cards:
       - Adeptus' Temptation
     - Other Cards:
+      - Guardian's Oath
       - Lyresong
       - Stone and Contracts
       - Thunder and Eternity

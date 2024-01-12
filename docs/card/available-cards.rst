@@ -1,7 +1,7 @@
 Available Cards
 ===============
 
-130 of 248 cards in Genius Invokation TCG are available in the simulator.
+131 of 248 cards in Genius Invokation TCG are available in the simulator.
 (excluding character cards which are not counted as cards in ``dgisim``)
 
 Equipment Cards
@@ -182,6 +182,7 @@ Other Event Card
 * Elemental Resonance: Woven Waters
 * Elemental Resonance: Woven Weeds
 * Elemental Resonance: Woven Winds
+* Guardian's Oath
 * I Haven't Lost Yet!
 * Leave It to Me!
 * Lyresong

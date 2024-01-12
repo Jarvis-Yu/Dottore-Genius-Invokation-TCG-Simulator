@@ -2440,7 +2440,7 @@ class GuardiansOath(EventCard, _DiceOnlyChoiceProvider):
             ))
         for summon in game_state.get_player(pid.other()).summons:
             efts.append(eft.RemoveSummonEffect(
-                target_pid=pid,
+                target_pid=pid.other(),
                 summon=type(summon),
             ))
         return tuple(efts)
