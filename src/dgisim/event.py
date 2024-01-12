@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 from typing_extensions import Self
 
 if TYPE_CHECKING:
-    from .card.card import Card
+    from .card.card import Card, EquipmentCard
     from .character.character import Character
     from .character.enums import CharacterSkill, CharacterSkillType
     from .effect.effect import SpecificDamageEffect
@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from .dice import AbstractDice
     from .state.game_state import GameState
     from .state.enums import Pid
+    from .status.status import EquipmentStatus
 
 __all__ = [
     # enums
@@ -29,6 +30,7 @@ __all__ = [
     "InformableEvent",
     "DmgIEvent",
     "CharacterDeathIEvent",
+    "EquipmentDiscardIEvent",
     "HealIEvent",
     "ReactionIEvent",
     "SkillIEvent",
@@ -71,6 +73,12 @@ class DmgIEvent(InformableEvent):
 @dataclass(frozen=True, kw_only=True)
 class CharacterDeathIEvent(InformableEvent):
     target: StaticTarget
+
+
+@dataclass(frozen=True, kw_only=True)
+class EquipmentDiscardIEvent(InformableEvent):
+    target: StaticTarget
+    status: type[EquipmentStatus]
 
 
 @dataclass(frozen=True, kw_only=True)

@@ -152,6 +152,7 @@ __all__ = [
     "StoneAndContracts",
     "Strategize",
     "TheBestestTravelCompanion",
+    "TheBoarPrincess",
     "ThunderAndEternity",
     "TossUp",
     "WhenTheCraneReturned",
@@ -2589,7 +2590,7 @@ class Lyresong(EventCard, _CharTargetChoiceProvider):
         char_target = game_state.get_character_target(instruction.target)
         assert char_target is not None
         artifact = char_target.character_statuses.just_find_type(stt.ArtifactEquipmentStatus)
-        card = artifact.ARTIFACT_CARD
+        card = artifact.CARD
         return (
             eft.RemoveCharacterStatusEffect(
                 target=instruction.target,
@@ -2745,6 +2746,26 @@ class TheBestestTravelCompanion(EventCard, _DiceOnlyChoiceProvider):
         )
 
 
+class TheBoarPrincess(EventCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDice.from_empty()
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.DiceOnlyInstruction)
+        return (
+            eft.AddCombatStatusEffect(
+                target_pid=pid,
+                status=stt.TheBoarPrincessStatus,
+            ),
+        )
+
+
 class ThunderAndEternity(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDice.from_empty()
 
@@ -2851,7 +2872,7 @@ class WhereIsTheUnseenRazor(EventCard, _CharTargetChoiceProvider):
         char_target = game_state.get_character_target(instruction.target)
         assert char_target is not None
         weapon = char_target.character_statuses.just_find_type(stt.WeaponEquipmentStatus)
-        card = weapon.WEAPON_CARD
+        card = weapon.CARD
         return (
             eft.RemoveCharacterStatusEffect(
                 target=instruction.target,
@@ -3198,7 +3219,7 @@ class ColdBloodedStrike(_TalentEquipmentSkillCard):
 
 #### Kamisato Ayaka ####
 
-class KantenSenmyouBlessing(TalentEventCard, _CharTargetChoiceProvider):
+class KantenSenmyouBlessing(EquipmentCard, TalentEventCard, _CharTargetChoiceProvider):
     _DICE_COST = AbstractDice({Element.CRYO: 2})
     _CHARACTER = chr.KamisatoAyaka
 

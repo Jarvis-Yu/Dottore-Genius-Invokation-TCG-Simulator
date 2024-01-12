@@ -55,6 +55,7 @@
       - Guardian's Oath
       - Lyresong
       - Stone and Contracts
+      - The Boar Princess
       - Thunder and Eternity
 
 ### Updated

@@ -143,6 +143,9 @@ class Statuses:
     def __iter__(self) -> Iterator[stt.Status]:
         return iter(self._statuses)
 
+    def __len__(self) -> int:
+        return len(self._statuses)
+
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Statuses):  # pragma: no cover
             return False

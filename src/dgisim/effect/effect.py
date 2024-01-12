@@ -639,6 +639,12 @@ class DefeatedMarkCheckerEffect(CheckerEffect):
                 )
                 for effect in on_death_effects:
                     game_state = effect.execute(game_state)
+                from ..status.statuses import Statuses
+                equipment_statuses = [
+                    type(status)
+                    for status in char.character_statuses
+                    if isinstance(status, Statuses._EQUIPMENT_CATEGORIES)
+                ]
                 game_state = StatusProcessing.inform_all_statuses(
                     game_state,
                     pid,
@@ -654,6 +660,16 @@ class DefeatedMarkCheckerEffect(CheckerEffect):
                         ).build()
                     ).build()
                 ).build()
+                for equipment_status in equipment_statuses:
+                    game_state = StatusProcessing.inform_all_statuses(
+                        game_state,
+                        pid,
+                        Informables.EQUIPMENT_DISCARDING,
+                        EquipmentDiscardIEvent(
+                            target=char_source,
+                            status=equipment_status,
+                        ),
+                    )
         return game_state
 
 
@@ -1582,6 +1598,12 @@ class AddRerollChancesEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class AddCharacterStatusEffect(DirectEffect):
+    """
+    Inits the status with default values and adds it to the character.
+
+    If the status is an equipment status and the character already has one,
+    all other statuses will be informed about the substitution.
+    """
     target: StaticTarget
     status: type[stt.PersonalStatus]
 
@@ -1594,9 +1616,33 @@ class AddCharacterStatusEffect(DirectEffect):
                 lambda ts: ts.update_status(self.status())
             ).build()
         elif issubclass(self.status, stt.EquipmentStatus):
+            from ..status.statuses import Statuses
+            category = next((
+                ctgy
+                for ctgy in Statuses._EQUIPMENT_CATEGORIES
+                if issubclass(self.status, ctgy)
+            ))
+            substituted_status = character.character_statuses.find_type(category)
             character = character.factory().f_character_statuses(
-                lambda es: es.update_status(self.status())
+                lambda cs: cs.update_status(self.status())
             ).build()
+            if substituted_status is not None:
+                assert isinstance(substituted_status, stt.EquipmentStatus)
+                game_state = game_state.factory().f_player(
+                    self.target.pid,
+                    lambda p: p.factory().f_characters(
+                        lambda cs: cs.factory().character(character).build()  # type: ignore
+                    ).build()
+                ).build()
+                return StatusProcessing.inform_all_statuses(
+                    game_state,
+                    self.target.pid,
+                    Informables.EQUIPMENT_DISCARDING,
+                    EquipmentDiscardIEvent(
+                        target=self.target,
+                        status=type(substituted_status),
+                    ),
+                )
         elif issubclass(self.status, stt.CharacterStatus):
             character = character.factory().f_character_statuses(
                 lambda cs: cs.update_status(self.status())

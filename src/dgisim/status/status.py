@@ -128,6 +128,7 @@ __all__ = [
     "RebelliousShieldStatus",
     "ReviveOnCooldownStatus",
     "StoneAndContractsStatus",
+    "TheBoarPrincessStatus",
     "WhenTheCraneReturnedStatus",
     "WhereIsTheUnseenRazorStatus",
     "WindAndFreedomStatus",
@@ -671,11 +672,16 @@ class EquipmentStatus(PersonalStatus):
     """
     Basic status, describing weapon, artifact and character unique talents
     """
+    @classproperty
+    def CARD(cls) -> type[crd.EquipmentCard]:
+        raise NotImplementedError()
 
 
 @dataclass(frozen=True)
 class TalentEquipmentStatus(EquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.EquipmentCard]:
+        raise NotImplementedError()
 
 
 @dataclass(frozen=True)
@@ -683,7 +689,7 @@ class WeaponEquipmentStatus(EquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType]
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         raise NotImplementedError()
 
     BASE_DAMAGE_BOOST: ClassVar[int] = 1
@@ -719,7 +725,7 @@ class WeaponEquipmentStatus(EquipmentStatus):
 @dataclass(frozen=True)
 class ArtifactEquipmentStatus(EquipmentStatus):
     @classproperty
-    def ARTIFACT_CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
         raise NotImplementedError(cls)
 
 
@@ -1206,7 +1212,7 @@ class AmosBowStatus(WeaponEquipmentStatus, _UsageLivingStatus):
     ADDITIONAL_DMG_BOOST: ClassVar[int] = 2
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import AmosBow
         return AmosBow
 
@@ -1274,7 +1280,7 @@ class ElegyForTheEndStatus(WeaponEquipmentStatus):
     ))
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import ElegyForTheEnd
         return ElegyForTheEnd
 
@@ -1314,7 +1320,7 @@ class KingsSquireStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.BOW
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import KingsSquire
         return KingsSquire
 
@@ -1324,7 +1330,7 @@ class RavenBowStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.BOW
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import RavenBow
         return RavenBow
 
@@ -1334,7 +1340,7 @@ class SacrificialBowStatus(_SacrificialWeaponStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.BOW
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import SacrificialBow
         return SacrificialBow
 
@@ -1353,7 +1359,7 @@ class AThousandFloatingDreamsStatus(WeaponEquipmentStatus, _UsageLivingStatus):
     ))
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import AThousandFloatingDreams
         return AThousandFloatingDreams
 
@@ -1397,7 +1403,7 @@ class FruitOfFulfillmentStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CATALYST
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import FruitOfFulfillment
         return FruitOfFulfillment
 
@@ -1407,7 +1413,7 @@ class MagicGuideStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CATALYST
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import MagicGuide
         return MagicGuide
 
@@ -1417,7 +1423,7 @@ class SacrificialFragmentsStatus(_SacrificialWeaponStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CATALYST
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import SacrificialFragments
         return SacrificialFragments
 
@@ -1429,7 +1435,7 @@ class SacrificialGreatswordStatus(_SacrificialWeaponStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CLAYMORE
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import SacrificialGreatsword
         return SacrificialGreatsword
 
@@ -1447,7 +1453,7 @@ class TheBellStatus(WeaponEquipmentStatus, _UsageLivingStatus):
     ))
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import TheBell
         return TheBell
 
@@ -1491,7 +1497,7 @@ class WhiteIronGreatswordStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.CLAYMORE
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import WhiteIronGreatsword
         return WhiteIronGreatsword
 
@@ -1503,7 +1509,7 @@ class WolfsGravestoneStatus(WeaponEquipmentStatus):
     ADDITIONAL_DMG_BOOST: ClassVar[int] = 2
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import WolfsGravestone
         return WolfsGravestone
 
@@ -1537,7 +1543,7 @@ class EngulfingLightningStatus(WeaponEquipmentStatus, _UsageLivingStatus):
     ))
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import EngulfingLightning
         return EngulfingLightning
 
@@ -1571,7 +1577,7 @@ class LithicSpearStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.POLEARM
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import LithicSpear
         return LithicSpear
 
@@ -1581,7 +1587,7 @@ class MoonpiercerStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.POLEARM
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import Moonpiercer
         return Moonpiercer
 
@@ -1592,7 +1598,7 @@ class VortexVanquisherStatus(WeaponEquipmentStatus):
     ADDITIONAL_DMG_BOOST: ClassVar[int] = 1
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import VortexVanquisher
         return VortexVanquisher
 
@@ -1625,7 +1631,7 @@ class WhiteTasselStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.POLEARM
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import WhiteTassel
         return WhiteTassel
 
@@ -1646,7 +1652,7 @@ class AquilaFavoniaStatus(WeaponEquipmentStatus, _UsageLivingStatus):
     ))
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import AquilaFavonia
         return AquilaFavonia
 
@@ -1700,7 +1706,7 @@ class FavoniusSwordStatus(WeaponEquipmentStatus, _UsageLivingStatus):
     ))
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import FavoniusSword
         return FavoniusSword
 
@@ -1749,7 +1755,7 @@ class SacrificialSwordStatus(_SacrificialWeaponStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.SWORD
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import SacrificialSword
         return SacrificialSword
 
@@ -1759,7 +1765,7 @@ class TravelersHandySwordStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.SWORD
 
     @classproperty
-    def WEAPON_CARD(cls) -> type[crd.WeaponEquipmentCard]:
+    def CARD(cls) -> type[crd.WeaponEquipmentCard]:
         from ..card.card import TravelersHandySword
         return TravelersHandySword
 
@@ -1770,7 +1776,7 @@ class TravelersHandySwordStatus(WeaponEquipmentStatus):
 @dataclass(frozen=True, kw_only=True)
 class CrownOfWatatsumiStatus(ArtifactEquipmentStatus):
     @classproperty
-    def ARTIFACT_CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
         from ..card.card import CrownOfWatatsumi
         return CrownOfWatatsumi
 
@@ -1797,7 +1803,7 @@ class FlowingRingsStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
     ))
 
     @classproperty
-    def ARTIFACT_CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
         from ..card.card import FlowingRings
         return FlowingRings
 
@@ -1850,7 +1856,7 @@ class GamblersEarringsStatus(ArtifactEquipmentStatus):
     ))
 
     @classproperty
-    def ARTIFACT_CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
         from ..card.card import GamblersEarrings
         return GamblersEarrings
 
@@ -1909,7 +1915,7 @@ class GeneralsAncientHelmStatus(ArtifactEquipmentStatus):
     ))
 
     @classproperty
-    def ARTIFACT_CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
         from ..card.card import GeneralsAncientHelm
         return GeneralsAncientHelm
 
@@ -1975,7 +1981,7 @@ class GildedDreamsStatus(_ShadowOfTheSandKingLikeStatus):
     MAX_USAGES: ClassVar[int] = 2
 
     @classproperty
-    def ARTIFACT_CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
         from ..card.card import GildedDreams
         return GildedDreams
 
@@ -2028,7 +2034,7 @@ class _HeartOfKhvarenasBrillianceLikeStatus(ArtifactEquipmentStatus, _UsageLivin
 @dataclass(frozen=True, kw_only=True)
 class HeartOfKhvarenasBrillianceStatus(_HeartOfKhvarenasBrillianceLikeStatus):
     @classproperty
-    def ARTIFACT_CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
         from ..card.card import HeartOfKhvarenasBrilliance
         return HeartOfKhvarenasBrilliance
 
@@ -2044,7 +2050,7 @@ class InstructorsCapStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
     ))
 
     @classproperty
-    def ARTIFACT_CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
         from ..card.card import InstructorsCap
         return InstructorsCap
 
@@ -2092,7 +2098,7 @@ class ShadowOfTheSandKingStatus(_ShadowOfTheSandKingLikeStatus):
     MAX_USAGES: ClassVar[int] = 1
 
     @classproperty
-    def ARTIFACT_CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
         from ..card.card import ShadowOfTheSandKing
         return ShadowOfTheSandKing
 
@@ -2110,7 +2116,7 @@ class TenacityOfTheMillelithStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
     ))
 
     @classproperty
-    def ARTIFACT_CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
         from ..card.card import TenacityOfTheMillelith
         return TenacityOfTheMillelith
 
@@ -2169,7 +2175,7 @@ class VourukashasGlowStatus(_HeartOfKhvarenasBrillianceLikeStatus):
     ))
 
     @classproperty
-    def ARTIFACT_CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
         from ..card.card import VourukashasGlow
         return VourukashasGlow
 
@@ -2720,6 +2726,65 @@ class StoneAndContractsStatus(CombatStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
+class TheBoarPrincessStatus(CombatStatus, _UsageStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    triggered_num: int = 0
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.DEATH_EVENT,
+        TriggeringSignal.POST_CARD,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.EQUIPMENT_DISCARDING:
+            assert isinstance(information, EquipmentDiscardIEvent)
+            if (
+                    information.target.pid is status_source.pid
+                    and issubclass(
+                        information.status,
+                        WeaponEquipmentStatus | ArtifactEquipmentStatus,
+                    )
+            ):
+                return replace(self, triggered_num=self.triggered_num + 1)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if (
+                (
+                    signal is TriggeringSignal.DEATH_EVENT
+                    or signal is TriggeringSignal.POST_CARD
+                )
+                and self.triggered_num > 0
+        ):
+            assert self.usages > 0
+            usable_usages = min(self.usages, self.triggered_num)
+            return [
+                eft.AddDiceEffect(
+                    pid=source.pid,
+                    element=Element.OMNI,
+                    num=usable_usages,
+                ),
+            ], replace(self, usages=-usable_usages, triggered_num=0)
+        elif signal is TriggeringSignal.ROUND_END:
+            return [], None
+        return [], self
+
+    def __str__(self) -> str:
+        return super().__str__() + f"({self.triggered_num})"  # pragma: no cover
+
+
+@dataclass(frozen=True, kw_only=True)
 class WhenTheCraneReturnedStatus(CombatStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.COMBAT_ACTION,
@@ -3152,7 +3217,10 @@ Group statues by characters, characters ordered alphabetically
 
 @dataclass(frozen=True, kw_only=True)
 class DescentOfDivinityStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import DescentOfDivinity
+        return DescentOfDivinity
 
 
 #### Arataki Itto ####
@@ -3166,6 +3234,11 @@ class AratakiIchibanStatus(TalentEquipmentStatus, _UsageLivingStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
     ))
+
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import AratakiIchiban
+        return AratakiIchiban
 
     def activated(self) -> bool:
         return self.usages + 1 >= self.ACTIVATION_THRESHOLD
@@ -3315,7 +3388,10 @@ class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class GrandExpectationStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import GrandExpectation
+        return GrandExpectation
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -3464,7 +3540,10 @@ class ColleiTalentStatus(HiddenStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class FloralSidewinderStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import FloralSidewinder
+        return FloralSidewinder
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -3562,6 +3641,11 @@ class StalwartAndTrueStatus(TalentEquipmentStatus):
     REACTABLE_SIGNALS = frozenset({
         TriggeringSignal.END_ROUND_CHECK_OUT,
     })
+
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import StalwartAndTrue
+        return StalwartAndTrue
 
     @override
     def _react_to_signal(
@@ -3750,14 +3834,20 @@ class GrimheartStatus(CharacterStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class WellspingOfWarLustStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import WellspingOfWarLust
+        return WellspingOfWarLust
 
 
 #### Fatui Pyro Agent ####
 
 @dataclass(frozen=True, kw_only=True)
 class PaidInFullStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import PaidInFull
+        return PaidInFull
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -3823,7 +3913,10 @@ class StealthStatus(CharacterStatus, FixedShieldStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class StellarPredatorStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import StellarPredator
+        return StellarPredator
 
 
 #### Ganyu ####
@@ -3860,7 +3953,10 @@ class IceLotusStatus(CombatStatus, FixedShieldStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class UndividedHeartStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import UndividedHeart
+        return UndividedHeart
 
 
 #### Hu Tao ####
@@ -3901,6 +3997,12 @@ class ParamitaPapilioStatus(CharacterStatus, _InfusionStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class SanguineRougeStatus(TalentEquipmentStatus):
+
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import SanguineRouge
+        return SanguineRouge
+
     @override
     def _preprocess(
             self,
@@ -3927,7 +4029,10 @@ class SanguineRougeStatus(TalentEquipmentStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class ProliferatingSporesStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import ProliferatingSpores
+        return ProliferatingSpores
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -4054,7 +4159,10 @@ class RadicalVitalityStatus(CharacterStatus, _UsageLivingStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class LandsOfDandelionStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import LandsOfDandelion
+        return LandsOfDandelion
 
 
 #### Kaedehara Kazuha ####
@@ -4155,7 +4263,10 @@ _MIDARE_RANZAN_MAP: dict[Element, type[MidareRanzanStatus]] = HashableDict({
 
 @dataclass(frozen=True, kw_only=True)
 class PoeticsOfFuubutsuStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import PoeticsOfFuubutsu
+        return PoeticsOfFuubutsu
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -4261,6 +4372,11 @@ class ColdBloodedStrikeStatus(TalentEquipmentStatus):
         TriggeringSignal.COMBAT_ACTION,
         TriggeringSignal.ROUND_END,
     ))
+
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import ColdBloodedStrike
+        return ColdBloodedStrike
 
     @override
     def _inform(
@@ -4378,6 +4494,11 @@ class KantenSenmyouBlessingStatus(TalentEquipmentStatus, _UsageStatus):
         TriggeringSignal.ROUND_END,
     ))
 
+    @classproperty
+    def CARD(cls) -> type[crd.EquipmentCard]:
+        from ..card.card import KantenSenmyouBlessing
+        return KantenSenmyouBlessing
+
     @override
     def _preprocess(
             self,
@@ -4434,7 +4555,10 @@ class KeqingTalentStatus(HiddenStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class ThunderingPenanceStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import ThunderingPenance
+        return ThunderingPenance
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -4507,7 +4631,10 @@ class ExplosiveSparkStatus(CharacterStatus, _UsageStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class PoundingSurpriseStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import PoundingSurprise
+        return PoundingSurprise
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -4607,14 +4734,20 @@ class CrowfeatherCoverStatus(CharacterStatus, _UsageStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class SinOfPrideStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import SinOfPride
+        return SinOfPride
 
 
 #### Maguu Kenki ####
 
 @dataclass(frozen=True, kw_only=True)
 class TranscendentAutomatonStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import TranscendentAutomaton
+        return TranscendentAutomaton
 
 
 #### Mona ####
@@ -4682,6 +4815,11 @@ class IllusoryTorrentStatus(HiddenStatus):
 @dataclass(frozen=True, kw_only=True)
 class ProphecyOfSubmersionStatus(TalentEquipmentStatus):
     DMG_BOOST: ClassVar[int] = 2
+
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import ProphecyOfSubmersion
+        return ProphecyOfSubmersion
 
     @override
     def _preprocess(
@@ -4870,7 +5008,10 @@ class ShrineOfMayaStatus(CombatStatus, _UsageStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class TheSeedOfStoredKnowledgeStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import TheSeedOfStoredKnowledge
+        return TheSeedOfStoredKnowledge
 
 
 #### Ningguang ####
@@ -4915,7 +5056,10 @@ class JadeScreenStatus(CombatStatus, FixedShieldStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class StrategicReserveStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import StrategicReserve
+        return StrategicReserve
 
 
 #### Noelle ####
@@ -4977,7 +5121,10 @@ class FullPlateStatus(CombatStatus, StackedShieldStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class IGotYourBackStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import IGotYourBack
+        return IGotYourBack
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -5109,7 +5256,10 @@ class QiqiTalentStatus(HiddenStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class RiteOfResurrectionStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import RiteOfResurrection
+        return RiteOfResurrection
 
 
 #### Rhodeia of Loch ####
@@ -5117,7 +5267,10 @@ class RiteOfResurrectionStatus(TalentEquipmentStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class StreamingSurgeStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import StreamingSurge
+        return StreamingSurge
 
 
 #### Sangonomiya Kokomi ####
@@ -5172,7 +5325,10 @@ class CeremonialGarmentStatus(CharacterStatus, _UsageStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class TamakushiCasketStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import TamakushiCasket
+        return TamakushiCasket
 
 
 #### Shenhe ####
@@ -5246,7 +5402,10 @@ class IcyQuillStatus(CombatStatus, _UsageStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class MysticalAbandonStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import MysticalAbandon
+        return MysticalAbandon
 
 
 #### Tartaglia ####
@@ -5254,7 +5413,10 @@ class MysticalAbandonStatus(TalentEquipmentStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class AbyssalMayhemHydrospoutStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import AbyssalMayhemHydrospout
+        return AbyssalMayhemHydrospout
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -5436,6 +5598,11 @@ class TideWithholderStatus(HiddenStatus):
 class KeenSightStatus(TalentEquipmentStatus):
     COST_DEDUCTION: ClassVar[int] = 1
 
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import KeenSight
+        return KeenSight
+
     @override
     def _preprocess(
             self,
@@ -5553,7 +5720,10 @@ class VijnanaSuffusionStatus(CharacterStatus, _UsageStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class EmbraceOfWindsStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import EmbraceOfWinds
+        return EmbraceOfWinds
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -5686,7 +5856,10 @@ class DescentStatus(CharacterStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class GalesOfReverieStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import GalesOfReverie
+        return GalesOfReverie
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -5814,7 +5987,10 @@ class RainbowBladeworkStatus(CombatStatus, _UsageStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class TheScentRemainedStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import TheScentRemained
+        return TheScentRemained
 
 #### Yae Miko ####
 
@@ -5893,7 +6069,10 @@ class TenkoThunderboltsStatus(CombatStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class TheShrinesSacredShadeStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import TheShrinesSacredShade
+        return TheShrinesSacredShade
 
 
 #### Yoimiya ####
@@ -5957,7 +6136,10 @@ class AurousBlazeStatus(CombatStatus, _UsageStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class NaganoharaMeteorSwarmStatus(TalentEquipmentStatus):
-    pass
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import NaganoharaMeteorSwarm
+        return NaganoharaMeteorSwarm
 
 
 @dataclass(frozen=True, kw_only=True)
