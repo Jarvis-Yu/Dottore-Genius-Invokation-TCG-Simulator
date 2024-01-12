@@ -47,6 +47,7 @@
       - In Every House a Stove
       - Joyous Celebration
       - Passing of Judgment
+      - Toss-Up
     - Other Cards:
       - Lyresong
       - Stone and Contracts

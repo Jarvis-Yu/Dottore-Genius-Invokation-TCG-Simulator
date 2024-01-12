@@ -148,6 +148,7 @@ __all__ = [
     "Strategize",
     "TheBestestTravelCompanion",
     "ThunderAndEternity",
+    "TossUp",
     "WhenTheCraneReturned",
     "WhereIsTheUnseenRazor",
     "WindAndFreedom",
@@ -2692,6 +2693,31 @@ class ThunderAndEternity(EventCard, _DiceOnlyChoiceProvider):
         )
 
 
+class TossUp(EventCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDice.from_empty()
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        return game_state.get_player(pid).dice.num_dice() > 0
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.SetRerollChancesEffect(
+                target_pid=pid,
+                reroll_chances=2,
+            ),
+            eft.RollPhaseStartEffect(),
+        )
+
+
 class WhenTheCraneReturned(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDice({Element.OMNI: 1})
 
@@ -2890,6 +2916,10 @@ class KnightsOfFavoniusLibrary(LocationCard):
             pid: Pid,
     ) -> tuple[eft.Effect, ...]:
         return (
+            eft.SetRerollChancesEffect(
+                target_pid=pid,
+                reroll_chances=1,
+            ),
             eft.RollPhaseStartEffect(),
         )
 

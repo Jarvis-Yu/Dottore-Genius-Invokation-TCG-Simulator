@@ -467,6 +467,7 @@ class ActionPhase(ph.Phase):
         new_dice = kept_dice + replacement_dice
         new_reroll_chances = player.dice_reroll_chances - 1
         new_effect_stack: EffectStack
+        assert new_reroll_chances >= 0, game_state
         if new_reroll_chances > 0:
             new_effect_stack = game_state.effect_stack
         else:

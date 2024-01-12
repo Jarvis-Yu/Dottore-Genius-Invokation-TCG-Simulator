@@ -267,7 +267,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         #### 3.3 General Event Card 0650 ####
         (card.TheBestestTravelCompanion, 650),
         (card.ChangingShifts, 651),
-        # (card.TossUp, 652),
+        (card.TossUp, 652),
         (card.Strategize, 653),
         (card.IHaventLostYet, 654),
         (card.LeaveItToMe, 655),

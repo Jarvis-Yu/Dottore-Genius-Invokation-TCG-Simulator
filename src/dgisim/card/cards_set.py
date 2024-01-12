@@ -107,6 +107,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     Strategize,
     TheBestestTravelCompanion,
     ThunderAndEternity,
+    TossUp,
     WhenTheCraneReturned,
     WhereIsTheUnseenRazor,
     WindAndFreedom,

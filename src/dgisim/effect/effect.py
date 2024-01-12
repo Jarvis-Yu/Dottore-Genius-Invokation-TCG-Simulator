@@ -125,8 +125,9 @@ __all__ = [
     "UpdateSupportEffect",
     "OverrideSupportEffect",
     "CastSkillEffect",
-    "BroadcastPreSkillInfoEffect",
     "BroadcastPostSkillInfoEffect",
+    "BroadcastPreSkillInfoEffect",
+    "SetRerollChancesEffect",
 ]
 
 ############################## base ##############################
@@ -2069,3 +2070,15 @@ class BroadcastPreSkillInfoEffect(DirectEffect):
                 skill_true_type=char.skill_actual_type(self.skill),
             ),
         )
+
+@dataclass(frozen=True, repr=False)
+class SetRerollChancesEffect(DirectEffect):
+    target_pid: Pid
+    reroll_chances: int
+
+    def execute(self, game_state: GameState) -> GameState:
+        return game_state.factory().f_player(
+            self.target_pid,
+            lambda p: p.factory().dice_reroll_chances(self.reroll_chances).build()
+        ).build()
+
