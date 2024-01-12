@@ -16,6 +16,8 @@ from typing import TYPE_CHECKING, cast
 from dataclasses import replace
 from typing_extensions import override
 
+import random
+
 from ..action import action as act
 from ..action import action_generator as acg
 from ..character import character as chr
@@ -123,6 +125,7 @@ __all__ = [
     "JoyousCelebration",
     "PassingOfJudgment",
     ## Other ##
+    "AbyssalSummons",
     "CalxsArts",
     "ChangingShifts",
     "ElementalResonanceEnduringRock",
@@ -2052,6 +2055,47 @@ class PassingOfJudgment(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
 
 
 # >>>>>>>>>>>>>>>>>>>> Event Cards / Arcane Legend Cards >>>>>>>>>>>>>>>>>>>>
+
+class AbyssalSummons(EventCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
+    SUMMONS: frozenset[type[sm.Summon]] = frozenset((
+        sm.CryoHilichurlShooterSummon,
+        sm.ElectroHilichurlShooterSummon,
+        sm.HilichurlBerserkerSummon,
+        sm.HydroSamachurlSummon,
+    ))
+
+    @override
+    @classmethod
+    def valid_in_deck(cls, deck: Deck) -> bool:
+        return 2 <= sum(
+            1
+            for char in deck.chars
+            if char.of_faction(Faction.MONSTER)
+        )
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        self_summons = game_state.get_player(pid).summons
+        backup_summons = set(cls.SUMMONS)
+        for summon in self_summons:
+            if type(summon) in backup_summons:
+                backup_summons.remove(type(summon))
+        if len(backup_summons) == 0:
+            return ()
+        return (
+            eft.AddSummonEffect(
+                target_pid=pid,
+                summon=random.choice(tuple(backup_summons)),
+            ),
+        )
+
 
 class CalxsArts(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDice({Element.OMNI: 1})

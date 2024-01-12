@@ -81,6 +81,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     VourukashasGlow,
 
     # Event Card
+    AbyssalSummons,
     CalxsArts,
     ChangingShifts,
     ElementalResonanceEnduringRock,

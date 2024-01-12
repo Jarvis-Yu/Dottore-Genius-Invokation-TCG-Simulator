@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (35/71 implemented)](#character-3571-implemented)
-  - [Card (131/248 implemented)](#card-131248-implemented)
+  - [Card (132/248 implemented)](#card-132248-implemented)
 
 ## Character (35/71 implemented)
 
@@ -56,7 +56,7 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (131/248 implemented)
+## Card (132/248 implemented)
 
 - [ ] Equipment Card (66/137):
   - [ ] Talent Card:
@@ -172,7 +172,7 @@ all I need now is to implement each card and character.
     - [x] Tenshukaku
     - [x] Vanarana
     - [ ] Weeping Willow of the Lake
-- [ ] Event Card (47/67):
+- [ ] Event Card (48/67):
   - [ ] Talent Card:
     - [x] Absorbing Prism
     - [x] Lightning Stiletto
@@ -213,7 +213,7 @@ all I need now is to implement each card and character.
     - [x] Joyous Celebration
     - [x] Passing of Judgment
   - [ ] Other Card:
-    - [ ] Abyssal Summons
+    - [x] Abyssal Summons
     - [ ] Blessing of the Divine Relic's Installation
     - [x] Calxs Arts
     - [x] Changing Shifts

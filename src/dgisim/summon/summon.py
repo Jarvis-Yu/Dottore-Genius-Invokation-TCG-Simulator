@@ -41,11 +41,15 @@ __all__ = [
     "BurningFlameSummon",
     "ChainsOfWardingThunderSummon",
     "ClusterbloomArrowSummon",
+    "CryoHilichurlShooterSummon",
     "CuileinAnbarSummon",
     "DandelionFieldSummon",
+    "ElectroHilichurlShooterSummon",
     "FierySanctumFieldSummon",
     "FrostflakeSekiNoToSummon",
+    "HilichurlBerserkerSummon",
     "HeraldOfFrostSummon",
+    "HydroSamachurlSummon",
     "LightfallSwordSummon",
     "OceanicMimicFrogSummon",
     "OceanicMimicRaptorSummon",
@@ -441,6 +445,14 @@ class ClusterbloomArrowSummon(_DmgPerRoundSummon):
 
 
 @dataclass(frozen=True, kw_only=True)
+class CryoHilichurlShooterSummon(_DmgPerRoundSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.CRYO
+
+
+@dataclass(frozen=True, kw_only=True)
 class CuileinAnbarSummon(_DmgPerRoundSummon):
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2
@@ -508,6 +520,14 @@ class DandelionFieldSummon(_DestroyOnNumSummon):
                 ),
             ], replace(self, usages=-1)
         return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class ElectroHilichurlShooterSummon(_DmgPerRoundSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.ELECTRO
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -586,6 +606,14 @@ class FrostflakeSekiNoToSummon(_DmgPerRoundSummon):
 
 
 @dataclass(frozen=True, kw_only=True)
+class HilichurlBerserkerSummon(_DestroyOnNumSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 2
+    ELEMENT: ClassVar[Element] = Element.PYRO
+
+
+@dataclass(frozen=True, kw_only=True)
 class HeraldOfFrostSummon(_DmgPerRoundSummon):
     usages: int = 3
     activated: bool = False
@@ -645,6 +673,14 @@ class HeraldOfFrostSummon(_DmgPerRoundSummon):
                 )
             ], replace(self, usages=0, activated=False)
         return super()._react_to_signal(game_state, source, signal)
+
+
+@dataclass(frozen=True, kw_only=True)
+class HydroSamachurlSummon(_DestroyOnNumSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.HYDRO
 
 
 @dataclass(frozen=True, kw_only=True)

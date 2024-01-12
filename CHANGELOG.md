@@ -51,6 +51,7 @@
     - Food Cards:
       - Adeptus' Temptation
     - Other Cards:
+      - Abyssal Summons
       - Guardian's Oath
       - Lyresong
       - Stone and Contracts
