@@ -278,7 +278,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         # (card.BlessingOfTheDivineRelicsInstallation, 660),
         (card.QuickKnit, 661),
         (card.SendOff, 662),
-        # (card.GuardiansOath, 663),
+        (card.GuardiansOath, 663),
         # (card.AbyssalSummons, 664),
         # (card.FatuiConspiracy, 665),
         # (card.FriendshipEternal, 666),
@@ -304,7 +304,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.MushroomPizza, 806),
         (card.LotusFlowerCrisp, 807),
         (card.TeyvatFriedEgg, 808),
-        # (card.AdeptusTemptation, 809),
+        (card.AdeptusTemptation, 809),
         (card.TandooriRoastChicken, 810),
         # (card.ButterCrab, 811),
 
@@ -632,6 +632,7 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.UnmovableMountainStatus, 457),
         (status.KingsSquireEffectStatus, 458),
         (status.MoonpiercerEffectStatus, 459),
+        (status.AdeptusTemptationStatus, 460),
 
         #### 3.2 Shield Character Status 525 ####
         (status.LithicGuardStatus, 525),

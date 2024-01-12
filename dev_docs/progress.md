@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (35/71 implemented)](#character-3571-implemented)
-  - [Card (129/248 implemented)](#card-129248-implemented)
+  - [Card (130/248 implemented)](#card-130248-implemented)
 
 ## Character (35/71 implemented)
 
@@ -56,7 +56,7 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (129/248 implemented)
+## Card (130/248 implemented)
 
 - [ ] Equipment Card (66/137):
   - [ ] Talent Card:
@@ -172,12 +172,12 @@ all I need now is to implement each card and character.
     - [x] Tenshukaku
     - [x] Vanarana
     - [ ] Weeping Willow of the Lake
-- [ ] Event Card (45/67):
+- [ ] Event Card (46/67):
   - [ ] Talent Card:
     - [x] Absorbing Prism
     - [x] Lightning Stiletto
   - [ ] Food Card:
-    - [ ] Adeptus' Temptation
+    - [x] Adeptus' Temptation
     - [ ] Butter Crab
     - [ ] Fish and Chips
     - [x] Jueyun Guoba

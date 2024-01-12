@@ -97,6 +97,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ElementalResonanceWovenWaters,
     ElementalResonanceWovenWeeds,
     ElementalResonanceWovenWinds,
+    GuardiansOath,
     IHaventLostYet,
     LeaveItToMe,
     Lyresong,
@@ -121,6 +122,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     PassingOfJudgment,
 
     ## Event Card / Food ##
+    AdeptusTemptation,
     JueyunGuoba,
     LotusFlowerCrisp,
     MondstadtHashBrown,

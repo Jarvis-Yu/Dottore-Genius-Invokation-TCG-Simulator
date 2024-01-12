@@ -48,6 +48,8 @@
       - Joyous Celebration
       - Passing of Judgment
       - Toss-Up
+    - Food Cards:
+      - Adeptus' Temptation
     - Other Cards:
       - Lyresong
       - Stone and Contracts

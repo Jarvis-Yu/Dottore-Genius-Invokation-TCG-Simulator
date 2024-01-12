@@ -1365,7 +1365,7 @@ class Fischl(Character):
                 target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                 element=Element.PIERCING,
                 damage=2,
-                damage_type=DamageType(elemental_burst=True),
+                damage_type=DamageType(elemental_burst=True, no_boost=True),
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -1474,7 +1474,7 @@ class Ganyu(Character):
                 target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                 element=Element.PIERCING,
                 damage=1,
-                damage_type=DamageType(elemental_burst=True),
+                damage_type=DamageType(elemental_burst=True, no_boost=True),
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -2136,7 +2136,7 @@ class Keqing(Character):
                 target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                 element=Element.PIERCING,
                 damage=3,
-                damage_type=DamageType(elemental_burst=True),
+                damage_type=DamageType(elemental_burst=True, no_boost=True),
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -3408,7 +3408,7 @@ class Tighnari(Character):
                 target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                 element=Element.PIERCING,
                 damage=1,
-                damage_type=DamageType(elemental_burst=True),
+                damage_type=DamageType(elemental_burst=True, no_boost=True),
             ),
             eft.ReferredDamageEffect(
                 source=source,

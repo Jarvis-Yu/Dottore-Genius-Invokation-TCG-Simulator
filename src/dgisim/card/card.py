@@ -105,6 +105,7 @@ __all__ = [
 
     # Event Card
     ## Food Card ##
+    "AdeptusTemptation",
     "JueyunGuoba",
     "LotusFlowerCrisp",
     "MintyMeatRolls",
@@ -138,6 +139,7 @@ __all__ = [
     "ElementalResonanceWovenWaters",
     "ElementalResonanceWovenWeeds",
     "ElementalResonanceWovenWinds",
+    "GuardiansOath",
     "IHaventLostYet",
     "LeaveItToMe",
     "Lyresong",
@@ -1667,6 +1669,21 @@ class VourukashasGlow(ArtifactEquipmentCard):
 # <<<<<<<<<<<<<<<<<<<< Event Cards / Food Cards <<<<<<<<<<<<<<<<<<<<
 
 
+class AdeptusTemptation(FoodCard, _CharTargetChoiceProvider):
+    _DICE_COST = AbstractDice({Element.ANY: 2})
+
+    @override
+    @classmethod
+    def food_effects(cls, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.StaticTargetInstruction)
+        return (
+            eft.AddCharacterStatusEffect(
+                instruction.target,
+                stt.AdeptusTemptationStatus,
+            ),
+        )
+
+
 class JueyunGuoba(FoodCard, _CharTargetChoiceProvider):
     _DICE_COST = AbstractDice({})
 
@@ -2403,6 +2420,31 @@ class ElementalResonanceWovenWinds(_ElementalResonanceDie):
     _ELEMENT = Element.ANEMO
 
 
+class GuardiansOath(EventCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDice({Element.OMNI: 4})
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.DiceOnlyInstruction)
+        efts: list[eft.Effect] = []
+        for summon in game_state.get_player(pid).summons:
+            efts.append(eft.RemoveSummonEffect(
+                target_pid=pid,
+                summon=type(summon),
+            ))
+        for summon in game_state.get_player(pid.other()).summons:
+            efts.append(eft.RemoveSummonEffect(
+                target_pid=pid,
+                summon=type(summon),
+            ))
+        return tuple(efts)
+
 class IHaventLostYet(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDice({})
 
@@ -2414,10 +2456,11 @@ class IHaventLostYet(EventCard, _DiceOnlyChoiceProvider):
                 game_state.get_player(pid)
                 .hidden_statuses
                 .just_find(stt.DeathThisRoundStatus).activated
-            ) and (
+            ) 
+            and (
                 stt.IHaventLostYetOnCooldownStatus not in
                 game_state.get_player(pid).combat_statuses
-        )
+            )
         )
 
     @override
