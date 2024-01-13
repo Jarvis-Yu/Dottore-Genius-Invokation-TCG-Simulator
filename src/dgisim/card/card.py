@@ -108,6 +108,7 @@ __all__ = [
     # Event Card
     ## Food Card ##
     "AdeptusTemptation",
+    "ButterCrab",
     "JueyunGuoba",
     "LotusFlowerCrisp",
     "MintyMeatRolls",
@@ -1687,6 +1688,23 @@ class AdeptusTemptation(FoodCard, _CharTargetChoiceProvider):
             ),
         )
 
+
+class ButterCrab(_RangedFoodCard):
+    _DICE_COST = AbstractDice({Element.ANY: 2})
+
+    @override
+    @classmethod
+    def ranged_food_effects(
+            cls,
+            instruction: act.DiceOnlyInstruction,
+            target: StaticTarget,
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddCharacterStatusEffect(
+                target=target,
+                status=stt.ButterCrabStatus,
+            ),
+        )
 
 class JueyunGuoba(FoodCard, _CharTargetChoiceProvider):
     _DICE_COST = AbstractDice({})

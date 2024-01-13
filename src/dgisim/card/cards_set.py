@@ -125,6 +125,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
 
     ## Event Card / Food ##
     AdeptusTemptation,
+    ButterCrab,
     JueyunGuoba,
     LotusFlowerCrisp,
     MondstadtHashBrown,

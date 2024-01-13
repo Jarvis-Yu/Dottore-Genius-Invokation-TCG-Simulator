@@ -135,6 +135,7 @@ __all__ = [
 
     # character status
     "AdeptusTemptationStatus",
+    "ButterCrabStatus",
     "FrozenStatus",
     "JueyunGuobaStatus",
     "KingsSquireEffectStatus",
@@ -2914,6 +2915,24 @@ class AdeptusTemptationStatus(CharacterStatus):
             ):
                 return item.delta_damage(self.DMG_BOOST), None
         return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], None
+        return [], self  # pragma: no cover
+
+
+@dataclass(frozen=True, kw_only=True)
+class ButterCrabStatus(CharacterStatus, StackedShieldStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    SHIELD_AMOUNT: ClassVar[int] = 2
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
 
     @override
     def _react_to_signal(

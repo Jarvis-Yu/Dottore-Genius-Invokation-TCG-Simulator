@@ -1,7 +1,7 @@
 Available Cards
 ===============
 
-133 of 248 cards in Genius Invokation TCG are available in the simulator.
+134 of 248 cards in Genius Invokation TCG are available in the simulator.
 (excluding character cards which are not counted as cards in ``dgisim``)
 
 Equipment Cards
@@ -147,6 +147,7 @@ Food Card
 ^^^^^^^^^
 
 * Adeptus' Temptation
+* Butter Crab
 * Jueyun Guoba
 * Lotus Flower Crisp
 * Minty Meat Rolls

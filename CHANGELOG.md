@@ -50,6 +50,7 @@
       - Toss-Up
     - Food Cards:
       - Adeptus' Temptation
+      - Butter Crab
     - Other Cards:
       - Abyssal Summons
       - Guardian's Oath

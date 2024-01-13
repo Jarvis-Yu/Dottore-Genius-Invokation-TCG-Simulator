@@ -307,7 +307,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.TeyvatFriedEgg, 808),
         (card.AdeptusTemptation, 809),
         (card.TandooriRoastChicken, 810),
-        # (card.ButterCrab, 811),
+        (card.ButterCrab, 811),
 
         #### 3.5 Character Event Card 0900 ####
         (card.LightningStiletto, 900),
@@ -635,6 +635,7 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.KingsSquireEffectStatus, 458),
         (status.MoonpiercerEffectStatus, 459),
         (status.AdeptusTemptationStatus, 460),
+        (status.ButterCrabStatus, 461),
 
         #### 3.2 Shield Character Status 525 ####
         (status.LithicGuardStatus, 525),
