@@ -159,3 +159,24 @@ class TestBennett(unittest.TestCase):
 
                 p1_combat_statuses = gsm.get_game_state().player1.combat_statuses
                 self.assertNotIn(status, p1_combat_statuses)
+
+    def test_inspiration_field_status_on_swap(self):
+        """
+        Tests that the status heals the character which triggered it instead of current active.
+        """
+        base_state = self.BASE_GAME
+        base_state = kill_character(base_state, character_id=1, pid=Pid.P1, hp=4)
+        base_state = kill_character(base_state, character_id=2, pid=Pid.P1, hp=4)
+        base_state = kill_character(base_state, character_id=3, pid=Pid.P1, hp=4)
+        base_state = AddCombatStatusEffect(Pid.P1, WhenTheCraneReturnedStatus).execute(base_state)
+        base_state = AddCombatStatusEffect(Pid.P1, InspirationFieldStatus).execute(base_state)
+
+        game_state = base_state
+
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
+        p1ac = p1_active_char(game_state)
+        assert p1ac.id == 3
+        p1c1, p1c2, p1c3 = game_state.player1.characters.get_characters()
+        self.assertEqual(p1c1.hp, 4)
+        self.assertEqual(p1c2.hp, 6)
+        self.assertEqual(p1c3.hp, 4)

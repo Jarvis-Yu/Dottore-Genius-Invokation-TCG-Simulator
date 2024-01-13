@@ -3397,8 +3397,9 @@ class GrandExpectationStatus(TalentEquipmentStatus):
 @dataclass(frozen=True, kw_only=True)
 class _InspirationFieldStatus(CombatStatus, _UsageStatus):
     usages: int = 2  # duration
-    MAX_USAGES: ClassVar[int] = 2
     activated: bool = False
+    target_char_id: None | int = None
+    MAX_USAGES: ClassVar[int] = 2
     DMG_BOOST: ClassVar[int] = 2
     BOOST_LOCK: ClassVar[bool]
     HP_CAP: ClassVar[int] = 7
@@ -3422,13 +3423,13 @@ class _InspirationFieldStatus(CombatStatus, _UsageStatus):
     ) -> Self:
         if info_type is Informables.POST_SKILL_USAGE:
             assert isinstance(information, SkillIEvent)
-            if self.activated:
-                return self
-            active_char_id = game_state.get_player(
-                status_source.pid
-            ).just_get_active_character().id
-            if information.source == StaticTarget(status_source.pid, Zone.CHARACTERS, active_char_id):
-                return replace(self, activated=True)
+            if (
+                    not self.activated
+                    and information.source.pid is status_source.pid
+            ):
+                assert self.target_char_id is None
+                assert isinstance(information.source.id, int)
+                return replace(self, activated=True, target_char_id=information.source.id)
         return self
 
     @override
@@ -3462,18 +3463,19 @@ class _InspirationFieldStatus(CombatStatus, _UsageStatus):
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION:
-            if not self.activated:
-                return [], self
-            active_char = game_state.get_player(source.pid).just_get_active_character()
-            if active_char.hp >= self.HP_CAP:
-                return [], replace(self, usages=0, activated=False)
+        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+            assert self.target_char_id is not None
+            target = StaticTarget.from_char_id(source.pid, self.target_char_id)
+            char = game_state.get_character_target(target)
+            assert char is not None
+            if char.hp >= self.HP_CAP:
+                return [], replace(self, usages=0, activated=False, target_char_id=None)
             return [
                 eft.RecoverHPEffect(
-                    target=StaticTarget(source.pid, Zone.CHARACTERS, active_char.id),
+                    target=target,
                     recovery=self.RECOVERY,
                 )
-            ], replace(self, usages=0, activated=False)
+            ], replace(self, usages=0, activated=False, target_char_id=None)
         if signal is TriggeringSignal.ROUND_END:
             return [], replace(self, usages=-1)
         return [], self
