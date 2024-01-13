@@ -50,7 +50,7 @@ class _TempTestDmgListenerStatus(PlayerHiddenStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class _TempTestInfiniteRevivalStatus(HiddenStatus, RevivalStatus):
+class _TempTestInfiniteRevivalStatus(CharacterHiddenStatus, RevivalStatus):
     REACTABLE_SIGNALS = frozenset({
         TriggeringSignal.TRIGGER_REVIVAL,
     })

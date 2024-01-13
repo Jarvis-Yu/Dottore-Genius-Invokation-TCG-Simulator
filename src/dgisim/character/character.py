@@ -1782,6 +1782,10 @@ class KaedeharaKazuha(Character):
         if reaction is not None and reaction.first_elem in stt._MIDARE_RANZAN_MAP:
             midare_to_use = stt._MIDARE_RANZAN_MAP[reaction.first_elem]
         effects: tuple[eft.Effect, ...] = (
+            eft.AddCharacterStatusEffect(
+                target=source,
+                status=stt.ChihayaburuStatus,
+            ),
             eft.ReferredDamageEffect(
                 source=source,
                 target=DynamicCharacterTarget.OPPO_ACTIVE,
@@ -1805,26 +1809,6 @@ class KaedeharaKazuha(Character):
                 ),
             )
         return effects
-
-    @override
-    def _post_skill(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            skill_type: CharacterSkill,
-            effects: tuple[eft.Effect, ...],
-    ) -> tuple[eft.Effect, ...]:
-        """ override for the afterwards swap of Kazuha's elemental skill """
-        appended_effects: tuple[eft.Effect, ...] = super()._post_skill(
-            game_state, source, skill_type, effects
-        )
-        if skill_type is CharacterSkill.SKILL2:
-            appended_effects += (
-                eft.ForwardSwapCharacterCheckEffect(
-                    target_player=source.pid,
-                ),
-            )
-        return appended_effects
 
     @override
     def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:

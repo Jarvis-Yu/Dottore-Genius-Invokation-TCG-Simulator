@@ -48,7 +48,7 @@ __all__ = [
     # type
     "PlayerHiddenStatus",
     "PersonalStatus",
-    "HiddenStatus",  # it should be statuses used to record character-talent related data
+    "CharacterHiddenStatus",  # it should be statuses used to record character-talent related data
     "EquipmentStatus",  # talent / weapon / artifact
     "TalentEquipmentStatus",
     "WeaponEquipmentStatus",
@@ -197,6 +197,7 @@ __all__ = [
     ## Jean ##
     "LandsOfDandelionStatus",
     ## Kaedehara Kazuha ##
+    "ChihayaburuStatus",
     "MidareRanzanStatus",
     "MidareRanzanCryoStatus",
     "MidareRanzanElectroStatus",
@@ -434,7 +435,7 @@ class Status:
         from ..summon import summon as sm
         from ..support import support as sp
         # do the removal or update of the status
-        if isinstance(self, HiddenStatus) \
+        if isinstance(self, CharacterHiddenStatus) \
                 or isinstance(self, EquipmentStatus) \
                 or isinstance(self, CharacterStatus):
             if new_status is None:
@@ -660,7 +661,7 @@ class PersonalStatus(Status):
 
 
 @dataclass(frozen=True)
-class HiddenStatus(PersonalStatus):
+class CharacterHiddenStatus(PersonalStatus):
     """
     Basic status, describing character talents
     """
@@ -3503,7 +3504,7 @@ class ChonghuasFrostFieldStatus(CombatStatus, _InfusionStatus):
 #### Collei ####
 
 @dataclass(frozen=True, kw_only=True)
-class ColleiTalentStatus(HiddenStatus):
+class ColleiTalentStatus(CharacterHiddenStatus):
     """ Saves the elemental skill usages of Collei per round """
     elemental_skill_used: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
@@ -3670,7 +3671,7 @@ class StalwartAndTrueStatus(TalentEquipmentStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class ElectroCrystalCoreHiddenStatus(HiddenStatus):
+class ElectroCrystalCoreHiddenStatus(CharacterHiddenStatus):
     REACTABLE_SIGNALS = frozenset({
         TriggeringSignal.INIT_GAME_START,
     })
@@ -3853,7 +3854,7 @@ class PaidInFullStatus(TalentEquipmentStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class StealthMasterStatus(HiddenStatus):
+class StealthMasterStatus(CharacterHiddenStatus):
     REACTABLE_SIGNALS = frozenset({
         TriggeringSignal.INIT_GAME_START,
     })
@@ -3924,7 +3925,7 @@ class StellarPredatorStatus(TalentEquipmentStatus):
 #### Ganyu ####
 
 @dataclass(frozen=True, kw_only=True)
-class GanyuTalentStatus(HiddenStatus):
+class GanyuTalentStatus(CharacterHiddenStatus):
     elemental_skill2ed: bool = False
 
     @override
@@ -4038,7 +4039,7 @@ class ProliferatingSporesStatus(TalentEquipmentStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class RadicalVitalityHiddenStatus(HiddenStatus):
+class RadicalVitalityHiddenStatus(CharacterHiddenStatus):
     REACTABLE_SIGNALS = frozenset({
         TriggeringSignal.INIT_GAME_START,
         TriggeringSignal.REVIVAL_GAME_START,
@@ -4169,6 +4170,24 @@ class LandsOfDandelionStatus(TalentEquipmentStatus):
 
 #### Kaedehara Kazuha ####
 
+
+@dataclass(frozen=True, kw_only=True)
+class ChihayaburuStatus(CharacterHiddenStatus):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION:
+            return [
+                eft.ForwardSwapCharacterCheckEffect(
+                    target_player=source.pid,
+                ),
+            ], None
+        return [], self
 
 @dataclass(frozen=True, kw_only=True)
 class MidareRanzanStatus(CharacterStatus):
@@ -4434,7 +4453,7 @@ class ColdBloodedStrikeStatus(TalentEquipmentStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class KamisatoArtSenhoStatus(HiddenStatus):
+class KamisatoArtSenhoStatus(CharacterHiddenStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.SELF_SWAP,
     ))
@@ -4535,7 +4554,7 @@ class KantenSenmyouBlessingStatus(TalentEquipmentStatus, _UsageStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class KeqingTalentStatus(HiddenStatus):
+class KeqingTalentStatus(CharacterHiddenStatus):
     can_infuse: bool
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.COMBAT_ACTION,
@@ -4776,7 +4795,7 @@ class IllusoryBubbleStatus(CombatStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class IllusoryTorrentStatus(HiddenStatus):
+class IllusoryTorrentStatus(CharacterHiddenStatus):
     available: bool = True
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
@@ -5245,7 +5264,7 @@ class FortunePreservingTalismanStatus(CombatStatus, _UsageStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class QiqiTalentStatus(HiddenStatus):
+class QiqiTalentStatus(CharacterHiddenStatus):
     revival_count: int = 0
     MAX_COUNT: ClassVar[int] = 2
 
@@ -5479,7 +5498,7 @@ class RangeStanceStatus(CharacterStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class RiptideCounterStatus(HiddenStatus, _UsageStatus):
+class RiptideCounterStatus(CharacterHiddenStatus, _UsageStatus):
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2
     AUTO_DESTROY: ClassVar[bool] = False
@@ -5566,7 +5585,7 @@ class RiptideStatus(CharacterStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class TideWithholderStatus(HiddenStatus):
+class TideWithholderStatus(CharacterHiddenStatus):
     REACTABLE_SIGNALS = frozenset({
         TriggeringSignal.INIT_GAME_START,
         TriggeringSignal.REVIVAL_GAME_START,

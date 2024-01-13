@@ -309,7 +309,7 @@ class TriggerStatusEffect(TriggerrbleEffect):
         effects: list[Effect] = []
 
         statuses: Statuses
-        if issubclass(self.status, stt.HiddenStatus):
+        if issubclass(self.status, stt.CharacterHiddenStatus):
             statuses = character.hidden_statuses
         elif issubclass(self.status, stt.EquipmentStatus | stt.CharacterStatus):
             statuses = character.character_statuses
@@ -1611,7 +1611,7 @@ class AddCharacterStatusEffect(DirectEffect):
         character = game_state.get_target(self.target)
         from ..character.character import Character
         assert isinstance(character, Character)
-        if issubclass(self.status, stt.HiddenStatus):  # pragma: no cover
+        if issubclass(self.status, stt.CharacterHiddenStatus):  # pragma: no cover
             character = character.factory().f_hiddens(
                 lambda ts: ts.update_status(self.status())
             ).build()
@@ -1667,7 +1667,7 @@ class RemoveCharacterStatusEffect(DirectEffect):
         if character is None:  # pragma: no cover
             return game_state
         new_character = character
-        if issubclass(self.status, stt.HiddenStatus):  # pragma: no cover
+        if issubclass(self.status, stt.CharacterHiddenStatus):  # pragma: no cover
             new_character = character.factory().f_hiddens(
                 lambda ts: ts.remove(self.status)
             ).build()
@@ -1698,7 +1698,7 @@ class UpdateCharacterStatusEffect(DirectEffect):
         character = game_state.get_target(self.target)
         from ..character.character import Character
         assert isinstance(character, Character)
-        if isinstance(self.status, stt.HiddenStatus):  # pragma: no cover
+        if isinstance(self.status, stt.CharacterHiddenStatus):  # pragma: no cover
             character = character.factory().f_hiddens(
                 lambda ts: ts.update_status(self.status)
             ).build()
@@ -1729,7 +1729,7 @@ class OverrideCharacterStatusEffect(DirectEffect):
         character = game_state.get_target(self.target)
         from ..character.character import Character
         assert isinstance(character, Character)
-        if isinstance(self.status, stt.HiddenStatus):
+        if isinstance(self.status, stt.CharacterHiddenStatus):
             character = character.factory().f_hiddens(
                 lambda ts: ts.update_status(self.status, override=True)
             ).build()

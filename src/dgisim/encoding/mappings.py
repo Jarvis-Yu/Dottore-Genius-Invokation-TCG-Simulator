@@ -811,6 +811,7 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.MidareRanzanHydroStatus, 12707),
         (status.MidareRanzanPyroStatus, 12708),
         (status.MidareRanzanElectroStatus, 12709),
+        (status.ChihayaburuStatus, 12710),
         ## Wanderer 12720 ##
         (status.DescentStatus, 12720),
         (status.GalesOfReverieStatus, 12721),
