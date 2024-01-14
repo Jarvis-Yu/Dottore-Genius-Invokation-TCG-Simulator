@@ -221,9 +221,8 @@ all I need now is to implement each card and character.
     - [x] Changing Shifts
     - [ ] Fatui Conspiracy
     - [ ] Flickering Four-Leaf Sigil
-    - [ ] Guardian's Oath
-    - [ ] Heavy Strike
     - [x] Guardian's Oath
+    - [ ] Heavy Strike
     - [x] I Haven't Lost Yet!
     - [x] Leave It to Me!
     - [x] Lyresong
