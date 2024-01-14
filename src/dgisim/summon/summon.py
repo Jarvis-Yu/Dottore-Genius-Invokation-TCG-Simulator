@@ -687,7 +687,7 @@ class HydroSamachurlSummon(_DestroyOnNumSummon):
 class LightfallSwordSummon(Summon, stt._UsageStatus):
     usages: int = 0
     skill_used: None | CharacterSkillType = None
-    skill_source: None | StaticTarget = None
+    skill_source_id: None | int = None
     AUTO_DESTROY: ClassVar[bool] = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.COMBAT_ACTION,
@@ -717,10 +717,11 @@ class LightfallSwordSummon(Summon, stt._UsageStatus):
                 return self
             from ..character.character import Eula
             if isinstance(source_char, Eula):
+                assert isinstance(information.source.id, int)
                 return replace(
                     self,
                     skill_used=information.skill_true_type,
-                    skill_source=information.source,
+                    skill_source_id=information.source.id,
                 )
         return self
 
@@ -729,8 +730,10 @@ class LightfallSwordSummon(Summon, stt._UsageStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.skill_used is not None:
-            assert self.skill_source is not None
-            source_char = game_state.get_character_target(self.skill_source)
+            assert self.skill_source_id is not None
+            source_char = game_state.get_character_target(
+                StaticTarget.from_char_id(source.pid, self.skill_source_id)
+            )
             from ..character.character import Eula
             if not (
                     source_char is not None
@@ -739,8 +742,8 @@ class LightfallSwordSummon(Summon, stt._UsageStatus):
             ):
                 return [], self
             if self.skill_used is CharacterSkillType.ELEMENTAL_SKILL and source_char.talent_equipped():
-                return [], replace(self, usages=3, skill_used=None, skill_source=None)
-            return [], replace(self, usages=2, skill_used=None, skill_source=None)
+                return [], replace(self, usages=3, skill_used=None, skill_source_id=None)
+            return [], replace(self, usages=2, skill_used=None, skill_source_id=None)
         elif signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             return [
                 eft.ReferredDamageEffect(

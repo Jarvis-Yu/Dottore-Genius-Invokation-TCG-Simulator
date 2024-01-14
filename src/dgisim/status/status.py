@@ -634,7 +634,7 @@ class Status:
             elif value is None:
                 ret_val.append(0)
             else:
-                raise Exception(f"unknown type {type(value)}")
+                raise Exception(f"unknown type {type(value)} from {self}")
         fillings = encoding_plan.STATUS_FIXED_LEN - len(ret_val)
         if fillings < 0:
             raise Exception(f"status {self} has too many fields")

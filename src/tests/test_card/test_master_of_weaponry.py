@@ -44,6 +44,9 @@ class TestMasterOfWeaponry(unittest.TestCase):
         base_state = replace_character(base_state, Pid.P1, Kaeya, 1)
         base_state = replace_character(base_state, Pid.P1, Kaeya, 2)
         base_state = replace_character(base_state, Pid.P1, Klee, 3)
+        base_state = replace_hand_cards(base_state, Pid.P1, Cards({
+            MasterOfWeaponry: 2,
+        }))
         
         game_state = base_state
         game_state = OverrideCharacterStatusEffect(
@@ -72,3 +75,28 @@ class TestMasterOfWeaponry(unittest.TestCase):
                 dice=ActualDice.from_empty(),
             ),
         ))
+
+        game_state = base_state
+
+        # cannot use card when transfer is not available (no weapon to transfer)
+        self.assertFalse(MasterOfWeaponry.loosely_usable(game_state, Pid.P2))
+
+        # cannot use card when no weapon can be transferred to other characters legally
+        game_state = AddCharacterStatusEffect(
+            target=StaticTarget.from_char_id(Pid.P1, 3),
+            status=FruitOfFulfillmentStatus,
+        ).execute(game_state)
+        self.assertFalse(MasterOfWeaponry.loosely_usable(game_state, Pid.P2))
+
+        # check action generator excludes first chars leading to no choice for second
+        game_state = AddCharacterStatusEffect(
+            target=StaticTarget.from_char_id(Pid.P1, 2),
+            status=AquilaFavoniaStatus,
+        ).execute(game_state)
+        assert MasterOfWeaponry.loosely_usable(game_state, Pid.P1)
+        acg = MasterOfWeaponry.action_generator(game_state, Pid.P1)
+        assert acg is not None
+        choices = acg.choices()
+        self.assertNotIn(StaticTarget.from_char_id(Pid.P1, 1), choices)
+        self.assertIn(StaticTarget.from_char_id(Pid.P1, 2), choices)
+        self.assertNotIn(StaticTarget.from_char_id(Pid.P1, 3), choices)

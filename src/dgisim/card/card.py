@@ -681,7 +681,10 @@ class _CharTargetChoiceProvider(Card):
 class _DualCharTargetChoiceProvider(Card):
     @classmethod
     def _valid_first_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:  # pragma: no cover
-        return not char.is_defeated()
+        return not char.is_defeated() and any(
+            cls._valid_second_char(game_state, pid, char, next_char)
+            for next_char in game_state.get_player(pid).characters
+        )
 
     @classmethod
     def _valid_second_char(
@@ -696,12 +699,10 @@ class _DualCharTargetChoiceProvider(Card):
     @override
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        for char in game_state.get_player(pid).characters:
-            if cls._valid_first_char(game_state, pid, char):
-                for next_char in game_state.get_player(pid).characters:
-                    if cls._valid_second_char(game_state, pid, char, next_char):
-                        return True
-        return False
+        return any(
+            cls._valid_first_char(game_state, pid, char)
+            for char in game_state.get_player(pid).characters
+        )
 
     @override
     @classmethod
