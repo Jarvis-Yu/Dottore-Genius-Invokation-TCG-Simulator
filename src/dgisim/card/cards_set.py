@@ -150,6 +150,8 @@ _DEFAULT_CARDS: list[type[Card]] = [
     Paimon,
     Rana,
     Setaria,
+    Timaeus,
+    Wagner,
     Xudong,
     YayoiNanatsuki,
     ## Support Card / Item ##

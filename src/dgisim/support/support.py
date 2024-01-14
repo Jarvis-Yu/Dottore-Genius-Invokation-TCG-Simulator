@@ -18,7 +18,7 @@ from itertools import chain
 from typing import ClassVar, TYPE_CHECKING
 from typing_extensions import Self, override
 
-from ..dice import ActualDice
+from ..dice import AbstractDice, ActualDice
 from ..effect import effect as eft
 from ..event import *
 from ..status import status as stt
@@ -50,6 +50,8 @@ __all__ = [
     "PaimonSupport",
     "RanaSupport",
     "SetariaSupport",
+    "TimaeusSupport",
+    "WagnerSupport",
     "XudongSupport",
     "YayoiNanatsukiSupport",
 
@@ -171,7 +173,7 @@ class DunyarzadSupport(Support, stt._UsageLivingStatus):
             item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
-        if signal is Preprocessables.CARD:
+        if signal is Preprocessables.CARD1:
             assert isinstance(item, CardPEvent)
             from ..card.card import CompanionCard
             if (
@@ -316,7 +318,7 @@ class MamereSupport(Support, stt._UsageStatus):
             item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
-        if signal is Preprocessables.CARD and self.activated:
+        if signal is Preprocessables.CARD1 and self.activated:
             from ..card.card import Mamere
             assert isinstance(item, CardPEvent)
             if (
@@ -369,7 +371,7 @@ class MasterZhangSupport(Support, stt._UsageLivingStatus):
             item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
-        if signal is Preprocessables.CARD:
+        if signal is Preprocessables.CARD1:
             assert isinstance(item, CardPEvent)
             from ..card.card import WeaponEquipmentCard
             if (
@@ -498,6 +500,107 @@ class SetariaSupport(Support, stt._UsageStatus):
                 ], replace(self, usages=-1)
         return [], self
 
+
+@dataclass(frozen=True, kw_only=True)
+class TimaeusSupport(Support, stt._UsageLivingStatus):
+    usages: int = 2
+    used: bool = False
+    MAX_USAGES: ClassVar[int] = BIG_INT
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.CARD2:
+            assert isinstance(item, CardPEvent)
+            from ..card.card import ArtifactEquipmentCard
+            if (
+                    item.pid is status_source.pid
+                    and issubclass(item.card_type, ArtifactEquipmentCard)
+                    and item.dice_cost.can_cost_less_elem()
+                    and item.dice_cost.num_dice() <= self.usages
+                    and not self.used
+            ):
+                return (
+                    item.with_new_cost(AbstractDice.from_empty()), 
+                    replace(
+                        self,
+                        usages=self.usages - item.dice_cost.num_dice(),
+                        used=True,
+                    ),
+                )
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], replace(self, usages=1, used=False)
+        return [], self
+
+    @override
+    def content_str(self) -> str:
+        return f"({self.usages}{'*' if not self.used else ''})"
+
+
+@dataclass(frozen=True, kw_only=True)
+class WagnerSupport(Support, stt._UsageLivingStatus):
+    usages: int = 2
+    used: bool = False
+    MAX_USAGES: ClassVar[int] = BIG_INT
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.CARD2:
+            assert isinstance(item, CardPEvent)
+            from ..card.card import WeaponEquipmentCard
+            if (
+                    item.pid is status_source.pid
+                    and issubclass(item.card_type, WeaponEquipmentCard)
+                    and item.dice_cost.can_cost_less_elem()
+                    and item.dice_cost.num_dice() <= self.usages
+                    and not self.used
+            ):
+                return (
+                    item.with_new_cost(AbstractDice.from_empty()), 
+                    replace(
+                        self,
+                        usages=self.usages - item.dice_cost.num_dice(),
+                        used=True,
+                    ),
+                )
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], replace(self, usages=1, used=False)
+        return [], self
+
+    @override
+    def content_str(self) -> str:
+        return f"({self.usages}{'*' if not self.used else ''})"
+
+
 @dataclass(frozen=True, kw_only=True)
 class XudongSupport(Support):
     usages: int = 1
@@ -514,23 +617,19 @@ class XudongSupport(Support):
             item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
-        if signal is Preprocessables.CARD:
+        if signal is Preprocessables.CARD1:
             assert isinstance(item, CardPEvent)
             from ..card.card import FoodCard
-            if item.pid is status_source.pid \
-                    and issubclass(item.card_type, FoodCard) \
-                    and item.dice_cost.num_dice() > 0 \
-                    and self.usages > 0:
-                # note that this only handle cases when food requires only one kind of dice
-                major_elem: Element
-                if item.dice_cost[Element.OMNI] == item.dice_cost.num_dice():
-                    major_elem = Element.OMNI
-                elif item.dice_cost[Element.ANY] == item.dice_cost.num_dice():
-                    major_elem = Element.ANY
-                else:
-                    raise NotImplementedError
-                new_cost = (item.dice_cost - {major_elem: self.COST_DEDUCTION}).validify()
-                return replace(item, dice_cost=new_cost), replace(self, usages=self.usages - 1)
+            if (
+                    item.pid is status_source.pid
+                    and issubclass(item.card_type, FoodCard)
+                    and item.dice_cost.can_cost_less_elem()
+                    and self.usages > 0
+            ):
+                return (
+                    item.with_new_cost(item.dice_cost.cost_less_elem(self.COST_DEDUCTION)), 
+                    replace(self, usages=self.usages - 1),
+                )
         return super()._preprocess(game_state, status_source, item, signal)
 
     @override
@@ -563,7 +662,7 @@ class YayoiNanatsukiSupport(Support, stt._UsageLivingStatus):
             item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
-        if signal is Preprocessables.CARD:
+        if signal is Preprocessables.CARD1:
             assert isinstance(item, CardPEvent)
             from ..card.card import ArtifactEquipmentCard
             if (
@@ -618,7 +717,7 @@ class NRESupport(Support, stt._UsageLivingStatus):
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
         from ..card.card import FoodCard
-        if signal is Preprocessables.CARD:
+        if signal is Preprocessables.CARD1:
             assert isinstance(item, CardPEvent)
             if (
                     not self.activated
@@ -779,7 +878,7 @@ class SumeruCitySupport(Support, stt._UsageLivingStatus):
                     item.with_new_cost(item.dice_cost.cost_less_elem(1)),
                     replace(self, usages=self.usages - 1),
                 )
-        elif signal is Preprocessables.CARD:
+        elif signal is Preprocessables.CARD1:
             # though the part below is kinda a duplicate of the above block of code,
             # the CardPEvent may become more different with ActionPEvent in the future,
             # so leave it as it is.

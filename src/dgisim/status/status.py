@@ -2212,7 +2212,7 @@ class AncientCourtyardStatus(CombatStatus):
             item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
-        if signal is Preprocessables.CARD:
+        if signal is Preprocessables.CARD1:
             assert isinstance(item, CardPEvent)
             from ..card.card import WeaponEquipmentCard, ArtifactEquipmentCard
             if (
@@ -2552,7 +2552,7 @@ class LyresongStatus(CombatStatus):
             item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
-        if signal is Preprocessables.CARD:
+        if signal is Preprocessables.CARD1:
             assert isinstance(item, CardPEvent)
             from ..card.card import ArtifactEquipmentCard
             if (
@@ -2622,7 +2622,7 @@ class PassingOfJudgmentStatus(CombatStatus, _UsageStatus):
             item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
-        if signal is Preprocessables.CARD:
+        if signal is Preprocessables.CARD1:
             assert isinstance(item, CardPEvent)
             from ..card.card import EventCard
             if (
@@ -2833,7 +2833,7 @@ class WhereIsTheUnseenRazorStatus(CombatStatus):
             item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
-        if signal is Preprocessables.CARD:
+        if signal is Preprocessables.CARD1:
             assert isinstance(item, CardPEvent)
             from ..card.card import WeaponEquipmentCard
             if (

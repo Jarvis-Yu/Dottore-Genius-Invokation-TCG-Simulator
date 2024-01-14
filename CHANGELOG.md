@@ -39,6 +39,8 @@
     - Master Zhang
     - Rana
     - Setaria
+    - Timaeus
+    - Wagner
     - Yayoi Nanatsuki
   - Event Cards:
     - Arcane Legend Cards:

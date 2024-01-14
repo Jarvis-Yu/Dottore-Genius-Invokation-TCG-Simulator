@@ -174,6 +174,8 @@ __all__ = [
     "Paimon",
     "Rana",
     "Setaria",
+    "Timaeus",
+    "Wagner",
     "Xudong",
     "YayoiNanatsuki",
     ## Item ##
@@ -312,12 +314,19 @@ class Card:
         game_state, card_event = StatusProcessing.preprocess_by_all_statuses(
             game_state=game_state,
             pid=pid,
-            pp_type=Preprocessables.CARD,
+            pp_type=Preprocessables.CARD1,
             item=CardPEvent(
                 pid=pid,
                 card_type=cls,
                 dice_cost=cls._DICE_COST,
             ),
+        )
+        assert isinstance(card_event, CardPEvent)
+        game_state, card_event = StatusProcessing.preprocess_by_all_statuses(
+            game_state=game_state,
+            pid=pid,
+            pp_type=Preprocessables.CARD2,
+            item=card_event,
         )
         assert isinstance(card_event, CardPEvent)
         return game_state, card_event.dice_cost
@@ -338,12 +347,19 @@ class Card:
         game_state, card_event = StatusProcessing.preprocess_by_all_statuses(
             game_state=game_state,
             pid=pid,
-            pp_type=Preprocessables.CARD,
+            pp_type=Preprocessables.CARD1,
             item=CardPEvent(
                 pid=pid,
                 card_type=cls,
                 dice_cost=cls._DICE_COST,
             ),
+        )
+        assert isinstance(card_event, CardPEvent)
+        game_state, card_event = StatusProcessing.preprocess_by_all_statuses(
+            game_state=game_state,
+            pid=pid,
+            pp_type=Preprocessables.CARD2,
+            item=card_event,
         )
         assert isinstance(card_event, CardPEvent)
         return game_state, card_event
@@ -3260,6 +3276,58 @@ class Rana(CompanionCard):
 class Setaria(CompanionCard):
     _DICE_COST = AbstractDice({Element.OMNI: 1})
     _SUPPORT_STATUS = sp.SetariaSupport
+
+
+class Timaeus(CompanionCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
+    _SUPPORT_STATUS = sp.TimaeusSupport
+
+    @classmethod
+    def _effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+    ) -> tuple[eft.Effect, ...]:
+        initial_deck = game_state.get_player(pid).initial_deck.cards
+        if sum([
+                initial_deck[card]
+                for card in initial_deck
+                if issubclass(card, ArtifactEquipmentCard)
+        ]) < 6:
+            return ()
+        return (
+            eft.DrawRandomCardOfTypeEffect(
+                pid=pid,
+                num=1,
+                card_type=ArtifactEquipmentCard,
+            ),
+        )
+
+
+class Wagner(CompanionCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
+    _SUPPORT_STATUS = sp.WagnerSupport
+
+    @classmethod
+    def _effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+    ) -> tuple[eft.Effect, ...]:
+        initial_deck = game_state.get_player(pid).initial_deck.cards
+        if len([
+                card
+                for card in initial_deck
+                if issubclass(card, WeaponEquipmentCard)
+        ]) < 3:
+            return ()
+        return (
+            eft.DrawRandomCardOfTypeEffect(
+                pid=pid,
+                num=1,
+                card_type=WeaponEquipmentCard,
+            ),
+        )
 
 
 class Xudong(CompanionCard):

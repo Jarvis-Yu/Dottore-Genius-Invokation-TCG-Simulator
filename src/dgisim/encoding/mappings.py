@@ -213,8 +213,8 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         #### 2.2 Companion Card 0350 ####
         (card.Paimon, 350),
         # (card.Katheryne, 351),
-        # (card.Timaeus, 352),
-        # (card.Wagner, 353),
+        (card.Timaeus, 352),
+        (card.Wagner, 353),
         # (card.ChefMao, 354),
         # (card.Tubby, 355),
         # (card.Timmie, 356),
@@ -920,8 +920,8 @@ SUPP_MAPPING: dict[type["Support"], int] = HashableDict({
         #### Companion 100 ####
         (support.PaimonSupport, 100),
         # (support.KatheryneSupport, 101),
-        # (support.TimaeusSupport, 102),
-        # (support.WagnerSupport, 103),
+        (support.TimaeusSupport, 102),
+        (support.WagnerSupport, 103),
         # (support.ChefMaoSupport, 104),
         # (support.TubbySupport, 105),
         # (support.TimmieSupport, 106),

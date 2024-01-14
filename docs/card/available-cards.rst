@@ -1,7 +1,7 @@
 Available Cards
 ===============
 
-137 of 248 cards in Genius Invokation TCG are available in the simulator.
+139 of 248 cards in Genius Invokation TCG are available in the simulator.
 (excluding character cards which are not counted as cards in ``dgisim``)
 
 Equipment Cards
@@ -112,6 +112,8 @@ Companion Card
 * Paimon
 * Rana
 * Setaria
+* Timaeus
+* Wagner
 * Xudong
 * Yayoi Nanatsuki
 

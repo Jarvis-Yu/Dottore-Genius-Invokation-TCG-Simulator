@@ -15,7 +15,8 @@ class Preprocessables(Enum):
     # Skill
     SKILL = "Skill"                    # same as SWAP but for skill
     # Card
-    CARD = "Card"                      # same as SWAP but for card
+    CARD1 = "Card1"                    # same as SWAP but for card, for the first time
+    CARD2 = "Card2"                    # same as SWAP but for card, for the second time
     # Damages
     DMG_ELEMENT = "DmgElement"         # To determine the element
     DMG_REACTION = "DmgReaction"       # To determine the reaction
