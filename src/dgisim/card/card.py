@@ -149,6 +149,7 @@ __all__ = [
     "LeaveItToMe",
     "Lyresong",
     "MasterOfWeaponry",
+    "NatureAndWisdom",
     "QuickKnit",
     "SendOff",
     "Starsigns",
@@ -2859,6 +2860,40 @@ class MasterOfWeaponry(EventCard, _DualCharTargetChoiceProvider):
                 target=instruction.target,
                 status=type(weapon_status),
             ),
+        )
+
+
+class NatureAndWisdom(EventCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
+
+    @override
+    @classmethod
+    def valid_in_deck(cls, deck: Deck) -> bool:
+        return 2 <= sum(
+            1
+            for char in deck.chars
+            if char.of_faction(Faction.SUMERU)
+        )
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.DiceOnlyInstruction)
+        return (
+            eft.DrawRandomCardEffect(
+                pid=Pid.P1,
+                num=1,
+            ),
+            eft.SetRedrawChancesEffect(
+                target_pid=pid,
+                redraw_chances=1,
+            ),
+            eft.CardSelectPhaseStartEffect(),
         )
 
 

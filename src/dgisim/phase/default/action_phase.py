@@ -472,12 +472,48 @@ class ActionPhase(ph.Phase):
             new_effect_stack = game_state.effect_stack
         else:
             # removes rolling phase effect
-            new_effect_stack = game_state.effect_stack.pop()[0]
+            new_effect_stack, _ = game_state.effect_stack.pop()
         return game_state.factory().f_player(
             pid,
             lambda p: p.factory()
             .dice_reroll_chances(new_reroll_chances)
             .dice(new_dice)
+            .build()
+        ).effect_stack(
+            new_effect_stack
+        ).build()
+
+    def _handle_card_select_action(
+            self,
+            game_state: GameState,
+            pid: Pid,
+            action: CardsSelectAction
+    ) -> None | GameState:
+        if action.selected_cards.empty():
+            return game_state.factory().f_player(
+                pid,
+                lambda p: p.factory().card_redraw_chances(0).build()
+            ).f_effect_stack(
+                lambda es: es.pop()[0]  # removes card selection phase effect
+            ).build()
+
+        player = game_state.get_player(pid)
+        new_deck, new_picked = player.deck_cards.switch_random_different(action.selected_cards)
+        new_hand = player.hand_cards - action.selected_cards + new_picked
+        new_redraw_chances: int = player.card_redraw_chances - 1
+
+        if new_redraw_chances > 0:
+            new_effect_stack = game_state.effect_stack
+        else:
+            # removes card selection phase effect
+            new_effect_stack, _ = game_state.effect_stack.pop()
+
+        return game_state.factory().f_player(
+            pid,
+            lambda p: p.factory()
+            .card_redraw_chances(new_redraw_chances)
+            .deck_cards(new_deck)
+            .hand_cards(new_hand)
             .build()
         ).effect_stack(
             new_effect_stack
@@ -502,10 +538,16 @@ class ActionPhase(ph.Phase):
             if not isinstance(action, DiceSelectAction):
                 raise Exception(f"Trying to execute {action} when a dice selection is expected")
 
+        elif self._card_selecting(game_state):  # pragma: no cover
+            if not isinstance(action, CardsSelectAction):
+                raise Exception(f"Trying to execute {action} when a card selection is expected")
+
         if isinstance(action, GameAction):
             return self._handle_game_action(game_state, pid, action)
         elif isinstance(action, DiceSelectAction):
             return self._handle_dice_select_action(game_state, pid, action)
+        elif isinstance(action, CardsSelectAction):
+            return self._handle_card_select_action(game_state, pid, action)
         elif isinstance(action, EndRoundAction):
             return self._handle_end_round(game_state, pid, action)
         raise Exception("Not Reached! Unknown Game State to process")
@@ -516,6 +558,14 @@ class ActionPhase(ph.Phase):
         return (
             effect_stack.is_not_empty()
             and isinstance(effect_stack.peek(), RollPhaseStartEffect)
+        )
+
+    @classmethod
+    def _card_selecting(cls, game_state: GameState) -> bool:
+        effect_stack = game_state.effect_stack
+        return (
+            effect_stack.is_not_empty()
+            and isinstance(effect_stack.peek(), CardSelectPhaseStartEffect)
         )
 
     def waiting_for(self, game_state: GameState) -> None | Pid:
@@ -534,6 +584,8 @@ class ActionPhase(ph.Phase):
             effect = effect_stack.peek()
             if isinstance(effect, RollPhaseStartEffect):
                 return super().waiting_for(game_state)
+            elif isinstance(effect, CardSelectPhaseStartEffect):
+                return super().waiting_for(game_state)
             else:
                 raise NotImplementedError
         else:
@@ -551,6 +603,9 @@ class ActionPhase(ph.Phase):
         # inserted roll phase
         if cls._rolling(action_generator.game_state):
             return (ActionType.SELECT_DICE, )
+
+        elif cls._card_selecting(action_generator.game_state):
+            return (ActionType.SELECT_CARDS, )
 
         choices: list[ActionType] = []
 
@@ -594,6 +649,11 @@ class ActionPhase(ph.Phase):
             assert player_choice is ActionType.SELECT_DICE
             from ...action.action_generator_generator import DiceSelectionActGenGenerator
             return just(DiceSelectionActGenGenerator.action_generator(game_state, pid))
+
+        elif cls._card_selecting(action_generator.game_state):
+            assert player_choice is ActionType.SELECT_CARDS
+            from ...action.action_generator_generator import CardsSelectionActGenGenerator
+            return just(CardsSelectionActGenGenerator.action_generator(game_state, pid))
 
         if player_choice is ActionType.PLAY_CARD:
             assert game_state.card_checker.playable(pid)

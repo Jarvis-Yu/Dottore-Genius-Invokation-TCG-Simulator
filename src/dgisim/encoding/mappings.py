@@ -287,7 +287,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.WindAndFreedom, 669),
         (card.StoneAndContracts, 670),
         (card.ThunderAndEternity, 671),
-        # (card.NatureAndWisdom, 672),
+        (card.NatureAndWisdom, 672),
         # (card.TheLegendOfVennessa, 673),
         # (card.RhythmOfTheGreatDream, 674),
         (card.WhereIsTheUnseenRazor, 675),
@@ -500,7 +500,8 @@ EFFECT_MAPPING: dict[type["Effect"], int] = HashableDict({
         #### 4.6 Other Effect 310 ####
         (effect.ConsecutiveActionEffect, 310),
         (effect.ApplyElementalAuraEffect, 311),
-        (effect.SetRerollChancesEffect, 312),
+        (effect.SetRedrawChancesEffect, 312),
+        (effect.SetRerollChancesEffect, 313),
 
         #### End 400 ####
     )

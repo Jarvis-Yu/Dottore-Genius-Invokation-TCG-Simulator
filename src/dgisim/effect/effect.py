@@ -64,6 +64,7 @@ __all__ = [
     "TriggerSupportEffect",
 
     # Phase Effect
+    "CardSelectPhaseStartEffect",
     "DeathSwapPhaseStartEffect",
     "DeathSwapPhaseEndEffect",
     "EndPhaseCheckoutEffect",
@@ -127,6 +128,7 @@ __all__ = [
     "CastSkillEffect",
     "BroadcastPostSkillInfoEffect",
     "BroadcastPreSkillInfoEffect",
+    "SetRedrawChancesEffect",
     "SetRerollChancesEffect",
 ]
 
@@ -455,6 +457,11 @@ class TriggerSupportEffect(TriggerrbleEffect):
         ).build()
 
 ############################## Phase Effect ##############################
+
+
+@dataclass(frozen=True, repr=False)
+class CardSelectPhaseStartEffect(PhaseStartEffect):
+    pass
 
 
 @dataclass(frozen=True, repr=False)
@@ -2118,6 +2125,18 @@ class BroadcastPreSkillInfoEffect(DirectEffect):
         )
 
 @dataclass(frozen=True, repr=False)
+class SetRedrawChancesEffect(DirectEffect):
+    target_pid: Pid
+    redraw_chances: int
+
+    def execute(self, game_state: GameState) -> GameState:
+        return game_state.factory().f_player(
+            self.target_pid,
+            lambda p: p.factory().card_redraw_chances(self.redraw_chances).build()
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
 class SetRerollChancesEffect(DirectEffect):
     target_pid: Pid
     reroll_chances: int
@@ -2127,4 +2146,3 @@ class SetRerollChancesEffect(DirectEffect):
             self.target_pid,
             lambda p: p.factory().dice_reroll_chances(self.reroll_chances).build()
         ).build()
-

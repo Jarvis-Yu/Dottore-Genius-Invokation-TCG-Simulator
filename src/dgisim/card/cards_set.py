@@ -104,6 +104,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     LeaveItToMe,
     Lyresong,
     MasterOfWeaponry,
+    NatureAndWisdom,
     QuickKnit,
     SendOff,
     Starsigns,

@@ -57,6 +57,7 @@
       - Guardian's Oath
       - Lyresong
       - Master of Weaponry
+      - Nature and Wisdom
       - Stone and Contracts
       - The Boar Princess
       - Thunder and Eternity
