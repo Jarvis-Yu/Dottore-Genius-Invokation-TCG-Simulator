@@ -23,6 +23,7 @@ jobs:
         coverage run -m unittest discover src/tests/ && echo && coverage report && coverage lcov
       env:
         RNG_PLAYS: 500
+        ENCODING_RUNS: 50
         SHOW_PROGRESS: 0
 
     - name: Coveralls
