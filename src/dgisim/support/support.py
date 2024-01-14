@@ -320,9 +320,6 @@ class LibenSupport(Support, stt._UsageLivingStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class LiuSuSupport(Support, stt._UsageStatus):
-    """
-    TODO: it is triggered on combat action instead of self swap.
-    """
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2
     activated: bool = True
