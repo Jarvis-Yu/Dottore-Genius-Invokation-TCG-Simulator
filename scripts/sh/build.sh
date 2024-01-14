@@ -2,7 +2,7 @@
 if [ -d "dist" ]; then
     rm -r dist/
 fi && \
-python scripts/py/package_file_path.py -r && \
+./venv/bin/python scripts/py/package_file_path.py -r && \
 {
     trap ctrl_c INT
 
@@ -13,5 +13,5 @@ python scripts/py/package_file_path.py -r && \
     }
 
     ./venv/bin/python -m build
-    python scripts/py/package_file_path.py -b
+    ./venv/bin/python scripts/py/package_file_path.py -b
 }
