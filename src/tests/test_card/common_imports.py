@@ -4,6 +4,7 @@ from src.dgisim.agents import *
 from src.dgisim.card.card import *
 from src.dgisim.card.cards import *
 from src.dgisim.deck import FrozenDeck, MutableDeck
+from src.dgisim.element import PURE_ELEMENTS
 from src.dgisim.game_state_machine import GameStateMachine
 from src.dgisim.state.enums import Pid
 from src.dgisim.status.status import *

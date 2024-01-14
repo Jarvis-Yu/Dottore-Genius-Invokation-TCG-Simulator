@@ -18,6 +18,8 @@ from itertools import chain
 from typing import ClassVar, TYPE_CHECKING
 from typing_extensions import Self, override
 
+import random
+
 from ..dice import AbstractDice, ActualDice
 from ..effect import effect as eft
 from ..event import *
@@ -26,7 +28,7 @@ from ..status import status as stt
 from ..character.enums import CharacterSkillType
 from ..effect.enums import TriggeringSignal, Zone
 from ..effect.structs import StaticTarget
-from ..element import Element
+from ..element import Element, PURE_ELEMENTS
 from ..helper.quality_of_life import BIG_INT, classproperty
 from ..status.enums import Informables, Preprocessables
 
@@ -42,6 +44,7 @@ __all__ = [
     # concrete implementations
     ## Companions ##
     "ChangTheNinthSupport",
+    "ChefMaoSupport",
     "DunyarzadSupport",
     "LibenSupport",
     "LiuSuSupport",
@@ -152,6 +155,63 @@ class ChangTheNinthSupport(Support, stt._UsageLivingStatus):
     @override
     def content_str(self) -> str:
         return f"{self.usages}|{self.listening}|{self.activated}"
+
+
+@dataclass(frozen=True, kw_only=True)
+class ChefMaoSupport(Support, stt._UsageLivingStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    triggered: bool = False  # should draw on POST_CARD signal
+    drawed: bool = False  # drawed this match
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_CARD,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.CARD1:
+            assert isinstance(item, CardPEvent)
+            from ..card.card import FoodCard
+            if (
+                    item.pid is status_source.pid
+                    and issubclass(item.card_type, FoodCard)
+            ):
+                if (self.usages > 0 or not self.drawed) and not self.triggered:
+                    return item, replace(self, triggered=True)
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.POST_CARD and self.triggered:
+            from ..card.card import FoodCard
+            assert self.usages > 0
+            effects: list[eft.Effect] = [
+                eft.AddDiceEffect(
+                    pid=source.pid,
+                    element=random.choice(tuple(PURE_ELEMENTS)),
+                    num=1,
+                ),
+            ]
+            if not self.drawed:
+                effects.append(eft.DrawRandomCardOfTypeEffect(
+                    pid=source.pid,
+                    num=1,
+                    card_type=FoodCard,
+                ))
+            return effects, replace(self, usages=-1, drawed=True, triggered=False)
+        elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
+            assert not self.triggered
+            return [], replace(self, usages=self.MAX_USAGES)
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)

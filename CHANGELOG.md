@@ -33,6 +33,7 @@
       - Shadow of the Sand King
       - Vourukasha's Glow
   - Support Cards:
+    - Chef Mao
     - Dunyarzad
     - Liu Su
     - Mamere
