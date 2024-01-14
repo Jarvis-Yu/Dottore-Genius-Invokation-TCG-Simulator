@@ -486,6 +486,7 @@ EFFECT_MAPPING: dict[type["Effect"], int] = HashableDict({
         (effect.PublicAddCardEffect, 282),
         (effect.PublicRemoveCardEffect, 283),
         (effect.PublicRemoveAllCardEffect, 284),
+        (effect.PrivateAddCardEffect, 285),
 
         #### 4.5 Dice Effect 290 ####
         (effect.AddDiceEffect, 290),
@@ -499,6 +500,7 @@ EFFECT_MAPPING: dict[type["Effect"], int] = HashableDict({
         #### 4.6 Other Effect 310 ####
         (effect.ConsecutiveActionEffect, 310),
         (effect.ApplyElementalAuraEffect, 311),
+        (effect.SetRerollChancesEffect, 312),
 
         #### End 400 ####
     )

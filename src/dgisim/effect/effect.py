@@ -186,7 +186,7 @@ class Effect:
             elif issubclass(value, Status):
                 ret_val.append(encoding_plan.code_for(value))
             else:
-                raise Exception("Unexpected Type", type(value))
+                raise Exception(f"Unexpected Type {type(value)} of {self.__class__.__name__}")
         fillings = encoding_plan.EFFECT_FIXED_LEN - len(ret_val)
         if fillings < 0:
             raise Exception("Too many values in effect", self)
