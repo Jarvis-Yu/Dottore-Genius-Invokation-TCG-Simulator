@@ -1777,6 +1777,7 @@ class TravelersHandySwordStatus(WeaponEquipmentStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class CrownOfWatatsumiStatus(ArtifactEquipmentStatus):
+    # TODO: not finished
     @classproperty
     def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
         from ..card.card import CrownOfWatatsumi

@@ -123,6 +123,7 @@ Item Card
 
 * NRE
 * Parametric Transformer
+* Treasure-Seeking Seelie
 
 Location Card
 ^^^^^^^^^^^^^

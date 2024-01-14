@@ -237,7 +237,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.ParametricTransformer, 450),
         (card.NRE, 451),
         # (card.RedFeatherFan, 452),
-        # (card.TreasureSeekingSeelie, 453),
+        (card.TreasureSeekingSeelie, 453),
 
         #### 3 Event Card 0550 ####
         #### 3.1 Arcane Legend Card 0550 ####
@@ -944,7 +944,7 @@ SUPP_MAPPING: dict[type["Support"], int] = HashableDict({
         (support.ParametricTransformerSupport, 200),
         (support.NRESupport, 201),
         # (support.RedFeatherFanSupport, 202),
-        # (support.TreasureSeekingSeelieSupport, 203),
+        (support.TreasureSeekingSeelieSupport, 203),
 
         #### End 300 ####
     )

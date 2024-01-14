@@ -41,6 +41,7 @@
     - Rana
     - Setaria
     - Timaeus
+    - Treasure-Seeking Seelie
     - Wagner
     - Yayoi Nanatsuki
   - Event Cards:

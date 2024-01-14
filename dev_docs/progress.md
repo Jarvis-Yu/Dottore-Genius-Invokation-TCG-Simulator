@@ -58,7 +58,7 @@ all I need now is to implement each card and character.
 
 ## Card (140/248 implemented)
 
-- [ ] Equipment Card (66/137):
+- [ ] Equipment Card (65/137):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
@@ -138,7 +138,7 @@ all I need now is to implement each card and character.
     - [x] Shadow of the Sand King
     - [x] Tenacity of the Millelith
     - [x] Vourukasha's Glow
-- [ ] Support Card (21/44):
+- [ ] Support Card (22/44):
   - [ ] Companion Card:
     - [x] Chang the Ninth
     - [x] Chef Mao
@@ -161,7 +161,7 @@ all I need now is to implement each card and character.
     - [x] NRE
     - [x] Parametric Transformer
     - [ ] Red Feather Fan
-    - [ ] Treasure-Seeking Seelie
+    - [x] Treasure-Seeking Seelie
   - [ ] Location Card:
     - [ ] Gandharva Ville
     - [ ] Golden House

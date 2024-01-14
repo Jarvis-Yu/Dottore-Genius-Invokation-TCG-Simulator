@@ -158,6 +158,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ## Support Card / Item ##
     NRE,
     ParametricTransformer,
+    TreasureSeekingSeelie,
     ## Support Card / Location ##
     KnightsOfFavoniusLibrary,
     LiyueHarborWharf,

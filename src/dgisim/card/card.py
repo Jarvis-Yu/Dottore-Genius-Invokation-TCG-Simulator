@@ -182,6 +182,7 @@ __all__ = [
     ## Item ##
     "NRE",
     "ParametricTransformer",
+    "TreasureSeekingSeelie",
     ## Location ##
     "KnightsOfFavoniusLibrary",
     "LiyueHarborWharf",
@@ -3371,6 +3372,10 @@ class NRE(ItemCard):
 class ParametricTransformer(ItemCard):
     _DICE_COST = AbstractDice({Element.ANY: 2})
     _SUPPORT_STATUS = sp.ParametricTransformerSupport
+
+class TreasureSeekingSeelie(ItemCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
+    _SUPPORT_STATUS = sp.TreasureSeekingSeelieSupport
 
 # >>>>>>>>>>>>>>>>>>>> Support Cards / Item Cards >>>>>>>>>>>>>>>>>>>>
 

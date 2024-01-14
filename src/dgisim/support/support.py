@@ -61,6 +61,7 @@ __all__ = [
     ## Item ##
     "NRESupport",
     "ParametricTransformerSupport",
+    "TreasureSeekingSeelieSupport",
 
     ## Locations ##
     "KnightsOfFavoniusLibrarySupport",
@@ -855,6 +856,47 @@ class ParametricTransformerSupport(Support, stt._UsageLivingStatus):
                 ], None
             assert self.usages + d_usages < self.MAX_USAGES
             return [], replace(self, usages=d_usages, activated=False, listening=False)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class TreasureSeekingSeelieSupport(Support, stt._UsageLivingStatus):
+    usages: int = 0
+    triggered: bool = False
+    MAX_USAGES: ClassVar[int] = 3
+    CARDS_DRAWN: ClassVar[int] = 3
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+    ))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.POST_SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if information.source.pid is status_source.pid:
+                return replace(self, triggered=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.triggered:
+            if self.usages + 1 == self.MAX_USAGES:
+                return [
+                    eft.DrawRandomCardEffect(
+                        pid=source.pid,
+                        num=self.CARDS_DRAWN,
+                    ),
+                ], None
+            assert self.usages < self.MAX_USAGES
+            return [], replace(self, usages=1, triggered=False)
         return [], self
 
 
