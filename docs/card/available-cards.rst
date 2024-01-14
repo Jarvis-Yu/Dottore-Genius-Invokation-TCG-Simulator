@@ -1,7 +1,7 @@
 Available Cards
 ===============
 
-134 of 248 cards in Genius Invokation TCG are available in the simulator.
+136 of 248 cards in Genius Invokation TCG are available in the simulator.
 (excluding character cards which are not counted as cards in ``dgisim``)
 
 Equipment Cards
@@ -168,6 +168,7 @@ Other Event Card
 ^^^^^^^^^^^^^^^^
 
 * Abyssal Summons
+* Blessing of the Divine Relic's Installation
 * Calxs Arts
 * Changing Shifts
 * Elemental Resonance: Enduring Rock
@@ -188,6 +189,7 @@ Other Event Card
 * I Haven't Lost Yet!
 * Leave It to Me!
 * Lyresong
+* Master of Weaponry
 * Quick Knit
 * Send Off
 * Starsigns

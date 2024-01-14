@@ -53,8 +53,10 @@
       - Butter Crab
     - Other Cards:
       - Abyssal Summons
+      - Blessing of the Divine Relic's Installation
       - Guardian's Oath
       - Lyresong
+      - Master of Weaponry
       - Stone and Contracts
       - The Boar Princess
       - Thunder and Eternity

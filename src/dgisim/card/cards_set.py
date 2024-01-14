@@ -82,6 +82,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
 
     # Event Card
     AbyssalSummons,
+    BlessingOfTheDivineRelicsInstallation,
     CalxsArts,
     ChangingShifts,
     ElementalResonanceEnduringRock,
@@ -102,6 +103,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     IHaventLostYet,
     LeaveItToMe,
     Lyresong,
+    MasterOfWeaponry,
     QuickKnit,
     SendOff,
     Starsigns,

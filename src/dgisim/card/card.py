@@ -127,6 +127,7 @@ __all__ = [
     "PassingOfJudgment",
     ## Other ##
     "AbyssalSummons",
+    "BlessingOfTheDivineRelicsInstallation",
     "CalxsArts",
     "ChangingShifts",
     "ElementalResonanceEnduringRock",
@@ -147,6 +148,7 @@ __all__ = [
     "IHaventLostYet",
     "LeaveItToMe",
     "Lyresong",
+    "MasterOfWeaponry",
     "QuickKnit",
     "SendOff",
     "Starsigns",
@@ -612,8 +614,6 @@ class _CharTargetChoiceProvider(Card):
         assert type(instruction) is act.StaticTargetInstruction
         if instruction.target is None:
             chars = game_state.get_player(pid).characters
-            chars = [char for char in chars if cls._valid_char(
-                game_state, pid, char)]
             return tuple(
                 StaticTarget(
                     pid=pid,
@@ -621,6 +621,7 @@ class _CharTargetChoiceProvider(Card):
                     id=char.id,
                 )
                 for char in chars
+                if cls._valid_char(game_state, pid, char)
             )
 
         elif instruction.dice is None:
@@ -672,6 +673,152 @@ class _CharTargetChoiceProvider(Card):
             pid=pid,
             action=replace(act.CardAction._all_none(), card=cls),
             instruction=act.StaticTargetInstruction._all_none(),
+            _choices_helper=cls._choices_helper,
+            _fill_helper=cls._fill_helper,
+        )
+
+
+class _DualCharTargetChoiceProvider(Card):
+    @classmethod
+    def _valid_first_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:  # pragma: no cover
+        return not char.is_defeated()
+
+    @classmethod
+    def _valid_second_char(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            chosen_char: chr.Character,
+            next_char: chr.Character,
+    ) -> bool:  # pragma: no cover
+        return chosen_char.id != next_char.id and not next_char.is_defeated()
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        for char in game_state.get_player(pid).characters:
+            if cls._valid_first_char(game_state, pid, char):
+                for next_char in game_state.get_player(pid).characters:
+                    if cls._valid_second_char(game_state, pid, char, next_char):
+                        return True
+        return False
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        if not isinstance(instruction, act.SourceTargetInstruction) \
+                or pid is not instruction.target.pid:
+            return False  # pragma: no cover
+        source_char = game_state.get_character_target(instruction.source)
+        target_char = game_state.get_character_target(instruction.target)
+        if source_char is None or target_char is None:  # pragma: no cover
+            return False
+        return (
+            cls._valid_first_char(game_state, pid, source_char)
+            and cls._valid_second_char(game_state, pid, source_char, target_char)
+            and super()._valid_instruction(game_state, pid, instruction)
+        )
+
+    @classmethod
+    def _choices_helper(
+            cls,
+            action_generator: acg.ActionGenerator,
+    ) -> GivenChoiceType:
+        game_state = action_generator.game_state
+        pid = action_generator.pid
+
+        assert action_generator._action_filled()
+
+        instruction = action_generator.instruction
+        assert type(instruction) is act.SourceTargetInstruction
+        if instruction.source is None:
+            chars = game_state.get_player(pid).characters
+            return tuple(
+                StaticTarget(
+                    pid=pid,
+                    zone=Zone.CHARACTERS,
+                    id=char.id,
+                )
+                for char in chars
+                if cls._valid_first_char(game_state, pid, char)
+            )
+
+        elif instruction.target is None:
+            chars = game_state.get_player(pid).characters
+            first_char = game_state.get_character_target(instruction.source)
+            assert first_char is not None
+            return tuple(
+                StaticTarget(
+                    pid=pid,
+                    zone=Zone.CHARACTERS,
+                    id=char.id,
+                )
+                for char in chars
+                if cls._valid_second_char(game_state, pid, first_char, char)
+            )
+
+        elif instruction.dice is None:
+            return cls.preprocessed_dice_cost(game_state, pid)[1]
+
+        raise Exception("Not Reached!"
+                        + "Should be called when there is something to fill. action_generator:\n"
+                        + f"{action_generator}"
+                        )
+
+    @classmethod
+    def _fill_helper(
+        cls,
+        action_generator: acg.ActionGenerator,
+        player_choice: DecidedChoiceType,
+    ) -> acg.ActionGenerator:
+        assert action_generator._action_filled()
+
+        instruction = action_generator.instruction
+        assert isinstance(instruction, act.SourceTargetInstruction)
+        if instruction.source is None:
+            assert isinstance(player_choice, StaticTarget)
+            assert player_choice.zone is Zone.CHARACTERS
+            return replace(
+                action_generator,
+                instruction=replace(instruction, source=player_choice),
+            )
+
+        elif instruction.target is None:
+            assert isinstance(player_choice, StaticTarget)
+            assert player_choice.zone is Zone.CHARACTERS
+            return replace(
+                action_generator,
+                instruction=replace(instruction, target=player_choice),
+            )
+
+        elif instruction.dice is None:
+            assert isinstance(player_choice, ActualDice)
+            return replace(
+                action_generator,
+                instruction=replace(instruction, dice=player_choice),
+            )
+
+        raise Exception("Not Reached!")
+
+    @override
+    @classmethod
+    def action_generator(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+    ) -> None | acg.ActionGenerator:
+        if not cls.strictly_usable(game_state, pid):  # pragma: no cover
+            return None
+        return acg.ActionGenerator(
+            game_state=game_state,
+            pid=pid,
+            action=replace(act.CardAction._all_none(), card=cls),
+            instruction=act.SourceTargetInstruction._all_none(),
             _choices_helper=cls._choices_helper,
             _fill_helper=cls._fill_helper,
         )
@@ -2116,6 +2263,44 @@ class AbyssalSummons(EventCard, _DiceOnlyChoiceProvider):
         )
 
 
+class BlessingOfTheDivineRelicsInstallation(EventCard, _DualCharTargetChoiceProvider):
+    _DICE_COST = AbstractDice.from_empty()
+
+    @classmethod
+    def _valid_first_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:  # pragma: no cover
+        return (
+            super()._valid_first_char(game_state, pid, char)
+            and any(
+                isinstance(status, stt.ArtifactEquipmentStatus)
+                for status in char.character_statuses
+            )
+        )
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.SourceTargetInstruction)
+        source_char = game_state.get_character_target(instruction.source)
+        assert source_char is not None
+        artifact_status = source_char.character_statuses.find_type(stt.ArtifactEquipmentStatus)
+        assert isinstance(artifact_status, stt.ArtifactEquipmentStatus)
+        return (
+            eft.RemoveCharacterStatusEffect(
+                target=instruction.source,
+                status=type(artifact_status),
+            ),
+            eft.AddCharacterStatusEffect(
+                target=instruction.target,
+                status=type(artifact_status),
+            ),
+        )
+
+
 class CalxsArts(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDice({Element.OMNI: 1})
 
@@ -2621,6 +2806,57 @@ class Lyresong(EventCard, _CharTargetChoiceProvider):
             eft.AddCombatStatusEffect(
                 target_pid=instruction.target.pid,
                 status=stt.LyresongStatus,
+            ),
+        )
+
+
+class MasterOfWeaponry(EventCard, _DualCharTargetChoiceProvider):
+    _DICE_COST = AbstractDice.from_empty()
+
+    @classmethod
+    def _valid_first_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:  # pragma: no cover
+        return (
+            super()._valid_first_char(game_state, pid, char)
+            and any(
+                isinstance(status, stt.WeaponEquipmentStatus)
+                for status in char.character_statuses
+            )
+        )
+
+    @classmethod
+    def _valid_second_char(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            chosen_char: chr.Character,
+            next_char: chr.Character,
+    ) -> bool:
+        return (
+            super()._valid_second_char(game_state, pid, chosen_char, next_char)
+            and chosen_char.WEAPON_TYPE is next_char.WEAPON_TYPE
+        )
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.SourceTargetInstruction)
+        source_char = game_state.get_character_target(instruction.source)
+        assert source_char is not None
+        weapon_status = source_char.character_statuses.find_type(stt.WeaponEquipmentStatus)
+        assert isinstance(weapon_status, stt.WeaponEquipmentStatus)
+        return (
+            eft.RemoveCharacterStatusEffect(
+                target=instruction.source,
+                status=type(weapon_status),
+            ),
+            eft.AddCharacterStatusEffect(
+                target=instruction.target,
+                status=type(weapon_status),
             ),
         )
 

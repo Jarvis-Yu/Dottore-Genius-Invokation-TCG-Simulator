@@ -136,3 +136,128 @@ class TestTheBoarPrincess(unittest.TestCase):
         self.assertNotIn(TheBoarPrincessStatus, game_state.player1.combat_statuses)
         dice_after = game_state.player1.dice
         self.assertEqual((dice_after - dice_before)[Element.OMNI], 2)
+
+    def test_on_transfer_by_card_artifact(self):
+        base_state = ONE_ACTION_TEMPLATE
+        base_state = replace_hand_cards(base_state, Pid.P1, Cards({
+            TheBoarPrincess: 2,
+            GamblersEarrings: 3,
+            InstructorsCap: 2,
+            BlessingOfTheDivineRelicsInstallation: 1,
+        }))
+
+        game_state = base_state
+
+        game_state = step_action(game_state, Pid.P1, CardAction(
+            card=TheBoarPrincess,
+            instruction=DiceOnlyInstruction(dice=ActualDice.from_empty()),
+        ))
+        boar_status = game_state.player1.combat_statuses.just_find(TheBoarPrincessStatus)
+        self.assertEqual(boar_status.usages, 2)
+
+        game_state = step_action(game_state, Pid.P1, CardAction(
+            card=GamblersEarrings,
+            instruction=StaticTargetInstruction(
+                target=StaticTarget.from_char_id(Pid.P1, 2),
+                dice=ActualDice({Element.HYDRO: 1}),
+            ),
+        ))
+        game_state = step_action(game_state, Pid.P1, CardAction(
+            card=GamblersEarrings,
+            instruction=StaticTargetInstruction(
+                target=StaticTarget.from_char_id(Pid.P1, 1),
+                dice=ActualDice({Element.HYDRO: 1}),
+            ),
+        ))
+        boar_status = game_state.player1.combat_statuses.just_find(TheBoarPrincessStatus)
+        self.assertEqual(boar_status.usages, 2)
+        equipped_state = game_state
+
+        # tranfer overwriting triggers
+        game_state = step_action(game_state, Pid.P1, CardAction(
+            card=BlessingOfTheDivineRelicsInstallation,
+            instruction=SourceTargetInstruction(
+                source=StaticTarget.from_char_id(Pid.P1, 2),
+                target=StaticTarget.from_char_id(Pid.P1, 1),
+                dice=ActualDice.from_empty(),
+            ),
+        ))
+        boar_status = game_state.player1.combat_statuses.just_find(TheBoarPrincessStatus)
+        self.assertEqual(boar_status.usages, 1)
+
+        # transfer no overwriting doesn't trigger
+        game_state = equipped_state
+        game_state = step_action(game_state, Pid.P1, CardAction(
+            card=BlessingOfTheDivineRelicsInstallation,
+            instruction=SourceTargetInstruction(
+                source=StaticTarget.from_char_id(Pid.P1, 2),
+                target=StaticTarget.from_char_id(Pid.P1, 3),
+                dice=ActualDice.from_empty(),
+            ),
+        ))
+        boar_status = game_state.player1.combat_statuses.just_find(TheBoarPrincessStatus)
+        self.assertEqual(boar_status.usages, 2)
+
+    def test_on_transfer_by_card_weapon(self):
+        base_state = ONE_ACTION_TEMPLATE
+        base_state = replace_hand_cards(base_state, Pid.P1, Cards({
+            TheBoarPrincess: 2,
+            AquilaFavonia: 3,
+            SacrificialSword: 2,
+            MasterOfWeaponry: 1,
+        }))
+        base_state = replace_character(base_state, Pid.P1, Kaeya, 1)
+        base_state = replace_character(base_state, Pid.P1, Kaeya, 2)
+        base_state = replace_character(base_state, Pid.P1, Kaeya, 3)
+
+        game_state = base_state
+
+        game_state = step_action(game_state, Pid.P1, CardAction(
+            card=TheBoarPrincess,
+            instruction=DiceOnlyInstruction(dice=ActualDice.from_empty()),
+        ))
+        boar_status = game_state.player1.combat_statuses.just_find(TheBoarPrincessStatus)
+        self.assertEqual(boar_status.usages, 2)
+
+        game_state = step_action(game_state, Pid.P1, CardAction(
+            card=AquilaFavonia,
+            instruction=StaticTargetInstruction(
+                target=StaticTarget.from_char_id(Pid.P1, 2),
+                dice=ActualDice({Element.HYDRO: 3}),
+            ),
+        ))
+        game_state = step_action(game_state, Pid.P1, CardAction(
+            card=SacrificialSword,
+            instruction=StaticTargetInstruction(
+                target=StaticTarget.from_char_id(Pid.P1, 1),
+                dice=ActualDice({Element.HYDRO: 3}),
+            ),
+        ))
+        boar_status = game_state.player1.combat_statuses.just_find(TheBoarPrincessStatus)
+        self.assertEqual(boar_status.usages, 2)
+        equipped_state = game_state
+
+        # tranfer overwriting triggers
+        game_state = step_action(game_state, Pid.P1, CardAction(
+            card=MasterOfWeaponry,
+            instruction=SourceTargetInstruction(
+                source=StaticTarget.from_char_id(Pid.P1, 2),
+                target=StaticTarget.from_char_id(Pid.P1, 1),
+                dice=ActualDice.from_empty(),
+            ),
+        ))
+        boar_status = game_state.player1.combat_statuses.just_find(TheBoarPrincessStatus)
+        self.assertEqual(boar_status.usages, 1)
+
+        # transfer no overwriting doesn't trigger
+        game_state = equipped_state
+        game_state = step_action(game_state, Pid.P1, CardAction(
+            card=MasterOfWeaponry,
+            instruction=SourceTargetInstruction(
+                source=StaticTarget.from_char_id(Pid.P1, 2),
+                target=StaticTarget.from_char_id(Pid.P1, 3),
+                dice=ActualDice.from_empty(),
+            ),
+        ))
+        boar_status = game_state.player1.combat_statuses.just_find(TheBoarPrincessStatus)
+        self.assertEqual(boar_status.usages, 2)
