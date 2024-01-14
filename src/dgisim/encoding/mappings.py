@@ -282,7 +282,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.AbyssalSummons, 664),
         # (card.FatuiConspiracy, 665),
         # (card.FriendshipEternal, 666),
-        # (card.HeavyStrike, 667),
+        (card.HeavyStrike, 667),
         # (card.PlungingStrike, 668),
         (card.WindAndFreedom, 669),
         (card.StoneAndContracts, 670),
@@ -639,6 +639,7 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.MoonpiercerEffectStatus, 459),
         (status.AdeptusTemptationStatus, 460),
         (status.ButterCrabStatus, 461),
+        (status.HeavyStrikeStatus, 462),
 
         #### 3.2 Shield Character Status 525 ####
         (status.LithicGuardStatus, 525),

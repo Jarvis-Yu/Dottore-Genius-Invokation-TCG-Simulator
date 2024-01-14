@@ -59,6 +59,7 @@
       - Abyssal Summons
       - Blessing of the Divine Relic's Installation
       - Guardian's Oath
+      - Heavy Strike
       - Lyresong
       - Master of Weaponry
       - Nature and Wisdom

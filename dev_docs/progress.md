@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (35/71 implemented)](#character-3571-implemented)
-  - [Card (140/248 implemented)](#card-140248-implemented)
+  - [Card (141/248 implemented)](#card-141248-implemented)
 
 ## Character (35/71 implemented)
 
@@ -56,7 +56,7 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (140/248 implemented)
+## Card (141/248 implemented)
 
 - [ ] Equipment Card (65/137):
   - [ ] Talent Card:
@@ -174,7 +174,7 @@ all I need now is to implement each card and character.
     - [x] Tenshukaku
     - [x] Vanarana
     - [ ] Weeping Willow of the Lake
-- [ ] Event Card (53/67):
+- [ ] Event Card (54/67):
   - [ ] Talent Card:
     - [x] Absorbing Prism
     - [x] Lightning Stiletto
@@ -222,7 +222,7 @@ all I need now is to implement each card and character.
     - [ ] Fatui Conspiracy
     - [ ] Flickering Four-Leaf Sigil
     - [x] Guardian's Oath
-    - [ ] Heavy Strike
+    - [x] Heavy Strike
     - [x] I Haven't Lost Yet!
     - [x] Leave It to Me!
     - [x] Lyresong

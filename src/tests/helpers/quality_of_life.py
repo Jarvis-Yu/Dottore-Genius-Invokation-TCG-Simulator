@@ -570,8 +570,12 @@ def skip_action_round(game_state: GameState, pid: Pid) -> GameState:
 
 def skip_action_round_until(game_state: GameState, pid: Pid) -> GameState:
     """ pid is the player that is skipped until. """
+    count = 0
     while pid is not game_state.waiting_for():
         game_state = skip_action_round(game_state, just(game_state.waiting_for()))
+        count += 1
+        if count > 20:
+            raise Exception(f"It seems {pid} has ended causing infinite loop in {game_state}")
     return game_state
 
 

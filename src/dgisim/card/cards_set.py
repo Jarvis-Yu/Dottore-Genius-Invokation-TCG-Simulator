@@ -100,6 +100,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ElementalResonanceWovenWeeds,
     ElementalResonanceWovenWinds,
     GuardiansOath,
+    HeavyStrike,
     IHaventLostYet,
     LeaveItToMe,
     Lyresong,

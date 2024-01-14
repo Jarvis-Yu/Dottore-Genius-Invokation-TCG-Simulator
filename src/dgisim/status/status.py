@@ -137,6 +137,7 @@ __all__ = [
     "AdeptusTemptationStatus",
     "ButterCrabStatus",
     "FrozenStatus",
+    "HeavyStrikeStatus",
     "JueyunGuobaStatus",
     "KingsSquireEffectStatus",
     "LithicGuardStatus",
@@ -2979,6 +2980,40 @@ class FrozenStatus(CharacterStatus):
             return [], None
         return [], self  # pragma: no cover
 
+
+@dataclass(frozen=True, kw_only=True)
+class HeavyStrikeStatus(CharacterStatus):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            if (
+                    item.dmg.source == status_source
+                    and item.dmg.damage_type.direct_normal_attack()
+            ):
+                if item.dmg.damage_type.charged_attack:
+                    return item.delta_damage(2), None
+                else:
+                    return item.delta_damage(1), None
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], None
+        return [], self  # pragma: no cover
 
 @dataclass(frozen=True)
 class JueyunGuobaStatus(CharacterStatus, _UsageStatus):

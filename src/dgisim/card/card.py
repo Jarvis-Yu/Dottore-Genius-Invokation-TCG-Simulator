@@ -28,7 +28,7 @@ from ..support import support as sp
 
 from ..character.enums import CharacterSkill, Faction, WeaponType
 from ..dice import AbstractDice, ActualDice
-from ..effect.enums import Zone
+from ..effect.enums import Zone, DynamicCharacterTarget
 from ..effect.structs import StaticTarget, DamageType
 from ..element import AURA_ELEMENTS, Element, PURE_ELEMENTS
 from ..event import CardPEvent
@@ -145,6 +145,7 @@ __all__ = [
     "ElementalResonanceWovenWeeds",
     "ElementalResonanceWovenWinds",
     "GuardiansOath",
+    "HeavyStrike",
     "IHaventLostYet",
     "LeaveItToMe",
     "Lyresong",
@@ -2712,6 +2713,24 @@ class GuardiansOath(EventCard, _DiceOnlyChoiceProvider):
                 summon=type(summon),
             ))
         return tuple(efts)
+
+class HeavyStrike(EventCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
+
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.RelativeAddCharacterStatusEffect(
+                source_pid=pid,
+                target=DynamicCharacterTarget.SELF_ACTIVE,
+                status=stt.HeavyStrikeStatus,
+            ),
+        )
 
 class IHaventLostYet(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDice({})
