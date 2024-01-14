@@ -13,6 +13,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ColdBloodedStrike,
     DescentOfDivinity,
     EmbraceOfWinds,
+    FloralSidewinder,
     GalesOfReverie,
     GrandExpectation,
     IGotYourBack,

@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (35/71 implemented)](#character-3571-implemented)
-  - [Card (141/248 implemented)](#card-141248-implemented)
+  - [Card (143/248 implemented)](#card-143248-implemented)
 
 ## Character (35/71 implemented)
 
@@ -56,9 +56,9 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (141/248 implemented)
+## Card (143/248 implemented)
 
-- [ ] Equipment Card (65/137):
+- [ ] Equipment Card (64/137):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
@@ -69,7 +69,6 @@ all I need now is to implement each card and character.
     - [x] Gales of Reverie
     - [x] Grand Expectation
     - [x] I Got Your Back
-    - [x] KantenSenmyouBlessing,
     - [x] Keen Sight
     - [x] Lands of Dandelion
     - [x] Mystical Abandon
@@ -174,9 +173,10 @@ all I need now is to implement each card and character.
     - [x] Tenshukaku
     - [x] Vanarana
     - [ ] Weeping Willow of the Lake
-- [ ] Event Card (54/67):
+- [ ] Event Card (57/67):
   - [ ] Talent Card:
     - [x] Absorbing Prism
+    - [x] Kanten Senmyou Blessing
     - [x] Lightning Stiletto
   - [ ] Food Card:
     - [x] Adeptus' Temptation
@@ -234,7 +234,7 @@ all I need now is to implement each card and character.
     - [x] Send Off
     - [x] Starsigns
     - [x] Stone and Contracts
-    - [ ] Strategize
+    - [x] Strategize
     - [x] The Bestest Travel Companion!
     - [x] The Boar Princess
     - [x] Thunder and Eternity
