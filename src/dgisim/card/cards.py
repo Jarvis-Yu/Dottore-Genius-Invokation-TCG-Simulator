@@ -43,7 +43,7 @@ class Cards:
             other_cards = other
         return Cards(self._cards - other_cards)
 
-    def pick_random_cards(self, num: int) -> tuple[Cards, Cards]:
+    def pick_random(self, num: int) -> tuple[Cards, Cards]:
         """
         :returns: a tuple of [cards left, cards selected].
 
@@ -57,7 +57,7 @@ class Cards:
         ))
         return Cards(self._cards - picked_cards), Cards(picked_cards)
 
-    def pick_random_cards_of_type(self, num: int, card_type: type[Card]) -> tuple[Cards, Cards]:
+    def pick_random_of_type(self, num: int, card_type: type[Card]) -> tuple[Cards, Cards]:
         """
         Similar to `.pick_random_cards()` but only select from cards of type `card_type`.
         """
@@ -73,6 +73,33 @@ class Cards:
             random.sample(list(qualified_cards.keys()), counts=qualified_cards.values(), k=num)
         ))
         return Cards(self._cards - picked_cards), Cards(picked_cards)
+
+    def switch_random_different(self, cards_back: Cards) -> tuple[Cards, Cards]:
+        """
+        :returns: a tuple of [cards left, cards selected].
+
+        `cards_back` is the cards to be put back into the pool,
+        and `self` should be the pool.
+
+        The selected cards try to be different from the cards in `cards_back`.
+        """
+        num_cards_to_pick = cards_back.num_cards()
+        avoided_cards_in_pool: dict[type[Card], int] = {}
+        for card in cards_back:
+            avoided_cards_in_pool[card] = self[card]
+        diff_pool = self - avoided_cards_in_pool
+        same_pool = cards_back + avoided_cards_in_pool
+        diff_pool_num = diff_pool.num_cards()
+
+        if diff_pool_num < num_cards_to_pick:
+            same_pick_num = num_cards_to_pick - diff_pool_num
+            same_left, same_picked = same_pool.pick_random(
+                same_pick_num
+            )
+            return same_left, diff_pool + same_picked
+        else:
+            diff_left, diff_picked = diff_pool.pick_random(num_cards_to_pick)
+            return diff_left + same_pool, diff_picked
 
     def num_cards(self) -> int:
         """ :returns: the number of cards. """
@@ -135,7 +162,7 @@ class Cards:
         if limit is not None:
             if not isinstance(cards, Cards):
                 cards = Cards(cards)
-            cards = cards.pick_random_cards(max(limit - self.num_cards(), 0))[1]
+            cards = cards.pick_random(max(limit - self.num_cards(), 0))[1]
         return self + cards
 
     def hide_all(self) -> Cards:

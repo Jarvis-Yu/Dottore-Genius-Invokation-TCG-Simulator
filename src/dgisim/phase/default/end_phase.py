@@ -44,11 +44,11 @@ class EndPhase(ph.Phase):
         cards_per_round = game_state.mode.cards_per_round()
         hand_card_limit = game_state.mode.hand_card_limit()
         active_player_deck, new_cards = (
-            active_player.deck_cards.pick_random_cards(cards_per_round)
+            active_player.deck_cards.pick_random(cards_per_round)
         )
         active_player_hand = active_player.hand_cards.extend(new_cards, limit=hand_card_limit)
         other_player_deck, new_cards = (
-            other_player.deck_cards.pick_random_cards(cards_per_round)
+            other_player.deck_cards.pick_random(cards_per_round)
         )
         other_player_hand = other_player.hand_cards.extend(new_cards, limit=hand_card_limit)
         return game_state.factory().round(

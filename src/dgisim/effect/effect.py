@@ -1422,7 +1422,7 @@ class DrawRandomCardEffect(DirectEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         deck_cards = game_state.get_player(self.pid).deck_cards
-        left_cards, chosen_cards = deck_cards.pick_random_cards(self.num)
+        left_cards, chosen_cards = deck_cards.pick_random(self.num)
         if chosen_cards.num_cards() == 0:
             return game_state
         return game_state.factory().f_player(
@@ -1446,7 +1446,7 @@ class DrawRandomCardOfTypeEffect(DirectEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         deck_cards = game_state.get_player(self.pid).deck_cards
-        left_cards, chosen_cards = deck_cards.pick_random_cards_of_type(self.num, self.card_type)
+        left_cards, chosen_cards = deck_cards.pick_random_of_type(self.num, self.card_type)
         if chosen_cards.num_cards() == 0:
             return game_state
         return game_state.factory().f_player(

@@ -13,6 +13,9 @@ class CardB(Card):
 class CardC(Card):
     pass
 
+class CardD(Card):
+    pass
+
 class TestCards(unittest.TestCase):
     def test_is_legal(self):
         cards = Cards({CardA: 1, CardB: 0})
@@ -62,3 +65,30 @@ class TestCards(unittest.TestCase):
         self.assertEqual(d[CardB], 1)
         self.assertEqual(d[CardC], 5)
         self.assertEqual(len(d), 2)
+
+    def test_switch_random_diff(self):
+        cards = Cards({CardA: 1, CardB: 2})
+        
+        # no overlap
+        returned = Cards({CardC: 1, CardD: 1})
+        deck, picked = cards.switch_random_different(returned)
+
+        self.assertNotIn(CardC, picked)
+        self.assertNotIn(CardD, picked)
+        self.assertEqual(deck + picked, cards + returned)
+
+        # has overlap
+        returned = Cards({CardA: 1, CardD: 1})
+        deck, picked = cards.switch_random_different(returned)
+
+        self.assertNotIn(CardA, picked)
+        self.assertNotIn(CardD, picked)
+        self.assertEqual(deck + picked, cards + returned)
+
+        # has to pick same
+        returned = Cards({CardA: 2, CardC: 1, CardD: 1})
+        deck, picked = cards.switch_random_different(returned)
+
+        self.assertEqual(picked[CardB], 2)
+        self.assertEqual(picked.num_cards(), 4)
+        self.assertEqual(deck + picked, cards + returned)

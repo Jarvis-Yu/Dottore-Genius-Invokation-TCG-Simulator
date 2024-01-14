@@ -34,12 +34,12 @@ class CardSelectPhase(ph.Phase):
             """
             Draw some number of random cards, and prioritize Arcane Legend Cards.
             """
-            deck_cards, arcane_cards = deck_cards.pick_random_cards_of_type(
+            deck_cards, arcane_cards = deck_cards.pick_random_of_type(
                 mode.initial_cards_num(),
                 ArcaneLegendCard,
             )
             left_to_draw = mode.initial_cards_num() - arcane_cards.num_cards()
-            deck_cards, normal_cards = deck_cards.pick_random_cards(left_to_draw)
+            deck_cards, normal_cards = deck_cards.pick_random(left_to_draw)
             return deck_cards, arcane_cards + normal_cards
 
         p1_deck, p1_hand = draw_random_cards(p1.deck_cards)
@@ -83,10 +83,8 @@ class CardSelectPhase(ph.Phase):
 
     def _handle_card_drawing(self, game_state: GameState, pid: Pid, action: CardsSelectAction) -> GameState:
         player: PlayerState = game_state.get_player(pid)
-        new_deck, new_cards = player.deck_cards.pick_random_cards(action.selected_cards.num_cards())
-        new_deck = new_deck + action.selected_cards
-        new_hand = player.hand_cards - action.selected_cards
-        new_hand = new_hand + new_cards
+        new_deck, new_picked = player.deck_cards.switch_random_different(action.selected_cards)
+        new_hand = player.hand_cards - action.selected_cards + new_picked
         new_redraw_chances: int = player.card_redraw_chances - 1
         new_player_phase: Act
         if new_redraw_chances > 0:

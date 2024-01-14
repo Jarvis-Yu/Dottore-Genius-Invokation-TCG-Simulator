@@ -56,7 +56,7 @@ class LazyAgent(PlayerAgent):
         if isinstance(curr_phase, mode.card_select_phase):
             _, selected_cards = game_state.get_player(
                 pid
-            ).hand_cards.pick_random_cards(self._NUM_PICKED_CARDS)
+            ).hand_cards.pick_random(self._NUM_PICKED_CARDS)
             return CardsSelectAction(selected_cards=selected_cards)
 
         elif isinstance(curr_phase, mode.starting_hand_select_phase):
@@ -169,45 +169,49 @@ class RandomAgent(PlayerAgent):
         return player_action
 
     def _random_action_generator_chooser(self, action_generator: ActionGenerator) -> PlayerAction:
-        while not action_generator.filled():
-            choices = action_generator.choices()
-            choice: DecidedChoiceType  # type: ignore
-            if isinstance(choices, tuple):
-                game_state = action_generator.game_state
-                if game_state.phase == game_state.mode.roll_phase() and random.random() < 0.8:
-                    choices = tuple(c for c in choices if c is not ActionType.END_ROUND)
-                choice = random.choice(choices)
-                action_generator = action_generator.choose(choice)
-            elif isinstance(choices, AbstractDice):
-                optional_choice = action_generator.dice_available().smart_selection(
-                    choices,
-                    action_generator.game_state.get_player(action_generator.pid).characters,
-                )
-                if optional_choice is None:
-                    raise Exception(f"There's not enough dice for {choices} from "  # pragma: no cover
-                                    + f"{action_generator.dice_available()} at game_state:"
-                                    + f"{action_generator.game_state}")
-                choice = optional_choice
-                action_generator = action_generator.choose(choice)
-            elif isinstance(choices, Cards):
-                _, choice = choices.pick_random_cards(random.randint(0, choices.num_cards()))
-                action_generator = action_generator.choose(choice)
-            elif isinstance(choices, ActualDice):
-                game_state = action_generator.game_state
-                wanted_elems = game_state.get_player(
-                    action_generator.pid
-                ).characters.all_elems()
-                if game_state.phase == game_state.mode.roll_phase():
-                    choice = ActualDice(dict(
-                        (elem, choices[elem])
-                        for elem in choices.elems()
-                        if not (elem is Element.OMNI or elem in wanted_elems)
-                    ))
+        try:
+            while not action_generator.filled():
+                choices = action_generator.choices()
+                choice: DecidedChoiceType  # type: ignore
+                if isinstance(choices, tuple):
+                    game_state = action_generator.game_state
+                    if game_state.phase == game_state.mode.roll_phase() and random.random() < 0.8:
+                        choices = tuple(c for c in choices if c is not ActionType.END_ROUND)
+                    choice = random.choice(choices)
+                    action_generator = action_generator.choose(choice)
+                elif isinstance(choices, AbstractDice):
+                    optional_choice = action_generator.dice_available().smart_selection(
+                        choices,
+                        action_generator.game_state.get_player(action_generator.pid).characters,
+                    )
+                    if optional_choice is None:
+                        raise Exception(f"There's not enough dice for {choices} from "  # pragma: no cover
+                                        + f"{action_generator.dice_available()} at game_state:"
+                                        + f"{action_generator.game_state}")
+                    choice = optional_choice
+                    action_generator = action_generator.choose(choice)
+                elif isinstance(choices, Cards):
+                    _, choice = choices.pick_random(random.randint(0, choices.num_cards()))
+                    action_generator = action_generator.choose(choice)
+                elif isinstance(choices, ActualDice):
+                    game_state = action_generator.game_state
+                    wanted_elems = game_state.get_player(
+                        action_generator.pid
+                    ).characters.all_elems()
+                    if game_state.phase == game_state.mode.roll_phase():
+                        choice = ActualDice(dict(
+                            (elem, choices[elem])
+                            for elem in choices.elems()
+                            if not (elem is Element.OMNI or elem in wanted_elems)
+                        ))
+                    else:
+                        _, choice = choices.pick_random_dice(random.randint(0, choices.num_dice()))
+                    action_generator = action_generator.choose(choice)
                 else:
-                    _, choice = choices.pick_random_dice(random.randint(0, choices.num_dice()))
-                action_generator = action_generator.choose(choice)
-            else:
-                raise NotImplementedError
+                    raise NotImplementedError
+        except Exception as e:
+            print(f"Error with action_generator: {action_generator}")
+            raise e
         return action_generator.generate_action()
 
     def _action_phase(self, history: list[GameState], pid: Pid) -> PlayerAction:
