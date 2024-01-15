@@ -1,7 +1,7 @@
 Available Cards
 ===============
 
-141 of 248 cards in Genius Invokation TCG are available in the simulator.
+143 of 248 cards in Genius Invokation TCG are available in the simulator.
 (excluding character cards which are not counted as cards in ``dgisim``)
 
 Equipment Cards
@@ -63,6 +63,7 @@ Artifact Card
 Talent Card
 ^^^^^^^^^^^
 
+* Abyssal Mayhem Hydrospout
 * Arataki Ichiban
 * Cold-Blooded Strike
 * Descent of Divinity
@@ -71,7 +72,6 @@ Talent Card
 * Gales of Reverie
 * Grand Expectation
 * I Got Your Back
-* Kanten Senmyou Blessing
 * Keen Sight
 * Lands of Dandelion
 * Mystical Abandon
@@ -166,6 +166,7 @@ Talent Card
 ^^^^^^^^^^^
 
 * Absorbing Prism
+* Kanten Senmyou Blessing
 * Lightning Stiletto
 
 Other Event Card
@@ -200,6 +201,7 @@ Other Event Card
 * Send Off
 * Starsigns
 * Stone and Contracts
+* Strategize
 * The Bestest Travel Companion!
 * The Boar Princess
 * Thunder and Eternity
