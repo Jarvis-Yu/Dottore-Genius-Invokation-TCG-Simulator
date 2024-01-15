@@ -817,6 +817,11 @@ class SwapCharacterEffect(DirectEffect):
 
 
 @dataclass(frozen=True, repr=False)
+class PrivateSwapCharacterEffect(SwapCharacterEffect):
+    ...
+
+
+@dataclass(frozen=True, repr=False)
 class BackwardSwapCharacterEffect(DirectEffect):
     """
     Swap the to the next active character.

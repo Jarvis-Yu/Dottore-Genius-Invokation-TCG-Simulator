@@ -75,7 +75,7 @@ class StartingHandSelectPhase(ph.Phase):
             ).build()
         ).f_effect_stack(
             lambda es: es.push_one(
-               eft.SwapCharacterEffect(StaticTarget(pid, Zone.CHARACTERS, char_id))
+               eft.SwapCharacterEffect(StaticTarget.from_char_id(pid, char_id))
             )
         ).build()
 
@@ -93,7 +93,7 @@ class StartingHandSelectPhase(ph.Phase):
     def waiting_for(self, game_state: GameState) -> Optional[Pid]:
         effect_stack = game_state.effect_stack
         # if no effects are to be executed or death swap phase is inserted
-        if effect_stack.is_empty():
+        if not(game_state.player1.in_end_phase() and game_state.player2.in_end_phase()):
             return super().waiting_for(game_state)
         else:
             return None

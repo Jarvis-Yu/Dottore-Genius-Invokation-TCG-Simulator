@@ -344,10 +344,17 @@ class GameState:
         Note the current version of the game only hides the cards, but not dice.
         Cards are hidden by replacing all with `OmniCard`, a special type of card.
         """
-        return self.factory().f_player(
+        game_state = self.factory().f_player(
             pid.other(),
             lambda p: p.hide_secrets()
         ).build()
+        if (
+                isinstance(game_state.phase, game_state.mode.starting_hand_select_phase)
+                and game_state.waiting_for() is not None
+        ):
+            # player is not supposed to know their opponent's starting hand
+            game_state = game_state.factory().effect_stack(EffectStack(())).build()
+        return game_state
 
     def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
         """
