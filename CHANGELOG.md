@@ -1,6 +1,22 @@
 # Change Log
 
-## 0.4.0
+## 0.4.1 (To be released)
+
+### Added
+
+- New Cards:
+  - Event Cards:
+    - Other Cards:
+      - Strategize (added in 0.4.0 but not in CHANGELOG)
+
+### Updated
+
+### Fixed
+
+- "Blessing of the Divine Relic's Installation" and "Master of Weaponry"
+  don't trigger on enter effects
+
+## 0.4.0 ( )
 
 ### Added
 

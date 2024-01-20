@@ -1777,6 +1777,54 @@ class TravelersHandySwordStatus(WeaponEquipmentStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
+class _ElementalDiscountStatus(ArtifactEquipmentStatus):
+    available: bool = True
+    _ELEMENT: ClassVar[Element]
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.CARD1:
+            assert isinstance(item, CardPEvent)
+            from ..card.card import TalentCard
+            if (
+                    item.pid is status_source.pid
+                    and self.available
+                    and issubclass(item.card_type, TalentCard)
+                    and item.dice_cost.can_cost_less_elem()
+                    and self._target_is_self_active(game_state, status_source)
+            ):
+                new_cost = item.dice_cost.cost_less_elem(2)
+                return item.with_new_cost(new_cost), None
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END and not self.available:
+            return [], replace(self, available=True)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class ArchaicPetraStatus(_ElementalDiscountStatus):
+    _ELEMENT: ClassVar[Element] = Element.GEO
+
+@dataclass(frozen=True, kw_only=True)
+class BlizzardStrayerStatus(_ElementalDiscountStatus):
+    _ELEMENT: ClassVar[Element] = Element.CRYO
+
+
+@dataclass(frozen=True, kw_only=True)
 class CrownOfWatatsumiStatus(ArtifactEquipmentStatus):
     # TODO: not finished
     @classproperty

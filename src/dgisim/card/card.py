@@ -2310,14 +2310,19 @@ class BlessingOfTheDivineRelicsInstallation(EventCard, _DualCharTargetChoiceProv
         assert source_char is not None
         artifact_status = source_char.character_statuses.find_type(stt.ArtifactEquipmentStatus)
         assert isinstance(artifact_status, stt.ArtifactEquipmentStatus)
+        artifact_card = artifact_status.CARD
+        assert issubclass(artifact_card, ArtifactEquipmentCard)
         return (
             eft.RemoveCharacterStatusEffect(
                 target=instruction.source,
                 status=type(artifact_status),
             ),
-            eft.AddCharacterStatusEffect(
+        ) + artifact_card.effects(
+            game_state,
+            pid,
+            act.StaticTargetInstruction(
                 target=instruction.target,
-                status=type(artifact_status),
+                dice=ActualDice.from_empty(),
             ),
         )
 
@@ -2888,14 +2893,19 @@ class MasterOfWeaponry(EventCard, _DualCharTargetChoiceProvider):
         assert source_char is not None
         weapon_status = source_char.character_statuses.find_type(stt.WeaponEquipmentStatus)
         assert isinstance(weapon_status, stt.WeaponEquipmentStatus)
+        weapon_card = weapon_status.CARD
+        assert issubclass(weapon_card, WeaponEquipmentCard)
         return (
             eft.RemoveCharacterStatusEffect(
                 target=instruction.source,
                 status=type(weapon_status),
             ),
-            eft.AddCharacterStatusEffect(
+        ) + weapon_card.effects(
+            game_state,
+            pid,
+            act.StaticTargetInstruction(
                 target=instruction.target,
-                status=type(weapon_status),
+                dice=ActualDice.from_empty(),
             ),
         )
 
