@@ -1200,7 +1200,7 @@ class UshiSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
             info_type: Informables,
             information: InformableEvent,
     ) -> Self:
-        if info_type is Informables.DMG_DELT:
+        if info_type is Informables.DMG_DEALT:
             assert isinstance(information, DmgIEvent)
             if (
                     self._is_target(game_state, status_source, information.dmg)

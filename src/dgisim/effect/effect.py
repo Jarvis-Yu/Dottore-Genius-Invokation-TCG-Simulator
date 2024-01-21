@@ -1145,7 +1145,7 @@ class SpecificDamageEffect(DirectEffect):
         game_state = StatusProcessing.inform_all_statuses(
             game_state,
             actual_damage.source.pid,
-            Informables.DMG_DELT,
+            Informables.DMG_DEALT,
             DmgIEvent(dmg=actual_damage),
         )
 

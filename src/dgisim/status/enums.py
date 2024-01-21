@@ -27,7 +27,7 @@ class Preprocessables(Enum):
     ROLL_CHANCES = "RollChances"       # To modify the roll chances
 
 class Informables(Enum):
-    DMG_DELT = "DmgDelt"
+    DMG_DEALT = "DmgDealt"
     HEALING = "Healing"
     REACTION_TRIGGERED = "ReactionTriggered"
     PRE_SKILL_USAGE = "PreSkillUsage"

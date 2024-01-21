@@ -39,7 +39,7 @@ class _TempTestDmgListenerStatus(PlayerHiddenStatus):
             info_type: Informables,
             information: InformableEvent,
     ) -> Self:
-        if info_type is Informables.DMG_DELT:
+        if info_type is Informables.DMG_DEALT:
             assert isinstance(information, DmgIEvent)
             if information.dmg.source.pid is status_source.pid:
                 return replace(self, dmgs=self.dmgs + (information.dmg,))

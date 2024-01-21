@@ -126,7 +126,7 @@ class ChangTheNinthSupport(Support, stt._UsageLivingStatus):
             return replace(self, listening=True)
         elif info_type is Informables.REACTION_TRIGGERED and self.listening and not self.activated:
             return replace(self, activated=True, listening=False)
-        elif info_type is Informables.DMG_DELT and self.listening and not self.activated:
+        elif info_type is Informables.DMG_DEALT and self.listening and not self.activated:
             assert isinstance(information, DmgIEvent)
             if (
                     information.dmg.reaction is not None
@@ -828,7 +828,7 @@ class ParametricTransformerSupport(Support, stt._UsageLivingStatus):
         if info_type is Informables.PRE_SKILL_USAGE:
             assert not self.listening
             return replace(self, listening=True)
-        elif info_type is Informables.DMG_DELT and self.listening and not self.activated:
+        elif info_type is Informables.DMG_DEALT and self.listening and not self.activated:
             assert isinstance(information, DmgIEvent)
             from ..dice import _PURE_ELEMS
             if information.dmg.element in _PURE_ELEMS:

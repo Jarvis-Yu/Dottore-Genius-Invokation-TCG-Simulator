@@ -2001,7 +2001,7 @@ class _ShadowOfTheSandKingLikeStatus(ArtifactEquipmentStatus, _UsageLivingStatus
             info_type: Informables,
             information: InformableEvent,
     ) -> Self:
-        if info_type is Informables.DMG_DELT:
+        if info_type is Informables.DMG_DEALT:
             assert isinstance(information, DmgIEvent)
             if (
                     not self.triggered
@@ -2057,7 +2057,7 @@ class _HeartOfKhvarenasBrillianceLikeStatus(ArtifactEquipmentStatus, _UsageLivin
             info_type: Informables,
             information: InformableEvent,
     ) -> Self:
-        if info_type is Informables.DMG_DELT:
+        if info_type is Informables.DMG_DEALT:
             assert isinstance(information, DmgIEvent)
             if (
                     not self.triggered
@@ -2180,7 +2180,7 @@ class TenacityOfTheMillelithStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
             info_type: Informables,
             information: InformableEvent,
     ) -> Self:
-        if info_type is Informables.DMG_DELT:
+        if info_type is Informables.DMG_DEALT:
             assert isinstance(information, DmgIEvent)
             dmg = information.dmg
             if (
@@ -2409,7 +2409,7 @@ class ElementalResonanceEnduringRockStatus(CombatStatus):
             info_type: Informables,
             information: InformableEvent,
     ) -> Self:
-        if info_type is Informables.DMG_DELT:
+        if info_type is Informables.DMG_DEALT:
             assert isinstance(information, DmgIEvent)
             if (
                     not self.activated
@@ -3671,7 +3671,7 @@ class SproutStatus(CombatStatus, _UsageStatus):
             info_type: Informables,
             information: InformableEvent,
     ) -> Self:
-        if info_type is Informables.DMG_DELT:
+        if info_type is Informables.DMG_DEALT:
             assert isinstance(information, DmgIEvent)
             dmg = information.dmg
             if (
@@ -4191,7 +4191,7 @@ class RadicalVitalityStatus(CharacterStatus, _UsageLivingStatus):
             info_type: Informables,
             information: InformableEvent,
     ) -> Self:
-        if info_type is Informables.DMG_DELT:
+        if info_type is Informables.DMG_DEALT:
             assert isinstance(information, DmgIEvent)
             dmg = information.dmg
             if (
@@ -4993,7 +4993,7 @@ class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
             info_type: Informables,
             information: InformableEvent,
     ) -> GameState:
-        if info_type is Informables.DMG_DELT:
+        if info_type is Informables.DMG_DEALT:
             assert isinstance(information, DmgIEvent)
             if (
                     self.usages == 0
