@@ -25,6 +25,7 @@ class Preprocessables(Enum):
     DMG_AMOUNT_MUL = "DmgNumberMul"    # To determine final amount of damage (multiplication/division)
     # Roll Phase
     ROLL_CHANCES = "RollChances"       # To modify the roll chances
+    ROLL_DICE_INIT = "RollDiceInit"    # To modify the initial dice
 
 class Informables(Enum):
     DMG_DEALT = "DmgDealt"

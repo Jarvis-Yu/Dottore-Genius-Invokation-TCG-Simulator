@@ -94,16 +94,30 @@ __all__ = [
     "TravelersHandySword",
 
     # Artifact Card
+    "ArchaicPetra",
+    "BlizzardStrayer",
+    "BrokenRimesEcho",
+    "CrimsonWitchOfFlames",
     "CrownOfWatatsumi",
+    "DeepwoodMemories",
     "FlowingRings",
     "GamblersEarrings",
     "GeneralsAncientHelm",
     "GildedDreams",
+    "HeartOfDepth",
     "HeartOfKhvarenasBrilliance",
     "InstructorsCap",
+    "LaurelCoronet",
+    "MaskOfSolitudeBasalt",
     "ShadowOfTheSandKing",
     "TenacityOfTheMillelith",
+    "ThunderSummonersCrown",
+    "ThunderingFury",
+    "ViridescentVenerer",
+    "ViridescentVenerersDiadem",
     "VourukashasGlow",
+    "WineStainedTricorne",
+    "WitchsScorchingHat",
 
     # Event Card
     ## Food Card ##
@@ -1753,9 +1767,34 @@ class TravelersHandySword(WeaponEquipmentCard):
 ########## Artifact Card ##########
 
 
+class ArchaicPetra(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
+    ARTIFACT_STATUS = stt.ArchaicPetraStatus
+
+
+class BlizzardStrayer(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
+    ARTIFACT_STATUS = stt.BlizzardStrayerStatus
+
+
+class BrokenRimesEcho(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDice({Element.ANY: 2})
+    ARTIFACT_STATUS = stt.BrokenRimesEchoStatus
+
+
+class CrimsonWitchOfFlames(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
+    ARTIFACT_STATUS = stt.CrimsonWitchOfFlamesStatus
+
+
 class CrownOfWatatsumi(ArtifactEquipmentCard):
     _DICE_COST = AbstractDice({Element.OMNI: 1})
     ARTIFACT_STATUS = stt.CrownOfWatatsumiStatus
+
+
+class DeepwoodMemories(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
+    ARTIFACT_STATUS = stt.DeepwoodMemoriesStatus
 
 
 class FlowingRings(ArtifactEquipmentCard):
@@ -1807,6 +1846,11 @@ class GildedDreams(ArtifactEquipmentCard):
         return tuple(effects)
 
 
+class HeartOfDepth(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
+    ARTIFACT_STATUS = stt.HeartOfDepthStatus
+
+
 class HeartOfKhvarenasBrilliance(ArtifactEquipmentCard):
     _DICE_COST = AbstractDice.from_empty()
     ARTIFACT_STATUS = stt.HeartOfKhvarenasBrillianceStatus
@@ -1815,6 +1859,16 @@ class HeartOfKhvarenasBrilliance(ArtifactEquipmentCard):
 class InstructorsCap(ArtifactEquipmentCard):
     _DICE_COST = AbstractDice({Element.ANY: 2})
     ARTIFACT_STATUS = stt.InstructorsCapStatus
+
+
+class LaurelCoronet(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDice({Element.ANY: 2})
+    ARTIFACT_STATUS = stt.LaurelCoronetStatus
+
+
+class MaskOfSolitudeBasalt(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDice({Element.ANY: 2})
+    ARTIFACT_STATUS = stt.MaskOfSolitudeBasaltStatus
 
 
 class ShadowOfTheSandKing(ArtifactEquipmentCard):
@@ -1842,9 +1896,40 @@ class TenacityOfTheMillelith(ArtifactEquipmentCard):
     ARTIFACT_STATUS = stt.TenacityOfTheMillelithStatus
 
 
+class ThunderSummonersCrown(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDice({Element.ANY: 2})
+    ARTIFACT_STATUS = stt.ThunderSummonersCrownStatus
+
+
+class ThunderingFury(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
+    ARTIFACT_STATUS = stt.ThunderingFuryStatus
+
+
+class ViridescentVenerer(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
+    ARTIFACT_STATUS = stt.ViridescentVenererStatus
+
+
+class ViridescentVenerersDiadem(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDice({Element.ANY: 2})
+    ARTIFACT_STATUS = stt.ViridescentVenerersDiademStatus
+
+
 class VourukashasGlow(ArtifactEquipmentCard):
     _DICE_COST = AbstractDice({Element.OMNI: 1})
     ARTIFACT_STATUS = stt.VourukashasGlowStatus
+
+
+class WineStainedTricorne(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDice({Element.ANY: 2})
+    ARTIFACT_STATUS = stt.WineStainedTricorneStatus
+
+
+class WitchsScorchingHat(ArtifactEquipmentCard):
+    _DICE_COST = AbstractDice({Element.ANY: 2})
+    ARTIFACT_STATUS = stt.WitchsScorchingHatStatus
+
 
 # <<<<<<<<<<<<<<<<<<<< Event Cards <<<<<<<<<<<<<<<<<<<<
 # <<<<<<<<<<<<<<<<<<<< Event Cards / Food Cards <<<<<<<<<<<<<<<<<<<<

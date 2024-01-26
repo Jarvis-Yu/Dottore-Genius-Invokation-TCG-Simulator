@@ -3,7 +3,8 @@ from typing import TYPE_CHECKING
 
 from .. import phase as ph
 
-from ...event import RollChancePEvent
+from ...element import Element
+from ...event import DiceRollInitPEvent, RollChancePEvent
 from ...action.action import DiceSelectAction, EndRoundAction, PlayerAction
 from ...action.action_generator import ActionGenerator
 from ...action.enums import ActionType
@@ -37,17 +38,39 @@ class RollPhase(ph.Phase):
             RollChancePEvent(pid=Pid.P2, chances=base_roll_chances)
         )
         assert isinstance(p2_chances, RollChancePEvent)
+        game_state, p1_dice_event = StatusProcessing.preprocess_by_all_statuses(
+            game_state, Pid.P1, Preprocessables.ROLL_DICE_INIT,
+            DiceRollInitPEvent(pid=Pid.P1, dice=ActualDice({Element.ANY: RollPhase._NUM_DICE})),
+        )
+        game_state, p2_dice_event = StatusProcessing.preprocess_by_all_statuses(
+            game_state, Pid.P2, Preprocessables.ROLL_DICE_INIT,
+            DiceRollInitPEvent(pid=Pid.P2, dice=ActualDice({Element.ANY: RollPhase._NUM_DICE})),
+        )
+        assert isinstance(p1_dice_event, DiceRollInitPEvent)
+        assert isinstance(p2_dice_event, DiceRollInitPEvent)
+
+        def roll_dice(dice: ActualDice) -> ActualDice:
+            if dice[Element.ANY] == 0:
+                return dice
+            assert dice[Element.ANY] > 0
+            replacement = ActualDice.from_random(dice[Element.ANY])
+            final_dice = dice + replacement + {Element.ANY: -dice[Element.ANY]}
+            assert final_dice.is_legal(), f"final_dice = {final_dice}"
+            return final_dice
+
+        p1_dice = roll_dice(p1_dice_event.dice)
+        p2_dice = roll_dice(p2_dice_event.dice)
         return game_state.factory().f_player1(
             lambda p1: p1.factory()
             .phase(Act.ACTION_PHASE)
             .dice_reroll_chances(p1_chances.chances)  # type: ignore
-            .dice(ActualDice.from_random(RollPhase._NUM_DICE))
+            .dice(p1_dice)
             .build()
         ).f_player2(
             lambda p2: p2.factory()
             .phase(Act.ACTION_PHASE)
             .dice_reroll_chances(p2_chances.chances)  # type: ignore
-            .dice(ActualDice.from_random(RollPhase._NUM_DICE))
+            .dice(p2_dice)
             .build()
         ).build()
 

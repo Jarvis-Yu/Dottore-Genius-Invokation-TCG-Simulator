@@ -10,8 +10,8 @@ project = 'dgisim'
 copyright = '2023, Leyang Yu'
 author = 'Leyang Yu'
 
-release = '0.4.0'
-version = '0.4.0'
+release = '0.5.0'
+version = '0.5.0'
 
 # -- General configuration
 

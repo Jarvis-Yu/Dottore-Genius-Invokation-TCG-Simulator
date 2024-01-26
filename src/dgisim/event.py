@@ -9,13 +9,15 @@ from typing import TYPE_CHECKING
 
 from typing_extensions import Self
 
+from .element import Element, Reaction
+
 if TYPE_CHECKING:
     from .card.card import Card, EquipmentCard
     from .character.character import Character
     from .character.enums import CharacterSkill, CharacterSkillType
+    from .dice import ActualDice
     from .effect.effect import SpecificDamageEffect
     from .effect.structs import DamageType, StaticTarget
-    from .element import Element, Reaction
     from .dice import AbstractDice
     from .state.game_state import GameState
     from .state.enums import Pid
@@ -38,6 +40,7 @@ __all__ = [
     "PreprocessableEvent",
     "ActionPEvent",
     "CardPEvent",
+    "DiceRollInitPEvent",
     "DmgPEvent",
     "RollChancePEvent",
 ]
@@ -58,6 +61,15 @@ class EventType(Enum):
     SKILL3 = "Elemental-Skill2"
     ELEMENTAL_BURST = "Elemental-Burst"
     SWAP = "Swap"
+
+    def is_skill(self) -> bool:
+        """ :returns: True if this event is a skill"""
+        return (
+            self is EventType.SKILL1
+            or self is EventType.SKILL2
+            or self is EventType.SKILL3
+            or self is EventType.ELEMENTAL_BURST
+        )
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -152,6 +164,23 @@ class CardPEvent(PreprocessableEvent):
 
     def invalidate(self) -> Self:
         return replace(self, invalidated=True)
+
+
+@dataclass(frozen=True, kw_only=True)
+class DiceRollInitPEvent(PreprocessableEvent):
+    pid: Pid
+    dice: ActualDice
+
+    def can_update(self) -> bool:
+        """ :returns: True if there are dice that can be 'collapsed'. """
+        return self.dice[Element.ANY] > 0
+
+    def update(self, elem: Element, num: int) -> Self:
+        """ :returns: event where num dice (if possible) are 'collapsed' into elem. """
+        num = min(num, self.dice[Element.ANY])
+        return replace(self,
+            dice=self.dice + {elem: num, Element.ANY: -num},
+        )
 
 
 @dataclass(frozen=True, kw_only=True)

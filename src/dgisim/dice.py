@@ -87,7 +87,7 @@ class Dice:
         Worst time complexity = O(k), k is kinds of dice held by this object.
         """
         return all(map(lambda x: x >= 0, self._dice.values())) \
-            and all(elem in self._LEGAL_ELEMS for elem in self._dice)
+            and all(elem in self._LEGAL_ELEMS for elem in self)
 
     def validify(self) -> Self:
         """

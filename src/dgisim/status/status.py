@@ -98,16 +98,30 @@ __all__ = [
     "SacrificialSwordStatus",
     "TravelersHandySwordStatus",
     ## Artifact ##
+    "ArchaicPetraStatus",
+    "BlizzardStrayerStatus",
+    "BrokenRimesEchoStatus",
+    "CrimsonWitchOfFlamesStatus",
     "CrownOfWatatsumiStatus",
+    "DeepwoodMemoriesStatus",
     "FlowingRingsStatus",
     "GamblersEarringsStatus",
     "GeneralsAncientHelmStatus",
     "GildedDreamsStatus",
+    "HeartOfDepthStatus",
     "HeartOfKhvarenasBrillianceStatus",
     "InstructorsCapStatus",
+    "LaurelCoronetStatus",
+    "MaskOfSolitudeBasaltStatus",
+    "ThunderSummonersCrownStatus",
+    "ThunderingFuryStatus",
     "ShadowOfTheSandKingStatus",
     "TenacityOfTheMillelithStatus",
+    "ViridescentVenererStatus",
+    "ViridescentVenerersDiademStatus",
     "VourukashasGlowStatus",
+    "WineStainedTricorneStatus",
+    "WitchsScorchingHatStatus",
 
     # combat status
     "AncientCourtyardStatus",
@@ -1778,6 +1792,9 @@ class TravelersHandySwordStatus(WeaponEquipmentStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class _ElementalDiscountStatus(ArtifactEquipmentStatus):
+    """
+    The template for budget elemental artifacts.
+    """
     available: bool = True
     _ELEMENT: ClassVar[Element]
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
@@ -1792,6 +1809,10 @@ class _ElementalDiscountStatus(ArtifactEquipmentStatus):
             item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
+        """
+        If this "status_source" casts a skill or talent card is played on "status_source",
+        the elemental cost of the card is reduced by 1.
+        """
         if signal is Preprocessables.CARD1:
             assert isinstance(item, CardPEvent)
             from ..card.card import TalentCard
@@ -1799,11 +1820,22 @@ class _ElementalDiscountStatus(ArtifactEquipmentStatus):
                     item.pid is status_source.pid
                     and self.available
                     and issubclass(item.card_type, TalentCard)
-                    and item.dice_cost.can_cost_less_elem()
-                    and self._target_is_self_active(game_state, status_source)
+                    and item.dice_cost.can_cost_less_elem(self._ELEMENT)
+                    and (target := item.card_type.implicit_target(game_state, item.pid)) is not None
+                    and target == status_source
             ):
-                new_cost = item.dice_cost.cost_less_elem(2)
-                return item.with_new_cost(new_cost), None
+                new_cost = item.dice_cost.cost_less_elem(1, self._ELEMENT)
+                return item.with_new_cost(new_cost), replace(self, available=False)
+        elif signal is Preprocessables.SKILL:
+            assert isinstance(item, ActionPEvent)
+            if (
+                    item.source == status_source
+                    and self.available
+                    and item.event_type.is_skill()
+                    and item.dice_cost.can_cost_less_elem(self._ELEMENT)
+            ):
+                new_cost = item.dice_cost.cost_less_elem(1, self._ELEMENT)
+                return replace(item, dice_cost=new_cost), replace(self, available=False)
         return item, self
 
     @override
@@ -1815,13 +1847,61 @@ class _ElementalDiscountStatus(ArtifactEquipmentStatus):
         return [], self
 
 
-@dataclass(frozen=True, kw_only=True)
-class ArchaicPetraStatus(_ElementalDiscountStatus):
-    _ELEMENT: ClassVar[Element] = Element.GEO
+class _ElementalDiscountSupplyStatus(_ElementalDiscountStatus):
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.ROLL_DICE_INIT:
+            assert isinstance(item, DiceRollInitPEvent)
+            if (
+                    item.pid == status_source.pid
+                    and item.can_update()
+            ):
+                return item.update(self._ELEMENT, 2), self
+        return super()._preprocess(game_state, status_source, item, signal)
+
 
 @dataclass(frozen=True, kw_only=True)
-class BlizzardStrayerStatus(_ElementalDiscountStatus):
+class ArchaicPetraStatus(_ElementalDiscountSupplyStatus):
+    _ELEMENT: ClassVar[Element] = Element.GEO
+
+    @classproperty
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import ArchaicPetra
+        return ArchaicPetra
+
+@dataclass(frozen=True, kw_only=True)
+class BlizzardStrayerStatus(_ElementalDiscountSupplyStatus):
     _ELEMENT: ClassVar[Element] = Element.CRYO
+
+    @classproperty
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import BlizzardStrayer
+        return BlizzardStrayer
+
+@dataclass(frozen=True, kw_only=True)
+class BrokenRimesEchoStatus(_ElementalDiscountStatus):
+    _ELEMENT: ClassVar[Element] = Element.CRYO
+
+    @classproperty
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import BrokenRimesEcho
+        return BrokenRimesEcho
+
+
+@dataclass(frozen=True, kw_only=True)
+class CrimsonWitchOfFlamesStatus(_ElementalDiscountSupplyStatus):
+    _ELEMENT: ClassVar[Element] = Element.PYRO
+
+    @classproperty
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import CrimsonWitchOfFlames
+        return CrimsonWitchOfFlames
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1843,6 +1923,16 @@ class CrownOfWatatsumiStatus(ArtifactEquipmentStatus):
         if info_type is Informables.HEALING:
             assert isinstance(information, HealIEvent)
         return self
+
+
+@dataclass(frozen=True, kw_only=True)
+class DeepwoodMemoriesStatus(_ElementalDiscountSupplyStatus):
+    _ELEMENT: ClassVar[Element] = Element.DENDRO
+
+    @classproperty
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import DeepwoodMemories
+        return DeepwoodMemories
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -2084,6 +2174,16 @@ class _HeartOfKhvarenasBrillianceLikeStatus(ArtifactEquipmentStatus, _UsageLivin
 
 
 @dataclass(frozen=True, kw_only=True)
+class HeartOfDepthStatus(_ElementalDiscountSupplyStatus):
+    _ELEMENT: ClassVar[Element] = Element.HYDRO
+
+    @classproperty
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import HeartOfDepth
+        return HeartOfDepth
+
+
+@dataclass(frozen=True, kw_only=True)
 class HeartOfKhvarenasBrillianceStatus(_HeartOfKhvarenasBrillianceLikeStatus):
     @classproperty
     def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
@@ -2142,6 +2242,26 @@ class InstructorsCapStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
         elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
             return [], replace(self, usages=self.MAX_USAGES)
         return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class LaurelCoronetStatus(_ElementalDiscountStatus):
+    _ELEMENT: ClassVar[Element] = Element.DENDRO
+
+    @classproperty
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import LaurelCoronet
+        return LaurelCoronet
+
+
+@dataclass(frozen=True, kw_only=True)
+class MaskOfSolitudeBasaltStatus(_ElementalDiscountStatus):
+    _ELEMENT: ClassVar[Element] = Element.GEO
+
+    @classproperty
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import MaskOfSolitudeBasalt
+        return MaskOfSolitudeBasalt
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -2220,6 +2340,46 @@ class TenacityOfTheMillelithStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
+class ThunderSummonersCrownStatus(_ElementalDiscountStatus):
+    _ELEMENT: ClassVar[Element] = Element.ELECTRO
+
+    @classproperty
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import ThunderSummonersCrown
+        return ThunderSummonersCrown
+
+
+@dataclass(frozen=True, kw_only=True)
+class ThunderingFuryStatus(_ElementalDiscountSupplyStatus):
+    _ELEMENT: ClassVar[Element] = Element.ELECTRO
+
+    @classproperty
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import ThunderingFury
+        return ThunderingFury
+
+
+@dataclass(frozen=True, kw_only=True)
+class ViridescentVenererStatus(_ElementalDiscountSupplyStatus):
+    _ELEMENT: ClassVar[Element] = Element.ANEMO
+
+    @classproperty
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import ViridescentVenerer
+        return ViridescentVenerer
+
+
+@dataclass(frozen=True, kw_only=True)
+class ViridescentVenerersDiademStatus(_ElementalDiscountStatus):
+    _ELEMENT: ClassVar[Element] = Element.ANEMO
+
+    @classproperty
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import ViridescentVenerersDiadem
+        return ViridescentVenerersDiadem
+
+
+@dataclass(frozen=True, kw_only=True)
 class VourukashasGlowStatus(_HeartOfKhvarenasBrillianceLikeStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         *_HeartOfKhvarenasBrillianceLikeStatus.REACTABLE_SIGNALS,
@@ -2243,6 +2403,26 @@ class VourukashasGlowStatus(_HeartOfKhvarenasBrillianceLikeStatus):
                 ),
             ], self
         return super()._react_to_signal(game_state, source, signal)
+
+
+@dataclass(frozen=True, kw_only=True)
+class WineStainedTricorneStatus(_ElementalDiscountStatus):
+    _ELEMENT: ClassVar[Element] = Element.HYDRO
+
+    @classproperty
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import WineStainedTricorne
+        return WineStainedTricorne
+
+
+@dataclass(frozen=True, kw_only=True)
+class WitchsScorchingHatStatus(_ElementalDiscountStatus):
+    _ELEMENT: ClassVar[Element] = Element.PYRO
+
+    @classproperty
+    def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
+        from ..card.card import WitchsScorchingHat
+        return WitchsScorchingHat
 
 
 ############################## Combat Status ##############################

@@ -1,13 +1,29 @@
 # Change Log
 
-## 0.4.1 (To be released)
+## 0.5.0 (To be released)
 
 ### Added
 
 - New Cards:
+  - Equipment Cards:
+    - Artifact Cards:
+      - Archaic Petra
+      - Blizzard Strayer
+      - Broken Rimes Echo
+      - Crimson Witch of Flames
+      - Deepwood Memories
+      - Heart of Depth
+      - Laurel Coronet
+      - Mask of Solitude Basalt
+      - Thunder Summoner's Crown
+      - Thundering Fury
+      - Viridescent Venerer
+      - Viridescent Venerer's Diadem
+      - Wine-Stained Tricorne
+      - Witchs Scorching Hat
   - Event Cards:
     - Other Cards:
-      - Strategize (added in 0.4.0 but not in CHANGELOG)
+      - Strategize (added in 0.4.0 but missed in CHANGELOG)
 
 ### Updated
 
@@ -16,7 +32,7 @@
 - "Blessing of the Divine Relic's Installation" and "Master of Weaponry"
   don't trigger on enter effects
 
-## 0.4.0 ( )
+## 0.4.0 (15 Jan 2024)
 
 ### Added
 

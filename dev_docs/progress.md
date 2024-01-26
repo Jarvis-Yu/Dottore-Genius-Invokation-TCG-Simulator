@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (35/71 implemented)](#character-3571-implemented)
-  - [Card (143/248 implemented)](#card-143248-implemented)
+  - [Card (157/248 implemented)](#card-157248-implemented)
 
 ## Character (35/71 implemented)
 
@@ -56,9 +56,9 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (143/248 implemented)
+## Card (157/248 implemented)
 
-- [ ] Equipment Card (64/137):
+- [ ] Equipment Card (78/137):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
@@ -122,7 +122,12 @@ all I need now is to implement each card and character.
       - [x] Sacrificial Sword
       - [x] Traveler's Handy Sword
   - [ ] Artifact Card:
+    - [x] Archaic Petra
+    - [x] Blizzard Strayer
+    - [x] Broken Rimes Echo
+    - [x] Crimson Witch of Flames
     - [ ] Crown of Watatsumi
+    - [x] Deepwood Memories
     - [ ] Echoes of an Offering
     - [ ] Emblem of Severed Fate
     - [ ] Exile's Circlet
@@ -130,13 +135,22 @@ all I need now is to implement each card and character.
     - [x] Gambler's Earrings
     - [x] General's Ancient Helm
     - [x] Gilded Dreams
+    - [x] Heart of Depth
     - [x] Heart of Khvarena's Brilliance
     - [x] Instructor's Cap
+    - [x] Laurel Coronet
+    - [x] Mask of Solitude Basalt
     - [ ] Ocean-Hued Clam
     - [ ] Ornate Kabuto
     - [x] Shadow of the Sand King
     - [x] Tenacity of the Millelith
+    - [x] Thunder Summoner's Crown
+    - [x] Thundering Fury
+    - [x] Viridescent Venerer
+    - [x] Viridescent Venerer's Diadem
     - [x] Vourukasha's Glow
+    - [x] Wine-Stained Tricorne
+    - [x] Witch's Scorching Hat
 - [ ] Support Card (22/44):
   - [ ] Companion Card:
     - [x] Chang the Ninth
