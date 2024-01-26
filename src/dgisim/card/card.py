@@ -1018,6 +1018,14 @@ class TalentCard(Card):
     def valid_in_deck(cls, deck: Deck) -> bool:
         return cls._CHARACTER in deck.chars
 
+    @classmethod
+    def implicit_target(cls, game_state: gs.GameState, pid: Pid) -> None | StaticTarget:
+        """
+        :returns: the target that the card is going to be played on, provided that
+                  the card is playable.
+        """
+        return StaticTarget.from_player_active(game_state, pid)
+
 
 class TalentEventCard(EventCard, TalentCard):
     @override
@@ -3617,15 +3625,31 @@ class ColdBloodedStrike(_TalentEquipmentSkillCard):
 
 #### Kamisato Ayaka ####
 
-class KantenSenmyouBlessing(EquipmentCard, TalentEventCard, _CharTargetChoiceProvider):
+class KantenSenmyouBlessing(EquipmentCard, TalentEventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDice({Element.CRYO: 2})
     _CHARACTER = chr.KamisatoAyaka
 
     @override
     @classmethod
-    def _valid_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:
-        return isinstance(char, chr.KamisatoAyaka) \
-            and super()._valid_char(game_state, pid, char)
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        cs = game_state.get_player(pid).characters
+        ayakas = [char for char in cs if type(char) is chr.KamisatoAyaka]
+        if (
+                not ayakas
+                or all(not ayaka.alive for ayaka in ayakas)
+        ):
+            return False
+        return Card._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def implicit_target(cls, game_state: gs.GameState, pid: Pid) -> StaticTarget | None:
+        cs = game_state.get_player(pid).characters
+        ayakas = [char for char in cs if type(char) is chr.KamisatoAyaka]
+        ayaka = next((ayaka for ayaka in ayakas if ayaka.alive), None)
+        if ayaka is None:
+            return None
+        return StaticTarget.from_char_id(pid, ayaka.id)
 
     @override
     @classmethod
@@ -3635,11 +3659,12 @@ class KantenSenmyouBlessing(EquipmentCard, TalentEventCard, _CharTargetChoicePro
             pid: Pid,
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
-        assert isinstance(instruction, act.StaticTargetInstruction)
-        assert isinstance(game_state.get_character_target(instruction.target), chr.KamisatoAyaka)
+        assert isinstance(instruction, act.DiceOnlyInstruction)
+        target = cls.implicit_target(game_state, pid)
+        assert target is not None
         return (
             eft.AddCharacterStatusEffect(
-                target=instruction.target,
+                target=target,
                 status=stt.KantenSenmyouBlessingStatus,
             ),
         )
@@ -3648,7 +3673,7 @@ class KantenSenmyouBlessing(EquipmentCard, TalentEventCard, _CharTargetChoicePro
 #### Keqing ####
 
 
-class LightningStiletto(TalentEventCard, _CombatActionCard, _CharTargetChoiceProvider):
+class LightningStiletto(TalentEventCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDice({Element.ELECTRO: 3})
 
     @override
@@ -3658,33 +3683,25 @@ class LightningStiletto(TalentEventCard, _CombatActionCard, _CharTargetChoicePro
 
     @override
     @classmethod
-    def _valid_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:
-        return isinstance(char, chr.Keqing) \
-            and super()._valid_char(game_state, pid, char)
+    def implicit_target(cls, game_state: gs.GameState, pid: Pid) -> StaticTarget | None:
+        cs = game_state.get_player(pid).characters
+        keqings = [char for char in cs if type(char) is chr.Keqing]
+        keqing = next((keqing for keqing in keqings if keqing.can_cast_skill()), None)
+        if keqing is None:
+            return None
+        return StaticTarget.from_char_id(pid, keqing.id)
 
     @override
     @classmethod
     def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
         cs = game_state.get_player(pid).characters
         keqings = [char for char in cs if type(char) is chr.Keqing]
-        if not keqings:  # pragma: no cover
-            return False
-        if all(not keqing.can_cast_skill() for keqing in keqings):
+        if (
+                not keqings
+                or all(not keqing.can_cast_skill() for keqing in keqings)
+        ):
             return False
         return Card._loosely_usable(game_state, pid)
-
-    @override
-    @classmethod
-    def _valid_instruction(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction
-    ) -> bool:
-        if not isinstance(instruction, act.StaticTargetInstruction):
-            return False
-        target = game_state.get_target(instruction.target)
-        return isinstance(target, chr.Keqing) and target.can_cast_skill()
 
     @override
     @classmethod
@@ -3694,17 +3711,19 @@ class LightningStiletto(TalentEventCard, _CombatActionCard, _CharTargetChoicePro
             pid: Pid,
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
-        assert isinstance(instruction, act.StaticTargetInstruction)
+        assert isinstance(instruction, act.DiceOnlyInstruction)
+        target = cls.implicit_target(game_state, pid)
+        assert target is not None
         return (
             eft.SwapCharacterEffect(
-                target=instruction.target,
+                target=target,
             ),
             eft.OverrideCharacterStatusEffect(
-                target=instruction.target,
+                target=target,
                 status=stt.KeqingTalentStatus(can_infuse=True),
             ),
             eft.CastSkillEffect(
-                target=instruction.target,
+                target=target,
                 skill=CharacterSkill.SKILL2,
             ),
         )

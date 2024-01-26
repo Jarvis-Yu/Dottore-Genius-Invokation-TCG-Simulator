@@ -74,10 +74,7 @@ class TestKeqing(unittest.TestCase):
         gsm = GameStateMachine(game_state_1, a1, a2)
         a1.inject_action(CardAction(
             card=LightningStiletto,
-            instruction=StaticTargetInstruction(
-                dice=ActualDice({Element.OMNI: 3}),
-                target=source,
-            )
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -96,10 +93,7 @@ class TestKeqing(unittest.TestCase):
         gsm = GameStateMachine(game_state, a1, a2)
         a1.inject_action(CardAction(
             card=LightningStiletto,
-            instruction=StaticTargetInstruction(
-                dice=ActualDice({Element.OMNI: 3}),
-                target=source,
-            )
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         ))
         gsm.player_step()
         gsm.auto_step()
@@ -335,21 +329,9 @@ class TestKeqing(unittest.TestCase):
         ).build()
 
         self.assertFalse(LightningStiletto.loosely_usable(game_state, Pid.P1))
-        self.assertIsNone(LightningStiletto.valid_instruction(
-            game_state,
-            Pid.P1,
-            DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
-        ))
         # False because frozen
         self.assertIsNone(LightningStiletto.valid_instruction(
             game_state,
             Pid.P1,
-            StaticTargetInstruction(
-                dice=ActualDice({Element.OMNI: 3}),
-                target=StaticTarget(
-                    pid=Pid.P1,
-                    zone=Zone.CHARACTERS,
-                    id=3,
-                )
-            ),
+            DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))

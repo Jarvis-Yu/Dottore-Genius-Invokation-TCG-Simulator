@@ -59,10 +59,7 @@ class TestSumeruCity(unittest.TestCase):
         self.assertEqual(game_state.player1.dice.num_dice(), 2)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=LightningStiletto,
-            instruction=StaticTargetInstruction(
-                dice=ActualDice({Element.OMNI: 2}),
-                target=StaticTarget.from_player_active(game_state, Pid.P1),
-            )
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 2})),
         ))
         self.assertEqual(game_state.player1.hand_cards.num_cards(), 1)
 

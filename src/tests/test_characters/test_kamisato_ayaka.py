@@ -88,10 +88,7 @@ class TestKamisatoAyaka(unittest.TestCase):
         game_state = silent_fast_swap(base_state, Pid.P1, 1)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=KantenSenmyouBlessing,
-            instruction=StaticTargetInstruction(
-                target=StaticTarget.from_player_active(base_state, Pid.P1),
-                dice=ActualDice({Element.CRYO: 2}),
-            ),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.CRYO: 2})),
         ))
         self.assertIs(game_state.waiting_for(), Pid.P1)
 

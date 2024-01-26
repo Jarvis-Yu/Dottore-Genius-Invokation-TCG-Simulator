@@ -115,10 +115,7 @@ class TestKaeya(unittest.TestCase):
         # test Keqing card swap cause usage of Icicle prior of Keqing's skill
         a1.inject_action(CardAction(
             card=LightningStiletto,
-            instruction=StaticTargetInstruction(
-                dice=ActualDice({Element.OMNI: 3}),
-                target=StaticTarget(Pid.P1, Zone.CHARACTERS, 3),
-            )
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3}))
         ))
         gsm = GameStateMachine(game_state_p1_move, a1, a2)
         gsm.player_step()

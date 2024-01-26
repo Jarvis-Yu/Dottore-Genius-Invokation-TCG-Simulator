@@ -65,10 +65,7 @@ class TestPassingOfJudgment(unittest.TestCase):
 
         game_state = step_action(game_state, Pid.P2, CardAction(
             card=LightningStiletto,
-            instruction=StaticTargetInstruction(
-                target=StaticTarget.from_char_id(Pid.P2, 3),
-                dice=ActualDice({Element.OMNI: 3}),
-            ),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 3})),
         ))
         p2ac = p2_active_char(game_state)
         self.assertEqual(p2ac.id, 1)
