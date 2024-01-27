@@ -2259,6 +2259,7 @@ class InEveryHouseAStove(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
             pid: Pid,
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
+        cards_drawn = min(max(0, game_state.round - 1), 4)
         return super().effects(
             game_state,
             pid,
@@ -2266,7 +2267,7 @@ class InEveryHouseAStove(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
         ) + (
             eft.DrawRandomCardEffect(
                 pid=pid,
-                num=min(game_state.round, 4),
+                num=cards_drawn,
             ),
         )
 

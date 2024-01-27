@@ -19,5 +19,5 @@ class TestInEveryHouseAStove(unittest.TestCase):
                 hand_after = game_state.player1.hand_cards
                 self.assertEqual(
                     hand_after.num_cards() - (hand_before.num_cards() - 1),  # -1 for card played
-                    min(n, 4),
+                    min((max(0, n - 1)), 4),
                 )

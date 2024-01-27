@@ -2395,7 +2395,7 @@ class VourukashasGlowStatus(_HeartOfKhvarenasBrillianceLikeStatus):
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT and self.usages < self.MAX_USAGES:
             return [
                 eft.RecoverHPEffect(
                     target=source,

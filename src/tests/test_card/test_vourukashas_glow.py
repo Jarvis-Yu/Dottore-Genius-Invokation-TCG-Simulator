@@ -49,7 +49,7 @@ class TestVourukashasGlow(unittest.TestCase):
 
         game_state = next_round(game_state)
         p1c1_aft, p1c2_aft, p1c3_aft = game_state.player1.characters.get_characters()
-        self.assertEqual(p1c1_aft.hp, p1c1_bfr.hp + 1)
+        self.assertEqual(p1c1_aft.hp, p1c1_bfr.hp)  # as the other effect was not triggered
         self.assertEqual(p1c2_aft.hp, p1c2_bfr.hp)  # as artifact is not equipped
         self.assertEqual(p1c3_aft.hp, p1c3_bfr.hp + 1)
 
