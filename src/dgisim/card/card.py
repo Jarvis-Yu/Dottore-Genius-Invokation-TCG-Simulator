@@ -257,6 +257,8 @@ __all__ = [
     "IGotYourBack",
     ## Qiqi ##
     "RiteOfResurrection",
+    ## Raiden Shogun ##
+    "WishesUnnumbered",
     ## Rhodeia of Loch ##
     "StreamingSurge",
     ## Sangonomiya Kokomi ##
@@ -3896,6 +3898,16 @@ class RiteOfResurrection(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDice({Element.CRYO: 5})
     _CHARACTER = chr.Qiqi
     _EQUIPMENT_STATUS = stt.RiteOfResurrectionStatus
+    _SKILL = CharacterSkill.ELEMENTAL_BURST
+
+
+#### Raiden Shogun ####
+
+
+class WishesUnnumbered(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDice({Element.ELECTRO: 4})
+    _CHARACTER = chr.RaidenShogun
+    _EQUIPMENT_STATUS = stt.WishesUnnumberedStatus
     _SKILL = CharacterSkill.ELEMENTAL_BURST
 
 

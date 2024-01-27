@@ -32,6 +32,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     Ningguang,
     Noelle,
     Qiqi,
+    RaidenShogun,
     RhodeiaOfLoch,
     SangonomiyaKokomi,
     Shenhe,

@@ -45,6 +45,7 @@ __all__ = [
     "CuileinAnbarSummon",
     "DandelionFieldSummon",
     "ElectroHilichurlShooterSummon",
+    "EyeOfStormyJudgmentSummon",
     "FierySanctumFieldSummon",
     "FrostflakeSekiNoToSummon",
     "HilichurlBerserkerSummon",
@@ -528,6 +529,31 @@ class ElectroHilichurlShooterSummon(_DmgPerRoundSummon):
     MAX_USAGES: ClassVar[int] = 2
     DMG: ClassVar[int] = 1
     ELEMENT: ClassVar[Element] = Element.ELECTRO
+
+
+@dataclass(frozen=True, kw_only=True)
+class EyeOfStormyJudgmentSummon(_DmgPerRoundSummon):
+    usages: int = 3
+    MAX_USAGES: ClassVar[int] = 3
+    DMG: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.ELECTRO
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            if (
+                    item.dmg.source.pid is status_source.pid
+                    and item.dmg.damage_type.direct_elemental_burst()
+            ):
+                return item.delta_damage(1), self
+        return item, self
 
 
 @dataclass(frozen=True, kw_only=True)

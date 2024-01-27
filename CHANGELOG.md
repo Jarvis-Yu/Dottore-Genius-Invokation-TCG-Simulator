@@ -4,6 +4,8 @@
 
 ### Added
 
+- New Characters:
+  - Raiden Shogun
 - New Cards:
   - Equipment Cards:
     - Artifact Cards:
@@ -21,6 +23,8 @@
       - Viridescent Venerer's Diadem
       - Wine-Stained Tricorne
       - Witchs Scorching Hat
+    - Talent Cards:
+      - Wishes Unnumbered
   - Event Cards:
     - Other Cards:
       - Strategize (added in 0.4.0 but missed in CHANGELOG)

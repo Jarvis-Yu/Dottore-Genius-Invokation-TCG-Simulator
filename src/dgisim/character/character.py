@@ -58,6 +58,7 @@ __all__ = [
     "Ningguang",
     "Noelle",
     "Qiqi",
+    "RaidenShogun",
     "RhodeiaOfLoch",
     "SangonomiyaKokomi",
     "Shenhe",
@@ -2874,7 +2875,81 @@ class Qiqi(Character):
         )
 
 
-# TODO: 4.3 update TBD
+class RaidenShogun(Character):
+    _ELEMENT = Element.ELECTRO
+    _WEAPON_TYPE = WeaponType.POLEARM
+    _TALENT_STATUS = stt.WishesUnnumberedStatus
+    _FACTIONS = frozenset((Faction.INAZUMA,))
+
+    _SKILL1_COST = AbstractDice({
+        Element.ELECTRO: 1,
+        Element.ANY: 2,
+    })
+    _SKILL2_COST = AbstractDice({
+        Element.ELECTRO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDice({
+        Element.ELECTRO: 4,
+    })
+
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        )
+
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=sm.EyeOfStormyJudgmentSummon,
+            ),
+        )
+
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        effects: list[eft.Effect] = [
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.max_energy,
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.ELECTRO,
+                damage=3,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+        ]
+        for char in game_state.get_player(source.pid).characters.get_alive_character_in_activity_order():
+            if char.id == source.id or char.is_defeated():
+                continue
+            effects.append(
+                eft.EnergyRechargeEffect(
+                    target=StaticTarget.from_char_id(source.pid, char.id),
+                    recharge=2,
+                ),
+            )
+        return tuple(effects)
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=2,
+            hiddens=stts.Statuses((
+                stt.ChakraDesiderataHiddenStatus(),
+            )),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
 class RhodeiaOfLoch(Character):
     # basic info
     _ELEMENT = Element.HYDRO

@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (35/71 implemented)](#character-3571-implemented)
-  - [Card (157/248 implemented)](#card-157248-implemented)
+  - [Character (36/71 implemented)](#character-3671-implemented)
+  - [Card (158/248 implemented)](#card-158248-implemented)
 
-## Character (35/71 implemented)
+## Character (36/71 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -34,6 +34,7 @@ all I need now is to implement each card and character.
   - [x] Keqing
   - [x] Kujou Sara
   - [ ] Lisa
+  - [x] Raiden Shogun
   - [x] Yae Miko
 - [ ] Dendro:
   - [x] Collei
@@ -56,9 +57,9 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (157/248 implemented)
+## Card (158/248 implemented)
 
-- [ ] Equipment Card (78/137):
+- [ ] Equipment Card (79/137):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
@@ -93,6 +94,7 @@ all I need now is to implement each card and character.
     - [x] Transcendent Automaton
     - [x] Undivided Heart
     - [x] Wellspring of War-Lust
+    - [x] Wishes Unnumbered
   - [ ] Weapon Card:
     - [ ] Bow:
       - [x] Amos' Bow

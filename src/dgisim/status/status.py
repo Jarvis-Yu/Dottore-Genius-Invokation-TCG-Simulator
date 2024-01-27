@@ -265,6 +265,10 @@ __all__ = [
     "FortunePreservingTalismanStatus",
     "QiqiTalentStatus",
     "RiteOfResurrectionStatus",
+    ## Raiden Shogun ##
+    "ChakraDesiderataHiddenStatus",
+    "ChakraDesiderataStatus",
+    "WishesUnnumberedStatus",
     ## Rhodeia of Loch ##
     "StreamingSurgeStatus",
     ## Sangonomiya Kokomi ##
@@ -5564,6 +5568,86 @@ class RiteOfResurrectionStatus(TalentEquipmentStatus):
     def CARD(cls) -> type[crd.TalentEquipmentCard]:
         from ..card.card import RiteOfResurrection
         return RiteOfResurrection
+
+
+#### Raiden Shogun ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class ChakraDesiderataHiddenStatus(CharacterHiddenStatus):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.INIT_GAME_START,
+        TriggeringSignal.REVIVAL_GAME_START,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal in (TriggeringSignal.INIT_GAME_START, TriggeringSignal.REVIVAL_GAME_START):
+            return [
+                eft.AddCharacterStatusEffect(
+                    target=source,
+                    status=ChakraDesiderataStatus,
+                ),
+            ], None
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class ChakraDesiderataStatus(CharacterStatus, _UsageLivingStatus):
+    usages: int = 0
+    MAX_USAGES: ClassVar[int] = 3
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.POST_SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if (
+                    information.source.pid is status_source.pid
+                    and information.source.id != status_source.id
+                    and information.skill_true_type is CharacterSkillType.ELEMENTAL_BURST
+                    and self.usages < self.MAX_USAGES
+            ):
+                return replace(self, usages=self.usages + 1)
+        return self
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            if (
+                    item.dmg.source == status_source
+                    and item.dmg.damage_type.direct_elemental_burst()
+                    and self.usages > 0
+            ):
+                this_char = game_state.get_character_target(status_source)
+                assert this_char is not None
+                if this_char.talent_equipped():
+                    return item.delta_damage(2 * self.usages), replace(self, usages=0)
+                else:
+                    return item.delta_damage(self.usages), replace(self, usages=0)
+        return item, self
+
+
+@dataclass(frozen=True, kw_only=True)
+class WishesUnnumberedStatus(TalentEquipmentStatus):
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import WishesUnnumbered
+        return WishesUnnumbered
 
 
 #### Rhodeia of Loch ####
