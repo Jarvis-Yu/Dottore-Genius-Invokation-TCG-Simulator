@@ -39,7 +39,7 @@ from dgisim import LinearEnv
 env = LinearEnv()
 rl_net = ...  # your RL network
 
-for episode range(100):
+for episode in range(100):
     env.reset()
     game_state, encoded_state, reward, turn, done = env.view()
 
