@@ -1,6 +1,6 @@
 # Change Log
 
-## 0.5.0 (To be released)
+## 0.5.0 (31 Jan 2024)
 
 ### Added
 
@@ -30,6 +30,8 @@
       - Strategize (added in 0.4.0 but missed in CHANGELOG)
 
 ### Updated
+
+- Loosen version requirement for dependency "typing-extensions"
 
 ### Fixed
 
