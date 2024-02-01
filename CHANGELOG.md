@@ -1,5 +1,7 @@
 # Change Log
 
+## 0.6.0 (To be released)
+
 ## 0.5.0 (31 Jan 2024)
 
 ### Added
