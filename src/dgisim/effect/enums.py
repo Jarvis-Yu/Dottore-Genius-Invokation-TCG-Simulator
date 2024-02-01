@@ -42,10 +42,9 @@ class TriggeringSignal(Enum):
     OPPO_DECLARE_END_ROUND = 7
     #: triggers when "when ... play a ... card"
     POST_CARD = 8
-    #: triggers when "when ... character takes DMG"
-    POST_DMG = 9
-    #: triggers when "after ... character takes Elemental Reaction DMG"
-    POST_REACTION = 10
+    ## 9 TO LET ##
+    #: triggers when "after ... character takes DMG"
+    POST_DMG = 10
     #: triggers when "after any ..."
     POST_ANY = 11
     #: triggers when "before ... choose their action"

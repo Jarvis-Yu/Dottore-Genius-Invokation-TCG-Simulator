@@ -568,7 +568,7 @@ class FierySanctumFieldSummon(_DmgPerRoundSummon, stt._ShieldStatus):
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         *_DmgPerRoundSummon.REACTABLE_SIGNALS,
-        TriggeringSignal.POST_REACTION,
+        TriggeringSignal.POST_DMG,
     ))
 
     @override
@@ -608,7 +608,7 @@ class FierySanctumFieldSummon(_DmgPerRoundSummon, stt._ShieldStatus):
         es, new_self = super()._react_to_signal(game_state, source, signal)
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT and new_self is not None:
             new_self = replace(new_self, shield_usages=1)
-        elif signal is TriggeringSignal.POST_REACTION and self.activated:
+        elif signal is TriggeringSignal.POST_DMG and self.activated:
             from ..character.character import Dehya
             dehya = game_state.get_player(source.pid).characters.find_first_character(Dehya)
             if dehya is not None and dehya.hp >= 7:
@@ -1215,7 +1215,7 @@ class UshiSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
     status_gaining_triggered: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.END_ROUND_CHECK_OUT,
-        TriggeringSignal.POST_REACTION,
+        TriggeringSignal.POST_DMG,
     ))
 
     @override
@@ -1254,7 +1254,7 @@ class UshiSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
                 )
             ], None
 
-        elif signal is TriggeringSignal.POST_REACTION and self.status_gaining_triggered:
+        elif signal is TriggeringSignal.POST_DMG and self.status_gaining_triggered:
             assert self.status_gaining_usages > 0
 
             # if active char is defeated, do nothing

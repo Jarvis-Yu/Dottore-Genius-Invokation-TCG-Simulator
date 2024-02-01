@@ -360,7 +360,7 @@ class Character:
             ),
             eft.AllStatusTriggererEffect(
                 pid=source.pid,
-                signal=TriggeringSignal.POST_REACTION,
+                signal=TriggeringSignal.POST_DMG,
             ),
             eft.DefeatedMarkCheckerEffect(),
             eft.AllStatusTriggererEffect(
@@ -368,10 +368,6 @@ class Character:
                 signal=TriggeringSignal.DEATH_EVENT,
             ),
             eft.DeathCheckCheckerEffect(),  # detect death swap request
-            eft.AllStatusTriggererEffect(
-                pid=source.pid,
-                signal=TriggeringSignal.POST_DMG,
-            ),
         )
 
     def skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:

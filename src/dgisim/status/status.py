@@ -2083,7 +2083,7 @@ class GeneralsAncientHelmStatus(ArtifactEquipmentStatus):
 class _ShadowOfTheSandKingLikeStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
     triggered: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.POST_REACTION,
+        TriggeringSignal.POST_DMG,
         TriggeringSignal.ROUND_END,
     ))
 
@@ -2111,7 +2111,7 @@ class _ShadowOfTheSandKingLikeStatus(ArtifactEquipmentStatus, _UsageLivingStatus
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.POST_REACTION and self.triggered:
+        if signal is TriggeringSignal.POST_DMG and self.triggered:
             return [
                 eft.DrawRandomCardEffect(pid=source.pid, num=1),
             ], replace(self, usages=-1, triggered=False)
@@ -2138,7 +2138,7 @@ class _HeartOfKhvarenasBrillianceLikeStatus(ArtifactEquipmentStatus, _UsageLivin
     MAX_USAGES: ClassVar[int] = 1
     triggered: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.POST_REACTION,
+        TriggeringSignal.POST_DMG,
         TriggeringSignal.ROUND_END,
     ))
 
@@ -2165,7 +2165,7 @@ class _HeartOfKhvarenasBrillianceLikeStatus(ArtifactEquipmentStatus, _UsageLivin
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.POST_REACTION and self.triggered:
+        if signal is TriggeringSignal.POST_DMG and self.triggered:
             if not self._target_is_self_active(game_state, source, source):
                 return [], replace(self, triggered=False)
             return [
@@ -2286,7 +2286,7 @@ class TenacityOfTheMillelithStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
     activated: bool = False
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.POST_REACTION,
+        TriggeringSignal.POST_DMG,
         TriggeringSignal.ROUND_START,
         TriggeringSignal.ROUND_END,
     ))
@@ -2319,7 +2319,7 @@ class TenacityOfTheMillelithStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.POST_REACTION and self.activated:
+        if signal is TriggeringSignal.POST_DMG and self.activated:
             if not self._target_is_self_active(game_state, source, source):
                 return [], replace(self, activated=False)
             this_char = game_state.get_character_target(source)
@@ -5166,7 +5166,7 @@ class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
     priority: int = 0
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.POST_REACTION,
+        TriggeringSignal.POST_DMG,
     ))
 
     @override
@@ -5208,7 +5208,7 @@ class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.POST_REACTION:
+        if signal is TriggeringSignal.POST_DMG:
             if self.activated_usages == 0:
                 return [], self
             dmg_element: Element
@@ -5240,7 +5240,7 @@ class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
             source: StaticTarget,
             signal: TriggeringSignal,
     ) -> list[eft.Effect]:
-        if signal is TriggeringSignal.POST_REACTION:
+        if signal is TriggeringSignal.POST_DMG:
             if self.activated_usages == 0:
                 return effects
             characters = game_state.get_player(source.pid).characters

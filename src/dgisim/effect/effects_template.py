@@ -76,7 +76,7 @@ def standard_post_effects(
     if has_damage:
         es.append(eft.AllStatusTriggererEffect(
             pid=priorized_pid,
-            signal=TriggeringSignal.POST_REACTION,
+            signal=TriggeringSignal.POST_DMG,
         ))
         es.append(eft.DefeatedMarkCheckerEffect())
         es.append(eft.AllStatusTriggererEffect(
@@ -84,8 +84,4 @@ def standard_post_effects(
             signal=TriggeringSignal.DEATH_EVENT,
         ))
         es.append(eft.DeathCheckCheckerEffect())
-        es.append(eft.AllStatusTriggererEffect(
-            pid=priorized_pid,
-            signal=TriggeringSignal.POST_DMG,
-        ))
     return es
