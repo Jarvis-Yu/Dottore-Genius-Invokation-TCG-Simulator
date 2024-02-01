@@ -67,7 +67,7 @@ class TestAratakiItto(unittest.TestCase):
         assert isinstance(ushi, UshiSummon)
         self.assertEqual(ushi.usages, 1)
         self.assertEqual(ushi.status_gaining_usages, 1)
-        self.assertEqual(ushi.status_gaining_available, False)
+        self.assertEqual(ushi.status_gaining_triggered, False)
 
     def test_elemental_burst(self):
         a1, a2 = PuppetAgent(), PuppetAgent()
@@ -260,7 +260,7 @@ class TestAratakiItto(unittest.TestCase):
         ushi = p1.summons.just_find(UshiSummon)
         assert isinstance(ushi, UshiSummon)
         self.assertEqual(ushi.status_gaining_usages, 1)
-        self.assertEqual(ushi.status_gaining_available, False)
+        self.assertEqual(ushi.status_gaining_triggered, False)
 
     def test_raging_oni_king_status(self):
         game_state = AddCharacterStatusEffect(

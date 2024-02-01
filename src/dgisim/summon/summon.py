@@ -1212,10 +1212,10 @@ class UshiSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
     SHIELD_AMOUNT: ClassVar[int] = 1
     DMG: ClassVar[int] = 1
     status_gaining_usages: int = 1
-    status_gaining_available: bool = False
+    status_gaining_triggered: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.END_ROUND_CHECK_OUT,
-        TriggeringSignal.POST_DMG,
+        TriggeringSignal.POST_REACTION,
     ))
 
     @override
@@ -1231,21 +1231,9 @@ class UshiSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
             if (
                     self._is_target(game_state, status_source, information.dmg)
                     and self.status_gaining_usages > 0
-                    and self.status_gaining_available is False
+                    and not self.status_gaining_triggered
             ):
-                return replace(self, status_gaining_available=True)
-        elif info_type is Informables.CHARACTER_DEATH:
-            """ This is a bug that currently exists in the official game """
-            assert isinstance(information, CharacterDeathIEvent)
-            if not self.status_gaining_available:
-                return self
-            my_active_character_ref = StaticTarget(
-                pid=status_source.pid,
-                zone=Zone.CHARACTERS,
-                id=game_state.get_player(status_source.pid).just_get_active_character().id
-            )
-            if information.target == my_active_character_ref:
-                return replace(self, status_gaining_available=False)
+                return replace(self, status_gaining_triggered=True)
         return self
 
     @override
@@ -1266,10 +1254,15 @@ class UshiSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
                 )
             ], None
 
-        elif signal is TriggeringSignal.POST_DMG:
-            if self.status_gaining_available is False:
-                return [], self
+        elif signal is TriggeringSignal.POST_REACTION and self.status_gaining_triggered:
             assert self.status_gaining_usages > 0
+
+            # if active char is defeated, do nothing
+            active_char = game_state.get_player(source.pid).get_active_character()
+            assert active_char is not None, (source, game_state)
+            if active_char.is_defeated():
+                return [], replace(self, usages=0, status_gaining_triggered=False)
+
             from ..character.character import AratakiItto
             itto = game_state.get_player(
                 source.pid).characters.find_first_character(AratakiItto)
@@ -1287,7 +1280,7 @@ class UshiSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
                 self,
                 usages=0,
                 status_gaining_usages=self.status_gaining_usages - 1,
-                status_gaining_available=False,
+                status_gaining_triggered=False,
             )
 
         return [], self
