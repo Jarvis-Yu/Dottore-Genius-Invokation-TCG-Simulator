@@ -76,7 +76,7 @@ class TestKamisatoAyaka(unittest.TestCase):
         self.assertIn(KamisatoAyakaCryoInfusionStatus, p1_active_char(game_state).character_statuses)
 
     def test_talent_card(self):
-        base_state =  replace_character_make_active_add_card(
+        base_state = replace_character_make_active_add_card(
             ACTION_TEMPLATE,
             Pid.P1,
             KamisatoAyaka,

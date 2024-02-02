@@ -1625,7 +1625,7 @@ class AddCharacterStatusEffect(DirectEffect):
         assert isinstance(character, Character)
         if issubclass(self.status, stt.CharacterHiddenStatus):  # pragma: no cover
             character = character.factory().f_hiddens(
-                lambda ts: ts.update_status(self.status())
+                lambda ts: ts.add_status(self.status)
             ).build()
         elif issubclass(self.status, stt.EquipmentStatus):
             from ..status.statuses import Statuses
@@ -1636,7 +1636,7 @@ class AddCharacterStatusEffect(DirectEffect):
             ))
             substituted_status = character.character_statuses.find_type(category)
             character = character.factory().f_character_statuses(
-                lambda cs: cs.update_status(self.status())
+                lambda cs: cs.add_status(self.status)
             ).build()
             if substituted_status is not None:
                 assert isinstance(substituted_status, stt.EquipmentStatus)
@@ -1657,7 +1657,7 @@ class AddCharacterStatusEffect(DirectEffect):
                 )
         elif issubclass(self.status, stt.CharacterStatus):
             character = character.factory().f_character_statuses(
-                lambda cs: cs.update_status(self.status())
+                lambda cs: cs.add_status(self.status)
             ).build()
         else:
             raise NotImplementedError(self.status)

@@ -27,6 +27,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     PoundingSurprise,
     ProliferatingSpores,
     ProphecyOfSubmersion,
+    PulsatingWitch,
     RiteOfResurrection,
     SanguineRouge,
     SinOfPride,

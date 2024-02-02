@@ -244,6 +244,9 @@ __all__ = [
     ## Kujou Sara ##
     "CrowfeatherCoverStatus",
     "SinOfPrideStatus",
+    ## Lisa ##
+    "ConductiveStatus",
+    "PulsatingWitchStatus",
     ## Maguu Kenki ##
     "TranscendentAutomatonStatus",
     ## Mona ##
@@ -578,6 +581,12 @@ class Status:
         """
         return [], self  # pragma: no cover
 
+    def add(self, other: type[Self]) -> None | Self:
+        """
+        Defines how the status update itself with the addition of the same type.
+        """
+        return self.update(other())
+
     def update(self, other: Self) -> None | Self:
         """
         Defines how the status update itself with an incoming status of the same type.
@@ -786,8 +795,12 @@ class CombatStatus(Status):
 ############################## template ##############################
 @dataclass(frozen=True)
 class _UsageStatus(Status):
+    #: default usages on creation
     usages: int
+    #: maximum usages
     MAX_USAGES: ClassVar[int] = BIG_INT
+    #: usages added when recreated
+    REPEATED_USAGES: ClassVar[int | None] = None
     AUTO_DESTROY: ClassVar[bool] = True
 
     @override
@@ -822,6 +835,12 @@ class _UsageStatus(Status):
         max_usages = max((self.usages, other.usages, self.MAX_USAGES))
         new_usages = min(self.usages + other.usages, max_usages)
         return replace(other, usages=new_usages)
+
+    @override
+    def add(self, other: type[Self]) -> None | Self:
+        if self.REPEATED_USAGES is None:
+            return super().add(other)
+        return self.update(other(usages=self.REPEATED_USAGES))
 
     def __str__(self) -> str:
         return super().__str__() + f"({self.usages})"  # pragma: no cover
@@ -5046,6 +5065,59 @@ class SinOfPrideStatus(TalentEquipmentStatus):
     def CARD(cls) -> type[crd.TalentEquipmentCard]:
         from ..card.card import SinOfPride
         return SinOfPride
+
+
+#### Lisa ####
+
+@dataclass(frozen=True, kw_only=True)
+class ConductiveStatus(CharacterStatus, _UsageStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 4
+    REPEATED_USAGES: ClassVar[int | None] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            if self.usages < self.MAX_USAGES:
+                return [], replace(self, usages=1)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class PulsatingWitchStatus(TalentEquipmentStatus, _UsageLivingStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.SELF_SWAP,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @classproperty
+    def CARD(cls) -> type[crd.EquipmentCard]:
+        from ..card.card import PulsatingWitch
+        return PulsatingWitch
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.SELF_SWAP and self.usages > 0:
+            if StaticTarget.from_player_active(game_state, source.pid) == source:
+                return [
+                    eft.RelativeAddCharacterStatusEffect(
+                        source_pid=source.pid,
+                        target=DynamicCharacterTarget.OPPO_ACTIVE,
+                        status=ConductiveStatus,
+                    )
+                ], replace(self, usages=-1)
+        elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
+            return [], replace(self, usages=self.MAX_USAGES)
+        return [], self
 
 
 #### Maguu Kenki ####

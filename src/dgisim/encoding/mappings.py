@@ -81,7 +81,7 @@ CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
         (char.RaidenShogun, 306),
         (char.YaeMiko, 307),
         (char.ElectroHypostasis, 308),
-        # (char.Lisa, 309),
+        (char.Lisa, 309),
         # (char.Dori, 310),
 
         #### Geo 400 ####
@@ -359,7 +359,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.WishesUnnumbered, 1231),
         (card.TheShrinesSacredShade, 1232),
         (card.AbsorbingPrism, 1233),
-        # Lisa 1234
+        (card.PulsatingWitch, 1234),
         # Dori 1235
 
         #### 4.5 Geo 1325 ####
@@ -759,6 +759,8 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.RockPaperScissorsComboPaperStatus, 6762),
         (status.RockPaperScissorsComboScissorsStatus, 6763),
         ## Lisa 6780 ##
+        (status.PulsatingWitchStatus, 6780),
+        (status.ConductiveStatus, 6781),
         ## Dori 6800 ##
 
         #### 4.5 Geo Character Status 8600 ####
@@ -871,7 +873,7 @@ SUMM_MAPPING: dict[type["Summon"], int] = HashableDict({
         (summon.EyeOfStormyJudgmentSummon, 305),
         (summon.SesshouSakuraSummon, 306),
         (summon.ChainsOfWardingThunderSummon, 307),
-        # (summon.LightningRoseSummon, 308),
+        (summon.LightningRoseSummon, 308),
         # (summon.AfterSalesServiceRoundsSummon, 309),
         # (summon.JinniSummon, 310),
 

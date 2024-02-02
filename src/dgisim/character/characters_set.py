@@ -26,6 +26,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     Keqing,
     Klee,
     KujouSara,
+    Lisa,
     MaguuKenki,
     Mona,
     Nahida,

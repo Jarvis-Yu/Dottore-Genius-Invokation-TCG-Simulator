@@ -2,6 +2,19 @@
 
 ## 0.6.0 (To be released)
 
+### Added
+
+- New Characters:
+  - Lisa
+- New Cards:
+  - Equipment Cards:
+    - Talent Cards:
+      - Pulsating Witch
+
+### Updated
+
+- Applied version 4.4's balance patch (forgot to mention in 0.5.0)
+
 ## 0.5.0 (31 Jan 2024)
 
 ### Added

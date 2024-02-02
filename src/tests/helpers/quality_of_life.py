@@ -683,6 +683,14 @@ def p2_active_char(game_state: GameState) -> Character:
     """ Returns the active character of player 2 """
     return game_state.get_player(Pid.P2).just_get_active_character()
 
+def p1_chars(game_state: GameState) -> tuple[Character, ...]:
+    """ Returns the characters of player 1 """
+    return game_state.player1.characters.get_characters()
+
+def p2_chars(game_state: GameState) -> tuple[Character, ...]:
+    """ Returns the characters of player 2 """
+    return game_state.player2.characters.get_characters()
+
 def end_round(game_state: GameState, pid: Pid) -> GameState:
     """ End round for `pid` given they have not ended yet. """
     game_state = skip_action_round_until(game_state, pid)

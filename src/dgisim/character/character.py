@@ -52,6 +52,7 @@ __all__ = [
     "Keqing",
     "Klee",
     "KujouSara",
+    "Lisa",
     "MaguuKenki",
     "Mona",
     "Nahida",
@@ -244,6 +245,8 @@ class Character:
     @abstractmethod
     def from_default(cls, id: int = -1) -> Character:
         """
+        :param id: the id of the character. If not provided, a default id is used.
+                   Note that the default id may conflict with other characters for a game.
         :returns: the default state of a character. Usually used to initialize a
                   new instance of the character.
         """
@@ -2278,6 +2281,118 @@ class KujouSara(Character):
             eft.AddSummonEffect(
                 target_pid=source.pid,
                 summon=sm.TenguJuuraiStormclusterSummon,
+            ),
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=2,
+            hiddens=stts.Statuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
+
+class Lisa(Character):
+    _ELEMENT = Element.ELECTRO
+    _WEAPON_TYPE = WeaponType.CATALYST
+    _TALENT_STATUS = stt.PulsatingWitchStatus
+    _FACTIONS = frozenset((Faction.MONDSTADT,))
+
+    _SKILL1_COST = AbstractDice({
+        Element.ELECTRO: 1,
+        Element.ANY: 2,
+    })
+    _SKILL2_COST = AbstractDice({
+        Element.ELECTRO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDice({
+        Element.ELECTRO: 3,
+    })
+
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        effects = normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.ELECTRO,
+            damage=1,
+        )
+        charged = game_state.get_player(source.pid).hidden_statuses.just_find(
+            stt.ChargedAttackStatus
+        ).can_charge
+        if charged:
+            effects += (
+                eft.RelativeAddCharacterStatusEffect(
+                    source_pid=source.pid,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    status=stt.ConductiveStatus,
+                ),
+            )
+        return effects
+
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        char_targets = DynamicCharacterTarget.OPPO_ACTIVE.get_target_chars(game_state, source.pid)
+        assert len(char_targets) == 1
+        char_target = char_targets[0]
+        optional_conductive = char_target.character_statuses.find(stt.ConductiveStatus)
+
+        effects: list[eft.Effect] = []
+        dmg = 2
+        if optional_conductive is not None:
+            conductive = optional_conductive
+            assert isinstance(conductive, stt.ConductiveStatus)
+            dmg += conductive.usages
+            effects.append(
+                eft.RemoveCharacterStatusEffect(
+                    target=StaticTarget.from_char_id(source.pid.other(), char_target.id),
+                    status=stt.ConductiveStatus,
+                )
+            )
+
+        effects.append(
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.ELECTRO,
+                damage=dmg,
+                damage_type=DamageType(elemental_skill=True),
+            )
+        )
+
+        if optional_conductive is None:
+            effects.append(
+                eft.RelativeAddCharacterStatusEffect(
+                    source_pid=source.pid,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    status=stt.ConductiveStatus,
+                ),
+            )
+
+        return tuple(effects)
+
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.max_energy,
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.ELECTRO,
+                damage=2,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=sm.LightningRoseSummon,
             ),
         )
 

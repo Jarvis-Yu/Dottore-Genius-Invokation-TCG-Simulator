@@ -28,6 +28,57 @@ class Statuses:
     def __init__(self, statuses: tuple[stt.Status, ...]):
         self._statuses = statuses
 
+    def add_status(self, incoming_status: type[stt.Status]) -> Self:
+        """
+        :param incoming_status: the status to be added.
+
+        Adds the incoming status to the current statuses. If the status of the same type already
+        exists, then the existing status will be notified to be updating knowing this is intended
+        to be an addition.
+        """
+        if issubclass(incoming_status, stt.EquipmentStatus):
+            return self._add_equipment_status(incoming_status)
+        return self._add_status(incoming_status)
+
+    def _add_status(self, incoming_status: type[stt.Status]) -> Self:
+        cls = type(self)
+        statuses = list(self._statuses)
+        for i, status in enumerate(statuses):
+            if type(status) is not incoming_status:
+                continue
+            new_status: None | stt.Status
+            new_status = status.add(incoming_status)
+            if status == new_status:
+                return self
+            if new_status is None:
+                return self.remove(type(status))
+            statuses[i] = new_status
+            return cls(tuple(statuses))
+        statuses.append(incoming_status())
+        return cls(tuple(statuses))
+
+    def _add_equipment_status(self, incoming_status: type[stt.EquipmentStatus]) -> Self:
+        cls = type(self)
+        statuses = list(self._statuses)
+        for i, status in enumerate(statuses):
+            if not any(
+                issubclass(incoming_status, category) and isinstance(status, category)
+                for category in self._EQUIPMENT_CATEGORIES
+            ):
+                continue
+            if type(status) is not incoming_status:
+                return self.remove(type(status)).update_status(incoming_status())
+            new_status: None | stt.Status
+            new_status = status.add(incoming_status)  # type: ignore
+            if status == new_status:
+                return self
+            if new_status is None:  # pragma: no cover
+                return self.remove(type(status))
+            statuses[i] = new_status
+            return cls(tuple(statuses))
+        statuses.append(incoming_status())
+        return cls(tuple(statuses))
+
     def update_status(self, incoming_status: stt.Status, override: bool = False) -> Self:
         """
         :param override: set to `True` if the `incoming_status` unconditionally overrides the

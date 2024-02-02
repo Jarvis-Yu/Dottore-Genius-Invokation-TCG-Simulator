@@ -52,6 +52,7 @@ __all__ = [
     "HeraldOfFrostSummon",
     "HydroSamachurlSummon",
     "LightfallSwordSummon",
+    "LightningRoseSummon",
     "OceanicMimicFrogSummon",
     "OceanicMimicRaptorSummon",
     "OceanicMimicSquirrelSummon",
@@ -781,6 +782,14 @@ class LightfallSwordSummon(Summon, stt._UsageStatus):
                 )
             ], None
         return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class LightningRoseSummon(_DmgPerRoundSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 2
+    ELEMENT: ClassVar[Element] = Element.ELECTRO
 
 
 @dataclass(frozen=True, kw_only=True)

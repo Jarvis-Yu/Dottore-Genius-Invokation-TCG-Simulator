@@ -245,6 +245,8 @@ __all__ = [
     "PoundingSurprise",
     ## Kujou Sara ##
     "SinOfPride",
+    ## Lisa ##
+    "PulsatingWitch",
     ## Maguu Kenki ##
     "TranscendentAutomaton",
     ## Mona ##
@@ -3840,6 +3842,53 @@ class SinOfPride(_TalentEquipmentSkillCard):
     _CHARACTER = chr.KujouSara
     _EQUIPMENT_STATUS = stt.SinOfPrideStatus
     _SKILL = CharacterSkill.SKILL2
+
+
+#### Lisa ####
+
+class PulsatingWitch(EquipmentCard, TalentEventCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDice({Element.ELECTRO: 1})
+    _CHARACTER = chr.Lisa
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        cs = game_state.get_player(pid).characters
+        lisas = [char for char in cs if type(char) is chr.Lisa]
+        if (
+                not lisas
+                or all(not lisa.alive for lisa in lisas)
+        ):
+            return False
+        return Card._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def implicit_target(cls, game_state: gs.GameState, pid: Pid) -> StaticTarget | None:
+        cs = game_state.get_player(pid).characters
+        lisas = [char for char in cs if type(char) is chr.Lisa]
+        lisa = next((lisa for lisa in lisas if lisa.alive), None)
+        if lisa is None:
+            return None
+        return StaticTarget.from_char_id(pid, lisa.id)
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.DiceOnlyInstruction)
+        target = cls.implicit_target(game_state, pid)
+        assert target is not None
+        return (
+            eft.AddCharacterStatusEffect(
+                target=target,
+                status=stt.PulsatingWitchStatus,
+            ),
+        )
 
 
 #### Maguu Kenki ####
