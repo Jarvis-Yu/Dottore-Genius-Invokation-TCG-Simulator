@@ -4822,7 +4822,7 @@ class KantenSenmyouBlessingStatus(TalentEquipmentStatus, _UsageStatus):
     ))
 
     @classproperty
-    def CARD(cls) -> type[crd.EquipmentCard]:
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
         from ..card.card import KantenSenmyouBlessing
         return KantenSenmyouBlessing
 
@@ -5098,7 +5098,7 @@ class PulsatingWitchStatus(TalentEquipmentStatus, _UsageLivingStatus):
     ))
 
     @classproperty
-    def CARD(cls) -> type[crd.EquipmentCard]:
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
         from ..card.card import PulsatingWitch
         return PulsatingWitch
 

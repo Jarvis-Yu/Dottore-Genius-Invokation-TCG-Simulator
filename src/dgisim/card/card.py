@@ -1087,6 +1087,10 @@ class TalentEventCard(EventCard, TalentCard):
 
 
 class TalentEquipmentCard(EquipmentCard, TalentCard):
+    _EQUIPMENT_STATUS: type[stt.EquipmentStatus]
+
+
+class _TalentEquipmentSkillCard(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
     _IS_SKILL: bool = True
     _SKILL: CharacterSkill
 
@@ -1129,10 +1133,6 @@ class TalentEquipmentCard(EquipmentCard, TalentCard):
                 instruction, act.DiceOnlyInstruction)
         return ret_val and cls._loosely_usable(game_state, pid)
 
-
-class _TalentEquipmentSkillCard(TalentEquipmentCard, _CombatActionCard, _DiceOnlyChoiceProvider):
-    _EQUIPMENT_STATUS: type[stt.EquipmentStatus]
-
     @override
     @classmethod
     def effects(
@@ -1157,6 +1157,35 @@ class _TalentEquipmentSkillCard(TalentEquipmentCard, _CombatActionCard, _DiceOnl
                 skill=cls._SKILL,
             ),
         )
+
+
+class _TalentEquipmentAnyEventCard(TalentEventCard, TalentEquipmentCard, _DiceOnlyChoiceProvider):
+    """
+    This is the template for talent cards that equip to certain type of character
+    no matter they are active or not.
+    """
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        cs = game_state.get_player(pid).characters
+        chars = [char for char in cs if type(char) is cls._CHARACTER]
+        if (
+                not chars
+                or all(not char.alive for char in chars)
+        ):
+            return False
+        return Card._loosely_usable(game_state, pid)
+
+    @override
+    @classmethod
+    def implicit_target(cls, game_state: gs.GameState, pid: Pid) -> StaticTarget | None:
+        cs = game_state.get_player(pid).characters
+        chars = [char for char in cs if type(char) is cls._CHARACTER]
+        char = next((char for char in chars if char.alive), None)
+        if char is None:
+            return None
+        return StaticTarget.from_char_id(pid, char.id)
 
 
 class WeaponEquipmentCard(EquipmentCard, _CharTargetChoiceProvider):
@@ -3715,31 +3744,10 @@ class ColdBloodedStrike(_TalentEquipmentSkillCard):
 
 #### Kamisato Ayaka ####
 
-class KantenSenmyouBlessing(EquipmentCard, TalentEventCard, _DiceOnlyChoiceProvider):
+class KantenSenmyouBlessing(_TalentEquipmentAnyEventCard):
     _DICE_COST = AbstractDice({Element.CRYO: 2})
     _CHARACTER = chr.KamisatoAyaka
-
-    @override
-    @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        cs = game_state.get_player(pid).characters
-        ayakas = [char for char in cs if type(char) is chr.KamisatoAyaka]
-        if (
-                not ayakas
-                or all(not ayaka.alive for ayaka in ayakas)
-        ):
-            return False
-        return Card._loosely_usable(game_state, pid)
-
-    @override
-    @classmethod
-    def implicit_target(cls, game_state: gs.GameState, pid: Pid) -> StaticTarget | None:
-        cs = game_state.get_player(pid).characters
-        ayakas = [char for char in cs if type(char) is chr.KamisatoAyaka]
-        ayaka = next((ayaka for ayaka in ayakas if ayaka.alive), None)
-        if ayaka is None:
-            return None
-        return StaticTarget.from_char_id(pid, ayaka.id)
+    _EQUIPMENT_STATUS = stt.KantenSenmyouBlessingStatus
 
     @override
     @classmethod
@@ -3755,7 +3763,7 @@ class KantenSenmyouBlessing(EquipmentCard, TalentEventCard, _DiceOnlyChoiceProvi
         return (
             eft.AddCharacterStatusEffect(
                 target=target,
-                status=stt.KantenSenmyouBlessingStatus,
+                status=cls._EQUIPMENT_STATUS,
             ),
         )
 
@@ -3846,31 +3854,10 @@ class SinOfPride(_TalentEquipmentSkillCard):
 
 #### Lisa ####
 
-class PulsatingWitch(EquipmentCard, TalentEventCard, _DiceOnlyChoiceProvider):
+class PulsatingWitch(_TalentEquipmentAnyEventCard):
     _DICE_COST = AbstractDice({Element.ELECTRO: 1})
     _CHARACTER = chr.Lisa
-
-    @override
-    @classmethod
-    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
-        cs = game_state.get_player(pid).characters
-        lisas = [char for char in cs if type(char) is chr.Lisa]
-        if (
-                not lisas
-                or all(not lisa.alive for lisa in lisas)
-        ):
-            return False
-        return Card._loosely_usable(game_state, pid)
-
-    @override
-    @classmethod
-    def implicit_target(cls, game_state: gs.GameState, pid: Pid) -> StaticTarget | None:
-        cs = game_state.get_player(pid).characters
-        lisas = [char for char in cs if type(char) is chr.Lisa]
-        lisa = next((lisa for lisa in lisas if lisa.alive), None)
-        if lisa is None:
-            return None
-        return StaticTarget.from_char_id(pid, lisa.id)
+    _EQUIPMENT_STATUS = stt.PulsatingWitchStatus
 
     @override
     @classmethod
@@ -3886,7 +3873,7 @@ class PulsatingWitch(EquipmentCard, TalentEventCard, _DiceOnlyChoiceProvider):
         return (
             eft.AddCharacterStatusEffect(
                 target=target,
-                status=stt.PulsatingWitchStatus,
+                status=cls._EQUIPMENT_STATUS,
             ),
         )
 
