@@ -170,6 +170,7 @@ __all__ = [
     "Starsigns",
     "StoneAndContracts",
     "Strategize",
+    "SunyataFlower",
     "TheBestestTravelCompanion",
     "TheBoarPrincess",
     "ThunderAndEternity",
@@ -865,8 +866,8 @@ class _DualCharTargetChoiceProvider(Card):
 
 class _SummonTargetChoiceProvider(Card):
     """
-    If _MY_SIDE is set to true, then all summons on my side can be chosen
-    If _OPPO_SIDE is set to true, then all summons on the opponent's side can be chosen
+    If _MY_SIDE is set to true, then all summons on my side can be chosen.
+    If _OPPO_SIDE is set to true, then all summons on the opponent's side can be chosen.
     """
     _MY_SIDE: bool = False
     _OPPO_SIDE: bool = False
@@ -1003,6 +1004,147 @@ class _SummonTargetChoiceProvider(Card):
             _choices_helper=cls._choices_helper,
             _fill_helper=cls._fill_helper,
         )
+
+
+class _SupportTargetChoiceProvider(Card):
+    """
+    If _MY_SIDE is set to true, then all supports on my side can be chosen.
+    If _OPPO_SIDE is set to true, then all supports on the opponent's side can be chosen.
+    """
+    _MY_SIDE: bool = False
+    _OPPO_SIDE: bool = False
+
+    @classmethod
+    def _valid_support(cls, support: sp.Support) -> bool:  # pragma: no cover
+        return True
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        return (
+            (
+                not cls._MY_SIDE
+                or (
+                    not (supports := game_state.get_player(pid).supports).empty()
+                    and any(
+                        cls._valid_support(support)
+                        for support in supports
+                    )
+                )
+            ) and (
+                not cls._OPPO_SIDE
+                or (
+                    not (supports := game_state.get_other_player(pid).supports).empty()
+                    and any(
+                        cls._valid_support(support)
+                        for support in supports
+                    )
+                )
+            )
+        )
+
+    @override
+    @classmethod
+    def _valid_instruction(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction
+    ) -> bool:
+        return (
+            isinstance(instruction, act.StaticTargetInstruction)
+            and (
+                (not cls._MY_SIDE or instruction.target.pid is pid)
+                and (not cls._OPPO_SIDE or instruction.target.pid is pid.other())
+            )
+            and isinstance(support := game_state.get_target(instruction.target), sp.Support)
+            and cls._valid_support(support)
+            and cls.loosely_usable(game_state, pid)
+        )
+
+    @classmethod
+    def _choices_helper(
+            cls,
+            action_generator: acg.ActionGenerator,
+    ) -> GivenChoiceType:
+        game_state = action_generator.game_state
+        pid = action_generator.pid
+
+        assert action_generator._action_filled()
+
+        instruction = action_generator.instruction
+        assert type(instruction) is act.StaticTargetInstruction
+        if instruction.target is None:
+            pids = []
+            if cls._MY_SIDE:
+                pids.append(pid)
+            if cls._OPPO_SIDE:
+                pids.append(pid.other())
+            choices = []
+            for this_pid in pids:
+                supports = game_state.get_player(this_pid).supports
+                choices += [
+                    StaticTarget(
+                        pid=this_pid,
+                        zone=Zone.SUPPORTS,
+                        id=support.sid,
+                    )
+                    for support in supports
+                    if cls._valid_support(support)
+                ]
+            return tuple(choices)
+
+        elif instruction.dice is None:
+            return cls.preprocessed_dice_cost(game_state, pid)[1]
+
+        raise Exception("Not Reached!"
+                        + "Should be called when there is something to fill. action_generator:\n"
+                        + f"{action_generator}"
+                        )
+
+    @classmethod
+    def _fill_helper(
+        cls,
+        action_generator: acg.ActionGenerator,
+        player_choice: DecidedChoiceType,
+    ) -> acg.ActionGenerator:
+        instruction = action_generator.instruction
+        assert isinstance(instruction, act.StaticTargetInstruction)
+        if instruction.target is None:
+            assert isinstance(player_choice, StaticTarget)
+            assert player_choice.zone is Zone.SUPPORTS
+            return replace(
+                action_generator,
+                instruction=replace(instruction, target=player_choice),
+            )
+
+        elif instruction.dice is None:
+            assert isinstance(player_choice, ActualDice)
+            return replace(
+                action_generator,
+                instruction=replace(instruction, dice=player_choice),
+            )
+
+        raise Exception("Not Reached!")
+
+    @override
+    @classmethod
+    def action_generator(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+    ) -> None | acg.ActionGenerator:
+        if not cls.strictly_usable(game_state, pid):  # pragma: no cover
+            return None
+        return acg.ActionGenerator(
+            game_state=game_state,
+            pid=pid,
+            action=replace(act.CardAction._all_none(), card=cls),
+            instruction=act.StaticTargetInstruction._all_none(),
+            _choices_helper=cls._choices_helper,
+            _fill_helper=cls._fill_helper,
+        )
+
 
 ############################## special card ##############################
 
@@ -3186,6 +3328,47 @@ class Strategize(EventCard, _DiceOnlyChoiceProvider):
             eft.DrawRandomCardEffect(
                 pid=pid,
                 num=2,
+            ),
+        )
+
+
+class SunyataFlower(EventCard, _SupportTargetChoiceProvider):
+    _DICE_COST = AbstractDice.from_empty()
+    _MY_SIDE = True
+
+    @override
+    @classmethod
+    def effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.StaticTargetInstruction)
+        assert instruction.target.zone is Zone.SUPPORTS
+        assert instruction.target.pid is pid
+        assert isinstance(instruction.target.id, int)
+        card_pool = [
+            card
+            for card in game_state.mode.all_cards()
+            if issubclass(card, SupportCard)
+        ]
+        return (
+            eft.RemoveSupportEffect(
+                target_pid=instruction.target.pid,
+                sid=instruction.target.id,
+            ),
+            eft.PrivateAddCardEffect(
+                pid=pid,
+                card=random.choice(card_pool),
+            ),
+            eft.PrivateAddCardEffect(
+                pid=pid,
+                card=random.choice(card_pool),
+            ),
+            eft.AddCombatStatusEffect(
+                target_pid=pid,
+                status=stt.SunyataFlowerStatus,
             ),
         )
 

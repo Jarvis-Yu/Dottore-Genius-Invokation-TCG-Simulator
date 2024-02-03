@@ -35,6 +35,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     StellarPredator,
     StrategicReserve,
     StreamingSurge,
+    SunyataFlower,
     TamakushiCasket,
     TheScentRemained,
     TheSeedOfStoredKnowledge,

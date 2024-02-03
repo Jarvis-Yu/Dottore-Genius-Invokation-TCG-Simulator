@@ -123,7 +123,7 @@ __all__ = [
     "WineStainedTricorneStatus",
     "WitchsScorchingHatStatus",
 
-    # combat status
+    # Combat Status
     "AncientCourtyardStatus",
     "CatalyzingFieldStatus",
     "ChangingShiftsStatus",
@@ -142,12 +142,13 @@ __all__ = [
     "RebelliousShieldStatus",
     "ReviveOnCooldownStatus",
     "StoneAndContractsStatus",
+    "SunyataFlowerStatus",
     "TheBoarPrincessStatus",
     "WhenTheCraneReturnedStatus",
     "WhereIsTheUnseenRazorStatus",
     "WindAndFreedomStatus",
 
-    # character status
+    # Character Status
     "AdeptusTemptationStatus",
     "ButterCrabStatus",
     "FrozenStatus",
@@ -2977,6 +2978,40 @@ class StoneAndContractsStatus(CombatStatus):
                     num=1,
                 ),
             ], None
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class SunyataFlowerStatus(CombatStatus):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.CARD1:
+            assert isinstance(item, CardPEvent)
+            from ..card.card import SupportCard
+            if (
+                    item.pid is status_source.pid
+                    and issubclass(item.card_type, SupportCard)
+                    and item.dice_cost.can_cost_less_elem()
+            ):
+                return item.with_new_cost(item.dice_cost.cost_less_elem(1)), None
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], None
         return [], self
 
 

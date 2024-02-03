@@ -92,6 +92,9 @@ class Supports:
             if s.sid != sid
         ), self._max_num)
 
+    def empty(self) -> bool:
+        return len(self) == 0
+
     def full(self) -> bool:
         return len(self) == self._max_num
 

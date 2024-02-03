@@ -10,6 +10,9 @@
   - Equipment Cards:
     - Talent Cards:
       - Pulsating Witch
+  - Event Cards:
+    - Other Cards:
+      - Sunyata Flower
 
 ### Updated
 

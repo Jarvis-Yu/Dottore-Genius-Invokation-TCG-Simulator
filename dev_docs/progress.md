@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (37/71 implemented)](#character-3771-implemented)
-  - [Card (159/248 implemented)](#card-159248-implemented)
+  - [Card (160/248 implemented)](#card-160248-implemented)
 
 ## Character (37/71 implemented)
 
@@ -57,7 +57,7 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (159/248 implemented)
+## Card (160/248 implemented)
 
 - [ ] Equipment Card (80/137):
   - [ ] Talent Card:
@@ -190,7 +190,7 @@ all I need now is to implement each card and character.
     - [x] Tenshukaku
     - [x] Vanarana
     - [ ] Weeping Willow of the Lake
-- [ ] Event Card (57/67):
+- [ ] Event Card (58/67):
   - [ ] Talent Card:
     - [x] Absorbing Prism
     - [x] Kanten Senmyou Blessing
@@ -252,6 +252,7 @@ all I need now is to implement each card and character.
     - [x] Starsigns
     - [x] Stone and Contracts
     - [x] Strategize
+    - [x] Sunyata Flower
     - [x] The Bestest Travel Companion!
     - [x] The Boar Princess
     - [x] Thunder and Eternity
