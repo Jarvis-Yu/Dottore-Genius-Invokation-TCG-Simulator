@@ -3,7 +3,7 @@ import unittest
 from src.tests.test_characters.common_imports import *
 
 
-class TestKamisatoAyaka(unittest.TestCase):
+class TestLisa(unittest.TestCase):
     BASE_GAME = replace_character_make_active_add_card(
         ONE_ACTION_TEMPLATE,
         Pid.P1,

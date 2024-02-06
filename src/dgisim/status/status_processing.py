@@ -15,6 +15,7 @@ from .enums import Preprocessables, Informables
 
 if TYPE_CHECKING:
     from ..card.card import Card
+    from ..character.character import Character
     from ..state.game_state import GameState
 
 __all__ = [
@@ -62,8 +63,11 @@ class StatusProcessing:
         # characters first
         characters = player.characters
         ordered_characters = characters.get_character_in_activity_order()
-        for character in ordered_characters:
+        
+        def process_character_status(character: Character) -> None:
             # get character's private statuses and add triggerStatusEffect to global effect_stack
+            nonlocal game_state
+
             statuses = character.get_all_statuses_ordered_flattened()
             character_id = character.id
             target = StaticTarget(
@@ -73,6 +77,8 @@ class StatusProcessing:
             )
             for status in statuses:
                 game_state = f(game_state, status, target)
+
+        process_character_status(ordered_characters[0])
 
         # hidden status
         hidden_statuses = player.hidden_statuses
@@ -93,6 +99,9 @@ class StatusProcessing:
         )
         for status in combat_statuses:
             game_state = f(game_state, status, target)
+
+        for character in ordered_characters[1:]:
+            process_character_status(character)
 
         # summons
         summons = player.summons
