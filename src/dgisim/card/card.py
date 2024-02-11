@@ -184,6 +184,7 @@ __all__ = [
     "ChangTheNinth",
     "ChefMao",
     "Dunyarzad",
+    "Jeht",
     "Liben",
     "LiuSu",
     "Mamere",
@@ -1452,13 +1453,14 @@ class SupportCard(Card):
                 target_pid=pid,
                 support=cls._SUPPORT_STATUS,
             ),
-        ) + cls._effects(game_state, pid)
+        ) + cls._effects(game_state, pid, instruction)
 
     @classmethod
     def _effects(
             cls,
             game_state: gs.GameState,
             pid: Pid,
+            instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         """ effects that are after the addition of the support """
         return ()  # pragma: no cover
@@ -3589,6 +3591,47 @@ class Dunyarzad(CompanionCard):
     _SUPPORT_STATUS = sp.DunyarzadSupport
 
 
+class Jeht(CompanionCard):
+    _DICE_COST = AbstractDice({Element.ANY: 2})
+    _SUPPORT_STATUS = sp.JehtSupport
+
+    @override
+    @classmethod
+    def _effects(
+            cls,
+            game_state: gs.GameState,
+            pid: Pid,
+            instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        """ effects that are after the addition of the support """
+        played_cards = game_state.get_player(pid).publicly_used_cards
+        supports_played = sum([
+            played_cards[card]
+            for card in played_cards
+            if issubclass(card, SupportCard)
+        ])
+        supports_on_fields = len(game_state.get_player(pid).supports)
+        supports_discarded = supports_played - supports_on_fields
+        if supports_discarded == 0:
+            return ()
+        else:
+            new_sid = -1
+            if isinstance(instruction, act.StaticTargetInstruction):
+                new_sid = cast(int, instruction.target.id)
+                supports_discarded += 1
+            else:
+                new_sid = game_state.get_player(pid).supports.new_sid(sp.JehtSupport)
+            return (
+                eft.UpdateSupportEffect(
+                    target_pid=pid,
+                    support=sp.JehtSupport(
+                        sid=new_sid,
+                        usages=min(supports_discarded, sp.JehtSupport.MAX_USAGES),
+                    ),
+                ),
+            )
+
+
 class Liben(CompanionCard):
     _DICE_COST = AbstractDice.from_empty()
     _SUPPORT_STATUS = sp.LibenSupport
@@ -3633,6 +3676,7 @@ class Timaeus(CompanionCard):
             cls,
             game_state: gs.GameState,
             pid: Pid,
+            instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         initial_deck = game_state.get_player(pid).initial_deck.cards
         if sum([
@@ -3659,6 +3703,7 @@ class Wagner(CompanionCard):
             cls,
             game_state: gs.GameState,
             pid: Pid,
+            instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         initial_deck = game_state.get_player(pid).initial_deck.cards
         if len([
@@ -3698,6 +3743,7 @@ class NRE(ItemCard):
             cls,
             game_state: gs.GameState,
             pid: Pid,
+            instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         return (
             eft.DrawRandomCardOfTypeEffect(
@@ -3730,6 +3776,7 @@ class KnightsOfFavoniusLibrary(LocationCard):
             cls,
             game_state: gs.GameState,
             pid: Pid,
+            instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         return (
             eft.SetRerollChancesEffect(

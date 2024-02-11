@@ -35,3 +35,6 @@ class Informables(Enum):
     POST_SKILL_USAGE = "PostSkillUsage"
     CHARACTER_DEATH = "CharacterDeath"
     EQUIPMENT_DISCARDING = "EquipmentDiscarding"
+
+    # removals
+    SUPPORT_REMOVAL = "SupportRemoval"

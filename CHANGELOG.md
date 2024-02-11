@@ -10,6 +10,9 @@
   - Equipment Cards:
     - Talent Cards:
       - Pulsating Witch
+  - Support Cards:
+    - Companion Cards:
+      - Jeht
   - Event Cards:
     - Other Cards:
       - Sunyata Flower

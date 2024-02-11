@@ -36,6 +36,7 @@ __all__ = [
     "HealIEvent",
     "ReactionIEvent",
     "SkillIEvent",
+    "SupportRemovelIEvent",
 
     "PreprocessableEvent",
     "ActionPEvent",
@@ -107,7 +108,6 @@ class ReactionIEvent(InformableEvent):
     reaction: Reaction
 
 
-
 @dataclass(frozen=True, kw_only=True)
 class SkillIEvent(InformableEvent):
     source: StaticTarget
@@ -132,6 +132,11 @@ class SkillIEvent(InformableEvent):
                 or isinstance(game_state.get_character_target(self.source), char_type)
             )
         )
+
+
+@dataclass(frozen=True, kw_only=True)
+class SupportRemovelIEvent(InformableEvent):
+    source: StaticTarget  # (pid, SUPPORT, sid)
 
 
 @dataclass(frozen=True, kw_only=True)

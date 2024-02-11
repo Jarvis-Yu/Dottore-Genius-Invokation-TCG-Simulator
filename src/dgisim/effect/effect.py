@@ -2036,6 +2036,14 @@ class RemoveSupportEffect(DirectEffect):
     sid: int
 
     def execute(self, game_state: GameState) -> GameState:
+        game_state = StatusProcessing.inform_all_statuses(
+            game_state,
+            self.target_pid,
+            Informables.SUPPORT_REMOVAL,
+            SupportRemovelIEvent(
+                source=StaticTarget.from_support(self.target_pid, self.sid),
+            ),
+        )
         return game_state.factory().f_player(
             self.target_pid,
             lambda p: p.factory().f_supports(

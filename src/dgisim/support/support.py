@@ -46,6 +46,7 @@ __all__ = [
     "ChangTheNinthSupport",
     "ChefMaoSupport",
     "DunyarzadSupport",
+    "JehtSupport",
     "LibenSupport",
     "LiuSuSupport",
     "MamereSupport",
@@ -265,6 +266,52 @@ class DunyarzadSupport(Support, stt._UsageLivingStatus):
             ], replace(self, usages=0, can_draw=False, drawed=True)
         elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
             return [], replace(self, usages=self.MAX_USAGES)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class JehtSupport(Support, stt._UsageLivingStatus):
+    usages: int = 0
+    MAX_USAGES: ClassVar[int] = 6
+    triggered: bool = False
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+    ))
+
+    @override
+    def _inform(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.SUPPORT_REMOVAL:
+            assert isinstance(information, SupportRemovelIEvent)
+            if self.usages < self.MAX_USAGES and information.source.pid is status_source.pid:
+                return replace(self, usages=self.usages + 1)
+        elif info_type is Informables.POST_SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if (
+                    self.usages >= 5
+                    and information.source.pid is status_source.pid
+                    and information.skill_true_type is CharacterSkillType.ELEMENTAL_BURST
+            ):
+                return replace(self, triggered=True)
+        return self
+    
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.triggered:
+            return [
+                eft.AddDiceEffect(
+                    pid=source.pid,
+                    element=Element.OMNI,
+                    num=self.usages - 2,
+                ),
+            ], None
         return [], self
 
 

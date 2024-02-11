@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (37/71 implemented)](#character-3771-implemented)
-  - [Card (160/248 implemented)](#card-160248-implemented)
+  - [Card (161/248 implemented)](#card-161248-implemented)
 
 ## Character (37/71 implemented)
 
@@ -57,7 +57,7 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (160/248 implemented)
+## Card (161/248 implemented)
 
 - [ ] Equipment Card (80/137):
   - [ ] Talent Card:
@@ -154,11 +154,12 @@ all I need now is to implement each card and character.
     - [x] Vourukasha's Glow
     - [x] Wine-Stained Tricorne
     - [x] Witch's Scorching Hat
-- [ ] Support Card (22/44):
+- [ ] Support Card (23/44):
   - [ ] Companion Card:
     - [x] Chang the Ninth
     - [x] Chef Mao
     - [x] Dunyarzad
+    - [x] Jeht
     - [x] Liben
     - [x] LiuSu
     - [x] Mamere

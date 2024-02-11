@@ -1211,7 +1211,7 @@ class _SacrificialWeaponStatus(WeaponEquipmentStatus, _UsageLivingStatus):
             assert isinstance(information, SkillIEvent)
             if (
                     self.usages > 0
-                    and information.skill_type.is_elemental_skill()
+                    and information.skill_true_type is CharacterSkillType.ELEMENTAL_SKILL
                     and information.source == status_source
             ):
                 return replace(self, activated=True)

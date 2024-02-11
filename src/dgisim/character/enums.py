@@ -27,13 +27,6 @@ class CharacterSkill(Enum):
             return EventType.ELEMENTAL_BURST
         raise NotImplementedError
 
-    # TODO: remove
-    def is_elemental_skill(self) -> bool:
-        return self is CharacterSkill.SKILL2 or self is CharacterSkill.SKILL3
-
-    def is_elemental_burst(self) -> bool:
-        return self is CharacterSkill.ELEMENTAL_BURST
-
 class CharacterSkillType(Enum):
     NORMAL_ATTACK = 1
     ELEMENTAL_SKILL = 2

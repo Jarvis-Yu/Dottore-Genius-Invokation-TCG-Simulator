@@ -163,6 +163,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ChangTheNinth,
     ChefMao,
     Dunyarzad,
+    Jeht,
     Liben,
     LiuSu,
     Mamere,
