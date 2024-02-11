@@ -293,8 +293,7 @@ class JehtSupport(Support, stt._UsageLivingStatus):
         elif info_type is Informables.POST_SKILL_USAGE:
             assert isinstance(information, SkillIEvent)
             if (
-                    self.usages >= 5
-                    and information.source.pid is status_source.pid
+                    information.source.pid is status_source.pid
                     and information.skill_true_type is CharacterSkillType.ELEMENTAL_BURST
             ):
                 return replace(self, triggered=True)
@@ -305,13 +304,16 @@ class JehtSupport(Support, stt._UsageLivingStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.triggered:
-            return [
-                eft.AddDiceEffect(
-                    pid=source.pid,
-                    element=Element.OMNI,
-                    num=self.usages - 2,
-                ),
-            ], None
+            if self.usages >= 5:
+                return [
+                    eft.AddDiceEffect(
+                        pid=source.pid,
+                        element=Element.OMNI,
+                        num=self.usages - 2,
+                    ),
+                ], None
+            else:
+                return [], replace(self, usages=0, triggered=False)
         return [], self
 
 
