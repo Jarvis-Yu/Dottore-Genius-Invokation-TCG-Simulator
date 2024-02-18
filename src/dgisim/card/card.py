@@ -214,6 +214,8 @@ __all__ = [
     "AratakiIchiban",
     ## Bennett ##
     "GrandExpectation",
+    ## Chongyun ##
+    "SteadyBreathing",
     ## Collei ##
     "FloralSidewinder",
     ## Dehya ##
@@ -3837,6 +3839,16 @@ class GrandExpectation(_TalentEquipmentSkillCard):
     _CHARACTER = chr.Bennett
     _EQUIPMENT_STATUS = stt.GrandExpectationStatus
     _SKILL = CharacterSkill.ELEMENTAL_BURST
+
+
+#### Chongyun ####
+
+
+class SteadyBreathing(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDice({Element.CRYO: 3})
+    _CHARACTER = chr.Chongyun
+    _EQUIPMENT_STATUS = stt.SteadyBreathingStatus
+    _SKILL = CharacterSkill.SKILL2
 
 
 #### Collei ####

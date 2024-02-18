@@ -39,7 +39,7 @@ CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
         (char.Ganyu, 0),
         # (char.Diona, 1),
         (char.Kaeya, 2),
-        # (char.Chongyun, 3),
+        (char.Chongyun, 3),
         (char.KamisatoAyaka, 4),
         (char.Eula, 5),
         (char.Shenhe, 6),
@@ -319,7 +319,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.UndividedHeart, 925),
         # Diona 926
         (card.ColdBloodedStrike, 927),
-        # Chongyun 928
+        (card.SteadyBreathing, 928),
         (card.KantenSenmyouBlessing, 929),
         (card.WellspingOfWarLust, 930),
         (card.MysticalAbandon, 931),
@@ -659,6 +659,9 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.ColdBloodedStrikeStatus, 640),
         (status.IcicleStatus, 641),
         ## Chongyun 660 ##
+        (status.ChonghuasFrostFieldEnhancedStatus, 660),
+        (status.ChonghuasFrostFieldStatus, 661),
+        (status.SteadyBreathingStatus, 662),
         ## KamisatoAyaka 680 ##
         (status.KamisatoArtSenhoStatus, 680),
         (status.KamisatoAyakaCryoInfusionEnhancedStatus, 681),

@@ -36,6 +36,7 @@ __all__ = [
     "Albedo",
     "AratakiItto",
     "Bennett",
+    "Chongyun",
     "Collei",
     "Dehya",
     "ElectroHypostasis",
@@ -864,6 +865,100 @@ class Bennett(Character):
             max_hp=10,
             energy=0,
             max_energy=2,
+            hiddens=stts.Statuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
+class Chongyun(Character):
+    _ELEMENT = Element.CRYO
+    _WEAPON_TYPE = WeaponType.CLAYMORE
+    _TALENT_STATUS = stt.SteadyBreathingStatus
+    _FACTIONS = frozenset((Faction.LIYUE,))
+
+    _SKILL1_COST = AbstractDice({
+        Element.CRYO: 1,
+        Element.ANY: 2,
+    })
+    _SKILL2_COST = AbstractDice({
+        Element.CRYO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDice({
+        Element.CRYO: 3,
+    })
+
+    @override
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        )
+
+    @override
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        talent_status: None | stt.ColleiTalentStatus = None
+        trigger_sprout: bool = False
+        effects: list[eft.Effect] = [
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.CRYO,
+                damage=3,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+        ]
+        if self.talent_equipped():
+            this_player = game_state.get_player(source.pid)
+            if stt.ChonghuasFrostFieldStatus in this_player.combat_statuses:
+                effects.append(
+                    eft.RemoveCombatStatusEffect(
+                        target_pid=source.pid,
+                        status=stt.ChonghuasFrostFieldStatus,
+                    )
+                )
+            effects.append(
+                eft.AddCombatStatusEffect(
+                    target_pid=source.pid,
+                    status=stt.ChonghuasFrostFieldEnhancedStatus,
+                )
+            )
+        else:
+            effects.append(
+                eft.AddCombatStatusEffect(
+                    target_pid=source.pid,
+                    status=stt.ChonghuasFrostFieldStatus,
+                )
+            )
+        return tuple(effects)
+
+    @override
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.max_energy,
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.CRYO,
+                damage=7,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=3,
             hiddens=stts.Statuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),

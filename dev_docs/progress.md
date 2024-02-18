@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (37/71 implemented)](#character-3771-implemented)
-  - [Card (161/248 implemented)](#card-161248-implemented)
+  - [Character (38/75 implemented)](#character-3875-implemented)
+  - [Card (162/259 implemented)](#card-162259-implemented)
 
-## Character (37/71 implemented)
+## Character (38/75 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -43,6 +43,7 @@ all I need now is to implement each card and character.
   - [x] Tighnari
   - [ ] Yaoyao
 - [ ] Cryo:
+  - [x] Chongyun
   - [x] Eula
   - [ ] Fatui Cryo Cicin Mage
   - [x] Kaeya
@@ -57,9 +58,9 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (161/248 implemented)
+## Card (162/259 implemented)
 
-- [ ] Equipment Card (80/137):
+- [ ] Equipment Card (81/143):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
@@ -84,6 +85,7 @@ all I need now is to implement each card and character.
     - [x] Sanguine Rouge
     - [x] Sin of Pride
     - [x] Stalwart and True
+    - [x] Steady Breathing
     - [x] Stellar Predator
     - [x] Strategic Reserve
     - [x] Streaming Surge
@@ -154,7 +156,7 @@ all I need now is to implement each card and character.
     - [x] Vourukasha's Glow
     - [x] Wine-Stained Tricorne
     - [x] Witch's Scorching Hat
-- [ ] Support Card (23/44):
+- [ ] Support Card (23/46):
   - [ ] Companion Card:
     - [x] Chang the Ninth
     - [x] Chef Mao
@@ -191,7 +193,7 @@ all I need now is to implement each card and character.
     - [x] Tenshukaku
     - [x] Vanarana
     - [ ] Weeping Willow of the Lake
-- [ ] Event Card (58/67):
+- [ ] Event Card (58/70):
   - [ ] Talent Card:
     - [x] Absorbing Prism
     - [x] Kanten Senmyou Blessing

@@ -177,7 +177,9 @@ __all__ = [
     "InspirationFieldStatus",
     "InspirationFieldEnhancedStatus",
     ## Chongyun ##
+    "ChonghuasFrostFieldEnhancedStatus",
     "ChonghuasFrostFieldStatus",
+    "SteadyBreathingStatus",
     ## Collei ##
     "ColleiTalentStatus",
     "FloralSidewinderStatus",
@@ -978,7 +980,7 @@ class RevivalStatus(Status):
 class _InfusionStatus(_UsageStatus):
     MAX_USAGES: ClassVar[int] = BIG_INT
     ELEMENT: ClassVar[Element]
-    damage_boost: int = 0
+    DAMAGE_BOOST: ClassVar[int] = 0
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
     ))
@@ -998,10 +1000,10 @@ class _InfusionStatus(_UsageStatus):
                 if self._dmg_element_condition(game_state, status_source, dmg):
                     new_item = replace(item, dmg=replace(dmg, element=self.ELEMENT))
             if signal is Preprocessables.DMG_AMOUNT_PLUS:
-                if self.damage_boost != 0  \
+                if self.DAMAGE_BOOST != 0  \
                         and self._dmg_boost_condition(game_state, status_source, dmg):
                     new_item = replace(item, dmg=replace(
-                        dmg, damage=dmg.damage + self.damage_boost))
+                        dmg, damage=dmg.damage + self.DAMAGE_BOOST))
         if new_item is not None:
             return new_item, self
         else:
@@ -3621,7 +3623,7 @@ class AratakiIchibanStatus(TalentEquipmentStatus, _UsageLivingStatus):
 class RagingOniKingStatus(CharacterStatus, _InfusionStatus):
     usages: int = 2  # duration
     ELEMENT: ClassVar[Element] = Element.GEO
-    damage_boost: int = 1
+    DAMAGE_BOOST: ClassVar[int] = 1
     status_gaining_usages: int = 1
     status_gaining_available: bool = False
 
@@ -3835,11 +3837,61 @@ class InspirationFieldEnhancedStatus(_InspirationFieldStatus):
 #### Chongyun ####
 
 
+def _chongyun_infusion_condition(game_state: GameState, dmg: eft.SpecificDamageEffect) -> bool:
+    """ Chongyun's infusion condition: normal attack of claymore, polearm, or sword. """
+    return (
+        dmg.damage_type.direct_normal_attack()
+        and (char := game_state.get_character_target(dmg.source)) is not None
+        and char.WEAPON_TYPE in {WeaponType.CLAYMORE, WeaponType.POLEARM, WeaponType.SWORD}
+    )
+
+
+@dataclass(frozen=True, kw_only=True)
+class ChonghuasFrostFieldEnhancedStatus(CombatStatus, _InfusionStatus):
+    usages: int = 2
+    ELEMENT: ClassVar[Element] = Element.CRYO
+    DAMAGE_BOOST: ClassVar[int] = 1
+
+    @override
+    def _dmg_element_condition(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: eft.SpecificDamageEffect,
+    ) -> bool:
+        return _chongyun_infusion_condition(game_state, item) and item.element is Element.PHYSICAL
+
+    @override
+    def _dmg_boost_condition(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: eft.SpecificDamageEffect,
+    ) -> bool:
+        return _chongyun_infusion_condition(game_state, item)
+
+
 @dataclass(frozen=True, kw_only=True)
 class ChonghuasFrostFieldStatus(CombatStatus, _InfusionStatus):
+    usages: int = 2
     ELEMENT: ClassVar[Element] = Element.CRYO
 
-    # TODO: other effects'll be implemented when Chongyun is implemented
+    @override
+    def _dmg_element_condition(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: eft.SpecificDamageEffect,
+    ) -> bool:
+        return _chongyun_infusion_condition(game_state, item) and item.element is Element.PHYSICAL
+
+
+@dataclass(frozen=True, kw_only=True)
+class SteadyBreathingStatus(TalentEquipmentStatus):
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import SteadyBreathing
+        return SteadyBreathing
 
 
 #### Collei ####
@@ -4336,7 +4388,7 @@ class BloodBlossomStatus(CharacterStatus):
 class ParamitaPapilioStatus(CharacterStatus, _InfusionStatus):
     usages: int = 2
     ELEMENT: ClassVar[Element] = Element.PYRO
-    damage_boost: int = 1
+    DAMAGE_BOOST: ClassVar[int] = 1
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -4837,7 +4889,7 @@ class KamisatoAyakaCryoInfusionEnhancedStatus(CharacterStatus, _InfusionStatus):
     ELEMENT: ClassVar[Element] = Element.CRYO
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 1
-    damage_boost: int = 1
+    DAMAGE_BOOST: ClassVar[int] = 1
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -4928,7 +4980,7 @@ class KeqingElectroInfusionEnhancedStatus(CharacterStatus, _InfusionStatus):
     usages: int = 3
     MAX_USAGES: ClassVar[int] = 3
     ELEMENT: ClassVar[Element] = Element.ELECTRO
-    damage_boost: int = 1
+    DAMAGE_BOOST: ClassVar[int] = 1
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -5546,7 +5598,7 @@ class IGotYourBackStatus(TalentEquipmentStatus):
 class SweepingTimeStatus(CharacterStatus, _InfusionStatus):
     usages: int = 2  # duration
     ELEMENT: ClassVar[Element] = Element.GEO
-    damage_boost: int = 2
+    DAMAGE_BOOST: ClassVar[int] = 2
     dice_reduction_usages: int = 1
     DICE_REDUCTION: ClassVar[int] = 1
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((

@@ -10,6 +10,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     Albedo,
     AratakiItto,
     Bennett,
+    Chongyun,
     Collei,
     Dehya,
     ElectroHypostasis,

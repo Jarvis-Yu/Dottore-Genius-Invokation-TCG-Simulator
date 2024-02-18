@@ -32,6 +32,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     SanguineRouge,
     SinOfPride,
     StalwartAndTrue,
+    SteadyBreathing,
     StellarPredator,
     StrategicReserve,
     StreamingSurge,

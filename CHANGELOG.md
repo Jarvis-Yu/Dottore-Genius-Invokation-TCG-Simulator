@@ -5,11 +5,13 @@
 ### Added
 
 - New Characters:
+  - Chongyun
   - Lisa
 - New Cards:
   - Equipment Cards:
     - Talent Cards:
       - Pulsating Witch
+      - Steady Breathing
   - Support Cards:
     - Companion Cards:
       - Jeht
