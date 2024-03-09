@@ -235,3 +235,25 @@ encoding_plan = EncodingPlan(
     summon_mapping=SUMM_MAPPING,
     support_mapping=SUPP_MAPPING,
 )
+
+if __name__ == "__main__":
+    # sizing report
+    from ..state.game_state import GameState
+    from ..helper.level_print import level_print_single
+
+    indent = 0
+    game_state = GameState.from_default()
+    encoding = game_state.encoding(encoding_plan)
+    print(f"game_state size = {len(encoding)}")
+
+    player = game_state.player1
+    encoding = player.encoding(encoding_plan)
+    print(f"player_state size = {len(encoding)}")
+
+    deck = player.initial_deck
+    encoding = deck.encoding(encoding_plan)
+    print(f"deck size = {len(encoding)}")
+
+    chars = player.characters
+    encoding = chars.encoding(encoding_plan)
+    print(f"chars size = {len(encoding)}")
