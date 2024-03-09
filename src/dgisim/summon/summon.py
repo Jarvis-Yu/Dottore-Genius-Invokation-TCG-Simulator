@@ -44,6 +44,7 @@ __all__ = [
     "CryoHilichurlShooterSummon",
     "CuileinAnbarSummon",
     "DandelionFieldSummon",
+    "DrunkenMistSummon",
     "ElectroHilichurlShooterSummon",
     "EyeOfStormyJudgmentSummon",
     "FierySanctumFieldSummon",
@@ -522,6 +523,31 @@ class DandelionFieldSummon(_DestroyOnNumSummon):
                 ),
             ], replace(self, usages=-1)
         return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class DrunkenMistSummon(_DmgPerRoundSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.CRYO
+
+    @override
+    def _react_to_signal(
+            self,
+            game_state: GameState,
+            source: StaticTarget,
+            signal: TriggeringSignal
+    ) -> tuple[list[eft.Effect], None | Self]:
+        es, new_self = super()._react_to_signal(game_state, source, signal)
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            es.append(
+                eft.RecoverHPEffect(
+                    target=StaticTarget.from_player_active(game_state, source.pid),
+                    recovery=2,
+                )
+            )
+        return es, new_self
 
 
 @dataclass(frozen=True, kw_only=True)

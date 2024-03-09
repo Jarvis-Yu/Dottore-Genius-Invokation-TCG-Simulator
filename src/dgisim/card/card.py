@@ -220,6 +220,8 @@ __all__ = [
     "FloralSidewinder",
     ## Dehya ##
     "StalwartAndTrue",
+    ## Diona ##
+    "ShakenNotPurred",
     ## Electro Hypostasis ##
     "AbsorbingPrism",
     ## Eula ##
@@ -3866,6 +3868,15 @@ class StalwartAndTrue(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDice({Element.PYRO: 4})
     _CHARACTER = chr.Dehya
     _EQUIPMENT_STATUS = stt.StalwartAndTrueStatus
+    _SKILL = CharacterSkill.SKILL2
+
+
+#### Diona ####
+
+class ShakenNotPurred(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDice({Element.CRYO: 3})
+    _CHARACTER = chr.Diona
+    _EQUIPMENT_STATUS = stt.ShakenNotPurredStatus
     _SKILL = CharacterSkill.SKILL2
 
 

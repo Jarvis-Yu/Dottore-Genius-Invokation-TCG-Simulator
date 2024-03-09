@@ -37,7 +37,7 @@ CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
     for c, i in (
         #### Cryo 000 ####
         (char.Ganyu, 0),
-        # (char.Diona, 1),
+        (char.Diona, 1),
         (char.Kaeya, 2),
         (char.Chongyun, 3),
         (char.KamisatoAyaka, 4),
@@ -317,7 +317,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         #### 4 Talent Card 0925 ####
         #### 4.1 Cryo 0925 ####
         (card.UndividedHeart, 925),
-        # Diona 926
+        (card.ShakenNotPurred, 926),
         (card.ColdBloodedStrike, 927),
         (card.SteadyBreathing, 928),
         (card.KantenSenmyouBlessing, 929),
@@ -655,6 +655,9 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.GanyuTalentStatus, 601),
         (status.IceLotusStatus, 602),
         ## Diona 620 ##
+        (status.ShakenNotPurredStatus, 620),
+        (status.CatClawShieldStatus, 621),
+        (status.CatClawShieldEnhancedStatus, 622),
         ## Kaeya 640 ##
         (status.ColdBloodedStrikeStatus, 640),
         (status.IcicleStatus, 641),
@@ -842,7 +845,7 @@ SUMM_MAPPING: dict[type["Summon"], int] = HashableDict({
     for summ, i in (
         #### Cryo 0 ####
         (summon.SacredCryoPearlSummon, 0),
-        # (summon.DrunkenMistSummon, 1),
+        (summon.DrunkenMistSummon, 1),
         (summon.FrostflakeSekiNoToSummon, 2),
         (summon.ShadowswordGallopingFrostSummon, 3),
         (summon.CryoHilichurlShooterSummon, 4),

@@ -213,7 +213,7 @@ class TestKaeya(unittest.TestCase):
         initial_hp = 3
         base_game_state = kill_character(
             game_state=self.BASE_GAME.factory().mode(AllOmniMode()).build(),
-            character_id=2,
+            char_id=2,
             pid=Pid.P1,
             hp=initial_hp,
         )

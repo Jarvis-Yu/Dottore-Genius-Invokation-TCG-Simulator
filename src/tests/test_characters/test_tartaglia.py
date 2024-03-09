@@ -150,7 +150,7 @@ class TestTartaglia(unittest.TestCase):
             target=DynamicCharacterTarget.OPPO_ACTIVE,
             status=RiptideStatus,
         ).execute(self.BASE_GAME)
-        base_state = kill_character(base_state, character_id=1, pid=Pid.P2, hp=1)
+        base_state = kill_character(base_state, char_id=1, pid=Pid.P2, hp=1)
 
         # test RiptideStatus transfers on direct kill
         game_state = step_skill(base_state, Pid.P1, CharacterSkill.SKILL1)

@@ -15,7 +15,7 @@ class TestTeyvatFriedEgg(unittest.TestCase):
     ).build()
 
     def test_basic_revival(self):
-        base_game = kill_character(self.BASE_GAME, character_id=1, pid=Pid.P1, hp=1)
+        base_game = kill_character(self.BASE_GAME, char_id=1, pid=Pid.P1, hp=1)
         game_state = base_game
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         game_state = step_skill(game_state, Pid.P2, CharacterSkill.SKILL1)
@@ -40,7 +40,7 @@ class TestTeyvatFriedEgg(unittest.TestCase):
         self.assertIn(ReviveOnCooldownStatus, game_state.player1.combat_statuses)
 
         # check cannot use twice per round
-        game_state = kill_character(game_state, character_id=1, pid=Pid.P1, hp=0)
+        game_state = kill_character(game_state, char_id=1, pid=Pid.P1, hp=0)
         self.assertRaises(Exception, lambda: game_state.action_step(Pid.P1, CardAction(
             card=TeyvatFriedEgg,
             instruction=StaticTargetInstruction(
@@ -69,7 +69,7 @@ class TestTeyvatFriedEgg(unittest.TestCase):
         self.assertIn(ReviveOnCooldownStatus, game_state.player1.combat_statuses)
 
     def test_revival_resets_character_statuses(self):
-        base_game = kill_character(self.BASE_GAME, character_id=1, pid=Pid.P1, hp=1)
+        base_game = kill_character(self.BASE_GAME, char_id=1, pid=Pid.P1, hp=1)
         game_state = base_game.factory().f_player1(
             lambda p1: p1.factory().f_characters(
                 lambda cs: cs.factory().f_active_character(

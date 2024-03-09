@@ -24,8 +24,8 @@ class TestGamblersEarrings(unittest.TestCase):
                 lambda cstts: cstts.update_status(IcicleStatus())  # Kaeya's burst
             ).build()
         ).build()
-        base_game = kill_character(base_game, character_id=1, hp=1)
-        base_game = kill_character(base_game, character_id=2, hp=1)
+        base_game = kill_character(base_game, char_id=1, hp=1)
+        base_game = kill_character(base_game, char_id=2, hp=1)
         for i in range(1, 4):
             base_game = just(base_game.action_step(Pid.P1, CardAction(
                 card=GamblersEarrings,

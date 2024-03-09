@@ -134,7 +134,7 @@ class TestNoelle(unittest.TestCase):
         self.assertEqual(p1ac_character_statuses.just_find(SweepingTimeStatus).usages, 1)
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         game_state = fill_dice_with_omni(game_state)
-        game_state = kill_character(game_state, character_id=1, hp=10)
+        game_state = kill_character(game_state, char_id=1, hp=10)
         game_state = step_skill(
             game_state,
             Pid.P1,
@@ -200,7 +200,7 @@ class TestNoelle(unittest.TestCase):
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         game_state = fill_dice_with_omni(game_state)
         game_state = auto_step(add_damage_effect(game_state, 2, Element.ELECTRO, Pid.P1, char_id=2))
-        game_state = kill_character(game_state, character_id=1, hp=10)
+        game_state = kill_character(game_state, char_id=1, hp=10)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
         p1_cs = game_state.player1.characters
         for char in p1_cs:

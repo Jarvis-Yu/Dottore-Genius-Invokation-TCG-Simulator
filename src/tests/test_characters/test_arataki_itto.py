@@ -242,7 +242,7 @@ class TestAratakiItto(unittest.TestCase):
                 lambda cs: cs.factory().active_character_id(2).build()
             ).build()
         ).build()
-        base_game = kill_character(base_game, character_id=1, pid=Pid.P1, hp=1)
+        base_game = kill_character(base_game, char_id=1, pid=Pid.P1, hp=1)
 
         # first character damage triggers ushi
         game_state = base_game.action_step(Pid.P2, SkillAction(

@@ -314,7 +314,7 @@ def heal_for_all(game_state: GameState) -> GameState:
 
 def kill_character(
         game_state: GameState,
-        character_id: int,
+        char_id: int,
         pid: Pid = Pid.P2,
         hp: int = 0,
 ) -> GameState:
@@ -325,7 +325,7 @@ def kill_character(
         pid,
         lambda p: p.factory().f_characters(
             lambda cs: cs.factory().f_character(
-                character_id,
+                char_id,
                 lambda c: c.factory().hp(hp).alive(hp > 0).build()
             ).build()
         ).build()

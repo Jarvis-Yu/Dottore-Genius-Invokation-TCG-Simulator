@@ -30,6 +30,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     PulsatingWitch,
     RiteOfResurrection,
     SanguineRouge,
+    ShakenNotPurred,
     SinOfPride,
     StalwartAndTrue,
     SteadyBreathing,

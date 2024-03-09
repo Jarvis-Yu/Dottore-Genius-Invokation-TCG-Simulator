@@ -1,7 +1,7 @@
 Available Cards
 ===============
 
-162 of 259 cards in Genius Invokation TCG are available in the simulator.
+163 of 259 cards in Genius Invokation TCG are available in the simulator.
 (excluding character cards which are not counted as cards in ``dgisim``)
 
 Equipment Cards
@@ -98,6 +98,7 @@ Talent Card
 * Pulsating Witch
 * Rite of Resurrection
 * Sanguine Rouge
+* Shaken, Not Purred
 * Sin of Pride
 * Stalwart and True
 * Steady Breathing

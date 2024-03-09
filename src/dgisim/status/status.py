@@ -187,6 +187,9 @@ __all__ = [
     ## Dehya ##
     "IncinerationDriveStatus",
     "StalwartAndTrueStatus",
+    ## Diona ##
+    "CatClawShieldEnhancedStatus",
+    "CatClawShieldStatus",
     ## Electro Hypostasis ##
     "ElectroCrystalCoreHiddenStatus",
     "ElectroCrystalCoreStatus",
@@ -4059,6 +4062,30 @@ class StalwartAndTrueStatus(TalentEquipmentStatus):
                     recovery=2,
                 )], self
         return [], self
+
+
+#### Diona ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class CatClawShieldEnhancedStatus(StackedShieldStatus, CombatStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+
+
+@dataclass(frozen=True, kw_only=True)
+class CatClawShieldStatus(StackedShieldStatus, CombatStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+
+
+@dataclass(frozen=True, kw_only=True)
+class ShakenNotPurredStatus(TalentEquipmentStatus):
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import ShakenNotPurred
+        return ShakenNotPurred
+
 
 #### Electro Hypostasis ####
 

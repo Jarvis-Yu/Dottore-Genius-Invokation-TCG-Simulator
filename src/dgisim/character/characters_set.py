@@ -13,6 +13,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     Chongyun,
     Collei,
     Dehya,
+    Diona,
     ElectroHypostasis,
     Eula,
     FatuiPyroAgent,

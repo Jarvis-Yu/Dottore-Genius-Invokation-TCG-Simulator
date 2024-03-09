@@ -32,7 +32,7 @@ class TestElementalSoothingWater(unittest.TestCase):
         active_char_id = 1
         for i in range(1, 4):
             with self.subTest(not_full_char_id=i):
-                game_state = kill_character(base_state, character_id=i, pid=Pid.P1, hp=8)
+                game_state = kill_character(base_state, char_id=i, pid=Pid.P1, hp=8)
                 self.assertTrue(ElementalResonanceSoothingWater.strictly_usable(game_state, Pid.P1))
                 game_state = step_action(game_state, Pid.P1, CardAction(
                     card=ElementalResonanceSoothingWater,
@@ -50,7 +50,7 @@ class TestElementalSoothingWater(unittest.TestCase):
 
         game_state = base_state
         for i in range(1, 4):
-            game_state = kill_character(game_state, character_id=i, pid=Pid.P1, hp=8)
+            game_state = kill_character(game_state, char_id=i, pid=Pid.P1, hp=8)
         self.assertTrue(ElementalResonanceSoothingWater.strictly_usable(game_state, Pid.P1))
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=ElementalResonanceSoothingWater,

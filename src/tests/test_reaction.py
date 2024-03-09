@@ -319,7 +319,7 @@ class TestStatus(unittest.TestCase):
                                                                               ---- 1/8/2023)
         """
         base_game = oppo_aura_elem(ACTION_TEMPLATE, Element.PYRO)
-        base_game = kill_character(base_game, character_id=2, hp=1)
+        base_game = kill_character(base_game, char_id=2, hp=1)
         base_game = base_game.factory().f_player1(
             lambda p1: p1.factory().f_characters(
                 lambda cs: cs.factory().active_character_id(

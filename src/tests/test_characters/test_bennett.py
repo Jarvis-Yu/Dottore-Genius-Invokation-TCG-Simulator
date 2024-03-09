@@ -73,7 +73,7 @@ class TestBennett(unittest.TestCase):
 
     def test_talent_card(self):
         base_game = recharge_energy_for_all(self.BASE_GAME)
-        base_game = kill_character(base_game, character_id=2, pid=Pid.P1, hp=6)
+        base_game = kill_character(base_game, char_id=2, pid=Pid.P1, hp=6)
 
         # play card directly
         game_state = step_action(base_game, Pid.P1, CardAction(
@@ -118,7 +118,7 @@ class TestBennett(unittest.TestCase):
                 base_game = AddCombatStatusEffect(
                     target_pid=Pid.P1, status=status
                 ).execute(self.BASE_GAME)
-                base_game = kill_character(base_game, character_id=2, pid=Pid.P1, hp=4)
+                base_game = kill_character(base_game, char_id=2, pid=Pid.P1, hp=4)
 
                 # P1 normal attack
                 game_state = step_skill(base_game, Pid.P1, CharacterSkill.SKILL1)
@@ -134,7 +134,7 @@ class TestBennett(unittest.TestCase):
                 self.assertEqual(p1ac.hp, 5)  # because opponent AC is Rhodeia of Loch
                 self.assertEqual(p2ac.hp, 8 if status is InspirationFieldStatus else 6)
 
-                game_state = kill_character(game_state, character_id=2, pid=Pid.P1, hp=7)
+                game_state = kill_character(game_state, char_id=2, pid=Pid.P1, hp=7)
 
                 # P1 normal attack
                 game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL1)
@@ -165,9 +165,9 @@ class TestBennett(unittest.TestCase):
         Tests that the status heals the character which triggered it instead of current active.
         """
         base_state = self.BASE_GAME
-        base_state = kill_character(base_state, character_id=1, pid=Pid.P1, hp=4)
-        base_state = kill_character(base_state, character_id=2, pid=Pid.P1, hp=4)
-        base_state = kill_character(base_state, character_id=3, pid=Pid.P1, hp=4)
+        base_state = kill_character(base_state, char_id=1, pid=Pid.P1, hp=4)
+        base_state = kill_character(base_state, char_id=2, pid=Pid.P1, hp=4)
+        base_state = kill_character(base_state, char_id=3, pid=Pid.P1, hp=4)
         base_state = AddCombatStatusEffect(Pid.P1, WhenTheCraneReturnedStatus).execute(base_state)
         base_state = AddCombatStatusEffect(Pid.P1, InspirationFieldStatus).execute(base_state)
 

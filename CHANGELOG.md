@@ -6,11 +6,13 @@
 
 - New Characters:
   - Chongyun
+  - Diona
   - Lisa
 - New Cards:
   - Equipment Cards:
     - Talent Cards:
       - Pulsating Witch
+      - Shaken, Not Purred
       - Steady Breathing
   - Support Cards:
     - Companion Cards:
@@ -21,7 +23,11 @@
 
 ### Updated
 
-- Applied version 4.4's balance patch (forgot to mention in 0.5.0)
+- Applied version 4.4's balance patch (forgot to mention in 0.5.0).
+
+### Fixed
+
+- Faulty description of size of encoded player state in documentation.
 
 ## 0.5.0 (31 Jan 2024)
 

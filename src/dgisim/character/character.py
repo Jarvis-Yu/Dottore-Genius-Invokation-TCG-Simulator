@@ -39,6 +39,7 @@ __all__ = [
     "Chongyun",
     "Collei",
     "Dehya",
+    "Diona",
     "ElectroHypostasis",
     "Eula",
     "FatuiPyroAgent",
@@ -1136,6 +1137,101 @@ class Dehya(Character):
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
+
+
+class Diona(Character):
+    _ELEMENT = Element.CRYO
+    _WEAPON_TYPE = WeaponType.BOW
+    _TALENT_STATUS = stt.ShakenNotPurredStatus
+    _FACTIONS = frozenset((Faction.MONDSTADT,))
+
+    _SKILL1_COST = AbstractDice({
+        Element.CRYO: 1,
+        Element.ANY: 2,
+    })
+    _SKILL2_COST = AbstractDice({
+        Element.CRYO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDice({
+        Element.CRYO: 3,
+    })
+
+    @override
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        )
+
+    @override
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        effects: list[eft.Effect] = [
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.CRYO,
+                damage=2,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+        ]
+        if not self.talent_equipped():
+            effects.append(eft.AddCombatStatusEffect(
+                target_pid=source.pid,
+                status=stt.CatClawShieldStatus,
+            ))
+        else:
+            if stt.CatClawShieldStatus in game_state.get_player(source.pid).combat_statuses:
+                effects.append(eft.RemoveCombatStatusEffect(
+                    target_pid=source.pid,
+                    status=stt.CatClawShieldStatus,
+                ))
+            effects.append(eft.AddCombatStatusEffect(
+                target_pid=source.pid,
+                status=stt.CatClawShieldEnhancedStatus,
+            ))
+        return tuple(effects)
+
+
+    @override
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.max_energy,
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.CRYO,
+                damage=1,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            eft.RecoverHPEffect(
+                target=source,
+                recovery=2,
+            ),
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=sm.DrunkenMistSummon,
+            ),
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=3,
+            hiddens=stts.Statuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
 
 
 class ElectroHypostasis(Character):

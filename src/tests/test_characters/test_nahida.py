@@ -313,7 +313,7 @@ class TestNahida(unittest.TestCase):
             target=StaticTarget(Pid.P2, Zone.CHARACTERS, 2),
             status=SeedOfSkandhaStatus(usages=1),
         ).execute(game_state)
-        game_state = kill_character(game_state, character_id=1, hp=3)
+        game_state = kill_character(game_state, char_id=1, hp=3)
         game_state = oppo_aura_elem(game_state, Element.ELECTRO)
         base_state = game_state
 

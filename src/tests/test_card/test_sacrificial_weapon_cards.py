@@ -52,7 +52,7 @@ class TestSacrificialWeaponEquipmentCard(unittest.TestCase):
         self.assertEqual(p1.dice[Element.ELECTRO], dice_before[Element.ELECTRO])
 
         # First Elemental Skill attacks gives dice
-        game_state = kill_character(game_state, character_id=1, hp=10)
+        game_state = kill_character(game_state, char_id=1, hp=10)
         game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
         p1 = game_state.player1
         p2ac = game_state.player2.just_get_active_character()
@@ -73,7 +73,7 @@ class TestSacrificialWeaponEquipmentCard(unittest.TestCase):
 
         game_state = auto_step(gsm.get_game_state())
         game_state = auto_step(just(game_state.action_step(Pid.P2, EndRoundAction())))
-        game_state = kill_character(game_state, character_id=1, hp=10)
+        game_state = kill_character(game_state, char_id=1, hp=10)
         game_state = fill_dice_with_omni(game_state)
         dice_before = game_state.player1.dice
 
