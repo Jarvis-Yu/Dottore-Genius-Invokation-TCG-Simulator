@@ -17,73 +17,72 @@ __all__ = [
 
 
 class Zone(Enum):
-    CHARACTERS = 1
-    SUMMONS = 2
-    SUPPORTS = 3
-    HIDDEN_STATUSES = 4
-    COMBAT_STATUSES = 5
-    HAND_CARD = 6
+    CHARACTERS = 0
+    SUMMONS = 1
+    SUPPORTS = 2
+    HIDDEN_STATUSES = 3
+    COMBAT_STATUSES = 4
+    HAND_CARD = 5
 
 
 class TriggeringSignal(Enum):
     #: triggers prepare skill statuses
-    ACT_PRE_SKILL = 1
+    ACT_PRE_SKILL = 0
     #: triggers when "after a character uses ..." (any skill)
-    COMBAT_ACTION = 2
+    COMBAT_ACTION = 1
     #: triggers when "after a ... character is defeated"
-    DEATH_EVENT = 3
+    DEATH_EVENT = 2
     #: triggers when "at the end phase, ..."
-    END_ROUND_CHECK_OUT = 4
+    END_ROUND_CHECK_OUT = 3
     #: triggers when a fast action is performed, unused signal.
-    FAST_ACTION = 5
+    FAST_ACTION = 4
     #: triggers when "when the battle begins" for the first time
-    INIT_GAME_START = 6
+    INIT_GAME_START = 5
     #: triggers when "when your opponent declare the end of their round"
-    OPPO_DECLARE_END_ROUND = 7
+    OPPO_DECLARE_END_ROUND = 6
     #: triggers when "when ... play a ... card"
-    POST_CARD = 8
-    ## 9 TO LET ##
+    POST_CARD = 7
     #: triggers when "after ... character takes DMG"
-    POST_DMG = 10
+    POST_DMG = 8
     #: triggers when "after any ..."
-    POST_ANY = 11
+    POST_ANY = 9
     #: triggers when "before ... choose their action"
-    PRE_ACTION = 12
+    PRE_ACTION = 10
     #: triggers when "End Phase"
-    ROUND_END = 13  # remove frozen etc.
+    ROUND_END = 11  # remove frozen etc.
     #: triggers when "when the Action Phase starts"
-    ROUND_START = 14
+    ROUND_START = 12
     #: triggers when "when you declare the end of your round"
-    SELF_DECLARE_END_ROUND = 15
+    SELF_DECLARE_END_ROUND = 13
     #: ABOUT TO BE DEPRECATED: triggers when this player switch a character
-    SELF_SWAP = 16  # swap of this player
+    SELF_SWAP = 14  # swap of this player
     #: ABOUT TO BE DEPRECATED: triggers when the opponent switch a character
-    OPPO_SWAP = 17  # swap of the opposing playing
+    OPPO_SWAP = 15  # swap of the opposing playing
     #: triggers when "when the character ... would be defeated"
-    TRIGGER_REVIVAL = 18
+    TRIGGER_REVIVAL = 16
     #: triggers when "when the character to which this is attached is defeated"
     # only triggers the character which is about to be defeated
-    DEATH_DECLARATION = 19
+    DEATH_DECLARATION = 17
     #: triggers when "when the battle begins" character is being revived
-    REVIVAL_GAME_START = 20
+    REVIVAL_GAME_START = 18
 
 
 class DynamicCharacterTarget(Enum):
-    SELF_ACTIVE = 1
-    SELF_OFF_FIELD = 2
-    SELF_ALL = 3
-    SELF_NEXT = 4
-    SELF_PREV = 5
-    SELF_NEXT_OFF = 6
-    SELF_PREV_OFF = 7
+    SELF_ACTIVE = 0
+    SELF_OFF_FIELD = 1
+    SELF_ALL = 2
+    SELF_NEXT = 3
+    SELF_PREV = 4
+    SELF_NEXT_OFF = 5
+    SELF_PREV_OFF = 6
 
-    OPPO_ACTIVE = 11
-    OPPO_OFF_FIELD = 12
-    OPPO_ALL = 13
-    OPPO_NEXT = 14
-    OPPO_PREV = 15
-    OPPO_NEXT_OFF = 16
-    OPPO_PREV_OFF = 17
+    OPPO_ACTIVE = 10
+    OPPO_OFF_FIELD = 11
+    OPPO_ALL = 12
+    OPPO_NEXT = 13
+    OPPO_PREV = 14
+    OPPO_NEXT_OFF = 15
+    OPPO_PREV_OFF = 16
 
     def get_targets(
             self,

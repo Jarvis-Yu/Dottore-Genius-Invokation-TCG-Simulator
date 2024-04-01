@@ -5,9 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 from itertools import chain
-from typing import Any, FrozenSet, Optional, Iterator
+from typing import Any, FrozenSet, Iterator, TYPE_CHECKING
 
 from .helper.hashable_dict import HashableDict
+
+if TYPE_CHECKING:
+    from .encoding.encoding_plan import EncodingPlan
 
 __all__ = [
     "AURA_ELEMENTS",
@@ -20,17 +23,17 @@ __all__ = [
 
 
 class Element(Enum):
-    OMNI = 1
-    PYRO = 2
-    HYDRO = 3
-    ANEMO = 4
-    ELECTRO = 5
-    DENDRO = 6
-    CRYO = 7
-    GEO = 8
-    PHYSICAL = 9
-    PIERCING = 10
-    ANY = 11
+    OMNI = 0
+    PYRO = 1
+    HYDRO = 2
+    ANEMO = 3
+    ELECTRO = 4
+    DENDRO = 5
+    CRYO = 6
+    GEO = 7
+    PHYSICAL = 8
+    PIERCING = 9
+    ANY = 10
 
     def __repr__(self) -> str:
         return self.name
@@ -151,7 +154,7 @@ class Reaction(Enum):
         raise Exception("Invalid reaction")
 
     @classmethod
-    def consult_reaction(cls, first: Element, second: Element) -> Optional[Reaction]:
+    def consult_reaction(cls, first: Element, second: Element) -> None | Reaction:
         """
         :returns: a Reaction if the `first` element can react with the `second` element.
         """
@@ -238,7 +241,7 @@ class ElementalAura:
         """ :returnx: `True` if `elem` is an aura element. """
         return elem in AURA_ELEMENTS
 
-    def peek(self) -> Optional[Element]:
+    def peek(self) -> None | Element:
         """ :returns: the element that has the highest priority to be reacted. """
         for elem, aura in self._aura.items():
             if aura:
@@ -294,9 +297,9 @@ class ElementalAura:
         """
         return Reaction.consult_reaction_with_aura(self, incoming_elem)
 
-    def encoding(self) -> list[int]:
+    def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
         return list(chain.from_iterable([
-            (elem.value, 1 if self._aura[elem] else 0)
+            (encoding_plan.encode_item(elem), 1 if self._aura[elem] else 0)
             for elem in AURA_ELEMENTS
         ]))
 

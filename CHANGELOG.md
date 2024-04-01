@@ -24,6 +24,9 @@
 ### Updated
 
 - Applied version 4.4's balance patch (forgot to mention in 0.5.0).
+- Improved encoding for enums in the game such that encoded state always use
+  different ID for different enums of different type.
+- Renames `EncodingPlan.code_for` to `EncodingPlan.encode_item`.
 
 ### Fixed
 

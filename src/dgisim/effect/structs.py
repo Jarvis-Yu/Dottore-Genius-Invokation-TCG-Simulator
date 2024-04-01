@@ -28,7 +28,7 @@ class StaticTarget:
         return [
             self.pid.value,
             self.zone.value,
-            self.id if isinstance(self.id, int) else encoding_plan.code_for(self.id),
+            self.id if isinstance(self.id, int) else encoding_plan.encode_item(self.id),
         ]
 
     @classmethod

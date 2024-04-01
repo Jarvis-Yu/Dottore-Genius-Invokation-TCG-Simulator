@@ -109,7 +109,7 @@ class PlayerAction:
             return CharacterSelectAction(char_id=encoding[1])
         elif action_type == 4:
             card_type = encoding_plan.type_for(encoding[3])
-            elem_code = encoding[4]
+            elem_code = encoding[4] - encoding_plan.encode_item(Element(0))
             if (
                     card_type is None
                     or not issubclass(card_type, Card)
@@ -135,7 +135,7 @@ class PlayerAction:
                 instruction=instruction,
             )
         elif action_type == 6:
-            skill_code = encoding[2]
+            skill_code = encoding[2] - encoding_plan.encode_item(CharacterSkill(0))
             if skill_code >= len(CharacterSkill):
                 return None
             skill = CharacterSkill(skill_code)
@@ -247,7 +247,7 @@ class ElementalTuningAction(GameAction):
 
     def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
         return list(chain(
-            [4, 0, 0, encoding_plan.code_for(self.card), self.dice_elem.value],
+            [4, 0, 0, encoding_plan.encode_item(self.card), encoding_plan.encode_item(self.dice_elem)],
             [0] * (encoding_plan.ACTION_FULL_SIZE - 5),
         ))
 
@@ -269,7 +269,7 @@ class CardAction(GameAction):
 
     def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
         return list(chain(
-            [5, 0, 0, encoding_plan.code_for(self.card), 0],
+            [5, 0, 0, encoding_plan.encode_item(self.card), 0],
             [0] * (encoding_plan.ACTION_LOCAL_SIZE - 5),
             self.instruction.encoding(encoding_plan),
         ))
@@ -291,7 +291,7 @@ class SkillAction(GameAction):
 
     def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
         return list(chain(
-            [6, 0, self.skill.value, 0, 0],
+            [6, 0, encoding_plan.encode_item(self.skill), 0, 0],
             [0] * (encoding_plan.ACTION_LOCAL_SIZE - 5),
             self.instruction.encoding(encoding_plan),
         ))

@@ -1,4 +1,5 @@
 import itertools
+from enum import Enum
 from typing import cast, no_type_check, TYPE_CHECKING, Union
 
 from .mappings import *
@@ -34,11 +35,13 @@ class EncodingPlan:
             self,
             mode_mapping: dict[type["Mode"], int],
             card_mapping: dict[type["Card"], int],
+            enum_mapping: dict[Enum, int],
             char_mapping: dict[type["Character"], int],
             effect_mapping: dict[type["Effect"], int],
             status_mapping: dict[type["Status"], int],
             summon_mapping: dict[type["Summon"], int],
             support_mapping: dict[type["Support"], int],
+            phase_base: int = 450,
             cards_fixed_len: int = 40,
             status_fixed_len: int = 7,
             statuses_fixed_len: int = 10,
@@ -71,6 +74,7 @@ class EncodingPlan:
         :param effect_fixed_len: the default fixed length of encoded effect vector.
         :param effects_fixed_len: the default fixed length of encoded effects vector.
         """
+        self._enum_mapping = enum_mapping
         self._card_mapping = card_mapping
         self._char_mapping = char_mapping
         self._effect_mapping = effect_mapping
@@ -78,6 +82,7 @@ class EncodingPlan:
         self._status_mapping = status_mapping
         self._summon_mapping = summon_mapping
         self._support_mapping = support_mapping
+        self.PHASE_BASE = phase_base
         self.CARDS_FIXED_LEN = cards_fixed_len
         self.STATUS_FIXED_LEN = status_fixed_len
         self.STATUSES_FIXED_LEN = statuses_fixed_len
@@ -106,6 +111,7 @@ class EncodingPlan:
         from ..summon.summon import Summon
         from ..support.support import Support
         self._TYPED_MAPPING = {
+            Enum: self._enum_mapping,
             Card: self._card_mapping,
             Character: self._char_mapping,
             Effect: self._effect_mapping,
@@ -125,6 +131,7 @@ class EncodingPlan:
         :returns: True if all codes are unique and non-zero.
         """
         all_vals = list(itertools.chain(
+            self._enum_mapping.values(),
             self._card_mapping.values(),
             self._char_mapping.values(),
             self._mode_mapping.values(),
@@ -136,9 +143,9 @@ class EncodingPlan:
         return len(all_vals) == len(all_vals_set) and 0 not in all_vals_set
 
     @no_type_check
-    def code_for(
+    def encode_item(
             self,
-            item: GameItem | GameItemType,
+            item: GameItem | GameItemType | Enum,
     ) -> int:
         """
         :returns: the code for the given item.
@@ -150,43 +157,49 @@ class EncodingPlan:
         from ..status.status import Status
         from ..summon.summon import Summon
         from ..support.support import Support
-        if isinstance(item, Card):
-            item = type(item)
-        elif isinstance(item, Status):
-            item = type(item)
-        elif isinstance(item, Effect):
-            item = type(item)
-        elif isinstance(item, Character):
-            item = type(item)
-        elif isinstance(item, Summon):
-            item = type(item)
-        elif isinstance(item, Support):
-            item = type(item)
-        elif isinstance(item, Mode):
-            item = type(item)
-        assert issubclass(item, Card | Character | Effect | Mode | Status | Summon | Support)
-        if issubclass(item, Card):
-            item_category = Card
-        elif issubclass(item, Status):
-            item_category = Status
-        elif issubclass(item, Effect):
-            item_category = Effect
-        elif issubclass(item, Character):
-            item_category = Character
-        elif issubclass(item, Summon):
-            item_category = Summon
-        elif issubclass(item, Support):
-            item_category = Support
+        _og_item = item
+        if isinstance(item, Enum):
+            item_category = Enum
         else:
-            assert issubclass(item, Mode), f"Unknown item type: {item}"
-            item_category = Mode
+            if isinstance(item, Card):
+                item = type(item)
+            elif isinstance(item, Summon):
+                item = type(item)
+            elif isinstance(item, Support):
+                item = type(item)
+            elif isinstance(item, Status):
+                item = type(item)
+            elif isinstance(item, Effect):
+                item = type(item)
+            elif isinstance(item, Character):
+                item = type(item)
+            elif isinstance(item, Mode):
+                item = type(item)
+            assert issubclass(item, Card | Character | Effect | Mode | Status | Summon | Support)
+            if issubclass(item, Card):
+                item_category = Card
+            elif issubclass(item, Summon):
+                item_category = Summon
+            elif issubclass(item, Support):
+                item_category = Support
+            elif issubclass(item, Status):
+                item_category = Status
+            elif issubclass(item, Effect):
+                item_category = Effect
+            elif issubclass(item, Character):
+                item_category = Character
+            else:
+                assert issubclass(item, Mode), f"Unknown item type: {item}"
+                item_category = Mode
         mapping = cast(
             dict[GameItemType, int],
             self._TYPED_MAPPING[item_category],
         )
         if item not in mapping:
-            return -1
-            raise Exception(f"Item has no code: {item}")
+            # return -1
+            raise Exception(
+                f"Item has no code for {item} under category {item_category}; item was {_og_item}."
+            )
         else:
             return mapping[item]
 
@@ -227,6 +240,7 @@ class EncodingPlan:
         return self.ACTION_FULL_SIZE
 
 encoding_plan = EncodingPlan(
+    enum_mapping=ENUM_MAPPING,
     card_mapping=CARD_MAPPING,
     char_mapping=CHAR_MAPPING,
     effect_mapping=EFFECT_MAPPING,

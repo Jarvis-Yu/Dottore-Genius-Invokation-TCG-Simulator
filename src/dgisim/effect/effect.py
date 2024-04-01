@@ -162,7 +162,7 @@ class Effect:
             [self.__getattribute__(fld.name)]
             for fld in fields(self)
         ]))
-        ret_val = [encoding_plan.code_for(self)]
+        ret_val = [encoding_plan.encode_item(self)]
         for value in values:
             if isinstance(value, bool):
                 ret_val.append(1 if value else 0)
@@ -170,7 +170,7 @@ class Effect:
                 ret_val.append(value)
             elif isinstance(value, Enum):
                 assert isinstance(value.value, int)
-                ret_val.append(value.value)
+                ret_val.append(encoding_plan.encode_item(value))
             elif value is None:
                 ret_val.append(0)
             elif isinstance(value, StaticTarget):
@@ -184,9 +184,9 @@ class Effect:
             elif isinstance(value, ActualDice):
                 ret_val.extend(value.encoding(encoding_plan))
             elif issubclass(value, Card):
-                ret_val.append(encoding_plan.code_for(value))
+                ret_val.append(encoding_plan.encode_item(value))
             elif issubclass(value, Status):
-                ret_val.append(encoding_plan.code_for(value))
+                ret_val.append(encoding_plan.encode_item(value))
             else:
                 raise Exception(f"Unexpected Type {type(value)} of {self.__class__.__name__}")
         fillings = encoding_plan.EFFECT_FIXED_LEN - len(ret_val)

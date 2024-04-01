@@ -1151,7 +1151,7 @@ class VanaranaSupport(Support):
             [self.__getattribute__(field.name)]
             for field in fields(self)
         ]))
-        ret_val = [encoding_plan.code_for(self)]
+        ret_val = [encoding_plan.encode_item(self)]
         for value in values:
             if isinstance(value, bool):
                 ret_val.append(1 if value else 0)
@@ -1159,7 +1159,7 @@ class VanaranaSupport(Support):
                 ret_val.append(value)
             elif isinstance(value, Enum):
                 assert isinstance(value.value, int), value
-                ret_val.append(value.value)
+                ret_val.append(encoding_plan.encode_item(value))
             elif isinstance(value, ActualDice):
                 fill_up = self._CAPACITY
                 for elem in value.elems():

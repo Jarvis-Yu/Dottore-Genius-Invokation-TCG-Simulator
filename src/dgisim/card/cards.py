@@ -180,7 +180,7 @@ class Cards:
         for card, num in self._cards.items():
             if num == 0:
                 continue
-            ret_val.append((encoding_plan.code_for(card), num))
+            ret_val.append((encoding_plan.encode_item(card), num))
         ret_val.sort()
         fillings = encoding_plan.CARDS_FIXED_LEN - len(ret_val)
         if fillings < 0:

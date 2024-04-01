@@ -547,9 +547,9 @@ class Character:
         :returns: the encoding of this character.
         """
         basics = [
-            encoding_plan.code_for(self),
-            self._ELEMENT.value,
-            self._WEAPON_TYPE.value,
+            encoding_plan.encode_item(self),
+            encoding_plan.encode_item(self._ELEMENT),
+            encoding_plan.encode_item(self._WEAPON_TYPE),
             self._id,
             1 if self._alive else 0,
             self._hp,
@@ -559,7 +559,7 @@ class Character:
         ]
         return list(chain(
             basics,
-            self._aura.encoding(),
+            self._aura.encoding(encoding_plan),
             self._hiddens.encoding(encoding_plan, encoding_plan.CHAR_HIDDEN_FIXED_LEN),
             self._statuses.encoding(encoding_plan, encoding_plan.CHAR_STT_FIXED_LEN),
         ))

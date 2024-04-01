@@ -361,10 +361,10 @@ class GameState:
         Encode the game state into a list of integers.
         """
         basics = [
-            encoding_plan.code_for(self._mode),
-            self._mode.phase_code(self._phase),
+            encoding_plan.encode_item(self._mode),
+            encoding_plan.PHASE_BASE + self._mode.phase_code(self._phase),
             self._round,
-            self._active_player_id.value,
+            encoding_plan.encode_item(self._active_player_id),
         ]
         return list(chain(
             basics,

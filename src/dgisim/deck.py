@@ -99,7 +99,7 @@ class Deck(ABC):
         """ :returns: A list of integers representing the deck. """
         from .card.cards import Cards
         return list(chain(
-            [encoding_plan.code_for(char) for char in self.chars],
+            [encoding_plan.encode_item(char) for char in self.chars],
             [0] * (3 - len(self.chars)),
             Cards(self.cards).encoding(encoding_plan),
         ))

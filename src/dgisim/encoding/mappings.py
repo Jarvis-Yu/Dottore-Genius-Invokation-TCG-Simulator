@@ -2,13 +2,19 @@
 This file contains the mappings for the encoding of the game's objects.
 """
 # mypy: ignore-errors
+from enum import Enum
 from typing import TYPE_CHECKING
 
+from ..action.enums import ActionType
 from ..card import card
 from ..character import character as char
+from ..character.enums import CharacterSkill, CharacterSkillType, WeaponType, Faction
 from ..effect import effect
+from ..effect.enums import Zone, TriggeringSignal, DynamicCharacterTarget
+from ..element import Element
 from ..helper.hashable_dict import HashableDict
 from ..mode import Mode, DefaultMode, AllOmniMode
+from ..state.enums import Pid, Act
 from ..status import status
 from ..summon import summon
 from ..support import support
@@ -22,6 +28,7 @@ if TYPE_CHECKING:
     from ..support.support import Support
 
 __all__ = [
+    "ENUM_MAPPING",
     "CHAR_MAPPING",
     "CARD_MAPPING",
     "EFFECT_MAPPING",
@@ -30,6 +37,23 @@ __all__ = [
     "SUMM_MAPPING",
     "SUPP_MAPPING",
 ]
+
+ENUM_MAPPING: dict[Enum, int] = HashableDict({
+    e: 500 + i
+    for e, i in (
+        *[(v,   0 + v.value) for v in Element],  # 11
+        *[(v,  20 + v.value) for v in ActionType],  # 8
+        *[(v,  40 + v.value) for v in CharacterSkill],  # 4
+        *[(v,  50 + v.value) for v in CharacterSkillType],  # 3
+        *[(v,  60 + v.value) for v in WeaponType],  # 6
+        *[(v,  70 + v.value) for v in Faction],  # 11
+        *[(v, 100 + v.value) for v in Zone],  # 6
+        *[(v, 110 + v.value) for v in TriggeringSignal],  # 20
+        *[(v, 160 + v.value) for v in DynamicCharacterTarget],  # 17
+        *[(v, 190 + v.value) for v in Pid],  # 2
+        *[(v, 195 + v.value) for v in Act],  # 4
+    )
+})
 
 # min size: 700
 CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
@@ -391,8 +415,21 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
 
         #### 5 Special Card 1625 ####
         (card.OmniCard, 1625),
+        (card.EventCard, 1626),
+        (card.EquipmentCard, 1627),
+        (card.TalentCard, 1628),
+        (card.TalentEventCard, 1629),
+        (card.TalentEquipmentCard, 1630),
+        (card.WeaponEquipmentCard, 1631),
+        (card.ArtifactEquipmentCard, 1632),
+        (card.SupportCard, 1633),
+        (card.CompanionCard, 1634),
+        (card.ItemCard, 1635),
+        (card.LocationCard, 1636),
+        (card.ArcaneLegendCard, 1637),
+        (card.FoodCard, 1638),
 
-        #### End 1630 ####
+        #### End 1650 ####
     )
 })
 

@@ -175,7 +175,7 @@ class Dice:
         """
         ret_val: list[int] = []
         for elem in Element:
-            ret_val.extend((elem.value, self[elem]))
+            ret_val.extend((encoding_plan.encode_item(elem), self[elem]))
         return ret_val
 
     @classmethod
@@ -187,6 +187,7 @@ class Dice:
         for elem_code, num in zip(encoding[::2], encoding[1::2]):
             if num == 0:
                 continue
+            elem_code -= encoding_plan.encode_item(Element(0))
             if elem_code > len(Element):
                 return None
             elem = Element(elem_code)

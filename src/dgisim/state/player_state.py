@@ -243,7 +243,7 @@ class PlayerState:
         Encode the player state into a list of integers.
         """
         basics = [
-            self._phase.value,
+            encoding_plan.encode_item(self._phase),
             int(self._consec_action),
             self._card_redraw_chances,
             self._dice_reroll_chances,
