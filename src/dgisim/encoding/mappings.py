@@ -831,6 +831,7 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.FloralSidewinderStatus, 10600),
         (status.ColleiTalentStatus, 10601),
         (status.FloralSidewinderStatus, 10602),
+        (status.SproutStatus, 10603),
         ## JadeplumeTerrorshroom 10620 ##
         (status.ProliferatingSporesStatus, 10620),
         (status.RadicalVitalityHiddenStatus, 10621),
