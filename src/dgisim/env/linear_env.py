@@ -1,5 +1,7 @@
 from typing import Callable, Literal
 
+from typing_extensions import Self
+
 from ..action.action import PlayerAction
 from ..deck import Deck
 from ..encoding.encoding_plan import EncodingPlan, encoding_plan
@@ -191,3 +193,16 @@ class LinearEnv:
             turn,
             self._curr_state.game_end(),
         )
+
+    def copy(self) -> Self:
+        new_self = type(self)(
+            mode=self._mode,
+            encoding_plan=self._encoding_plan,
+            reward_method=self._reward_method,
+            invalid_action_penalty=self._invalid_action_penalty,
+        )
+        new_self._last_deck1 = self._last_deck1
+        new_self._last_deck2 = self._last_deck2
+        new_self._curr_state = self._curr_state
+        new_self._last_reset = self._last_reset
+        return new_self
