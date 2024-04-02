@@ -28,18 +28,23 @@ if TYPE_CHECKING:
     from ..support.support import Support
 
 __all__ = [
+    "MODE_MAPPING",
     "ENUM_MAPPING",
     "CHAR_MAPPING",
     "CARD_MAPPING",
     "EFFECT_MAPPING",
-    "MODE_MAPPING",
     "STT_MAPPING",
     "SUMM_MAPPING",
     "SUPP_MAPPING",
 ]
 
+MODE_MAPPING: dict[type["Mode"], int] = HashableDict({
+    DefaultMode: 501,
+    AllOmniMode: 502,
+})
+
 ENUM_MAPPING: dict[Enum, int] = HashableDict({
-    e: 500 + i
+    e: 600 + i
     for e, i in (
         *[(v,   0 + v.value) for v in Element],  # 11
         *[(v,  20 + v.value) for v in ActionType],  # 8
@@ -544,11 +549,6 @@ EFFECT_MAPPING: dict[type["Effect"], int] = HashableDict({
 
         #### End 400 ####
     )
-})
-
-MODE_MAPPING: dict[type["Mode"], int] = HashableDict({
-    DefaultMode: 501,
-    AllOmniMode: 502,
 })
 
 STT_MAPPING: dict[type["Status"], int] = HashableDict({

@@ -188,7 +188,7 @@ class LinearEnv:
 
         return (
             perspective_state,
-            perspective_state.encoding(encoding_plan),
+            perspective_state.encoding(self._encoding_plan),
             self._reward_method(self._curr_state),
             turn,
             self._curr_state.game_end(),
