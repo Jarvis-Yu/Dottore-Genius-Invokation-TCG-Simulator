@@ -356,22 +356,31 @@ class GameState:
             game_state = game_state.factory().effect_stack(EffectStack(())).build()
         return game_state
 
-    def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
+    def encoding(self, encoding_plan: EncodingPlan, perspective: Pid = Pid.P1) -> list[int]:
         """
         Encode the game state into a list of integers.
         """
+        encoding_plan = encoding_plan.perspective_version(perspective)
         basics = [
             encoding_plan.encode_item(self._mode),
             encoding_plan.PHASE_BASE + self._mode.phase_code(self._phase),
             self._round,
             encoding_plan.encode_item(self._active_player_id),
         ]
-        return list(chain(
-            basics,
-            self._player1.encoding(encoding_plan),
-            self._player2.encoding(encoding_plan),
-            self._effect_stack.encoding(encoding_plan),
-        ))
+        if perspective is Pid.P1:
+            return list(chain(
+                basics,
+                self._player1.encoding(encoding_plan),
+                self._player2.encoding(encoding_plan),
+                self._effect_stack.encoding(encoding_plan),
+            ))
+        else:
+            return list(chain(
+                basics,
+                self._player2.encoding(encoding_plan),
+                self._player1.encoding(encoding_plan),
+                self._effect_stack.encoding(encoding_plan),
+            ))
 
     def get_decks(self) -> tuple[Deck, Deck]:
         """

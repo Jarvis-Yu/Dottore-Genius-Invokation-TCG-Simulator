@@ -29,12 +29,15 @@ class LinearEnv:
             encoding_plan: EncodingPlan = encoding_plan,
             reward_method: Callable[[GameState], int | float] = real_reward,
             invalid_action_penalty: int | float = -0.1,
+            fix_perspective: bool = False,
     ):
         """
         :param mode: the mode of the game.
         :param encoding_plan: the encoding plan of the game.
         :param reward_method: the reward method of the game.
         :param invalid_action_penalty: the penalty for invalid action.
+        :param fix_perspective: if True, always present active character as P1 with fixed positions.
+                                (this affect only the encoded state)
         """
         self._mode = mode
         self._encoding_plan = encoding_plan
@@ -44,7 +47,11 @@ class LinearEnv:
         self._last_deck2: None | Deck = None
         self._curr_state: GameState
         self._last_reset: Callable[[], None] = self._reset_random
+        self._fix_perspective = fix_perspective
         self.reset()
+
+    def fix_perspective(self, fix_persepctive: bool) -> None:
+        self._fix_perspective = fix_persepctive
 
     def reset(self) -> None:
         """
@@ -96,12 +103,14 @@ class LinearEnv:
             case Pid.P1:
                 turn = 1
                 perspective_state = self._curr_state.prespective_view(Pid.P1)
+                perspective = Pid.P1
             case _:
                 turn = 2
                 perspective_state = self._curr_state.prespective_view(Pid.P2)
+                perspective = Pid.P2 if self._fix_perspective else Pid.P1
         return (
             perspective_state,
-            perspective_state.encoding(self._encoding_plan),
+            perspective_state.encoding(self._encoding_plan, perspective),
             0,
             turn,
             self._curr_state.game_end(),

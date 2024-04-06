@@ -1,7 +1,11 @@
+import copy
 import itertools
 from enum import Enum
 from typing import cast, no_type_check, TYPE_CHECKING, Union
 
+from typing_extensions import Self
+
+from ..state.enums import Pid
 from .mappings import *
 
 if TYPE_CHECKING:
@@ -27,6 +31,8 @@ GameItemType = type["Card"] | type["Character"] | type["Effect"] | type["Mode"] 
 
 
 class EncodingPlan:
+    _flip_cache: None | Self = None
+
     """
     This is the class for GameState encoding planning.
     It contains information on the codes for each type of item.
@@ -53,6 +59,7 @@ class EncodingPlan:
             supports_fixed_len: int = 4,
             effect_fixed_len: int = 25,
             effects_fixed_len: int = 40,
+            perspective: Pid = Pid.P1,
     ) -> None:
         """
         :param mode_mapping: a mapping from mode to code.
@@ -82,6 +89,7 @@ class EncodingPlan:
         self._status_mapping = status_mapping
         self._summon_mapping = summon_mapping
         self._support_mapping = support_mapping
+        self._perspective = perspective
         self.PHASE_BASE = phase_base
         self.CARDS_FIXED_LEN = cards_fixed_len
         self.STATUS_FIXED_LEN = status_fixed_len
@@ -94,6 +102,7 @@ class EncodingPlan:
         self.SUPPORTS_FIXED_LEN = supports_fixed_len
         self.EFFECT_FIXED_LEN = effect_fixed_len
         self.EFFECTS_FIXED_LEN = effects_fixed_len
+
         from ..element import Element
         self.ACTION_LOCAL_SIZE = 5 + self.CARDS_FIXED_LEN * 2
         self.ACTION_FULL_SIZE = (
@@ -160,6 +169,8 @@ class EncodingPlan:
         _og_item = item
         if isinstance(item, Enum):
             item_category = Enum
+            if self._perspective is Pid.P2 and isinstance(item, Pid):
+                item = item.other()
         else:
             if isinstance(item, Card):
                 item = type(item)
@@ -238,6 +249,15 @@ class EncodingPlan:
         :returns: the size of the vector of any encoded action.
         """
         return self.ACTION_FULL_SIZE
+
+    def perspective_version(self, pid: Pid) -> Self:
+        if self._perspective is pid:
+            return self
+        if self._flip_cache is None:
+            new_self = copy.copy(self)
+            new_self._perspective = pid
+            self._flip_cache = new_self
+        return self._flip_cache
 
 encoding_plan = EncodingPlan(
     enum_mapping=ENUM_MAPPING,

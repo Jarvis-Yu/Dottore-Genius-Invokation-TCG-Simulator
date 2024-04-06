@@ -146,7 +146,7 @@ class RandomAgent(PlayerAgent):
     def _card_select_phase(self, history: list[GameState], pid: Pid) -> PlayerAction:
         game_state = history[-1]
         act_gen = game_state.action_generator(pid)
-        assert act_gen is not None
+        assert act_gen is not None, f"{pid} in:\n{game_state}"
         player_action = self._random_action_generator_chooser(act_gen)
         return player_action
 
