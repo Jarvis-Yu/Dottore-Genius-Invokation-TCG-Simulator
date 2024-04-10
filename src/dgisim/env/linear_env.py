@@ -146,11 +146,11 @@ class LinearEnv:
             optional_action = PlayerAction.decoding(action, self._encoding_plan)
             if optional_action is None:
                 perspective_state = self._curr_state.prespective_view(
-                    Pid.P1 if turn == 1 else Pid.P2
+                    Pid(turn)
                 )
                 return (
                     perspective_state,
-                    perspective_state.encoding(self._encoding_plan),
+                    perspective_state.encoding(self._encoding_plan, Pid(turn)),
                     (
                         self._invalid_action_penalty
                         if turn == 1
@@ -167,10 +167,10 @@ class LinearEnv:
         try:
             state = self._curr_state.action_step(curr_player, action)
         except Exception as e:
-            perspective_state = self._curr_state.prespective_view(Pid.P1 if turn == 1 else Pid.P2)
+            perspective_state = self._curr_state.prespective_view(Pid(turn))
             return (
                 perspective_state,
-                perspective_state.encoding(self._encoding_plan),
+                perspective_state.encoding(self._encoding_plan, Pid(turn)),
                 (
                     self._invalid_action_penalty
                     if turn == 1
@@ -197,7 +197,7 @@ class LinearEnv:
 
         return (
             perspective_state,
-            perspective_state.encoding(self._encoding_plan),
+            perspective_state.encoding(self._encoding_plan, Pid.P2 if turn == 2 else Pid.P1),
             self._reward_method(self._curr_state),
             turn,
             self._curr_state.game_end(),

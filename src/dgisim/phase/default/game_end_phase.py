@@ -18,6 +18,9 @@ class GameEndPhase(ph.Phase):
     def step(self, game_state: GameState) -> GameState:
         raise Exception("Not Reached")
 
+    def waiting_for(self, game_state: ph.GameState) -> None | ph.Pid:
+        return None
+
     def step_action(self, game_state: GameState, pid: Pid, action: PlayerAction) -> None | GameState:
         raise Exception("Not Reached")
 
