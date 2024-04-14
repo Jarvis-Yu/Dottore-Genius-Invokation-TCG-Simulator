@@ -65,6 +65,15 @@ class EffectStack:
             return self
         return EffectStack(self._effects + effects[::-1])
 
+    def push_right(self, effects: Effect | Sequence[Effect]) -> EffectStack:
+        """
+        :returns: the new EffectStack with `effects` pushed onto it. The push follows FIFO, like a queue.
+        """
+        if isinstance(effects, Effect):
+            effects = (effects, )
+        effects = tuple(effects)
+        return EffectStack(effects + self._effects)
+
     def contains(self, effect_type: type[Effect]) -> bool:
         """
         :returns: `True` if there's an effect of the exact type of`effect_type`.

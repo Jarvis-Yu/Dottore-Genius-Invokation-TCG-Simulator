@@ -59,7 +59,10 @@ class GameState:
         active_player_id: Pid,
         player1: ps.PlayerState,
         player2: ps.PlayerState,
-        effect_stack: EffectStack
+        effect_stack: EffectStack,
+        common_effect_stack: EffectStack,
+        dmg_effect_stack: EffectStack,
+        lethal_dmg_effect_stack: EffectStack,
     ):
         """
         :param mode: game mode.
@@ -70,6 +73,9 @@ class GameState:
                         beginning of the game.
         :param player2: player 2, the opponent of `player1`.
         :param effect_stack: pending effects to be executed by the game.
+        :param common_effect_stack: common effects queued during effect-group execution.
+        :param dmg_effect_stack: pending damage effects to be executed by the game.
+        :param lethal_dmg_effect_stack: pending lethal damage effects to be executed by the game.
         """
         # REMINDER: don't forget to update factory when adding new fields
         self._mode = mode
@@ -79,6 +85,9 @@ class GameState:
         self._player1 = player1
         self._player2 = player2
         self._effect_stack = effect_stack
+        self._common_effect_stack = common_effect_stack
+        self._dmg_effect_stack = dmg_effect_stack
+        self._leathal_dmg_effect_stack = lethal_dmg_effect_stack
 
         # checkers
         self._card_checker = CardChecker(self)
@@ -100,6 +109,9 @@ class GameState:
             player1=ps.PlayerState.example_player(mode),
             player2=ps.PlayerState.example_player(mode),
             effect_stack=EffectStack(()),
+            common_effect_stack=EffectStack(()),
+            dmg_effect_stack=EffectStack(()),
+            lethal_dmg_effect_stack=EffectStack(()),
         )
 
     @classmethod
@@ -115,6 +127,9 @@ class GameState:
             player1=player1,
             player2=player2,
             effect_stack=EffectStack(()),
+            common_effect_stack=EffectStack(()),
+            dmg_effect_stack=EffectStack(()),
+            lethal_dmg_effect_stack=EffectStack(()),
         )
 
     @classmethod
@@ -136,6 +151,9 @@ class GameState:
             player1=ps.PlayerState.from_deck(mode, p1_deck),
             player2=ps.PlayerState.from_deck(mode, p2_deck),
             effect_stack=EffectStack(()),
+            common_effect_stack=EffectStack(()),
+            dmg_effect_stack=EffectStack(()),
+            lethal_dmg_effect_stack=EffectStack(()),
         )
 
     def factory(self) -> GameStateFactory:
@@ -166,6 +184,21 @@ class GameState:
     def effect_stack(self) -> EffectStack:
         """ :returns: the stack of pending effects to be executed. """
         return self._effect_stack
+
+    @property
+    def common_effect_stack(self) -> EffectStack:
+        """ :returns: the stack of pending common effects to be executed. """
+        return self._common_effect_stack
+
+    @property
+    def dmg_effect_stack(self) -> EffectStack:
+        """ :returns: the stack of pending dmg effects to be executed. """
+        return self._dmg_effect_stack
+    
+    @property
+    def lethal_dmg_effect_stack(self) -> EffectStack:
+        """ :returns: the stack of pending lethal dmg effects to be executed. """
+        return self._leathal_dmg_effect_stack
 
     @property
     def player1(self) -> ps.PlayerState:
@@ -441,6 +474,9 @@ class GameStateFactory:
         self._player1 = game_state.player1
         self._player2 = game_state.player2
         self._effect_stack = game_state.effect_stack
+        self._common_effect_stack = game_state.common_effect_stack
+        self._dmg_effect_stack = game_state.dmg_effect_stack
+        self._leathal_dmg_effect_stack = game_state.lethal_dmg_effect_stack
 
     def mode(self, new_mode: md.Mode) -> GameStateFactory:
         self._mode = new_mode
@@ -466,6 +502,24 @@ class GameStateFactory:
 
     def f_effect_stack(self, f: Callable[[EffectStack], EffectStack]) -> GameStateFactory:
         return self.effect_stack(f(self._effect_stack))
+
+    def common_effect_stack(self, common_effect_stack: EffectStack) -> GameStateFactory:
+        self._common_effect_stack = common_effect_stack
+        return self
+    
+    def f_common_effect_stack(self, f: Callable[[EffectStack], EffectStack]) -> GameStateFactory:
+        return self.common_effect_stack(f(self._common_effect_stack))
+    
+    def dmg_effect_stack(self, dmg_effect_stack: EffectStack) -> GameStateFactory:
+        self._dmg_effect_stack = dmg_effect_stack
+        return self
+    
+    def f_dmg_effect_stack(self, f: Callable[[EffectStack], EffectStack]) -> GameStateFactory:
+        return self.dmg_effect_stack(f(self._dmg_effect_stack))
+    
+    def lethal_dmg_effect_stack(self, lethal_dmg_effect_stack: EffectStack) -> GameStateFactory:
+        self._leathal_dmg_effect_stack = lethal_dmg_effect_stack
+        return self
 
     def active_player_id(self, pid: Pid) -> GameStateFactory:
         self._active_player = pid
@@ -524,6 +578,9 @@ class GameStateFactory:
             round=self._round,
             active_player_id=self._active_player,
             effect_stack=self._effect_stack,
+            common_effect_stack=self._common_effect_stack,
+            dmg_effect_stack=self._dmg_effect_stack,
+            lethal_dmg_effect_stack=self._leathal_dmg_effect_stack,
             player1=self._player1,
             player2=self._player2,
         )
