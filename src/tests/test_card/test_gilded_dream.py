@@ -26,8 +26,7 @@ class TestGildedDreams(unittest.TestCase):
         ))
         dice_after = game_state.player1.dice
         dice_diff = dice_after - dice_before
-        self.assertEqual(dice_diff[Element.ANEMO], 1)
-        self.assertEqual(dice_diff[Element.OMNI], 1)
+        self.assertEqual(dice_diff[Element.ANEMO], 2)
 
         # test less dice generated for team with < 3 elements
         game_state = replace_character(game_state, Pid.P1, Venti, 3)
@@ -42,7 +41,6 @@ class TestGildedDreams(unittest.TestCase):
         dice_after = game_state.player1.dice
         dice_diff = dice_after - dice_before
         self.assertEqual(dice_diff[Element.ANEMO], 1)
-        self.assertEqual(dice_diff[Element.OMNI], 0)
 
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=GildedDreams,

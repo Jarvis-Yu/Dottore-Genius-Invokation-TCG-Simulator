@@ -24,7 +24,7 @@ class TestKnightsOfFavoniusLibrary(unittest.TestCase):
         a1.inject_actions([
             CardAction(
                 card=KnightsOfFavoniusLibrary,
-                instruction=DiceOnlyInstruction(dice=ActualDice({Element.ANEMO: 1})),
+                instruction=DiceOnlyInstruction(dice=ActualDice.from_empty()),
             ),
             DiceSelectAction(
                 selected_dice=ActualDice({}),
@@ -34,14 +34,14 @@ class TestKnightsOfFavoniusLibrary(unittest.TestCase):
         a2.inject_actions([
             CardAction(
                 card=KnightsOfFavoniusLibrary,
-                instruction=DiceOnlyInstruction(dice=ActualDice({Element.PYRO: 1})),
+                instruction=DiceOnlyInstruction(dice=ActualDice.from_empty()),
             ),
             DiceSelectAction(
                 selected_dice=ActualDice({}),
             ),
             CardAction(
                 card=KnightsOfFavoniusLibrary,
-                instruction=DiceOnlyInstruction(dice=ActualDice({Element.ELECTRO: 1})),
+                instruction=DiceOnlyInstruction(dice=ActualDice.from_empty()),
             ),
             DiceSelectAction(
                 selected_dice=ActualDice({Element.GEO: 2}),

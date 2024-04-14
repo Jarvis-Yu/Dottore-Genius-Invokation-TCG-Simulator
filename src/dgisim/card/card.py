@@ -1994,7 +1994,7 @@ class GeneralsAncientHelm(ArtifactEquipmentCard):
 
 
 class GildedDreams(ArtifactEquipmentCard):
-    _DICE_COST = AbstractDice({Element.ANY: 3})
+    _DICE_COST = AbstractDice({Element.OMNI: 3})
     ARTIFACT_STATUS = stt.GildedDreamsStatus
 
     @override
@@ -2008,22 +2008,14 @@ class GildedDreams(ArtifactEquipmentCard):
         assert isinstance(instruction, act.StaticTargetInstruction)
         attached_char = game_state.get_character_target(instruction.target)
         assert attached_char is not None
+        team_elems = game_state.get_player(instruction.target.pid).characters.all_elems()
         effects: list[eft.Effect] = [
             eft.AddDiceEffect(
                 pid=instruction.target.pid,
                 element=attached_char.ELEMENT,
-                num=1,
+                num=1 if len(team_elems) < 3 else 2,
             ),
         ]
-        team_elems = game_state.get_player(instruction.target.pid).characters.all_elems()
-        if len(team_elems) >= 3:
-            effects.append(
-                eft.AddDiceEffect(
-                    pid=instruction.target.pid,
-                    element=Element.OMNI,
-                    num=1,
-                ),
-            )
         return tuple(effects)
 
 
@@ -3772,7 +3764,7 @@ class TreasureSeekingSeelie(ItemCard):
 
 
 class KnightsOfFavoniusLibrary(LocationCard):
-    _DICE_COST = AbstractDice({Element.OMNI: 1})
+    _DICE_COST = AbstractDice.from_empty()
     _SUPPORT_STATUS = sp.KnightsOfFavoniusLibrarySupport
 
     @classmethod
