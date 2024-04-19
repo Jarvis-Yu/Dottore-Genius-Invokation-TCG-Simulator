@@ -80,7 +80,6 @@ __all__ = [
     # Checker Effect
     "AliveMarkCheckerEffect",  # mark dead characters defeated and revive the revivables
     "DefeatedMarkCheckerEffect",
-    "SwapCharacterCheckerEffect",  # detect on swap
     "DeathCheckCheckerEffect",  # detect death swap
     "DefeatedCheckerEffect",
 
@@ -729,40 +728,6 @@ class DefeatedMarkCheckerEffect(CheckerEffect):
                         ),
                     )
         return game_state
-
-
-@dataclass(frozen=True, repr=False)
-class SwapCharacterCheckerEffect(CheckerEffect):
-    my_active: StaticTarget
-    oppo_active: StaticTarget
-
-    def execute(self, game_state: GameState) -> GameState:
-        my_ac_id = game_state.get_player(self.my_active.pid).just_get_active_character().id
-        oppo_ac_id = game_state.get_player(
-            self.oppo_active.pid).just_get_active_character().id
-        my_pid = self.my_active.pid
-        effects: list[Effect] = []
-        if my_ac_id != self.my_active.id:  # pragma: no cover
-            effects += [
-                PlayerStatusTriggererEffect(
-                    pid=my_pid,
-                    self_signal=TriggeringSignal.SELF_SWAP,
-                    other_signal=TriggeringSignal.OPPO_SWAP,
-                ),
-            ]
-        if oppo_ac_id != self.oppo_active.id:
-            effects += [
-                PlayerStatusTriggererEffect(
-                    pid=my_pid,
-                    self_signal=TriggeringSignal.OPPO_SWAP,
-                    other_signal=TriggeringSignal.SELF_SWAP,
-                ),
-            ]
-        if not effects:
-            return game_state
-        return game_state.factory().f_effect_stack(
-            lambda es: es.push_many_fl(effects)
-        ).build()
 
 
 @dataclass(frozen=True, repr=False)

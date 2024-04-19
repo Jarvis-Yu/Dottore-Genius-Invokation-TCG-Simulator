@@ -4927,7 +4927,8 @@ class KamisatoArtSenhoStatus(CharacterHiddenStatus):
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.SELF_SWAP:
-            if StaticTarget.from_player_active(game_state, source.pid) == source:
+            assert isinstance(detail, SwapIEvent), f"{game_state}"
+            if detail.target == source:
                 source_char = game_state.get_character_target(source)
                 assert source_char is not None
                 effects: list[eft.Effect] = []

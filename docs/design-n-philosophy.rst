@@ -238,24 +238,16 @@ So after ``CastSkillEffect`` is executed, the ``effect_stack`` looks like this:
     3. BroadCastSkillInfoEffect
        - source: {pid: P1, zone: Characters, character_id: 1}
        - skill: ElementalSkill1
-    4. SwapCharacterCheckerEffect
-       - my_active: {pid: P1, zone: Characters, character_id: 1}
-       - oppo_active: {pid: P2, zone: Characters, character_id: 1}
-    5. DeathCheckCheckerEffect
-    6. AllStatusTriggererEffect
+    4. DeathCheckCheckerEffect
+    5. AllStatusTriggererEffect
        - pid: P1
        - signal: CombatAction
-    7. TurnEndEffect
+    6. TurnEndEffect
 
 The first two effects should be somewhat obvious.
 
 ``BroadCastSkillInfoEffect`` notifies all statuses that some event has happened,
 some statuses may save the notification inside themselves for later use.
-
-``SwapCharacterCheckerEffect`` checks if the active character of any player have been changed.
-If so, some more subsequent effects are added to handle the character swap.
-I'm not going into details here. Spoiler: this effect can handle Kaeya's burst with
-the reaction Overloaded well.
 
 ``DeathCheckCheckerEffect`` checks if the active character of any player is dead.
 If so, some effects are added to handle the 'inserted' death swap.

@@ -58,22 +58,6 @@ def standard_post_effects(
         es.append(eft.AliveMarkCheckerEffect())
         es.append(eft.DefeatedCheckerEffect())
     es.append(eft.EffectsGroupEndEffect())
-    # if has_swap or has_damage:
-    #     es.append(
-    #         eft.SwapCharacterCheckerEffect(
-    #             my_active=StaticTarget(
-    #                 pid=priorized_pid,
-    #                 zone=Zone.CHARACTERS,
-    #                 id=game_state.get_player(priorized_pid).just_get_active_character().id,
-    #             ),
-    #             oppo_active=StaticTarget(
-    #                 pid=priorized_pid.other(),
-    #                 zone=Zone.CHARACTERS,
-    #                 id=game_state.get_player(
-    #                     priorized_pid.other()).just_get_active_character().id,
-    #             ),
-    #         )
-    #     )
     if has_damage:
         es.append(eft.AllStatusTriggererEffect(
             pid=priorized_pid,

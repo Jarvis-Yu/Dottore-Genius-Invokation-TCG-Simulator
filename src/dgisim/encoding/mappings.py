@@ -454,9 +454,8 @@ EFFECT_MAPPING: dict[type["Effect"], int] = HashableDict({
         #### 1 Checker Effect 050 ####
         (effect.AliveMarkCheckerEffect, 50),
         (effect.DefeatedMarkCheckerEffect, 51),
-        (effect.SwapCharacterCheckerEffect, 52),
-        (effect.DeathCheckCheckerEffect, 53),
-        (effect.DefeatedCheckerEffect, 54),
+        (effect.DeathCheckCheckerEffect, 52),
+        (effect.DefeatedCheckerEffect, 53),
 
         #### 2 Triggerrable Effect 075 ####
         #### 2.1 Triggerer Effect 075 ####
