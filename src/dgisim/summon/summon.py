@@ -114,15 +114,16 @@ class _DestoryOnEndNumSummon(Summon):
             new_status: Optional[Self],
             source: StaticTarget,
             signal: TriggeringSignal,
+            detail: None | InformableEvent,
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         if new_status is None:
-            return super()._post_react_to_signal(game_state, effects, new_status, source, signal)
+            return super()._post_react_to_signal(game_state, effects, new_status, source, signal, detail)
 
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT \
                 and self.usages + new_status.usages <= 0:
-            return super()._post_react_to_signal(game_state, effects, None, source, signal)
+            return super()._post_react_to_signal(game_state, effects, None, source, signal, detail)
 
-        return super()._post_react_to_signal(game_state, effects, new_status, source, signal)
+        return super()._post_react_to_signal(game_state, effects, new_status, source, signal, detail)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -136,10 +137,8 @@ class _DmgPerRoundSummon(_DestroyOnNumSummon):
     ))
 
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         es: list[eft.Effect] = []
         d_usages = 0
@@ -165,10 +164,8 @@ class _TeamDmgPerRoundSummon(_DmgPerRoundSummon):
     OFF_FIELD_DMG: ClassVar[int]
 
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         es: list[eft.Effect] = []
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
@@ -181,7 +178,7 @@ class _TeamDmgPerRoundSummon(_DmgPerRoundSummon):
                     damage_type=DamageType(summon=True),
                 )
             )
-        super_es, new_self = super()._react_to_signal(game_state, source, signal)
+        super_es, new_self = super()._react_to_signal(game_state, source, signal, detail)
         return es + super_es, new_self
 
 
@@ -229,10 +226,8 @@ class _ConvertableAnemoSummon(_DestroyOnNumSummon):
         return self
 
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         es: list[eft.Effect] = []
         new_self = self
@@ -341,10 +336,8 @@ class BakeKurageSummon(_DestroyOnNumSummon):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         # if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
         #     return [], replace(self, usages=self.MAX_USAGES, activated=False)
@@ -422,12 +415,10 @@ class ChainsOfWardingThunderSummon(_DmgPerRoundSummon):
         return super()._preprocess(game_state, status_source, item, signal)
 
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], Optional[Self]]:
-        es, new_self = super()._react_to_signal(game_state, source, signal)
+        es, new_self = super()._react_to_signal(game_state, source, signal, detail)
         if new_self is None:
             return es, None
         if signal is TriggeringSignal.ROUND_END \
@@ -503,10 +494,8 @@ class DandelionFieldSummon(_DestroyOnNumSummon):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             return [
@@ -534,12 +523,10 @@ class DrunkenMistSummon(_DmgPerRoundSummon):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        es, new_self = super()._react_to_signal(game_state, source, signal)
+        es, new_self = super()._react_to_signal(game_state, source, signal, detail)
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             es.append(
                 eft.RecoverHPEffect(
@@ -627,12 +614,10 @@ class FierySanctumFieldSummon(_DmgPerRoundSummon, stt._ShieldStatus):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        es, new_self = super()._react_to_signal(game_state, source, signal)
+        es, new_self = super()._react_to_signal(game_state, source, signal, detail)
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT and new_self is not None:
             new_self = replace(new_self, shield_usages=1)
         elif signal is TriggeringSignal.POST_DMG and self.activated:
@@ -702,10 +687,8 @@ class HeraldOfFrostSummon(_DmgPerRoundSummon):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
             self_alive_chars = game_state.get_player(
@@ -725,7 +708,7 @@ class HeraldOfFrostSummon(_DmgPerRoundSummon):
                     recovery=self.HEAL_AMOUNT,
                 )
             ], replace(self, usages=0, activated=False)
-        return super()._react_to_signal(game_state, source, signal)
+        return super()._react_to_signal(game_state, source, signal, detail)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -780,7 +763,8 @@ class LightfallSwordSummon(Summon, stt._UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.skill_used is not None:
             assert self.skill_source_id is not None
@@ -831,7 +815,8 @@ class OceanicMimicFrogSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         es: list[eft.Effect] = []
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT \
@@ -901,10 +886,8 @@ class OzSummon(_DmgPerRoundSummon):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
             return [
@@ -916,7 +899,7 @@ class OzSummon(_DmgPerRoundSummon):
                     damage_type=DamageType(summon=True),
                 ),
             ], replace(self, usages=-1, activated=False)
-        return super()._react_to_signal(game_state, source, signal)
+        return super()._react_to_signal(game_state, source, signal, detail)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -932,10 +915,8 @@ class ReflectionSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         es: list[eft.Effect] = []
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
@@ -976,10 +957,8 @@ class SesshouSakuraSummon(_DestroyOnNumSummon):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         es: list[eft.Effect] = []
         d_usages = 0
@@ -1044,10 +1023,8 @@ class _ShadowswordBaseSummon(_DmgPerRoundSummon):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
             return [
@@ -1059,7 +1036,7 @@ class _ShadowswordBaseSummon(_DmgPerRoundSummon):
                     damage_type=DamageType(summon=True),
                 ),
             ], replace(self, usages=0, activated=False)
-        return super()._react_to_signal(game_state, source, signal)
+        return super()._react_to_signal(game_state, source, signal, detail)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1129,14 +1106,12 @@ class SolarIsotomaSummon(_DmgPerRoundSummon):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END and self.passive_usages < self.DEFAULT_PASSIVE_USAGES:
             return [], replace(self, usages=0, passive_usages=self.DEFAULT_PASSIVE_USAGES)
-        return super()._react_to_signal(game_state, source, signal)
+        return super()._react_to_signal(game_state, source, signal, detail)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1146,12 +1121,10 @@ class StormEyeSummon(_ConvertableAnemoSummon):
     DMG: ClassVar[int] = 2
 
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], Optional[Self]]:
-        es, new_self = super()._react_to_signal(game_state, source, signal)
+        es, new_self = super()._react_to_signal(game_state, source, signal, detail)
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             oppo_active_char_id = game_state.get_player(
                 source.pid.other()
@@ -1208,12 +1181,10 @@ class _TenguJuuraiSummon(_DmgPerRoundSummon):
     ELEMENT: ClassVar[Element] = Element.ELECTRO
 
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        es, new_self = super()._react_to_signal(game_state, source, signal)
+        es, new_self = super()._react_to_signal(game_state, source, signal, detail)
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             es.append(
                 eft.RelativeAddCharacterStatusEffect(
@@ -1273,10 +1244,8 @@ class UshiSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             return [

@@ -139,7 +139,8 @@ class ChangTheNinthSupport(Support, stt._UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION:
             d_usages = 1 if self.activated else 0
@@ -191,7 +192,8 @@ class ChefMaoSupport(Support, stt._UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.POST_CARD and self.triggered:
             from ..card.card import FoodCard
@@ -253,7 +255,8 @@ class DunyarzadSupport(Support, stt._UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.POST_CARD and self.can_draw:
             from ..card.card import CompanionCard
@@ -301,7 +304,8 @@ class JehtSupport(Support, stt._UsageLivingStatus):
     
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.triggered:
             if self.usages >= 5:
@@ -328,7 +332,8 @@ class LibenSupport(Support, stt._UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             this_player = game_state.get_player(source.pid)
@@ -380,7 +385,8 @@ class LiuSuSupport(Support, stt._UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.SELF_SWAP and self.activated:
             active_char = game_state.get_player(source.pid).get_active_character()
@@ -438,7 +444,8 @@ class MamereSupport(Support, stt._UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.POST_CARD and self.triggered:
             from random import choice
@@ -503,7 +510,8 @@ class MasterZhangSupport(Support, stt._UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
             return [], replace(self, usages=self.MAX_USAGES)
@@ -522,7 +530,8 @@ class PaimonSupport(Support, stt._UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_START:
             return [
@@ -565,7 +574,8 @@ class RanaSupport(Support, stt._UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.triggered:
             next_char = game_state.get_player(
@@ -594,7 +604,8 @@ class SetariaSupport(Support, stt._UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.POST_ANY:
             hand_cards = game_state.get_player(source.pid).hand_cards
@@ -647,7 +658,8 @@ class TimaeusSupport(Support, stt._UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], replace(self, usages=1, used=False)
@@ -697,7 +709,8 @@ class WagnerSupport(Support, stt._UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], replace(self, usages=1, used=False)
@@ -741,7 +754,8 @@ class XudongSupport(Support):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], type(self)(sid=self.sid)
@@ -794,7 +808,8 @@ class YayoiNanatsukiSupport(Support, stt._UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
             return [], replace(self, usages=self.MAX_USAGES)
@@ -837,7 +852,8 @@ class NRESupport(Support, stt._UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         from ..card.card import FoodCard
         if signal is TriggeringSignal.POST_CARD and self.activated:
@@ -886,7 +902,8 @@ class ParametricTransformerSupport(Support, stt._UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION:
             d_usages = 1 if self.activated else 0
@@ -934,7 +951,8 @@ class TreasureSeekingSeelieSupport(Support, stt._UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.triggered:
             if self.usages + 1 == self.MAX_USAGES:
@@ -977,7 +995,8 @@ class LiyueHarborWharfSupport(Support, stt._UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             assert self.usages > 0
@@ -1057,7 +1076,8 @@ class TenshukakuSupport(Support):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_START:
             this_player_dice = game_state.get_player(source.pid).dice
@@ -1088,7 +1108,8 @@ class VanaranaSupport(Support):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             this_player = game_state.get_player(source.pid)

@@ -64,6 +64,7 @@ class _TempTestInfiniteRevivalStatus(CharacterHiddenStatus, RevivalStatus):
             effects: list[Effect],
             source: StaticTarget,
             signal: TriggeringSignal,
+            detail: None | InformableEvent,
     ) -> list[Effect]:
         if signal is TriggeringSignal.TRIGGER_REVIVAL:
             effects.append(
@@ -85,7 +86,7 @@ class _TempTestStatus(CharacterStatus):
     ))
 
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal, detail: None | InformableEvent
     ) -> tuple[list[Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION:
             return [

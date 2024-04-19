@@ -340,7 +340,7 @@ class TriggerStatusEffect(TriggerrbleEffect):
         status = statuses.find(self.status)
         if status is None:
             return []
-        effects = status.react_to_signal(game_state, self.target, self.signal)
+        effects = status.react_to_signal(game_state, self.target, self.signal, self.detail)
         return effects
 
     def execute(self, game_state: GameState) -> GameState:
@@ -373,6 +373,7 @@ class TriggerHiddenStatusEffect(TriggerrbleEffect):
                 id=-1,
             ),
             self.signal,
+            self.detail,
         )
 
     def execute(self, game_state: GameState) -> GameState:
@@ -405,6 +406,7 @@ class TriggerCombatStatusEffect(TriggerrbleEffect):
                 id=-1,
             ),
             self.signal,
+            self.detail,
         )
 
     def execute(self, game_state: GameState) -> GameState:
@@ -437,6 +439,7 @@ class TriggerSummonEffect(TriggerrbleEffect):
                 id=-1,
             ),
             self.signal,
+            self.detail,
         )
 
     def execute(self, game_state: GameState) -> GameState:
@@ -470,6 +473,7 @@ class TriggerSupportEffect(TriggerrbleEffect):
                 id=self.sid,
             ),
             self.signal,
+            self.detail,
         )
 
     def execute(self, game_state: GameState) -> GameState:

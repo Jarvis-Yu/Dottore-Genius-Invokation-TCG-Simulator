@@ -448,6 +448,7 @@ class Status:
             game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal,
+            detail: None | InformableEvent = None,
             silent: bool = False,  # ignore post checkers if True
     ) -> list[eft.Effect]:
         """
@@ -458,8 +459,8 @@ class Status:
 
         :returns: a list of effects generated.
         """
-        es, new_status = self._react_to_signal(game_state, source, signal)
-        es, new_status = self._post_react_to_signal(game_state, es, new_status, source, signal)
+        es, new_status = self._react_to_signal(game_state, source, signal, detail)
+        es, new_status = self._post_react_to_signal(game_state, es, new_status, source, signal, detail)
 
         from ..summon import summon as sm
         from ..support import support as sp
@@ -534,7 +535,7 @@ class Status:
         else:  # pragma: no cover
             raise NotImplementedError
 
-        es = self._post_update_react_to_signal(game_state, es, source, signal)
+        es = self._post_update_react_to_signal(game_state, es, source, signal, detail)
 
         if silent:
             return es
@@ -562,6 +563,7 @@ class Status:
             effects: list[eft.Effect],
             source: StaticTarget,
             signal: TriggeringSignal,
+            detail: None | InformableEvent,
     ) -> list[eft.Effect]:
         return effects
 
@@ -572,11 +574,13 @@ class Status:
             new_status: None | Self,
             source: StaticTarget,
             signal: TriggeringSignal,
+            detail: None | InformableEvent,
     ) -> tuple[list[eft.Effect], None | Self]:
         return effects, case_val(new_status == self, self, new_status)
 
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         """
         Returns a tuple, containg the effects and how to update self
@@ -1036,7 +1040,8 @@ class _InfusionStatus(_UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         d_usages = 0
         if signal is TriggeringSignal.ROUND_END:
@@ -1075,7 +1080,8 @@ class _SkillCostReductionStatus(Status):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -1101,7 +1107,8 @@ class ChargedAttackStatus(PlayerHiddenStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.can_charge:
             return [], replace(self, can_charge=False)
@@ -1134,7 +1141,8 @@ class PlungeAttackStatus(PlayerHiddenStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.can_plunge:
             return [], replace(self, can_plunge=False)
@@ -1174,10 +1182,8 @@ class DeathThisRoundStatus(PlayerHiddenStatus):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             if self.activated:
@@ -1224,10 +1230,8 @@ class _SacrificialWeaponStatus(WeaponEquipmentStatus, _UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION:
             if self.activated:
@@ -1310,7 +1314,8 @@ class AmosBowStatus(WeaponEquipmentStatus, _UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
             return [], replace(self, usages=self.MAX_USAGES)
@@ -1349,7 +1354,8 @@ class ElegyForTheEndStatus(WeaponEquipmentStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
             return [
@@ -1437,7 +1443,8 @@ class AThousandFloatingDreamsStatus(WeaponEquipmentStatus, _UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
             return [], replace(self, usages=self.MAX_USAGES)
@@ -1523,7 +1530,8 @@ class TheBellStatus(WeaponEquipmentStatus, _UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
             return [
@@ -1595,7 +1603,8 @@ class EngulfingLightningStatus(WeaponEquipmentStatus, _UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if (
                 (
@@ -1722,7 +1731,8 @@ class AquilaFavoniaStatus(WeaponEquipmentStatus, _UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
             if self._target_is_self_active(game_state, source, source):
@@ -1777,7 +1787,8 @@ class FavoniusSwordStatus(WeaponEquipmentStatus, _UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
             attached_char = game_state.get_character_target(source)
@@ -1869,7 +1880,8 @@ class _ElementalDiscountStatus(ArtifactEquipmentStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END and not self.available:
             return [], replace(self, available=True)
@@ -1999,10 +2011,8 @@ class FlowingRingsStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
             assert self.usages > 0
@@ -2054,10 +2064,8 @@ class GamblersEarringsStatus(ArtifactEquipmentStatus):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.DEATH_EVENT:
             if self.triggerable():
@@ -2092,7 +2100,8 @@ class GeneralsAncientHelmStatus(ArtifactEquipmentStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_START:
             return [
@@ -2134,7 +2143,8 @@ class _ShadowOfTheSandKingLikeStatus(ArtifactEquipmentStatus, _UsageLivingStatus
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.POST_DMG and self.triggered:
             return [
@@ -2188,7 +2198,8 @@ class _HeartOfKhvarenasBrillianceLikeStatus(ArtifactEquipmentStatus, _UsageLivin
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.POST_DMG and self.triggered:
             if not self._target_is_self_active(game_state, source, source):
@@ -2256,7 +2267,8 @@ class InstructorsCapStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
             this_char = game_state.get_character_target(source)
@@ -2342,7 +2354,8 @@ class TenacityOfTheMillelithStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.POST_DMG and self.activated:
             if not self._target_is_self_active(game_state, source, source):
@@ -2422,7 +2435,8 @@ class VourukashasGlowStatus(_HeartOfKhvarenasBrillianceLikeStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT and self.usages < self.MAX_USAGES:
             return [
@@ -2431,7 +2445,7 @@ class VourukashasGlowStatus(_HeartOfKhvarenasBrillianceLikeStatus):
                     recovery=1,
                 ),
             ], self
-        return super()._react_to_signal(game_state, source, signal)
+        return super()._react_to_signal(game_state, source, signal, detail)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -2485,7 +2499,8 @@ class AncientCourtyardStatus(CombatStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -2632,7 +2647,8 @@ class ElementalResonanceEnduringRockStatus(CombatStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION:
             if not self.activated:
@@ -2686,7 +2702,8 @@ class ElementalResonanceFerventFlamesStatus(CombatStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -2720,7 +2737,8 @@ class ElementalResonanceShatteringIceStatus(CombatStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -2756,7 +2774,8 @@ class ElementalResonanceSprawlingGreeneryStatus(CombatStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -2771,7 +2790,8 @@ class IHaventLostYetOnCooldownStatus(CombatStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -2824,7 +2844,8 @@ class LyresongStatus(CombatStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -2858,7 +2879,8 @@ class MillennialMovementFarewellSongStatus(CombatStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], replace(self, usages=-1)
@@ -2894,7 +2916,8 @@ class PassingOfJudgmentStatus(CombatStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -2915,7 +2938,8 @@ class ReviveOnCooldownStatus(CombatStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -2948,10 +2972,8 @@ class FreshWindOfFreedomStatus(CombatStatus):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.DEATH_EVENT:
             if self.activated:
@@ -2969,7 +2991,8 @@ class StoneAndContractsStatus(CombatStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_START:
             return [
@@ -3013,7 +3036,8 @@ class SunyataFlowerStatus(CombatStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -3053,7 +3077,8 @@ class TheBoarPrincessStatus(CombatStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if (
                 (
@@ -3102,7 +3127,8 @@ class WhenTheCraneReturnedStatus(CombatStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.triggered:
             return [
@@ -3139,7 +3165,8 @@ class WhereIsTheUnseenRazorStatus(CombatStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -3170,7 +3197,8 @@ class WindAndFreedomStatus(CombatStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.triggered:
             return [
@@ -3211,7 +3239,8 @@ class AdeptusTemptationStatus(CharacterStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -3229,7 +3258,8 @@ class ButterCrabStatus(CharacterStatus, StackedShieldStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -3265,7 +3295,8 @@ class FrozenStatus(CharacterStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -3300,7 +3331,8 @@ class HeavyStrikeStatus(CharacterStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -3333,7 +3365,8 @@ class JueyunGuobaStatus(CharacterStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -3364,10 +3397,8 @@ class LotusFlowerCrispStatus(CharacterStatus, FixedShieldStatus):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         d_usages = 0
         if signal is TriggeringSignal.ROUND_END:
@@ -3406,7 +3437,8 @@ class MintyMeatRollsStatus(CharacterStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         d_usages = 0
         if signal is TriggeringSignal.ROUND_END:
@@ -3433,7 +3465,8 @@ class MushroomPizzaStatus(CharacterStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         es: list[eft.Effect] = []
         d_usages = 0
@@ -3479,7 +3512,8 @@ class NorthernSmokedChickenStatus(CharacterStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -3494,7 +3528,8 @@ class SatiatedStatus(CharacterStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -3529,7 +3564,8 @@ class TandooriRoastChickenStatus(CharacterStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -3547,7 +3583,8 @@ class UnmovableMountainStatus(CharacterStatus, StackedShieldStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -3615,7 +3652,8 @@ class AratakiIchibanStatus(TalentEquipmentStatus, _UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], replace(self, usages=-self.usages)
@@ -3665,7 +3703,8 @@ class RagingOniKingStatus(CharacterStatus, _InfusionStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], replace(self, usages=-1)
@@ -3808,7 +3847,8 @@ class _InspirationFieldStatus(CombatStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
             assert self.target_char_id is not None
@@ -3927,10 +3967,8 @@ class ColleiTalentStatus(CharacterHiddenStatus):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END and self.elemental_skill_used:
             return [], replace(self, elemental_skill_used=False)
@@ -3979,10 +4017,8 @@ class SproutStatus(CombatStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
             return [
@@ -4014,7 +4050,8 @@ class IncinerationDriveStatus(CharacterStatus, PrepareSkillStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ACT_PRE_SKILL:
             return [
@@ -4048,7 +4085,8 @@ class StalwartAndTrueStatus(TalentEquipmentStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             this_char = game_state.get_character_target(source)
@@ -4098,7 +4136,8 @@ class ElectroCrystalCoreHiddenStatus(CharacterHiddenStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.INIT_GAME_START:
             return [
@@ -4123,7 +4162,8 @@ class ElectroCrystalCoreStatus(CharacterStatus, RevivalStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.TRIGGER_REVIVAL:
             character = game_state.get_character_target(source)
@@ -4139,6 +4179,7 @@ class ElectroCrystalCoreStatus(CharacterStatus, RevivalStatus):
             effects: list[eft.Effect],
             source: StaticTarget,
             signal: TriggeringSignal,
+            detail: None | InformableEvent,
     ) -> list[eft.Effect]:
         if signal is TriggeringSignal.TRIGGER_REVIVAL:
             effects.append(
@@ -4161,7 +4202,8 @@ class RockPaperScissorsComboPaperStatus(CharacterStatus, PrepareSkillStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ACT_PRE_SKILL:
             return [
@@ -4193,7 +4235,8 @@ class RockPaperScissorsComboScissorsStatus(CharacterStatus, PrepareSkillStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ACT_PRE_SKILL:
             return [
@@ -4248,7 +4291,8 @@ class GrimheartStatus(CharacterStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
             return [], None
@@ -4281,7 +4325,8 @@ class StealthMasterStatus(CharacterHiddenStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.INIT_GAME_START:
             return [
@@ -4393,10 +4438,8 @@ class BloodBlossomStatus(CharacterStatus):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             return [
@@ -4467,7 +4510,8 @@ class RadicalVitalityHiddenStatus(CharacterHiddenStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if (
                 signal is TriggeringSignal.INIT_GAME_START
@@ -4549,7 +4593,8 @@ class RadicalVitalityStatus(CharacterStatus, _UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.POST_DMG:
             d_usages = 0
@@ -4599,7 +4644,8 @@ class ChihayaburuStatus(CharacterHiddenStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION:
             return [
@@ -4660,7 +4706,8 @@ class MidareRanzanStatus(CharacterStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION:
             if self._protected:
@@ -4783,10 +4830,8 @@ class IcicleStatus(CombatStatus, _UsageStatus):
     ))
 
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | IcicleStatus]:
         if signal is TriggeringSignal.SELF_SWAP:
             effects: list[eft.Effect] = [
@@ -4842,10 +4887,8 @@ class ColdBloodedStrikeStatus(TalentEquipmentStatus):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         es: list[eft.Effect] = []
         new_self = self
@@ -4880,7 +4923,8 @@ class KamisatoArtSenhoStatus(CharacterHiddenStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.SELF_SWAP:
             if StaticTarget.from_player_active(game_state, source.pid) == source:
@@ -4963,7 +5007,8 @@ class KantenSenmyouBlessingStatus(TalentEquipmentStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
             return [], replace(self, usages=self.MAX_USAGES)
@@ -4981,10 +5026,8 @@ class KeqingTalentStatus(CharacterHiddenStatus):
     ))
 
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | KeqingTalentStatus]:
         if signal is TriggeringSignal.COMBAT_ACTION:
             return [], type(self)(can_infuse=False)
@@ -5109,10 +5152,8 @@ class SparksnSplashStatus(CombatStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         es: list[eft.Effect] = []
         new_self = self
@@ -5194,7 +5235,8 @@ class ConductiveStatus(CharacterStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             if self.usages < self.MAX_USAGES:
@@ -5218,7 +5260,8 @@ class PulsatingWitchStatus(TalentEquipmentStatus, _UsageLivingStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.SELF_SWAP and self.usages > 0:
             if StaticTarget.from_player_active(game_state, source.pid) == source:
@@ -5294,7 +5337,8 @@ class IllusoryTorrentStatus(CharacterHiddenStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         new_self = self
         if signal is TriggeringSignal.ROUND_END:
@@ -5392,7 +5436,8 @@ class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.POST_DMG:
             if self.activated_usages == 0:
@@ -5425,6 +5470,7 @@ class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
             effects: list[eft.Effect],
             source: StaticTarget,
             signal: TriggeringSignal,
+            detail: None | InformableEvent,
     ) -> list[eft.Effect]:
         if signal is TriggeringSignal.POST_DMG:
             if self.activated_usages == 0:
@@ -5493,7 +5539,8 @@ class ShrineOfMayaStatus(CombatStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], replace(self, usages=-1)
@@ -5590,7 +5637,8 @@ class FullPlateStatus(CombatStatus, StackedShieldStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION:
             if self.heal_usages <= 0:
@@ -5669,7 +5717,8 @@ class SweepingTimeStatus(CharacterStatus, _InfusionStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], replace(self, usages=-1, dice_reduction_usages=1)
@@ -5721,7 +5770,8 @@ class FortunePreservingTalismanStatus(CombatStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
             active_char = game_state.get_player(source.pid).just_get_active_character()
@@ -5768,7 +5818,8 @@ class ChakraDesiderataHiddenStatus(CharacterHiddenStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal in (TriggeringSignal.INIT_GAME_START, TriggeringSignal.REVIVAL_GAME_START):
             return [
@@ -5881,7 +5932,8 @@ class CeremonialGarmentStatus(CharacterStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
             self_chars = game_state.get_player(source.pid).characters
@@ -5962,7 +6014,8 @@ class IcyQuillStatus(CombatStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             if self.normal_attack_deduction_usages < self.DEFAULT_NORMAL_ATTACK_DEDUCTION_USAGES:
@@ -6030,7 +6083,8 @@ class MeleeStanceStatus(CharacterStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             effects: list[eft.Effect] = []
@@ -6062,7 +6116,8 @@ class RiptideCounterStatus(CharacterHiddenStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
             return [], type(self)()
@@ -6079,7 +6134,8 @@ class RiptideTransferStatus(CombatStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.DEATH_EVENT:
             target = StaticTarget.from_player_active(game_state, source.pid)
@@ -6112,7 +6168,8 @@ class RiptideStatus(CharacterStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.DEATH_DECLARATION:
             return [
@@ -6146,7 +6203,8 @@ class TideWithholderStatus(CharacterHiddenStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if (
                 signal is TriggeringSignal.INIT_GAME_START
@@ -6257,10 +6315,8 @@ class VijnanaSuffusionStatus(CharacterStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         es: list[eft.Effect] = []
         new_self = self
@@ -6330,7 +6386,8 @@ class StormzoneStatus(CombatStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if self.triggered and signal is TriggeringSignal.SELF_SWAP:
             from ..character.character import Venti
@@ -6378,7 +6435,8 @@ class WindsOfHarmonyStatus(CombatStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -6413,7 +6471,8 @@ class DescentStatus(CharacterStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.SELF_SWAP and self.activated:
             return [
@@ -6540,10 +6599,8 @@ class RainbowBladeworkStatus(CombatStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
             assert self.usages >= 1
@@ -6604,10 +6661,8 @@ class RiteOfDispatchStatus(CharacterStatus):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -6622,10 +6677,8 @@ class TenkoThunderboltsStatus(CombatStatus):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.PRE_ACTION:
             if game_state.active_player_id is source.pid:
@@ -6687,10 +6740,8 @@ class AurousBlazeStatus(CombatStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self,
-            game_state: GameState,
-            source: StaticTarget,
-            signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
             assert self.usages >= 1
@@ -6764,7 +6815,8 @@ class NiwabiEnshouStatus(CharacterStatus, _UsageStatus):
 
     @override
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION:
             if self.activated:
