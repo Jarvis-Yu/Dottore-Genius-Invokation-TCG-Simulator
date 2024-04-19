@@ -192,20 +192,21 @@ class StatusProcessing:
                 return game_state
 
             if isinstance(status, stt.PersonalStatus):
-                effects.append(eft.TriggerStatusEffect(target, type(status), signal))
+                effects.append(eft.TriggerStatusEffect(target, type(status), signal, detail))
 
             elif isinstance(status, stt.PlayerHiddenStatus):
-                effects.append(eft.TriggerHiddenStatusEffect(target.pid, type(status), signal))
+                effects.append(eft.TriggerHiddenStatusEffect(target.pid, type(status), signal, detail))
 
             elif isinstance(status, stt.CombatStatus):
-                effects.append(eft.TriggerCombatStatusEffect(target.pid, type(status), signal))
+                effects.append(eft.TriggerCombatStatusEffect(target.pid, type(status), signal, detail))
 
             elif isinstance(status, sm.Summon):
-                effects.append(eft.TriggerSummonEffect(target.pid, type(status), signal))
+                effects.append(eft.TriggerSummonEffect(target.pid, type(status), signal, detail))
 
             elif isinstance(status, sp.Support):
                 effects.append(eft.TriggerSupportEffect(
-                    target.pid, type(status), status.sid, signal))
+                    target.pid, type(status), status.sid, signal, detail
+                ))
 
             return game_state
 
@@ -228,7 +229,7 @@ class StatusProcessing:
                 return game_state
 
             assert isinstance(status, stt.PersonalStatus)
-            effects.append(eft.TriggerStatusEffect(target, type(status), signal))
+            effects.append(eft.TriggerStatusEffect(target, type(status), signal, detail))
 
             return game_state
 
