@@ -355,14 +355,15 @@ class Character:
                 source=source,
                 skill=skill_type,
             ),
-            eft.SwapCharacterCheckerEffect(  # handle swap events
-                my_active=source,
-                oppo_active=StaticTarget(
-                    pid=source.pid.other(),
-                    zone=Zone.CHARACTERS,
-                    id=game_state.get_other_player(source.pid).just_get_active_character().id
-                )
-            ),
+            eft.EffectsGroupEndEffect(),
+            # eft.SwapCharacterCheckerEffect(  # handle swap events
+            #     my_active=source,
+            #     oppo_active=StaticTarget(
+            #         pid=source.pid.other(),
+            #         zone=Zone.CHARACTERS,
+            #         id=game_state.get_other_player(source.pid).just_get_active_character().id
+            #     )
+            # ),
             eft.AllStatusTriggererEffect(
                 pid=source.pid,
                 signal=TriggeringSignal.POST_DMG,

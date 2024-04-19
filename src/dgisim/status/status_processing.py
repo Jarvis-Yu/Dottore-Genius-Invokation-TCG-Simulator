@@ -141,7 +141,7 @@ class StatusProcessing:
 
     @staticmethod
     def trigger_all_statuses_effects(
-            game_state: GameState, pid: Pid, signal: TriggeringSignal
+            game_state: GameState, pid: Pid, signal: TriggeringSignal, detail: None | InformableEvent = None,
     ) -> list[eft.TriggerrbleEffect]:
         """
         Takes the current game_state, trigger all statuses in order of player pid
@@ -155,20 +155,21 @@ class StatusProcessing:
                 return game_state
 
             if isinstance(status, stt.PersonalStatus):
-                effects.append(eft.TriggerStatusEffect(target, type(status), signal))
+                effects.append(eft.TriggerStatusEffect(target, type(status), signal, detail))
 
             elif isinstance(status, stt.PlayerHiddenStatus):
-                effects.append(eft.TriggerHiddenStatusEffect(target.pid, type(status), signal))
+                effects.append(eft.TriggerHiddenStatusEffect(target.pid, type(status), signal, detail))
 
             elif isinstance(status, stt.CombatStatus):
-                effects.append(eft.TriggerCombatStatusEffect(target.pid, type(status), signal))
+                effects.append(eft.TriggerCombatStatusEffect(target.pid, type(status), signal, detail))
 
             elif isinstance(status, sm.Summon):
-                effects.append(eft.TriggerSummonEffect(target.pid, type(status), signal))
+                effects.append(eft.TriggerSummonEffect(target.pid, type(status), signal, detail))
 
             elif isinstance(status, sp.Support):
                 effects.append(eft.TriggerSupportEffect(
-                    target.pid, type(status), status.sid, signal))
+                    target.pid, type(status), status.sid, signal, detail
+                ))
 
             return game_state
 
@@ -177,7 +178,7 @@ class StatusProcessing:
 
     @staticmethod
     def trigger_player_statuses_effects(
-            game_state: GameState, pid: Pid, signal: TriggeringSignal
+            game_state: GameState, pid: Pid, signal: TriggeringSignal, detail: None | InformableEvent = None,
     ) -> list[eft.Effect]:
         """
         Takes the current game_state, trigger all statuses in order of player pid
@@ -213,7 +214,7 @@ class StatusProcessing:
 
     @staticmethod
     def trigger_personal_statuses_effect(
-            game_state: GameState, target: StaticTarget, signal: TriggeringSignal
+            game_state: GameState, target: StaticTarget, signal: TriggeringSignal, detail: None | InformableEvent = None,
     ) -> list[eft.Effect]:
         """
         Takes the current game_state, trigger all statuses of a particular character

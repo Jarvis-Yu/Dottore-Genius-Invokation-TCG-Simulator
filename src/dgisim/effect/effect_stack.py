@@ -39,6 +39,14 @@ class EffectStack:
         assert not self.is_empty()
         return self._effects[-1]
 
+    def peek_all(self) -> tuple[Effect, ...]:
+        """ :returns: all effects in pop order. """
+        return self._effects[::-1]
+
+    def peek_all_rev(self) -> tuple[Effect, ...]:
+        """ :returns: all effects in push order. """
+        return self._effects
+
     def push_one(self, effect: Effect) -> EffectStack:
         """ :returns: the new EffectStack with `effect` pushed onto it. """
         return EffectStack(self._effects + (effect, ))
@@ -69,7 +77,7 @@ class EffectStack:
         """
         :returns: the new EffectStack with `effects` pushed onto it. The push follows FIFO, like a queue.
         """
-        if isinstance(effects, Effect):
+        if not isinstance(effects, Sequence):
             effects = (effects, )
         effects = tuple(effects)
         return EffectStack(effects + self._effects)

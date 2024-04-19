@@ -36,6 +36,7 @@ __all__ = [
     "HealIEvent",
     "ReactionIEvent",
     "SkillIEvent",
+    "SwapIEvent",
     "SupportRemovelIEvent",
 
     "PreprocessableEvent",
@@ -132,6 +133,12 @@ class SkillIEvent(InformableEvent):
                 or isinstance(game_state.get_character_target(self.source), char_type)
             )
         )
+
+
+@dataclass(frozen=True, kw_only=True)
+class SwapIEvent(InformableEvent):
+    source: StaticTarget
+    target: StaticTarget
 
 
 @dataclass(frozen=True, kw_only=True)

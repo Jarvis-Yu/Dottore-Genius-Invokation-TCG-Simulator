@@ -191,7 +191,7 @@ class GameStateMachine:
 
         Keeps making state transitions until predicate holds for the latest game state.
         """
-        while not predicate(self._game_state):
+        while not predicate(self._game_state) and not self.game_end():
             self.one_step(observe=observe)
 
     def one_step(self, observe=False) -> None:

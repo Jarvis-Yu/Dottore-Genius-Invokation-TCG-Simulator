@@ -449,6 +449,7 @@ EFFECT_MAPPING: dict[type["Effect"], int] = HashableDict({
         (effect.RollPhaseStartEffect, 4),
         (effect.SetBothPlayerPhaseEffect, 5),
         (effect.TurnEndEffect, 6),
+        (effect.EffectsGroupEndEffect, 7),
     
         #### 1 Checker Effect 050 ####
         (effect.AliveMarkCheckerEffect, 50),
@@ -510,7 +511,6 @@ EFFECT_MAPPING: dict[type["Effect"], int] = HashableDict({
         (effect.SwapCharacterEffect, 225),
         (effect.BackwardSwapCharacterEffect, 226),
         (effect.ForwardSwapCharacterEffect, 227),
-        (effect.ForwardSwapCharacterCheckEffect, 228),
 
         #### 4.2 Damage Effect 250 ####
         (effect.SpecificDamageEffect, 250),
@@ -547,7 +547,9 @@ EFFECT_MAPPING: dict[type["Effect"], int] = HashableDict({
         (effect.SetRedrawChancesEffect, 312),
         (effect.SetRerollChancesEffect, 313),
 
-        #### End 400 ####
+        #### 5 Broadcast Effect 400 ####
+        (effect.BroadcastSwapEffect, 400),
+        #### End 500 ####
     )
 })
 

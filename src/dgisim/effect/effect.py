@@ -16,16 +16,18 @@ from dataclasses import asdict, dataclass, field, fields, replace
 from enum import Enum
 from itertools import chain
 from typing import cast, FrozenSet, Iterable, Optional, Sequence, TYPE_CHECKING, Union
+from warnings import warn
 
 from typing_extensions import override
 
-from ..helper.quality_of_life import dataclass_repr
+from ..helper.quality_of_life import dataclass_repr, is_subclass
 from ..status import status as stt
 from ..summon import summon as sm
 from ..support import support as sp
 
 from ..character.enums import CharacterSkill
 from ..dice import ActualDice
+from ..effect.effect_stack import EffectStack
 from ..element import Element, Reaction, ReactionDetail
 from ..event import *
 from ..helper.quality_of_life import just, case_val, BIG_INT
@@ -48,6 +50,7 @@ __all__ = [
 
     # type
     "CheckerEffect",
+    "BroadcastEffect",
     "DirectEffect",
     "PhaseEffect",
     "PhaseStartEffect",
@@ -72,6 +75,7 @@ __all__ = [
     "RollPhaseStartEffect",
     "SetBothPlayerPhaseEffect",
     "TurnEndEffect",
+    "EffectsGroupEndEffect",
 
     # Checker Effect
     "AliveMarkCheckerEffect",  # mark dead characters defeated and revive the revivables
@@ -80,12 +84,14 @@ __all__ = [
     "DeathCheckCheckerEffect",  # detect death swap
     "DefeatedCheckerEffect",
 
+    # Broadcast Effect
+    "BroadcastSwapEffect",
+
     # Direct Effect
     "ConsecutiveActionEffect",
     "SwapCharacterEffect",
     "BackwardSwapCharacterEffect",
     "ForwardSwapCharacterEffect",
-    "ForwardSwapCharacterCheckEffect",
     "ApplyElementalAuraEffect",
     "SpecificDamageEffect",
     "ReferredDamageEffect",
@@ -163,6 +169,7 @@ class Effect:
             for fld in fields(self)
         ]))
         ret_val = [encoding_plan.encode_item(self)]
+
         for value in values:
             if isinstance(value, bool):
                 ret_val.append(1 if value else 0)
@@ -183,9 +190,13 @@ class Effect:
                 ret_val.extend(value.encoding())
             elif isinstance(value, ActualDice):
                 ret_val.extend(value.encoding(encoding_plan))
-            elif issubclass(value, Card):
+            elif isinstance(value, InformableEvent):
+                # TODO: implement encoding for InformableEvent
+                # warn(f"Encoding for InformableEvent is not implemented", FutureWarning)
+                pass
+            elif is_subclass(value, Card):
                 ret_val.append(encoding_plan.encode_item(value))
-            elif issubclass(value, Status):
+            elif is_subclass(value, Status):
                 ret_val.append(encoding_plan.encode_item(value))
             else:
                 raise Exception(f"Unexpected Type {type(value)} of {self.__class__.__name__}")
@@ -205,6 +216,11 @@ class TriggerrbleEffect(ABC, Effect):
     @abstractmethod
     def new_effects(self, game_state: GameState) -> Sequence[Effect]:
         pass
+
+
+@dataclass(frozen=True, repr=False)
+class BroadcastEffect(Effect):
+    pass
 
 
 @dataclass(frozen=True, repr=False)
@@ -237,13 +253,16 @@ class AllStatusTriggererEffect(TriggerrbleEffect):
     """
     pid: Pid
     signal: TriggeringSignal
+    detail: None | InformableEvent = None
 
     @override
     def new_effects(self, game_state: GameState) -> Sequence[Effect]:
         raise Exception("Not Reached")
 
     def execute(self, game_state: GameState) -> GameState:
-        effects = StatusProcessing.trigger_all_statuses_effects(game_state, self.pid, self.signal)
+        effects = StatusProcessing.trigger_all_statuses_effects(
+            game_state, self.pid, self.signal, self.detail
+        )
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_fl(effects)
         ).build()
@@ -254,14 +273,15 @@ class PlayerStatusTriggererEffect(TriggerrbleEffect):
     pid: Pid
     self_signal: TriggeringSignal
     other_signal: TriggeringSignal
+    detail: None | InformableEvent = None
 
     @override
     def new_effects(self, game_state: GameState) -> Sequence[Effect]:
         self_effects = StatusProcessing.trigger_player_statuses_effects(
-            game_state, self.pid, self.self_signal
+            game_state, self.pid, self.self_signal, self.detail
         )
         oppo_effects = StatusProcessing.trigger_player_statuses_effects(
-            game_state, self.pid.other(), self.other_signal
+            game_state, self.pid.other(), self.other_signal, self.detail
         )
         return self_effects + oppo_effects
 
@@ -278,13 +298,12 @@ class PlayerStatusTriggererEffect(TriggerrbleEffect):
 class PersonalStatusTriggererEffect(TriggerrbleEffect):
     target: StaticTarget
     signal: TriggeringSignal
+    detail: None | InformableEvent = None
 
     @override
     def new_effects(self, game_state: GameState) -> Sequence[Effect]:
         return StatusProcessing.trigger_personal_statuses_effect(
-            game_state,
-            self.target,
-            self.signal
+            game_state, self.target, self.signal, self.detail
         )
 
     def execute(self, game_state: GameState) -> GameState:
@@ -301,6 +320,7 @@ class TriggerStatusEffect(TriggerrbleEffect):
     target: StaticTarget
     status: type[stt.PersonalStatus]
     signal: TriggeringSignal
+    detail: None | InformableEvent = None
 
     @override
     def new_effects(self, game_state: GameState) -> Sequence[Effect]:
@@ -337,6 +357,7 @@ class TriggerHiddenStatusEffect(TriggerrbleEffect):
     target_pid: Pid  # the player the status belongs to
     status: type[stt.PlayerHiddenStatus]
     signal: TriggeringSignal
+    detail: None | InformableEvent = None
 
     @override
     def new_effects(self, game_state: GameState) -> Sequence[Effect]:
@@ -368,6 +389,7 @@ class TriggerCombatStatusEffect(TriggerrbleEffect):
     target_pid: Pid  # the player the status belongs to
     status: type[stt.CombatStatus]
     signal: TriggeringSignal
+    detail: None | InformableEvent = None
 
     @override
     def new_effects(self, game_state: GameState) -> Sequence[Effect]:
@@ -399,6 +421,7 @@ class TriggerSummonEffect(TriggerrbleEffect):
     target_pid: Pid
     summon: type[sm.Summon]
     signal: TriggeringSignal
+    detail: None | InformableEvent = None
 
     @override
     def new_effects(self, game_state: GameState) -> Sequence[Effect]:
@@ -431,6 +454,7 @@ class TriggerSupportEffect(TriggerrbleEffect):
     support_type: type[sp.Support]
     sid: int
     signal: TriggeringSignal
+    detail: None | InformableEvent = None
 
     @override
     def new_effects(self, game_state: GameState) -> Sequence[Effect]:
@@ -579,6 +603,29 @@ class TurnEndEffect(PhaseEffect):
                     TriggeringSignal.PRE_ACTION,
                 )
             )
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class EffectsGroupEndEffect(PhaseEffect):
+    """
+    This effect is used after a group of effects are executed.
+    It then adds queued effects to the effect stack.
+    """
+    def execute(self, game_state: GameState) -> GameState:
+        new_effects = (  # note that the order is reversed
+            game_state.lethal_dmg_effect_stack.peek_all_rev()
+            + game_state.dmg_effect_stack.peek_all_rev()
+            + game_state.common_effect_stack.peek_all_rev()
+        )
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_many_lf(new_effects)
+        ).common_effect_stack(
+            EffectStack(())
+        ).dmg_effect_stack(
+            EffectStack(())
+        ).lethal_dmg_effect_stack(
+            EffectStack(())
         ).build()
 
 
@@ -773,6 +820,27 @@ class DefeatedCheckerEffect(CheckerEffect):
             return game_state.factory().phase(game_state.mode.game_end_phase()).build()
         return game_state
 
+
+############################## Broadcast Effect ##############################
+
+
+@dataclass(frozen=True, repr=False)
+class BroadcastSwapEffect(BroadcastEffect):
+    home_pid: Pid  # the player that should be broadcasted first
+    source: StaticTarget
+    target: StaticTarget
+
+    def execute(self, game_state: GameState) -> GameState:
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_one(PlayerStatusTriggererEffect(
+                pid=self.home_pid,
+                self_signal=TriggeringSignal.SELF_SWAP,
+                other_signal=TriggeringSignal.OPPO_SWAP,
+                detail=SwapIEvent(source=self.source, target=self.target),
+            ))
+        ).build()
+
+
 ############################## Direct Effect ##############################
 
 
@@ -789,6 +857,9 @@ class ConsecutiveActionEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class SwapCharacterEffect(DirectEffect):
+    """
+    Swap to the target character and immediately broadcast the swap.
+    """
     target: StaticTarget
 
     def execute(self, game_state: GameState) -> GameState:
@@ -800,10 +871,12 @@ class SwapCharacterEffect(DirectEffect):
             return game_state
 
         effects: list[Effect] = [
-            PlayerStatusTriggererEffect(
-                pid=pid,
-                self_signal=TriggeringSignal.SELF_SWAP,
-                other_signal=TriggeringSignal.OPPO_SWAP,
+            BroadcastSwapEffect(
+                home_pid=pid,
+                source=StaticTarget.from_char_id(pid, 
+                    0 if active_character is None else active_character.id
+                ),
+                target=self.target,
             ),
         ]
         return game_state.factory().f_player(
@@ -825,8 +898,6 @@ class PrivateSwapCharacterEffect(SwapCharacterEffect):
 class BackwardSwapCharacterEffect(DirectEffect):
     """
     Swap the to the next active character.
-
-    This effect doesn't auto-add swap checker.
     """
     target_player: Pid
 
@@ -845,6 +916,7 @@ class BackwardSwapCharacterEffect(DirectEffect):
         )
         if next_char is None:
             return game_state
+        source = StaticTarget.from_player_active(game_state, self.target_player)
         return game_state.factory().f_player(
             self.target_player,
             lambda p: p.factory().f_characters(
@@ -852,6 +924,12 @@ class BackwardSwapCharacterEffect(DirectEffect):
                     next_char.id  # type: ignore
                 ).build()
             ).build()
+        ).f_common_effect_stack(
+            lambda es: es.push_right(BroadcastSwapEffect(
+                home_pid=self.target_player,
+                source=source,
+                target=StaticTarget.from_char_id(self.target_player, next_char.id),  # type: ignore
+            ))
         ).build()
 
 
@@ -859,8 +937,6 @@ class BackwardSwapCharacterEffect(DirectEffect):
 class ForwardSwapCharacterEffect(DirectEffect):
     """
     Swap the to the next active character.
-
-    This effect doesn't auto-add swap checker.
     """
     target_player: Pid
 
@@ -879,6 +955,7 @@ class ForwardSwapCharacterEffect(DirectEffect):
         )
         if next_char is None:
             return game_state
+        source = StaticTarget.from_player_active(game_state, self.target_player)
         return game_state.factory().f_player(
             self.target_player,
             lambda p: p.factory().f_characters(
@@ -886,47 +963,12 @@ class ForwardSwapCharacterEffect(DirectEffect):
                     next_char.id  # type: ignore
                 ).build()
             ).build()
-        ).build()
-
-
-@dataclass(frozen=True, repr=False)
-class ForwardSwapCharacterCheckEffect(DirectEffect):
-    """
-    Swap the to the next active character.
-
-    This effect auto-adds swap checker.
-    """
-    target_player: Pid
-
-    def execute(self, game_state: GameState) -> GameState:
-        characters = game_state.get_player(self.target_player).characters
-        ordered_chars = characters.get_character_in_activity_order()
-        from ..character.character import Character
-        next_char: Optional[Character] = next(
-            (
-                char
-                for char in ordered_chars[1:]
-                if char.is_alive()
-            ),
-            None
-        )
-        if next_char is None:
-            return game_state
-        return game_state.factory().f_player(
-            self.target_player,
-            lambda p: p.factory().f_characters(
-                lambda cs: cs.factory().active_character_id(
-                    next_char.id  # type: ignore
-                ).build()
-            ).build()
-        ).f_effect_stack(
-            lambda es: es.push_one(
-                PlayerStatusTriggererEffect(
-                    pid=self.target_player,
-                    self_signal=TriggeringSignal.SELF_SWAP,
-                    other_signal=TriggeringSignal.OPPO_SWAP,
-                ),
-            )
+        ).f_common_effect_stack(
+            lambda es: es.push_right(BroadcastSwapEffect(
+                home_pid=self.target_player,
+                source=source,
+                target=StaticTarget.from_char_id(self.target_player, next_char.id),  # type: ignore
+            ))
         ).build()
 
 

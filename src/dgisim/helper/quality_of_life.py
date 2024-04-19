@@ -67,3 +67,10 @@ def just(optional_val: None | _T, backup: None | _T = None) -> _T:
         else:
             return backup
     return optional_val
+
+def is_subclass(cls: type, parent: type) -> bool:
+    """
+    :returns: True if cls is a subclass of parent
+    """
+    assert isclass(cls), f"{cls} is not a class"
+    return issubclass(cls, parent)

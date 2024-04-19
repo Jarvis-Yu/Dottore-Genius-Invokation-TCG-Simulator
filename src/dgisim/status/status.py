@@ -4603,7 +4603,7 @@ class ChihayaburuStatus(CharacterHiddenStatus):
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION:
             return [
-                eft.ForwardSwapCharacterCheckEffect(
+                eft.ForwardSwapCharacterEffect(
                     target_player=source.pid,
                 ),
             ], None
