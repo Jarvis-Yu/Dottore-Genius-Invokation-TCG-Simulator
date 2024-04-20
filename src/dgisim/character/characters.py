@@ -54,6 +54,38 @@ class Characters:
         """ :returns: the active character's id. """
         return self._active_character_id
 
+    def get_chars_in_order(
+            self,
+            ordered: bool = False,
+            from_id: None | int = None,
+            active: bool = False,
+            non_active: bool = False,
+            alive: bool = False,
+    ) -> tuple[Character, ...]:
+        """
+        :param ordered: if `True`, characters are ordered based on their activity.
+        :param from_id: if not `None`, characters are ordered starting from `from_id`.
+        :param active: if `True`, only the active character is returned.
+        :param non_active: if `True`, only the non-active characters are returned.
+        :param alive: if `True`, only the alive characters are returned.
+        :retruns: characters satisfying the conditions.
+        """
+        chars = self._characters
+        if ordered:
+            chars = self.get_character_in_activity_order()
+        elif from_id is not None:
+            chars = self.get_character_ordered_from_id(from_id)
+        return tuple([
+            char
+            for char in chars
+            if (
+                (not active or char.id == self._active_character_id)
+                and (not non_active or char.id != self._active_character_id)
+                and (not alive or char.is_alive())
+            )
+        ])
+        ...
+
     def just_get_active_character_id(self) -> int:
         """ :returns: the active character's id. If the id is `None`, an exception is thrown. """
         val = self.get_active_character_id()

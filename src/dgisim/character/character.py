@@ -356,10 +356,6 @@ class Character:
                 skill=skill_type,
             ),
             eft.EffectsGroupEndEffect(),
-            eft.AllStatusTriggererEffect(
-                pid=source.pid,
-                signal=TriggeringSignal.POST_DMG,
-            ),
             eft.DefeatedMarkCheckerEffect(),
             eft.AllStatusTriggererEffect(
                 pid=source.pid,
@@ -2803,8 +2799,6 @@ class Nahida(Character):
     ) -> tuple[eft.Effect, ...]:
         oppo_pid = source.pid.other()
         oppo_active_character = game_state.get_player(oppo_pid).just_get_active_character()
-        has_reaction = \
-            oppo_active_character.elemental_aura.consult_reaction(self.ELEMENT) is not None
         effects: list[eft.Effect] = [
             eft.ReferredDamageEffect(
                 source=source,
@@ -2825,19 +2819,9 @@ class Nahida(Character):
             )
         )
         for id in char_ids:
-            effects.append(eft.UpdateCharacterStatusEffect(
+            effects.append(eft.AddCharacterStatusEffect(
                 target=StaticTarget(oppo_pid, Zone.CHARACTERS, id),
-                status=stt.SeedOfSkandhaStatus(activated_usages=(
-                    1
-                    if (
-                        id == oppo_active_character.id
-                        and has_reaction
-                        and oppo_active_character.character_statuses.find(
-                            stt.SeedOfSkandhaStatus
-                        ) is None
-                    )
-                    else 0
-                )),
+                status=stt.SeedOfSkandhaStatus,
             ))
         return tuple(effects)
 

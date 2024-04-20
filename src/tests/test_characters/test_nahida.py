@@ -45,7 +45,7 @@ class TestNahida(unittest.TestCase):
         self.assertEqual(p2ac.hp, 10)
 
         gsm.player_step()
-        gsm.auto_step(observe=False)
+        gsm.auto_step()
         p2cs = gsm.get_game_state().player2.characters
         p2c1 = p2cs.just_get_character(1)
         p2c2 = p2cs.just_get_character(2)
@@ -61,7 +61,6 @@ class TestNahida(unittest.TestCase):
         self.assertNotIn(SeedOfSkandhaStatus, p2c3.character_statuses)
         p2c1_status = p2c1.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c1_status.usages, 2)
-        self.assertEqual(p2c1_status.activated_usages, 0)
 
         # with reaction and no prior Seed of Skandha Status
         game_state = oppo_aura_elem(self.BASE_GAME, Element.ELECTRO)
@@ -82,7 +81,6 @@ class TestNahida(unittest.TestCase):
         self.assertNotIn(SeedOfSkandhaStatus, p2c3.character_statuses)
         p2c1_status = p2c1.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c1_status.usages, 1)
-        self.assertEqual(p2c1_status.activated_usages, 0)
 
         # with no reaction but prior Seed of Skandha Status
         game_state = UpdateCharacterStatusEffect(
@@ -106,13 +104,10 @@ class TestNahida(unittest.TestCase):
         self.assertIn(SeedOfSkandhaStatus, p2c3.character_statuses)
         p2c1_status = p2c1.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c1_status.usages, 2)
-        self.assertEqual(p2c1_status.activated_usages, 0)
         p2c2_status = p2c2.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c2_status.usages, 2)
-        self.assertEqual(p2c2_status.activated_usages, 0)
         p2c3_status = p2c3.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c3_status.usages, 2)
-        self.assertEqual(p2c3_status.activated_usages, 0)
 
         # with reaction and prior Seed of Skandha Status
         game_state = UpdateCharacterStatusEffect(
@@ -137,13 +132,10 @@ class TestNahida(unittest.TestCase):
         self.assertIn(SeedOfSkandhaStatus, p2c3.character_statuses)
         p2c1_status = p2c1.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c1_status.usages, 1)
-        self.assertEqual(p2c1_status.activated_usages, 0)
         p2c2_status = p2c2.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c2_status.usages, 1)
-        self.assertEqual(p2c2_status.activated_usages, 0)
         p2c3_status = p2c3.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c3_status.usages, 1)
-        self.assertEqual(p2c3_status.activated_usages, 0)
 
     def test_elemental_skill2(self):
         # without reaction
@@ -169,13 +161,10 @@ class TestNahida(unittest.TestCase):
         self.assertIn(SeedOfSkandhaStatus, p2c3.character_statuses)
         p2c1_status = p2c1.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c1_status.usages, 2)
-        self.assertEqual(p2c1_status.activated_usages, 0)
         p2c2_status = p2c2.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c2_status.usages, 2)
-        self.assertEqual(p2c2_status.activated_usages, 0)
         p2c3_status = p2c3.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c3_status.usages, 2)
-        self.assertEqual(p2c3_status.activated_usages, 0)
 
         # with reaction
         game_state = oppo_aura_elem(self.BASE_GAME, Element.HYDRO)
@@ -196,13 +185,10 @@ class TestNahida(unittest.TestCase):
         self.assertIn(SeedOfSkandhaStatus, p2c3.character_statuses)
         p2c1_status = p2c1.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c1_status.usages, 1)
-        self.assertEqual(p2c1_status.activated_usages, 0)
         p2c2_status = p2c2.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c2_status.usages, 1)
-        self.assertEqual(p2c2_status.activated_usages, 0)
         p2c3_status = p2c3.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c3_status.usages, 1)
-        self.assertEqual(p2c3_status.activated_usages, 0)
 
     def test_elemental_burst(self):
         game_state = recharge_energy_for_all(self.BASE_GAME)
@@ -259,10 +245,8 @@ class TestNahida(unittest.TestCase):
         self.assertNotIn(SeedOfSkandhaStatus, p2c3.character_statuses)
         p2c1_status = p2c1.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c1_status.usages, 3)
-        self.assertEqual(p2c1_status.activated_usages, 0)
         p2c2_status = p2c2.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c2_status.usages, 2)
-        self.assertEqual(p2c2_status.activated_usages, 0)
         self.assertIn(ShrineOfMayaStatus, p1.combat_statuses)
         self.assertEqual(p1.combat_statuses.just_find(ShrineOfMayaStatus).usages, 3)
 
@@ -300,7 +284,6 @@ class TestNahida(unittest.TestCase):
         self.assertNotIn(SeedOfSkandhaStatus, p2c3.character_statuses)
         p2c1_status = p2c1.character_statuses.just_find(SeedOfSkandhaStatus)
         self.assertEqual(p2c1_status.usages, 1)
-        self.assertEqual(p2c1_status.activated_usages, 0)
         self.assertIn(ShrineOfMayaStatus, p1.combat_statuses)
         self.assertEqual(p1.combat_statuses.just_find(ShrineOfMayaStatus).usages, 2)
 

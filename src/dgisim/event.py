@@ -82,6 +82,7 @@ class InformableEvent:
 @dataclass(frozen=True, kw_only=True)
 class DmgIEvent(InformableEvent):
     dmg: SpecificDamageEffect
+    lethal: bool = False
 
 
 @dataclass(frozen=True, kw_only=True)

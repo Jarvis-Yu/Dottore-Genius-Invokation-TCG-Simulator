@@ -39,13 +39,46 @@ class EffectStack:
         assert not self.is_empty()
         return self._effects[-1]
 
-    def peek_all(self) -> tuple[Effect, ...]:
-        """ :returns: all effects in pop order. """
-        return self._effects[::-1]
+    def _first_barrier_idx(self) -> int:
+        from .effect import GroupEffectBarrierEffect
+        last_barrier_idx = -1
+        for i, effect in enumerate(self._effects):
+            if isinstance(effect, GroupEffectBarrierEffect):
+                last_barrier_idx = i
+                break
+        return last_barrier_idx
 
-    def peek_all_rev(self) -> tuple[Effect, ...]:
+    def peek_all_left(self) -> tuple[Effect, ...]:
+        """ :returns: all effects in pop order. """
+        from .effect import GroupEffectBarrierEffect
+        first_barrier_idx = self._first_barrier_idx()
+        if first_barrier_idx == -1:
+            return self._effects[::-1]
+        return self._effects[first_barrier_idx-1::-1]
+
+    def peek_all_rev_left(self) -> tuple[Effect, ...]:
         """ :returns: all effects in push order. """
-        return self._effects
+        from .effect import GroupEffectBarrierEffect
+        first_barrier_idx = self._first_barrier_idx()
+        if first_barrier_idx == -1:
+            return self._effects
+        return self._effects[:first_barrier_idx]
+
+    def pop_all_left(self) -> tuple[EffectStack, tuple[Effect, ...]]:
+        """ :returns: EffectStack with remaining effects and all popped effects. """
+        from .effect import GroupEffectBarrierEffect
+        first_barrier_idx = self._first_barrier_idx()
+        if first_barrier_idx == -1:
+            return (EffectStack(()), self._effects[::-1])
+        return (EffectStack(self._effects[first_barrier_idx+1:]), self._effects[first_barrier_idx-1::-1])
+
+    def pop_all_rev_left(self) -> tuple[EffectStack, tuple[Effect, ...]]:
+        """ :returns: EffectStack with remaining effects and all popped effects. """
+        from .effect import GroupEffectBarrierEffect
+        first_barrier_idx = self._first_barrier_idx()
+        if first_barrier_idx == -1:
+            return (EffectStack(()), self._effects)
+        return (EffectStack(self._effects[first_barrier_idx+1:]), self._effects[:first_barrier_idx])
 
     def push_one(self, effect: Effect) -> EffectStack:
         """ :returns: the new EffectStack with `effect` pushed onto it. """
@@ -73,7 +106,7 @@ class EffectStack:
             return self
         return EffectStack(self._effects + effects[::-1])
 
-    def push_right(self, effects: Effect | Sequence[Effect]) -> EffectStack:
+    def push_left(self, effects: Effect | Sequence[Effect]) -> EffectStack:
         """
         :returns: the new EffectStack with `effects` pushed onto it. The push follows FIFO, like a queue.
         """
@@ -81,6 +114,16 @@ class EffectStack:
             effects = (effects, )
         effects = tuple(effects)
         return EffectStack(effects + self._effects)
+
+    def push_barrier_left(self) -> EffectStack:
+        """
+        :returns: the new EffectStack with a barrier left-pushed.
+
+        A barrier separates effects returned by `peek_all` into two groups, and only
+        one group can be popped at a time.
+        """
+        from .effect import GroupEffectBarrierEffect
+        return self.push_left(GroupEffectBarrierEffect())
 
     def contains(self, effect_type: type[Effect]) -> bool:
         """

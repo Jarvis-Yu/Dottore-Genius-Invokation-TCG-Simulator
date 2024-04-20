@@ -521,6 +521,9 @@ class GameStateFactory:
         self._leathal_dmg_effect_stack = lethal_dmg_effect_stack
         return self
 
+    def f_lethal_dmg_effect_stack(self, f: Callable[[EffectStack], EffectStack]) -> GameStateFactory:
+        return self.lethal_dmg_effect_stack(f(self._leathal_dmg_effect_stack))
+
     def active_player_id(self, pid: Pid) -> GameStateFactory:
         self._active_player = pid
         return self

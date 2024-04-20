@@ -76,6 +76,8 @@ __all__ = [
     "SetBothPlayerPhaseEffect",
     "TurnEndEffect",
     "EffectsGroupEndEffect",
+    "EffectsGroupStartEffect",
+    "GroupEffectBarrierEffect",
 
     # Checker Effect
     "AliveMarkCheckerEffect",  # mark dead characters defeated and revive the revivables
@@ -84,6 +86,7 @@ __all__ = [
     "DefeatedCheckerEffect",
 
     # Broadcast Effect
+    "BroadcastDamageEffect",
     "BroadcastSwapEffect",
 
     # Direct Effect
@@ -148,7 +151,7 @@ class Effect:
 
         Called to execute the effect on the passed-in `game_state`.
         """
-        raise Exception("Not Overriden or Implemented")
+        raise Exception(f"{self}: Not Overriden or Implemented")
 
     def name(self) -> str:
         return self.__class__.__name__
@@ -192,6 +195,8 @@ class Effect:
             elif isinstance(value, InformableEvent):
                 # TODO: implement encoding for InformableEvent
                 # warn(f"Encoding for InformableEvent is not implemented", FutureWarning)
+                pass
+            elif isinstance(value, SpecificDamageEffect):  # TODO
                 pass
             elif is_subclass(value, Card):
                 ret_val.append(encoding_plan.encode_item(value))
@@ -616,20 +621,44 @@ class EffectsGroupEndEffect(PhaseEffect):
     It then adds queued effects to the effect stack.
     """
     def execute(self, game_state: GameState) -> GameState:
-        new_effects = (  # note that the order is reversed
-            game_state.lethal_dmg_effect_stack.peek_all_rev()
-            + game_state.dmg_effect_stack.peek_all_rev()
-            + game_state.common_effect_stack.peek_all_rev()
-        )
+        new_common_effects, popped_common_effects = game_state.common_effect_stack.pop_all_rev_left()
+        new_dmg_effects, popped_dmg_effects = game_state.dmg_effect_stack.pop_all_rev_left()
+        new_lethal_dmg_effects, popped_lethal_dmg_effects = game_state.lethal_dmg_effect_stack.pop_all_rev_left()
+        new_effects = (popped_lethal_dmg_effects + popped_dmg_effects + popped_common_effects)  # note that the order is reversed
         return game_state.factory().f_effect_stack(
             lambda es: es.push_many_lf(new_effects)
         ).common_effect_stack(
-            EffectStack(())
+            new_common_effects
         ).dmg_effect_stack(
-            EffectStack(())
+            new_dmg_effects
         ).lethal_dmg_effect_stack(
-            EffectStack(())
+            new_lethal_dmg_effects
         ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class EffectsGroupStartEffect(PhaseEffect):
+    """
+    This effect is used only before a group of effects are executed.
+    This can be omitted unless the there is a group of effects waiting to be executed
+    before this group starts.
+    """
+    def execute(self, game_state: GameState) -> GameState:
+        return game_state.factory().f_common_effect_stack(
+            lambda es: es.push_barrier_left()
+        ).f_dmg_effect_stack(
+            lambda es: es.push_barrier_left()
+        ).f_lethal_dmg_effect_stack(
+            lambda es: es.push_barrier_left()
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class GroupEffectBarrierEffect(PhaseEffect):
+    """
+    This effect is used within EffectStack to indicate the start of a group of effects.
+    """
+    pass
 
 
 ############################## Checker Effect ##############################
@@ -794,6 +823,22 @@ class DefeatedCheckerEffect(CheckerEffect):
 
 
 @dataclass(frozen=True, repr=False)
+class BroadcastDamageEffect(BroadcastEffect):
+    home_pid: Pid
+    dmg: SpecificDamageEffect
+    lethal: bool
+
+    def execute(self, game_state: GameState) -> GameState:
+        return game_state.factory().f_effect_stack(
+            lambda es: es.push_one(AllStatusTriggererEffect(
+                pid=self.home_pid,
+                signal=TriggeringSignal.POST_DMG,
+                detail=DmgIEvent(dmg=self.dmg, lethal=self.lethal),
+            ))
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
 class BroadcastSwapEffect(BroadcastEffect):
     home_pid: Pid  # the player that should be broadcasted first
     source: StaticTarget
@@ -894,7 +939,7 @@ class BackwardSwapCharacterEffect(DirectEffect):
                 ).build()
             ).build()
         ).f_common_effect_stack(
-            lambda es: es.push_right(BroadcastSwapEffect(
+            lambda es: es.push_left(BroadcastSwapEffect(
                 home_pid=self.target_player,
                 source=source,
                 target=StaticTarget.from_char_id(self.target_player, next_char.id),  # type: ignore
@@ -933,7 +978,7 @@ class ForwardSwapCharacterEffect(DirectEffect):
                 ).build()
             ).build()
         ).f_common_effect_stack(
-            lambda es: es.push_right(BroadcastSwapEffect(
+            lambda es: es.push_left(BroadcastSwapEffect(
                 home_pid=self.target_player,
                 source=source,
                 target=StaticTarget.from_char_id(self.target_player, next_char.id),  # type: ignore
@@ -1167,6 +1212,20 @@ class SpecificDamageEffect(DirectEffect):
         # Damage Calculation
         hp = target.hp
         hp = max(0, hp - actual_damage.damage)
+
+        if hp != 0:
+            game_state = game_state.factory().f_dmg_effect_stack(
+                lambda es: es.push_left(BroadcastDamageEffect(
+                    home_pid=self.source.pid, dmg=actual_damage, lethal=False,
+                ))
+            ).build()
+        else:
+            # TODO: confirm if lethal damage to revivable character is treated as lethal
+            game_state = game_state.factory().f_lethal_dmg_effect_stack(
+                lambda es: es.push_left(BroadcastDamageEffect(
+                    home_pid=self.source.pid, dmg=actual_damage, lethal=True,
+                ))
+            ).build()
 
         target_pid = self.target.pid
         effects: list[Effect] = []

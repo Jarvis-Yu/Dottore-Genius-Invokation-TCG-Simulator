@@ -2,7 +2,7 @@ import unittest
 from dataclasses import dataclass
 
 from src.dgisim.effect.effect_stack import EffectStack
-from src.dgisim.effect.effect import Effect
+from src.dgisim.effect.effect import Effect, GroupEffectBarrierEffect
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -97,3 +97,20 @@ class TestEffectStack(unittest.TestCase):
         x.add(effect_stack_a1)
         x.add(effect_stack_a2)
         self.assertEqual(len(x), 1)
+
+    def test_barrier(self):
+        effect_stack = EffectStack((
+            IdEffect(id=1),
+            IdEffect(id=2),
+            IdEffect(id=3),
+            IdEffect(id=4),
+        ))
+        effect_stack = effect_stack.push_barrier_left()
+        effect_stack = effect_stack.push_left((
+            IdEffect(id=5),
+            IdEffect(id=6),
+        ))
+        self.assertEqual(effect_stack._first_barrier_idx(), 2)
+        effect_stack, effects = effect_stack.pop_all_left()
+        self.assertEqual(len(effects), 2)
+        self.assertNotIn(GroupEffectBarrierEffect, map(type, effects))

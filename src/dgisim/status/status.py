@@ -24,7 +24,7 @@ from ..effect import effect as eft
 
 from ..character.enums import CharacterSkill, CharacterSkillType, WeaponType
 from ..dice import ActualDice
-from ..effect.effects_template import standard_post_effects
+from ..effect.effects_template import budget_post_effect, standard_post_effects
 from ..effect.enums import Zone, TriggeringSignal, DynamicCharacterTarget
 from ..effect.structs import StaticTarget, DamageType
 from ..element import Element, Reaction
@@ -443,13 +443,17 @@ class Status:
     ) -> Self:
         return self
 
+    _BUDGET_SIGNALS = frozenset({
+        TriggeringSignal.POST_DMG,
+        TriggeringSignal.DIRECT_TRIGGER,
+    })
+
     def react_to_signal(
             self,
             game_state: GameState,
             source: StaticTarget,
             signal: TriggeringSignal,
             detail: None | InformableEvent = None,
-            silent: bool = False,  # ignore post checkers if True
     ) -> list[eft.Effect]:
         """
         :param game_state: the current game state.
@@ -465,9 +469,7 @@ class Status:
         from ..summon import summon as sm
         from ..support import support as sp
         # do the removal or update of the status
-        if isinstance(self, CharacterHiddenStatus) \
-                or isinstance(self, EquipmentStatus) \
-                or isinstance(self, CharacterStatus):
+        if isinstance(self, PersonalStatus):
             if new_status is None:
                 es.append(eft.RemoveCharacterStatusEffect(
                     source,
@@ -537,23 +539,15 @@ class Status:
 
         es = self._post_update_react_to_signal(game_state, es, source, signal, detail)
 
-        if silent:
-            return es
-
         has_damage = False
-        has_swap = False
         for effect in es:
             has_damage = has_damage or isinstance(effect, eft.ReferredDamageEffect) \
                 or isinstance(effect, eft.SpecificDamageEffect)
-            has_swap = has_swap or (
-                isinstance(effect, eft.SwapCharacterEffect)
-                or isinstance(effect, eft.ForwardSwapCharacterEffect)
-                or isinstance(effect, eft.ApplyElementalAuraEffect) and effect.element in (
-                    Element.ELECTRO,
-                    Element.PYRO,
-                )
-            )
-        es += standard_post_effects(game_state, source.pid, has_damage, has_swap)
+
+        if signal in self._BUDGET_SIGNALS:
+            es += budget_post_effect(game_state, source.pid, has_damage)
+        else:
+            es += standard_post_effects(game_state, source.pid, has_damage)
 
         return es
 
@@ -2115,43 +2109,28 @@ class GeneralsAncientHelmStatus(ArtifactEquipmentStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class _ShadowOfTheSandKingLikeStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
-    triggered: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.POST_DMG,
         TriggeringSignal.ROUND_END,
     ))
 
     @override
-    def _inform(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            info_type: Informables,
-            information: InformableEvent,
-    ) -> Self:
-        if info_type is Informables.DMG_DEALT:
-            assert isinstance(information, DmgIEvent)
-            if (
-                    not self.triggered
-                    and self.usages > 0
-                    and self._target_is_self_active(game_state, status_source)
-                    and information.dmg.target.pid is status_source.pid.other()
-                    and information.dmg.reaction is not None
-            ):
-                return replace(self, triggered=True)
-        return self
-
-    @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.POST_DMG and self.triggered:
-            return [
-                eft.DrawRandomCardEffect(pid=source.pid, num=1),
-            ], replace(self, usages=-1, triggered=False)
+        if signal is TriggeringSignal.POST_DMG:
+            assert isinstance(detail, DmgIEvent)
+            if (
+                    self.usages > 0
+                    and self._target_is_self_active(game_state, source)
+                    and detail.dmg.target.pid is source.pid.other()
+                    and detail.dmg.reaction is not None
+            ):
+                return [
+                    eft.DrawRandomCardEffect(pid=source.pid, num=1),
+                ], replace(self, usages=-1)
         elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
-            assert not self.triggered
             return [], replace(self, usages=self.MAX_USAGES)
         return [], self
 
@@ -5393,47 +5372,11 @@ class ProphecyOfSubmersionStatus(TalentEquipmentStatus):
 class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2
-    activated_usages: int = 0
-    priority: int = 0
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.POST_DMG,
+        TriggeringSignal.DIRECT_TRIGGER,
     ))
-
-    @override
-    def inform(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            info_type: Informables,
-            information: InformableEvent,
-    ) -> GameState:
-        if info_type is Informables.DMG_DEALT:
-            assert isinstance(information, DmgIEvent)
-            if (
-                    self.usages == 0
-                    or information.dmg.reaction is None
-                    or information.dmg.target != status_source
-            ):
-                return game_state
-            chars = game_state.get_player(status_source.pid).characters
-            this_char = chars.get_character(cast(int, status_source.id))
-            assert this_char is not None
-            if type(self) not in this_char.character_statuses:
-                return game_state
-            base_priority = 0
-            for char in chars:
-                if char is this_char:
-                    continue
-                if (status := char.character_statuses.find(type(self))) is not None:
-                    assert isinstance(status, type(self))
-                    base_priority = max(base_priority, status.priority)
-            return eft.OverrideCharacterStatusEffect(
-                target=status_source,
-                status=replace(self, activated_usages=self.activated_usages +
-                               1, priority=base_priority + 1)
-            ).execute(game_state)
-        return game_state
 
     @override
     def _react_to_signal(
@@ -5441,8 +5384,13 @@ class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.POST_DMG:
-            if self.activated_usages == 0:
+            assert isinstance(detail, DmgIEvent)
+            if not (
+                    detail.dmg.target == source
+                    and detail.dmg.reaction is not None
+            ):
                 return [], self
+            assert self.usages > 0, f"{game_state}"
             dmg_element: Element
             oppo_player = game_state.get_player(source.pid.other())
             oppo_chars = oppo_player.characters
@@ -5455,57 +5403,43 @@ class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
                 dmg_element = Element.DENDRO
             else:
                 dmg_element = Element.PIERCING
-            return [eft.SpecificDamageEffect(
-                source=source,
-                target=source,
-                element=dmg_element,
-                damage=1,
-                damage_type=DamageType(status=True, no_boost=True),
-            )], replace(self, usages=-1, activated_usages=-1, priority=0)
+            effects: list[eft.Effect] = [
+                eft.SpecificDamageEffect(
+                    source=source,
+                    target=source,
+                    element=dmg_element,
+                    damage=1,
+                    damage_type=DamageType(status=True, no_boost=True),
+                ),
+                eft.UpdateCharacterStatusEffect(
+                    target=source,
+                    status=replace(self, usages=-1),
+                ),
+            ]
+            off_field_alive_chars = game_state.get_player(
+                source.pid
+            ).characters.get_character_ordered_from_id(cast(int, source.id))[1:]
+            for char in off_field_alive_chars:
+                effects.extend((
+                    eft.EffectsGroupStartEffect(),
+                    eft.TriggerStatusEffect(
+                        target=StaticTarget.from_char_id(source.pid, char.id),
+                        status=SeedOfSkandhaStatus,
+                        signal=TriggeringSignal.DIRECT_TRIGGER,
+                    ),
+                ))
+            return effects, self
+        elif signal is TriggeringSignal.DIRECT_TRIGGER:
+            return [
+                eft.SpecificDamageEffect(
+                    source=source,
+                    target=source,
+                    element=Element.PIERCING,
+                    damage=1,
+                    damage_type=DamageType(status=True, no_boost=True),
+                ),
+            ], replace(self, usages=-1)
         return [], self
-
-    @override
-    def _post_update_react_to_signal(
-            self,
-            game_state: GameState,
-            effects: list[eft.Effect],
-            source: StaticTarget,
-            signal: TriggeringSignal,
-            detail: None | InformableEvent,
-    ) -> list[eft.Effect]:
-        if signal is TriggeringSignal.POST_DMG:
-            if self.activated_usages == 0:
-                return effects
-            characters = game_state.get_player(source.pid).characters
-            assert isinstance(source.id, int)
-            ordered_chars = characters.get_character_ordered_from_id(source.id)
-            for char in ordered_chars[1:]:
-                status = char.character_statuses.find(type(self))
-                if status is not None:
-                    assert isinstance(status, type(self))
-                    char_source = replace(source, id=char.id)
-                    effects += (
-                        eft.SpecificDamageEffect(
-                            source=char_source,
-                            target=char_source,
-                            element=Element.PIERCING,
-                            damage=1,
-                            damage_type=DamageType(status=True, no_boost=True),
-                        ),
-                        eft.UpdateCharacterStatusEffect(
-                            target=char_source,
-                            status=replace(status, usages=-1),
-                        )
-                    )
-            return effects
-        return effects
-
-    @override
-    def _update(self, other: Self) -> None | Self:
-        new_self = super()._update(other)
-        if new_self is None:
-            return None
-        return replace(new_self, activated_usages=self.activated_usages + other.activated_usages)
 
 
 @dataclass(frozen=True, kw_only=True)

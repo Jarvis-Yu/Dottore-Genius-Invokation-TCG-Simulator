@@ -450,6 +450,8 @@ EFFECT_MAPPING: dict[type["Effect"], int] = HashableDict({
         (effect.SetBothPlayerPhaseEffect, 5),
         (effect.TurnEndEffect, 6),
         (effect.EffectsGroupEndEffect, 7),
+        (effect.EffectsGroupStartEffect, 8),
+        (effect.GroupEffectBarrierEffect, 9),
     
         #### 1 Checker Effect 050 ####
         (effect.AliveMarkCheckerEffect, 50),
@@ -548,6 +550,7 @@ EFFECT_MAPPING: dict[type["Effect"], int] = HashableDict({
 
         #### 5 Broadcast Effect 400 ####
         (effect.BroadcastSwapEffect, 400),
+        (effect.BroadcastDamageEffect, 401),
         #### End 500 ####
     )
 })

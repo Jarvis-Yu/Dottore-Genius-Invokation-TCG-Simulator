@@ -65,6 +65,8 @@ class TriggeringSignal(Enum):
     DEATH_DECLARATION = 17
     #: triggers when "when the battle begins" character is being revived
     REVIVAL_GAME_START = 18
+    #: directly trigger a status
+    DIRECT_TRIGGER = 19
 
 
 class DynamicCharacterTarget(Enum):

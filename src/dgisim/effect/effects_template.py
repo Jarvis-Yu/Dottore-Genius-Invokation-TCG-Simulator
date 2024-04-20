@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 __all__ = [
     "normal_attack_template",
     "standard_post_effects",
+    "budget_post_effect",
 ]
 
 
@@ -51,7 +52,6 @@ def standard_post_effects(
         game_state: GameState,
         priorized_pid: Pid,
         has_damage: bool = True,
-        has_swap: bool = True,
 ) -> list[eft.Effect]:
     es: list[eft.Effect] = []
     if has_damage:
@@ -59,14 +59,23 @@ def standard_post_effects(
         es.append(eft.DefeatedCheckerEffect())
     es.append(eft.EffectsGroupEndEffect())
     if has_damage:
-        es.append(eft.AllStatusTriggererEffect(
-            pid=priorized_pid,
-            signal=TriggeringSignal.POST_DMG,
-        ))
         es.append(eft.DefeatedMarkCheckerEffect())
         es.append(eft.AllStatusTriggererEffect(
             pid=priorized_pid,
             signal=TriggeringSignal.DEATH_EVENT,
         ))
         es.append(eft.DeathCheckCheckerEffect())
+    return es
+
+
+def budget_post_effect(
+        game_state: GameState,
+        priorized_pid: Pid,
+        has_damage: bool = True,
+) -> list[eft.Effect]:
+    es: list[eft.Effect] = []
+    if has_damage:
+        es.append(eft.AliveMarkCheckerEffect())
+        es.append(eft.DefeatedCheckerEffect())
+    es.append(eft.EffectsGroupEndEffect())
     return es
