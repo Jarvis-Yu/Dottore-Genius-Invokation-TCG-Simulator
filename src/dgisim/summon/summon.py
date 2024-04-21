@@ -262,7 +262,7 @@ class _ConvertableAnemoSummon(_DestroyOnNumSummon):
             if new_self._convertable():
                 opponent_aura = (
                     game_state
-                    .get_player(source.pid.other())
+                    .get_player(source.pid.other)
                     .just_get_active_character()
                     .elemental_aura
                 )
@@ -405,7 +405,7 @@ class ChainsOfWardingThunderSummon(_DmgPerRoundSummon):
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.SWAP:
             assert isinstance(item, ActionPEvent) and item.event_type is EventType.SWAP
-            if item.source.pid is status_source.pid.other() \
+            if item.source.pid is status_source.pid.other \
                     and self.swap_reduce_usages > 0:
                 assert item.dice_cost.num_dice() == item.dice_cost[Element.ANY]
                 new_cost = item.dice_cost + {Element.ANY: self.COST_RAISE}
@@ -1127,7 +1127,7 @@ class StormEyeSummon(_ConvertableAnemoSummon):
         es, new_self = super()._react_to_signal(game_state, source, signal, detail)
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             oppo_active_char_id = game_state.get_player(
-                source.pid.other()
+                source.pid.other
             ).just_get_active_character().id
             self_active_char_id = game_state.get_player(
                 source.pid
@@ -1135,11 +1135,11 @@ class StormEyeSummon(_ConvertableAnemoSummon):
             id_diff = self_active_char_id - oppo_active_char_id
             if id_diff < 0:
                 es.append(eft.BackwardSwapCharacterEffect(
-                    target_player=source.pid.other(),
+                    target_player=source.pid.other,
                 ))
             elif id_diff > 0:
                 es.append(eft.ForwardSwapCharacterEffect(
-                    target_player=source.pid.other(),
+                    target_player=source.pid.other,
                 ))
         return es, new_self
 
@@ -1164,7 +1164,7 @@ class TalismanSpiritSummon(_DmgPerRoundSummon):
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
             if not (
-                    dmg.target.pid is status_source.pid.other()
+                    dmg.target.pid is status_source.pid.other
                     and (
                         dmg.element is Element.CRYO
                         or dmg.element is Element.PHYSICAL

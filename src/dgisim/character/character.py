@@ -992,7 +992,7 @@ class Collei(Character):
             )
             assert talent_status is not None
             if not talent_status.elemental_skill_used:
-                oppo_active = game_state.get_player(source.pid.other()).just_get_active_character()
+                oppo_active = game_state.get_player(source.pid.other).just_get_active_character()
                 trigger_sprout = \
                     oppo_active.elemental_aura.consult_reaction(Element.DENDRO) is not None
         return (
@@ -1710,7 +1710,7 @@ class HuTao(Character):
             ).hidden_statuses.just_find(stt.ChargedAttackStatus)
             if charged_status.can_charge:
                 effects.append(eft.AddCharacterStatusEffect(
-                    target=StaticTarget.from_player_active(game_state, source.pid.other()),
+                    target=StaticTarget.from_player_active(game_state, source.pid.other),
                     status=stt.BloodBlossomStatus,
                 ))
         return tuple(effects) + normal_attack_template(
@@ -1875,7 +1875,7 @@ class Jean(Character):
                 damage_type=DamageType(elemental_skill=True),
             ),
             eft.ForwardSwapCharacterEffect(
-                target_player=source.pid.other(),
+                target_player=source.pid.other,
             ),
         )
 
@@ -1954,7 +1954,7 @@ class KaedeharaKazuha(Character):
         midare_to_use: type[stt.MidareRanzanStatus] = stt.MidareRanzanStatus
         oppo_active_character_aura = (
             game_state
-            .get_player(source.pid.other())
+            .get_player(source.pid.other)
             .just_get_active_character()
             .elemental_aura
         )
@@ -1994,7 +1994,7 @@ class KaedeharaKazuha(Character):
     def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         oppo_active_character_aura = (
             game_state
-            .get_player(source.pid.other())
+            .get_player(source.pid.other)
             .just_get_active_character()
             .elemental_aura
         )
@@ -2382,7 +2382,7 @@ class Klee(Character):
                 damage_type=DamageType(elemental_burst=True),
             ),
             eft.AddCombatStatusEffect(
-                target_pid=source.pid.other(),
+                target_pid=source.pid.other,
                 status=stt.SparksnSplashStatus,
             ),
         )
@@ -2531,7 +2531,7 @@ class Lisa(Character):
             dmg += conductive.usages
             effects.append(
                 eft.RemoveCharacterStatusEffect(
-                    target=StaticTarget.from_char_id(source.pid.other(), char_target.id),
+                    target=StaticTarget.from_char_id(source.pid.other, char_target.id),
                     status=stt.ConductiveStatus,
                 )
             )
@@ -2797,7 +2797,7 @@ class Nahida(Character):
             dmg_amount: int,
             single_target: bool = False
     ) -> tuple[eft.Effect, ...]:
-        oppo_pid = source.pid.other()
+        oppo_pid = source.pid.other
         oppo_active_character = game_state.get_player(oppo_pid).just_get_active_character()
         effects: list[eft.Effect] = [
             eft.ReferredDamageEffect(
@@ -2827,7 +2827,7 @@ class Nahida(Character):
 
     def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         oppo_active_character = game_state.get_player(
-            source.pid.other()
+            source.pid.other
         ).just_get_active_character()
         SKILL_DMG = 2
         return self._elemental_skill_template(
@@ -2854,12 +2854,12 @@ class Nahida(Character):
         )
         ):
             # talent card effect for electro
-            for char in game_state.get_player(source.pid.other()).characters:
+            for char in game_state.get_player(source.pid.other).characters:
                 original_status = char.character_statuses.find(stt.SeedOfSkandhaStatus)
                 if original_status is not None:
                     assert isinstance(original_status, stt.SeedOfSkandhaStatus)
                     effects.append(eft.OverrideCharacterStatusEffect(
-                        target=StaticTarget(source.pid.other(), Zone.CHARACTERS, char.id),
+                        target=StaticTarget(source.pid.other, Zone.CHARACTERS, char.id),
                         status=replace(original_status, usages=original_status.usages + 1),
                     ))
         effects.append(eft.ReferredDamageEffect(
@@ -3578,7 +3578,7 @@ class Tartaglia(Character):
     })
 
     def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
-        oppo_char = game_state.get_player(source.pid.other()).just_get_active_character()
+        oppo_char = game_state.get_player(source.pid.other).just_get_active_character()
         pre_effects: list[eft.Effect] = []
         # if stt.RiptideStatus in oppo_char.get_character_statuses():
         #     pre_effects.append()
@@ -3659,7 +3659,7 @@ class Tartaglia(Character):
         is_melee = stt.MeleeStanceStatus in self._statuses
         if not is_melee:
             return ()
-        target_char = game_state.get_player(source.pid.other()).just_get_active_character()
+        target_char = game_state.get_player(source.pid.other).just_get_active_character()
         counter = self._hiddens.just_find(stt.RiptideCounterStatus)
         if (
                 counter.usages <= 0

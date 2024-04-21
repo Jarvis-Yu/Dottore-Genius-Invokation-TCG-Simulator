@@ -187,14 +187,14 @@ class ActionPhase(ph.Phase):
         elif other_player.phase is Act.PASSIVE_WAIT_PHASE:
             other_player_new_phase = Act.ACTION_PHASE
             effects.append(AllStatusTriggererEffect(
-                active_player_id.other(),
+                active_player_id.other,
                 TriggeringSignal.PRE_ACTION,
             ))
         else:  # pragma: no cover
             print(f"ERROR pid={pid}\n {game_state}")
             raise Exception(f"Unknown Game State to process {other_player.phase}")
         return game_state.factory().active_player_id(
-            active_player_id.other()
+            active_player_id.other
         ).player(
             active_player_id,
             active_player.factory().phase(

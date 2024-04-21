@@ -170,7 +170,7 @@ class EncodingPlan:
         if isinstance(item, Enum):
             item_category = Enum
             if self._perspective is Pid.P2 and isinstance(item, Pid):
-                item = item.other()
+                item = item.other
         else:
             if isinstance(item, Card):
                 item = type(item)

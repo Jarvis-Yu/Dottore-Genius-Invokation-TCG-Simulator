@@ -1569,7 +1569,7 @@ class WolfsGravestoneStatus(WeaponEquipmentStatus):
             dmg: DmgPEvent,
     ) -> tuple[DmgPEvent, Self]:
         oppo_active_char = game_state.get_player(
-            status_source.pid.other()
+            status_source.pid.other
         ).just_get_active_character()
         final_dmg_boost = self.BASE_DAMAGE_BOOST
         if oppo_active_char.hp <= self.HP_THRESHOLD:
@@ -1718,7 +1718,7 @@ class AquilaFavoniaStatus(WeaponEquipmentStatus, _UsageLivingStatus):
             if (
                     self.usages > 0
                     and not self.activated
-                    and information.source.pid is status_source.pid.other()
+                    and information.source.pid is status_source.pid.other
             ):
                 return replace(self, activated=True)
         return self
@@ -2051,7 +2051,7 @@ class GamblersEarringsStatus(ArtifactEquipmentStatus):
     ) -> Self:
         if info_type is Informables.CHARACTER_DEATH:
             assert isinstance(information, CharacterDeathIEvent)
-            if information.target.pid is status_source.pid.other() \
+            if information.target.pid is status_source.pid.other \
                     and self.informable():
                 return replace(self, informed_num=self.informed_num + 1)
         return self
@@ -2124,7 +2124,7 @@ class _ShadowOfTheSandKingLikeStatus(ArtifactEquipmentStatus, _UsageLivingStatus
             if (
                     self.usages > 0
                     and self._target_is_self_active(game_state, source)
-                    and detail.dmg.target.pid is source.pid.other()
+                    and detail.dmg.target.pid is source.pid.other
                     and detail.dmg.reaction is not None
             ):
                 return [
@@ -2943,7 +2943,7 @@ class FreshWindOfFreedomStatus(CombatStatus):
     ) -> Self:
         if info_type is Informables.CHARACTER_DEATH:
             assert isinstance(information, CharacterDeathIEvent)
-            if information.target.pid is status_source.pid.other() \
+            if information.target.pid is status_source.pid.other \
                     and game_state.get_player(status_source.pid).in_action_phase() \
                     and not self.activated:
                 return replace(self, activated=True)
@@ -5392,7 +5392,7 @@ class SeedOfSkandhaStatus(CharacterStatus, _UsageStatus):
                 return [], self
             assert self.usages > 0, f"{game_state}"
             dmg_element: Element
-            oppo_player = game_state.get_player(source.pid.other())
+            oppo_player = game_state.get_player(source.pid.other)
             oppo_chars = oppo_player.characters
             from ..character.character import Nahida
             if (
@@ -6112,14 +6112,14 @@ class RiptideStatus(CharacterStatus):
             ], self
         elif signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             self_active_id = game_state.get_player(source.pid).just_get_active_character().id
-            oppo_active = game_state.get_player(source.pid.other()).just_get_active_character()
+            oppo_active = game_state.get_player(source.pid.other).just_get_active_character()
             if (
                     self_active_id == source.id
                     and AbyssalMayhemHydrospoutStatus in oppo_active.character_statuses
             ):
                 return [
                     eft.SpecificDamageEffect(
-                        source=StaticTarget.from_char_id(source.pid.other(), oppo_active.id),
+                        source=StaticTarget.from_char_id(source.pid.other, oppo_active.id),
                         target=source,
                         element=Element.PIERCING,
                         damage=1,
@@ -6450,12 +6450,12 @@ class WindfavoredStatus(CharacterStatus, _UsageStatus):
                     and item.dmg.damage_type.direct_normal_attack()
             ):
                 return item, self
-            oppo_player = game_state.get_player(status_source.pid.other())
+            oppo_player = game_state.get_player(status_source.pid.other)
             alive_chars = oppo_player.characters.get_alive_character_in_activity_order()
             if len(alive_chars) > 1:
                 return (
                     item.change_target(StaticTarget.from_char_id(
-                        status_source.pid.other(),
+                        status_source.pid.other,
                         alive_chars[1].id,
                     )),
                     self,

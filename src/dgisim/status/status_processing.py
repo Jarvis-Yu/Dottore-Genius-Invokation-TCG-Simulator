@@ -139,7 +139,7 @@ class StatusProcessing:
         f(game_state, status, status_source) -> game_state
         """
         game_state = StatusProcessing.loop_one_player_all_statuses(game_state, pid, f)
-        game_state = StatusProcessing.loop_one_player_all_statuses(game_state, pid.other(), f)
+        game_state = StatusProcessing.loop_one_player_all_statuses(game_state, pid.other, f)
         return game_state
 
     @staticmethod
@@ -164,7 +164,7 @@ class StatusProcessing:
             game_state, pid, f, skip_targets=skip_targets
         )
         game_state = StatusProcessing.loop_one_player_all_statuses(
-            game_state, pid.other(), f, skip_targets=skip_targets
+            game_state, pid.other, f, skip_targets=skip_targets
         )
         return game_state
 

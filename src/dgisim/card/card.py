@@ -920,7 +920,7 @@ class _SummonTargetChoiceProvider(Card):
             isinstance(instruction, act.StaticTargetInstruction)
             and (
                 (not cls._MY_SIDE or instruction.target.pid is pid)
-                and (not cls._OPPO_SIDE or instruction.target.pid is pid.other())
+                and (not cls._OPPO_SIDE or instruction.target.pid is pid.other)
             )
             and isinstance(summon := game_state.get_target(instruction.target), sm.Summon)
             and cls._valid_summon(summon)
@@ -944,7 +944,7 @@ class _SummonTargetChoiceProvider(Card):
             if cls._MY_SIDE:
                 pids.append(pid)
             if cls._OPPO_SIDE:
-                pids.append(pid.other())
+                pids.append(pid.other)
             choices = []
             for this_pid in pids:
                 summons = game_state.get_player(this_pid).summons
@@ -1060,7 +1060,7 @@ class _SupportTargetChoiceProvider(Card):
             isinstance(instruction, act.StaticTargetInstruction)
             and (
                 (not cls._MY_SIDE or instruction.target.pid is pid)
-                and (not cls._OPPO_SIDE or instruction.target.pid is pid.other())
+                and (not cls._OPPO_SIDE or instruction.target.pid is pid.other)
             )
             and isinstance(support := game_state.get_target(instruction.target), sp.Support)
             and cls._valid_support(support)
@@ -1084,7 +1084,7 @@ class _SupportTargetChoiceProvider(Card):
             if cls._MY_SIDE:
                 pids.append(pid)
             if cls._OPPO_SIDE:
-                pids.append(pid.other())
+                pids.append(pid.other)
             choices = []
             for this_pid in pids:
                 supports = game_state.get_player(this_pid).supports
@@ -2502,7 +2502,7 @@ class PassingOfJudgment(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
             instruction,
         ) + (
             eft.AddCombatStatusEffect(
-                target_pid=pid.other(),
+                target_pid=pid.other,
                 status=stt.PassingOfJudgmentStatus,
             ),
         )
@@ -2979,9 +2979,9 @@ class GuardiansOath(EventCard, _DiceOnlyChoiceProvider):
                 target_pid=pid,
                 summon=type(summon),
             ))
-        for summon in game_state.get_player(pid.other()).summons:
+        for summon in game_state.get_player(pid.other).summons:
             efts.append(eft.RemoveSummonEffect(
-                target_pid=pid.other(),
+                target_pid=pid.other,
                 summon=type(summon),
             ))
         return tuple(efts)

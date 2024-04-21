@@ -17,6 +17,7 @@ class Pid(Enum):
     def is_player2(self) -> bool:
         return self is Pid.P2
 
+    @property
     def other(self) -> Pid:
         """ :returns: `P2` if this is `P1`, vice versa. """
         if self is Pid.P1:

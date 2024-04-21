@@ -285,7 +285,7 @@ class PlayerStatusTriggererEffect(TriggerrbleEffect):
             game_state, self.pid, self.self_signal, self.detail
         )
         oppo_effects = StatusProcessing.trigger_player_statuses_effects(
-            game_state, self.pid.other(), self.other_signal, self.detail
+            game_state, self.pid.other, self.other_signal, self.detail
         )
         return self_effects + oppo_effects
 
@@ -595,7 +595,7 @@ class TurnEndEffect(PhaseEffect):
             ).build()
         elif other_player.phase is not Act.END_PHASE:
             game_state = game_state.factory().active_player_id(
-                active_player_id.other()
+                active_player_id.other
             ).player(
                 active_player_id,
                 player.factory().phase(Act.PASSIVE_WAIT_PHASE).build()
@@ -671,7 +671,7 @@ class AliveMarkCheckerEffect(CheckerEffect):
     def execute(self, game_state: GameState) -> GameState:
         active_pid = game_state.active_player_id
         revival_effects: list[Effect] = []
-        for pid in (active_pid, active_pid.other()):
+        for pid in (active_pid, active_pid.other):
             for char in game_state.get_player(pid).characters.get_character_in_activity_order():
                 if not char.is_alive() or char.hp > 0:
                     continue
@@ -715,7 +715,7 @@ class DefeatedMarkCheckerEffect(CheckerEffect):
 
     def execute(self, game_state: GameState) -> GameState:
         active_pid = game_state.active_player_id
-        for pid in (active_pid, active_pid.other()):
+        for pid in (active_pid, active_pid.other):
             for char in game_state.get_player(pid).characters.get_character_in_activity_order():
                 if char.is_alive() or char.hp >= 0:
                     continue
@@ -1022,21 +1022,21 @@ class ApplyElementalAuraEffect(DirectEffect):
             if reaction_detail.reaction_type is Reaction.BLOOM:
                 effects.append(
                     AddCombatStatusEffect(
-                        target_pid=self.target.pid.other(),
+                        target_pid=self.target.pid.other,
                         status=stt.DendroCoreStatus,
                     )
                 )
             elif reaction_detail.reaction_type is Reaction.BURNING:
                 effects.append(
                     AddSummonEffect(
-                        target_pid=self.target.pid.other(),
+                        target_pid=self.target.pid.other,
                         summon=sm.BurningFlameSummon,
                     )
                 )
             elif reaction_detail.reaction_type is Reaction.CRYSTALLIZE:
                 effects.append(
                     AddCombatStatusEffect(
-                        target_pid=self.target.pid.other(),
+                        target_pid=self.target.pid.other,
                         status=stt.CrystallizeStatus,
                     )
                 )
@@ -1060,7 +1060,7 @@ class ApplyElementalAuraEffect(DirectEffect):
             elif reaction_detail.reaction_type is Reaction.QUICKEN:
                 effects.append(
                     AddCombatStatusEffect(
-                        target_pid=self.target.pid.other(),
+                        target_pid=self.target.pid.other,
                         status=stt.CatalyzingFieldStatus,
                     )
                 )
@@ -1286,7 +1286,7 @@ class SpecificDamageEffect(DirectEffect):
         elif reaction.reaction_type is Reaction.QUICKEN:
             effects.append(
                 AddCombatStatusEffect(
-                    target_pid=actual_damage.target.pid.other(),
+                    target_pid=actual_damage.target.pid.other,
                     status=stt.CatalyzingFieldStatus,
                 )
             )
@@ -1294,7 +1294,7 @@ class SpecificDamageEffect(DirectEffect):
         elif reaction.reaction_type is Reaction.BLOOM:
             effects.append(
                 AddCombatStatusEffect(
-                    target_pid=actual_damage.target.pid.other(),
+                    target_pid=actual_damage.target.pid.other,
                     status=stt.DendroCoreStatus,
                 )
             )
@@ -1302,7 +1302,7 @@ class SpecificDamageEffect(DirectEffect):
         elif reaction.reaction_type is Reaction.CRYSTALLIZE:
             effects.append(
                 AddCombatStatusEffect(
-                    target_pid=actual_damage.target.pid.other(),
+                    target_pid=actual_damage.target.pid.other,
                     status=stt.CrystallizeStatus,
                 )
             )
@@ -1310,7 +1310,7 @@ class SpecificDamageEffect(DirectEffect):
         elif reaction.reaction_type is Reaction.BURNING:
             effects.append(
                 AddSummonEffect(
-                    target_pid=actual_damage.target.pid.other(),
+                    target_pid=actual_damage.target.pid.other,
                     summon=sm.BurningFlameSummon,
                 )
             )

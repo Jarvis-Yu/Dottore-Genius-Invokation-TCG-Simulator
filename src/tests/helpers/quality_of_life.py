@@ -127,7 +127,7 @@ def add_damage_effect(
         lambda es: es.push_many_fl((
             ReferredDamageEffect(
                 source=StaticTarget(
-                    pid.other(),
+                    pid.other,
                     Zone.CHARACTERS,
                     case_val(char_id is None, 1, char_id),  # type: ignore
                 ),

@@ -67,7 +67,7 @@ class StartingHandSelectPhase(ph.Phase):
         if not chars.char_id_valid(char_id):  # pragma: no cover
             return game_state
         return game_state.factory().active_player_id(
-            pid.other()
+            pid.other
         ).f_player(
             pid,
             lambda p: p.factory().phase(
