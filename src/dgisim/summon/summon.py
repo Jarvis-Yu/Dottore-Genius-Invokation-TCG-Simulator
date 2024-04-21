@@ -622,15 +622,17 @@ class FierySanctumFieldSummon(_DmgPerRoundSummon, stt._ShieldStatus):
             new_self = replace(new_self, shield_usages=1)
         elif signal is TriggeringSignal.POST_DMG and self.activated:
             from ..character.character import Dehya
-            dehya = game_state.get_player(source.pid).characters.find_first_character(Dehya)
-            if dehya is not None and dehya.hp >= 7:
-                es.append(eft.SpecificDamageEffect(
-                    source=source,
-                    target=StaticTarget.from_char_id(source.pid, dehya.id),
-                    element=Element.PIERCING,
-                    damage=1,
-                    damage_type=DamageType(summon=True),
-                ))
+            assert isinstance(detail, DmgIEvent)
+            if detail.dmg.target != source:
+                dehya = game_state.get_player(source.pid).characters.find_first_character(Dehya)
+                if dehya is not None and dehya.hp >= 7:
+                    es.append(eft.SpecificDamageEffect(
+                        source=source,
+                        target=StaticTarget.from_char_id(source.pid, dehya.id),
+                        element=Element.PIERCING,
+                        damage=1,
+                        damage_type=DamageType(summon=True),
+                    ))
                 if new_self is not None:
                     new_self = replace(new_self, activated=False)
         return es, new_self
