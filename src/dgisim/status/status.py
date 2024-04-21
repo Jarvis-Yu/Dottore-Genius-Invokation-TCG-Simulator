@@ -2150,44 +2150,28 @@ class GildedDreamsStatus(_ShadowOfTheSandKingLikeStatus):
 class _HeartOfKhvarenasBrillianceLikeStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 1
-    triggered: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.POST_DMG,
         TriggeringSignal.ROUND_END,
     ))
-
-
-    @override
-    def _inform(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            info_type: Informables,
-            information: InformableEvent,
-    ) -> Self:
-        if info_type is Informables.DMG_DEALT:
-            assert isinstance(information, DmgIEvent)
-            if (
-                    not self.triggered
-                    and self.usages > 0
-                    and information.dmg.target == status_source
-            ):
-                return replace(self, triggered=True)
-        return self
 
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.POST_DMG and self.triggered:
-            if not self._target_is_self_active(game_state, source, source):
-                return [], replace(self, triggered=False)
+        if signal is TriggeringSignal.POST_DMG:
+            assert isinstance(detail, DmgIEvent)
+            if not (
+                    self._target_is_self_active(game_state, source, source)
+                    and self.usages > 0
+                    and detail.dmg.target == source
+            ):
+                return [], self
             return [
                 eft.DrawRandomCardEffect(pid=source.pid, num=1),
-            ], replace(self, usages=-1, triggered=False)
+            ], replace(self, usages=-1)
         elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
-            assert not self.triggered
             return [], replace(self, usages=self.MAX_USAGES)
         return [], self
 
