@@ -687,7 +687,7 @@ class PlayerHiddenStatus(Status):
 
 @dataclass(frozen=True)
 class PersonalStatus(Status):
-    def talent_equiped(self, game_state: GameState, status_source: StaticTarget) -> int:
+    def talent_equiped(self, game_state: GameState, status_source: StaticTarget) -> bool:
         char = game_state.get_character_target(status_source)
         assert char is not None
         return char.talent_equipped()
@@ -4513,15 +4513,12 @@ class RadicalVitalityStatus(CharacterStatus, _UsageLivingStatus):
     NOMINAL_MAX_USAGES: ClassVar[int] = 3
     REACTABLE_SIGNALS = frozenset({
         TriggeringSignal.POST_DMG,
+        TriggeringSignal.COMBAT_ACTION,
         TriggeringSignal.END_ROUND_CHECK_OUT,
     })
 
     def max_usages(self, game_state: GameState, source: StaticTarget) -> int:
-        return self.NOMINAL_MAX_USAGES + (
-            1
-            if self.talent_equiped(game_state, source)
-            else 0
-        )
+        return self.NOMINAL_MAX_USAGES + self.talent_equiped(game_state, source)
 
     @override
     def _inform(
@@ -4536,17 +4533,9 @@ class RadicalVitalityStatus(CharacterStatus, _UsageLivingStatus):
             dmg = information.dmg
             if (
                 not self.activated
-                and (
-                    (
-                    dmg.source == status_source
-                    and dmg.element.is_pure_element()
-                    and dmg.damage_type.directly_from_character()
-                    )
-                    or (
-                    dmg.target == status_source
-                    and dmg.element.is_pure_element()
-                    )
-                )
+                and dmg.source == status_source
+                and dmg.element.is_pure_element()
+                and dmg.damage_type.directly_from_character()
                 and self.usages < self.max_usages(game_state, status_source)
             ):
                 return replace(self, activated=True)
@@ -4576,6 +4565,13 @@ class RadicalVitalityStatus(CharacterStatus, _UsageLivingStatus):
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.POST_DMG:
+            assert isinstance(detail, DmgIEvent)
+            if (
+                    detail.dmg.target == source
+                    and detail.dmg.element.is_pure_element()
+            ):
+                return [], replace(self, usages=1)
+        elif signal is TriggeringSignal.COMBAT_ACTION:
             d_usages = 0
             if self.activated:
                 d_usages = 1
