@@ -363,6 +363,7 @@ class BakeKurageSummon(_DestroyOnNumSummon):
                     damage_type=DamageType(summon=True),
                 ),
                 eft.RecoverHPEffect(
+                    source=StaticTarget.from_summon(source.pid, type(self)),
                     target=StaticTarget.from_char_id(
                         source.pid, self_chars.just_get_active_character_id()
                     ),
@@ -507,6 +508,7 @@ class DandelionFieldSummon(_DestroyOnNumSummon):
                     damage_type=DamageType(summon=True),
                 ),
                 eft.RecoverHPEffect(
+                    source=StaticTarget.from_summon(source.pid, type(self)),
                     target=StaticTarget.from_player_active(game_state, source.pid),
                     recovery=self.HEAL_AMOUNT,
                 ),
@@ -530,6 +532,7 @@ class DrunkenMistSummon(_DmgPerRoundSummon):
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             es.append(
                 eft.RecoverHPEffect(
+                    source=StaticTarget.from_summon(source.pid, type(self)),
                     target=StaticTarget.from_player_active(game_state, source.pid),
                     recovery=2,
                 )
@@ -706,6 +709,7 @@ class HeraldOfFrostSummon(_DmgPerRoundSummon):
             )
             return [
                 eft.RecoverHPEffect(
+                    source=StaticTarget.from_summon(source.pid, type(self)),
                     target=StaticTarget.from_char_id(source.pid, char_to_heal.id),
                     recovery=self.HEAL_AMOUNT,
                 )
@@ -1271,7 +1275,8 @@ class UshiSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
 
             from ..character.character import AratakiItto
             itto = game_state.get_player(
-                source.pid).characters.find_first_character(AratakiItto)
+                source.pid
+            ).characters.find_first_character(AratakiItto)
             assert itto is not None
             return [
                 eft.AddCharacterStatusEffect(

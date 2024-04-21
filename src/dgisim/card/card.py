@@ -1650,7 +1650,7 @@ class FoodCard(EventCard):
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.StaticTargetInstruction)
-        return cls.food_effects(instruction) + (
+        return cls.food_effects(pid, instruction) + (
             eft.AddCharacterStatusEffect(
                 instruction.target,
                 stt.SatiatedStatus,
@@ -1658,7 +1658,7 @@ class FoodCard(EventCard):
         )
 
     @classmethod
-    def food_effects(cls, instruction: act.Instruction) -> tuple[eft.Effect, ...]:  # pragma: no cover
+    def food_effects(cls, pid: Pid, instruction: act.Instruction) -> tuple[eft.Effect, ...]:  # pragma: no cover
         assert isinstance(instruction, act.StaticTargetInstruction)
         return ()
 
@@ -1719,10 +1719,11 @@ class _DirectHealCard(FoodCard):
 
     @override
     @classmethod
-    def food_effects(cls, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
+    def food_effects(cls, pid: Pid, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.StaticTargetInstruction)
         return (
             eft.RecoverHPEffect(
+                StaticTarget.from_card(pid, cls),
                 instruction.target,
                 cls.heal_amount()
             ),
@@ -2113,7 +2114,7 @@ class AdeptusTemptation(FoodCard, _CharTargetChoiceProvider):
 
     @override
     @classmethod
-    def food_effects(cls, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
+    def food_effects(cls, pid: Pid, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.StaticTargetInstruction)
         return (
             eft.AddCharacterStatusEffect(
@@ -2145,7 +2146,7 @@ class JueyunGuoba(FoodCard, _CharTargetChoiceProvider):
 
     @override
     @classmethod
-    def food_effects(cls, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
+    def food_effects(cls, pid: Pid, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.StaticTargetInstruction)
         return (
             eft.AddCharacterStatusEffect(
@@ -2160,7 +2161,7 @@ class LotusFlowerCrisp(FoodCard, _CharTargetChoiceProvider):
 
     @override
     @classmethod
-    def food_effects(cls, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
+    def food_effects(cls, pid: Pid, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.StaticTargetInstruction)
         return (
             eft.AddCharacterStatusEffect(
@@ -2175,7 +2176,7 @@ class MintyMeatRolls(FoodCard, _CharTargetChoiceProvider):
 
     @override
     @classmethod
-    def food_effects(cls, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
+    def food_effects(cls, pid: Pid, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.StaticTargetInstruction)
         return (
             eft.AddCharacterStatusEffect(
@@ -2203,10 +2204,11 @@ class MushroomPizza(FoodCard, _CharTargetChoiceProvider):
 
     @override
     @classmethod
-    def food_effects(cls, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
+    def food_effects(cls, pid: Pid, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.StaticTargetInstruction)
         return (
             eft.RecoverHPEffect(
+                StaticTarget.from_card(pid, cls),
                 instruction.target,
                 1
             ),
@@ -2227,7 +2229,7 @@ class NorthernSmokedChicken(FoodCard, _CharTargetChoiceProvider):
 
     @override
     @classmethod
-    def food_effects(cls, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
+    def food_effects(cls, pid: Pid, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.StaticTargetInstruction)
         return (
             eft.AddCharacterStatusEffect(
@@ -2313,7 +2315,7 @@ class TeyvatFriedEgg(FoodCard, _CharTargetChoiceProvider):
             instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.StaticTargetInstruction)
-        return cls.food_effects(instruction) + (
+        return cls.food_effects(pid, instruction) + (
             eft.AddCharacterStatusEffect(
                 instruction.target,
                 stt.SatiatedStatus,
@@ -2326,10 +2328,11 @@ class TeyvatFriedEgg(FoodCard, _CharTargetChoiceProvider):
 
     @override
     @classmethod
-    def food_effects(cls, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
+    def food_effects(cls, pid: Pid, instruction: act.Instruction) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.StaticTargetInstruction)
         return (
             eft.ReviveRecoverHPEffect(
+                source=StaticTarget.from_card(pid, cls),
                 target=instruction.target,
                 recovery=1,
             ),
@@ -2851,11 +2854,13 @@ class ElementalResonanceSoothingWater(_ElementalResonanceCard, _DiceOnlyChoicePr
     ) -> tuple[eft.Effect, ...]:
         chars = game_state.get_player(pid).characters.get_alive_character_in_activity_order()
         effects: list[eft.Effect] = [eft.RecoverHPEffect(
+            source=StaticTarget.from_card(pid, cls),
             target=StaticTarget.from_char_id(pid, chars[0].id),
             recovery=cls._MAIN_RECOVERY,
         )]
         for char in chars[1:]:
             effects.append(eft.RecoverHPEffect(
+                source=StaticTarget.from_card(pid, cls),
                 target=StaticTarget.from_char_id(pid, char.id),
                 recovery=cls._SUB_RECOVERY,
             ))
@@ -3894,6 +3899,7 @@ class AbsorbingPrism(TalentEventCard, _CombatActionCard, _DiceOnlyChoiceProvider
         )
         return (
             eft.RecoverHPEffect(
+                StaticTarget.from_card(pid, cls),
                 target=target,
                 recovery=3,
             ),

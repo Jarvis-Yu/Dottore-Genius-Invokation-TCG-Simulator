@@ -87,6 +87,7 @@ __all__ = [
 
     # Broadcast Effect
     "BroadcastDamageEffect",
+    "BroadcastHealingEffect",
     "BroadcastSwapEffect",
 
     # Direct Effect
@@ -840,6 +841,21 @@ class BroadcastDamageEffect(BroadcastEffect):
 
 
 @dataclass(frozen=True, repr=False)
+class BroadcastHealingEffect(BroadcastEffect):
+    home_pid: Pid
+    source: StaticTarget
+    target: StaticTarget
+    amount: int
+
+    def execute(self, game_state: GameState) -> GameState:
+        return AllStatusTriggererEffect(
+            pid=self.home_pid,
+            signal=TriggeringSignal.POST_HEAL,
+            detail=HealIEvent(source=self.source, target=self.target, heal_amount=self.amount),
+        ).execute(game_state)
+
+
+@dataclass(frozen=True, repr=False)
 class BroadcastSwapEffect(BroadcastEffect):
     home_pid: Pid  # the player that should be broadcasted first
     source: StaticTarget
@@ -1444,6 +1460,7 @@ class EnergyDrainEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class RecoverHPEffect(DirectEffect):
+    source: StaticTarget
     target: StaticTarget
     recovery: int
 
@@ -1465,6 +1482,13 @@ class RecoverHPEffect(DirectEffect):
                     lambda c: c.factory().hp(hp).build()
                 ).build()
             ).build()
+        ).f_common_effect_stack(
+            lambda es: es.push_left(BroadcastHealingEffect(
+                home_pid=self.source.pid,
+                source=self.source,
+                target=self.target,
+                amount=self.recovery,
+            ))
         ).build()
 
 
@@ -1492,6 +1516,13 @@ class ReviveRecoverHPEffect(RecoverHPEffect):
             lambda es: es.push_one(PersonalStatusTriggererEffect(
                 target=self.target,
                 signal=TriggeringSignal.REVIVAL_GAME_START,
+            ))
+        ).f_common_effect_stack(
+            lambda es: es.push_left(BroadcastHealingEffect(
+                home_pid=self.source.pid,
+                source=self.source,
+                target=self.target,
+                amount=self.recovery,
             ))
         ).build()
 

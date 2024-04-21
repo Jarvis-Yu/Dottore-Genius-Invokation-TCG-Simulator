@@ -1732,6 +1732,7 @@ class AquilaFavoniaStatus(WeaponEquipmentStatus, _UsageLivingStatus):
             if self._target_is_self_active(game_state, source, source):
                 return [
                     eft.RecoverHPEffect(
+                        source=source,
                         target=source,
                         recovery=self.HP_RECOVERY,
                     ),
@@ -2389,6 +2390,7 @@ class VourukashasGlowStatus(_HeartOfKhvarenasBrillianceLikeStatus):
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT and self.usages < self.MAX_USAGES:
             return [
                 eft.RecoverHPEffect(
+                    source=source,
                     target=source,
                     recovery=1,
                 ),
@@ -3421,8 +3423,9 @@ class MushroomPizzaStatus(CharacterStatus, _UsageStatus):
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             es.append(
                 eft.RecoverHPEffect(
-                    source,
-                    1,
+                    source=source,
+                    target=source,
+                    recovery=1,
                 )
             )
         if signal is TriggeringSignal.ROUND_END:
@@ -3807,6 +3810,7 @@ class _InspirationFieldStatus(CombatStatus, _UsageStatus):
                 return [], replace(self, usages=0, activated=False, target_char_id=None)
             return [
                 eft.RecoverHPEffect(
+                    source=source,
                     target=target,
                     recovery=self.RECOVERY,
                 )
@@ -4044,6 +4048,7 @@ class StalwartAndTrueStatus(TalentEquipmentStatus):
                     and this_char.hp <= 6
             ):
                 return [eft.RecoverHPEffect(
+                    source=source,
                     target=source,
                     recovery=2,
                 )], self
@@ -4132,6 +4137,7 @@ class ElectroCrystalCoreStatus(CharacterStatus, RevivalStatus):
         if signal is TriggeringSignal.TRIGGER_REVIVAL:
             effects.append(
                 eft.ReviveRecoverHPEffect(
+                    source=source,
                     target=source,
                     recovery=self._HEAL_AMOUNT,
                 )
@@ -4841,6 +4847,7 @@ class ColdBloodedStrikeStatus(TalentEquipmentStatus):
             assert self.usages >= 1
             es.append(
                 eft.RecoverHPEffect(
+                    source=source,
                     target=source,
                     recovery=2,
                 )
@@ -5551,6 +5558,7 @@ class FullPlateStatus(CombatStatus, StackedShieldStatus):
             for char in this_player.characters.get_character_in_activity_order():
                 if char.is_alive():
                     effects.append(eft.RecoverHPEffect(
+                        source=source,
                         target=StaticTarget(source.pid, Zone.CHARACTERS, char.id),
                         recovery=self.HEAL_AMOUNT,
                     ))
@@ -5679,6 +5687,7 @@ class FortunePreservingTalismanStatus(CombatStatus, _UsageStatus):
                 return [], replace(self, usages=0, activated=False)
             return [
                 eft.RecoverHPEffect(
+                    source=source,
                     target=StaticTarget.from_char_id(source.pid, active_char.id),
                     recovery=self.HEAL_AMOUNT,
                 )
@@ -5839,6 +5848,7 @@ class CeremonialGarmentStatus(CharacterStatus, _UsageStatus):
             self_chars = game_state.get_player(source.pid).characters
             return [
                 eft.RecoverHPEffect(
+                    source=source,
                     target=StaticTarget.from_char_id(source.pid, char.id),
                     recovery=1,
                 )

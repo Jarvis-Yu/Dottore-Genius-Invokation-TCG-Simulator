@@ -44,29 +44,30 @@ class TriggeringSignal(Enum):
     POST_CARD = 7
     #: triggers when "after ... character takes DMG"
     POST_DMG = 8
+    POST_HEAL = 9
     #: triggers when "after any ..."
-    POST_ANY = 9
+    POST_ANY = 10
     #: triggers when "before ... choose their action"
-    PRE_ACTION = 10
+    PRE_ACTION = 11
     #: triggers when "End Phase"
-    ROUND_END = 11  # remove frozen etc.
+    ROUND_END = 12  # remove frozen etc.
     #: triggers when "when the Action Phase starts"
-    ROUND_START = 12
+    ROUND_START = 13
     #: triggers when "when you declare the end of your round"
-    SELF_DECLARE_END_ROUND = 13
+    SELF_DECLARE_END_ROUND = 14
     #: ABOUT TO BE DEPRECATED: triggers when this player switch a character
-    SELF_SWAP = 14  # swap of this player
+    SELF_SWAP = 15  # swap of this player
     #: ABOUT TO BE DEPRECATED: triggers when the opponent switch a character
-    OPPO_SWAP = 15  # swap of the opposing playing
+    OPPO_SWAP = 16  # swap of the opposing playing
     #: triggers when "when the character ... would be defeated"
-    TRIGGER_REVIVAL = 16
+    TRIGGER_REVIVAL = 17
     #: triggers when "when the character to which this is attached is defeated"
     # only triggers the character which is about to be defeated
-    DEATH_DECLARATION = 17
+    DEATH_DECLARATION = 18
     #: triggers when "when the battle begins" character is being revived
-    REVIVAL_GAME_START = 18
+    REVIVAL_GAME_START = 19
     #: directly trigger a status
-    DIRECT_TRIGGER = 19
+    DIRECT_TRIGGER = 20
 
 
 class DynamicCharacterTarget(Enum):

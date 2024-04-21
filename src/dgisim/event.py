@@ -30,8 +30,8 @@ __all__ = [
     "EventType",
 
     "InformableEvent",
-    "DmgIEvent",
     "CharacterDeathIEvent",
+    "DmgIEvent",
     "EquipmentDiscardIEvent",
     "HealIEvent",
     "ReactionIEvent",
@@ -80,14 +80,14 @@ class InformableEvent:
 
 
 @dataclass(frozen=True, kw_only=True)
-class DmgIEvent(InformableEvent):
-    dmg: SpecificDamageEffect
-    lethal: bool = False
+class CharacterDeathIEvent(InformableEvent):
+    target: StaticTarget
 
 
 @dataclass(frozen=True, kw_only=True)
-class CharacterDeathIEvent(InformableEvent):
-    target: StaticTarget
+class DmgIEvent(InformableEvent):
+    dmg: SpecificDamageEffect
+    lethal: bool = False
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -98,6 +98,7 @@ class EquipmentDiscardIEvent(InformableEvent):
 
 @dataclass(frozen=True, kw_only=True)
 class HealIEvent(InformableEvent):
+    source: StaticTarget
     target: StaticTarget
     heal_amount: int
 

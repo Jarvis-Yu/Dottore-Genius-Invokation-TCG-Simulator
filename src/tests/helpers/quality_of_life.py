@@ -69,6 +69,7 @@ class _TempTestInfiniteRevivalStatus(CharacterHiddenStatus, RevivalStatus):
         if signal is TriggeringSignal.TRIGGER_REVIVAL:
             effects.append(
                 ReviveRecoverHPEffect(
+                    source=source,
                     target=source,
                     recovery=BIG_INT,
                 ),
@@ -472,6 +473,7 @@ def replace_character(
     game_state = game_state.factory().f_effect_stack(
         lambda es: es.push_many_fl((
             ReviveRecoverHPEffect(
+                source=StaticTarget.from_char_id(pid, char_id),
                 target=StaticTarget.from_char_id(pid, char_id),
                 recovery=character_instance.max_hp,
             ),

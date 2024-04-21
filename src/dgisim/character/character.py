@@ -1198,6 +1198,7 @@ class Diona(Character):
                 damage_type=DamageType(elemental_burst=True),
             ),
             eft.RecoverHPEffect(
+                source=source,
                 target=source,
                 recovery=2,
             ),
@@ -1749,6 +1750,7 @@ class HuTao(Character):
                 damage_type=DamageType(elemental_burst=True),
             ),
             eft.RecoverHPEffect(
+                source=source,
                 target=source,
                 recovery=heal,
             ),
@@ -1890,6 +1892,7 @@ class Jean(Character):
         self_characters = game_state.get_player(source.pid).characters
         for character in self_characters.get_alive_character_in_activity_order():
             effects.append(eft.RecoverHPEffect(
+                source=source,
                 target=StaticTarget.from_char_id(source.pid, character.id),
                 recovery=2,
             ))
@@ -3116,6 +3119,7 @@ class Qiqi(Character):
                         ),
                     ) + tuple(
                         eft.ReviveRecoverHPEffect(
+                            source=source,
                             target=StaticTarget.from_char_id(source.pid, char.id),
                             recovery=2,
                         )
@@ -3442,6 +3446,7 @@ class SangonomiyaKokomi(Character):
         self_characters = game_state.get_player(source.pid).characters
         for character in self_characters.get_alive_character_in_activity_order():
             effects.append(eft.RecoverHPEffect(
+                source=source,
                 target=StaticTarget.from_char_id(source.pid, character.id),
                 recovery=1,
             ))

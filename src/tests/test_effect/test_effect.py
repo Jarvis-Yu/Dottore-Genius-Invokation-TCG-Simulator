@@ -63,8 +63,9 @@ class TestEffect(unittest.TestCase):
         # Heals normally
         g1 = game_state.factory().f_effect_stack(
             lambda es: es.push_one(RecoverHPEffect(
-                StaticTarget(Pid.P1, Zone.CHARACTERS, 2),
-                1
+                source=StaticTarget(Pid.P1, Zone.CHARACTERS, 2),
+                target=StaticTarget(Pid.P1, Zone.CHARACTERS, 2),
+                recovery=1,
             ))
         ).build()
         g1 = g1.step()
@@ -75,8 +76,9 @@ class TestEffect(unittest.TestCase):
         # No overheal
         g2 = game_state.factory().f_effect_stack(
             lambda es: es.push_one(RecoverHPEffect(
-                StaticTarget(Pid.P1, Zone.CHARACTERS, 2),
-                3
+                source=StaticTarget(Pid.P1, Zone.CHARACTERS, 2),
+                target=StaticTarget(Pid.P1, Zone.CHARACTERS, 2),
+                recovery=3,
             ))
         ).build()
         g2 = g2.step()

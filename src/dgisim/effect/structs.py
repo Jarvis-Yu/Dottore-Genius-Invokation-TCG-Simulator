@@ -8,6 +8,7 @@ from ..state.enums import Pid
 from .enums import Zone
 
 if TYPE_CHECKING:
+    from ..card.card import Card
     from ..encoding.encoding_plan import EncodingPlan
     from ..state.game_state import GameState
     from ..summon.summon import Summon
@@ -22,7 +23,7 @@ __all__ = [
 class StaticTarget:
     pid: Pid
     zone: Zone
-    id: int | type["Summon"]
+    id: int | type["Summon"] | type["Card"]
 
     def encoding(self, encoding_plan: "EncodingPlan") -> list[int]:
         return [
@@ -87,6 +88,10 @@ class StaticTarget:
         :returns: the static target for support with `sid` of player `pid`.
         """
         return cls(pid, Zone.SUPPORTS, sid)
+
+    @classmethod
+    def from_card(cls, pid: Pid, card: type["Card"]) -> Self:
+        return cls(pid, Zone.HAND_CARD, card)
 
 
 @dataclass(frozen=True, kw_only=True, repr=False)

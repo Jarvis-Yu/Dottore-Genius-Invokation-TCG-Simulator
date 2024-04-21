@@ -551,6 +551,7 @@ EFFECT_MAPPING: dict[type["Effect"], int] = HashableDict({
         #### 5 Broadcast Effect 400 ####
         (effect.BroadcastSwapEffect, 400),
         (effect.BroadcastDamageEffect, 401),
+        (effect.BroadcastHealingEffect, 402),
         #### End 500 ####
     )
 })
