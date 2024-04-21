@@ -52,7 +52,8 @@ class StatusProcessing:
     def loop_one_player_all_statuses(
             game_state: GameState,
             pid: Pid,
-            f: Callable[[GameState, stt.Status, StaticTarget], GameState]
+            f: Callable[[GameState, stt.Status, StaticTarget], GameState],
+            skip_targets: set[StaticTarget] = set(),
     ) -> GameState:
         """
         Perform f on all statuses of player pid in order
@@ -75,6 +76,8 @@ class StatusProcessing:
                 Zone.CHARACTERS,
                 character_id
             )
+            if target in skip_targets:
+                return
             for status in statuses:
                 game_state = f(game_state, status, target)
 
@@ -129,7 +132,7 @@ class StatusProcessing:
     def loop_all_statuses(
             game_state: GameState,
             pid: Pid,
-            f: Callable[[GameState, stt.Status, StaticTarget], GameState]
+            f: Callable[[GameState, stt.Status, StaticTarget], GameState],
     ) -> GameState:
         """
         Perform f on all statuses of player pid and opponent in order
@@ -140,8 +143,36 @@ class StatusProcessing:
         return game_state
 
     @staticmethod
+    def loop_all_statuses_but_target_first(
+            game_state: GameState,
+            pid: Pid,
+            target: StaticTarget,
+            f: Callable[[GameState, stt.Status, StaticTarget], GameState],
+    ) -> GameState:
+        """
+        Perform f on all statuses of player pid and opponent in order,
+        but the target is processed first. (and skipped if it is encountered again)
+        f(game_state, status, status_source) -> game_state
+        """
+        char = game_state.get_character_target(target)
+        assert char is not None
+        char_statuses = char.get_all_statuses_ordered_flattened()
+        for status in char_statuses:
+            game_state = f(game_state, status, target)
+        skip_targets = {target}
+        game_state = StatusProcessing.loop_one_player_all_statuses(
+            game_state, pid, f, skip_targets=skip_targets
+        )
+        game_state = StatusProcessing.loop_one_player_all_statuses(
+            game_state, pid.other(), f, skip_targets=skip_targets
+        )
+        return game_state
+
+    @staticmethod
     def trigger_all_statuses_effects(
-            game_state: GameState, pid: Pid, signal: TriggeringSignal, detail: None | InformableEvent = None,
+            game_state: GameState, pid: Pid, signal: TriggeringSignal,
+            detail: None | InformableEvent = None,
+            is_lethal_dmg: bool = False,
     ) -> list[eft.TriggerrbleEffect]:
         """
         Takes the current game_state, trigger all statuses in order of player pid
@@ -173,7 +204,11 @@ class StatusProcessing:
 
             return game_state
 
-        StatusProcessing.loop_all_statuses(game_state, pid, f)
+        if not is_lethal_dmg:
+            StatusProcessing.loop_all_statuses(game_state, pid, f)
+        else:
+            assert isinstance(detail, DmgIEvent)
+            StatusProcessing.loop_all_statuses_but_target_first(game_state, pid, detail.dmg.target, f)
         return effects
 
     @staticmethod

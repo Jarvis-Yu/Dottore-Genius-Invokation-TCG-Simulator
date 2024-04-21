@@ -829,12 +829,13 @@ class BroadcastDamageEffect(BroadcastEffect):
     lethal: bool
 
     def execute(self, game_state: GameState) -> GameState:
+        detail = DmgIEvent(dmg=self.dmg, lethal=self.lethal)
+        effects = StatusProcessing.trigger_all_statuses_effects(
+            game_state, self.home_pid, TriggeringSignal.POST_DMG, detail,
+            is_lethal_dmg=self.lethal,
+        )
         return game_state.factory().f_effect_stack(
-            lambda es: es.push_one(AllStatusTriggererEffect(
-                pid=self.home_pid,
-                signal=TriggeringSignal.POST_DMG,
-                detail=DmgIEvent(dmg=self.dmg, lethal=self.lethal),
-            ))
+            lambda es: es.push_many_fl(effects)
         ).build()
 
 
@@ -845,14 +846,12 @@ class BroadcastSwapEffect(BroadcastEffect):
     target: StaticTarget
 
     def execute(self, game_state: GameState) -> GameState:
-        return game_state.factory().f_effect_stack(
-            lambda es: es.push_one(PlayerStatusTriggererEffect(
-                pid=self.home_pid,
-                self_signal=TriggeringSignal.SELF_SWAP,
-                other_signal=TriggeringSignal.OPPO_SWAP,
-                detail=SwapIEvent(source=self.source, target=self.target),
-            ))
-        ).build()
+        return PlayerStatusTriggererEffect(
+            pid=self.home_pid,
+            self_signal=TriggeringSignal.SELF_SWAP,
+            other_signal=TriggeringSignal.OPPO_SWAP,
+            detail=SwapIEvent(source=self.source, target=self.target),
+        ).execute(game_state)
 
 
 ############################## Direct Effect ##############################
