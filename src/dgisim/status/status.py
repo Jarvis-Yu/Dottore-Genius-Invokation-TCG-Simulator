@@ -2299,7 +2299,6 @@ class ShadowOfTheSandKingStatus(_ShadowOfTheSandKingLikeStatus):
 class TenacityOfTheMillelithStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 1
-    activated: bool = False
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.POST_DMG,
@@ -2313,32 +2312,18 @@ class TenacityOfTheMillelithStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
         return TenacityOfTheMillelith
 
     @override
-    def _inform(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            info_type: Informables,
-            information: InformableEvent,
-    ) -> Self:
-        if info_type is Informables.DMG_DEALT:
-            assert isinstance(information, DmgIEvent)
-            dmg = information.dmg
-            if (
-                    not self.activated
-                    and self.usages > 0
-                    and dmg.target == status_source
-            ):
-                return replace(self, activated=True)
-        return self
-
-    @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.POST_DMG and self.activated:
-            if not self._target_is_self_active(game_state, source, source):
-                return [], replace(self, activated=False)
+        if signal is TriggeringSignal.POST_DMG:
+            assert isinstance(detail, DmgIEvent)
+            if not (
+                    self._target_is_self_active(game_state, source)
+                    and self.usages > 0
+                    and detail.dmg.target == source
+            ):
+                return [], self
             this_char = game_state.get_character_target(source)
             assert this_char is not None
             return [
@@ -2347,7 +2332,7 @@ class TenacityOfTheMillelithStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
                     element=this_char.ELEMENT,
                     num=1,
                 ),
-            ], replace(self, usages=-1, activated=False)
+            ], replace(self, usages=-1)
         elif signal is TriggeringSignal.ROUND_START:
             return [
                 eft.AddCharacterStatusEffect(
