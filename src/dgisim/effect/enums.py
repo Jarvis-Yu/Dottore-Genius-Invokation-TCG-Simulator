@@ -44,7 +44,7 @@ class TriggeringSignal(Enum):
     POST_CARD = 7
     #: triggers when "after ... character takes DMG"
     POST_DMG = 8
-    POST_HEAL = 9
+    POST_HEALING = 9
     #: triggers when "after any ..."
     POST_ANY = 10
     #: triggers when "before ... choose their action"

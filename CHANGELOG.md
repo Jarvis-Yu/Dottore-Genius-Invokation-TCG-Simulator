@@ -18,6 +18,8 @@
       - Pulsating Witch
       - Shaken, Not Purred
       - Steady Breathing
+    - Artifact Cardso
+      - Crown of Watatsumi
   - Support Cards:
     - Companion Cards:
       - Jeht
@@ -36,6 +38,7 @@
 ### Fixed
 
 - Faulty description of size of encoded player state in documentation.
+- Faulty execution order of damage, swap, healing signals
 
 ## 0.5.0 (31 Jan 2024)
 

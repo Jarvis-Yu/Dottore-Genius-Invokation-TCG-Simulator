@@ -78,7 +78,7 @@ class _TempTestInfiniteRevivalStatus(CharacterHiddenStatus, RevivalStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class _TempTestStatus(CharacterStatus):
+class _TempTestDmgStatus(CharacterStatus):
     dmg: int
     elem: Element
     target: StaticTarget
@@ -87,7 +87,8 @@ class _TempTestStatus(CharacterStatus):
     ))
 
     def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal, detail: None | InformableEvent
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
     ) -> tuple[list[Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION:
             return [
@@ -97,7 +98,29 @@ class _TempTestStatus(CharacterStatus):
                     element=self.elem,
                     damage=self.dmg,
                     damage_type=DamageType(status=True, no_boost=True),
-                )
+                ),
+            ], None
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class _TempTestHealingStatus(CharacterStatus):
+    healing: int
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+    ))
+
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION:
+            return [
+                RecoverHPEffect(
+                    source=source,
+                    target=source,
+                    recovery=self.healing,
+                ),
             ], None
         return [], self
 
@@ -481,6 +504,7 @@ def replace_character(
                 target=StaticTarget.from_char_id(pid, char_id),
                 signal=TriggeringSignal.INIT_GAME_START,
             ),
+            EffectsGroupEndEffect(),
         ))
     ).build()
     return auto_step(game_state)
@@ -531,8 +555,7 @@ def silent_fast_swap(game_state: GameState, pid: Pid, char_id: int) -> GameState
 
 
 def simulate_status_dmg(
-        game_state: GameState,
-        dmg_amount: int,
+        game_state: GameState, dmg_amount: int,
         element: Element = Element.PIERCING,
         pid: Pid = Pid.P2,
         char_id: None | int = None,
@@ -549,7 +572,7 @@ def simulate_status_dmg(
     )
     game_state = UpdateCharacterStatusEffect(
         target=target,
-        status=_TempTestStatus(
+        status=_TempTestDmgStatus(
             dmg=dmg_amount,
             elem=element,
             target=target,
@@ -558,7 +581,34 @@ def simulate_status_dmg(
     game_state = game_state.factory().f_effect_stack(
         lambda es: es.push_one(TriggerStatusEffect(
             target=target,
-            status=_TempTestStatus,
+            status=_TempTestDmgStatus,
+            signal=TriggeringSignal.COMBAT_ACTION,
+        ))
+    ).build()
+    return auto_step(game_state, observe=observe)
+
+
+def simulate_status_heal(
+        game_state: GameState, healing: int, pid: Pid,
+        char_id: None | int = None,
+        observe: bool = False,
+):
+    """
+    Simulate a healing from a test-only, one-time status that is on the target character.
+    """
+    target = (
+        StaticTarget.from_player_active(game_state, pid)
+        if char_id is None
+        else StaticTarget.from_char_id(pid, char_id)
+    )
+    game_state = UpdateCharacterStatusEffect(
+        target=target,
+        status=_TempTestHealingStatus(healing=healing),
+    ).execute(game_state)
+    game_state = game_state.factory().f_effect_stack(
+        lambda es: es.push_one(TriggerStatusEffect(
+            target=target,
+            status=_TempTestHealingStatus,
             signal=TriggeringSignal.COMBAT_ACTION,
         ))
     ).build()

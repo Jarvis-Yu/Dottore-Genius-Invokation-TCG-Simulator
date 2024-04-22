@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (39/75 implemented)](#character-3975-implemented)
-  - [Card (163/259 implemented)](#card-163259-implemented)
+  - [Card (164/259 implemented)](#card-164259-implemented)
 
 ## Character (39/75 implemented)
 
@@ -59,9 +59,9 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (163/259 implemented)
+## Card (164/259 implemented)
 
-- [ ] Equipment Card (82/143):
+- [ ] Equipment Card (83/143):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
@@ -133,7 +133,7 @@ all I need now is to implement each card and character.
     - [x] Blizzard Strayer
     - [x] Broken Rimes Echo
     - [x] Crimson Witch of Flames
-    - [ ] Crown of Watatsumi
+    - [x] Crown of Watatsumi
     - [x] Deepwood Memories
     - [ ] Echoes of an Offering
     - [ ] Emblem of Severed Fate

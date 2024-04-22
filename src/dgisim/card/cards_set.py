@@ -80,6 +80,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     BlizzardStrayer,
     BrokenRimesEcho,
     CrimsonWitchOfFlames,
+    CrownOfWatatsumi,
     DeepwoodMemories,
     FlowingRings,
     GamblersEarrings,

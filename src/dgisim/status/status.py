@@ -1838,10 +1838,7 @@ class _ElementalDiscountStatus(ArtifactEquipmentStatus):
 
     @override
     def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: PreprocessableEvent,
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
         """
@@ -1941,24 +1938,59 @@ class CrimsonWitchOfFlamesStatus(_ElementalDiscountSupplyStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class CrownOfWatatsumiStatus(ArtifactEquipmentStatus):
-    # TODO: not finished
+class CrownOfWatatsumiStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
+    usages: int = 0
+    MAX_USAGES: ClassVar[int] = 2
+    accumulated_healing: int = 0
+    HEALING_THRESHOLD: ClassVar[int] = 3
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_HEALING,
+    ))
+
     @classproperty
     def CARD(cls) -> type[crd.ArtifactEquipmentCard]:
         from ..card.card import CrownOfWatatsumi
         return CrownOfWatatsumi
 
     @override
-    def _inform(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            info_type: Informables,
-            information: InformableEvent,
-    ) -> Self:
-        if info_type is Informables.HEALING:
-            assert isinstance(information, HealIEvent)
-        return self
+    def _preprocess(
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            if not (
+                    self.usages > 0
+                    and item.dmg.source == status_source
+                    and item.dmg.damage_type.directly_from_character()
+            ):
+                return item, self
+            return item.delta_damage(self.usages), replace(self, usages=0)
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.POST_HEALING:
+            assert isinstance(detail, HealingIEvent)
+            if not (
+                    self.usages < self.MAX_USAGES
+                    and detail.target == source
+            ):
+                return [], self
+            new_acc_healing = self.accumulated_healing + detail.healing
+            if new_acc_healing < self.HEALING_THRESHOLD:
+                return [], replace(self, usages=0, accumulated_healing=new_acc_healing)
+            d_usages = min(new_acc_healing // self.HEALING_THRESHOLD, self.MAX_USAGES - self.usages)
+            new_acc_healing = (
+                new_acc_healing % self.HEALING_THRESHOLD
+                if d_usages + self.usages < self.MAX_USAGES
+                else 0
+            )
+            return [], replace(self, usages=d_usages, accumulated_healing=new_acc_healing)
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)

@@ -850,8 +850,8 @@ class BroadcastHealingEffect(BroadcastEffect):
     def execute(self, game_state: GameState) -> GameState:
         return AllStatusTriggererEffect(
             pid=self.home_pid,
-            signal=TriggeringSignal.POST_HEAL,
-            detail=HealIEvent(source=self.source, target=self.target, heal_amount=self.amount),
+            signal=TriggeringSignal.POST_HEALING,
+            detail=HealingIEvent(source=self.source, target=self.target, healing=self.amount),
         ).execute(game_state)
 
 
@@ -1487,7 +1487,7 @@ class RecoverHPEffect(DirectEffect):
                 home_pid=self.source.pid,
                 source=self.source,
                 target=self.target,
-                amount=self.recovery,
+                amount=hp - character.hp,  # type: ignore
             ))
         ).build()
 
@@ -1522,7 +1522,7 @@ class ReviveRecoverHPEffect(RecoverHPEffect):
                 home_pid=self.source.pid,
                 source=self.source,
                 target=self.target,
-                amount=self.recovery,
+                amount=hp,
             ))
         ).build()
 
