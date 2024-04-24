@@ -1168,7 +1168,7 @@ class VanaranaSupport(Support):
         """
         :returns: the encoding of the content of the status. (excluding the type of status)
         """
-        values = list(chain(*[
+        values = [0] + list(chain(*[
             [self.__getattribute__(field.name)]
             for field in fields(self)
         ]))

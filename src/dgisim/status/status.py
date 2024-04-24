@@ -650,9 +650,12 @@ class Status:
         """
         :returns: the encoding of the content of the status. (excluding the type of status)
         """
-        values = list(chain(*[
-            [self.__getattribute__(field.name)]
-            for field in fields(self)
+        field_names = set(field.name for field in fields(self))
+        usages_value = self.__getattribute__("usages") if "usages" in field_names else 0
+        field_names.discard("usages")
+        values = [usages_value] + list(chain(*[
+            [self.__getattribute__(field_name)]
+            for field_name in field_names
         ]))
         ret_val = [encoding_plan.encode_item(self)]
         for value in values:
