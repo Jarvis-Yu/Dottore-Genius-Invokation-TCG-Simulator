@@ -1980,7 +1980,7 @@ class CrownOfWatatsumiStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
             assert isinstance(detail, HealingIEvent)
             if not (
                     self.usages < self.MAX_USAGES
-                    and detail.target == source
+                    and detail.target.pid == source.pid
             ):
                 return [], self
             new_acc_healing = self.accumulated_healing + detail.healing
