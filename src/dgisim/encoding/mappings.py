@@ -452,6 +452,7 @@ EFFECT_MAPPING: dict[type["Effect"], int] = HashableDict({
         (effect.EffectsGroupEndEffect, 7),
         (effect.EffectsGroupStartEffect, 8),
         (effect.GroupEffectBarrierEffect, 9),
+        (effect.CardSelectPhaseStartEffect, 10),
     
         #### 1 Checker Effect 050 ####
         (effect.AliveMarkCheckerEffect, 50),

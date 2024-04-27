@@ -792,12 +792,15 @@ class YayoiNanatsukiSupport(Support, stt._UsageLivingStatus):
                     and item.dice_cost.can_cost_less_elem()
                     and self.usages > 0
             ):
-                self_chars = game_state.get_player(status_source.pid).characters
-                additional_deduction = sum([
-                    1
-                    for char in self_chars
+                characters_with_artifact = [
+                    char
+                    for char in game_state.get_player(status_source.pid).characters
                     if char.character_statuses.find_type(stt.ArtifactEquipmentStatus) is not None
-                ])
+                ]
+                if len(characters_with_artifact) >= 2:
+                    additional_deduction = 1
+                else:
+                    additional_deduction = 0
                 return (
                     item.with_new_cost(item.dice_cost.cost_less_elem(
                         self.COST_DEDUCTION + additional_deduction
