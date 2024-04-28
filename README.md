@@ -2,7 +2,7 @@
 
 [![PyPI Version](https://img.shields.io/pypi/v/dgisim.svg)](https://pypi.org/project/dgisim/)
 [![Documentation Status](https://readthedocs.org/projects/dottore-genius-invokation-tcg-simulator/badge/?version=latest)](https://dottore-genius-invokation-tcg-simulator.readthedocs.io/en/latest/?badge=latest)
-![Python 3.10](https://img.shields.io/badge/python->=3.10-blue.svg)
+![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)
 [![Coverage Status](https://coveralls.io/repos/github/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/badge.svg?branch=master)](https://coveralls.io/github/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator?branch=master)
 [![license](https://img.shields.io/github/license/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator)](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/blob/master/LICENSE)
 
@@ -14,6 +14,7 @@ A Genshin Impact Genius Invokation TCG simulator intended to be used for Reinfor
 - [**Game design**](https://dottore-genius-invokation-tcg-simulator.readthedocs.io/en/stable/design-n-philosophy.html)
 - [**Bug reports**](https://github.com/Jarvis-Yu/Dottore-Genius-Invokation-TCG-Simulator/issues)
 - [**Discord server**](https://discord.gg/arammB6BEY)
+- [**QQ Group**](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=Emk4VNANVGlHUY1lU2v2c-Gb8vprHX5O&authKey=7oU8xKJ93wGirIPxyG9xP31%2F0Vy9xkJYJtvebpFcqncwKQUXt%2FzggH7yOpoJapH6&noverify=0&group_code=794275160)
 
 This package aims to help programmers code things based on Genius Invokation
 TCG with ease. e.g. AI, desktop application, website...
