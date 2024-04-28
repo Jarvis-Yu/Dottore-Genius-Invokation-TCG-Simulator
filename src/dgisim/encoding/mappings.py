@@ -126,7 +126,7 @@ CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
         (char.JadeplumeTerrorshroom, 501),
         (char.Tighnari, 502),
         (char.Nahida, 503),
-        # (char.Yaoyao, 504),
+        (char.Yaoyao, 504),
         # (char.Baizhu, 505),
 
         #### Anemo 600 ####
@@ -406,7 +406,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.ProliferatingSpores, 1426),
         (card.KeenSight, 1427),
         (card.TheSeedOfStoredKnowledge, 1428),
-        # Yaoyao 1429
+        (card.Beneficent, 1429),
         # Baizhu 1430
 
         #### 4.7 Anemo 1525 ####
@@ -850,6 +850,8 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.SeedOfSkandhaStatus, 10661),
         (status.ShrineOfMayaStatus, 10662),
         ## Yaoyao 10680 ##
+        (status.BeneficentStatus, 10680),
+        (status.AdeptalLegacyStatus, 10681),
         ## Baizhu 10700 ##
 
         #### 4.7 Anemo Character Status 12600 ####
@@ -939,7 +941,7 @@ SUMM_MAPPING: dict[type["Summon"], int] = HashableDict({
         (summon.CuileinAnbarSummon, 500),
         ##(summon.BountifulCoreSummon, 501),
         (summon.ClusterbloomArrowSummon, 502),
-        # (summon.YueguiThrowingModeSummon, 503),
+        (summon.YueguiThrowingModeSummon, 503),
         # (summon.GossamerSpriteSummon, 504),
 
         #### Anemo(convertible) 600 ####

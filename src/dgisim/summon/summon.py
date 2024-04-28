@@ -69,6 +69,7 @@ __all__ = [
     "TenguJuuraiAmbushSummon",
     "TenguJuuraiStormclusterSummon",
     "UshiSummon",
+    "YueguiThrowingModeSummon",
 ]
 
 
@@ -233,6 +234,7 @@ class _ConvertableAnemoSummon(_DestroyOnNumSummon):
         new_self = self
         if signal is TriggeringSignal.COMBAT_ACTION:
             if self._to_be_converted():
+                assert self.ready_elem is not None
                 new_self = replace(
                     self,
                     usages=0,  # this is delta-usages
@@ -243,6 +245,7 @@ class _ConvertableAnemoSummon(_DestroyOnNumSummon):
 
         elif signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             if self._to_be_converted():
+                assert self.ready_elem is not None
                 new_self = replace(
                     self,
                     usages=0,  # this is delta-usages
@@ -1294,4 +1297,51 @@ class UshiSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
                 status_gaining_triggered=False,
             )
 
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class YueguiThrowingModeSummon(_DestroyOnNumSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 1
+    HEALING: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.DENDRO
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            from ..character.character import Yaoyao
+            characters = game_state.get_player(source.pid).characters
+            yaoyao = characters.find_first_character(Yaoyao)
+            assert yaoyao is not None
+            dmg, healing = 0, 0
+            if yaoyao.talent_equipped() and self.usages == 1:
+                dmg, healing = 1, 1
+            chars_by_dmg_taken = sorted(
+                characters.get_alive_character_in_activity_order(),
+                key=lambda c: c.hp_lost(),
+                reverse=True,
+            )
+            char_target = StaticTarget.from_char_id(source.pid, chars_by_dmg_taken[0].id)
+            return [
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=self.ELEMENT,
+                    damage=self.DMG + dmg,
+                    damage_type=DamageType(summon=True),
+                ),
+                eft.RecoverHPEffect(
+                    source=source,
+                    target=char_target,
+                    recovery=self.HEALING + healing,
+                ),
+            ], replace(self, usages=-1)
         return [], self

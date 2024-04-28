@@ -45,6 +45,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     Wanderer,
     Xingqiu,
     YaeMiko,
+    Yaoyao,
     Yoimiya,
 ]
 

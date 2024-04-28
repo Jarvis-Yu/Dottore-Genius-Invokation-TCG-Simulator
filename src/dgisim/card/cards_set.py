@@ -10,6 +10,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     AbsorbingPrism,
     AbyssalMayhemHydrospout,
     AratakiIchiban,
+    Beneficent,
     ColdBloodedStrike,
     DescentOfDivinity,
     EmbraceOfWinds,

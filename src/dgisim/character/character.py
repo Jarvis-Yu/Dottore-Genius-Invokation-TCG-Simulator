@@ -71,6 +71,7 @@ __all__ = [
     "Wanderer",
     "Xingqiu",
     "YaeMiko",
+    "Yaoyao",
     "Yoimiya",
 ]
 
@@ -4099,6 +4100,73 @@ class YaeMiko(Character):
                 )
             )
         return tuple(effects)
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=2,
+            hiddens=stts.Statuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
+class Yaoyao(Character):
+    _ELEMENT = Element.DENDRO
+    _WEAPON_TYPE = WeaponType.POLEARM
+    _TALENT_STATUS = stt.BeneficentStatus
+    _FACTIONS = frozenset((Faction.LIYUE,))
+
+    _SKILL1_COST = AbstractDice({
+        Element.DENDRO: 1,
+        Element.ANY: 2,
+    })
+    _SKILL2_COST = AbstractDice({
+        Element.DENDRO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDice({
+        Element.DENDRO: 4,
+    })
+
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        )
+
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=sm.YueguiThrowingModeSummon,
+            ),
+        )
+
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.max_energy,
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.DENDRO,
+                damage=1,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            eft.AddCombatStatusEffect(
+                target_pid=source.pid,
+                status=stt.AdeptalLegacyStatus,
+            ),
+        )
 
     @classmethod
     def from_default(cls, id: int = -1) -> Self:

@@ -71,7 +71,7 @@ class ActionGenerator:
         assert self.action is not None
         action = self.action
         if self.instruction is not None:
-            action = replace(action, instruction=self.instruction)
+            action = replace(action, instruction=self.instruction)  # type: ignore
         return action
 
     def choices(self) -> GivenChoiceType:

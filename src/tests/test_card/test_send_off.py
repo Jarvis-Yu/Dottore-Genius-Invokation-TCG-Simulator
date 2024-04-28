@@ -25,6 +25,7 @@ class TestSendOff(unittest.TestCase):
         ))
         p2_summons = game_state.player2.summons
         self.assertIn(ReflectionSummon, p2_summons)
+        summon: Summon
         summon = p2_summons.just_find(ReflectionSummon)
         self.assertEqual(summon.usages, 0)
 

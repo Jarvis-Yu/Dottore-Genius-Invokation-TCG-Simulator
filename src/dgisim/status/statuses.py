@@ -14,7 +14,7 @@ __all__ = [
     "Statuses",
 ]
 
-_U = TypeVar('_U')
+__InputStatus = TypeVar('__InputStatus', bound=stt.Status)
 
 
 class Statuses:
@@ -149,7 +149,7 @@ class Statuses:
         """ :returns: the status of the exact type `status`, or `None` if not found. """
         return next((bf for bf in self._statuses if type(bf) is status), None)
 
-    def just_find(self, status: type[_U]) -> _U:
+    def just_find(self, status: type[__InputStatus]) -> __InputStatus:
         """ :returns: the status of the exact type `status`, or an exception is thrown. """
         assert issubclass(status, stt.Status)
         found_status = just(self.find(status))
@@ -160,7 +160,7 @@ class Statuses:
         """ :returns: the status of the type `status`, or `None` if not found. """
         return next((bf for bf in self._statuses if isinstance(bf, status)), None)
 
-    def just_find_type(self, status: type[_U]) -> _U:
+    def just_find_type(self, status: type[__InputStatus]) -> __InputStatus:
         """ :returns: the status of the type `status`, or an exception is thrown. """
         assert issubclass(status, stt.Status)
         found_status = just(self.find_type(status))

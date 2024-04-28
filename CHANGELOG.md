@@ -12,9 +12,11 @@
   - Chongyun
   - Diona
   - Lisa
+  - Yaoyao
 - New Cards:
   - Equipment Cards:
     - Talent Cards:
+      - Beneficent
       - Pulsating Witch
       - Shaken, Not Purred
       - Steady Breathing

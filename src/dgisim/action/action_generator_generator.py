@@ -69,9 +69,7 @@ class CardActGenGenerator(ABC):
 
     @classmethod
     def action_generator(
-            cls,
-            game_state: GameState,
-            pid: Pid,
+            cls, game_state: GameState, pid: Pid,
     ) -> None | ActionGenerator:
         if not game_state.card_checker.playable(pid):  # pragma: no cover
             return None

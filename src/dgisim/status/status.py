@@ -313,6 +313,8 @@ __all__ = [
     "RiteOfDispatchStatus",
     "TenkoThunderboltsStatus",
     "TheShrinesSacredShadeStatus",
+    ## Yaoyao ##
+    "AdeptalLegacyStatus",
     ## Yoimiya ##
     "AurousBlazeStatus",
     "NaganoharaMeteorSwarmStatus",
@@ -6647,6 +6649,47 @@ class TheShrinesSacredShadeStatus(TalentEquipmentStatus):
         return TheShrinesSacredShade
 
 
+#### Yaoyao ####
+
+@dataclass(frozen=True, kw_only=True)
+class AdeptalLegacyStatus(CombatStatus, _UsageStatus):
+    usages: int = 3
+    MAX_USAGES: ClassVar[int] = 3
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.SELF_SWAP,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.SELF_SWAP:
+            return [
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=Element.DENDRO,
+                    damage=1,
+                    damage_type=DamageType(status=True),
+                ),
+                eft.RecoverHPEffect(
+                    source=source,
+                    target=StaticTarget.from_player_active(game_state, source.pid),
+                    recovery=1,
+                ),
+            ], replace(self, usages=-1)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class BeneficentStatus(TalentEquipmentStatus):
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import Beneficent
+        return Beneficent
+
+
 #### Yoimiya ####
 
 @dataclass(frozen=True, kw_only=True)
@@ -6661,10 +6704,7 @@ class AurousBlazeStatus(CombatStatus, _UsageStatus):
 
     @override
     def _inform(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            info_type: Informables,
+            self, game_state: GameState, status_source: StaticTarget, info_type: Informables,
             information: InformableEvent,
     ) -> Self:
         if self.activated:

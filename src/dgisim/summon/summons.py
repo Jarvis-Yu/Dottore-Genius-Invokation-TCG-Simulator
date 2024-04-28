@@ -1,6 +1,6 @@
 from __future__ import annotations
 from itertools import chain
-from typing import Iterator, Optional, TYPE_CHECKING, Union
+from typing import Iterator, Optional, TYPE_CHECKING, TypeVar, Union
 
 from ..helper.quality_of_life import just
 
@@ -12,6 +12,7 @@ __all__ = [
     "Summons",
 ]
 
+__InputSummon = TypeVar("__InputSummon", bound="Summon")
 
 class Summons:
     """
@@ -25,10 +26,10 @@ class Summons:
     def get_summons(self) -> tuple[Summon, ...]:
         return self._summons
 
-    def find(self, summon_type: type[Summon]) -> None | Summon:
+    def find(self, summon_type: type[__InputSummon]) -> None | __InputSummon:
         return next((s for s in self._summons if type(s) is summon_type), None)
 
-    def just_find(self, summon_type: type[Summon]) -> Summon:
+    def just_find(self, summon_type: type[__InputSummon]) -> __InputSummon:
         return just(self.find(summon_type))
 
     def update_summon(self, incoming_summon: Summon, override: bool = False) -> Summons:

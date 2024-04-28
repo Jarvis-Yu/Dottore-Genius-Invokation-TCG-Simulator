@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (39/75 implemented)](#character-3975-implemented)
-  - [Card (164/259 implemented)](#card-164259-implemented)
+  - [Character (40/83 implemented)](#character-4083-implemented)
+  - [Card (165/283 implemented)](#card-165283-implemented)
 
-## Character (39/75 implemented)
+## Character (40/83 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -41,7 +41,7 @@ all I need now is to implement each card and character.
   - [x] Jadeplume Terrorshroom
   - [x] Nahida
   - [x] Tighnari
-  - [ ] Yaoyao
+  - [x] Yaoyao
 - [ ] Cryo:
   - [x] Chongyun
   - [x] Diona
@@ -59,12 +59,13 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (164/259 implemented)
+## Card (165/283 implemented)
 
-- [ ] Equipment Card (83/143):
+- [ ] Equipment Card (84/155):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
+    - [x] Beneficent
     - [x] Cold-Blooded Strike
     - [x] Descent of Divinity
     - [x] Embrace of Winds
@@ -158,7 +159,7 @@ all I need now is to implement each card and character.
     - [x] Vourukasha's Glow
     - [x] Wine-Stained Tricorne
     - [x] Witch's Scorching Hat
-- [ ] Support Card (23/46):
+- [ ] Support Card (23/51):
   - [ ] Companion Card:
     - [x] Chang the Ninth
     - [x] Chef Mao
@@ -195,7 +196,7 @@ all I need now is to implement each card and character.
     - [x] Tenshukaku
     - [x] Vanarana
     - [ ] Weeping Willow of the Lake
-- [ ] Event Card (58/70):
+- [ ] Event Card (58/77):
   - [ ] Talent Card:
     - [x] Absorbing Prism
     - [x] Kanten Senmyou Blessing
