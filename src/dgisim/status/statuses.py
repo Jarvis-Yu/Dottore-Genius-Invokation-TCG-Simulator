@@ -173,7 +173,8 @@ class Statuses:
             filter(lambda bf: type(bf) != status, self._statuses)
         ))
 
-    def get_statuses(self) -> tuple[stt.Status, ...]:
+    @property
+    def statuses(self) -> tuple[stt.Status, ...]:
         """ :returns: tuple of statuses. """
         return self._statuses
 

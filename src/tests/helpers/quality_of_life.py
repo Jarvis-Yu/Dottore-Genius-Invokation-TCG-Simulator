@@ -55,8 +55,10 @@ class _TempTestInfiniteRevivalStatus(CharacterHiddenStatus, RevivalStatus):
         TriggeringSignal.TRIGGER_REVIVAL,
     })
 
-    def revivable(self, game_state: GameState, char: StaticTarget) -> bool:
-        return True
+    def revivable(
+            self, game_state: GameState, status_source: StaticTarget, char_source: StaticTarget,
+    ) -> bool:
+        return status_source == char_source
 
     def _post_update_react_to_signal(
             self,

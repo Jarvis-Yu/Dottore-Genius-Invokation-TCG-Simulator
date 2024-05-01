@@ -987,7 +987,9 @@ class PrepareSkillStatus(Status):
 @dataclass(frozen=True, kw_only=True)
 class RevivalStatus(Status):
     @abstractmethod
-    def revivable(self, game_state: GameState, char: StaticTarget) -> bool:
+    def revivable(
+            self, game_state: GameState, status_source: StaticTarget, char_source: StaticTarget,
+    ) -> bool:
         pass
 
 
@@ -4156,8 +4158,10 @@ class ElectroCrystalCoreStatus(CharacterStatus, RevivalStatus):
     })
 
     @override
-    def revivable(self, game_state: GameState, char: StaticTarget) -> bool:
-        return True
+    def revivable(
+            self, game_state: GameState, status_source: StaticTarget, char_source: StaticTarget,
+    ) -> bool:
+        return status_source == char_source
 
     @override
     def _react_to_signal(

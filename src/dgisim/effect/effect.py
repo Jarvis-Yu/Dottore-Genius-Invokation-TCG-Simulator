@@ -682,7 +682,7 @@ class AliveMarkCheckerEffect(CheckerEffect):
                     for status in char.get_all_statuses_ordered_flattened()
                     if (
                         isinstance(status, stt.RevivalStatus)
-                        and status.revivable(game_state, char_source)
+                        and status.revivable(game_state, char_source, char_source)
                     )
                 ), None)
                 if revival_status is not None:
@@ -1228,14 +1228,13 @@ class SpecificDamageEffect(DirectEffect):
         hp = target.hp
         hp = max(0, hp - actual_damage.damage)
 
-        if hp != 0:
+        if hp != 0 or target.will_revive(game_state, actual_damage.target):
             game_state = game_state.factory().f_dmg_effect_stack(
                 lambda es: es.push_left(BroadcastDamageEffect(
                     home_pid=self.source.pid, dmg=actual_damage, lethal=False,
                 ))
             ).build()
         else:
-            # TODO: confirm if lethal damage to revivable character is treated as lethal
             game_state = game_state.factory().f_lethal_dmg_effect_stack(
                 lambda es: es.push_left(BroadcastDamageEffect(
                     home_pid=self.source.pid, dmg=actual_damage, lethal=True,

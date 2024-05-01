@@ -215,7 +215,7 @@ class Character:
         :returns: a tuple of statuses that are ordered so that those that should be
                   executed first has a lower index.
         """
-        return sum([statuses.get_statuses() for statuses in self.get_all_statuses_ordered()], ())
+        return sum([statuses.statuses for statuses in self.get_all_statuses_ordered()], ())
 
     def factory(self) -> CharacterFactory:
         """ :returns: a factory for the current character. """
@@ -224,6 +224,12 @@ class Character:
     def hp_lost(self) -> int:
         """ :returns: the lost hp. """
         return self._max_hp - self._hp
+
+    def will_revive(self, game_state: GameState, source: StaticTarget) -> bool:
+        for status in chain(self._hiddens.statuses, self._statuses.statuses):
+            if isinstance(status, stt.RevivalStatus) and status.revivable(game_state, source, source):
+                return True
+        return False
 
     @classproperty
     def FACTIONS(cls) -> frozenset[Faction]:
