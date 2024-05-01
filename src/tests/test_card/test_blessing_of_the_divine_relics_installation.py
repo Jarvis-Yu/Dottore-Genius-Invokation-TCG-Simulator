@@ -14,7 +14,7 @@ class TestBlessingOfTheDivineRelicsInstallation(unittest.TestCase):
         game_state = base_state
         game_state = UpdateCharacterStatusEffect(
             target=StaticTarget.from_char_id(Pid.P1, 2),
-            status=GamblersEarringsStatus(triggered_num=2),
+            status=GamblersEarringsStatus(usages=2),
         ).execute(game_state)
         game_state = AddCharacterStatusEffect(
             target=StaticTarget.from_char_id(Pid.P1, 1),
@@ -33,7 +33,7 @@ class TestBlessingOfTheDivineRelicsInstallation(unittest.TestCase):
         artifact = p1c1.character_statuses.find_type(ArtifactEquipmentStatus)
         self.assertIsInstance(artifact, GamblersEarringsStatus)
         assert isinstance(artifact, GamblersEarringsStatus)
-        self.assertEqual(artifact.triggered_num, 0)
+        self.assertEqual(artifact.usages, 3)
         self.assertNotIn(ArtifactEquipmentStatus, p1c2.character_statuses)
 
     def test_action_validity(self):

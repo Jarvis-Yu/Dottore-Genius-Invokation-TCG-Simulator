@@ -615,6 +615,11 @@ class Status:
             status_source: StaticTarget,
             target: None | StaticTarget = None,
     ):
+        """
+        :param status_source: the positon of this status.
+        :param target: the target to be checked, default to status_source if not provided.
+        :returns: True if target is the active character of the player in ``game_state``.
+        """
         if target is None:
             target = status_source
         return (
@@ -2069,14 +2074,13 @@ class FlowingRingsStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class GamblersEarringsStatus(ArtifactEquipmentStatus):
-    informed_num: int = 0
-    triggered_num: int = 0
-    MAX_TRIGGER_NUM: ClassVar[int] = 3
-    NUM_DICE_PER_TRIGGER: ClassVar[int] = 2
+class GamblersEarringsStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
+    usages: int = 3
+    MAX_USAGES: ClassVar[int] = 3
+    DICE_GEN_NUM: ClassVar[int] = 2
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.DEATH_EVENT,
+        TriggeringSignal.POST_DMG,
     ))
 
     @classproperty
@@ -2084,50 +2088,23 @@ class GamblersEarringsStatus(ArtifactEquipmentStatus):
         from ..card.card import GamblersEarrings
         return GamblersEarrings
 
-    def triggerable(self) -> bool:
-        return self.triggered_num < self.MAX_TRIGGER_NUM and self.informed_num > 0
-
-    def informable(self) -> bool:
-        return self.triggered_num + self.informed_num < self.MAX_TRIGGER_NUM
-
-    @override
-    def _inform(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            info_type: Informables,
-            information: InformableEvent,
-    ) -> Self:
-        if info_type is Informables.CHARACTER_DEATH:
-            assert isinstance(information, CharacterDeathIEvent)
-            if information.target.pid is status_source.pid.other \
-                    and self.informable():
-                return replace(self, informed_num=self.informed_num + 1)
-        return self
-
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.DEATH_EVENT:
-            if self.triggerable():
-                this_player = game_state.get_player(source.pid)
-                active_char_id = this_player.just_get_active_character().id
-                if active_char_id is not source.id:
-                    return [], replace(self, informed_num=0)
-                additions = self.informed_num * self.NUM_DICE_PER_TRIGGER
+        if signal is TriggeringSignal.POST_DMG:
+            assert isinstance(detail, DmgIEvent)
+            if (
+                    self.usages > 0
+                    and detail.lethal
+                    and detail.dmg.target.pid is not source.pid
+                    and self._target_is_self_active(game_state, source)
+            ):
                 return [
-                    eft.AddDiceEffect(pid=source.pid, element=Element.OMNI, num=additions)
-                ], replace(
-                    self,
-                    triggered_num=self.triggered_num + self.informed_num,
-                    informed_num=0
-                )
+                    eft.AddDiceEffect(pid=source.pid, element=Element.OMNI, num=self.DICE_GEN_NUM),
+                ], replace(self, usages=-1)
         return [], self
-
-    def __str__(self) -> str:
-        return super().__str__() + f"({self.informed_num},{self.triggered_num})"
 
 
 @dataclass(frozen=True, kw_only=True)

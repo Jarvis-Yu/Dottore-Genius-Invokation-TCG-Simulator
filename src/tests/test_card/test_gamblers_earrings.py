@@ -25,7 +25,7 @@ class TestGamblersEarrings(unittest.TestCase):
             ).build()
         ).build()
         base_game = kill_character(base_game, char_id=1, hp=1)
-        base_game = kill_character(base_game, char_id=2, hp=1)
+        base_game = kill_character(base_game, char_id=3, hp=1)
         for i in range(1, 4):
             base_game = just(base_game.action_step(Pid.P1, CardAction(
                 card=GamblersEarrings,
@@ -39,8 +39,7 @@ class TestGamblersEarrings(unittest.TestCase):
         p1ac = base_game.player1.just_get_active_character()
         self.assertIn(GamblersEarringsStatus, p1ac.character_statuses)
         gamblers = p1ac.character_statuses.just_find(GamblersEarringsStatus)
-        self.assertEqual(gamblers.informed_num, 0)
-        self.assertEqual(gamblers.triggered_num, 0)
+        self.assertEqual(gamblers.usages, 3)
 
         # overloaded kill checks swaps before triggering gamblers earrings
         game_state = oppo_aura_elem(base_game, Element.PYRO)
@@ -59,19 +58,18 @@ class TestGamblersEarrings(unittest.TestCase):
         )
         self.assertEqual(gsm.get_game_state().player1.dice.num_dice(), num_dice)
 
-        gsm.auto_step(observe=False)
+        gsm.auto_step()
         self.assertEqual(gsm.get_game_state().player1.dice.num_dice(), num_dice + 2)
+        gamblers = p1_active_char(gsm.get_game_state()).character_statuses.just_find(GamblersEarringsStatus)
+        self.assertEqual(gamblers.usages, 2)
 
         # multiple kill rewards correctly
         game_state = oppo_aura_elem(base_game, Element.PYRO)  # overload, so P2 doesn't need to swap
-        game_state = just(game_state.action_step(
-            Pid.P1,
-            SkillAction(
-                skill=CharacterSkill.ELEMENTAL_BURST,
-                instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 4}))
-            )
-        ))
-        num_dice = game_state.player1.dice.num_dice()
-        gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
-        gsm.auto_step(observe=False)
-        self.assertEqual(gsm.get_game_state().player1.dice.num_dice(), num_dice + 4)
+        num_dice = game_state.player1.dice.num_dice() - 4  # burst cost deduction
+        game_state = step_skill(
+            game_state, Pid.P1, CharacterSkill.ELEMENTAL_BURST,
+            dice=ActualDice({Element.OMNI: 4}),
+        )
+        self.assertEqual(game_state.player1.dice.num_dice(), num_dice + 4)
+        gamblers = p1_active_char(game_state).character_statuses.just_find(GamblersEarringsStatus)
+        self.assertEqual(gamblers.usages, 1)
