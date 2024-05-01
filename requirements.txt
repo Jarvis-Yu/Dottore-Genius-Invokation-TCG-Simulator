@@ -1,3 +1,7 @@
+# package requirements
+typing-extensions>=4.7.1
+
+# dev requirements
 build==0.10.0
 coverage==7.2.7
 matplotlib==3.8.2
@@ -6,4 +10,3 @@ setuptools==67.3.2
 snakeviz==2.2.0
 tqdm==4.66.1
 twine==4.0.2
-typing-extensions==4.7.1
