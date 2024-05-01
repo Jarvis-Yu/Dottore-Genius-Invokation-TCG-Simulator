@@ -16,6 +16,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     Diona,
     ElectroHypostasis,
     Eula,
+    FatuiCryoCicinMage,
     FatuiPyroAgent,
     Fischl,
     Ganyu,

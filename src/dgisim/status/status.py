@@ -198,6 +198,9 @@ __all__ = [
     ## Eula ##
     "GrimheartStatus",
     "WellspingOfWarLustStatus",
+    ## Fatui Cryo Cicin Mage ##
+    "CicinsColdGlareStatus",
+    "FlowingCicinShieldStatus",
     ## Fatui Pyro Agent ##
     "PaidInFullStatus",
     "StealthMasterStatus",
@@ -893,7 +896,10 @@ class _ShieldStatus(Status):
 
 @dataclass(frozen=True, kw_only=True)
 class FixedShieldStatus(_ShieldStatus, _UsageStatus):
-    """ The shield status where only one usage can be consumed by a DMG effect """
+    """
+    The shield status where only one usage can be consumed by a DMG effect.
+    Typically appeared to be violet in game.
+    """
     usages: int
     MAX_USAGES: ClassVar[int] = BIG_INT
     SHIELD_AMOUNT: ClassVar[int] = 0  # shield amount per stack
@@ -935,7 +941,10 @@ class FixedShieldStatus(_ShieldStatus, _UsageStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class StackedShieldStatus(_ShieldStatus, _UsageStatus):
-    """ The shield status where all usages can be consumed by a DMG effect """
+    """
+    The shield status where all usages can be consumed by a DMG effect.
+    Typically appeared to be yellow in game.
+    """
     usages: int
     MAX_USAGES: ClassVar[int] = BIG_INT
     SHIELD_AMOUNT: ClassVar[int] = 1  # shield amount per usage
@@ -4296,6 +4305,22 @@ class WellspingOfWarLustStatus(TalentEquipmentStatus):
     def CARD(cls) -> type[crd.TalentEquipmentCard]:
         from ..card.card import WellspingOfWarLust
         return WellspingOfWarLust
+
+
+#### Fatui Cryo Cicin Mage ####
+
+@dataclass(frozen=True, kw_only=True)
+class CicinsColdGlareStatus(TalentEquipmentStatus):
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import CicinsColdGlare
+        return CicinsColdGlare
+
+
+@dataclass(frozen=True, kw_only=True)
+class FlowingCicinShieldStatus(StackedShieldStatus, CharacterStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 4
 
 
 #### Fatui Pyro Agent ####

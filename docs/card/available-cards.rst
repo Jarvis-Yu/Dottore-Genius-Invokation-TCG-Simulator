@@ -1,7 +1,7 @@
 Available Cards
 ===============
 
-165 of 283 cards in Genius Invokation TCG are available in the simulator.
+166 of 283 cards in Genius Invokation TCG are available in the simulator.
 (excluding character cards which are not counted as cards in ``dgisim``)
 
 Equipment Cards
@@ -80,6 +80,7 @@ Talent Card
 
 * Abyssal Mayhem Hydrospout
 * Arataki Ichiban
+* Cicin's Cold Glare
 * Cold-Blooded Strike
 * Descent of Divinity
 * Embrace of Winds

@@ -11,12 +11,14 @@
 - New Characters:
   - Chongyun
   - Diona
+  - Fatui Cryo Cicin Mage
   - Lisa
   - Yaoyao
 - New Cards:
   - Equipment Cards:
     - Talent Cards:
       - Beneficent
+      - Cicin's Cold Glare
       - Pulsating Witch
       - Shaken, Not Purred
       - Steady Breathing

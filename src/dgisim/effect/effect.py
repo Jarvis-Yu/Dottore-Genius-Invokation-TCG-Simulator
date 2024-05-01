@@ -2191,6 +2191,10 @@ class CastSkillEffect(DirectEffect):
         assert isinstance(character, Character)
         if not character.can_cast_skill():  # pragma: no cover
             return game_state
+        game_state = BroadcastPreSkillInfoEffect(
+            source=self.target,
+            skill=self.skill,
+        ).execute(game_state)
         effects = character.skill(game_state, self.target, self.skill)
         if not effects:  # pragma: no cover
             return game_state

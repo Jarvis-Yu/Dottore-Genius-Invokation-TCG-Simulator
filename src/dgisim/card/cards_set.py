@@ -11,6 +11,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     AbyssalMayhemHydrospout,
     AratakiIchiban,
     Beneficent,
+    CicinsColdGlare,
     ColdBloodedStrike,
     DescentOfDivinity,
     EmbraceOfWinds,

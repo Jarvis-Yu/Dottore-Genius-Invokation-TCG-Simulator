@@ -41,6 +41,7 @@ __all__ = [
     "BurningFlameSummon",
     "ChainsOfWardingThunderSummon",
     "ClusterbloomArrowSummon",
+    "CryoCicinsSummon",
     "CryoHilichurlShooterSummon",
     "CuileinAnbarSummon",
     "DandelionFieldSummon",
@@ -421,7 +422,7 @@ class ChainsOfWardingThunderSummon(_DmgPerRoundSummon):
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         es, new_self = super()._react_to_signal(game_state, source, signal, detail)
         if new_self is None:
             return es, None
@@ -440,6 +441,87 @@ class ClusterbloomArrowSummon(_DmgPerRoundSummon):
     MAX_USAGES: ClassVar[int] = 2
     DMG: ClassVar[int] = 1
     ELEMENT: ClassVar[Element] = Element.DENDRO
+
+
+@dataclass(frozen=True, kw_only=True)
+class CryoCicinsSummon(_DmgPerRoundSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 3
+    DMG: ClassVar[int] = 1
+    TALENT_DMG: ClassVar[int] = 2
+    ELEMENT: ClassVar[Element] = Element.CRYO
+    normal_attacked: bool = False  # True if normal attack is used by FatuiCryoCicinMage
+    exceeded: bool = False  # True if talent is equipped and usages will exceed MAX_USAGES
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        *_DmgPerRoundSummon.REACTABLE_SIGNALS,
+        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_DMG,
+    ))
+
+    @override
+    def _inform(
+            self, game_state: GameState, status_source: StaticTarget, info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.PRE_SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            from ..character.character import FatuiCryoCicinMage
+            char = game_state.get_character_target(information.source)
+            if not (
+                    information.source.pid is status_source.pid
+                    and isinstance(char, FatuiCryoCicinMage)
+            ):
+                return self
+            usages_addition = 0
+            if information.skill_true_type is CharacterSkillType.NORMAL_ATTACK:
+                usages_addition = 1
+            elif information.skill_type is CharacterSkill.SKILL2:
+                usages_addition = 2
+            future_usages = self.usages + usages_addition
+            if future_usages > self.MAX_USAGES and char.talent_equipped():
+                # here we assume it is safe to ignore usages addition caused by normal attack
+                return replace(self, exceeded=True)
+            elif information.skill_true_type is CharacterSkillType.NORMAL_ATTACK:
+                return replace(self, normal_attacked=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        es, new_self = super()._react_to_signal(game_state, source, signal, detail)
+        if signal is TriggeringSignal.POST_DMG:
+            assert isinstance(detail, DmgIEvent)
+            from ..character.character import FatuiCryoCicinMage
+            target_char = game_state.get_character_target(detail.dmg.target)
+            if (
+                    detail.dmg.target.pid == source.pid
+                    and isinstance(target_char, FatuiCryoCicinMage)
+                    and detail.dmg.reaction is not None
+            ):
+                return [], replace(self, usages=-1)
+        elif signal is TriggeringSignal.COMBAT_ACTION:
+            if self.exceeded:
+                return [
+                    eft.ReferredDamageEffect(
+                        source=source,
+                        target=DynamicCharacterTarget.OPPO_ACTIVE,
+                        element=self.ELEMENT,
+                        damage=self.TALENT_DMG,
+                        damage_type=DamageType(summon=True),
+                    )
+                ], replace(self, usages=0, exceeded=False)
+            elif self.normal_attacked:
+                return [], replace(self, usages=1, normal_attacked=False)
+        return es, new_self
+
+    @override
+    def content_repr(self) -> str:
+        return (
+            f"{self.usages}"
+            + f"{' atked' if self.normal_attacked else ''}{' exceeded' if self.exceeded else ''}"
+        )
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -675,10 +757,7 @@ class HeraldOfFrostSummon(_DmgPerRoundSummon):
 
     @override
     def _inform(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            info_type: Informables,
+            self, game_state: GameState, status_source: StaticTarget, info_type: Informables,
             information: InformableEvent,
     ) -> Self:
         if info_type is Informables.POST_SKILL_USAGE:

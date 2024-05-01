@@ -226,6 +226,8 @@ __all__ = [
     "AbsorbingPrism",
     ## Eula ##
     "WellspingOfWarLust",
+    ## Fatui Cicin Mage ##
+    "CicinsColdGlare",
     ## Fatui Pyro Agent ##
     "PaidInFull",
     ## Fischl ##
@@ -3920,6 +3922,15 @@ class WellspingOfWarLust(_TalentEquipmentSkillCard):
     _CHARACTER = chr.Eula
     _EQUIPMENT_STATUS = stt.WellspingOfWarLustStatus
     _SKILL = CharacterSkill.ELEMENTAL_BURST
+
+
+#### Fatui Cryo Cicin Mage ####
+
+class CicinsColdGlare(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDice({Element.CRYO: 3})
+    _CHARACTER = chr.FatuiCryoCicinMage
+    _EQUIPMENT_STATUS = stt.CicinsColdGlareStatus
+    _SKILL = CharacterSkill.SKILL2
 
 
 #### Fatui Pyro Agent ####

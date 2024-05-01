@@ -42,6 +42,7 @@ __all__ = [
     "Diona",
     "ElectroHypostasis",
     "Eula",
+    "FatuiCryoCicinMage",
     "FatuiPyroAgent",
     "Fischl",
     "Ganyu",
@@ -320,12 +321,7 @@ class Character:
         This should only be called to get effects right before the skill is to be executed.
         Otherwise faulty effects may be generated.
         """
-        return (
-            eft.BroadcastPreSkillInfoEffect(
-                source=source,
-                skill=skill_type,
-            ),
-        ) + self._post_skill(
+        return self._post_skill(
             game_state,
             source,
             skill_type,
@@ -1418,6 +1414,99 @@ class Eula(Character):
             hiddens=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
+
+
+class FatuiCryoCicinMage(Character):
+    _ELEMENT = Element.CRYO
+    _WEAPON_TYPE = WeaponType.NONE
+    _TALENT_STATUS = stt.CicinsColdGlareStatus
+    _FACTIONS = frozenset((Faction.FATUI,))
+
+    _SKILL1_COST = AbstractDice({
+        Element.CRYO: 1,
+        Element.ANY: 2,
+    })
+    _SKILL2_COST = AbstractDice({
+        Element.CRYO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDice({
+        Element.CRYO: 3,
+    })
+
+    @override
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.CRYO,
+            damage=1,
+        )
+
+    @override
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        if sm.CryoCicinsSummon in game_state.get_player(source.pid).summons:
+            cryo_cicins = game_state.get_player(source.pid).summons.just_find(sm.CryoCicinsSummon)
+            cicin_update = replace(cryo_cicins, usages=2)
+        else:
+            cicin_update = sm.CryoCicinsSummon()
+        return (
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.CRYO,
+                damage=1,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+            eft.UpdateSummonEffect(
+                target_pid=source.pid,
+                summon=cicin_update,
+            ),
+        )
+
+    @override
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        shield_amount = 1
+        if sm.CryoCicinsSummon in game_state.get_player(source.pid).summons:
+            cryo_cicins = game_state.get_player(source.pid).summons.just_find(sm.CryoCicinsSummon)
+            shield_amount += min(cryo_cicins.usages, 3)
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.max_energy,
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.CRYO,
+                damage=5,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            eft.ApplyElementalAuraEffect(
+                source=source,
+                target=source,
+                element=Element.CRYO,
+                source_type=DamageType(elemental_burst=True),
+            ),
+            eft.UpdateCharacterStatusEffect(
+                target=source,
+                status=stt.FlowingCicinShieldStatus(usages=shield_amount),
+            ),
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=3,
+            hiddens=stts.Statuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
 
 
 class FatuiPyroAgent(Character):

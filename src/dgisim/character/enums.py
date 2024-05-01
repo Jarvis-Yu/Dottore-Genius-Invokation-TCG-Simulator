@@ -11,6 +11,7 @@ __all__ = [
 
 
 class CharacterSkill(Enum):
+    """ Describes the skill "id" of the skill. """
     SKILL1 = 0  # typically the normal attack
     SKILL2 = 1  # typically the 1st elemental skill
     SKILL3 = 2  # typically the 2nd elemental skill
@@ -28,6 +29,7 @@ class CharacterSkill(Enum):
         raise NotImplementedError
 
 class CharacterSkillType(Enum):
+    """ Describes the category of the skill.  """
     NORMAL_ATTACK = 0
     ELEMENTAL_SKILL = 1
     ELEMENTAL_BURST = 2

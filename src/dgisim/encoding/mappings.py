@@ -72,7 +72,7 @@ CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
         (char.KamisatoAyaka, 4),
         (char.Eula, 5),
         (char.Shenhe, 6),
-        # (char.FatuiCryoCicinMage, 7),
+        (char.FatuiCryoCicinMage, 7),
         (char.Qiqi, 8),
 
         #### Hydro 100 ####
@@ -352,7 +352,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.KantenSenmyouBlessing, 929),
         (card.WellspingOfWarLust, 930),
         (card.MysticalAbandon, 931),
-        # FatuiCryoCicinMage 932
+        (card.CicinsColdGlare, 932),
         (card.RiteOfResurrection, 933),
 
         #### 4.2 Hydro 1025 ####
@@ -720,6 +720,8 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.MysticalAbandonStatus, 720),
         (status.IcyQuillStatus, 721),
         ## FatuiCryoCicinMage 740 ##
+        (status.CicinsColdGlareStatus, 740),
+        (status.FlowingCicinShieldStatus, 741),
         ## Qiqi 760 ##
         (status.RiteOfResurrectionStatus, 760),
         (status.FortunePreservingTalismanStatus, 761),
@@ -897,7 +899,7 @@ SUMM_MAPPING: dict[type["Summon"], int] = HashableDict({
         (summon.CryoHilichurlShooterSummon, 4),
         (summon.LightfallSwordSummon, 5),
         (summon.TalismanSpiritSummon, 6),
-        # (summon.CryoCicinsSummon, 7),
+        (summon.CryoCicinsSummon, 7),
         (summon.HeraldOfFrostSummon, 8),
 
         #### Hydro 100 ####

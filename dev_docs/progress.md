@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (40/83 implemented)](#character-4083-implemented)
-  - [Card (165/283 implemented)](#card-165283-implemented)
+  - [Character (41/83 implemented)](#character-4183-implemented)
+  - [Card (166/283 implemented)](#card-166283-implemented)
 
-## Character (40/83 implemented)
+## Character (41/83 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -46,7 +46,7 @@ all I need now is to implement each card and character.
   - [x] Chongyun
   - [x] Diona
   - [x] Eula
-  - [ ] Fatui Cryo Cicin Mage
+  - [x] Fatui Cryo Cicin Mage
   - [x] Kaeya
   - [x] Kamisato Ayaka
   - [x] Ganyu
@@ -59,13 +59,14 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (165/283 implemented)
+## Card (166/283 implemented)
 
-- [ ] Equipment Card (84/155):
+- [ ] Equipment Card (85/155):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
     - [x] Beneficent
+    - [x] Cicin's Cold Glare
     - [x] Cold-Blooded Strike
     - [x] Descent of Divinity
     - [x] Embrace of Winds

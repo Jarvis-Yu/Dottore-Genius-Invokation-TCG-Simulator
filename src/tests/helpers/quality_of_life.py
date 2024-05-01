@@ -429,6 +429,7 @@ def remove_all_thick_shield(game_state: GameState) -> GameState:
 
 
 def remove_aura(game_state: GameState, pid: Pid = Pid.P2, char_id: None | int = None) -> GameState:
+    """ Removes all elemental aura of the target character, default to the active character. """
     return game_state.factory().f_player(
         pid,
         lambda p: p.factory().f_characters(
