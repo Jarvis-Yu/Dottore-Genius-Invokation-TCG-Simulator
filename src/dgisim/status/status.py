@@ -2923,35 +2923,23 @@ class ReviveOnCooldownStatus(CombatStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class FreshWindOfFreedomStatus(CombatStatus):
-    activated: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.DEATH_EVENT,
+        TriggeringSignal.POST_DMG,
         TriggeringSignal.ROUND_END,
     ))
-
-    @override
-    def _inform(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            info_type: Informables,
-            information: InformableEvent,
-    ) -> Self:
-        if info_type is Informables.CHARACTER_DEATH:
-            assert isinstance(information, CharacterDeathIEvent)
-            if information.target.pid is status_source.pid.other \
-                    and game_state.get_player(status_source.pid).in_action_phase() \
-                    and not self.activated:
-                return replace(self, activated=True)
-        return self
 
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.DEATH_EVENT:
-            if self.activated:
+        if signal is TriggeringSignal.POST_DMG:
+            assert isinstance(detail, DmgIEvent)
+            if (
+                    detail.lethal
+                    and detail.dmg.target.pid is source.pid.other
+                    and game_state.get_player(source.pid).in_action_phase()
+            ):
                 return [eft.ConsecutiveActionEffect(target_pid=source.pid)], None
         elif signal is TriggeringSignal.ROUND_END:
             return [], None
@@ -6081,7 +6069,6 @@ class RiptideCounterStatus(CharacterHiddenStatus, _UsageStatus):
 class RiptideTransferStatus(CombatStatus):
     """ The intermediate status to add RiptideStatus to the next active character. """
     REACTABLE_SIGNALS = frozenset({
-        TriggeringSignal.DEATH_EVENT,
         TriggeringSignal.SELF_SWAP,
     })
 
@@ -6090,18 +6077,7 @@ class RiptideTransferStatus(CombatStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.DEATH_EVENT:
-            target = StaticTarget.from_player_active(game_state, source.pid)
-            target_char = game_state.get_character_target(target)
-            assert target_char is not None
-            if target_char.is_alive():
-                return [
-                    eft.AddCharacterStatusEffect(
-                        target=target,
-                        status=RiptideStatus,
-                    ),
-                ], None
-        elif signal is TriggeringSignal.SELF_SWAP:  # TODO: not necessarily accurate signal
+        if signal is TriggeringSignal.SELF_SWAP:  # TODO: not necessarily accurate signal
             target = StaticTarget.from_player_active(game_state, source.pid)
             return [
                 eft.AddCharacterStatusEffect(
@@ -6115,7 +6091,7 @@ class RiptideTransferStatus(CombatStatus):
 @dataclass(frozen=True, kw_only=True)
 class RiptideStatus(CharacterStatus):
     REACTABLE_SIGNALS = frozenset({
-        TriggeringSignal.DEATH_DECLARATION,
+        TriggeringSignal.POST_DMG,
         TriggeringSignal.END_ROUND_CHECK_OUT,
     })
 
@@ -6124,10 +6100,23 @@ class RiptideStatus(CharacterStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.DEATH_DECLARATION:
-            return [
-                eft.AddCombatStatusEffect(source.pid, RiptideTransferStatus),
-            ], self
+        if signal is TriggeringSignal.POST_DMG:
+            assert isinstance(detail, DmgIEvent)
+            if (
+                    detail.lethal
+                    and detail.dmg.target == source
+            ):
+                self_active = game_state.get_player(source.pid).just_get_active_character()
+                if self_active.alive:
+                    return [
+                        eft.AddCharacterStatusEffect(
+                            target=StaticTarget.from_char_id(source.pid, self_active.id),
+                            status=RiptideStatus,
+                        ),
+                    ], None
+                return [
+                    eft.AddCombatStatusEffect(source.pid, RiptideTransferStatus),
+                ], None
         elif signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             self_active_id = game_state.get_player(source.pid).just_get_active_character().id
             oppo_active = game_state.get_player(source.pid.other).just_get_active_character()

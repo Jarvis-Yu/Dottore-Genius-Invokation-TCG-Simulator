@@ -61,9 +61,6 @@ class TriggeringSignal(Enum):
     OPPO_SWAP = 16  # swap of the opposing playing
     #: triggers when "when the character ... would be defeated"
     TRIGGER_REVIVAL = 17
-    #: triggers when "when the character to which this is attached is defeated"
-    # only triggers the character which is about to be defeated
-    DEATH_DECLARATION = 18
     #: triggers when "when the battle begins" character is being revived
     REVIVAL_GAME_START = 19
     #: directly trigger a status

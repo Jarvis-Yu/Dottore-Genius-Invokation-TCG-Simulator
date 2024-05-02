@@ -482,11 +482,11 @@ class Character:
         return self.character_statuses.contains(talent_status)
 
     def is_alive(self) -> bool:
-        """ Same as `.get_alive()`. """
+        """ Same as `.alive`. """
         return self._alive
 
     def is_defeated(self) -> bool:
-        """ Negation of `.alive()`. """
+        """ Negation of `.alive`. """
         return not self._alive
 
     def satiated(self) -> bool:

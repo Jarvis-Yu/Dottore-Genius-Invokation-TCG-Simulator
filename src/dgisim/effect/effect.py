@@ -721,11 +721,6 @@ class DefeatedMarkCheckerEffect(CheckerEffect):
                 if char.is_alive() or char.hp >= 0:
                     continue
                 char_source = StaticTarget(pid, Zone.CHARACTERS, char.id)
-                on_death_effects = StatusProcessing.trigger_personal_statuses_effect(
-                    game_state, char_source, TriggeringSignal.DEATH_DECLARATION
-                )
-                for effect in on_death_effects:
-                    game_state = effect.execute(game_state)
                 from ..status.statuses import Statuses
                 equipment_statuses = [
                     type(status)
