@@ -99,6 +99,7 @@ CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
         # (char.AbyssLectorFathomlessFlames, 208),
         # (char.Yanfei, 209),
         (char.Dehya, 210),
+        (char.Lyney, 211),
 
         #### Elctro 300 ####
         (char.Fischl, 300),
@@ -379,6 +380,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         # AbyssLectorFathomlessFlames 1133
         # Yanfei 1134
         (card.StalwartAndTrue, 1135),
+        (card.ConclusiveOvation, 1136),
 
         #### 4.4 Electro 1225 ####
         (card.StellarPredator, 1225),
@@ -784,6 +786,9 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         ## Dehya 4800 ##
         (status.StalwartAndTrueStatus, 4800),
         (status.IncinerationDriveStatus, 4801),
+        ## Lyney 4820 ##
+        (status.ConclusiveOvationStatus, 4820),
+        (status.PropSurplusStatus, 4821),
 
         #### 4.4 Electro Character Status 6600 ####
         ## Fischl 6600 ##
@@ -920,6 +925,7 @@ SUMM_MAPPING: dict[type["Summon"], int] = HashableDict({
         # (summon.BaronBunnySummon, 203),
         # (summon.DarkfireFurnaceSummon, 204),
         (summon.FierySanctumFieldSummon, 205),
+        (summon.GrinMalkinHatSummon, 206),
 
         #### Electro 300 ####
         (summon.OzSummon, 300),

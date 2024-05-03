@@ -56,6 +56,7 @@ __all__ = [
     "Klee",
     "KujouSara",
     "Lisa",
+    "Lyney",
     "MaguuKenki",
     "Mona",
     "Nahida",
@@ -2672,6 +2673,115 @@ class Lisa(Character):
             eft.AddSummonEffect(
                 target_pid=source.pid,
                 summon=sm.LightningRoseSummon,
+            ),
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=2,
+            hiddens=stts.Statuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
+class Lyney(Character):
+    _ELEMENT = Element.PYRO
+    _WEAPON_TYPE = WeaponType.BOW
+    _TALENT_STATUS = stt.ConclusiveOvationStatus
+    _FACTIONS = frozenset((Faction.FATUI, Faction.FONTAINE))
+
+    _SKILL1_COST = AbstractDice({
+        Element.PYRO: 1,
+        Element.ANY: 2,
+    })
+    _SKILL2_COST = AbstractDice({
+        Element.PYRO: 3,
+    })
+    _SKILL3_COST = AbstractDice({
+        Element.PYRO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDice({
+        Element.PYRO: 3,
+    })
+
+    @override
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        )
+
+    @override
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        effects: list[eft.Effect] = [
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.PYRO,
+                damage=2,
+                damage_type=DamageType(normal_attack=True),
+            ),
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=sm.GrinMalkinHatSummon,
+            ),
+            eft.AddCharacterStatusEffect(
+                target=source,
+                status=stt.PropSurplusStatus,
+            ),
+        ]
+        if self.hp >= 6:
+            effects.append(eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.SELF_ACTIVE,
+                element=Element.PIERCING,
+                damage=1,
+                damage_type=DamageType(normal_attack=True, no_boost=True),
+            ))
+        return tuple(effects)
+
+    @override
+    def _skill3(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.PYRO,
+                damage=3,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+        )
+
+    @override
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.max_energy,
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.PYRO,
+                damage=3,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=sm.GrinMalkinHatSummon,
+            ),
+            eft.AddCharacterStatusEffect(
+                target=source,
+                status=stt.PropSurplusStatus,
             ),
         )
 

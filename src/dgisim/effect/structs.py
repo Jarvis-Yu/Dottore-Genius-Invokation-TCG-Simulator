@@ -34,6 +34,7 @@ class StaticTarget:
 
     @classmethod
     def decoding(cls, encoding: list[int], encoding_plan: "EncodingPlan") -> None | Self:
+        # TODO: check validity of this method
         pid_code = encoding[0]
         zone_code = encoding[1]
         if pid_code >= len(Pid) or zone_code >= len(Zone):

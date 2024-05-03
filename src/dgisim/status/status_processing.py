@@ -108,12 +108,12 @@ class StatusProcessing:
 
         # summons
         summons = player.summons
-        target = StaticTarget(
-            pid,
-            Zone.SUMMONS,
-            -1,
-        )
         for summon in summons:
+            target = StaticTarget(
+                pid,
+                Zone.SUMMONS,
+                type(summon),
+            )
             game_state = f(game_state, summon, target)
 
         # supports

@@ -255,6 +255,8 @@ __all__ = [
     "SinOfPride",
     ## Lisa ##
     "PulsatingWitch",
+    ## Lyney ##
+    "ConclusiveOvation",
     ## Maguu Kenki ##
     "TranscendentAutomaton",
     ## Mona ##
@@ -4140,6 +4142,15 @@ class PulsatingWitch(_TalentEquipmentAnyEventCard):
                 status=cls._EQUIPMENT_STATUS,
             ),
         )
+
+
+#### Lyney ####
+
+class ConclusiveOvation(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDice({Element.PYRO: 3})
+    _CHARACTER = chr.Lyney
+    _EQUIPMENT_STATUS = stt.ConclusiveOvationStatus
+    _SKILL = CharacterSkill.SKILL2
 
 
 #### Maguu Kenki ####

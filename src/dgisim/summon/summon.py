@@ -50,6 +50,7 @@ __all__ = [
     "EyeOfStormyJudgmentSummon",
     "FierySanctumFieldSummon",
     "FrostflakeSekiNoToSummon",
+    "GrinMalkinHatSummon",
     "HilichurlBerserkerSummon",
     "HeraldOfFrostSummon",
     "HydroSamachurlSummon",
@@ -731,6 +732,14 @@ class FrostflakeSekiNoToSummon(_DmgPerRoundSummon):
     MAX_USAGES: ClassVar[int] = 2
     DMG: ClassVar[int] = 2
     ELEMENT: ClassVar[Element] = Element.CRYO
+
+
+@dataclass(frozen=True, kw_only=True)
+class GrinMalkinHatSummon(_DmgPerRoundSummon):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.PYRO
 
 
 @dataclass(frozen=True, kw_only=True)

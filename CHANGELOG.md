@@ -13,12 +13,14 @@
   - Diona
   - Fatui Cryo Cicin Mage
   - Lisa
+  - Lyney
   - Yaoyao
 - New Cards:
   - Equipment Cards:
     - Talent Cards:
       - Beneficent
       - Cicin's Cold Glare
+      - Conclusive Ovation
       - Pulsating Witch
       - Shaken, Not Purred
       - Steady Breathing

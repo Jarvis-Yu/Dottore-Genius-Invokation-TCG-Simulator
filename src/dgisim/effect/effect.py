@@ -28,7 +28,7 @@ from ..support import support as sp
 from ..character.enums import CharacterSkill
 from ..dice import ActualDice
 from ..effect.effect_stack import EffectStack
-from ..element import Element, Reaction, ReactionDetail
+from ..element import Element, ElementalAura, Reaction, ReactionDetail
 from ..event import *
 from ..helper.quality_of_life import just, case_val, BIG_INT
 from ..state.enums import Pid, Act
@@ -441,7 +441,7 @@ class TriggerSummonEffect(TriggerrbleEffect):
             StaticTarget(
                 pid=self.target_pid,
                 zone=Zone.SUMMONS,
-                id=-1,
+                id=type(summon),
             ),
             self.signal,
             self.detail,
@@ -1146,7 +1146,7 @@ class SpecificDamageEffect(DirectEffect):
     @classmethod
     def _reaction_confirmation(
             cls, game_state: GameState, damage: SpecificDamageEffect
-    ) -> tuple[GameState, SpecificDamageEffect, Optional[ReactionDetail]]:
+    ) -> tuple[GameState, SpecificDamageEffect, ElementalAura, None | ReactionDetail]:
         """ This is the pass to check final damage reaction type """
         target_char = game_state.get_character_target(damage.target)
         assert target_char is not None
@@ -1164,20 +1164,20 @@ class SpecificDamageEffect(DirectEffect):
         elif new_aura.aurable(second_elem):
             new_aura = new_aura.add(second_elem)
 
-        if new_aura != all_aura:
-            game_state = game_state.factory().f_player(
-                just(game_state.belongs_to(target_char)),
-                lambda p: p.factory().f_characters(
-                    lambda cs: cs.factory().character(
-                        target_char.factory().elemental_aura(new_aura).build()  # type: ignore
-                    ).build()
-                ).build()
-            ).build()
+        # if new_aura != all_aura:
+        #     game_state = game_state.factory().f_player(
+        #         just(game_state.belongs_to(target_char)),
+        #         lambda p: p.factory().f_characters(
+        #             lambda cs: cs.factory().character(
+        #                 target_char.factory().elemental_aura(new_aura).build()  # type: ignore
+        #             ).build()
+        #         ).build()
+        #     ).build()
 
         game_state, damage = cls._damage_preprocess(
             game_state, damage, Preprocessables.DMG_REACTION
         )
-        return game_state, damage, reaction_detail
+        return game_state, damage, new_aura, reaction_detail
 
     @classmethod
     def _damage_confirmation(
@@ -1197,8 +1197,9 @@ class SpecificDamageEffect(DirectEffect):
             return game_state
 
         # Preprocessing
+        old_aura = target.elemental_aura
         game_state, elemented_damage = self._element_confirmation(game_state, self)
-        game_state, reactioned_damage, reaction = self._reaction_confirmation(
+        game_state, reactioned_damage, new_aura, reaction = self._reaction_confirmation(
             game_state, elemented_damage
         )
         if reaction is not None:
@@ -1207,6 +1208,16 @@ class SpecificDamageEffect(DirectEffect):
                 damage=reactioned_damage.damage + reaction.reaction_type.damage_boost(),
             )
         game_state, actual_damage = self._damage_confirmation(game_state, reactioned_damage)
+        if new_aura != old_aura:
+            game_state = game_state.factory().f_player(
+                self.target.pid,
+                lambda p: p.factory().f_characters(
+                    lambda cs: cs.factory().f_character(
+                        cast(int, self.target.id),
+                        lambda c: c.factory().elemental_aura(new_aura).build()
+                    ).build()
+                ).build()
+            ).build()
         # Update all statuses with this damage
         game_state = StatusProcessing.inform_all_statuses(
             game_state,

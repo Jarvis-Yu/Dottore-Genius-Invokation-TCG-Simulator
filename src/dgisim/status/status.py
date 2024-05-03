@@ -256,6 +256,9 @@ __all__ = [
     ## Lisa ##
     "ConductiveStatus",
     "PulsatingWitchStatus",
+    ## Lyney ##
+    "ConclusiveOvationStatus",
+    "PropSurplusStatus",
     ## Maguu Kenki ##
     "TranscendentAutomatonStatus",
     ## Mona ##
@@ -864,6 +867,7 @@ class _UsageStatus(Status):
 
 
 class _UsageLivingStatus(_UsageStatus):
+    """ Same as _UsageStatus, but does not auto destroy itself when usages is 0 or below. """
     AUTO_DESTROY: ClassVar[bool] = False
 
 
@@ -4287,7 +4291,7 @@ class CicinsColdGlareStatus(TalentEquipmentStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class FlowingCicinShieldStatus(StackedShieldStatus, CharacterStatus):
+class FlowingCicinShieldStatus(CharacterStatus, StackedShieldStatus):
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 4
 
@@ -5260,6 +5264,97 @@ class PulsatingWitchStatus(TalentEquipmentStatus, _UsageLivingStatus):
         return [], self
 
 
+#### Lyney ####
+
+@dataclass(frozen=True, kw_only=True)
+class ConclusiveOvationStatus(TalentEquipmentStatus, _UsageLivingStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import ConclusiveOvation
+        return ConclusiveOvation
+
+    @override
+    def _preprocess(
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            if not (
+                    self.usages > 0
+                    and item.dmg.source.pid is status_source.pid
+            ):
+                return item, self
+            boostable = False
+            target_character = game_state.get_character_target(item.dmg.target)
+            if target_character is not None and target_character.elemental_aura.contains(Element.PYRO):
+                if item.dmg.damage_type.directly_from_character():
+                    boostable = item.dmg.source == status_source
+                elif item.dmg.damage_type.summon:
+                    from ..summon.summon import GrinMalkinHatSummon
+                    summon_instance = game_state.get_target(item.dmg.source)
+                    boostable = isinstance(summon_instance, GrinMalkinHatSummon)
+            if boostable:
+                return item.delta_damage(2), replace(self, usages=-1)
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
+            return [], replace(self, usages=self.MAX_USAGES)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class PropSurplusStatus(CharacterStatus, _UsageLivingStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 3
+    triggered: bool = False  # damage boost has taken effect
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+    ))
+
+    @override
+    def _preprocess(
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            if not (
+                    self.usages > 0
+                    and item.dmg.source == status_source
+                    and item.dmg.damage_type.direct_elemental_skill()
+            ):
+                return item, self
+            return item.delta_damage(self.usages), replace(self, triggered=True)
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.triggered:
+            return [
+                eft.RecoverHPEffect(
+                    source=source,
+                    target=source,
+                    recovery=self.usages,
+                ),
+            ], None
+        return [], self
+
+
 #### Maguu Kenki ####
 
 @dataclass(frozen=True, kw_only=True)
@@ -5277,10 +5372,7 @@ class TranscendentAutomatonStatus(TalentEquipmentStatus):
 class IllusoryBubbleStatus(CombatStatus):
     @override
     def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: PreprocessableEvent,
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_MUL:

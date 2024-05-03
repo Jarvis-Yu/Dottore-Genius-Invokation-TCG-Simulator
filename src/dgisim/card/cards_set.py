@@ -13,6 +13,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     Beneficent,
     CicinsColdGlare,
     ColdBloodedStrike,
+    ConclusiveOvation,
     DescentOfDivinity,
     EmbraceOfWinds,
     FloralSidewinder,
