@@ -292,6 +292,8 @@ __all__ = [
     ## Shenhe ##
     "IcyQuillStatus",
     "MysticalAbandonStatus",
+    ## Stonehide Lawachurl ##
+    "InfusedStonehideStatus",
     ## Tartaglia ##
     "AbyssalMayhemHydrospoutStatus",
     "MeleeStanceStatus",
@@ -6068,8 +6070,43 @@ class MysticalAbandonStatus(TalentEquipmentStatus):
         return MysticalAbandon
 
 
-#### Tartaglia ####
+#### Stonehide Lawachurl ####
 
+@dataclass(frozen=True, kw_only=True)
+class InfusedStonehideStatus(CharacterStatus, FixedShieldStatus):
+    usages: int = 3
+    MAX_USAGES: ClassVar[int] = 3
+    SHIELD_AMOUNT: ClassVar[int] = 1
+    boosted: bool = False  # +1 DMG per round
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+    ))
+
+    @override
+    def _preprocess(
+            self,
+            game_state: GameState,
+            status_source: StaticTarget,
+            item: PreprocessableEvent,
+            signal: Preprocessables
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            if not (
+                    item.dmg.source == status_source
+                    and item.dmg.damage_type.directly_from_character()
+            ):
+                return item, self
+            new_self = self
+            if item.dmg.element is Element.PHYSICAL:
+                item = item.convert_element(Element.GEO)
+            if not self.boosted:
+                item = item.delta_damage(1)
+                new_self = replace(self, boosted=True)
+            return item, new_self
+        return item, self
+
+
+#### Tartaglia ####
 
 @dataclass(frozen=True, kw_only=True)
 class AbyssalMayhemHydrospoutStatus(TalentEquipmentStatus):

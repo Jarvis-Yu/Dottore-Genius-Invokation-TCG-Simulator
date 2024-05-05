@@ -2723,12 +2723,11 @@ class Lyney(Character):
     @override
     def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         effects: list[eft.Effect] = [
-            eft.ReferredDamageEffect(
+            *normal_attack_template(
+                game_state=game_state,
                 source=source,
-                target=DynamicCharacterTarget.OPPO_ACTIVE,
                 element=Element.PYRO,
                 damage=2,
-                damage_type=DamageType(normal_attack=True),
             ),
             eft.AddSummonEffect(
                 target_pid=source.pid,
@@ -3765,6 +3764,77 @@ class Shenhe(Character):
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
+
+
+class StonehideLawachurl(Character):
+    # TODO: WIP
+    _ELEMENT = Element.GEO
+    _WEAPON_TYPE = WeaponType.NONE
+    _TALENT_STATUS = None
+    _FACTIONS = frozenset((Faction.MONSTER, Faction.HILICHURL))
+
+    _SKILL1_COST = AbstractDice({
+        Element.GEO: 1,
+        Element.ANY: 2,
+    })
+    _SKILL2_COST = AbstractDice({
+        Element.GEO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDice({
+        Element.GEO: 3,
+    })
+
+    @override
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        )
+
+    @override
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.PHYSICAL,
+                damage=3,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+        )
+
+    @override
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                drain=self.max_energy,
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.PHYSICAL,
+                damage=5,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=3,
+            hiddens=stts.Statuses(()),
+            statuses=stts.Statuses((stt.InfusedStonehideStatus(), )),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
 
 
 class Tartaglia(Character):

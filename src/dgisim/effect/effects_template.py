@@ -28,6 +28,10 @@ def normal_attack_template(
         damage: int,
         target: DynamicCharacterTarget = DynamicCharacterTarget.OPPO_ACTIVE,
 ) -> tuple[eft.Effect, ...]:
+    """
+    :returns: tuple of a single normal attack effect, containing charged or plunge information
+              if applicable.
+    """
     player = game_state.get_player(source.pid)
     assert stt.ChargedAttackStatus in player.hidden_statuses
     charged_status = player.hidden_statuses.just_find(stt.ChargedAttackStatus)
