@@ -1,7 +1,7 @@
 Available Cards
 ===============
 
-167 of 283 cards in Genius Invokation TCG are available in the simulator.
+168 of 283 cards in Genius Invokation TCG are available in the simulator.
 (excluding character cards which are not counted as cards in ``dgisim``)
 
 Equipment Cards
@@ -114,6 +114,7 @@ Talent Card
 * The Shrine's Sacred Shade
 * Thundering Penance
 * Transcendent Automaton
+* Turn Control
 * Undivided Heart
 * Wellspring of War-Lust
 * Wishes Unnumbered

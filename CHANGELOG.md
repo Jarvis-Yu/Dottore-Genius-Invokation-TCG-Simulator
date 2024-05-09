@@ -15,6 +15,7 @@
   - Lisa
   - Lyney
   - Yaoyao
+  - Yelan
 - New Cards:
   - Equipment Cards:
     - Talent Cards:
@@ -24,6 +25,7 @@
       - Pulsating Witch
       - Shaken, Not Purred
       - Steady Breathing
+      - Turn Control
     - Artifact Cardso
       - Crown of Watatsumi
   - Support Cards:

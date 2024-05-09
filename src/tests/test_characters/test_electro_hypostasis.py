@@ -10,7 +10,7 @@ class TestAratakiItto(unittest.TestCase):
                 2
             ).character(
                 ElectroHypostasis.from_default(2).factory().f_hiddens(
-                    lambda hiddens: hiddens.remove(ElectroCrystalCoreHiddenStatus)
+                    lambda hiddens: hiddens.remove(ElectroHypostasisPassiveStatus)
                 ).f_character_statuses(
                     lambda cstts: cstts.update_status(ElectroCrystalCoreStatus())
                 ).build()
@@ -249,7 +249,7 @@ class TestAratakiItto(unittest.TestCase):
         ).build()
         electro_hypostasis = game_state.player1.characters.get_character(2)
         assert electro_hypostasis is not None
-        self.assertIn(ElectroCrystalCoreHiddenStatus, electro_hypostasis.hidden_statuses)
+        self.assertIn(ElectroHypostasisPassiveStatus, electro_hypostasis.hidden_statuses)
         self.assertNotIn(ElectroCrystalCoreStatus, electro_hypostasis.character_statuses)
 
         # gain character status ver electro core status on first action phase start
@@ -259,7 +259,7 @@ class TestAratakiItto(unittest.TestCase):
         game_state = gsm.get_game_state()
         electro_hypostasis = game_state.player1.characters.get_character(2)
         assert electro_hypostasis is not None
-        self.assertNotIn(ElectroCrystalCoreHiddenStatus, electro_hypostasis.hidden_statuses)
+        self.assertNotIn(ElectroHypostasisPassiveStatus, electro_hypostasis.hidden_statuses)
         self.assertIn(ElectroCrystalCoreStatus, electro_hypostasis.character_statuses)
 
     def test_triggering_electro_crystal_core_status(self):

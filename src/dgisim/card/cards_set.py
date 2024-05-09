@@ -47,6 +47,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     TheShrinesSacredShade,
     ThunderingPenance,
     TranscendentAutomaton,
+    TurnControl,
     UndividedHeart,
     WellspingOfWarLust,
     WishesUnnumbered,

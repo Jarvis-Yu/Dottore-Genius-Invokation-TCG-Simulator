@@ -141,6 +141,7 @@ __all__ = [
     "PassingOfJudgmentStatus",
     "RebelliousShieldStatus",
     "ReviveOnCooldownStatus",
+    # "SandAndDreamsStatus",
     "StoneAndContractsStatus",
     "SunyataFlowerStatus",
     "TheBoarPrincessStatus",
@@ -191,7 +192,7 @@ __all__ = [
     "CatClawShieldEnhancedStatus",
     "CatClawShieldStatus",
     ## Electro Hypostasis ##
-    "ElectroCrystalCoreHiddenStatus",
+    "ElectroHypostasisPassiveStatus",
     "ElectroCrystalCoreStatus",
     "RockPaperScissorsComboPaperStatus",
     "RockPaperScissorsComboScissorsStatus",
@@ -323,6 +324,11 @@ __all__ = [
     "TheShrinesSacredShadeStatus",
     ## Yaoyao ##
     "AdeptalLegacyStatus",
+    ## Yelan ##
+    "BreakthroughStatus",
+    "ExquisiteThrowStatus",
+    "TurnControlStatus",
+    "YelanPassiveStatus",
     ## Yoimiya ##
     "AurousBlazeStatus",
     "NaganoharaMeteorSwarmStatus",
@@ -587,6 +593,11 @@ class Status:
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         """
+        :param game_state: the current game state.
+        :param source: the position of this status.
+        :param signal: the triggering signal.
+        :param detail: the detail of the signal if applicable.
+
         Returns a tuple, containg the effects and how to update self
         * if the returned new self is the same object as itself, then it is taken as no change
           requested
@@ -1910,10 +1921,7 @@ class _ElementalDiscountStatus(ArtifactEquipmentStatus):
 class _ElementalDiscountSupplyStatus(_ElementalDiscountStatus):
     @override
     def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: PreprocessableEvent,
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.ROLL_DICE_INIT:
@@ -2950,6 +2958,11 @@ class FreshWindOfFreedomStatus(CombatStatus):
         elif signal is TriggeringSignal.ROUND_END:
             return [], None
         return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class SandAndDreamsStatus(CombatStatus):
+    ...
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -4101,7 +4114,7 @@ class ShakenNotPurredStatus(TalentEquipmentStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class ElectroCrystalCoreHiddenStatus(CharacterHiddenStatus):
+class ElectroHypostasisPassiveStatus(CharacterHiddenStatus):
     REACTABLE_SIGNALS = frozenset({
         TriggeringSignal.INIT_GAME_START,
     })
@@ -6814,6 +6827,164 @@ class BeneficentStatus(TalentEquipmentStatus):
         return Beneficent
 
 
+#### Yelan ####
+
+@dataclass(frozen=True, kw_only=True)
+class BreakthroughStatus(CharacterStatus, _UsageLivingStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 3
+    should_draw: bool = False
+    should_stack: bool = False
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+    ))
+
+    @override
+    def _inform(
+            self, game_state: GameState, status_source: StaticTarget, info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.POST_SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if (
+                    self.usages < self.MAX_USAGES
+                    and information.source == status_source
+                    and information.skill_type is CharacterSkill.SKILL2
+            ):
+                return replace(self, should_stack=True)
+        return self
+
+    @override
+    def _preprocess(
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_ELEMENT:
+            assert isinstance(item, DmgPEvent)
+            if (
+                    self.usages >= 2
+                    and item.dmg.source == status_source
+                    and item.dmg.element is Element.PHYSICAL
+                    and item.dmg.damage_type.direct_normal_attack()
+            ):
+                return (
+                    item.convert_element(Element.HYDRO),
+                    replace(self, should_draw=True),
+                )
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION:
+            if self.should_draw:
+                return [
+                    eft.DrawRandomCardEffect(pid=source.pid, num=1),
+                ], replace(self, usages=-2, should_draw=False)
+            elif self.should_stack:
+                return [], replace(self, usages=2, should_stack=False)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class ExquisiteThrowStatus(CombatStatus, _UsageStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    normal_attacked: bool = False
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.ROUND_END,
+    ))
+    
+    @override
+    def _inform(
+            self, game_state: GameState, status_source: StaticTarget, info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.POST_SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if (
+                    information.source.pid is status_source.pid
+                    and information.skill_true_type is CharacterSkillType.NORMAL_ATTACK
+            ):
+                return replace(self, normal_attacked=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION and self.normal_attacked:
+            return [
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=Element.HYDRO,
+                    damage=1,
+                    damage_type=DamageType(status=True),
+                ),
+            ], replace(self, normal_attacked=False)
+        elif signal is TriggeringSignal.ROUND_END:
+            return [], replace(self, usages=-1)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class TurnControlStatus(TalentEquipmentStatus):
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import TurnControl
+        return TurnControl
+
+    @override
+    def _preprocess(
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.ROLL_DICE_INIT:
+            assert isinstance(item, DiceRollInitPEvent)
+            if (
+                    item.pid == status_source.pid
+                    and item.can_update()
+            ):
+                char_unique_elems = {
+                    char.ELEMENT
+                    for char in game_state.get_player(status_source.pid).characters
+                }
+                return item.update(Element.OMNI, len(char_unique_elems)), self
+        return super()._preprocess(game_state, status_source, item, signal)
+
+
+@dataclass(frozen=True, kw_only=True)
+class YelanPassiveStatus(CharacterHiddenStatus):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.INIT_GAME_START,
+        TriggeringSignal.REVIVAL_GAME_START,
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal in {
+                TriggeringSignal.INIT_GAME_START,
+                TriggeringSignal.REVIVAL_GAME_START,
+                TriggeringSignal.END_ROUND_CHECK_OUT,
+        }:
+            return [
+                eft.AddCharacterStatusEffect(
+                    target=source,
+                    status=BreakthroughStatus,
+                )
+            ], self
+        return [], self
+
+
 #### Yoimiya ####
 
 @dataclass(frozen=True, kw_only=True)
@@ -6890,10 +7061,7 @@ class NiwabiEnshouStatus(CharacterStatus, _UsageStatus):
 
     @override
     def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: PreprocessableEvent,
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:

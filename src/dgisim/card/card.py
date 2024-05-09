@@ -291,6 +291,8 @@ __all__ = [
     "TheShrinesSacredShade",
     ## Yaoyao ##
     "Beneficent",
+    ## Yelan ##
+    "TurnControl",
     ## Yoimiya ##
     "NaganoharaMeteorSwarm",
 ]
@@ -4311,6 +4313,15 @@ class Beneficent(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDice({Element.DENDRO: 3})
     _CHARACTER = chr.Yaoyao
     _EQUIPMENT_STATUS = stt.BeneficentStatus
+    _SKILL = CharacterSkill.SKILL2
+
+
+#### Yelan ####
+
+class TurnControl(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDice({Element.HYDRO: 3})
+    _CHARACTER = chr.Yelan
+    _EQUIPMENT_STATUS = stt.TurnControlStatus
     _SKILL = CharacterSkill.SKILL2
 
 

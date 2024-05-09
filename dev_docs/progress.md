@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (42/83 implemented)](#character-4283-implemented)
-  - [Card (167/283 implemented)](#card-167283-implemented)
+  - [Character (43/83 implemented)](#character-4383-implemented)
+  - [Card (168/283 implemented)](#card-168283-implemented)
 
-## Character (42/83 implemented)
+## Character (43/83 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -23,6 +23,7 @@ all I need now is to implement each card and character.
   - [x] Sangonomiya Kokomi
   - [x] Tartaglia
   - [x] Xingqiu
+  - [x] Yelan
 - [ ] Anemo:
   - [x] Jean
   - [x] Kaedehara Kazuha
@@ -60,9 +61,9 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (167/283 implemented)
+## Card (168/283 implemented)
 
-- [ ] Equipment Card (86/155):
+- [ ] Equipment Card (87/155):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
@@ -101,6 +102,7 @@ all I need now is to implement each card and character.
     - [x] The Shrine's Sacred Shade
     - [x] Thundering Penance
     - [x] Transcendent Automaton
+    - [x] Turn Control
     - [x] Undivided Heart
     - [x] Wellspring of War-Lust
     - [x] Wishes Unnumbered

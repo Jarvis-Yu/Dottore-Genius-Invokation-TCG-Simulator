@@ -473,6 +473,7 @@ def replace_init_deck(game_state: GameState, pid: Pid, cards: Cards) -> GameStat
     ).build()
 
 def replace_entire_deck(game_state: GameState, pid: Pid, cards: Cards) -> GameState:
+    """ Changes both init deck and runtime deck. """
     new_deck: Deck = game_state.get_player(pid).initial_deck.to_mutable()
     new_deck.cards = cards.to_dict()
     new_deck = new_deck.to_frozen()
@@ -487,7 +488,8 @@ def replace_character(
         char: type[Character],
         char_id: int,
 ) -> GameState:
-    character_instance = char.from_default(char_id).factory().hp(0).alive(False).build()
+    # character_instance = char.from_default(char_id).factory().hp(char).alive(False).build()
+    character_instance = char.from_default(char_id)
     game_state = game_state.factory().f_player(
         pid,
         lambda p: p.factory().f_characters(
@@ -498,11 +500,6 @@ def replace_character(
     ).build()
     game_state = game_state.factory().f_effect_stack(
         lambda es: es.push_many_fl((
-            ReviveRecoverHPEffect(
-                source=StaticTarget.from_char_id(pid, char_id),
-                target=StaticTarget.from_char_id(pid, char_id),
-                recovery=character_instance.max_hp,
-            ),
             PersonalStatusTriggererEffect(
                 target=StaticTarget.from_char_id(pid, char_id),
                 signal=TriggeringSignal.INIT_GAME_START,

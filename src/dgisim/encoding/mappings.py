@@ -86,6 +86,7 @@ CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
         (char.Tartaglia, 107),
         # (char.Candice, 108),
         # (char.Nilou, 109),
+        (char.Yelan, 110),
 
         #### Pyro 200 ####
         # (char.Diluc, 200),
@@ -367,6 +368,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.AbyssalMayhemHydrospout, 1032),
         # Candice 1033
         # Nilou 1034
+        (card.TurnControl, 1035),
 
         #### 4.3 Pyro 1125 ####
         # Diluc 1125
@@ -756,6 +758,11 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.TideWithholderStatus, 2746),
         ## Candice 2760 ##
         ## Nilou 2780 ##
+        ## Yelan 2800 ##
+        (status.TurnControlStatus, 2800),
+        (status.YelanPassiveStatus, 2801),
+        (status.BreakthroughStatus, 2802),
+        (status.ExquisiteThrowStatus, 2803),
 
         #### 4.3 Pyro Character Status 4600 ####
         ## Diluc 4600 ##
@@ -813,7 +820,7 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.RiteOfDispatchStatus, 6741),
         (status.TenkoThunderboltsStatus, 6742),
         ## ElectroHypostasis 6760 ##
-        (status.ElectroCrystalCoreHiddenStatus, 6760),
+        (status.ElectroHypostasisPassiveStatus, 6760),
         (status.ElectroCrystalCoreStatus, 6761),
         (status.RockPaperScissorsComboPaperStatus, 6762),
         (status.RockPaperScissorsComboScissorsStatus, 6763),

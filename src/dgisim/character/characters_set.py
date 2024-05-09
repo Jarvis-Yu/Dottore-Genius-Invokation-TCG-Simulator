@@ -48,6 +48,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     Xingqiu,
     YaeMiko,
     Yaoyao,
+    Yelan,
     Yoimiya,
 ]
 

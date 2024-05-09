@@ -1,7 +1,7 @@
 Available Characters
 ====================
 
-42 of 83 characters in Genius Invokation TCG are available in the simulator.
+43 of 83 characters in Genius Invokation TCG are available in the simulator.
 
 Pyro
 ------
@@ -17,10 +17,12 @@ Pyro
 Hydro
 -----
 
-*  Mona
-*  Rhodeia of Loch
-*  Sangonomiya Kokomi
-*  Xingqiu
+* Mona
+* Rhodeia of Loch
+* Sangonomiya Kokomi
+* Tartaglia
+* Xingqiu
+* Yelan
 
 Anemo
 -----
