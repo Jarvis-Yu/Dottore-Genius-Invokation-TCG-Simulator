@@ -141,7 +141,7 @@ __all__ = [
     "PassingOfJudgmentStatus",
     "RebelliousShieldStatus",
     "ReviveOnCooldownStatus",
-    # "SandAndDreamsStatus",
+    "SandAndDreamsStatus",
     "StoneAndContractsStatus",
     "SunyataFlowerStatus",
     "TheBoarPrincessStatus",
@@ -2886,10 +2886,7 @@ class PassingOfJudgmentStatus(CombatStatus, _UsageStatus):
 
     @override
     def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: PreprocessableEvent,
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.CARD1:
@@ -2962,7 +2959,20 @@ class FreshWindOfFreedomStatus(CombatStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class SandAndDreamsStatus(CombatStatus):
-    ...
+    @override
+    def _preprocess(
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.SKILL:
+            assert isinstance(item, ActionPEvent)
+            if (
+                    status_source.pid is item.source.pid
+                    and item.event_type.is_skill()
+                    and item.dice_cost.can_cost_less_elem()
+            ):
+                return item.with_new_cost(item.dice_cost.cost_less_elem(3)), None
+        return item, self
 
 
 @dataclass(frozen=True, kw_only=True)

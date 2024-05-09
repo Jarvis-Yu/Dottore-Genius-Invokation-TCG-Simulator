@@ -100,6 +100,8 @@ class Support(stt.Status):
             + self.content_str()
 
     def content_str(self) -> str:  # pragma: no cover
+        if isinstance(self, stt._UsageStatus):
+            return f"{self.usages}"
         return ""
 
 
@@ -308,12 +310,13 @@ class JehtSupport(Support, stt._UsageLivingStatus):
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.COMBAT_ACTION and self.triggered:
-            if self.usages >= 5:
+            from ..status.status import SandAndDreamsStatus
+            sand_n_dreams = game_state.get_player(source.pid).combat_statuses.find(SandAndDreamsStatus)
+            if self.usages >= 6 and sand_n_dreams is None:
                 return [
-                    eft.AddDiceEffect(
-                        pid=source.pid,
-                        element=Element.OMNI,
-                        num=self.usages - 2,
+                    eft.AddCombatStatusEffect(
+                        target_pid=source.pid,
+                        status=SandAndDreamsStatus,
                     ),
                 ], None
             else:

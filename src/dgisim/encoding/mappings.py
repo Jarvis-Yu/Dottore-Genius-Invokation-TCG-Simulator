@@ -670,6 +670,7 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.StoneAndContractsStatus, 318),
         (status.TheBoarPrincessStatus, 319),
         (status.SunyataFlowerStatus, 320),
+        (status.SandAndDreamsStatus, 321),
 
         #### 2.2 Shield Combat Status 375 ####
         (status.CrystallizeStatus, 375),
