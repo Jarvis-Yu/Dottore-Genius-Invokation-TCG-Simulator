@@ -1164,16 +1164,6 @@ class SpecificDamageEffect(DirectEffect):
         elif new_aura.aurable(second_elem):
             new_aura = new_aura.add(second_elem)
 
-        # if new_aura != all_aura:
-        #     game_state = game_state.factory().f_player(
-        #         just(game_state.belongs_to(target_char)),
-        #         lambda p: p.factory().f_characters(
-        #             lambda cs: cs.factory().character(
-        #                 target_char.factory().elemental_aura(new_aura).build()  # type: ignore
-        #             ).build()
-        #         ).build()
-        #     ).build()
-
         game_state, damage = cls._damage_preprocess(
             game_state, damage, Preprocessables.DMG_REACTION
         )
@@ -1952,7 +1942,7 @@ class AddCombatStatusEffect(DirectEffect):
         return game_state.factory().f_player(
             self.target_pid,
             lambda p: p.factory().f_combat_statuses(
-                lambda ss: ss.update_status(self.status())
+                lambda ss: ss.add_status(self.status)
             ).build()
         ).build()
 
@@ -2008,7 +1998,7 @@ class AddSummonEffect(DirectEffect):
         return game_state.factory().f_player(
             self.target_pid,
             lambda p: p.factory().f_summons(
-                lambda ss: ss.update_summon(self.summon())
+                lambda ss: ss.add_summon(self.summon)
             ).build()
         ).build()
 

@@ -253,6 +253,8 @@ __all__ = [
     "PoundingSurprise",
     ## Kujou Sara ##
     "SinOfPride",
+    ## Layla ##
+    "LightsRemit",
     ## Lisa ##
     "PulsatingWitch",
     ## Lyney ##
@@ -4117,6 +4119,15 @@ class SinOfPride(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDice({Element.ELECTRO: 3})
     _CHARACTER = chr.KujouSara
     _EQUIPMENT_STATUS = stt.SinOfPrideStatus
+    _SKILL = CharacterSkill.SKILL2
+
+
+#### Layla ####
+
+class LightsRemit(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDice({Element.CRYO: 3})
+    _CHARACTER = chr.Layla
+    _EQUIPMENT_STATUS = stt.LightsRemitStatus
     _SKILL = CharacterSkill.SKILL2
 
 

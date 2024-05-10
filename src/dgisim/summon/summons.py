@@ -32,12 +32,29 @@ class Summons:
     def just_find(self, summon_type: type[__InputSummon]) -> __InputSummon:
         return just(self.find(summon_type))
 
+    def add_summon(self, incoming_summon: type[Summon]) -> Summons:
+        summons = list(self._summons)
+        for i, summon in enumerate(summons):
+            if type(summon) != incoming_summon:
+                continue
+            new_summon: None | Summon
+            new_summon = summon.add(incoming_summon)
+            if summon == new_summon:
+                return self
+            if new_summon is None:
+                return self.remove_summon(type(summon))
+            summons[i] = new_summon
+            return Summons(tuple(summons), self._max_num)
+        if len(summons) < self._max_num:
+            summons.append(incoming_summon())
+        return Summons(tuple(summons), self._max_num)
+
     def update_summon(self, incoming_summon: Summon, override: bool = False) -> Summons:
         summons = list(self._summons)
         for i, summon in enumerate(summons):
             if type(summon) != type(incoming_summon):
                 continue
-            new_summon: Optional[Summon]
+            new_summon: None | Summon
             if override:
                 new_summon = incoming_summon
             else:

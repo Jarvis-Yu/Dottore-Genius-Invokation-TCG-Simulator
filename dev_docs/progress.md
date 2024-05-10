@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (43/83 implemented)](#character-4383-implemented)
-  - [Card (168/283 implemented)](#card-168283-implemented)
+  - [Character (44/83 implemented)](#character-4483-implemented)
+  - [Card (169/283 implemented)](#card-169283-implemented)
 
-## Character (43/83 implemented)
+## Character (44/83 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -52,6 +52,7 @@ all I need now is to implement each card and character.
   - [x] Kaeya
   - [x] Kamisato Ayaka
   - [x] Ganyu
+  - [x] Layla
   - [x] Qiqi
   - [x] Shenhe
 - [ ] Geo:
@@ -61,9 +62,9 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [ ] Stonehide Lawachurl
 
-## Card (168/283 implemented)
+## Card (169/283 implemented)
 
-- [ ] Equipment Card (87/155):
+- [ ] Equipment Card (88/155):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
@@ -79,6 +80,7 @@ all I need now is to implement each card and character.
     - [x] I Got Your Back
     - [x] Keen Sight
     - [x] Lands of Dandelion
+    - [x] Light's Remit
     - [x] Mystical Abandon
     - [x] Naganohara Meteor Swarm
     - [x] Paid in Full

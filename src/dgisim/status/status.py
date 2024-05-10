@@ -254,6 +254,10 @@ __all__ = [
     ## Kujou Sara ##
     "CrowfeatherCoverStatus",
     "SinOfPrideStatus",
+    ## Layla ##
+    "CurtainOfSlumberStatus",
+    "LightsRemitStatus",
+    "ShootingStarStatus",
     ## Lisa ##
     "ConductiveStatus",
     "PulsatingWitchStatus",
@@ -828,6 +832,13 @@ class CombatStatus(Status):
 ############################## template ##############################
 @dataclass(frozen=True)
 class _UsageStatus(Status):
+    """
+    A Status template that provides auto handling of usages.
+
+    - for ._react_to_signal(), returning same self means no change, otherwise, the returned
+      usages will be treated as delta usages.
+    - for ._preprocess() and ._inform(), the returned usages will be the final usages.
+    """
     #: default usages on creation
     usages: int
     #: maximum usages
@@ -5144,10 +5155,7 @@ class SparksnSplashStatus(CombatStatus, _UsageStatus):
 
     @override
     def _inform(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            info_type: Informables,
+            self, game_state: GameState, status_source: StaticTarget, info_type: Informables,
             information: InformableEvent,
     ) -> Self:
         if self.activated or self.usages == 0:
@@ -5232,6 +5240,82 @@ class SinOfPrideStatus(TalentEquipmentStatus):
     def CARD(cls) -> type[crd.TalentEquipmentCard]:
         from ..card.card import SinOfPride
         return SinOfPride
+
+
+#### Layla ####
+
+@dataclass(frozen=True, kw_only=True)
+class CurtainOfSlumberStatus(CombatStatus, StackedShieldStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+
+
+@dataclass(frozen=True, kw_only=True)
+class LightsRemitStatus(TalentEquipmentStatus):
+    @classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import LightsRemit
+        return LightsRemit
+
+
+@dataclass(frozen=True, kw_only=True)
+class ShootingStarStatus(CombatStatus, _UsageLivingStatus):
+    usages: int = 0
+    used_skill: bool = False
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.COMBAT_ACTION,
+    ))
+
+    @override
+    def add(self, other: type[Self]) -> None | Self:
+        return self.update(replace(self, usages=2))
+
+    @override
+    def _inform(
+            self, game_state: GameState, status_source: StaticTarget, info_type: Informables,
+            information: InformableEvent,
+    ) -> Self:
+        if info_type is Informables.POST_SKILL_USAGE:
+            assert isinstance(information, SkillIEvent)
+            if information.source.pid == status_source.pid:
+                return replace(self, used_skill=True)
+        return self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.COMBAT_ACTION:
+            effects: list[eft.Effect] = []
+            curr_usages = self.usages
+            if self.used_skill:
+                effects.append(eft.UpdateCombatStatusEffect(
+                    target_pid=source.pid,
+                    status=ShootingStarStatus(usages=1, used_skill=False),
+                ))
+                curr_usages += 1
+            if curr_usages >= 4:
+                from ..character.character import Layla
+                effects.append(eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=Element.CRYO,
+                    damage=1,
+                    damage_type=DamageType(status=True),
+                ))
+                layla = game_state.get_player(source.pid).characters.find_first_character(Layla)
+                if layla is not None and layla.talent_equipped():
+                    effects.append(eft.DrawRandomCardEffect(
+                        pid=source.pid,
+                        num=1,
+                    ))
+                effects.append(eft.UpdateCombatStatusEffect(
+                    target_pid=source.pid,
+                    status=ShootingStarStatus(usages=-4, used_skill=False),
+                ))
+            return effects, self
+        return [], self
 
 
 #### Lisa ####

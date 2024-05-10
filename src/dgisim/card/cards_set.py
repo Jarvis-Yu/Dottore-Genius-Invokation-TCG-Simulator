@@ -23,6 +23,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     KantenSenmyouBlessing,
     KeenSight,
     LandsOfDandelion,
+    LightsRemit,
     MysticalAbandon,
     NaganoharaMeteorSwarm,
     PaidInFull,

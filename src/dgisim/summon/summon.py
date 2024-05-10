@@ -39,6 +39,7 @@ __all__ = [
     "AutumnWhirlwindSummon",
     "BakeKurageSummon",
     "BurningFlameSummon",
+    "CelestialDreamsphereSummon",
     "ChainsOfWardingThunderSummon",
     "ClusterbloomArrowSummon",
     "CryoCicinsSummon",
@@ -387,6 +388,30 @@ class BurningFlameSummon(_DmgPerRoundSummon):
 
 
 @dataclass(frozen=True, kw_only=True)
+class CelestialDreamsphereSummon(_DmgPerRoundSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 1
+    ELEMENT: ClassVar[Element] = Element.CRYO
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        es, new_self = super()._react_to_signal(game_state, source, signal, detail)
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            if stt.ShootingStarStatus in game_state.get_player(source.pid).combat_statuses:
+                return es + [
+                    eft.UpdateCombatStatusEffect(
+                        target_pid=source.pid,
+                        status=stt.ShootingStarStatus(usages=1),
+                    ),
+                ], new_self
+        return es, new_self
+
+
+@dataclass(frozen=True, kw_only=True)
 class ChainsOfWardingThunderSummon(_DmgPerRoundSummon):
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2
@@ -420,6 +445,7 @@ class ChainsOfWardingThunderSummon(_DmgPerRoundSummon):
                 )
         return super()._preprocess(game_state, status_source, item, signal)
 
+    @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
@@ -458,6 +484,10 @@ class CryoCicinsSummon(_DmgPerRoundSummon):
         TriggeringSignal.COMBAT_ACTION,
         TriggeringSignal.POST_DMG,
     ))
+
+    @override
+    def add(self, other: type[Self]) -> None | Self:
+        return self.update(replace(self, usages=2))
 
     @override
     def _inform(
@@ -1368,17 +1398,13 @@ class UshiSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
             itto = game_state.get_player(
                 source.pid
             ).characters.find_first_character(AratakiItto)
-            assert itto is not None
-            return [
-                eft.AddCharacterStatusEffect(
-                    target=StaticTarget(
-                        pid=source.pid,
-                        zone=Zone.CHARACTERS,
-                        id=itto.id,
-                    ),
+            effects: list[eft.Effect] = []
+            if itto is not None and itto.alive:
+                effects.append(eft.AddCharacterStatusEffect(
+                    target=StaticTarget.from_char_id(source.pid, itto.id),
                     status=stt.SuperlativeSuperstrengthStatus
-                )
-            ], replace(
+                ))
+            return effects, replace(
                 self,
                 usages=0,
                 status_gaining_usages=self.status_gaining_usages - 1,
@@ -1408,9 +1434,8 @@ class YueguiThrowingModeSummon(_DestroyOnNumSummon):
             from ..character.character import Yaoyao
             characters = game_state.get_player(source.pid).characters
             yaoyao = characters.find_first_character(Yaoyao)
-            assert yaoyao is not None
             dmg, healing = 0, 0
-            if yaoyao.talent_equipped() and self.usages == 1:
+            if yaoyao is not None and yaoyao.talent_equipped() and self.usages == 1:
                 dmg, healing = 1, 1
             chars_by_dmg_taken = sorted(
                 characters.get_alive_character_in_activity_order(),

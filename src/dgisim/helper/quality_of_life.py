@@ -9,7 +9,9 @@ __all__ = [
     "case_val",
     "classproperty",
     "dataclass_repr",
+    "is_subclass",
     "just",
+    "safe_issubclass",
 ]
 
 _T = TypeVar('_T')
@@ -56,6 +58,18 @@ def dataclass_repr(self) -> str:
     return f"{self.__class__.__name__}({', '.join(paired_fields)})"
 
 
+def is_instance_or_subclass(item: type | object, parent: type) -> bool:
+    """ :returns: True if item is an instance of parent or a subclass of parent. """
+    return isinstance(item, parent) or safe_issubclass(item, parent)
+
+def is_subclass(cls: type, parent: type) -> bool:
+    """
+    :returns: True if cls is a subclass of parent
+    """
+    assert isclass(cls), f"{cls} is not a class"
+    return issubclass(cls, parent)
+
+
 def just(optional_val: None | _T, backup: None | _T = None) -> _T:
     """
     Removes Optional and get value directly
@@ -68,9 +82,9 @@ def just(optional_val: None | _T, backup: None | _T = None) -> _T:
             return backup
     return optional_val
 
-def is_subclass(cls: type, parent: type) -> bool:
+
+def safe_issubclass(cls: type | object, parent: type) -> bool:
     """
-    :returns: True if cls is a subclass of parent
+    :returns: False if cls is not a subclass of parent or is not a class.
     """
-    assert isclass(cls), f"{cls} is not a class"
-    return issubclass(cls, parent)
+    return isclass(cls) and issubclass(cls, parent)

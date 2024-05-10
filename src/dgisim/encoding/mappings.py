@@ -74,6 +74,7 @@ CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
         (char.Shenhe, 6),
         (char.FatuiCryoCicinMage, 7),
         (char.Qiqi, 8),
+        (char.Layla, 9),
 
         #### Hydro 100 ####
         # (char.Barbara, 100),
@@ -356,6 +357,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.MysticalAbandon, 931),
         (card.CicinsColdGlare, 932),
         (card.RiteOfResurrection, 933),
+        (card.LightsRemit, 934),
 
         #### 4.2 Hydro 1025 ####
         # Barbara 1025
@@ -731,6 +733,10 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.RiteOfResurrectionStatus, 760),
         (status.FortunePreservingTalismanStatus, 761),
         (status.QiqiTalentStatus, 762),
+        ## Layla 780 ##
+        (status.LightsRemitStatus, 780),
+        (status.CurtainOfSlumberStatus, 781),
+        (status.ShootingStarStatus, 782),
 
         #### 4.2 Hydro Character Status 2600 ####
         ## Barbara 2600 ##
@@ -914,6 +920,7 @@ SUMM_MAPPING: dict[type["Summon"], int] = HashableDict({
         (summon.TalismanSpiritSummon, 6),
         (summon.CryoCicinsSummon, 7),
         (summon.HeraldOfFrostSummon, 8),
+        (summon.CelestialDreamsphereSummon, 9),
 
         #### Hydro 100 ####
         # (summon.MelodyLoopSummon, 100),

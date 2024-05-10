@@ -1,7 +1,7 @@
 Available Cards
 ===============
 
-168 of 283 cards in Genius Invokation TCG are available in the simulator.
+169 of 283 cards in Genius Invokation TCG are available in the simulator.
 (excluding character cards which are not counted as cards in ``dgisim``)
 
 Equipment Cards
@@ -91,6 +91,7 @@ Talent Card
 * I Got Your Back
 * Keen Sight
 * Lands of Dandelion
+* Light's Remit
 * Mystical Abandon
 * Naganohara Meteor Swarm
 * Paid in Full

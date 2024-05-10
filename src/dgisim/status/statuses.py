@@ -1,11 +1,12 @@
 from __future__ import annotations
+from inspect import isclass
 from itertools import chain
 from typing import Iterator, Optional, TYPE_CHECKING, TypeVar
 from typing_extensions import override, Self
 
 from ..status import status as stt
 
-from ..helper.quality_of_life import just
+from ..helper.quality_of_life import just, is_instance_or_subclass
 
 if TYPE_CHECKING:
     from ..encoding.encoding_plan import EncodingPlan

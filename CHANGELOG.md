@@ -12,6 +12,7 @@
   - Chongyun
   - Diona
   - Fatui Cryo Cicin Mage
+  - Layla
   - Lisa
   - Lyney
   - Yaoyao
@@ -22,6 +23,7 @@
       - Beneficent
       - Cicin's Cold Glare
       - Conclusive Ovation
+      - Light's Remit
       - Pulsating Witch
       - Shaken, Not Purred
       - Steady Breathing
