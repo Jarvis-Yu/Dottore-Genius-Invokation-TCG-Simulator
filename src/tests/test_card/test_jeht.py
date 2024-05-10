@@ -18,7 +18,7 @@ class TestJeht(unittest.TestCase):
         game_state = base_state
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=Jeht,
-            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 2})),
+            instruction=DiceOnlyInstruction(dice=ActualDice({Element.OMNI: 1})),
         ))
         for _ in range(3):
             game_state = step_action(game_state, Pid.P1, CardAction(
@@ -66,7 +66,7 @@ class TestJeht(unittest.TestCase):
             card=Jeht,
             instruction=StaticTargetInstruction(
                 target=StaticTarget.from_support(Pid.P1, 2),
-                dice=ActualDice({Element.OMNI: 2}),
+                dice=ActualDice({Element.OMNI: 1}),
             ),
         ))
         jeht2 = game_state.player1.supports.find_by_sid(2)

@@ -3601,7 +3601,7 @@ class Dunyarzad(CompanionCard):
 
 
 class Jeht(CompanionCard):
-    _DICE_COST = AbstractDice({Element.ANY: 2})
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
     _SUPPORT_STATUS = sp.JehtSupport
 
     @override
