@@ -5,6 +5,7 @@
 ### Added
 
 - Enabled flipped encoding of a game. (Make P2 P1 and vice versa)
+- Enabled ordered flat encoding for dice and cards
 
 ---
 

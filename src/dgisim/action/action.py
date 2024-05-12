@@ -46,9 +46,9 @@ Action encoding scheme:
 - 3: card id
 - 4: element
 - 5-84: cards selected
-- 85-106: dice selected
-- 107-109: target 1
-- 110-112: target 2
+- 85-104: dice selected
+- 105-107: target 1
+- 108-110: target 2
 """
 
 @dataclass(frozen=True, repr=False)
@@ -101,7 +101,7 @@ class PlayerAction:
                 return None
             return CardsSelectAction(selected_cards=cards)
         elif action_type == 2:
-            dice = ActualDice.decoding(encoding[encoding_plan.ACTION_LOCAL_SIZE:107], encoding_plan)
+            dice = ActualDice.decoding(encoding[encoding_plan.ACTION_LOCAL_SIZE:105], encoding_plan)
             if dice is None or not dice.is_legal():
                 return None
             return DiceSelectAction(selected_dice=dice)

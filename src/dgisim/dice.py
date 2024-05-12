@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import random
 from collections import Counter, defaultdict
+from functools import cached_property
 from typing import Any, Iterator, Iterable
 from typing_extensions import override, Self, TYPE_CHECKING
 
@@ -169,13 +170,22 @@ class Dice:
         """ :returns: the internal frozen dictionary of dice. """
         return self._dice
 
+    @cached_property
+    def ordered_dice(self) -> tuple[Element, ...]:
+        return Counter(self._dice).elements()  # type: ignore
+
     def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
         """
         :returns: the encoding of this Dice.
         """
-        ret_val: list[int] = []
-        for elem in Element:
-            ret_val.extend((encoding_plan.encode_item(elem), self[elem]))
+        ret_val: list[int] = [
+            encoding_plan.encode_item(elem)
+            for elem in self.ordered_dice
+        ]
+        fillings = encoding_plan.DICE_FIXED_LEN - len(ret_val)
+        if fillings < 0:
+            raise Exception(f"Too many dice: {self.num_dice()}")
+        ret_val += [0] * fillings
         return ret_val
 
     @classmethod
@@ -183,15 +193,15 @@ class Dice:
         """
         :returns: the Dice object decoded from `encoding`.
         """
-        dice: dict[Element, int] = {}
-        for elem_code, num in zip(encoding[::2], encoding[1::2]):
-            if num == 0:
+        dice: dict[Element, int] = defaultdict(int)
+        for elem_code in encoding:
+            if elem_code == 0:
                 continue
             elem_code -= encoding_plan.encode_item(Element(0))
             if elem_code > len(Element):
                 return None
             elem = Element(elem_code)
-            dice[elem] = num
+            dice[elem] += 1
         return cls(dice)
 
     def dict_str(self) -> dict[str, Any]:

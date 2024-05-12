@@ -48,7 +48,8 @@ class EncodingPlan:
             summon_mapping: dict[type["Summon"], int],
             support_mapping: dict[type["Support"], int],
             phase_base: int = 450,
-            cards_fixed_len: int = 40,
+            cards_fixed_len: int = 50,
+            dice_fixed_len: int = 20,
             status_fixed_len: int = 7,
             statuses_fixed_len: int = 10,
             char_hidden_fixed_len: int = 4,
@@ -92,6 +93,7 @@ class EncodingPlan:
         self._perspective = perspective
         self.PHASE_BASE = phase_base
         self.CARDS_FIXED_LEN = cards_fixed_len
+        self.DICE_FIXED_LEN = dice_fixed_len
         self.STATUS_FIXED_LEN = status_fixed_len
         self.STATUSES_FIXED_LEN = statuses_fixed_len
         self.CHAR_HIDDEN_FIXED_LEN = char_hidden_fixed_len
@@ -104,10 +106,10 @@ class EncodingPlan:
         self.EFFECTS_FIXED_LEN = effects_fixed_len
 
         from ..element import Element
-        self.ACTION_LOCAL_SIZE = 5 + self.CARDS_FIXED_LEN * 2
+        self.ACTION_LOCAL_SIZE = 5 + self.CARDS_FIXED_LEN
         self.ACTION_FULL_SIZE = (
             self.ACTION_LOCAL_SIZE  # size of cards
-            + len(Element) * 2  # dice of instruction
+            + self.DICE_FIXED_LEN  # dice of instruction
             + 3  # StaticTarget of instruction
             + 3  # StaticTarget of instruction
         )
