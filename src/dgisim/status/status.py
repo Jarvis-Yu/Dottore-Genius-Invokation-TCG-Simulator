@@ -1145,7 +1145,7 @@ class ChargedAttackStatus(PlayerHiddenStatus):
     """
     can_charge: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
 
     @override
@@ -1153,7 +1153,7 @@ class ChargedAttackStatus(PlayerHiddenStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.can_charge:
+        if signal is TriggeringSignal.POST_SKILL and self.can_charge:
             return [], replace(self, can_charge=False)
         return [], self
 
@@ -1162,7 +1162,7 @@ class ChargedAttackStatus(PlayerHiddenStatus):
 class PlungeAttackStatus(PlayerHiddenStatus):
     can_plunge: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
         TriggeringSignal.ROUND_END,
         TriggeringSignal.SELF_SWAP,
     ))
@@ -1187,7 +1187,7 @@ class PlungeAttackStatus(PlayerHiddenStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.can_plunge:
+        if signal is TriggeringSignal.POST_SKILL and self.can_plunge:
             return [], replace(self, can_plunge=False)
         elif signal is TriggeringSignal.ROUND_END and self.can_plunge:
             return [], replace(self, can_plunge=False)
@@ -1249,7 +1249,7 @@ class _SacrificialWeaponStatus(WeaponEquipmentStatus, _UsageLivingStatus):
     DICE_GAIN_NUM: ClassVar[int] = 1
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
         TriggeringSignal.ROUND_END,
     ))
 
@@ -1276,7 +1276,7 @@ class _SacrificialWeaponStatus(WeaponEquipmentStatus, _UsageLivingStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION:
+        if signal is TriggeringSignal.POST_SKILL:
             if self.activated:
                 assert self.usages > 0
                 equiper = game_state.get_character_target(source)
@@ -1370,7 +1370,7 @@ class ElegyForTheEndStatus(WeaponEquipmentStatus):
     WEAPON_TYPE: ClassVar[WeaponType] = WeaponType.BOW
     activated: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
 
     @classproperty
@@ -1400,7 +1400,7 @@ class ElegyForTheEndStatus(WeaponEquipmentStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+        if signal is TriggeringSignal.POST_SKILL and self.activated:
             return [
                 eft.AddCombatStatusEffect(
                     target_pid=source.pid,
@@ -1544,7 +1544,7 @@ class TheBellStatus(WeaponEquipmentStatus, _UsageLivingStatus):
     activated: bool = False
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
         TriggeringSignal.ROUND_END,
     ))
 
@@ -1576,7 +1576,7 @@ class TheBellStatus(WeaponEquipmentStatus, _UsageLivingStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+        if signal is TriggeringSignal.POST_SKILL and self.activated:
             return [
                 eft.AddCombatStatusEffect(
                     target_pid=source.pid,
@@ -1745,7 +1745,7 @@ class AquilaFavoniaStatus(WeaponEquipmentStatus, _UsageLivingStatus):
     HP_RECOVERY: ClassVar[int] = 1
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
         TriggeringSignal.ROUND_END,
     ))
 
@@ -1777,7 +1777,7 @@ class AquilaFavoniaStatus(WeaponEquipmentStatus, _UsageLivingStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+        if signal is TriggeringSignal.POST_SKILL and self.activated:
             if self._target_is_self_active(game_state, source, source):
                 return [
                     eft.RecoverHPEffect(
@@ -1801,7 +1801,7 @@ class FavoniusSwordStatus(WeaponEquipmentStatus, _UsageLivingStatus):
     activated: bool = False
     ENERGY_RECHARGE_AMOUNT: ClassVar[int] = 1
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
         TriggeringSignal.ROUND_END,
     ))
 
@@ -1834,7 +1834,7 @@ class FavoniusSwordStatus(WeaponEquipmentStatus, _UsageLivingStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+        if signal is TriggeringSignal.POST_SKILL and self.activated:
             attached_char = game_state.get_character_target(source)
             assert attached_char is not None
             if attached_char.energy < attached_char.max_energy:
@@ -2054,7 +2054,7 @@ class FlowingRingsStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
     usages: int = 1
     activated: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
         TriggeringSignal.ROUND_END,
     ))
 
@@ -2087,7 +2087,7 @@ class FlowingRingsStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+        if signal is TriggeringSignal.POST_SKILL and self.activated:
             assert self.usages > 0
             return [
                 eft.DrawRandomCardEffect(pid=source.pid, num=1),
@@ -2251,7 +2251,7 @@ class InstructorsCapStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
     MAX_USAGES: ClassVar[int] = 3
     activated: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
         TriggeringSignal.ROUND_END,
     ))
 
@@ -2284,7 +2284,7 @@ class InstructorsCapStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+        if signal is TriggeringSignal.POST_SKILL and self.activated:
             this_char = game_state.get_character_target(source)
             assert this_char is not None
             return [
@@ -2621,7 +2621,7 @@ class DendroCoreStatus(CombatStatus):
 class ElementalResonanceEnduringRockStatus(CombatStatus):
     activated: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
         TriggeringSignal.ROUND_END,
     ))
 
@@ -2650,7 +2650,7 @@ class ElementalResonanceEnduringRockStatus(CombatStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION:
+        if signal is TriggeringSignal.POST_SKILL:
             if not self.activated:
                 return [], self
             combat_statuses = game_state.get_player(source.pid).combat_statuses
@@ -3110,7 +3110,7 @@ class TheBoarPrincessStatus(CombatStatus, _UsageStatus):
 @dataclass(frozen=True, kw_only=True)
 class WhenTheCraneReturnedStatus(CombatStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
     triggered: bool = False
 
@@ -3133,7 +3133,7 @@ class WhenTheCraneReturnedStatus(CombatStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.triggered:
+        if signal is TriggeringSignal.POST_SKILL and self.triggered:
             return [
                 eft.ForwardSwapCharacterEffect(source.pid),
             ], None
@@ -3179,7 +3179,7 @@ class WhereIsTheUnseenRazorStatus(CombatStatus):
 @dataclass(frozen=True, kw_only=True)
 class WindAndFreedomStatus(CombatStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
         TriggeringSignal.ROUND_END,
     ))
     triggered: bool = False
@@ -3203,7 +3203,7 @@ class WindAndFreedomStatus(CombatStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.triggered:
+        if signal is TriggeringSignal.POST_SKILL and self.triggered:
             return [
                 eft.ForwardSwapCharacterEffect(source.pid),
             ], replace(self, triggered=False)
@@ -3673,7 +3673,7 @@ class RagingOniKingStatus(CharacterStatus, _InfusionStatus):
     status_gaining_available: bool = False
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
         TriggeringSignal.ROUND_END,
     ))
 
@@ -3712,7 +3712,7 @@ class RagingOniKingStatus(CharacterStatus, _InfusionStatus):
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.ROUND_END:
             return [], replace(self, usages=-1)
-        elif signal is TriggeringSignal.COMBAT_ACTION:
+        elif signal is TriggeringSignal.POST_SKILL:
             if self.status_gaining_available:
                 return [
                     eft.AddCharacterStatusEffect(
@@ -3796,7 +3796,7 @@ class _InspirationFieldStatus(CombatStatus, _UsageStatus):
     RECOVERY: ClassVar[int] = 2
 
     REACTABLE_SIGNALS = frozenset({
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
         TriggeringSignal.ROUND_END,
     })
 
@@ -3854,7 +3854,7 @@ class _InspirationFieldStatus(CombatStatus, _UsageStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+        if signal is TriggeringSignal.POST_SKILL and self.activated:
             assert self.target_char_id is not None
             target = StaticTarget.from_char_id(source.pid, self.target_char_id)
             char = game_state.get_character_target(target)
@@ -3995,7 +3995,7 @@ class SproutStatus(CombatStatus, _UsageStatus):
     MAX_USAGES: ClassVar[int] = 1
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
         TriggeringSignal.ROUND_END,
     ))
 
@@ -4025,7 +4025,7 @@ class SproutStatus(CombatStatus, _UsageStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+        if signal is TriggeringSignal.POST_SKILL and self.activated:
             return [
                 eft.ReferredDamageEffect(
                     source=source,
@@ -4277,7 +4277,7 @@ class RockPaperScissorsComboScissorsStatus(CharacterStatus, PrepareSkillStatus):
 class GrimheartStatus(CharacterStatus):
     activated: bool = False
     REACTABLE_SIGNALS = frozenset({
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     })
 
     @override
@@ -4303,7 +4303,7 @@ class GrimheartStatus(CharacterStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+        if signal is TriggeringSignal.POST_SKILL and self.activated:
             return [], None
         return [], self
 
@@ -4559,7 +4559,7 @@ class RadicalVitalityStatus(CharacterStatus, _UsageLivingStatus):
     NOMINAL_MAX_USAGES: ClassVar[int] = 3
     REACTABLE_SIGNALS = frozenset({
         TriggeringSignal.POST_DMG,
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
         TriggeringSignal.END_ROUND_CHECK_OUT,
     })
 
@@ -4617,7 +4617,7 @@ class RadicalVitalityStatus(CharacterStatus, _UsageLivingStatus):
                     and detail.dmg.element.is_pure_element()
             ):
                 return [], replace(self, usages=1)
-        elif signal is TriggeringSignal.COMBAT_ACTION:
+        elif signal is TriggeringSignal.POST_SKILL:
             d_usages = 0
             if self.activated:
                 d_usages = 1
@@ -4660,7 +4660,7 @@ class LandsOfDandelionStatus(TalentEquipmentStatus):
 @dataclass(frozen=True, kw_only=True)
 class ChihayaburuStatus(CharacterHiddenStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
 
     @override
@@ -4668,7 +4668,7 @@ class ChihayaburuStatus(CharacterHiddenStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION:
+        if signal is TriggeringSignal.POST_SKILL:
             return [
                 eft.ForwardSwapCharacterEffect(
                     target_player=source.pid,
@@ -4683,7 +4683,7 @@ class MidareRanzanStatus(CharacterStatus):
     _ELEMENT: ClassVar[Element] = Element.ANEMO
     _DMG_BOOST: ClassVar[int] = 1
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
 
     @override
@@ -4730,7 +4730,7 @@ class MidareRanzanStatus(CharacterStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION:
+        if signal is TriggeringSignal.POST_SKILL:
             if self._protected:
                 return [], replace(self, _protected=False)
             elif self._needs_removal:
@@ -4876,7 +4876,7 @@ class ColdBloodedStrikeStatus(TalentEquipmentStatus):
     usages: int = 1
     activated: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
         TriggeringSignal.ROUND_END,
     ))
 
@@ -4914,7 +4914,7 @@ class ColdBloodedStrikeStatus(TalentEquipmentStatus):
         es: list[eft.Effect] = []
         new_self = self
 
-        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+        if signal is TriggeringSignal.POST_SKILL and self.activated:
             assert self.usages >= 1
             es.append(
                 eft.RecoverHPEffect(
@@ -5045,14 +5045,14 @@ class KantenSenmyouBlessingStatus(TalentEquipmentStatus, _UsageStatus):
 class KeqingTalentStatus(CharacterHiddenStatus):
     can_infuse: bool
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
 
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | KeqingTalentStatus]:
-        if signal is TriggeringSignal.COMBAT_ACTION:
+        if signal is TriggeringSignal.POST_SKILL:
             return [], type(self)(can_infuse=False)
         return [], self  # pragma: no cover
 
@@ -5150,7 +5150,7 @@ class SparksnSplashStatus(CombatStatus, _UsageStatus):
     activated: bool = False
     MAX_USAGES: ClassVar[int] = 2
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
 
     @override
@@ -5178,7 +5178,7 @@ class SparksnSplashStatus(CombatStatus, _UsageStatus):
         es: list[eft.Effect] = []
         new_self = self
 
-        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+        if signal is TriggeringSignal.POST_SKILL and self.activated:
             assert self.usages >= 1
             es.append(
                 eft.ReferredDamageEffect(
@@ -5263,7 +5263,7 @@ class ShootingStarStatus(CombatStatus, _UsageLivingStatus):
     usages: int = 0
     used_skill: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
 
     @override
@@ -5286,7 +5286,7 @@ class ShootingStarStatus(CombatStatus, _UsageLivingStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION:
+        if signal is TriggeringSignal.POST_SKILL:
             effects: list[eft.Effect] = []
             curr_usages = self.usages
             if self.used_skill:
@@ -5429,7 +5429,7 @@ class PropSurplusStatus(CharacterStatus, _UsageLivingStatus):
     MAX_USAGES: ClassVar[int] = 3
     triggered: bool = False  # damage boost has taken effect
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
 
     @override
@@ -5453,7 +5453,7 @@ class PropSurplusStatus(CharacterStatus, _UsageLivingStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.triggered:
+        if signal is TriggeringSignal.POST_SKILL and self.triggered:
             return [
                 eft.RecoverHPEffect(
                     source=source,
@@ -5752,7 +5752,7 @@ class FullPlateStatus(CombatStatus, StackedShieldStatus):
     MAX_HEAL_USAGES: ClassVar[int] = 1
     HEAL_AMOUNT: ClassVar[int] = 1
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
         TriggeringSignal.ROUND_END,
     ))
 
@@ -5779,7 +5779,7 @@ class FullPlateStatus(CombatStatus, StackedShieldStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION:
+        if signal is TriggeringSignal.POST_SKILL:
             if self.heal_usages <= 0:
                 return [], self
             this_player = game_state.get_player(source.pid)
@@ -5881,7 +5881,7 @@ class FortunePreservingTalismanStatus(CombatStatus, _UsageStatus):
     HEAL_AMOUNT: ClassVar[int] = 2
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
 
     @override
@@ -5913,7 +5913,7 @@ class FortunePreservingTalismanStatus(CombatStatus, _UsageStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+        if signal is TriggeringSignal.POST_SKILL and self.activated:
             active_char = game_state.get_player(source.pid).just_get_active_character()
             if active_char.hp_lost() == 0:
                 return [], replace(self, usages=0, activated=False)
@@ -6049,7 +6049,7 @@ class CeremonialGarmentStatus(CharacterStatus, _UsageStatus):
     activated: bool = False
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
         TriggeringSignal.ROUND_END,
     ))
 
@@ -6076,7 +6076,7 @@ class CeremonialGarmentStatus(CharacterStatus, _UsageStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+        if signal is TriggeringSignal.POST_SKILL and self.activated:
             self_chars = game_state.get_player(source.pid).characters
             return [
                 eft.RecoverHPEffect(
@@ -6448,7 +6448,7 @@ class VijnanaSuffusionStatus(CharacterStatus, _UsageStatus):
     activated: bool = False
     MAX_USAGES: ClassVar[int] = 2
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
 
     @override
@@ -6499,7 +6499,7 @@ class VijnanaSuffusionStatus(CharacterStatus, _UsageStatus):
         es: list[eft.Effect] = []
         new_self = self
 
-        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+        if signal is TriggeringSignal.POST_SKILL and self.activated:
             from ..summon.summon import ClusterbloomArrowSummon
             assert self.usages >= 1
             es.append(
@@ -6755,7 +6755,7 @@ class RainbowBladeworkStatus(CombatStatus, _UsageStatus):
     ELEMENT: ClassVar[Element] = Element.HYDRO
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
 
     @override
@@ -6780,7 +6780,7 @@ class RainbowBladeworkStatus(CombatStatus, _UsageStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+        if signal is TriggeringSignal.POST_SKILL and self.activated:
             assert self.usages >= 1
             return [
                 eft.ReferredDamageEffect(
@@ -6930,7 +6930,7 @@ class BreakthroughStatus(CharacterStatus, _UsageLivingStatus):
     should_draw: bool = False
     should_stack: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
 
     @override
@@ -6972,7 +6972,7 @@ class BreakthroughStatus(CharacterStatus, _UsageLivingStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION:
+        if signal is TriggeringSignal.POST_SKILL:
             if self.should_draw:
                 return [
                     eft.DrawRandomCardEffect(pid=source.pid, num=1),
@@ -6988,7 +6988,7 @@ class ExquisiteThrowStatus(CombatStatus, _UsageStatus):
     MAX_USAGES: ClassVar[int] = 2
     normal_attacked: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
         TriggeringSignal.ROUND_END,
     ))
     
@@ -7011,7 +7011,7 @@ class ExquisiteThrowStatus(CombatStatus, _UsageStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.normal_attacked:
+        if signal is TriggeringSignal.POST_SKILL and self.normal_attacked:
             return [
                 eft.ReferredDamageEffect(
                     source=source,
@@ -7087,7 +7087,7 @@ class AurousBlazeStatus(CombatStatus, _UsageStatus):
     MAX_USAGES: ClassVar[int] = 2
     activated: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
         TriggeringSignal.ROUND_END,
     ))
 
@@ -7117,7 +7117,7 @@ class AurousBlazeStatus(CombatStatus, _UsageStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+        if signal is TriggeringSignal.POST_SKILL and self.activated:
             assert self.usages >= 1
             return [eft.ReferredDamageEffect(
                 source=source,
@@ -7150,7 +7150,7 @@ class NiwabiEnshouStatus(CharacterStatus, _UsageStatus):
     INFUSION_ELEMENT: ClassVar[Element] = Element.PYRO
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
 
     @override
@@ -7189,7 +7189,7 @@ class NiwabiEnshouStatus(CharacterStatus, _UsageStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION:
+        if signal is TriggeringSignal.POST_SKILL:
             if self.activated:
                 this_char = game_state.get_character_target(source)
                 assert this_char is not None

@@ -194,7 +194,7 @@ class _ConvertableAnemoSummon(_DestroyOnNumSummon):
     ready_elem: None | Element = None
     DMG: ClassVar[int]
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
         TriggeringSignal.END_ROUND_CHECK_OUT,
     ))
 
@@ -235,7 +235,7 @@ class _ConvertableAnemoSummon(_DestroyOnNumSummon):
     ) -> tuple[list[eft.Effect], Optional[Self]]:
         es: list[eft.Effect] = []
         new_self = self
-        if signal is TriggeringSignal.COMBAT_ACTION:
+        if signal is TriggeringSignal.POST_SKILL:
             if self._to_be_converted():
                 assert self.ready_elem is not None
                 new_self = replace(
@@ -481,7 +481,7 @@ class CryoCicinsSummon(_DmgPerRoundSummon):
     exceeded: bool = False  # True if talent is equipped and usages will exceed MAX_USAGES
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         *_DmgPerRoundSummon.REACTABLE_SIGNALS,
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
         TriggeringSignal.POST_DMG,
     ))
 
@@ -532,7 +532,7 @@ class CryoCicinsSummon(_DmgPerRoundSummon):
                     and detail.dmg.reaction is not None
             ):
                 return [], replace(self, usages=-1)
-        elif signal is TriggeringSignal.COMBAT_ACTION:
+        elif signal is TriggeringSignal.POST_SKILL:
             if self.exceeded:
                 return [
                     eft.ReferredDamageEffect(
@@ -791,7 +791,7 @@ class HeraldOfFrostSummon(_DmgPerRoundSummon):
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         *_DmgPerRoundSummon.REACTABLE_SIGNALS,
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
 
     @override
@@ -816,7 +816,7 @@ class HeraldOfFrostSummon(_DmgPerRoundSummon):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+        if signal is TriggeringSignal.POST_SKILL and self.activated:
             self_alive_chars = game_state.get_player(
                 source.pid
             ).characters.get_alive_character_in_activity_order()
@@ -853,7 +853,7 @@ class LightfallSwordSummon(Summon, stt._UsageStatus):
     skill_source_id: None | int = None
     AUTO_DESTROY: ClassVar[bool] = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
         TriggeringSignal.END_ROUND_CHECK_OUT,
     ))
 
@@ -893,7 +893,7 @@ class LightfallSwordSummon(Summon, stt._UsageStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.skill_used is not None:
+        if signal is TriggeringSignal.POST_SKILL and self.skill_used is not None:
             assert self.skill_source_id is not None
             source_char = game_state.get_character_target(
                 StaticTarget.from_char_id(source.pid, self.skill_source_id)
@@ -988,7 +988,7 @@ class OzSummon(_DmgPerRoundSummon):
     ELEMENT: ClassVar[Element] = Element.ELECTRO
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         *_DmgPerRoundSummon.REACTABLE_SIGNALS,
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
 
     @override
@@ -1016,7 +1016,7 @@ class OzSummon(_DmgPerRoundSummon):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], Optional[Self]]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+        if signal is TriggeringSignal.POST_SKILL and self.activated:
             return [
                 eft.ReferredDamageEffect(
                     source=source,
@@ -1125,7 +1125,7 @@ class _ShadowswordBaseSummon(_DmgPerRoundSummon):
     DMG: ClassVar[int] = 1
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         *_DmgPerRoundSummon.REACTABLE_SIGNALS,
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
 
     @override
@@ -1153,7 +1153,7 @@ class _ShadowswordBaseSummon(_DmgPerRoundSummon):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
+        if signal is TriggeringSignal.POST_SKILL and self.activated:
             return [
                 eft.ReferredDamageEffect(
                     source=source,

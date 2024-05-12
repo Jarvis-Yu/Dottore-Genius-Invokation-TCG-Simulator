@@ -29,7 +29,7 @@ class TriggeringSignal(Enum):
     #: triggers prepare skill statuses
     ACT_PRE_SKILL = 0
     #: triggers when "after a character uses ..." (any skill)
-    COMBAT_ACTION = 1
+    POST_SKILL = 1
     #: triggers when "after a ... character is defeated"
     DEATH_EVENT = 2
     #: triggers when "at the end phase, ..."

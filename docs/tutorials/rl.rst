@@ -85,24 +85,24 @@ when initializing.
 Game Encoding Details
 ---------------------
 
-A |GameState| object is encoded as a 1D vector of length 3082.
+A |GameState| object is encoded as a 1D vector of length 2682.
 
 The encoding for a |GameState| object is ordered as follows:
 
 * ``4`` ints for basic game information (game mode, game phase, round number, active player id)
-* ``1039`` ints for player 1 information (deck, hand, characters, statuses, summons, supports...)
-* ``1039`` ints for player 2 information
+* ``839`` ints for player 1 information (deck, hand, characters, statuses, summons, supports...)
+* ``839`` ints for player 2 information
 * ``1000`` ints for all pending effects to be executed (useful when facing death swap)
 
 The encoding for a |PlayerState| object is ordered as follows:
 
 * ``4`` ints for basic information (player phase, right for consecutive action...)
 * ``22`` ints for dice
-* ``80`` ints for hand cards (designed for 40 cards max for future expansion)
-* ``80`` ints for deck cards
-* ``80`` ints for publicly used cards (cards used that your opponent can see)
-* ``80`` ints for publicly gained cards (cards gained that your opponent can see)
-* ``83`` ints for initial deck (containing 3 characters and 30 cards)
+* ``40`` ints for hand cards (designed for 40 cards max for future expansion)
+* ``40`` ints for deck cards
+* ``40`` ints for publicly used cards (cards used that your opponent can see)
+* ``40`` ints for publicly gained cards (cards gained that your opponent can see)
+* ``43`` ints for initial deck (containing 3 characters and 30 cards)
 * ``414`` ints for characters
 * ``70`` ints for hidden statuses (whether plunge attack is available...)
 * ``70`` ints for combat statuses (designed for 10 statuses max)

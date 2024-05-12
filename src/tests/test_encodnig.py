@@ -44,11 +44,11 @@ class TestEncoding(unittest.TestCase):
         else:
             encodings = set()
             for i, game_state in enumerate(game_states):
+                encodings.add(len(game_state.encoding(encoding_plan)))
                 print(end='\b' * len(prev_progress))
-                prev_progress = f"[{i}/{len(game_states)}]"
+                prev_progress = f"[{i}/{len(game_states)}]" + f"({list(encodings)[0]})"
                 print(end=prev_progress)
                 sys.stdout.flush()
-                encodings.add(len(game_state.encoding(encoding_plan)))
             print(end='\b' * len(prev_progress))
             sys.stdout.flush()
             self.assertEqual(len(encodings), 1, encodings)

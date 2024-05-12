@@ -109,7 +109,7 @@ class ActionPhase(ph.Phase):
             ),
             AllStatusTriggererEffect(
                 pid,
-                TriggeringSignal.COMBAT_ACTION,
+                TriggeringSignal.POST_SKILL,
             ),
             AllStatusTriggererEffect(
                 pid,
@@ -244,7 +244,7 @@ class ActionPhase(ph.Phase):
         ))
         new_effects.append(AllStatusTriggererEffect(
             pid,
-            TriggeringSignal.COMBAT_ACTION,
+            TriggeringSignal.POST_SKILL,
         ))
         new_effects.append(AllStatusTriggererEffect(
             pid,
@@ -337,7 +337,7 @@ class ActionPhase(ph.Phase):
         if card.is_combat_action():
             new_effects.append(AllStatusTriggererEffect(
                 pid,
-                TriggeringSignal.COMBAT_ACTION,
+                TriggeringSignal.POST_SKILL,
             ))
         new_effects.append(AllStatusTriggererEffect(
             pid,

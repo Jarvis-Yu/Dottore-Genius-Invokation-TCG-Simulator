@@ -1,6 +1,6 @@
 from __future__ import annotations
 import random
-from collections import Counter
+from collections import Counter, defaultdict
 from itertools import chain
 from typing import Iterator, TYPE_CHECKING
 
@@ -172,22 +172,20 @@ class Cards:
         from .card import OmniCard
         return Cards({OmniCard: self.num_cards()})
 
+    def ordered_cards(self) -> list[type[Card]]:
+        return Counter(self._cards).elements()  # type: ignore
+
     def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
         """
         :returns: the encoding of this `Cards` object.
         """
-        ret_val: list[tuple[int, int]] = []
-        for card, num in self._cards.items():
-            if num == 0:
-                continue
-            ret_val.append((encoding_plan.encode_item(card), num))
-        ret_val.sort()
+        ret_val = [encoding_plan.encode_item(card) for card in self.ordered_cards()]
         fillings = encoding_plan.CARDS_FIXED_LEN - len(ret_val)
         if fillings < 0:
             raise Exception(f"Too many cards: {len(self._cards)}")
         for _ in range(fillings):
-            ret_val.append((0, 0))
-        return list(chain.from_iterable(ret_val))
+            ret_val.append(0)
+        return ret_val
 
     @classmethod
     def decoding(cls, encoding: list[int], encoding_plan: EncodingPlan) -> None | Cards:
@@ -195,14 +193,14 @@ class Cards:
         :returns: the `Cards` object decoded from `encoding`.
         """
         from .card import Card
-        cards: dict[type[Card], int] = {}
-        for card_code, num in zip(encoding[::2], encoding[1::2]):
-            if card_code == 0 or num == 0:
-                break
+        cards: dict[type[Card], int] = defaultdict(int)
+        for card_code in encoding:
+            if card_code == 0:
+                continue
             card = encoding_plan.type_for(card_code)
             if card is None or not issubclass(card, Card):
                 return None
-            cards[card] = num
+            cards[card] += 1
         return cls(cards)
 
     def __getitem__(self, card: type[Card]) -> int:

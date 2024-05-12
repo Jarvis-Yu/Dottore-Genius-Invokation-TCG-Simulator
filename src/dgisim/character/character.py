@@ -3150,7 +3150,7 @@ class Nahida(Character):
                 and any(
                     char.ELEMENT is Element.HYDRO
                     for char in game_state.get_player(source.pid).characters
-        )
+                )
         ):
             # talent card effect for hydro
             effects.append(eft.UpdateCombatStatusEffect(

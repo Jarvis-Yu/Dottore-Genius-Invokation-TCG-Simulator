@@ -113,7 +113,7 @@ class ChangTheNinthSupport(Support, stt._UsageLivingStatus):
     activated: bool = False
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
 
     @override
@@ -144,7 +144,7 @@ class ChangTheNinthSupport(Support, stt._UsageLivingStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION:
+        if signal is TriggeringSignal.POST_SKILL:
             d_usages = 1 if self.activated else 0
             if self.usages + d_usages == self.MAX_USAGES:
                 return [
@@ -280,7 +280,7 @@ class JehtSupport(Support, stt._UsageLivingStatus):
     MAX_USAGES: ClassVar[int] = 6
     triggered: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
 
     @override
@@ -309,7 +309,7 @@ class JehtSupport(Support, stt._UsageLivingStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.triggered:
+        if signal is TriggeringSignal.POST_SKILL and self.triggered:
             from ..status.status import SandAndDreamsStatus
             sand_n_dreams = game_state.get_player(source.pid).combat_statuses.find(SandAndDreamsStatus)
             if self.usages >= 6 and sand_n_dreams is None:
@@ -554,7 +554,7 @@ class RanaSupport(Support, stt._UsageStatus):
     AUTO_DESTROY: ClassVar[bool] = False
     triggered: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
         TriggeringSignal.ROUND_END,
     ))
 
@@ -580,7 +580,7 @@ class RanaSupport(Support, stt._UsageStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.triggered:
+        if signal is TriggeringSignal.POST_SKILL and self.triggered:
             next_char = game_state.get_player(
                 source.pid
             ).characters.get_nth_next_alive_character_in_activity_order(1)
@@ -885,7 +885,7 @@ class ParametricTransformerSupport(Support, stt._UsageLivingStatus):
     NUM_DICE_GENERATED: ClassVar[int] = 3
 
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
 
     @override
@@ -911,7 +911,7 @@ class ParametricTransformerSupport(Support, stt._UsageLivingStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION:
+        if signal is TriggeringSignal.POST_SKILL:
             d_usages = 1 if self.activated else 0
             if self.usages + d_usages == self.MAX_USAGES:
                 dice = ActualDice.from_random(
@@ -938,7 +938,7 @@ class TreasureSeekingSeelieSupport(Support, stt._UsageLivingStatus):
     MAX_USAGES: ClassVar[int] = 3
     CARDS_DRAWN: ClassVar[int] = 3
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
 
     @override
@@ -960,7 +960,7 @@ class TreasureSeekingSeelieSupport(Support, stt._UsageLivingStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION and self.triggered:
+        if signal is TriggeringSignal.POST_SKILL and self.triggered:
             if self.usages + 1 == self.MAX_USAGES:
                 return [
                     eft.DrawRandomCardEffect(

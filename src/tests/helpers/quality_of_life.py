@@ -85,14 +85,14 @@ class _TempTestDmgStatus(CharacterStatus):
     elem: Element
     target: StaticTarget
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
 
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION:
+        if signal is TriggeringSignal.POST_SKILL:
             return [
                 SpecificDamageEffect(
                     source=source,
@@ -109,14 +109,14 @@ class _TempTestDmgStatus(CharacterStatus):
 class _TempTestHealingStatus(CharacterStatus):
     healing: int
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.COMBAT_ACTION,
+        TriggeringSignal.POST_SKILL,
     ))
 
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[Effect], None | Self]:
-        if signal is TriggeringSignal.COMBAT_ACTION:
+        if signal is TriggeringSignal.POST_SKILL:
             return [
                 RecoverHPEffect(
                     source=source,
@@ -582,7 +582,7 @@ def simulate_status_dmg(
         lambda es: es.push_one(TriggerStatusEffect(
             target=target,
             status=_TempTestDmgStatus,
-            signal=TriggeringSignal.COMBAT_ACTION,
+            signal=TriggeringSignal.POST_SKILL,
         ))
     ).build()
     return auto_step(game_state, observe=observe)
@@ -609,7 +609,7 @@ def simulate_status_heal(
         lambda es: es.push_one(TriggerStatusEffect(
             target=target,
             status=_TempTestHealingStatus,
-            signal=TriggeringSignal.COMBAT_ACTION,
+            signal=TriggeringSignal.POST_SKILL,
         ))
     ).build()
     return auto_step(game_state, observe=observe)

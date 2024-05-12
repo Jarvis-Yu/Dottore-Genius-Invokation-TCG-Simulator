@@ -14,7 +14,7 @@ class TestTriggerStatusEffect(unittest.TestCase):
             TriggerStatusEffect(
                 StaticTarget(Pid.P1, Zone.CHARACTERS, 1),
                 status=CharacterHiddenStatus,
-                signal=TriggeringSignal.COMBAT_ACTION,
+                signal=TriggeringSignal.POST_SKILL,
             ).execute(ACTION_TEMPLATE),
             ACTION_TEMPLATE
         )
@@ -23,7 +23,7 @@ class TestTriggerStatusEffect(unittest.TestCase):
             TriggerCombatStatusEffect(
                 Pid.P1,
                 status=CombatStatus,
-                signal=TriggeringSignal.COMBAT_ACTION,
+                signal=TriggeringSignal.POST_SKILL,
             ).execute(ACTION_TEMPLATE),
             ACTION_TEMPLATE
         )
@@ -32,7 +32,7 @@ class TestTriggerStatusEffect(unittest.TestCase):
             TriggerSummonEffect(
                 Pid.P1,
                 summon=Summon,
-                signal=TriggeringSignal.COMBAT_ACTION,
+                signal=TriggeringSignal.POST_SKILL,
             ).execute(ACTION_TEMPLATE),
             ACTION_TEMPLATE
         )
@@ -42,7 +42,7 @@ class TestTriggerStatusEffect(unittest.TestCase):
                 Pid.P1,
                 support_type=Support,
                 sid=1,
-                signal=TriggeringSignal.COMBAT_ACTION,
+                signal=TriggeringSignal.POST_SKILL,
             ).execute(ACTION_TEMPLATE),
             ACTION_TEMPLATE
         )
