@@ -1,6 +1,7 @@
 from __future__ import annotations
 import random
 from collections import Counter, defaultdict
+from functools import cached_property
 from itertools import chain
 from typing import Iterator, TYPE_CHECKING
 
@@ -172,14 +173,15 @@ class Cards:
         from .card import OmniCard
         return Cards({OmniCard: self.num_cards()})
 
-    def ordered_cards(self) -> list[type[Card]]:
-        return Counter(self._cards).elements()  # type: ignore
+    @cached_property
+    def ordered_cards(self) -> tuple[type[Card], ...]:
+        return tuple(Counter(self._cards).elements())  # type: ignore
 
     def encoding(self, encoding_plan: EncodingPlan) -> list[int]:
         """
         :returns: the encoding of this `Cards` object.
         """
-        ret_val = [encoding_plan.encode_item(card) for card in self.ordered_cards()]
+        ret_val = [encoding_plan.encode_item(card) for card in self.ordered_cards]
         fillings = encoding_plan.CARDS_FIXED_LEN - len(ret_val)
         if fillings < 0:
             raise Exception(f"Too many cards: {len(self._cards)}")
