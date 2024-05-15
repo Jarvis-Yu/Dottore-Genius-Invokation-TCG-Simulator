@@ -163,5 +163,6 @@ class EndPhase(ph.Phase):
         if pid is not self.waiting_for(game_state):  # pragma: no cover
             return None
         assert game_state.death_swapping(pid)
-        from ...action.action_generator_generator import SwapActGenGenerator
-        return SwapActGenGenerator.action_generator(game_state, pid)
+        # action generator of ActionPhase only allow death swapping in this case so it is safe
+        from .action_phase import ActionPhase
+        return ActionPhase().action_generator(game_state, pid)

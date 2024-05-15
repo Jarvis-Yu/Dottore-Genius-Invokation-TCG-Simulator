@@ -333,7 +333,7 @@ class GameState:
             import random
             random.seed(seed)
         gs = self
-        while gs.waiting_for() is None:
+        while gs.waiting_for() is None and not gs.game_end():
             gs = gs._phase.step(gs)
         return gs
 
