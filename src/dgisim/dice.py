@@ -335,7 +335,6 @@ class ActualDice(Dice):
         """
         if requirement.num_dice() > self.num_dice():
             return None
-        # TODO: optimize for having game_state
         from collections import defaultdict
         remaining: dict[Element, int] = self._dice.copy()
         answer: dict[Element, int] = defaultdict(int)

@@ -325,6 +325,18 @@ class GameState:
             random.seed(seed)
         return self._phase.step(self)
 
+    def auto_step(self, seed: int | float | None = None) -> GameState:
+        """
+        Same as step, but automatically step until a player action is required.
+        """
+        if seed is not None:
+            import random
+            random.seed(seed)
+        gs = self
+        while gs.waiting_for() is None:
+            gs = gs._phase.step(gs)
+        return gs
+
     def action_step(
             self,
             pid: Pid,

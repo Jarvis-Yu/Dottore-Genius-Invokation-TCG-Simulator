@@ -404,9 +404,9 @@ class SwapActGenGenerator(ABC):
 
     @classmethod
     def _fill_helper(
-        cls,
-        action_generator: ActionGenerator,
-        player_choice: DecidedChoiceType,
+            cls,
+            action_generator: ActionGenerator,
+            player_choice: DecidedChoiceType,
     ) -> ActionGenerator:
         action = action_generator.action
         assert type(action) is SwapAction \
