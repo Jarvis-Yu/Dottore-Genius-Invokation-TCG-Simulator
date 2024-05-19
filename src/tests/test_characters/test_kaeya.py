@@ -252,9 +252,6 @@ class TestKaeya(unittest.TestCase):
 
         gsm.player_step()  # p1 end round, go to next round
         gsm.auto_step()
-        a1.inject_front_action(DiceSelectAction(selected_dice=ActualDice({})))
-        a2.inject_front_action(DiceSelectAction(selected_dice=ActualDice({})))
-        gsm.step_until_phase(base_game_state.mode.action_phase())
 
         gsm.player_step()  # p2 end round, let p1 play
         gsm.auto_step()

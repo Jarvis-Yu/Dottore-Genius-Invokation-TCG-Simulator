@@ -62,13 +62,13 @@ class RollPhase(ph.Phase):
         p2_dice = roll_dice(p2_dice_event.dice)
         return game_state.factory().f_player1(
             lambda p1: p1.factory()
-            .phase(Act.ACTION_PHASE)
+            .phase(Act.ACTION_PHASE if p1_chances.chances > 0 else Act.END_PHASE)
             .dice_reroll_chances(p1_chances.chances)  # type: ignore
             .dice(p1_dice)
             .build()
         ).f_player2(
             lambda p2: p2.factory()
-            .phase(Act.ACTION_PHASE)
+            .phase(Act.ACTION_PHASE if p2_chances.chances > 0 else Act.END_PHASE)
             .dice_reroll_chances(p2_chances.chances)  # type: ignore
             .dice(p2_dice)
             .build()

@@ -17,13 +17,13 @@ class RollPhase(DefaultRollPhase):
     def _get_all_dice_and_activate(self, game_state: GameState) -> GameState:
         return game_state.factory().f_player1(
             lambda p1: p1.factory()
-            .phase(Act.ACTION_PHASE)
+            .phase(Act.END_PHASE)
             .dice_reroll_chances(0)
             .dice(ActualDice.from_all(RollPhase._NUM_DICE, Element.OMNI))
             .build()
         ).f_player2(
             lambda p2: p2.factory()
-            .phase(Act.ACTION_PHASE)
+            .phase(Act.END_PHASE)
             .dice_reroll_chances(0)
             .dice(ActualDice.from_all(RollPhase._NUM_DICE, Element.OMNI))
             .build()

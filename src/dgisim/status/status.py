@@ -4578,11 +4578,11 @@ class RadicalVitalityStatus(CharacterStatus, _UsageLivingStatus):
             assert isinstance(information, DmgIEvent)
             dmg = information.dmg
             if (
-                not self.activated
-                and dmg.source == status_source
-                and dmg.element.is_pure_element()
-                and dmg.damage_type.directly_from_character()
-                and self.usages < self.max_usages(game_state, status_source)
+                    not self.activated
+                    and dmg.source == status_source
+                    and dmg.element.is_pure_element()
+                    and dmg.damage_type.directly_from_character()
+                    and self.usages < self.max_usages(game_state, status_source)
             ):
                 return replace(self, activated=True)
         return self
@@ -4599,8 +4599,8 @@ class RadicalVitalityStatus(CharacterStatus, _UsageLivingStatus):
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
             if (
-                dmg.source == status_source
-                and dmg.damage_type.direct_elemental_burst()
+                    dmg.source == status_source
+                    and dmg.damage_type.direct_elemental_burst()
             ):
                 return item.delta_damage(self.usages), replace(self, to_clear=True)
         return item, self
@@ -4625,7 +4625,8 @@ class RadicalVitalityStatus(CharacterStatus, _UsageLivingStatus):
                 d_usages = -self.usages
             if d_usages == 0:
                 return [], self
-            assert self.usages + d_usages <= self.max_usages(game_state, source)
+            # TODO: this assertion threw an error once
+            assert self.usages + d_usages <= self.max_usages(game_state, source), game_state
             return [], replace(self, usages=d_usages, activated=False, to_clear=False)
         elif signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             if self.usages >= self.max_usages(game_state, source):
