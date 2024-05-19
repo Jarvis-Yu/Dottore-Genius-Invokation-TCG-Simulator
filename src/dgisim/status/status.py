@@ -4615,6 +4615,7 @@ class RadicalVitalityStatus(CharacterStatus, _UsageLivingStatus):
             if (
                     detail.dmg.target == source
                     and detail.dmg.element.is_pure_element()
+                    and self.usages < self.max_usages(game_state, source)
             ):
                 return [], replace(self, usages=1)
         elif signal is TriggeringSignal.POST_SKILL:
@@ -4625,7 +4626,6 @@ class RadicalVitalityStatus(CharacterStatus, _UsageLivingStatus):
                 d_usages = -self.usages
             if d_usages == 0:
                 return [], self
-            # TODO: this assertion threw an error once
             assert self.usages + d_usages <= self.max_usages(game_state, source), game_state
             return [], replace(self, usages=d_usages, activated=False, to_clear=False)
         elif signal is TriggeringSignal.END_ROUND_CHECK_OUT:
