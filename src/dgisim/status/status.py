@@ -4624,9 +4624,9 @@ class RadicalVitalityStatus(CharacterStatus, _UsageLivingStatus):
                 d_usages = 1
             if self.to_clear:
                 d_usages = -self.usages
+            d_usages = min(d_usages, self.max_usages(game_state, source) - self.usages)
             if d_usages == 0:
                 return [], self
-            assert self.usages + d_usages <= self.max_usages(game_state, source), game_state
             return [], replace(self, usages=d_usages, activated=False, to_clear=False)
         elif signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             if self.usages >= self.max_usages(game_state, source):
