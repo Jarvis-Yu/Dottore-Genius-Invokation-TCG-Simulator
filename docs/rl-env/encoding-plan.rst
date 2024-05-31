@@ -11,3 +11,8 @@ Encoding Plan
     :members:
 
     .. automethod:: __init__
+
+``LazyEncodingPlan`` is a subclass of ``EncodingPlan`` whose ``encode`` would always return an empty list.
+
+.. autoclass:: dgisim.encoding.encoding_plan.LazyEncodingPlan
+    .. automethod:: encode
