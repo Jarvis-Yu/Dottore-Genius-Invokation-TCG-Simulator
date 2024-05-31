@@ -270,7 +270,7 @@ class LazyEncodingPlan(EncodingPlan):
     """
     def encode(self, game_state: "GameState", perspective:Pid):
         """
-        :returns: None.
+        :returns: [].
         """
         return []
 
