@@ -268,7 +268,7 @@ class LazyEncodingPlan(EncodingPlan):
 
     It can accelerate env.step() if you don't need the encoding instantly.
     """
-    def encode(self, game_state: "GameState", perspective:Pid):
+    def encode(self, game_state: "GameState", perspective: Pid) -> list[int]:
         """
         :returns: [].
         """
