@@ -150,7 +150,7 @@ class LinearEnv:
                 )
                 return (
                     perspective_state,
-                    perspective_state.encoding(self._encoding_plan, Pid(turn)),
+                    self._encoding_plan.encode(perspective_state, Pid(turn)),
                     (
                         self._invalid_action_penalty
                         if turn == 1
@@ -170,7 +170,7 @@ class LinearEnv:
             perspective_state = self._curr_state.prespective_view(Pid(turn))
             return (
                 perspective_state,
-                perspective_state.encoding(self._encoding_plan, Pid(turn)),
+                self._encoding_plan.encode(perspective_state, Pid(turn)),
                 (
                     self._invalid_action_penalty
                     if turn == 1

@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "EncodingPlan",
-    "EncodingPlanFast",
+    "LazyEncodingPlan",
     "encoding_plan",
     "GameItem",
     "GameItemType",
@@ -235,7 +235,7 @@ class EncodingPlan:
             and mode.all_chars().issubset(self._char_mapping.keys())
         )
 
-    def encode(self, game_state: "GameState", perspective:Pid) -> list[int]:
+    def encode(self, game_state: "GameState", perspective: Pid) -> list[int]:
         return game_state.encoding(self, perspective)
 
     @property
@@ -262,7 +262,12 @@ class EncodingPlan:
             self._flip_cache = new_self
         return self._flip_cache
 
-class EncodingPlanFast(EncodingPlan):
+class LazyEncodingPlan(EncodingPlan):
+    """
+    A lazy version of EncodingPlan that does not encode anything, returning None.
+
+    It can accelerate env.step() if you don't need the encoding instantly.
+    """
     def encode(self, game_state: "GameState", perspective:Pid):
         """
         :returns: None.
@@ -287,7 +292,7 @@ if __name__ == "__main__":
 
     indent = 0
     game_state = GameState.from_default()
-    encoding = game_state.encoding(encoding_plan)
+    encoding = encoding_plan.encode(game_state, Pid.P1)
     print(f"game_state size = {len(encoding)}")
 
     player = game_state.player1
