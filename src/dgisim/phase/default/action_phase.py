@@ -550,7 +550,7 @@ class ActionPhase(ph.Phase):
             return self._handle_card_select_action(game_state, pid, action)
         elif isinstance(action, EndRoundAction):
             return self._handle_end_round(game_state, pid, action)
-        raise Exception("Not Reached! Unknown Game State to process")
+        raise Exception(f"Not Reached! Unknown Game State to process. {action} \n {game_state}")
 
     @classmethod
     def _rolling(cls, game_state: GameState) -> bool:
