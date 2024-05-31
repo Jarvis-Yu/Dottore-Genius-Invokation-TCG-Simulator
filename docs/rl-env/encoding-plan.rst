@@ -12,7 +12,7 @@ Encoding Plan
 
     .. automethod:: __init__
 
-``EncodingPlanFast`` is a subclass of ``EncodingPlan`` whose ``encode`` would always return None.
+``LazyEncodingPlan`` is a subclass of ``EncodingPlan`` whose ``encode`` would always return None.
 
-.. autoclass:: dgisim.encoding.encoding_plan.EncodingPlanFast
+.. autoclass:: dgisim.encoding.encoding_plan.LazyEncodingPlan
     .. automethod:: encode
