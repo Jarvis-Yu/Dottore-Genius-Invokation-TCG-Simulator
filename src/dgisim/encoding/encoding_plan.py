@@ -272,7 +272,7 @@ class LazyEncodingPlan(EncodingPlan):
         """
         :returns: None.
         """
-        return None
+        return []
 
 encoding_plan = EncodingPlan(
     enum_mapping=ENUM_MAPPING,
