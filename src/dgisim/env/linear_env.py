@@ -110,7 +110,7 @@ class LinearEnv:
                 perspective = Pid.P2 if self._fix_perspective else Pid.P1
         return (
             perspective_state,
-            perspective_state.encoding(self._encoding_plan, perspective),
+            self._encoding_plan.encode(perspective_state, perspective),
             0,
             turn,
             self._curr_state.game_end(),
@@ -197,7 +197,7 @@ class LinearEnv:
 
         return (
             perspective_state,
-            perspective_state.encoding(self._encoding_plan, Pid.P2 if turn == 2 else Pid.P1),
+            self._encoding_plan.encode(perspective_state, Pid.P2 if turn == 2 else Pid.P1),
             self._reward_method(self._curr_state),
             turn,
             self._curr_state.game_end(),

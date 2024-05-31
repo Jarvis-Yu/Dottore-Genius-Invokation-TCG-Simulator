@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "EncodingPlan",
+    "EncodingPlanFast",
     "encoding_plan",
     "GameItem",
     "GameItemType",
@@ -234,8 +235,8 @@ class EncodingPlan:
             and mode.all_chars().issubset(self._char_mapping.keys())
         )
 
-    def encode(self, game_state: "GameState") -> list[int]:
-        return game_state.encoding(self)
+    def encode(self, game_state: "GameState", perspective:Pid) -> list[int]:
+        return game_state.encoding(self, perspective)
 
     @property
     def game_encoding_size(self) -> int:
@@ -260,6 +261,13 @@ class EncodingPlan:
             new_self._perspective = pid
             self._flip_cache = new_self
         return self._flip_cache
+
+class EncodingPlanFast(EncodingPlan):
+    def encode(self, game_state: "GameState", perspective:Pid):
+        """
+        :returns: None.
+        """
+        return None
 
 encoding_plan = EncodingPlan(
     enum_mapping=ENUM_MAPPING,

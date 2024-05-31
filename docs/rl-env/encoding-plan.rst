@@ -11,3 +11,8 @@ Encoding Plan
     :members:
 
     .. automethod:: __init__
+
+``EncodingPlanFast`` is a subclass of ``EncodingPlan`` whose ``encode`` would always return None.
+
+.. autoclass:: dgisim.encoding.encoding_plan.EncodingPlanFast
+    .. automethod:: encode
