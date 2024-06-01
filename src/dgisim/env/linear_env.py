@@ -102,11 +102,11 @@ class LinearEnv:
         match self._curr_state.waiting_for():
             case Pid.P1:
                 turn = 1
-                perspective_state = self._curr_state.prespective_view(Pid.P1)
+                perspective_state = self._curr_state.perspective_view(Pid.P1)
                 perspective = Pid.P1
             case _:
                 turn = 2
-                perspective_state = self._curr_state.prespective_view(Pid.P2)
+                perspective_state = self._curr_state.perspective_view(Pid.P2)
                 perspective = Pid.P2 if self._fix_perspective else Pid.P1
         return (
             perspective_state,
@@ -145,7 +145,7 @@ class LinearEnv:
         if isinstance(action, list):
             optional_action = PlayerAction.decoding(action, self._encoding_plan)
             if optional_action is None:
-                perspective_state = self._curr_state.prespective_view(
+                perspective_state = self._curr_state.perspective_view(
                     Pid(turn)
                 )
                 return (
@@ -167,7 +167,7 @@ class LinearEnv:
         try:
             state = self._curr_state.action_step(curr_player, action)
         except Exception as e:
-            perspective_state = self._curr_state.prespective_view(Pid(turn))
+            perspective_state = self._curr_state.perspective_view(Pid(turn))
             return (
                 perspective_state,
                 self._encoding_plan.encode(perspective_state, Pid(turn)),
@@ -190,10 +190,10 @@ class LinearEnv:
                 perspective_state = self._curr_state
             case Pid.P1:
                 turn = 1
-                perspective_state = self._curr_state.prespective_view(Pid.P1)
+                perspective_state = self._curr_state.perspective_view(Pid.P1)
             case _:
                 turn = 2
-                perspective_state = self._curr_state.prespective_view(Pid.P2)
+                perspective_state = self._curr_state.perspective_view(Pid.P2)
 
         return (
             perspective_state,

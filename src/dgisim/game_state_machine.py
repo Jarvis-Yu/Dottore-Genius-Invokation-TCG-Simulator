@@ -37,8 +37,8 @@ class GameStateMachine:
         self._history = [game_state]
         self._seeds: list[int | float] = []
         self._perspective_history: dict[Pid, list[GameState]] = {
-            Pid.P1: [game_state.prespective_view(Pid.P1)],
-            Pid.P2: [game_state.prespective_view(Pid.P2)],
+            Pid.P1: [game_state.perspective_view(Pid.P1)],
+            Pid.P2: [game_state.perspective_view(Pid.P2)],
         }
         self._action_history: list[int] = []
         self._actions: dict[int, PlayerAction] = {}
@@ -129,8 +129,8 @@ class GameStateMachine:
 
     def _append_history(self, game_state: GameState) -> None:
         self._history.append(self._game_state)
-        self._perspective_history[Pid.P1].append(self._game_state.prespective_view(Pid.P1))
-        self._perspective_history[Pid.P2].append(self._game_state.prespective_view(Pid.P2))
+        self._perspective_history[Pid.P1].append(self._game_state.perspective_view(Pid.P1))
+        self._perspective_history[Pid.P2].append(self._game_state.perspective_view(Pid.P2))
 
     def _step(self, observe=False) -> None:
         self._game_state = self._game_state.step(seed=self._seed)

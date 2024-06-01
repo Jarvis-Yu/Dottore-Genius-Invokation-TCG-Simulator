@@ -381,7 +381,7 @@ class GameState:
         """
         return type(self._phase) is type(self._mode.game_end_phase())
 
-    def prespective_view(self, pid: Pid) -> GameState:
+    def perspective_view(self, pid: Pid) -> GameState:
         """
         :returns: a new `GameState` that is in the perspective of player `pid`,
                   hiding their opponent's cards and dice.
