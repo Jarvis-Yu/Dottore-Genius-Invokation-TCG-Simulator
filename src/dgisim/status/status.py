@@ -132,8 +132,10 @@ __all__ = [
     "AncientCourtyardStatus",
     "CatalyzingFieldStatus",
     "ChangingShiftsStatus",
+    "CryoCicinMageStatus",
     "CrystallizeStatus",
     "DendroCoreStatus",
+    "ElectrohammerVanguardStatus",
     "IHaventLostYetOnCooldownStatus",
     "ElementalResonanceEnduringRockStatus",
     "ElementalResonanceFerventFlamesStatus",
@@ -143,7 +145,9 @@ __all__ = [
     "LeaveItToMeStatus",
     "LyresongStatus",
     "MillennialMovementFarewellSongStatus",
+    "MirrorMaidenStatus",
     "PassingOfJudgmentStatus",
+    "PyroslingerBracerStatus",
     "RebelliousShieldStatus",
     "RedFeatherFanStatus",
     "ReviveOnCooldownStatus",
@@ -788,6 +792,7 @@ class WeaponEquipmentStatus(EquipmentStatus):
                 dmg.source == status_source
                 and dmg.damage_type.directly_from_character()
                 and dmg.element is not Element.PIERCING
+                and dmg.damage_type.can_boost
             ):
                 return self._process_dmg(game_state, status_source, item)
         return super()._preprocess(game_state, status_source, item, signal)
@@ -1475,10 +1480,7 @@ class AThousandFloatingDreamsStatus(WeaponEquipmentStatus, _UsageLivingStatus):
 
     @override
     def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: PreprocessableEvent,
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
         item, new_self = super()._preprocess(game_state, status_source, item, signal)
@@ -1492,6 +1494,7 @@ class AThousandFloatingDreamsStatus(WeaponEquipmentStatus, _UsageLivingStatus):
                     and dmg.source.pid is status_source.pid
                     and dmg.damage_type.directly_from_character()
                     and dmg.reaction is not None
+                    and dmg.damage_type.can_boost
             ):
                 return (
                     item.delta_damage(new_self.DMG_BOOST),
@@ -1733,7 +1736,7 @@ class VortexVanquisherStatus(WeaponEquipmentStatus):
                 or any(
                     isinstance(status, StackedShieldStatus)
                     for status in active_char.character_statuses
-        )
+                )
         ):
             final_dmg_boost += self.ADDITIONAL_DMG_BOOST
         return dmg.delta_damage(final_dmg_boost), self
@@ -2019,6 +2022,7 @@ class _CrownOfWatatsumiStatus(ArtifactEquipmentStatus, _UsageLivingStatus):
                     self.usages > 0
                     and item.dmg.source == status_source
                     and item.dmg.damage_type.directly_from_character()
+                    and item.dmg.damage_type.can_boost
             ):
                 return item, self
             return item.delta_damage(self.usages), replace(self, usages=0)
@@ -2201,6 +2205,7 @@ class EmblemOfSeveredFateStatus(_OrnateKabutoStatus):
             if (
                     item.dmg.source == status_source
                     and item.dmg.damage_type.direct_elemental_burst()
+                    and item.dmg.damage_type.can_boost
             ):
                 return item.delta_damage(self.DMG_BOOST), self
         return item, self
@@ -2699,7 +2704,7 @@ class CatalyzingFieldStatus(CombatStatus):
             dmg = item.dmg
             assert self.usages >= 1
             elem_can_boost = dmg.element is Element.ELECTRO or dmg.element is Element.DENDRO
-            legal_to_boost = status_source.pid is dmg.source.pid and dmg.damage_type.can_boost()
+            legal_to_boost = status_source.pid is dmg.source.pid and dmg.damage_type.can_boost
             target_is_active = dmg.target.id == game_state.get_player(
                 dmg.target.pid
             ).just_get_active_character().id
@@ -2722,10 +2727,7 @@ class ChangingShiftsStatus(CombatStatus):
 
     @override
     def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: PreprocessableEvent,
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.SWAP_COST_OMNI:
@@ -2738,13 +2740,48 @@ class ChangingShiftsStatus(CombatStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
+class _FatuiAmbusherStatus(CombatStatus, _UsageStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    ELEMENT: ClassVar[Element]
+    DAMAGE: ClassVar[int] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_SKILL,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.POST_SKILL:
+            assert isinstance(detail, SkillIEvent)
+            if detail.source.pid is source.pid:
+                return [
+                    eft.ReferredDamageEffect(
+                        source=source,
+                        target=DynamicCharacterTarget.SELF_ACTIVE,
+                        element=self.ELEMENT,
+                        damage=self.DAMAGE,
+                        damage_type=DamageType(status=True, no_boost=True),
+                    ),
+                ], replace(self, usages=-1)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class CryoCicinMageStatus(_FatuiAmbusherStatus):
+    ELEMENT: ClassVar[Element] = Element.CRYO
+
+
+@dataclass(frozen=True, kw_only=True)
 class CrystallizeStatus(CombatStatus, StackedShieldStatus):
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 2
 
 
 @dataclass(frozen=True)
-class DendroCoreStatus(CombatStatus):
+class DendroCoreStatus(CombatStatus, _UsageStatus):
     """
     When you deal Pyro DMG or Electro DMG to an opposing active character, DMG dealt +2.
     Usage(s): 1
@@ -2752,8 +2789,9 @@ class DendroCoreStatus(CombatStatus):
     Experiment results:
     - normally the maxinum num of usage(s) is 1
     """
-    damage_boost: ClassVar[int] = 2
     usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    DAMAGE_BOOST: ClassVar[int] = 2
 
     @override
     def _preprocess(
@@ -2765,26 +2803,14 @@ class DendroCoreStatus(CombatStatus):
     ) -> tuple[PreprocessableEvent, None | DendroCoreStatus]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
-            dmg = item.dmg
-            assert self.usages >= 1
-            elem_can_boost = dmg.element is Element.ELECTRO or dmg.element is Element.PYRO
-            legal_to_boost = status_source.pid is dmg.source.pid and dmg.damage_type.can_boost()
-            target_is_active = dmg.target.id == game_state.get_player(
-                dmg.target.pid
-            ).just_get_active_character().id
-            if elem_can_boost and legal_to_boost and target_is_active:
-                new_damage = replace(dmg, damage=dmg.damage + DendroCoreStatus.damage_boost)
-                new_item = DmgPEvent(dmg=new_damage)
-                if self.usages == 1:
-                    return new_item, None
-                else:  # pragma: no cover
-                    return new_item, DendroCoreStatus(self.usages - 1)
+            if (
+                    item.dmg.source.pid == status_source.pid
+                    and item.dmg.damage_type.can_boost
+                    and item.dmg.element in (Element.PYRO, Element.ELECTRO)
+                    and item.dmg.target == StaticTarget.from_player_active(game_state, status_source.pid.other)
+            ):
+                return item.delta_damage(self.DAMAGE_BOOST), replace(self, usages=self.usages - 1)
         return super()._preprocess(game_state, status_source, item, signal)
-
-    # @override
-    # def update(self, other: DendroCoreStatus) -> DendroCoreStatus:
-    #     total_count = min(self.count + other.count, 2)
-    #     return DendroCoreStatus(total_count)
 
     def __str__(self) -> str:
         return super().__str__() + f"({self.usages})"  # pragma: no cover
@@ -2940,7 +2966,7 @@ class ElementalResonanceSprawlingGreeneryStatus(CombatStatus):
             if (
                     dmg.source.pid is status_source.pid
                     and dmg.reaction is not None
-                    and dmg.damage_type.can_boost()
+                    and dmg.damage_type.can_boost
             ):
                 return replace(item, dmg=replace(dmg, damage=dmg.damage + self.DMG_BOOST)), None
         return item, self
@@ -2953,6 +2979,11 @@ class ElementalResonanceSprawlingGreeneryStatus(CombatStatus):
         if signal is TriggeringSignal.ROUND_END:
             return [], None
         return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class ElectrohammerVanguardStatus(_FatuiAmbusherStatus):
+    ELEMENT: ClassVar[Element] = Element.ELECTRO
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -3046,6 +3077,7 @@ class MillennialMovementFarewellSongStatus(CombatStatus, _UsageStatus):
             if (
                     item.dmg.source.pid is status_source.pid
                     and item.dmg.damage_type.directly_from_character()
+                    and item.dmg.damage_type.can_boost
             ):
                 return item.delta_damage(1), self
         return item, self
@@ -3058,6 +3090,11 @@ class MillennialMovementFarewellSongStatus(CombatStatus, _UsageStatus):
         if signal is TriggeringSignal.ROUND_END:
             return [], replace(self, usages=-1)
         return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class MirrorMaidenStatus(_FatuiAmbusherStatus):
+    ELEMENT: ClassVar[Element] = Element.HYDRO
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -3092,6 +3129,11 @@ class PassingOfJudgmentStatus(CombatStatus, _UsageStatus):
         if signal is TriggeringSignal.ROUND_END:
             return [], None
         return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class PyroslingerBracerStatus(_FatuiAmbusherStatus):
+    ELEMENT: ClassVar[Element] = Element.PYRO
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -3445,7 +3487,7 @@ class AdeptusTemptationStatus(CharacterStatus):
             if (
                     dmg.source == status_source
                     and dmg.damage_type.direct_elemental_burst()
-                    and dmg.damage_type.can_boost()
+                    and dmg.damage_type.can_boost
             ):
                 return item.delta_damage(self.DMG_BOOST), None
         return item, self
@@ -3563,6 +3605,7 @@ class HeavyStrikeStatus(CharacterStatus):
             if (
                     item.dmg.source == status_source
                     and item.dmg.damage_type.direct_normal_attack()
+                    and item.dmg.damage_type.can_boost
             ):
                 if item.dmg.damage_type.charged_attack:
                     return item.delta_damage(2), None
@@ -3774,6 +3817,7 @@ class SashimiPlatterStatus(CharacterStatus):
             if (
                     item.dmg.source == status_source
                     and item.dmg.damage_type.direct_normal_attack()
+                    and item.dmg.damage_type.can_boost
             ):
                 return item.delta_damage(1), self
         return item, self
@@ -3820,9 +3864,10 @@ class TandooriRoastChickenStatus(CharacterStatus):
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
             if (
-                dmg.source == status_source
-                and dmg.damage_type.direct_elemental_skill()
-                and dmg.element is not Element.PIERCING
+                    dmg.source == status_source
+                    and dmg.damage_type.direct_elemental_skill()
+                    and dmg.element is not Element.PIERCING
+                    and item.dmg.damage_type.can_boost
             ):
                 return item.delta_damage(self.DMG_BOOST), None
         return super()._preprocess(game_state, status_source, item, signal)
@@ -4548,6 +4593,7 @@ class GrimheartStatus(CharacterStatus):
                     item.dmg.source == status_source
                     and item.dmg.damage_type.direct_elemental_skill()
                     and not self.activated
+                    and item.dmg.damage_type.can_boost
             ):
                 return item.delta_damage(3), replace(self, activated=True)
         return item, self
@@ -4627,10 +4673,7 @@ class StealthStatus(CharacterStatus, FixedShieldStatus):
 
     @override
     def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: PreprocessableEvent,
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
@@ -4645,6 +4688,7 @@ class StealthStatus(CharacterStatus, FixedShieldStatus):
                     dmg.source == status_source
                     and dmg.element is Element.PHYSICAL
                     and dmg.damage_type.directly_from_character()
+                    and item.dmg.damage_type.can_boost
             ):
                 return item, self
             char = game_state.get_character_target(status_source)
@@ -4765,6 +4809,7 @@ class SanguineRougeStatus(TalentEquipmentStatus):
                     and item.dmg.element is Element.PYRO
                     and item.dmg.damage_type.directly_from_character()
                     and this_char.hp <= 6
+                    and item.dmg.damage_type.can_boost
             ):
                 return item.delta_damage(1), self
         return item, self
@@ -4855,6 +4900,7 @@ class RadicalVitalityStatus(CharacterStatus, _UsageLivingStatus):
             if (
                     dmg.source == status_source
                     and dmg.damage_type.direct_elemental_burst()
+                    and item.dmg.damage_type.can_boost
             ):
                 return item.delta_damage(self.usages), replace(self, to_clear=True)
         return item, self
@@ -5440,6 +5486,7 @@ class CrowfeatherCoverStatus(CharacterStatus, _UsageStatus):
                         item.dmg.damage_type.direct_elemental_skill()
                         or item.dmg.damage_type.direct_elemental_burst()
                     )
+                    and item.dmg.damage_type.can_boost
             ):
                 return item, self
             dmg_boost = 1
@@ -5631,7 +5678,7 @@ class ConclusiveOvationStatus(TalentEquipmentStatus, _UsageLivingStatus):
                     from ..summon.summon import GrinMalkinHatSummon
                     summon_instance = game_state.get_target(item.dmg.source)
                     boostable = isinstance(summon_instance, GrinMalkinHatSummon)
-            if boostable:
+            if boostable and item.dmg.damage_type.can_boost:
                 return item.delta_damage(2), replace(self, usages=-1)
         return item, self
 
@@ -5665,6 +5712,7 @@ class PropSurplusStatus(CharacterStatus, _UsageLivingStatus):
                     self.usages > 0
                     and item.dmg.source == status_source
                     and item.dmg.damage_type.direct_elemental_skill()
+                    and item.dmg.damage_type.can_boost
             ):
                 return item, self
             return item.delta_damage(self.usages), replace(self, triggered=True)
@@ -5778,7 +5826,7 @@ class ProphecyOfSubmersionStatus(TalentEquipmentStatus):
             dmg = item.dmg
             if (
                     dmg.source.pid is status_source.pid
-                    and dmg.damage_type.can_boost()
+                    and dmg.damage_type.can_boost
                     and dmg.reaction is not None
                     and dmg.reaction.elem_reaction(Element.HYDRO)
                     and (
@@ -5947,7 +5995,7 @@ class JadeScreenStatus(CombatStatus, FixedShieldStatus):
             if (
                     item.dmg.element is Element.GEO
                     and item.dmg.source.pid is status_source.pid
-                    and item.dmg.damage_type.can_boost()
+                    and item.dmg.damage_type.can_boost
             ):
                 active_char = game_state.get_player(status_source.pid).just_get_active_character()
                 from ..character.character import Ningguang
@@ -6215,10 +6263,7 @@ class ChakraDesiderataStatus(CharacterStatus, _UsageLivingStatus):
 
     @override
     def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: PreprocessableEvent,
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
@@ -6227,6 +6272,7 @@ class ChakraDesiderataStatus(CharacterStatus, _UsageLivingStatus):
                     item.dmg.source == status_source
                     and item.dmg.damage_type.direct_elemental_burst()
                     and self.usages > 0
+                    and item.dmg.damage_type.can_boost
             ):
                 this_char = game_state.get_character_target(status_source)
                 assert this_char is not None
@@ -6284,6 +6330,7 @@ class CeremonialGarmentStatus(CharacterStatus, _UsageStatus):
             if (
                     dmg.source == status_source
                     and dmg.damage_type.direct_normal_attack()
+                    and dmg.damage_type.can_boost
             ):
                 return item.delta_damage(self.DAMAGE_BOOST), replace(self, activated=True)
         return item, self
@@ -6414,6 +6461,7 @@ class StoneForceStatus(CharacterStatus):
             if not (
                     item.dmg.source == status_source
                     and item.dmg.damage_type.directly_from_character()
+                    and item.dmg.damage_type.can_boost
             ):
                 return item, self
             return item.delta_damage(1), replace(self, boostable=False)
@@ -6516,6 +6564,7 @@ class MeleeStanceStatus(CharacterStatus, _UsageStatus):
                     dmg.source == status_source
                     and dmg.damage_type.directly_from_character()
                     and RiptideStatus in oppo_char.character_statuses
+                    and dmg.damage_type.can_boost
             ):
                 return item.delta_damage(1), self
         elif signal is Preprocessables.DMG_ELEMENT:
@@ -6964,6 +7013,7 @@ class WindfavoredStatus(CharacterStatus, _UsageStatus):
             if not (
                     item.dmg.source == status_source
                     and item.dmg.damage_type.direct_normal_attack()
+                    and item.dmg.damage_type.can_boost
             ):
                 return item, self
             return item.delta_damage(2), replace(self, usages=self.usages - 1)
@@ -7441,7 +7491,11 @@ class NiwabiEnshouStatus(CharacterStatus, _UsageStatus):
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
-            if dmg.source == status_source and dmg.damage_type.direct_normal_attack():
+            if (
+                    dmg.source == status_source
+                    and dmg.damage_type.direct_normal_attack()
+                    and dmg.damage_type.can_boost
+            ):
                 return item.delta_damage(self.DAMAGE_BOOST), (
                     self
                     if self.activated
@@ -7454,6 +7508,7 @@ class NiwabiEnshouStatus(CharacterStatus, _UsageStatus):
                     dmg.source == status_source
                     and dmg.element is Element.PHYSICAL
                     and dmg.damage_type.directly_from_character()
+                    and dmg.damage_type.can_boost
             ):
                 return item, self
             return item.convert_element(self.INFUSION_ELEMENT), (

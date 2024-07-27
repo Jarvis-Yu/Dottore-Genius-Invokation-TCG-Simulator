@@ -165,6 +165,7 @@ __all__ = [
     "ElementalResonanceWovenWaters",
     "ElementalResonanceWovenWeeds",
     "ElementalResonanceWovenWinds",
+    "FatuiConspiracy",
     "GuardiansOath",
     "HeavyStrike",
     "IHaventLostYet",
@@ -2658,10 +2659,7 @@ class AbyssalSummons(EventCard, _DiceOnlyChoiceProvider):
     @override
     @classmethod
     def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         self_summons = game_state.get_player(pid).summons
         backup_summons = set(cls.SUMMONS)
@@ -3094,6 +3092,44 @@ class ElementalResonanceWovenWeeds(_ElementalResonanceDie):
 
 class ElementalResonanceWovenWinds(_ElementalResonanceDie):
     _ELEMENT = Element.ANEMO
+
+
+class FatuiConspiracy(EventCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDice({Element.OMNI: 2})
+    FATUUS: frozenset[type[stt._FatuiAmbusherStatus]] = frozenset((
+        stt.CryoCicinMageStatus,
+        stt.ElectrohammerVanguardStatus,
+        stt.MirrorMaidenStatus,
+        stt.PyroslingerBracerStatus,
+    ))
+
+    @override
+    @classmethod
+    def valid_in_deck(cls, deck: Deck) -> bool:
+        return 2 <= sum([
+            char.of_faction(Faction.FATUI)
+            for char in deck.chars
+        ])
+
+    @override
+    @classmethod
+    def effects(
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        oppo_combat_statuses = game_state.get_player(pid.other).combat_statuses
+        available_fatuus = [
+            fatui
+            for fatui in cls.FATUUS
+            if fatui not in oppo_combat_statuses
+        ]
+        if not available_fatuus:
+            available_fatuus = list(cls.FATUUS)
+        return (
+            eft.AddCombatStatusEffect(
+                target_pid=pid.other,
+                status=random.choice(available_fatuus),
+            ),
+        )
 
 
 class GuardiansOath(EventCard, _DiceOnlyChoiceProvider):

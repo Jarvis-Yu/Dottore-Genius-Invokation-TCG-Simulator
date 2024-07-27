@@ -131,6 +131,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ElementalResonanceWovenWaters,
     ElementalResonanceWovenWeeds,
     ElementalResonanceWovenWinds,
+    FatuiConspiracy,
     GuardiansOath,
     HeavyStrike,
     IHaventLostYet,

@@ -244,6 +244,7 @@ class DmgPEvent(PreprocessableEvent):
     dmg: SpecificDamageEffect
 
     def delta_damage(self, d_damage: int) -> Self:
+        assert self.dmg.damage_type.can_boost or d_damage < 0
         new_damage = max(0, self.dmg.damage + d_damage)
         return replace(self, dmg=replace(self.dmg, damage=new_damage))
 

@@ -883,7 +883,11 @@ def assert_last_dmg(
         amount: None | int = None,
         elem: None | Element = None,
 ) -> None:
-    """ checks the last damage dealt from the player """
+    """
+    checks the last damage dealt from the player.
+
+    Prerequisite: the game state has a corresponding dmg listener.
+    """
     dmgs = get_dmg_listener_data(game_state, pid)
     dmg = dmgs[-(last_index + 1)]
     if source is not None:
@@ -1048,3 +1052,67 @@ def add_hand_card(game_state: GameState, pid: Pid, card: type[Card], num: int = 
             lambda hcs: hcs + {card: num}
         ).build()
     ).build()
+
+
+class _TempTestAutoRemoveAuraStatus(CombatStatus):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_DMG,
+    ))
+    REMOVE_MAPPING: ClassVar[dict[Element, Element]] = {
+        Element.PYRO: Element.HYDRO,
+        Element.HYDRO: Element.PYRO,
+        Element.ELECTRO: Element.CRYO,
+        Element.DENDRO: Element.HYDRO,
+        Element.CRYO: Element.PYRO,
+    }
+
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[Effect], None | Self]:
+        if signal is TriggeringSignal.POST_DMG:
+            assert isinstance(detail, DmgIEvent)
+            if detail.dmg.target.pid is source.pid and detail.dmg.element.is_aurable():
+                effects: list[Effect] = [
+                    ApplyElementalAuraEffect(
+                        source=source,
+                        target=detail.dmg.target,
+                        element=self.REMOVE_MAPPING[detail.dmg.element],
+                        source_type=DamageType(status=True),
+                    ),
+                ]
+                if (
+                        detail.dmg.element is Element.DENDRO
+                        and DendroCoreStatus not in game_state.get_player(detail.dmg.target.pid.other).combat_statuses
+                ):
+                    effects.append(RemoveCombatStatusEffect(detail.dmg.target.pid.other, DendroCoreStatus))
+                return effects, self
+        return [], self
+
+
+def add_aura_remover(game_state: GameState, pid: Pid) -> GameState:
+    """
+    Adds a combat status that triggers on POST_DMG, that auto apply element to characters
+    affacted by the damage element to remove the aura.
+
+    TODO: update when Nilou is implemented
+    """
+    return game_state.factory().f_player(
+        pid,
+        lambda p: p.factory().f_combat_statuses(
+            lambda csts: csts.add_status(_TempTestAutoRemoveAuraStatus)
+        ).build()
+    ).build()
+
+
+def remove_aura_remover(game_state: GameState, pid: Pid) -> GameState:
+    """
+    Removes the combat status added in ``add_aura_remover``.
+    """
+    return game_state.factory().f_player(
+        pid,
+        lambda p: p.factory().f_combat_statuses(
+            lambda csts: csts.remove(_TempTestAutoRemoveAuraStatus)
+        ).build()
+    ).build()
+

@@ -62,7 +62,7 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [x] Stonehide Lawachurl
 
-## Card (188/334 implemented)
+## Card (189/334 implemented)
 
 - [ ] Equipment Card (93/177):
   - [ ] Talent Card:
@@ -205,7 +205,7 @@ all I need now is to implement each card and character.
     - [x] Tenshukaku
     - [x] Vanarana
     - [x] Weeping Willow of the Lake
-- [ ] Event Card (60/101):
+- [ ] Event Card (61/101):
   - [ ] Talent Card:
     - [x] Absorbing Prism
     - [x] Kanten Senmyou Blessing
@@ -251,7 +251,7 @@ all I need now is to implement each card and character.
     - [x] Blessing of the Divine Relic's Installation
     - [x] Calxs Arts
     - [x] Changing Shifts
-    - [ ] Fatui Conspiracy
+    - [x] Fatui Conspiracy
     - [ ] Flickering Four-Leaf Sigil
     - [x] Guardian's Oath
     - [x] Heavy Strike

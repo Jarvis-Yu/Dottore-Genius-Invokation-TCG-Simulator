@@ -153,6 +153,7 @@ class DamageType:
     def directly_from_status(self) -> bool:  # pragma: no cover
         return self.status and not self.reaction
 
+    @property
     def can_boost(self) -> bool:
         return not self.no_boost
 

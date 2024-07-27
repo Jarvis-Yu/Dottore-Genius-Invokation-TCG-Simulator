@@ -59,6 +59,7 @@
       - Fish and Chips
       - Sashimi Platter
     - Other Cards:
+      - Fatui Conspiracy
       - Sunyata Flower
 
 ### Updated

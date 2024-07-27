@@ -318,7 +318,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.SendOff, 662),
         (card.GuardiansOath, 663),
         (card.AbyssalSummons, 664),
-        # (card.FatuiConspiracy, 665),
+        (card.FatuiConspiracy, 665),
         # (card.FriendshipEternal, 666),
         (card.HeavyStrike, 667),
         # (card.PlungingStrike, 668),
@@ -682,6 +682,10 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.SunyataFlowerStatus, 320),
         (status.SandAndDreamsStatus, 321),
         (status.RedFeatherFanStatus, 322),
+        (status.CryoCicinMageStatus, 323),
+        (status.ElectrohammerVanguardStatus, 324),
+        (status.MirrorMaidenStatus, 325),
+        (status.PyroslingerBracerStatus, 326),
 
         #### 2.2 Shield Combat Status 375 ####
         (status.CrystallizeStatus, 375),

@@ -593,6 +593,7 @@ class DandelionFieldSummon(_DestroyOnNumSummon):
                     dmg.source.pid is status_source.pid
                     and dmg.element is Element.ANEMO
                     and dmg.damage_type.directly_from_character()
+                    and dmg.damage_type.can_boost
             ):
                 return item, self
             self_chars = game_state.get_player(status_source.pid).characters
@@ -668,10 +669,7 @@ class EyeOfStormyJudgmentSummon(_DmgPerRoundSummon):
 
     @override
     def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: PreprocessableEvent,
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:
@@ -679,6 +677,7 @@ class EyeOfStormyJudgmentSummon(_DmgPerRoundSummon):
             if (
                     item.dmg.source.pid is status_source.pid
                     and item.dmg.damage_type.direct_elemental_burst()
+                    and item.dmg.damage_type.can_boost
             ):
                 return item.delta_damage(1), self
         return item, self
@@ -701,10 +700,7 @@ class FierySanctumFieldSummon(_DmgPerRoundSummon, stt._ShieldStatus):
 
     @override
     def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: PreprocessableEvent,
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_MINUS:
@@ -1243,6 +1239,7 @@ class SolarIsotomaSummon(_DmgPerRoundSummon):
                     dmg.source.pid is status_source.pid
                     and dmg.damage_type.direct_plunge_attack()
                     and self._some_char_equiped_talent(game_state, status_source.pid, Albedo)
+                    and dmg.damage_type.can_boost
             ):
                 return item.delta_damage(self.DMG_BOOST), self
         elif signal is Preprocessables.SWAP:
