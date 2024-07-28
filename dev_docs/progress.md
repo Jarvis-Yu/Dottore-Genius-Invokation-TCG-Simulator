@@ -11,56 +11,91 @@ all I need now is to implement each card and character.
 
 - [ ] Pyro:
   - [x] Bennett
+  - [ ] Chevreuse
   - [x] Dehya
+  - [ ] Emperor of Fire and Iron
   - [x] Fatui Pyro Agent
   - [x] Hu Tao
   - [x] Klee
   - [x] Lyney
+  - [ ] Thoma
+  - [ ] Xiangling
+  - [ ] Xinyan
   - [x] Yoimiya
 - [ ] Hydro:
+  - [ ] Abyss Herald: Wicked Torrents
+  - [ ] All-Devouring Narwhal
+  - [ ] Barbara
+  - [ ] Furina
+  - [ ] Kamisato Ayato
   - [x] Mona
+  - [ ] Neuvillette
+  - [ ] Nilou
   - [x] Rhodeia of Loch
   - [x] Sangonomiya Kokomi
   - [x] Tartaglia
   - [x] Xingqiu
   - [x] Yelan
 - [ ] Anemo:
+  - [ ] Consecrated Flying Serpent
+  - [ ] Dvalin
+  - [ ] Faruzan
   - [x] Jean
   - [x] Kaedehara Kazuha
+  - [ ] Lynette
   - [x] Maguu Kenki
+  - [ ] Sayu
   - [x] Venti
   - [x] Wanderer
 - [ ] Electro:
+  - [ ] Beidou
+  - [ ] Consecrated Scorpion
+  - [ ] Cyno
   - [x] Electro Hypostasis
   - [x] Fischl
   - [x] Keqing
   - [x] Kujou Sara
+  - [ ] Kuki Shinobu
   - [x] Lisa
+  - [ ] Millennial Pearl Seahorse
   - [x] Raiden Shogun
+  - [ ] Razor
+  - [ ] Thunder Manifestation
   - [x] Yae Miko
 - [ ] Dendro:
+  - [ ] Baizhu
   - [x] Collei
+  - [ ] Guardian of Apep's Oasis
   - [x] Jadeplume Terrorshroom
+  - [ ] Kaveh
+  - [ ] Kirara
   - [x] Nahida
   - [x] Tighnari
   - [x] Yaoyao
 - [ ] Cryo:
+  - [ ] Charlotte
   - [x] Chongyun
+  - [ ] Cryo Hypostasis
   - [x] Diona
   - [x] Eula
   - [x] Fatui Cryo Cicin Mage
+  - [ ] Frost Operative
   - [x] Kaeya
   - [x] Kamisato Ayaka
   - [x] Ganyu
+  - [ ] La Signora
   - [x] Layla
   - [x] Qiqi
   - [x] Shenhe
 - [ ] Geo:
   - [x] Albedo
   - [x] Arataki Itto
+  - [ ] Gorou
+  - [ ] Navia
   - [x] Ningguang
   - [x] Noelle
   - [x] Stonehide Lawachurl
+  - [ ] Yun Jin
 
 ## Card (192/334 implemented)
 
@@ -113,15 +148,23 @@ all I need now is to implement each card and character.
     - [ ] Bow:
       - [x] Amos' Bow
       - [x] Elegy for the End
+      - [ ] End of the Line
       - [x] King's Squire
       - [x] Raven Bow
       - [x] Sacrificial Bow
     - [ ] Catalyst:
       - [x] A Thousand Floating Dreams
       - [x] Fruit of Fulfillment
+      - [ ] Lost Prayer to the Sacred Winds
       - [x] Magic Guide
       - [x] Sacrificial Fragments
+      - [ ] Skyward Atlas
+      - [ ] Tome of the Eternal Flow
+      - [ ] Tulaytullah's Remembrance
     - [ ] Claymore:
+      - [ ] "Ultimate Overlord's Mega Magic Sword"
+      - [ ] Beacon of the Reed Sea
+      - [ ] Forest Regalia
       - [x] Sacrificial Greatsword
       - [x] The Bell
       - [x] White Iron Greatsword
@@ -130,14 +173,22 @@ all I need now is to implement each card and character.
       - [x] Engulfing Lightning
       - [x] Lithic Spear
       - [x] Moonpiercer
+      - [ ] Primordial Jade Winged-Spear
+      - [ ] Prospector's Drill
+      - [ ] Rightful Reward
       - [x] Vortex Vanquisher
       - [x] White Tassel
     - [ ] Sword:
       - [x] Aquila Favonia
       - [x] Favonius Sword
+      - [ ] Light of Foliar Incision
       - [x] Sacrificial Sword
+      - [ ] Sapwood Blade
+      - [ ] Skyward Blade
+      - [ ] Splendor of Tranquil Waters
       - [x] Traveler's Handy Sword
   - [ ] Artifact Card:
+    - [ ] Amethyst Crown
     - [x] Archaic Petra
     - [x] Blizzard Strayer
     - [x] Broken Rimes Echo
@@ -147,6 +198,7 @@ all I need now is to implement each card and character.
     - [x] Echoes of an Offering
     - [x] Emblem of Severed Fate
     - [x] Exile's Circlet
+    - [ ] Flower of Paradise Lost
     - [x] Flowing Rings
     - [x] Gambler's Earrings
     - [x] General's Ancient Helm
@@ -155,6 +207,7 @@ all I need now is to implement each card and character.
     - [x] Heart of Khvarena's Brilliance
     - [x] Instructor's Cap
     - [x] Laurel Coronet
+    - [ ] Marechaussee Hunter
     - [x] Mask of Solitude Basalt
     - [x] Ocean-Hued Clam
     - [x] Ornate Kabuto
@@ -162,6 +215,7 @@ all I need now is to implement each card and character.
     - [x] Tenacity of the Millelith
     - [x] Thunder Summoner's Crown
     - [x] Thundering Fury
+    - [ ] Veteran's Visage
     - [x] Viridescent Venerer
     - [x] Viridescent Venerer's Diadem
     - [x] Vourukasha's Glow
@@ -179,13 +233,17 @@ all I need now is to implement each card and character.
     - [x] Master Zhang
     - [x] Paimon
     - [x] Rana
+    - [ ] Serene
     - [x] Setaria
+    - [ ] Taroumaru
+    - [ ] The Mausoleum of King Deshret
     - [x] Timaeus
     - [x] Timmie
     - [x] Wagner
     - [x] Xudong
     - [x] Yayoi Nanatsuki
   - [ ] Item Card:
+    - [ ] Lumenstone Adjuvant
     - [x] Memento Lens
     - [x] NRE
     - [x] Parametric Transformer
@@ -193,13 +251,16 @@ all I need now is to implement each card and character.
     - [x] Seed Dispensary
     - [x] Treasure-Seeking Seelie
   - [ ] Location Card:
+    - [ ] Central Laboratory Ruins
     - [x] Dawn Winery
+    - [ ] Fortress of Meropide
     - [x] Gandharva Ville
     - [x] Golden House
     - [x] Jade Chamber
     - [x] Knights of Favonius Library
     - [x] Liyue Harbor Wharf
     - [x] Opera Epiclese
+    - [ ] Seirai Island
     - [x] Stormterror's Lair
     - [x] Sumeru City
     - [x] Tenshukaku
@@ -220,6 +281,7 @@ all I need now is to implement each card and character.
     - [x] Mondstadt Hash Brown
     - [x] Mushroom Pizza
     - [x] Nothern Smoked Chicken
+    - [ ] Rainow Macarons
     - [x] Sashimi Platter
     - [x] Sweet Madame
     - [x] Tandoori Roast Chicken
@@ -242,36 +304,63 @@ all I need now is to implement each card and character.
   - [ ] Arcane Legend:
     - [x] Ancient Courtyard
     - [x] Covenant of Rock
+    - [ ] Day of Resistance: Moment of Shattered Dreams
     - [x] Fresh Wind of Freedom
     - [x] In Every House a Stove
     - [x] Joyous Celebration
     - [x] Passing of Judgment
+    - [ ] Vicious Ancient Battle
   - [ ] Other Card:
+    - [ ] "I'd Rather Lose Money Myself..."
     - [x] Abyssal Summons
+    - [ ] Awaken, My Kindred
     - [x] Blessing of the Divine Relic's Installation
     - [x] Calxs Arts
+    - [ ] Canotila's Support
     - [x] Changing Shifts
+    - [ ] Cosanzeana's Support
+    - [ ] Countdown to the Show: 1
+    - [ ] Countdown to the Show: 2
+    - [ ] Countdown to the Show: 3
+    - [ ] Crystal Shrapnel
     - [x] Fatui Conspiracy
     - [x] Flickering Four-Leaf Sigil
+    - [ ] Forbidden Knowledge
     - [x] Guardian's Oath
     - [x] Heavy Strike
     - [x] I Haven't Lost Yet!
+    - [ ] Laume's Support
     - [x] Leave It to Me!
+    - [ ] Lutine's Support
     - [x] Lyresong
     - [x] Master of Weaponry
     - [x] Nature and Wisdom
+    - [ ] Overcharged Balls
     - [x] Pankration!
     - [x] Plunging Strike
+    - [ ] Puca's Support
     - [x] Quick Knit
+    - [ ] Seats Sacred and Secular
     - [x] Send Off
+    - [ ] Serene's Support
+    - [ ] Sluasi's Support
     - [x] Starsigns
     - [x] Stone and Contracts
     - [x] Strategize
     - [x] Sunyata Flower
+    - [ ] Tada!
+    - [ ] Taroumaru's Savings
     - [x] The Bestest Travel Companion!
     - [x] The Boar Princess
+    - [ ] The Show Begins!
+    - [ ] Thirona's Support
     - [x] Thunder and Eternity
+    - [ ] Topyas's Support
     - [x] Toss-Up
+    - [ ] Undersea Treasure
+    - [ ] Underwater Treasure Hunt
+    - [ ] Virda's Support
+    - [ ] Water and Justice
     - [x] When the Crane Returned
     - [x] Where Is the Unseen Razor?
     - [x] Wind and Freedom
