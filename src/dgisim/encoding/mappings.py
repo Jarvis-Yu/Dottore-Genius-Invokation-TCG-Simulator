@@ -321,7 +321,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.FatuiConspiracy, 665),
         # (card.FriendshipEternal, 666),
         (card.HeavyStrike, 667),
-        # (card.PlungingStrike, 668),
+        (card.PlungingStrike, 668),
         (card.WindAndFreedom, 669),
         (card.StoneAndContracts, 670),
         (card.ThunderAndEternity, 671),

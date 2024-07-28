@@ -5,7 +5,7 @@ from .common_imports import *
 EVENT_CARD = FlickeringFourLeafSigil
 EVENT_STATUS = FlickeringFourLeafSigilStatus
 
-class TestFatuiConspiracy(unittest.TestCase):
+class TestFlickeringFourLeafSigil(unittest.TestCase):
     def test_behaviour(self):
         base_state = ACTION_TEMPLATE
         base_state = replace_hand_cards(base_state, Pid.P1, Cards({EVENT_CARD: 2}))

@@ -882,6 +882,11 @@ def assert_last_dmg(
         target: None | StaticTarget = None,
         amount: None | int = None,
         elem: None | Element = None,
+        normal_attack: None | bool = None,
+        elemental_skill: None | bool = None,
+        elemental_burst: None | bool = None,
+        status: None | bool = None,
+        summon: None | bool = None,
 ) -> None:
     """
     checks the last damage dealt from the player.
@@ -898,6 +903,16 @@ def assert_last_dmg(
         testbody.assertEqual(dmg.damage, amount)
     if elem is not None:
         testbody.assertIs(dmg.element, elem)
+    if normal_attack is not None:
+        testbody.assertIs(normal_attack, dmg.damage_type.direct_normal_attack())
+    if elemental_skill is not None:
+        testbody.assertIs(elemental_skill, dmg.damage_type.direct_elemental_skill())
+    if elemental_burst is not None:
+        testbody.assertIs(elemental_burst, dmg.damage_type.direct_elemental_burst())
+    if status is not None:
+        testbody.assertIs(status, dmg.damage_type.directly_from_status())
+    if summon is not None:
+        testbody.assertIs(summon, dmg.damage_type.directly_from_summon())
 
 
 def reactivate_player(game_state: GameState, pid: Pid) -> GameState:

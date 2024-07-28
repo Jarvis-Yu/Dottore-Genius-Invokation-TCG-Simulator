@@ -62,6 +62,7 @@
       - Fatui Conspiracy
       - Flickering Four-Leaf Sigil
       - Pankration!
+      - Plunging Strike
       - Sunyata Flower
 
 ### Updated

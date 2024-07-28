@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (45/95 implemented)](#character-4595-implemented)
-  - [Card (184/334 implemented)](#card-184334-implemented)
+  - [Card (192/334 implemented)](#card-184334-implemented)
 
 ## Character (45/95 implemented)
 
@@ -62,7 +62,7 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [x] Stonehide Lawachurl
 
-## Card (191/334 implemented)
+## Card (192/334 implemented)
 
 - [ ] Equipment Card (93/177):
   - [ ] Talent Card:
@@ -205,7 +205,7 @@ all I need now is to implement each card and character.
     - [x] Tenshukaku
     - [x] Vanarana
     - [x] Weeping Willow of the Lake
-- [ ] Event Card (63/101):
+- [ ] Event Card (64/101):
   - [ ] Talent Card:
     - [x] Absorbing Prism
     - [x] Kanten Senmyou Blessing
@@ -261,7 +261,7 @@ all I need now is to implement each card and character.
     - [x] Master of Weaponry
     - [x] Nature and Wisdom
     - [x] Pankration!
-    - [ ] Plunging Strike
+    - [x] Plunging Strike
     - [x] Quick Knit
     - [x] Send Off
     - [x] Starsigns

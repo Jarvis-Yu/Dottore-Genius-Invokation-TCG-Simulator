@@ -175,6 +175,7 @@ __all__ = [
     "MasterOfWeaponry",
     "NatureAndWisdom",
     "Pankration",
+    "PlungingStrike",
     "QuickKnit",
     "SendOff",
     "Starsigns",
@@ -3413,6 +3414,41 @@ class Pankration(EventCard, _DiceOnlyChoiceProvider):
         )
 
 
+class PlungingStrike(EventCard, _CombatActionCard, _CharTargetChoiceProvider):
+    _DICE_COST = AbstractDice({Element.OMNI: 3})
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        non_active_chars = game_state.get_player(pid).characters.get_required_chars(
+            non_active=True,
+            alive=True,
+        )
+        return any(
+            char.can_cast_skill()
+            for char in non_active_chars
+        ) and super()._loosely_usable(game_state, pid)
+
+    @classmethod
+    def _valid_char(cls, game_state: gs.GameState, pid: Pid, char: chr.Character) -> bool:  # pragma: no cover
+        return (
+            char.can_cast_skill()
+            and char.id != game_state.get_player(pid).just_get_active_character().id
+        ) and super()._valid_char(game_state, pid, char)
+
+    @override
+    @classmethod
+    def effects(
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.StaticTargetInstruction)
+        return (
+            eft.SwapCharacterEffect(target=instruction.target),
+            eft.EffectsGroupEndEffect(),
+            eft.CastSkillEffect(target=instruction.target, skill=CharacterSkill.SKILL1),
+        )
+
+
 class QuickKnit(EventCard, _SummonTargetChoiceProvider):
     _DICE_COST = AbstractDice({Element.OMNI: 1})
     _MY_SIDE = True
@@ -4326,10 +4362,7 @@ class LightningStiletto(TalentEventCard, _CombatActionCard, _DiceOnlyChoiceProvi
     @override
     @classmethod
     def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.DiceOnlyInstruction)
         target = cls.implicit_target(game_state, pid)

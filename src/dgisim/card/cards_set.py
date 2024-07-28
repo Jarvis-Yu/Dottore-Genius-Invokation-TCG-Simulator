@@ -141,6 +141,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     MasterOfWeaponry,
     NatureAndWisdom,
     Pankration,
+    PlungingStrike,
     QuickKnit,
     SendOff,
     Starsigns,
