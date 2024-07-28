@@ -1,4 +1,5 @@
 import os
+import signal
 
 from argparse import ArgumentParser
 from typing import Callable
@@ -7,6 +8,14 @@ ROOT_DIR = os.path.abspath("./src/package/")
 
 ORIGINAL = "..dgisim"
 REPLACEMENT = "._core"
+
+
+def signal_suppresser(signum, frame):
+    print("Reverting changes...")
+
+
+signal.signal(signal.SIGINT, signal_suppresser)
+
 
 def do_text_work(f: Callable[[str], str]) -> None:
     for subdir, dirs, files in os.walk(ROOT_DIR):
@@ -19,6 +28,7 @@ def do_text_work(f: Callable[[str], str]) -> None:
             file_content = f(file_content)
             with open(file_path, "wt") as fout:
                 fout.write(file_content)
+
 
 if __name__ == "__main__":
     parser = ArgumentParser()

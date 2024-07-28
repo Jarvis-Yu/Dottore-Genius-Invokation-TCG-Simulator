@@ -62,7 +62,7 @@ all I need now is to implement each card and character.
   - [x] Noelle
   - [x] Stonehide Lawachurl
 
-## Card (190/334 implemented)
+## Card (191/334 implemented)
 
 - [ ] Equipment Card (93/177):
   - [ ] Talent Card:
@@ -205,7 +205,7 @@ all I need now is to implement each card and character.
     - [x] Tenshukaku
     - [x] Vanarana
     - [x] Weeping Willow of the Lake
-- [ ] Event Card (62/101):
+- [ ] Event Card (63/101):
   - [ ] Talent Card:
     - [x] Absorbing Prism
     - [x] Kanten Senmyou Blessing
@@ -260,7 +260,7 @@ all I need now is to implement each card and character.
     - [x] Lyresong
     - [x] Master of Weaponry
     - [x] Nature and Wisdom
-    - [ ] Pankration!
+    - [x] Pankration!
     - [ ] Plunging Strike
     - [x] Quick Knit
     - [x] Send Off

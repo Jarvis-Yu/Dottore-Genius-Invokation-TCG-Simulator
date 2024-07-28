@@ -8,7 +8,7 @@ fi && \
 
     function ctrl_c() {
         echo "Build Job Canceled..."
-        python scripts/py/package_file_path.py -b
+        ./venv/bin/python scripts/py/package_file_path.py -b
         exit 1
     }
 

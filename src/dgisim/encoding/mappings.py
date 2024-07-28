@@ -329,7 +329,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         # (card.TheLegendOfVennessa, 673),
         # (card.RhythmOfTheGreatDream, 674),
         (card.WhereIsTheUnseenRazor, 675),
-        # (card.Pankration, 676),
+        (card.Pankration, 676),
         (card.Lyresong, 677),
         (card.TheBoarPrincess, 678),
         (card.SunyataFlower, 679),
@@ -687,6 +687,7 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.ElectrohammerVanguardStatus, 324),
         (status.MirrorMaidenStatus, 325),
         (status.PyroslingerBracerStatus, 326),
+        (status.PankrationStatus, 327),
 
         #### 2.2 Shield Combat Status 375 ####
         (status.CrystallizeStatus, 375),

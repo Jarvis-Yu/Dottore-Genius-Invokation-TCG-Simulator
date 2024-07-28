@@ -61,6 +61,7 @@
     - Other Cards:
       - Fatui Conspiracy
       - Flickering Four-Leaf Sigil
+      - Pankration!
       - Sunyata Flower
 
 ### Updated

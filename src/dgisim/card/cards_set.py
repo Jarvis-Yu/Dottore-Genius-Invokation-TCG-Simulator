@@ -140,6 +140,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     Lyresong,
     MasterOfWeaponry,
     NatureAndWisdom,
+    Pankration,
     QuickKnit,
     SendOff,
     Starsigns,

@@ -1,7 +1,7 @@
 Available Cards
 ===============
 
-190 of 334 cards in Genius Invokation TCG are available in the simulator.
+191 of 334 cards in Genius Invokation TCG are available in the simulator.
 (excluding character cards which are not counted as cards in ``dgisim``)
 
 Equipment Cards
@@ -242,6 +242,7 @@ Other Event Card
 * Lyresong
 * Master of Weaponry
 * Nature and Wisdom
+* Pankration!
 * Quick Knit
 * Send Off
 * Starsigns

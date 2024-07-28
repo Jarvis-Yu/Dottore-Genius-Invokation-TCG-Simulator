@@ -146,6 +146,7 @@ __all__ = [
     "LyresongStatus",
     "MillennialMovementFarewellSongStatus",
     "MirrorMaidenStatus",
+    "PankrationStatus",
     "PassingOfJudgmentStatus",
     "PyroslingerBracerStatus",
     "RebelliousShieldStatus",
@@ -3096,6 +3097,38 @@ class MillennialMovementFarewellSongStatus(CombatStatus, _UsageStatus):
 @dataclass(frozen=True, kw_only=True)
 class MirrorMaidenStatus(_FatuiAmbusherStatus):
     ELEMENT: ClassVar[Element] = Element.HYDRO
+
+
+@dataclass(frozen=True, kw_only=True)
+class PankrationStatus(CombatStatus):
+    CARD_DRAW_NUM: ClassVar[int] = 2
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.SELF_DECLARE_END_ROUND,
+        TriggeringSignal.OPPO_DECLARE_END_ROUND,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.SELF_DECLARE_END_ROUND:
+            assert not game_state.get_player(source.pid.other).in_end_phase()
+            return [
+                eft.DrawTopCardEffect(
+                    pid=source.pid.other,
+                    num=self.CARD_DRAW_NUM,
+                ),
+            ], None
+        elif signal is TriggeringSignal.OPPO_DECLARE_END_ROUND:
+            assert not game_state.get_player(source.pid).in_end_phase()
+            return [
+                eft.DrawTopCardEffect(
+                    pid=source.pid,
+                    num=self.CARD_DRAW_NUM,
+                ),
+            ], None
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)

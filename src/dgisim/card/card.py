@@ -174,6 +174,7 @@ __all__ = [
     "Lyresong",
     "MasterOfWeaponry",
     "NatureAndWisdom",
+    "Pankration",
     "QuickKnit",
     "SendOff",
     "Starsigns",
@@ -3250,10 +3251,7 @@ class LeaveItToMe(EventCard, _DiceOnlyChoiceProvider):
     @override
     @classmethod
     def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         return (
             eft.AddCombatStatusEffect(
@@ -3374,10 +3372,7 @@ class NatureAndWisdom(EventCard, _DiceOnlyChoiceProvider):
     @override
     @classmethod
     def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.DiceOnlyInstruction)
         return (
@@ -3393,6 +3388,31 @@ class NatureAndWisdom(EventCard, _DiceOnlyChoiceProvider):
         )
 
 
+class Pankration(EventCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDice.from_empty()
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        return (
+            super()._loosely_usable(game_state, pid)
+            and game_state.get_player(pid).dice.num_dice() >= 8
+            and not game_state.get_player(pid.other).in_end_phase()
+        )
+
+    @override
+    @classmethod
+    def effects(
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddCombatStatusEffect(
+                target_pid=pid,
+                status=stt.PankrationStatus,
+            ),
+        )
+
+
 class QuickKnit(EventCard, _SummonTargetChoiceProvider):
     _DICE_COST = AbstractDice({Element.OMNI: 1})
     _MY_SIDE = True
@@ -3400,10 +3420,7 @@ class QuickKnit(EventCard, _SummonTargetChoiceProvider):
     @override
     @classmethod
     def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.StaticTargetInstruction)
         return (
