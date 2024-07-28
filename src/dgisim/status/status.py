@@ -163,6 +163,7 @@ __all__ = [
     "AdeptusTemptationStatus",
     "ButterCrabStatus",
     "FishAndChipsStatus",
+    "FlickeringFourLeafSigilStatus",
     "FrozenStatus",
     "HeavyStrikeStatus",
     "JueyunGuobaStatus",
@@ -3552,9 +3553,27 @@ class FishAndChipsStatus(CharacterStatus):
         return [], self
 
 
+@dataclass(frozen=True, kw_only=True)
+class FlickeringFourLeafSigilStatus(CharacterStatus):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            return [
+                eft.SwapCharacterEffect(target=source),
+            ], self
+        return [], self
+
+
 @dataclass(frozen=True)
 class FrozenStatus(CharacterStatus):
-    damage_boost: ClassVar[int] = 2
+    DAMAGE_BOOST: ClassVar[int] = 2
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
     ))
@@ -3571,7 +3590,7 @@ class FrozenStatus(CharacterStatus):
             is_damage_target = dmg.target == status_source
             if is_damage_target and can_reaction:
                 return (
-                    DmgPEvent(dmg=replace(dmg, damage=dmg.damage + FrozenStatus.damage_boost)),
+                    DmgPEvent(dmg=replace(dmg, damage=dmg.damage + FrozenStatus.DAMAGE_BOOST)),
                     None
                 )
         return super()._preprocess(game_state, status_source, item, signal)

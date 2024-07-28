@@ -60,6 +60,7 @@
       - Sashimi Platter
     - Other Cards:
       - Fatui Conspiracy
+      - Flickering Four-Leaf Sigil
       - Sunyata Flower
 
 ### Updated

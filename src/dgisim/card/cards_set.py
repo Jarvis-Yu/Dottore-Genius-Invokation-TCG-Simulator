@@ -132,6 +132,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ElementalResonanceWovenWeeds,
     ElementalResonanceWovenWinds,
     FatuiConspiracy,
+    FlickeringFourLeafSigil,
     GuardiansOath,
     HeavyStrike,
     IHaventLostYet,

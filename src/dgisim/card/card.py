@@ -166,6 +166,7 @@ __all__ = [
     "ElementalResonanceWovenWeeds",
     "ElementalResonanceWovenWinds",
     "FatuiConspiracy",
+    "FlickeringFourLeafSigil",
     "GuardiansOath",
     "HeavyStrike",
     "IHaventLostYet",
@@ -659,10 +660,7 @@ class _CharTargetChoiceProvider(Card):
     @override
     @classmethod
     def _valid_instruction(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction
     ) -> bool:
         if not isinstance(instruction, act.StaticTargetInstruction) \
                 or pid is not instruction.target.pid:
@@ -3132,16 +3130,30 @@ class FatuiConspiracy(EventCard, _DiceOnlyChoiceProvider):
         )
 
 
+class FlickeringFourLeafSigil(EventCard, _CharTargetChoiceProvider):
+    _DICE_COST = AbstractDice.from_empty()
+
+    @override
+    @classmethod
+    def effects(
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.StaticTargetInstruction)
+        return (
+            eft.AddCharacterStatusEffect(
+                target=instruction.target,
+                status=stt.FlickeringFourLeafSigilStatus,
+            ),
+        )
+
+
 class GuardiansOath(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDice({Element.OMNI: 4})
 
     @override
     @classmethod
     def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         assert isinstance(instruction, act.DiceOnlyInstruction)
         efts: list[eft.Effect] = []
@@ -3157,15 +3169,13 @@ class GuardiansOath(EventCard, _DiceOnlyChoiceProvider):
             ))
         return tuple(efts)
 
+
 class HeavyStrike(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDice({Element.OMNI: 1})
 
     @classmethod
     def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         return (
             eft.RelativeAddCharacterStatusEffect(
