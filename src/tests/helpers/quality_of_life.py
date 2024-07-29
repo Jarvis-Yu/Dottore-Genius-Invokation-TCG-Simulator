@@ -596,9 +596,11 @@ def replace_character(
         game_state: GameState,
         pid: Pid,
         char: type[Character],
-        char_id: int,
+        char_id: None | int = None,
 ) -> GameState:
     # character_instance = char.from_default(char_id).factory().hp(char).alive(False).build()
+    if char_id is None:
+        char_id = game_state.get_player(pid).just_get_active_character().id
     character_instance = char.from_default(char_id)
     game_state = game_state.factory().f_player(
         pid,
@@ -611,7 +613,7 @@ def replace_character(
     game_state = game_state.factory().f_effect_stack(
         lambda es: es.push_many_fl((
             PersonalStatusTriggererEffect(
-                target=StaticTarget.from_char_id(pid, char_id),
+                target=StaticTarget.from_char_id(pid, char_id),  # type: ignore
                 signal=TriggeringSignal.INIT_GAME_START,
             ),
             EffectsGroupEndEffect(),
@@ -887,6 +889,7 @@ def assert_last_dmg(
         elemental_burst: None | bool = None,
         status: None | bool = None,
         summon: None | bool = None,
+        card: None | bool = None,
 ) -> None:
     """
     checks the last damage dealt from the player.
@@ -913,6 +916,8 @@ def assert_last_dmg(
         testbody.assertIs(status, dmg.damage_type.directly_from_status())
     if summon is not None:
         testbody.assertIs(summon, dmg.damage_type.directly_from_summon())
+    if card is not None:
+        testbody.assertIs(card, dmg.damage_type.directly_from_card())
 
 
 def reactivate_player(game_state: GameState, pid: Pid) -> GameState:

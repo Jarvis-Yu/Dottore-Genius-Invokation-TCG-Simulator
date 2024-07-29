@@ -53,6 +53,7 @@
       - Jade Chamber
       - Opera Epiclese
       - Stormterror's Lair
+      - The Mausoleum of King Deshret
       - Weeping Willow of the Lake
   - Event Cards:
     - Food Cards:
@@ -61,6 +62,7 @@
     - Other Cards:
       - Fatui Conspiracy
       - Flickering Four-Leaf Sigil
+      - Forbideen Knowledge
       - Pankration!
       - Plunging Strike
       - Sunyata Flower

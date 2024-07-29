@@ -384,6 +384,12 @@ class OrderedCards:
         """ :returns: new cards with this card at top. """
         return self + (card,)
 
+    def random_add(self, card: type[Card] | Sequence[type[Card]]) -> OrderedCards:
+        """ :returns: new cards with input card(s) randomly inserted. """
+        if not isinstance(card, Sequence):
+            card = (card,)
+        return type(self)(_standard_insertions(self._cards, card))
+
     def remove(self, card: type[Card]) -> OrderedCards:
         """ :returns: new cards with the top most card passed in removed. """
         for i, card in reversed(list(enumerate(self._cards))):
@@ -460,6 +466,9 @@ class OrderedCards:
 
     def __iter__(self) -> Iterator[type[Card]]:
         return iter(self._cards)
+
+    def __reversed__(self) -> Iterator[type[Card]]:
+        return reversed(self._cards)
 
     def to_dict(self) -> dict[type[Card], int]:
         return Counter(self._cards)

@@ -117,6 +117,7 @@ class DamageType:
     elemental_burst: bool = False
     status: bool = False  # any talent, equipmenet, character status, combat status.
     summon: bool = False
+    card: bool = False
     reaction: bool = False  # reaction secondary damage
     no_boost: bool = False  # Klee's burst status...
 
@@ -152,6 +153,9 @@ class DamageType:
 
     def directly_from_status(self) -> bool:  # pragma: no cover
         return self.status and not self.reaction
+
+    def directly_from_card(self) -> bool:  # pragma: no cover
+        return self.card and not self.reaction
 
     @property
     def can_boost(self) -> bool:

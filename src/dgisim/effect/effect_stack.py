@@ -50,7 +50,6 @@ class EffectStack:
 
     def peek_all_left(self) -> tuple[Effect, ...]:
         """ :returns: all effects in pop order. """
-        from .effect import GroupEffectBarrierEffect
         first_barrier_idx = self._first_barrier_idx()
         if first_barrier_idx == -1:
             return self._effects[::-1]
@@ -58,7 +57,6 @@ class EffectStack:
 
     def peek_all_rev_left(self) -> tuple[Effect, ...]:
         """ :returns: all effects in push order. """
-        from .effect import GroupEffectBarrierEffect
         first_barrier_idx = self._first_barrier_idx()
         if first_barrier_idx == -1:
             return self._effects
@@ -66,7 +64,6 @@ class EffectStack:
 
     def pop_all_left(self) -> tuple[EffectStack, tuple[Effect, ...]]:
         """ :returns: EffectStack with remaining effects and all popped effects. """
-        from .effect import GroupEffectBarrierEffect
         first_barrier_idx = self._first_barrier_idx()
         if first_barrier_idx == -1:
             return (EffectStack(()), self._effects[::-1])
@@ -74,7 +71,6 @@ class EffectStack:
 
     def pop_all_rev_left(self) -> tuple[EffectStack, tuple[Effect, ...]]:
         """ :returns: EffectStack with remaining effects and all popped effects. """
-        from .effect import GroupEffectBarrierEffect
         first_barrier_idx = self._first_barrier_idx()
         if first_barrier_idx == -1:
             return (EffectStack(()), self._effects)

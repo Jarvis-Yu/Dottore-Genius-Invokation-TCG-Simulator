@@ -6,7 +6,7 @@ from functools import cached_property
 from typing import Any, Iterator, Iterable
 from typing_extensions import override, Self, TYPE_CHECKING
 
-from .element import Element
+from .element import Element, PURE_ELEMENTS
 from .helper.hashable_dict import HashableDict
 from .helper.quality_of_life import BIG_INT, case_val
 
@@ -226,15 +226,7 @@ class Dice:
         )))
 
 
-_PURE_ELEMS = frozenset({
-    Element.PYRO,
-    Element.HYDRO,
-    Element.ANEMO,
-    Element.ELECTRO,
-    Element.DENDRO,
-    Element.CRYO,
-    Element.GEO,
-})
+_PURE_ELEMS = frozenset(PURE_ELEMENTS)
 
 
 class ActualDice(Dice):

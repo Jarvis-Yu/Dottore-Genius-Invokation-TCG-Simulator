@@ -326,13 +326,16 @@ class ActionPhase(ph.Phase):
             ))
         if not card_event.invalidated:
             new_effects += card.effects(game_state, pid, action.instruction)
-        new_effects.append(AllStatusTriggererEffect(
-            pid,
-            TriggeringSignal.POST_CARD,
-        ))
-        new_effects.append(AllStatusTriggererEffect(
-            pid,
-            TriggeringSignal.POST_ANY,
+        new_effects.extend((
+            EffectsGroupEndEffect(),
+            AllStatusTriggererEffect(
+                pid,
+                TriggeringSignal.POST_CARD,
+            ),
+            AllStatusTriggererEffect(
+                pid,
+                TriggeringSignal.POST_ANY,
+            ),
         ))
         if not card_event.invalidated:
             if card.is_combat_action():
@@ -355,6 +358,7 @@ class ActionPhase(ph.Phase):
             pid: Pid,
             action: ElementalTuningAction
     ) -> None | GameState:
+        assert action.card.is_tunable()
         player = game_state.get_player(pid)
         cards = player.hand_cards
         dice = player.dice

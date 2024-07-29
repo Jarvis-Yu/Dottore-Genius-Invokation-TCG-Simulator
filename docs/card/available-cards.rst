@@ -1,7 +1,7 @@
 Available Cards
 ===============
 
-192 of 334 cards in Genius Invokation TCG are available in the simulator.
+194 of 334 cards in Genius Invokation TCG are available in the simulator.
 (excluding character cards which are not counted as cards in ``dgisim``)
 
 Equipment Cards
@@ -172,6 +172,7 @@ Location Card
 * Stormterror's Lair
 * Sumeru City
 * Tenshukaku
+* The Mausoleum of King Deshret
 * Vanarana
 * Weeping Willow of the Lake
 
@@ -235,6 +236,7 @@ Other Event Card
 * Elemental Resonance: Woven Winds
 * Fatui Conspiracy
 * Flickering Four-Leaf Sigil
+* Forbidden Knowledge
 * Guardian's Oath
 * Heavy Strike
 * I Haven't Lost Yet!

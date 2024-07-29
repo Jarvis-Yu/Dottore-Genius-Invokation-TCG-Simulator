@@ -28,7 +28,7 @@ class TestMamere(unittest.TestCase):
         self.assertEqual(mamere1.usages, 2)
         hand_cards = game_state.player1.hand_cards
         generated_card = next(iter(hand_cards - Cards({Mamere: 1, ChangTheNinth: 1})))
-        self.assertTrue(issubclass(generated_card, MamereSupport._card_categories))
+        self.assertTrue(issubclass(generated_card, MamereSupport._CARD_CATEGORIES))
         self.assertIsNot(generated_card, Mamere)
 
         # add second Mamere and double check the previous Mamere is not triggered
@@ -55,7 +55,7 @@ class TestMamere(unittest.TestCase):
         hand_cards = game_state.player1.hand_cards
         self.assertEqual(hand_cards.num_cards(), 2)
         for card in hand_cards:
-            self.assertTrue(issubclass(card, MamereSupport._card_categories))
+            self.assertTrue(issubclass(card, MamereSupport._CARD_CATEGORIES))
             self.assertIsNot(card, Mamere)
         mamere1 = game_state.player1.supports.find_by_sid(1)
         mamere3 = game_state.player1.supports.find_by_sid(3)

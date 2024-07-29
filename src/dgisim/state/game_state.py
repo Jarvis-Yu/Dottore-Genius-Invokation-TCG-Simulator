@@ -869,7 +869,10 @@ class ElementalTuningChecker:
         active_character_elem = active_character.ELEMENT
         dice = player.dice
         return (
-            player.hand_cards.not_empty()
+            any(
+                card.is_tunable()
+                for card in player.hand_cards
+            )
             and dice[Element.OMNI] + dice[active_character_elem] < dice.num_dice()
             and (elem is None or dice[elem] > 0)
         )

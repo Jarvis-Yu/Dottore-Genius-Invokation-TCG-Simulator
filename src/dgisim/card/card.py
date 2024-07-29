@@ -167,6 +167,7 @@ __all__ = [
     "ElementalResonanceWovenWinds",
     "FatuiConspiracy",
     "FlickeringFourLeafSigil",
+    "ForbiddenKnowledge",
     "GuardiansOath",
     "HeavyStrike",
     "IHaventLostYet",
@@ -226,6 +227,7 @@ __all__ = [
     "StormterrorsLair",
     "SumeruCity",
     "Tenshukaku",
+    "TheMausoleumOfKingDeshret",
     "Vanarana",
     "WeepingWillowOfTheLake",
 
@@ -327,7 +329,8 @@ __all__ = [
 
 
 class Card:
-    _DICE_COST = AbstractDice({Element.OMNI: BIG_INT})
+    _DICE_COST: AbstractDice = AbstractDice({Element.OMNI: BIG_INT})
+    _TUNABLE: bool = True
 
     @classmethod
     def effects(
@@ -525,6 +528,11 @@ class Card:
     def is_combat_action() -> bool:
         """ :returns: if playing the card is a combat action. """
         return False
+
+    @classmethod
+    def is_tunable(cls) -> bool:
+        """ :returns: if the card can be used for elemental tuning. """
+        return cls._TUNABLE
 
     @classmethod
     def name(cls) -> str:
@@ -3149,6 +3157,47 @@ class FlickeringFourLeafSigil(EventCard, _CharTargetChoiceProvider):
         )
 
 
+class ForbiddenKnowledge(EventCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDice.from_empty()
+    _TUNABLE = False
+
+    @override
+    @classmethod
+    def valid_in_deck(cls, deck: Deck) -> bool:
+        return False
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+            return (
+                super()._loosely_usable(game_state, pid)
+                and stt.ForbiddenKnowledgeStatus not in game_state.get_player(pid).combat_statuses
+            )
+
+    @override
+    @classmethod
+    def effects(
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.ReferredDamageEffect(
+                source=StaticTarget.from_card(pid, cls),
+                target=DynamicCharacterTarget.SELF_ACTIVE,
+                damage=1,
+                element=Element.PIERCING,
+                damage_type=DamageType(card=True, no_boost=True),
+            ),
+            eft.DrawTopCardEffect(
+                pid=pid,
+                num=1,
+            ),
+            eft.AddCombatStatusEffect(
+                target_pid=pid,
+                status=stt.ForbiddenKnowledgeStatus,
+            ),
+        )
+
+
 class GuardiansOath(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDice({Element.OMNI: 4})
 
@@ -4093,6 +4142,11 @@ class SumeruCity(LocationCard):
 class Tenshukaku(LocationCard):
     _DICE_COST = AbstractDice({Element.OMNI: 2})
     _SUPPORT_STATUS = sp.TenshukakuSupport
+
+
+class TheMausoleumOfKingDeshret(LocationCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
+    _SUPPORT_STATUS = sp.TheMausoleumOfKingDeshretSupport
 
 
 class Vanarana(LocationCard):

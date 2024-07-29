@@ -214,6 +214,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     StormterrorsLair,
     SumeruCity,
     Tenshukaku,
+    TheMausoleumOfKingDeshret,
     Vanarana,
     WeepingWillowOfTheLake,
 ]

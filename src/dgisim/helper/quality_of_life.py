@@ -36,11 +36,24 @@ class _CachedClassProperty:
         return self._cache
 
 
+class _HackeyCachedClassProperty(_CachedClassProperty):
+    def __init__(self, fget):
+        self._fget = fget
+
+    def __get__(self, obj, klass=None):
+        if klass is None:
+            klass = type(obj)
+        ret_val = self._fget.__get__(obj, klass)()
+        setattr(klass, self._fget.__name__, ret_val)
+        return ret_val
+
+
 def cached_classproperty(func) -> _CachedClassProperty:
     if not isinstance(func, classmethod):
         func = classmethod(func)
 
-    return _CachedClassProperty(func)
+    return _HackeyCachedClassProperty(func)
+    # return _CachedClassProperty(func)
 
 
 def case_val(condition: bool, first: _T, second: _T) -> _T:

@@ -86,6 +86,7 @@ __all__ = [
     "DefeatedCheckerEffect",
 
     # Broadcast Effect
+    "BroadcastCardDrawEffect",
     "BroadcastDamageEffect",
     "BroadcastHealingEffect",
     "BroadcastStatusRemovalEffect",
@@ -109,6 +110,7 @@ __all__ = [
     "PublicRemoveCardEffect",
     "PublicRemoveAllCardEffect",
     "PrivateAddCardEffect",
+    "PublicAddDeckCardRandomEffect",
     "AddDiceEffect",
     "RemoveDiceEffect",
     "AddCharacterStatusEffect",
@@ -820,6 +822,19 @@ class DefeatedCheckerEffect(CheckerEffect):
 
 
 @dataclass(frozen=True, repr=False)
+class BroadcastCardDrawEffect(BroadcastEffect):
+    drawer_pid: Pid
+    card: type[Card]
+
+    def execute(self, game_state: GameState) -> GameState:
+        return AllStatusTriggererEffect(
+            pid=self.drawer_pid,
+            signal=TriggeringSignal.POST_CARD_DRAW,
+            detail=CardDrawIEvent(player=self.drawer_pid, card=self.card),
+        ).execute(game_state)
+
+
+@dataclass(frozen=True, repr=False)
 class BroadcastDamageEffect(BroadcastEffect):
     home_pid: Pid
     dmg: SpecificDamageEffect
@@ -1233,13 +1248,6 @@ class SpecificDamageEffect(DirectEffect):
                     ).build()
                 ).build()
             ).build()
-        # Update all statuses with this damage
-        game_state = StatusProcessing.inform_all_statuses(
-            game_state,
-            actual_damage.source.pid,
-            Informables.DMG_DEALT,
-            DmgIEvent(dmg=actual_damage),
-        )
 
         # Check damage target
         target = game_state.get_character_target(actual_damage.target)
@@ -1250,12 +1258,24 @@ class SpecificDamageEffect(DirectEffect):
         hp = max(0, hp - actual_damage.damage)
 
         if hp != 0 or target.will_revive(game_state, actual_damage.target):
+            game_state = StatusProcessing.inform_all_statuses(
+                game_state,
+                actual_damage.source.pid,
+                Informables.DMG_DEALT,
+                DmgIEvent(dmg=actual_damage, lethal=False),
+            )
             game_state = game_state.factory().f_dmg_effect_stack(
                 lambda es: es.push_left(BroadcastDamageEffect(
                     home_pid=self.source.pid, dmg=actual_damage, lethal=False,
                 ))
             ).build()
         else:
+            game_state = StatusProcessing.inform_all_statuses(
+                game_state,
+                actual_damage.source.pid,
+                Informables.DMG_DEALT,
+                DmgIEvent(dmg=actual_damage, lethal=True),
+            )
             game_state = game_state.factory().f_lethal_dmg_effect_stack(
                 lambda es: es.push_left(BroadcastDamageEffect(
                     home_pid=self.source.pid, dmg=actual_damage, lethal=True,
@@ -1557,6 +1577,13 @@ class DrawTopCardEffect(DirectEffect):
         left_cards, chosen_cards = deck_cards.pick(self.num)
         if chosen_cards.num_cards() == 0:
             return game_state
+        effects: list[Effect] = [
+            BroadcastCardDrawEffect(
+                drawer_pid=self.pid,
+                card=card,
+            )
+            for card in chosen_cards
+        ]
         return game_state.factory().f_player(
             self.pid,
             lambda p: p.factory().deck_cards(
@@ -1567,6 +1594,8 @@ class DrawTopCardEffect(DirectEffect):
                     limit=game_state.mode.hand_card_limit()
                 )
             ).build()
+        ).f_common_effect_stack(
+            lambda ces: ces.push_left(effects)
         ).build()
 
 
@@ -1581,6 +1610,13 @@ class DrawRandomCardOfTypeEffect(DirectEffect):
         left_cards, chosen_cards = deck_cards.pick_random_of_type(self.num, self.card_type)
         if chosen_cards.num_cards() == 0:
             return game_state
+        effects: list[Effect] = [
+            BroadcastCardDrawEffect(
+                drawer_pid=self.pid,
+                card=card,
+            )
+            for card in chosen_cards
+        ]
         return game_state.factory().f_player(
             self.pid,
             lambda p: p.factory().deck_cards(
@@ -1591,6 +1627,8 @@ class DrawRandomCardOfTypeEffect(DirectEffect):
                     limit=game_state.mode.hand_card_limit()
                 )
             ).build()
+        ).f_common_effect_stack(
+            lambda ces: ces.push_left(effects)
         ).build()
 
 
@@ -1672,6 +1710,23 @@ class PrivateAddCardEffect(DirectEffect):
             self.pid,
             lambda p: p.factory().f_hand_cards(
                 lambda cs: cs.add(self.card)
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class PublicAddDeckCardRandomEffect(DirectEffect):
+    pid: Pid
+    card: type[Card]
+    num: int
+
+    def execute(self, game_state: GameState) -> GameState:
+        return game_state.factory().f_player(
+            self.pid,
+            lambda p: p.factory().f_deck_cards(
+                lambda cs: cs.random_add((self.card,) * self.num)
+            ).f_publicly_gained_cards(
+                lambda cs: cs.extend({self.card: self.num})
             ).build()
         ).build()
 
@@ -1820,7 +1875,7 @@ class RemoveCharacterStatusEffect(DirectEffect):
                 lambda cs: cs.factory().character(new_character).build()
             ).build()
         ).f_common_effect_stack(
-            lambda es: es.push_one(BroadcastStatusRemovalEffect(
+            lambda es: es.push_left(BroadcastStatusRemovalEffect(
                 self.target,
                 self.status,
             ))

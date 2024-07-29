@@ -97,7 +97,7 @@ all I need now is to implement each card and character.
   - [x] Stonehide Lawachurl
   - [ ] Yun Jin
 
-## Card (192/334 implemented)
+## Card (194/334 implemented)
 
 - [ ] Equipment Card (93/177):
   - [ ] Talent Card:
@@ -221,7 +221,7 @@ all I need now is to implement each card and character.
     - [x] Vourukasha's Glow
     - [x] Wine-Stained Tricorne
     - [x] Witch's Scorching Hat
-- [ ] Support Card (34/56):
+- [ ] Support Card (35/56):
   - [ ] Companion Card:
     - [x] Chang the Ninth
     - [x] Chef Mao
@@ -236,7 +236,7 @@ all I need now is to implement each card and character.
     - [ ] Serene
     - [x] Setaria
     - [ ] Taroumaru
-    - [ ] The Mausoleum of King Deshret
+    - [x] The Mausoleum of King Deshret
     - [x] Timaeus
     - [x] Timmie
     - [x] Wagner
@@ -266,7 +266,7 @@ all I need now is to implement each card and character.
     - [x] Tenshukaku
     - [x] Vanarana
     - [x] Weeping Willow of the Lake
-- [ ] Event Card (64/101):
+- [ ] Event Card (65/101):
   - [ ] Talent Card:
     - [x] Absorbing Prism
     - [x] Kanten Senmyou Blessing
@@ -325,7 +325,7 @@ all I need now is to implement each card and character.
     - [ ] Crystal Shrapnel
     - [x] Fatui Conspiracy
     - [x] Flickering Four-Leaf Sigil
-    - [ ] Forbidden Knowledge
+    - [x] Forbidden Knowledge
     - [x] Guardian's Oath
     - [x] Heavy Strike
     - [x] I Haven't Lost Yet!

@@ -30,6 +30,7 @@ __all__ = [
     "EventType",
 
     "InformableEvent",
+    "CardDrawIEvent",
     "CharacterDeathIEvent",
     "DmgIEvent",
     "EquipmentDiscardIEvent",
@@ -105,6 +106,12 @@ class EventType(Enum):
 @dataclass(frozen=True, kw_only=True)
 class InformableEvent:
     pass
+
+
+@dataclass(frozen=True, kw_only=True)
+class CardDrawIEvent(InformableEvent):
+    player: Pid
+    card: type[Card]
 
 
 @dataclass(frozen=True, kw_only=True)

@@ -136,6 +136,7 @@ __all__ = [
     "CrystallizeStatus",
     "DendroCoreStatus",
     "ElectrohammerVanguardStatus",
+    "ForbiddenKnowledgeStatus",
     "IHaventLostYetOnCooldownStatus",
     "ElementalResonanceEnduringRockStatus",
     "ElementalResonanceFerventFlamesStatus",
@@ -156,6 +157,7 @@ __all__ = [
     "StoneAndContractsStatus",
     "SunyataFlowerStatus",
     "TheBoarPrincessStatus",
+    "TheMausoleumOfKingDeshretStatus",
     "WhenTheCraneReturnedStatus",
     "WhereIsTheUnseenRazorStatus",
     "WindAndFreedomStatus",
@@ -1151,6 +1153,22 @@ class _SkillCostReductionStatus(Status):
             return [], None
         return [], self  # pragma: no cover
 
+
+@dataclass(frozen=True, kw_only=True)
+class _OneRoundStatus(Status):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END:
+            return [], None
+        return [], self  # pragma: no cover
+
 ############################## Hidden Status ##############################
 
 
@@ -1209,12 +1227,13 @@ class PlungeAttackStatus(PlayerHiddenStatus):
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.POST_SKILL and self.can_plunge:
-            return [], replace(self, can_plunge=False)
+            assert isinstance(detail, SkillIEvent)
+            if detail.source.pid is source.pid:
+                return [], replace(self, can_plunge=False)
         elif signal is TriggeringSignal.ROUND_END and self.can_plunge:
             return [], replace(self, can_plunge=False)
-        elif signal is TriggeringSignal.SELF_SWAP:
-            if not self.can_plunge:
-                return [], replace(self, can_plunge=True)
+        elif signal is TriggeringSignal.SELF_SWAP and not self.can_plunge:
+            return [], replace(self, can_plunge=True)
         return [], self
 
     @override
@@ -1232,15 +1251,16 @@ class DeathThisRoundStatus(PlayerHiddenStatus):
 
     @override
     def _inform(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            info_type: Informables,
+            self, game_state: GameState, status_source: StaticTarget, info_type: Informables,
             information: InformableEvent,
     ) -> Self:
-        if info_type is Informables.CHARACTER_DEATH:
-            assert isinstance(information, CharacterDeathIEvent)
-            if not self.activated and information.target.pid == status_source.pid:
+        if info_type is Informables.DMG_DEALT:
+            assert isinstance(information, DmgIEvent)
+            if (
+                    not self.activated
+                    and information.dmg.target.pid is status_source.pid
+                    and information.lethal
+            ):
                 return replace(self, activated=True)
         return self
 
@@ -1249,9 +1269,8 @@ class DeathThisRoundStatus(PlayerHiddenStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.ROUND_END:
-            if self.activated:
-                return [], replace(self, activated=False)
+        if signal is TriggeringSignal.ROUND_END and self.activated:
+            return [], replace(self, activated=False)
         return [], self
 
     def __str__(self) -> str:
@@ -2989,19 +3008,12 @@ class ElectrohammerVanguardStatus(_FatuiAmbusherStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
-class IHaventLostYetOnCooldownStatus(CombatStatus):
-    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.ROUND_END,
-    ))
+class ForbiddenKnowledgeStatus(CombatStatus, _OneRoundStatus):
+    pass
 
-    @override
-    def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
-            detail: None | InformableEvent
-    ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.ROUND_END:
-            return [], None
-        return [], self  # pragma: no cover
+@dataclass(frozen=True, kw_only=True)
+class IHaventLostYetOnCooldownStatus(CombatStatus, _OneRoundStatus):
+    pass
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -3397,6 +3409,35 @@ class TheBoarPrincessStatus(CombatStatus, _UsageStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
+class TheMausoleumOfKingDeshretStatus(CombatStatus):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_CARD_DRAW,
+        TriggeringSignal.ROUND_END,
+    ))
+    @cached_classproperty
+    def _FORBID_KNOW(cls): from ..card.card import ForbiddenKnowledge; return ForbiddenKnowledge
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.POST_CARD_DRAW:
+            assert isinstance(detail, CardDrawIEvent)
+            if detail.player is source.pid:
+                return [
+                    eft.PublicAddDeckCardRandomEffect(
+                        pid=source.pid,
+                        card=self._FORBID_KNOW,
+                        num=1,
+                    ),
+                ], self
+        elif signal is TriggeringSignal.ROUND_END:
+            return [], None
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
 class WhenTheCraneReturnedStatus(CombatStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.POST_SKILL,
@@ -3405,10 +3446,7 @@ class WhenTheCraneReturnedStatus(CombatStatus):
 
     @override
     def _inform(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            info_type: Informables,
+            self, game_state: GameState, status_source: StaticTarget, info_type: Informables,
             information: InformableEvent,
     ) -> Self:
         if info_type is Informables.POST_SKILL_USAGE:
@@ -3435,6 +3473,8 @@ class WhereIsTheUnseenRazorStatus(CombatStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
     ))
+    @cached_classproperty
+    def _WEAPON_CARD(cls): from ..card.card import WeaponEquipmentCard; return WeaponEquipmentCard
 
     @override
     def _preprocess(
@@ -3443,10 +3483,9 @@ class WhereIsTheUnseenRazorStatus(CombatStatus):
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.CARD1_COST_OMNI:
             assert isinstance(item, CardPEvent)
-            from ..card.card import WeaponEquipmentCard
             if (
                     item.pid is status_source.pid
-                    and issubclass(item.card_type, WeaponEquipmentCard)
+                    and issubclass(item.card_type, self._WEAPON_CARD)
                     and item.dice_cost.can_cost_less_elem()
             ):
                 return item.with_new_cost(item.dice_cost.cost_less_elem(self.COST_DEDUCTION)), None
@@ -5586,6 +5625,8 @@ class ShootingStarStatus(CombatStatus, _UsageLivingStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.POST_SKILL,
     ))
+    @cached_classproperty
+    def _LAYLA(cls): from ..character.character import Layla; return Layla
 
     @override
     def add(self, other: type[Self]) -> None | Self:
@@ -5617,7 +5658,6 @@ class ShootingStarStatus(CombatStatus, _UsageLivingStatus):
                 ))
                 curr_usages += 1
             if curr_usages >= 4:
-                from ..character.character import Layla
                 effects.append(eft.ReferredDamageEffect(
                     source=source,
                     target=DynamicCharacterTarget.OPPO_ACTIVE,
@@ -5625,7 +5665,7 @@ class ShootingStarStatus(CombatStatus, _UsageLivingStatus):
                     damage=1,
                     damage_type=DamageType(status=True),
                 ))
-                layla = game_state.get_player(source.pid).characters.find_first_character(Layla)
+                layla = game_state.get_player(source.pid).characters.find_first_character(self._LAYLA)
                 if layla is not None and layla.talent_equipped():
                     effects.append(eft.DrawTopCardEffect(
                         pid=source.pid,

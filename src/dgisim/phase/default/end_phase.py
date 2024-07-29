@@ -27,6 +27,10 @@ class EndPhase(ph.Phase):
         effects: list[Effect] = []
         effects += [
             EndPhaseCheckoutEffect(),
+            DrawTopCardEffect(active_pid, game_state.mode.cards_per_round()),
+            EffectsGroupEndEffect(),
+            DrawTopCardEffect(active_pid.other, game_state.mode.cards_per_round()),
+            EffectsGroupEndEffect(),
             EndRoundEffect(),
             SetBothPlayerPhaseEffect(Act.END_PHASE),
         ]
@@ -39,14 +43,6 @@ class EndPhase(ph.Phase):
 
     def _to_roll_phase(self, game_state: GameState, new_round: int) -> GameState:
         active_player_id = game_state.active_player_id
-        active_player = game_state.get_player(active_player_id)
-        other_player = game_state.get_other_player(active_player_id)
-        cards_per_round = game_state.mode.cards_per_round()
-        hand_card_limit = game_state.mode.hand_card_limit()
-        active_player_deck, new_cards = active_player.deck_cards.pick(cards_per_round)
-        active_player_hand = active_player.hand_cards.extend(new_cards.to_dict(), limit=hand_card_limit)
-        other_player_deck, new_cards = other_player.deck_cards.pick(cards_per_round)
-        other_player_hand = other_player.hand_cards.extend(new_cards.to_dict(), limit=hand_card_limit)
         return game_state.factory().round(
             new_round
         ).phase(
@@ -57,10 +53,6 @@ class EndPhase(ph.Phase):
                 Act.PASSIVE_WAIT_PHASE
             ).dice(
                 ActualDice.from_empty()
-            ).hand_cards(
-                active_player_hand
-            ).deck_cards(
-                active_player_deck
             ).build()
         ).f_other_player(
             active_player_id,
@@ -68,10 +60,6 @@ class EndPhase(ph.Phase):
                 Act.PASSIVE_WAIT_PHASE
             ).dice(
                 ActualDice.from_empty()
-            ).hand_cards(
-                other_player_hand
-            ).deck_cards(
-                other_player_deck
             ).build()
         ).build()
 

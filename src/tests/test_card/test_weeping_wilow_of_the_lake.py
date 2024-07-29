@@ -26,7 +26,7 @@ class TestWeepingWillowOfTheLake(unittest.TestCase):
             return isinstance(effect, AllStatusTriggererEffect) and effect.signal is TriggeringSignal.ROUND_END
 
         game_state = step_until(game_state, after_END_ROUND_CHECK_OUT)
-        self.assertEqual(game_state.player1.hand_cards.num_cards(), 3)
+        self.assertEqual(game_state.player1.hand_cards.num_cards(), 3 + game_state.mode.cards_per_round())
         self.assertEqual(p1_support_status(game_state, 1).usages, 2)
         
         # check end round with == 2 cards triggers willow
@@ -34,7 +34,7 @@ class TestWeepingWillowOfTheLake(unittest.TestCase):
         self.assertEqual(p1_support_status(game_state, 1).usages, 2)
         game_state = replace_hand_cards(game_state, Pid.P1, Cards({Liben: 2}))
         game_state = step_until(game_state, after_END_ROUND_CHECK_OUT)
-        self.assertEqual(game_state.player1.hand_cards[Paimon], 2)
+        self.assertEqual(game_state.player1.hand_cards[Paimon], 2 + game_state.mode.cards_per_round())
         self.assertEqual(p1_support_status(game_state, 1).usages, 1)
 
         # check end round with < 2 cards triggers willow
@@ -42,5 +42,5 @@ class TestWeepingWillowOfTheLake(unittest.TestCase):
         self.assertEqual(p1_support_status(game_state, 1).usages, 1)
         game_state = replace_hand_cards(game_state, Pid.P1, Cards({Liben: 1}))
         game_state = step_until(game_state, after_END_ROUND_CHECK_OUT)
-        self.assertEqual(game_state.player1.hand_cards[Paimon], 2)
+        self.assertEqual(game_state.player1.hand_cards[Paimon], 2 + game_state.mode.cards_per_round())
         self.assertNotIn(SUPPORT_STATUS, game_state.player1.supports)

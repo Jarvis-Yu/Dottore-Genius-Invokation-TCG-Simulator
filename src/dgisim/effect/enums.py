@@ -67,6 +67,8 @@ class TriggeringSignal(Enum):
     DIRECT_TRIGGER = 20
     #: triggers when some status is removed
     POST_STATUS_REMOVAL = 21
+    #: triggres after each card is drawn
+    POST_CARD_DRAW = 22
 
 
 class DynamicCharacterTarget(Enum):

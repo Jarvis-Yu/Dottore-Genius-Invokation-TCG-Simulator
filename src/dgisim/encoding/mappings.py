@@ -334,6 +334,8 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.TheBoarPrincess, 678),
         (card.SunyataFlower, 679),
         (card.FlickeringFourLeafSigil, 680),
+        (card.ForbiddenKnowledge, 681),
+        (card.TheMausoleumOfKingDeshret, 682),
 
         #### 3.4 Food Card 0800 ####
         (card.JueyunGuoba, 800),
@@ -546,6 +548,7 @@ EFFECT_MAPPING: dict[type["Effect"], int] = HashableDict({
         (effect.PublicRemoveCardEffect, 283),
         (effect.PublicRemoveAllCardEffect, 284),
         (effect.PrivateAddCardEffect, 285),
+        (effect.PublicAddDeckCardRandomEffect, 286),
 
         #### 4.5 Dice Effect 290 ####
         (effect.AddDiceEffect, 290),
@@ -567,6 +570,7 @@ EFFECT_MAPPING: dict[type["Effect"], int] = HashableDict({
         (effect.BroadcastDamageEffect, 401),
         (effect.BroadcastHealingEffect, 402),
         (effect.BroadcastStatusRemovalEffect, 403),
+        (effect.BroadcastCardDrawEffect, 404),
         #### End 500 ####
     )
 })
@@ -688,6 +692,8 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.MirrorMaidenStatus, 325),
         (status.PyroslingerBracerStatus, 326),
         (status.PankrationStatus, 327),
+        (status.ForbiddenKnowledgeStatus, 328),
+        (status.TheMausoleumOfKingDeshretStatus, 329),
 
         #### 2.2 Shield Combat Status 375 ####
         (status.CrystallizeStatus, 375),
@@ -1023,6 +1029,7 @@ SUPP_MAPPING: dict[type["Support"], int] = HashableDict({
         (support.StormterrorsLairSupport, 14),
         (support.OperaEpicleseSupport, 15),
         (support.WeepingWillowOfTheLakeSupport, 16),
+        (support.TheMausoleumOfKingDeshretSupport, 17),
 
         #### Companion 100 ####
         (support.PaimonSupport, 100),

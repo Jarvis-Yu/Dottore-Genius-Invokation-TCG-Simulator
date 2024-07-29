@@ -29,7 +29,7 @@ from ..character.enums import CharacterSkillType
 from ..effect.enums import TriggeringSignal, Zone
 from ..effect.structs import StaticTarget
 from ..element import Element, PURE_ELEMENTS
-from ..helper.quality_of_life import BIG_INT, classproperty
+from ..helper.quality_of_life import BIG_INT, cached_classproperty
 from ..status.enums import Informables, Preprocessables
 
 if TYPE_CHECKING:
@@ -80,6 +80,7 @@ __all__ = [
     "StormterrorsLairSupport",
     "SumeruCitySupport",
     "TenshukakuSupport",
+    "TheMausoleumOfKingDeshretSupport",
     "VanaranaSupport",
     "WeepingWillowOfTheLakeSupport",
 ]
@@ -184,6 +185,8 @@ class ChefMaoSupport(Support, stt._UsageLivingStatus):
         TriggeringSignal.POST_CARD,
         TriggeringSignal.ROUND_END,
     ))
+    @cached_classproperty
+    def _FOODCARD(cls): from ..card.card import FoodCard; return FoodCard
 
     @override
     def _preprocess(
@@ -195,10 +198,9 @@ class ChefMaoSupport(Support, stt._UsageLivingStatus):
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.CARD1:
             assert isinstance(item, CardPEvent)
-            from ..card.card import FoodCard
             if (
                     item.pid is status_source.pid
-                    and issubclass(item.card_type, FoodCard)
+                    and issubclass(item.card_type, self._FOODCARD)
             ):
                 if (self.usages > 0 or not self.drawed) and not self.triggered:
                     return item, replace(self, triggered=True)
@@ -210,7 +212,6 @@ class ChefMaoSupport(Support, stt._UsageLivingStatus):
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.POST_CARD and self.triggered:
-            from ..card.card import FoodCard
             assert self.usages > 0
             effects: list[eft.Effect] = [
                 eft.AddDiceEffect(
@@ -224,7 +225,7 @@ class ChefMaoSupport(Support, stt._UsageLivingStatus):
                 effects.append(eft.DrawRandomCardOfTypeEffect(
                     pid=source.pid,
                     num=1,
-                    card_type=FoodCard,
+                    card_type=self._FOODCARD,
                 ))
             return effects, replace(self, usages=-1, drawed=True, triggered=False)
         elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
@@ -243,6 +244,8 @@ class DunyarzadSupport(Support, stt._UsageLivingStatus):
         TriggeringSignal.POST_CARD,
         TriggeringSignal.ROUND_END,
     ))
+    @cached_classproperty
+    def _COMPCARD(cls): from ..card.card import CompanionCard; return CompanionCard
 
     @override
     def _preprocess(
@@ -254,10 +257,9 @@ class DunyarzadSupport(Support, stt._UsageLivingStatus):
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.CARD1_COST_OMNI:
             assert isinstance(item, CardPEvent)
-            from ..card.card import CompanionCard
             if (
                     item.pid is status_source.pid
-                    and issubclass(item.card_type, CompanionCard)
+                    and issubclass(item.card_type, self._COMPCARD)
                     and self.usages > 0
                     and item.dice_cost.can_cost_less_elem()
             ):
@@ -267,10 +269,9 @@ class DunyarzadSupport(Support, stt._UsageLivingStatus):
                 )
         elif signal is Preprocessables.CARD1:
             assert isinstance(item, CardPEvent)
-            from ..card.card import CompanionCard
             if (
                     item.pid is status_source.pid
-                    and issubclass(item.card_type, CompanionCard)
+                    and issubclass(item.card_type, self._COMPCARD)
                     and not self.drawed
                     and not self.can_draw
             ):
@@ -283,12 +284,11 @@ class DunyarzadSupport(Support, stt._UsageLivingStatus):
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.POST_CARD and self.can_draw:
-            from ..card.card import CompanionCard
             return [
                 eft.DrawRandomCardOfTypeEffect(
                     pid=source.pid,
                     num=1,
-                    card_type=CompanionCard,
+                    card_type=self._COMPCARD,
                 )
             ], replace(self, usages=0, can_draw=False, drawed=True)
         elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
@@ -304,6 +304,8 @@ class JehtSupport(Support, stt._UsageLivingStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.POST_SKILL,
     ))
+    @cached_classproperty
+    def _SANDNDREAM_STS(cls): from ..status.status import SandAndDreamsStatus; return SandAndDreamsStatus
 
     @override
     def _inform(
@@ -332,13 +334,12 @@ class JehtSupport(Support, stt._UsageLivingStatus):
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.POST_SKILL and self.triggered:
-            from ..status.status import SandAndDreamsStatus
-            sand_n_dreams = game_state.get_player(source.pid).combat_statuses.find(SandAndDreamsStatus)
+            sand_n_dreams = game_state.get_player(source.pid).combat_statuses.find(self._SANDNDREAM_STS)
             if self.usages >= 6 and sand_n_dreams is None:
                 return [
                     eft.AddCombatStatusEffect(
                         target_pid=source.pid,
-                        status=SandAndDreamsStatus,
+                        status=self._SANDNDREAM_STS,
                     ),
                 ], None
             else:
@@ -439,8 +440,8 @@ class MamereSupport(Support, stt._UsageStatus):
         TriggeringSignal.ROUND_END,
     ))
 
-    @classproperty
-    def _card_categories(cls) -> tuple[type[Card], ...]:
+    @cached_classproperty
+    def _CARD_CATEGORIES(cls) -> tuple[type[Card], ...]:
         from ..card.card import FoodCard, LocationCard, CompanionCard, ItemCard
         return (
             FoodCard,
@@ -448,22 +449,20 @@ class MamereSupport(Support, stt._UsageStatus):
             CompanionCard,
             ItemCard,
         )
+    @cached_classproperty
+    def _MAMERE_CARD(cls) -> type[Card]: from ..card.card import Mamere; return Mamere
 
     @override
     def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: PreprocessableEvent,
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.CARD1 and self.activated:
-            from ..card.card import Mamere
             assert isinstance(item, CardPEvent)
             if (
                     item.pid is status_source.pid
-                    and issubclass(item.card_type, self._card_categories)
-                    and item.card_type is not Mamere
+                    and issubclass(item.card_type, self._CARD_CATEGORIES)
+                    and item.card_type is not self._MAMERE_CARD
             ):
                 return item, replace(self, triggered=True)
         return item, self
@@ -475,12 +474,11 @@ class MamereSupport(Support, stt._UsageStatus):
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.POST_CARD and self.triggered:
             from random import choice
-            from ..card.card import Mamere
             assert self.activated
             card_pool = [
                 card
                 for card in game_state.mode.all_cards()
-                if issubclass(card, self._card_categories) and card is not Mamere
+                if issubclass(card, self._CARD_CATEGORIES) and card is not self._MAMERE_CARD
             ]
             return [
                 eft.PrivateAddCardEffect(
@@ -502,6 +500,8 @@ class MasterZhangSupport(Support, stt._UsageLivingStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
     ))
+    @cached_classproperty
+    def _WEAPON_CARD(cls): from ..card.card import WeaponEquipmentCard; return WeaponEquipmentCard
 
     @override
     def _preprocess(
@@ -513,10 +513,9 @@ class MasterZhangSupport(Support, stt._UsageLivingStatus):
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.CARD1_COST_OMNI:
             assert isinstance(item, CardPEvent)
-            from ..card.card import WeaponEquipmentCard
             if (
                     item.pid is status_source.pid
-                    and issubclass(item.card_type, WeaponEquipmentCard)
+                    and issubclass(item.card_type, self._WEAPON_CARD)
                     and item.dice_cost.can_cost_less_elem()
                     and self.usages > 0
             ):
@@ -655,21 +654,19 @@ class TimaeusSupport(Support, stt._UsageLivingStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
     ))
+    @cached_classproperty
+    def _ARTIFACT_CARD(cls): from ..card.card import ArtifactEquipmentCard; return ArtifactEquipmentCard
 
     @override
     def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: PreprocessableEvent,
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.CARD2:
             assert isinstance(item, CardPEvent)
-            from ..card.card import ArtifactEquipmentCard
             if (
                     item.pid is status_source.pid
-                    and issubclass(item.card_type, ArtifactEquipmentCard)
+                    and issubclass(item.card_type, self._ARTIFACT_CARD)
                     and item.dice_cost.can_cost_less_elem()
                     and item.dice_cost.num_dice() <= self.usages
                     and not self.used
@@ -738,6 +735,8 @@ class WagnerSupport(Support, stt._UsageLivingStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
     ))
+    @cached_classproperty
+    def _WEAPON_CARD(cls): from ..card.card import WeaponEquipmentCard; return WeaponEquipmentCard
 
     @override
     def _preprocess(
@@ -746,10 +745,9 @@ class WagnerSupport(Support, stt._UsageLivingStatus):
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.CARD2:
             assert isinstance(item, CardPEvent)
-            from ..card.card import WeaponEquipmentCard
             if (
                     item.pid is status_source.pid
-                    and issubclass(item.card_type, WeaponEquipmentCard)
+                    and issubclass(item.card_type, self._WEAPON_CARD)
                     and item.dice_cost.can_cost_less_elem()
                     and item.dice_cost.num_dice() <= self.usages
                     and not self.used
@@ -785,6 +783,8 @@ class XudongSupport(Support):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
     ))
+    @cached_classproperty
+    def _FOOD_CARD(cls): from ..card.card import FoodCard; return FoodCard
 
     @override
     def _preprocess(
@@ -796,10 +796,9 @@ class XudongSupport(Support):
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.CARD1_COST_OMNI:
             assert isinstance(item, CardPEvent)
-            from ..card.card import FoodCard
             if (
                     item.pid is status_source.pid
-                    and issubclass(item.card_type, FoodCard)
+                    and issubclass(item.card_type, self._FOOD_CARD)
                     and item.dice_cost.can_cost_less_elem()
                     and self.usages > 0
             ):
@@ -831,6 +830,8 @@ class YayoiNanatsukiSupport(Support, stt._UsageLivingStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
     ))
+    @cached_classproperty
+    def _ARTIFACT_CARD(cls): from ..card.card import ArtifactEquipmentCard; return ArtifactEquipmentCard
 
     @override
     def _preprocess(
@@ -842,10 +843,9 @@ class YayoiNanatsukiSupport(Support, stt._UsageLivingStatus):
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.CARD1_COST_OMNI:
             assert isinstance(item, CardPEvent)
-            from ..card.card import ArtifactEquipmentCard
             if (
                     item.pid is status_source.pid
-                    and issubclass(item.card_type, ArtifactEquipmentCard)
+                    and issubclass(item.card_type, self._ARTIFACT_CARD)
                     and item.dice_cost.can_cost_less_elem()
                     and self.usages > 0
             ):
@@ -889,20 +889,21 @@ class NRESupport(Support, stt._UsageLivingStatus):
         TriggeringSignal.POST_CARD,
         TriggeringSignal.ROUND_END,
     ))
+    @cached_classproperty
+    def _FOOD_CARD(cls): from ..card.card import FoodCard; return FoodCard
 
     @override
     def _preprocess(
             self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
-        from ..card.card import FoodCard
         if signal is Preprocessables.CARD1:
             assert isinstance(item, CardPEvent)
             if (
                     not self.activated
                     and self.usages > 0
                     and item.pid is status_source.pid
-                    and issubclass(item.card_type, FoodCard)
+                    and issubclass(item.card_type, self._FOOD_CARD)
             ):
                 return item, replace(self, activated=True)
         return item, self
@@ -912,13 +913,12 @@ class NRESupport(Support, stt._UsageLivingStatus):
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        from ..card.card import FoodCard
         if signal is TriggeringSignal.POST_CARD and self.activated:
             return [
                 eft.DrawRandomCardOfTypeEffect(
                     pid=source.pid,
                     num=1,
-                    card_type=FoodCard,
+                    card_type=self._FOOD_CARD,
                 ),
             ], replace(self, usages=-1, activated=False)
         elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
@@ -952,8 +952,7 @@ class ParametricTransformerSupport(Support, stt._UsageLivingStatus):
             return replace(self, listening=True)
         elif info_type is Informables.DMG_DEALT and self.listening and not self.activated:
             assert isinstance(information, DmgIEvent)
-            from ..dice import _PURE_ELEMS
-            if information.dmg.element in _PURE_ELEMS:
+            if information.dmg.element in PURE_ELEMENTS:
                 return replace(self, activated=True, listening=False)
         return self
 
@@ -1016,6 +1015,8 @@ class SeedDispensarySupport(Support, stt._UsageStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
     ))
+    @cached_classproperty
+    def _SUPPORT_CARD(cls): from ..card.card import SupportCard; return SupportCard
 
     @override
     def _preprocess(
@@ -1024,9 +1025,8 @@ class SeedDispensarySupport(Support, stt._UsageStatus):
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.CARD1_COST_OMNI and self.usages > 0 and self.available:
             assert isinstance(item, CardPEvent)
-            from ..card.card import SupportCard
             if (
-                    issubclass(item.card_type, SupportCard)
+                    issubclass(item.card_type, self._SUPPORT_CARD)
                     and item.card_type._DICE_COST.num_dice() >= 2
                     and item.dice_cost.can_cost_less_elem()
             ):
@@ -1165,6 +1165,10 @@ class GoldenHouseSupport(Support, stt._UsageStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
     ))
+    @cached_classproperty
+    def _WEP_ART_CARD(cls):
+        from ..card.card import WeaponEquipmentCard, ArtifactEquipmentCard
+        return WeaponEquipmentCard | ArtifactEquipmentCard
 
     @override
     def _preprocess(
@@ -1173,9 +1177,8 @@ class GoldenHouseSupport(Support, stt._UsageStatus):
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.CARD1_COST_OMNI and self.usages > 0 and self.available:
             assert isinstance(item, CardPEvent)
-            from ..card.card import WeaponEquipmentCard, ArtifactEquipmentCard
             if (
-                    issubclass(item.card_type, WeaponEquipmentCard | ArtifactEquipmentCard)
+                    issubclass(item.card_type, self._WEP_ART_CARD)
                     and item.card_type._DICE_COST.num_dice() >= 3
                     and item.dice_cost.can_cost_less_elem()
             ):
@@ -1286,6 +1289,10 @@ class MementoLensSupport(Support, stt._UsageLivingStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
     ))
+    @cached_classproperty
+    def _ELIGIBLE_CARD(cls):
+        from ..card.card import WeaponEquipmentCard, ArtifactEquipmentCard, LocationCard, CompanionCard
+        return WeaponEquipmentCard | ArtifactEquipmentCard | LocationCard | CompanionCard
 
     @override
     def _preprocess(
@@ -1293,15 +1300,11 @@ class MementoLensSupport(Support, stt._UsageLivingStatus):
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.CARD1_COST_OMNI and self.usages > 0:
-            from ..card.card import WeaponEquipmentCard, ArtifactEquipmentCard, LocationCard, CompanionCard
             assert isinstance(item, CardPEvent)
             if (
                     item.pid is status_source.pid
                     and item.dice_cost.can_cost_less_elem()
-                    and issubclass(
-                        item.card_type,
-                        WeaponEquipmentCard | ArtifactEquipmentCard | LocationCard | CompanionCard,
-                    )
+                    and issubclass(item.card_type, self._ELIGIBLE_CARD)
                     and item.card_type in game_state.get_player(status_source.pid).publicly_used_cards
             ):
                 return (
@@ -1375,6 +1378,8 @@ class StormterrorsLairSupport(Support, stt._UsageStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
     ))
+    @cached_classproperty
+    def _TALENT_CARD(cls): from ..card.card import TalentCard; return TalentCard
 
     @override
     def _preprocess(
@@ -1383,10 +1388,9 @@ class StormterrorsLairSupport(Support, stt._UsageStatus):
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.CARD1_COST_OMNI and self.available:
             assert isinstance(item, CardPEvent)
-            from ..card.card import TalentCard
             if (
                     item.pid is status_source.pid
-                    and issubclass(item.card_type, TalentCard)
+                    and issubclass(item.card_type, self._TALENT_CARD)
                     and item.dice_cost.can_cost_less_elem()
             ):
                 return (
@@ -1425,6 +1429,8 @@ class SumeruCitySupport(Support, stt._UsageLivingStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
     ))
+    @cached_classproperty
+    def _TALENT_CARD(cls): from ..card.card import TalentCard; return TalentCard
 
     @override
     def _preprocess(
@@ -1450,10 +1456,9 @@ class SumeruCitySupport(Support, stt._UsageLivingStatus):
             # the CardPEvent may become more different with ActionPEvent in the future,
             # so leave it as it is.
             assert isinstance(item, CardPEvent)
-            from ..card.card import TalentCard
             if not (
                     self.usages > 0
-                    and issubclass(item.card_type, TalentCard)
+                    and issubclass(item.card_type, self._TALENT_CARD)
                     and item.pid is status_source.pid
                     and item.dice_cost.can_cost_less_elem()
             ):
@@ -1494,6 +1499,41 @@ class TenshukakuSupport(Support):
                         num=1,
                     ),
                 ], self
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class TheMausoleumOfKingDeshretSupport(Support, stt._UsageLivingStatus):
+    usages: int = 0
+    MAX_USAGES: ClassVar[int] = 4
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_CARD_DRAW,
+    ))
+    @cached_classproperty
+    def _FORBID_KNOW(cls): from ..card.card import ForbiddenKnowledge; return ForbiddenKnowledge
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.POST_CARD_DRAW:
+            assert isinstance(detail, CardDrawIEvent)
+            if detail.player is source.pid.other:
+                if self.MAX_USAGES - self.usages > 1:
+                    return [], replace(self, usages=1)
+                else:
+                    return [
+                        eft.PublicAddDeckCardRandomEffect(
+                            pid=detail.player,
+                            card=self._FORBID_KNOW,
+                            num=2,
+                        ),
+                        eft.AddCombatStatusEffect(
+                            target_pid=detail.player,
+                            status=stt.TheMausoleumOfKingDeshretStatus,
+                        ),
+                    ], None
         return [], self
 
 

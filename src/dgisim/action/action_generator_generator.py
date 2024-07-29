@@ -196,7 +196,11 @@ class ElemTuningActGenGenerator(ABC):
         assert type(action) is ElementalTuningAction
 
         if action.card is None:
-            return tuple(card for card in action_generator.hand_cards_available())
+            return tuple(
+                card
+                for card in action_generator.hand_cards_available()
+                if card.is_tunable()
+            )
 
         active_character = game_state.get_player(pid).just_get_active_character()
         if action.dice_elem is None:
@@ -223,6 +227,7 @@ class ElemTuningActGenGenerator(ABC):
         if action.card is None:
             from ..card.card import Card
             assert issubclass(player_choice, Card)  # type: ignore
+            assert player_choice.is_tunable(), f"Chosen card {player_choice} is not tunable"
             return replace(
                 action_generator,
                 action=replace(action, card=player_choice)
