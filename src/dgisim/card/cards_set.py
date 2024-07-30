@@ -158,6 +158,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ## Event Card / Arcane Legend ##
     AncientCourtyard,
     CovenantOfRock,
+    DayOfResistanceMomentOfShatteredDreams,
     FreshWindOfFreedom,
     InEveryHouseAStove,
     JoyousCelebration,

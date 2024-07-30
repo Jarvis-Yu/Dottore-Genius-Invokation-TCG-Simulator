@@ -142,6 +142,7 @@ __all__ = [
     ## Arcane Legend Card ##
     "AncientCourtyard",
     "CovenantOfRock",
+    "DayOfResistanceMomentOfShatteredDreams",
     "FreshWindOfFreedom",
     "InEveryHouseAStove",
     "JoyousCelebration",
@@ -1644,17 +1645,20 @@ class ArcaneLegendCard(Card):
     @override
     @classmethod
     def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         return (
             eft.AddHiddenStatusEffect(
                 pid,
                 stt.ArcaneLegendUsedStatus,
             ),
-        )
+        ) + cls._arcane_legend_effects(game_state, pid, instruction)
+
+    @classmethod
+    def _arcane_legend_effects(
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return ()
 
 
 class FoodCard(EventCard):
@@ -2462,17 +2466,10 @@ class AncientCourtyard(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
 
     @override
     @classmethod
-    def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
+    def _arcane_legend_effects(
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
-        return super().effects(
-            game_state,
-            pid,
-            instruction,
-        ) + (
+        return (
             eft.AddCombatStatusEffect(
                 target_pid=pid,
                 status=stt.AncientCourtyardStatus,
@@ -2490,19 +2487,11 @@ class CovenantOfRock(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
 
     @override
     @classmethod
-    def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
+    def _arcane_legend_effects(
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
-        import random
         elem1, elem2 = random.sample(tuple(PURE_ELEMENTS), 2)
-        return super().effects(
-            game_state,
-            pid,
-            instruction,
-        ) + (
+        return (
             eft.AddDiceEffect(
                 source=StaticTarget.from_card(pid, cls),
                 pid=pid,
@@ -2518,22 +2507,32 @@ class CovenantOfRock(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
         )
 
 
+class DayOfResistanceMomentOfShatteredDreams(EventCard, _CharTargetChoiceProvider, ArcaneLegendCard):
+    _DICE_COST = AbstractDice.from_empty()
+
+    @override
+    @classmethod
+    def _arcane_legend_effects(
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        assert isinstance(instruction, act.StaticTargetInstruction)
+        return (
+            eft.AddCharacterStatusEffect(
+                target=instruction.target,
+                status=stt.DayOfResistanceMomentOfShatteredDreamsStatus,
+            ),
+        )
+
+
 class FreshWindOfFreedom(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
     _DICE_COST = AbstractDice.from_empty()
 
     @override
     @classmethod
-    def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
+    def _arcane_legend_effects(
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
-        return super().effects(
-            game_state,
-            pid,
-            instruction,
-        ) + (
+        return (
             eft.AddCombatStatusEffect(
                 target_pid=pid,
                 status=stt.FreshWindOfFreedomStatus,
@@ -2546,11 +2545,8 @@ class InEveryHouseAStove(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
 
     @override
     @classmethod
-    def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
+    def _arcane_legend_effects(
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         draw_talent_condition = game_state.round == 1 and 2 <= len([
             card
@@ -2558,11 +2554,7 @@ class InEveryHouseAStove(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
             if issubclass(card, TalentCard) and num > 0
         ])
         if draw_talent_condition:
-            return super().effects(
-                game_state,
-                pid,
-                instruction,
-            ) + (
+            return (
                 eft.DrawRandomCardOfTypeEffect(
                     pid=pid,
                     num=1,
@@ -2571,11 +2563,7 @@ class InEveryHouseAStove(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
             )
         else:
             cards_drawn = min(max(0, game_state.round - 1), 4)
-            return super().effects(
-                game_state,
-                pid,
-                instruction,
-            ) + (
+            return (
                 eft.DrawTopCardEffect(
                     pid=pid,
                     num=cards_drawn,
@@ -2598,18 +2586,11 @@ class JoyousCelebration(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
 
     @override
     @classmethod
-    def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
+    def _arcane_legend_effects(
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         active_char = game_state.get_player(pid).just_get_active_character()
-        return super().effects(
-            game_state,
-            pid,
-            instruction,
-        ) + tuple([
+        return tuple([
             eft.ApplyElementalAuraEffect(
                 source=StaticTarget(Pid.P1, Zone.HAND_CARD, -1),
                 target=StaticTarget.from_char_id(pid, char.id),
@@ -2628,17 +2609,10 @@ class PassingOfJudgment(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
 
     @override
     @classmethod
-    def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
+    def _arcane_legend_effects(
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
-        return super().effects(
-            game_state,
-            pid,
-            instruction,
-        ) + (
+        return (
             eft.AddCombatStatusEffect(
                 target_pid=pid.other,
                 status=stt.PassingOfJudgmentStatus,

@@ -165,6 +165,7 @@ __all__ = [
     # Character Status
     "AdeptusTemptationStatus",
     "ButterCrabStatus",
+    "DayOfResistanceMomentOfShatteredDreamsStatus",
     "FishAndChipsStatus",
     "FlickeringFourLeafSigilStatus",
     "FrozenStatus",
@@ -3592,6 +3593,13 @@ class ButterCrabStatus(CharacterStatus, StackedShieldStatus):
         if signal is TriggeringSignal.ROUND_END:
             return [], None
         return [], self  # pragma: no cover
+
+
+@dataclass(frozen=True, kw_only=True)
+class DayOfResistanceMomentOfShatteredDreamsStatus(CharacterStatus, FixedShieldStatus, _OneRoundStatus):
+    usages: int = 4
+    MAX_USAGES: ClassVar[int] = 4
+    SHIELD_AMOUNT: ClassVar[int] = 1
 
 
 @dataclass(frozen=True, kw_only=True)

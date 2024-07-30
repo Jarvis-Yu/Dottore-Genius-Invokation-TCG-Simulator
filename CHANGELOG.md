@@ -57,6 +57,8 @@
       - The Mausoleum of King Deshret
       - Weeping Willow of the Lake
   - Event Cards:
+    - Arcane Legend Cards:
+      - Day of Resistance: Moment of Shattered Dreams
     - Food Cards:
       - Fish and Chips
       - Sashimi Platter

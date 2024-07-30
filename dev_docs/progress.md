@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (45/95 implemented)](#character-4595-implemented)
-  - [Card (196/334 implemented)](#card-196334-implemented)
+  - [Card (197/334 implemented)](#card-197334-implemented)
 
 ## Character (45/95 implemented)
 
@@ -97,7 +97,7 @@ all I need now is to implement each card and character.
   - [x] Stonehide Lawachurl
   - [ ] Yun Jin
 
-## Card (196/334 implemented)
+## Card (197/334 implemented)
 
 - [ ] Equipment Card (93/177):
   - [ ] Talent Card:
@@ -304,7 +304,7 @@ all I need now is to implement each card and character.
   - [ ] Arcane Legend:
     - [x] Ancient Courtyard
     - [x] Covenant of Rock
-    - [ ] Day of Resistance: Moment of Shattered Dreams
+    - [x] Day of Resistance: Moment of Shattered Dreams
     - [x] Fresh Wind of Freedom
     - [x] In Every House a Stove
     - [x] Joyous Celebration
