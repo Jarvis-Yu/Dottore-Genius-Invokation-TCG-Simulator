@@ -5034,7 +5034,7 @@ class RadicalVitalityStatus(CharacterStatus, _UsageLivingStatus):
                 return [
                     eft.EnergyDrainEffect(
                         target=source,
-                        drain=char.max_energy,
+                        amount=char.max_energy,
                     ),
                 ], replace(self, usages=-self.usages)
         return [], self

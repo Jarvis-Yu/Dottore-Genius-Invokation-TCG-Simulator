@@ -302,13 +302,21 @@ def drain_energy_for_all(game_state: GameState) -> GameState:
     ).build()
 
 
-def recharge_energy_for(game_state: GameState, pid: Pid, char_id: None | int = None) -> GameState:
+def recharge_energy_for(
+        game_state: GameState, pid: Pid, char_id: None | int = None, amount: None | int = None,
+) -> GameState:
+    """
+    :param amount: if None, then set to max energy, otherwise set to min(max_energy, energy)
+    """
+    assert not (amount is not None and amount < 0)
     return game_state.factory().f_player(
         pid,
         lambda p: p.factory().f_characters(
             lambda cs: cs.factory().f_character(
                 cs.just_get_active_character_id() if char_id is None else char_id,
-                lambda c: c.factory().energy(c.max_energy).build()
+                lambda c: c.factory().energy(
+                    c.max_energy if amount is None else min(c.max_energy, amount)
+                ).build()
             ).build()
         ).build()
     ).build()

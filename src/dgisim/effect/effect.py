@@ -1479,14 +1479,14 @@ class EnergyRechargeEffect(DirectEffect):
 @dataclass(frozen=True, repr=False)
 class EnergyDrainEffect(DirectEffect):
     target: StaticTarget
-    drain: int
+    amount: int
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
         from ..character.character import Character
         if not isinstance(character, Character):  # pragma: no cover
             return game_state
-        energy = max(character.energy - self.drain, 0)
+        energy = max(character.energy - self.amount, 0)
         if energy == character.energy:
             return game_state
         character = character.factory().energy(energy).build()

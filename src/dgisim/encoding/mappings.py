@@ -287,6 +287,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.InEveryHouseAStove, 554),
         (card.PassingOfJudgment, 555),
         (card.DayOfResistanceMomentOfShatteredDreams, 556),
+        (card.ViciousAncientBattle, 557),
 
         #### 3.2 Elemental Resonance Card 0600 ####
         (card.ElementalResonanceShatteringIce, 600),

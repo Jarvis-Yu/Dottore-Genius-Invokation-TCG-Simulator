@@ -163,6 +163,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     InEveryHouseAStove,
     JoyousCelebration,
     PassingOfJudgment,
+    ViciousAncientBattle,
 
     ## Event Card / Food ##
     AdeptusTemptation,

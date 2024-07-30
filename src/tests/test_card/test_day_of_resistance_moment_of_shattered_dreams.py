@@ -8,13 +8,13 @@ ARCANE_STATUS = DayOfResistanceMomentOfShatteredDreamsStatus
 def p1_arcane_status(game_state: GameState, char_id: int = 1) -> ARCANE_STATUS:
     return game_state.player1.characters.just_get_character(char_id).character_statuses.just_find(ARCANE_STATUS)
 
-class TestGoldenHouse(unittest.TestCase):
+class TestDayOfResistanceMomentOfShatteredDreams(unittest.TestCase):
     def test_behaviour(self):
         self.assertTrue(issubclass(ARCANE_LEGEND, ArcaneLegendCard))
 
         base_state = ACTION_TEMPLATE
         base_state = replace_hand_cards(base_state, Pid.P1, Cards({ARCANE_LEGEND: 1}))
-        base_state = play_char_target_card(base_state, Pid.P1, ARCANE_LEGEND, 1)
+        base_state = play_char_target_card(base_state, Pid.P1, ARCANE_LEGEND, 1, cost=0)
         base_state = grant_all_infinite_revival(base_state)
         base_state = add_dmg_listener(base_state, Pid.P1)
         base_state = add_aura_remover(base_state, Pid.P1)

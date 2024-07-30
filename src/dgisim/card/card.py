@@ -147,6 +147,7 @@ __all__ = [
     "InEveryHouseAStove",
     "JoyousCelebration",
     "PassingOfJudgment",
+    "ViciousAncientBattle",
     ## Other ##
     "AbyssalSummons",
     "BlessingOfTheDivineRelicsInstallation",
@@ -792,7 +793,7 @@ class _DualCharTargetChoiceProvider(Card):
         return any(
             cls._valid_first_char(game_state, pid, char)
             for char in game_state.get_player(pid).characters
-        )
+        ) and super()._loosely_usable(game_state, pid)
 
     @override
     @classmethod
@@ -2619,6 +2620,30 @@ class PassingOfJudgment(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
             ),
         )
 
+class ViciousAncientBattle(EventCard, _DiceOnlyChoiceProvider, ArcaneLegendCard):
+    _DICE_COST = AbstractDice.from_empty()
+
+    @override
+    @classmethod
+    def _loosely_usable(cls, game_state: gs.GameState, pid: Pid) -> bool:
+        return super()._loosely_usable(game_state, pid) and (
+            (active_char := game_state.get_player(pid.other).get_active_character()) is not None
+            and active_char.energy > 0
+        )
+
+    @override
+    @classmethod
+    def _arcane_legend_effects(
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.EnergyDrainEffect(
+                target=StaticTarget.from_player_active(game_state, pid.other),
+                amount=1,
+            ),
+        )
+
+
 
 # >>>>>>>>>>>>>>>>>>>> Event Cards / Arcane Legend Cards >>>>>>>>>>>>>>>>>>>>
 
@@ -2749,7 +2774,7 @@ class CalxsArts(EventCard, _DiceOnlyChoiceProvider):
                 target=StaticTarget(
                     Pid.P1, Zone.CHARACTERS, char.id
                 ),
-                drain=1,
+                amount=1,
             )
             for char in none_active_chars
         ]

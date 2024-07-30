@@ -674,7 +674,7 @@ class Albedo(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -751,7 +751,7 @@ class AratakiItto(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -822,7 +822,7 @@ class Bennett(Character):
         effects: list[eft.Effect] = [
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -936,7 +936,7 @@ class Chongyun(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -1026,7 +1026,7 @@ class Collei(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -1105,7 +1105,7 @@ class Dehya(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -1195,7 +1195,7 @@ class Diona(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -1278,7 +1278,7 @@ class ElectroHypostasis(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -1396,7 +1396,7 @@ class Eula(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -1477,7 +1477,7 @@ class FatuiCryoCicinMage(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -1561,7 +1561,7 @@ class FatuiPyroAgent(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -1634,7 +1634,7 @@ class Fischl(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -1743,7 +1743,7 @@ class Ganyu(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -1835,7 +1835,7 @@ class HuTao(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -1909,7 +1909,7 @@ class JadeplumeTerrorshroom(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -1981,7 +1981,7 @@ class Jean(Character):
         effects: list[eft.Effect] = [
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
         ]
         self_characters = game_state.get_player(source.pid).characters
@@ -2106,7 +2106,7 @@ class KaedeharaKazuha(Character):
         effects: tuple[eft.Effect, ...] = (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -2192,7 +2192,7 @@ class Kaeya(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -2262,7 +2262,7 @@ class KamisatoAyaka(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -2393,7 +2393,7 @@ class Keqing(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -2472,7 +2472,7 @@ class Klee(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -2549,7 +2549,7 @@ class KujouSara(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -2620,7 +2620,7 @@ class Layla(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -2732,7 +2732,7 @@ class Lisa(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -2843,7 +2843,7 @@ class Lyney(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -2946,7 +2946,7 @@ class MaguuKenki(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -3016,7 +3016,7 @@ class Mona(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -3130,7 +3130,7 @@ class Nahida(Character):
     def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         effects: list[eft.Effect] = [eft.EnergyDrainEffect(
             target=source,
-            drain=self.max_energy,
+            amount=self.max_energy,
         )]
         if (
                 self.talent_equipped()
@@ -3239,7 +3239,7 @@ class Ningguang(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -3312,7 +3312,7 @@ class Noelle(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -3411,7 +3411,7 @@ class Qiqi(Character):
         return effects + (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -3478,7 +3478,7 @@ class RaidenShogun(Character):
         effects: list[eft.Effect] = [
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -3639,7 +3639,7 @@ class RhodeiaOfLoch(Character):
         effects: list[eft.Effect] = [
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -3716,7 +3716,7 @@ class SangonomiyaKokomi(Character):
         effects: list[eft.Effect] = [
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -3814,7 +3814,7 @@ class Shenhe(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -3888,7 +3888,7 @@ class StonehideLawachurl(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -3990,7 +3990,7 @@ class Tartaglia(Character):
         effects: list[eft.Effect] = [
             eft.EnergyDrainEffect(
                 target=source,
-                drain=3,
+                amount=3,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -4098,7 +4098,7 @@ class Tighnari(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=2,
+                amount=2,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -4178,7 +4178,7 @@ class Venti(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -4262,7 +4262,7 @@ class Wanderer(Character):
         effects: list[eft.Effect] = [
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
         ]
         if stt.WindfavoredStatus in self._statuses:
@@ -4348,7 +4348,7 @@ class Xingqiu(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -4424,7 +4424,7 @@ class YaeMiko(Character):
         effects: list[eft.Effect] = [
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -4506,7 +4506,7 @@ class Yaoyao(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -4580,7 +4580,7 @@ class Yelan(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -4650,7 +4650,7 @@ class Yoimiya(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                drain=self.max_energy,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,

@@ -59,6 +59,7 @@
   - Event Cards:
     - Arcane Legend Cards:
       - Day of Resistance: Moment of Shattered Dreams
+      - Vicious Ancient Battle
     - Food Cards:
       - Fish and Chips
       - Sashimi Platter
