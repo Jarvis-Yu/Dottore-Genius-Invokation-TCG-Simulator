@@ -3423,7 +3423,7 @@ class TheMausoleumOfKingDeshretStatus(CombatStatus):
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.POST_CARD_DRAW:
-            assert isinstance(detail, CardDrawIEvent)
+            assert isinstance(detail, CardIEvent)
             if detail.player is source.pid:
                 return [
                     eft.PublicAddDeckCardRandomEffect(

@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (45/95 implemented)](#character-4595-implemented)
-  - [Card (192/334 implemented)](#card-184334-implemented)
+  - [Card (196/334 implemented)](#card-196334-implemented)
 
 ## Character (45/95 implemented)
 
@@ -97,7 +97,7 @@ all I need now is to implement each card and character.
   - [x] Stonehide Lawachurl
   - [ ] Yun Jin
 
-## Card (194/334 implemented)
+## Card (196/334 implemented)
 
 - [ ] Equipment Card (93/177):
   - [ ] Talent Card:
@@ -221,7 +221,7 @@ all I need now is to implement each card and character.
     - [x] Vourukasha's Glow
     - [x] Wine-Stained Tricorne
     - [x] Witch's Scorching Hat
-- [ ] Support Card (35/56):
+- [ ] Support Card (36/56):
   - [ ] Companion Card:
     - [x] Chang the Ninth
     - [x] Chef Mao
@@ -235,7 +235,7 @@ all I need now is to implement each card and character.
     - [x] Rana
     - [ ] Serene
     - [x] Setaria
-    - [ ] Taroumaru
+    - [x] Taroumaru
     - [x] The Mausoleum of King Deshret
     - [x] Timaeus
     - [x] Timmie
@@ -266,7 +266,7 @@ all I need now is to implement each card and character.
     - [x] Tenshukaku
     - [x] Vanarana
     - [x] Weeping Willow of the Lake
-- [ ] Event Card (65/101):
+- [ ] Event Card (66/101):
   - [ ] Talent Card:
     - [x] Absorbing Prism
     - [x] Kanten Senmyou Blessing
@@ -349,7 +349,7 @@ all I need now is to implement each card and character.
     - [x] Strategize
     - [x] Sunyata Flower
     - [ ] Tada!
-    - [ ] Taroumaru's Savings
+    - [x] Taroumaru's Savings
     - [x] The Bestest Travel Companion!
     - [x] The Boar Princess
     - [ ] The Show Begins!

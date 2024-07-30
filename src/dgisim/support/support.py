@@ -55,6 +55,7 @@ __all__ = [
     "PaimonSupport",
     "RanaSupport",
     "SetariaSupport",
+    "TaroumaruSupport",
     "TimaeusSupport",
     "TimmieSupport",
     "WagnerSupport",
@@ -643,6 +644,37 @@ class SetariaSupport(Support, stt._UsageStatus):
                         num=1,
                     ),
                 ], replace(self, usages=-1)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class TaroumaruSupport(Support, stt._UsageLivingStatus):
+    usages: int = 0
+    MAX_USAGES: ClassVar[int] = 2
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_CARD,
+    ))
+    @cached_classproperty
+    def _TAROUMARU_CARD(cls): from ..card.card import TaroumarusSavings; return TaroumarusSavings
+    @cached_classproperty
+    def _TAROUMARU_SUMMON(cls): from ..summon.summon import TaroumaruEnragedSummon; return TaroumaruEnragedSummon
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.POST_CARD:
+            assert isinstance(detail, CardIEvent)
+            if detail.player is source.pid and detail.card is self._TAROUMARU_CARD:
+                if self.MAX_USAGES - self.usages > 1:
+                    return [], replace(self, usages=1)
+                return [
+                    eft.AddSummonEffect(
+                        target_pid=source.pid,
+                        summon=self._TAROUMARU_SUMMON,
+                    ),
+                ], None
         return [], self
 
 
@@ -1518,7 +1550,7 @@ class TheMausoleumOfKingDeshretSupport(Support, stt._UsageLivingStatus):
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.POST_CARD_DRAW:
-            assert isinstance(detail, CardDrawIEvent)
+            assert isinstance(detail, CardIEvent)
             if detail.player is source.pid.other:
                 if self.MAX_USAGES - self.usages > 1:
                     return [], replace(self, usages=1)

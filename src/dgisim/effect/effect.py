@@ -111,6 +111,7 @@ __all__ = [
     "PublicRemoveAllCardEffect",
     "PrivateAddCardEffect",
     "PublicAddDeckCardRandomEffect",
+    "PublicAddDeckCardEvenEffect",
     "AddDiceEffect",
     "RemoveDiceEffect",
     "AddCharacterStatusEffect",
@@ -830,7 +831,7 @@ class BroadcastCardDrawEffect(BroadcastEffect):
         return AllStatusTriggererEffect(
             pid=self.drawer_pid,
             signal=TriggeringSignal.POST_CARD_DRAW,
-            detail=CardDrawIEvent(player=self.drawer_pid, card=self.card),
+            detail=CardIEvent(player=self.drawer_pid, card=self.card),
         ).execute(game_state)
 
 
@@ -1725,6 +1726,23 @@ class PublicAddDeckCardRandomEffect(DirectEffect):
             self.pid,
             lambda p: p.factory().f_deck_cards(
                 lambda cs: cs.random_add((self.card,) * self.num)
+            ).f_publicly_gained_cards(
+                lambda cs: cs.extend({self.card: self.num})
+            ).build()
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class PublicAddDeckCardEvenEffect(DirectEffect):
+    pid: Pid
+    card: type[Card]
+    num: int
+
+    def execute(self, game_state: GameState) -> GameState:
+        return game_state.factory().f_player(
+            self.pid,
+            lambda p: p.factory().f_deck_cards(
+                lambda cs: cs.even_add((self.card,) * self.num)
             ).f_publicly_gained_cards(
                 lambda cs: cs.extend({self.card: self.num})
             ).build()

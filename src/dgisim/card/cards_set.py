@@ -191,6 +191,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     Paimon,
     Rana,
     Setaria,
+    Taroumaru,
     Timaeus,
     Timmie,
     Wagner,

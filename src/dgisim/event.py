@@ -30,7 +30,7 @@ __all__ = [
     "EventType",
 
     "InformableEvent",
-    "CardDrawIEvent",
+    "CardIEvent",
     "CharacterDeathIEvent",
     "DmgIEvent",
     "EquipmentDiscardIEvent",
@@ -109,7 +109,7 @@ class InformableEvent:
 
 
 @dataclass(frozen=True, kw_only=True)
-class CardDrawIEvent(InformableEvent):
+class CardIEvent(InformableEvent):
     player: Pid
     card: type[Card]
 

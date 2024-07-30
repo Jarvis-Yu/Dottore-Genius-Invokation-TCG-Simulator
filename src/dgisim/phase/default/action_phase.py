@@ -331,6 +331,7 @@ class ActionPhase(ph.Phase):
             AllStatusTriggererEffect(
                 pid,
                 TriggeringSignal.POST_CARD,
+                detail=CardIEvent(player=pid, card=card),
             ),
             AllStatusTriggererEffect(
                 pid,

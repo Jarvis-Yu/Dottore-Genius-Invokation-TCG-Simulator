@@ -268,6 +268,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.YayoiNanatsuki, 369),
         (card.Mamere, 370),
         (card.Jeht, 371),
+        (card.Taroumaru, 372),
 
         #### 2.3 Item Card 0450 ####
         (card.ParametricTransformer, 450),
@@ -336,6 +337,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.FlickeringFourLeafSigil, 680),
         (card.ForbiddenKnowledge, 681),
         (card.TheMausoleumOfKingDeshret, 682),
+        (card.TaroumarusSavings, 683),
 
         #### 3.4 Food Card 0800 ####
         (card.JueyunGuoba, 800),
@@ -549,6 +551,7 @@ EFFECT_MAPPING: dict[type["Effect"], int] = HashableDict({
         (effect.PublicRemoveAllCardEffect, 284),
         (effect.PrivateAddCardEffect, 285),
         (effect.PublicAddDeckCardRandomEffect, 286),
+        (effect.PublicAddDeckCardEvenEffect, 287),
 
         #### 4.5 Dice Effect 290 ####
         (effect.AddDiceEffect, 290),
@@ -1004,7 +1007,10 @@ SUMM_MAPPING: dict[type["Summon"], int] = HashableDict({
         (summon.StormEyeSummon, 651),
         (summon.AutumnWhirlwindSummon, 652),
 
-        #### End 700 ####
+        #### Physical 700 ####
+        (summon.TaroumaruEnragedSummon, 700),
+
+        #### End 800 ####
     )
 })
 
@@ -1054,6 +1060,7 @@ SUPP_MAPPING: dict[type["Support"], int] = HashableDict({
         (support.YayoiNanatsukiSupport, 119),
         (support.MamereSupport, 120),
         (support.JehtSupport, 121),
+        (support.TaroumaruSupport, 122),
 
         #### Item 200 ####
         (support.ParametricTransformerSupport, 200),

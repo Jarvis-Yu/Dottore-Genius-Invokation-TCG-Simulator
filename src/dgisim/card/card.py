@@ -183,6 +183,7 @@ __all__ = [
     "StoneAndContracts",
     "Strategize",
     "SunyataFlower",
+    "TaroumarusSavings",
     "TheBestestTravelCompanion",
     "TheBoarPrincess",
     "ThunderAndEternity",
@@ -204,6 +205,7 @@ __all__ = [
     "Paimon",
     "Rana",
     "Setaria",
+    "Taroumaru",
     "Timaeus",
     "Timmie",
     "Wagner",
@@ -3552,10 +3554,7 @@ class Starsigns(EventCard, _DiceOnlyChoiceProvider):
     @override
     @classmethod
     def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         return (
             eft.EnergyRechargeEffect(
@@ -3655,16 +3654,36 @@ class SunyataFlower(EventCard, _SupportTargetChoiceProvider):
         )
 
 
+class TaroumarusSavings(EventCard, _DiceOnlyChoiceProvider):
+    _DICE_COST = AbstractDice.from_empty()
+
+    @override
+    @classmethod
+    def valid_in_deck(cls, deck: Deck) -> bool:
+        return False
+
+    @override
+    @classmethod
+    def effects(
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.AddDiceEffect(
+                source=StaticTarget.from_card(pid, cls),
+                pid=pid,
+                element=Element.OMNI,
+                num=1,
+            ),
+        )
+
+
 class TheBestestTravelCompanion(EventCard, _DiceOnlyChoiceProvider):
     _DICE_COST = AbstractDice({Element.ANY: 2})
 
     @override
     @classmethod
     def effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         return (
             eft.AddDiceEffect(
@@ -3949,16 +3968,30 @@ class Setaria(CompanionCard):
     _SUPPORT_STATUS = sp.SetariaSupport
 
 
+class Taroumaru(CompanionCard):
+    _DICE_COST = AbstractDice({Element.ANY: 2})
+    _SUPPORT_STATUS = sp.TaroumaruSupport
+
+    @classmethod
+    def _effects(
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
+    ) -> tuple[eft.Effect, ...]:
+        return (
+            eft.PublicAddDeckCardEvenEffect(
+                pid=pid,
+                card=TaroumarusSavings,
+                num=4,
+            ),
+        )
+
+
 class Timaeus(CompanionCard):
     _DICE_COST = AbstractDice({Element.OMNI: 2})
     _SUPPORT_STATUS = sp.TimaeusSupport
 
     @classmethod
     def _effects(
-            cls,
-            game_state: gs.GameState,
-            pid: Pid,
-            instruction: act.Instruction,
+            cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
         initial_deck = game_state.get_player(pid).initial_deck.cards
         if sum([

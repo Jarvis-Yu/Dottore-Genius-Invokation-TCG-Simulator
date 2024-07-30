@@ -69,6 +69,7 @@ __all__ = [
     "SolarIsotomaSummon",
     "StormEyeSummon",
     "TalismanSpiritSummon",
+    "TaroumaruEnragedSummon",
     "TenguJuuraiAmbushSummon",
     "TenguJuuraiStormclusterSummon",
     "UshiSummon",
@@ -1330,6 +1331,14 @@ class _TenguJuuraiSummon(_DmgPerRoundSummon):
                 ),
             )
         return es, new_self
+
+
+@dataclass(frozen=True, kw_only=True)
+class TaroumaruEnragedSummon(_DmgPerRoundSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 2
+    ELEMENT: ClassVar[Element] = Element.PHYSICAL
 
 
 @dataclass(frozen=True, kw_only=True)

@@ -384,11 +384,35 @@ class OrderedCards:
         """ :returns: new cards with this card at top. """
         return self + (card,)
 
-    def random_add(self, card: type[Card] | Sequence[type[Card]]) -> OrderedCards:
+    def random_add(self, cards: type[Card] | Sequence[type[Card]]) -> OrderedCards:
         """ :returns: new cards with input card(s) randomly inserted. """
-        if not isinstance(card, Sequence):
-            card = (card,)
-        return type(self)(_standard_insertions(self._cards, card))
+        if not isinstance(cards, Sequence):
+            cards = (cards,)
+        return type(self)(_standard_insertions(self._cards, cards))
+
+    def even_add(self, cards: type[Card] | Sequence[type[Card]]) -> OrderedCards:
+        """
+        :param cards: if it is a sequence, then it is ordered as LIFO.
+        :returns: new cards with input card(s) evenly inserted.
+
+        e.g. when 4 cards are inserted into 14 cards, the result will be:
+        14 = 2 + 3 + 3 + 3 + 3; and then the 4 cards are insterted evenly.
+        """
+        if not isinstance(cards, Sequence):
+            cards = (cards,)
+        num_groups = len(cards) + 1
+        remainder = len(self._cards) % num_groups
+        group_len = len(self._cards) // num_groups
+        group_lens = [group_len + (i <= remainder) for i in range(num_groups, 0, -1)]
+        groups: list[Sequence[type[Card]]] = []
+        j = 0
+        for i, card in enumerate(cards):
+            next_j = j + group_lens[i]
+            groups.append(self._cards[j:next_j])
+            j = next_j
+            groups.append((card,))
+        groups.append(self._cards[j:])
+        return type(self)(list(chain(*groups)))
 
     def remove(self, card: type[Card]) -> OrderedCards:
         """ :returns: new cards with the top most card passed in removed. """

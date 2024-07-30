@@ -41,6 +41,7 @@
   - Support Cards:
     - Companion Cards:
       - Jeht
+      - Taroumaru
       - Timmie
     - Item Cards:
       - Memento Lens
@@ -66,6 +67,7 @@
       - Pankration!
       - Plunging Strike
       - Sunyata Flower
+      - Taroumaru's Savings
 
 ### Updated
 
