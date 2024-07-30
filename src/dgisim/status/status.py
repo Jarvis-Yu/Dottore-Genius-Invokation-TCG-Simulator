@@ -291,6 +291,10 @@ __all__ = [
     "SeedOfSkandhaStatus",
     "ShrineOfMayaStatus",
     "TheSeedOfStoredKnowledgeStatus",
+    ## Nilou ##
+    "TheStarrySkiesTheirFlowersRainStatus",
+    "GoldenChalicesBountyStatus",
+    "LingeringAeonStatus",
     ## Ningguang ##
     "JadeScreenStatus",
     "StrategicReserveStatus",
@@ -6064,6 +6068,47 @@ class TheSeedOfStoredKnowledgeStatus(TalentEquipmentStatus):
         return TheSeedOfStoredKnowledge
 
 
+#### Nilou ####
+
+@dataclass(frozen=True, kw_only=True)
+class  TheStarrySkiesTheirFlowersRainStatus(TalentEquipmentStatus):
+    @cached_classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import TheStarrySkiesTheirFlowersRain
+        return TheStarrySkiesTheirFlowersRain
+
+
+@dataclass(frozen=True, kw_only=True)
+class GoldenChalicesBountyStatus(CombatStatus):
+    pass
+
+
+@dataclass(frozen=True, kw_only=True)
+class LingeringAeonStatus(CharacterStatus, _UsageStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            return [
+                eft.SpecificDamageEffect(
+                    source=source.with_status(type(self)),
+                    target=source,
+                    element=Element.HYDRO,
+                    damage=3,
+                    damage_type=DamageType(status=True, no_boost=True),
+                ),
+            ], replace(self, usages=-1)
+        return [], self
+
+
 #### Ningguang ####
 
 @dataclass(frozen=True, kw_only=True)
@@ -6075,19 +6120,13 @@ class JadeScreenStatus(CombatStatus, FixedShieldStatus):
 
     @override
     def _triggering_condition(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            damage: eft.SpecificDamageEffect
+            self, game_state: GameState, status_source: StaticTarget, damage: eft.SpecificDamageEffect
     ) -> bool:
         return damage.damage >= self.DAMAGE_THRESHOLD
 
     @override
     def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: PreprocessableEvent,
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:

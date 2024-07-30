@@ -293,6 +293,8 @@ __all__ = [
     "ProphecyOfSubmersion",
     ## Nahida ##
     "TheSeedOfStoredKnowledge",
+    ## Nilou ##
+    "TheStarrySkiesTheirFlowersRain",
     ## Ningguang ##
     "StrategicReserve",
     ## Noelle ##
@@ -4561,6 +4563,15 @@ class TheSeedOfStoredKnowledge(_TalentEquipmentSkillCard):
     _CHARACTER = chr.Nahida
     _EQUIPMENT_STATUS = stt.TheSeedOfStoredKnowledgeStatus
     _SKILL = CharacterSkill.ELEMENTAL_BURST
+
+
+#### Nilou ####
+
+class TheStarrySkiesTheirFlowersRain(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDice({Element.HYDRO: 3})
+    _CHARACTER = chr.Nilou
+    _EQUIPMENT_STATUS = stt.TheStarrySkiesTheirFlowersRainStatus
+    _SKILL = CharacterSkill.SKILL2
 
 
 #### Ningguang ####

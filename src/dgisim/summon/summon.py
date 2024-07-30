@@ -24,7 +24,7 @@ from ..effect.enums import TriggeringSignal, DynamicCharacterTarget, Zone
 from ..effect.structs import DamageType, StaticTarget
 from ..element import Element, Reaction
 from ..event import *
-from ..helper.quality_of_life import BIG_INT
+from ..helper.quality_of_life import BIG_INT, cached_classproperty
 from ..status.enums import Preprocessables, Informables
 
 if TYPE_CHECKING:
@@ -38,6 +38,7 @@ __all__ = [
     # concrete implementations
     "AutumnWhirlwindSummon",
     "BakeKurageSummon",
+    "BountifulCoreSummon",
     "BurningFlameSummon",
     "CelestialDreamsphereSummon",
     "ChainsOfWardingThunderSummon",
@@ -370,6 +371,48 @@ class BakeKurageSummon(_DestroyOnNumSummon):
                         source.pid, self_chars.just_get_active_character_id()
                     ),
                     recovery=self.HEAL_AMOUNT,
+                ),
+            ], replace(self, usages=-1)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class BountifulCoreSummon(_DmgPerRoundSummon):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 3
+    DMG: ClassVar[int] = 2
+    ELEMENT: ClassVar[Element] = Element.DENDRO
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.SELF_DECLARE_END_ROUND,
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    ))
+    @cached_classproperty
+    def _NILOU(cls): from ..character.character import Nilou; return Nilou
+
+
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        condition = (
+            signal is TriggeringSignal.END_ROUND_CHECK_OUT
+            or (
+                signal is TriggeringSignal.SELF_DECLARE_END_ROUND
+                and self.usages >= 2
+            )
+        )
+        if condition:
+            dmg_boost = any(
+                type(char) is self._NILOU and char.talent_equipped()
+                for char in game_state.get_player(source.pid).characters
+            )
+            return [
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=self.ELEMENT,
+                    damage=self.DMG + (1 if dmg_boost else 0),
+                    damage_type=DamageType(summon=True),
                 ),
             ], replace(self, usages=-1)
         return [], self

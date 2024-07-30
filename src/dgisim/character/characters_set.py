@@ -35,6 +35,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     MaguuKenki,
     Mona,
     Nahida,
+    Nilou,
     Ningguang,
     Noelle,
     Qiqi,

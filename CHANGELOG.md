@@ -16,6 +16,7 @@
   - Layla
   - Lisa
   - Lyney
+  - Nilou
   - Stonehide Lawachurl
   - Yaoyao
   - Yelan
@@ -30,6 +31,7 @@
       - Shaken, Not Purred
       - Steady Breathing
       - Stonehide Reforged
+      - The Starry Skies Their Flowers Rain
       - Turn Control
     - Artifact Cardso
       - Crown of Watatsumi

@@ -86,7 +86,7 @@ CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
         # (char.KamisatoAyato, 106),
         (char.Tartaglia, 107),
         # (char.Candice, 108),
-        # (char.Nilou, 109),
+        (char.Nilou, 109),
         (char.Yelan, 110),
 
         #### Pyro 200 ####
@@ -382,7 +382,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         # KamisatoAyato 1031
         (card.AbyssalMayhemHydrospout, 1032),
         # Candice 1033
-        # Nilou 1034
+        (card.TheStarrySkiesTheirFlowersRain, 1034),
         (card.TurnControl, 1035),
 
         #### 4.3 Pyro 1125 ####
@@ -795,6 +795,9 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.TideWithholderStatus, 2746),
         ## Candice 2760 ##
         ## Nilou 2780 ##
+        (status.TheStarrySkiesTheirFlowersRainStatus, 2780),
+        (status.GoldenChalicesBountyStatus, 2781),
+        (status.LingeringAeonStatus, 2782),
         ## Yelan 2800 ##
         (status.TurnControlStatus, 2800),
         (status.YelanPassiveStatus, 2801),
@@ -995,7 +998,7 @@ SUMM_MAPPING: dict[type["Summon"], int] = HashableDict({
 
         #### Dendro 500 ####
         (summon.CuileinAnbarSummon, 500),
-        ##(summon.BountifulCoreSummon, 501),
+        (summon.BountifulCoreSummon, 501),
         (summon.ClusterbloomArrowSummon, 502),
         (summon.YueguiThrowingModeSummon, 503),
         # (summon.GossamerSpriteSummon, 504),

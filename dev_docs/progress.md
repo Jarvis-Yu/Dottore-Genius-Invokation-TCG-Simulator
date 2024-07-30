@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (45/95 implemented)](#character-4595-implemented)
-  - [Card (198/334 implemented)](#card-198334-implemented)
+  - [Character (46/95 implemented)](#character-4695-implemented)
+  - [Card (199/334 implemented)](#card-199334-implemented)
 
-## Character (45/95 implemented)
+## Character (46/95 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -30,7 +30,7 @@ all I need now is to implement each card and character.
   - [ ] Kamisato Ayato
   - [x] Mona
   - [ ] Neuvillette
-  - [ ] Nilou
+  - [x] Nilou
   - [x] Rhodeia of Loch
   - [x] Sangonomiya Kokomi
   - [x] Tartaglia
@@ -97,9 +97,9 @@ all I need now is to implement each card and character.
   - [x] Stonehide Lawachurl
   - [ ] Yun Jin
 
-## Card (198/334 implemented)
+## Card (199/334 implemented)
 
-- [ ] Equipment Card (93/177):
+- [ ] Equipment Card (95/177):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
@@ -138,6 +138,7 @@ all I need now is to implement each card and character.
     - [x] The Scent Remained
     - [x] The Seed of Stored Knowledge
     - [x] The Shrine's Sacred Shade
+    - [x] The Starry Skies Their Flowers Rain
     - [x] Thundering Penance
     - [x] Transcendent Automaton
     - [x] Turn Control
@@ -266,7 +267,7 @@ all I need now is to implement each card and character.
     - [x] Tenshukaku
     - [x] Vanarana
     - [x] Weeping Willow of the Lake
-- [ ] Event Card (66/101):
+- [ ] Event Card (68/101):
   - [ ] Talent Card:
     - [x] Absorbing Prism
     - [x] Kanten Senmyou Blessing

@@ -898,7 +898,8 @@ def assert_last_dmg(
         status: None | bool = None,
         summon: None | bool = None,
         card: None | bool = None,
-) -> None:
+        clear: bool = False,
+) -> GameState:
     """
     checks the last damage dealt from the player.
 
@@ -926,6 +927,10 @@ def assert_last_dmg(
         testbody.assertIs(summon, dmg.damage_type.directly_from_summon())
     if card is not None:
         testbody.assertIs(card, dmg.damage_type.directly_from_card())
+    if clear:
+        game_state = remove_dmg_listener(game_state, pid)
+        game_state = add_dmg_listener(game_state, pid)
+    return game_state
 
 
 def reactivate_player(game_state: GameState, pid: Pid) -> GameState:
@@ -1144,3 +1149,11 @@ def remove_aura_remover(game_state: GameState, pid: Pid) -> GameState:
         ).build()
     ).build()
 
+
+def add_combat_status(game_state: GameState, pid: Pid, status: type[CombatStatus]) -> GameState:
+    return game_state.factory().f_player(
+        pid,
+        lambda p: p.factory().f_combat_statuses(
+            lambda csts: csts.add_status(status)
+        ).build()
+    ).build()

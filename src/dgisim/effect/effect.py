@@ -1072,12 +1072,21 @@ class ApplyElementalAuraEffect(DirectEffect):
         else:
             new_aura = new_aura.remove(reaction_detail.first_elem)
             if reaction_detail.reaction_type is Reaction.BLOOM:
-                effects.append(
-                    AddCombatStatusEffect(
-                        target_pid=self.target.pid.other,
-                        status=stt.DendroCoreStatus,
+                if stt.GoldenChalicesBountyStatus in game_state.get_player(self.target.pid.other).combat_statuses:
+                    # Nilou - Golden Chalices
+                    effects.append(
+                        AddSummonEffect(
+                            target_pid=self.target.pid.other,
+                            summon=sm.BountifulCoreSummon,
+                        )
                     )
-                )
+                else:
+                    effects.append(
+                        AddCombatStatusEffect(
+                            target_pid=self.target.pid.other,
+                            status=stt.DendroCoreStatus,
+                        )
+                    )
             elif reaction_detail.reaction_type is Reaction.BURNING:
                 effects.append(
                     AddSummonEffect(
@@ -1349,12 +1358,21 @@ class SpecificDamageEffect(DirectEffect):
             )
 
         elif reaction.reaction_type is Reaction.BLOOM:
-            effects.append(
-                AddCombatStatusEffect(
-                    target_pid=actual_damage.target.pid.other,
-                    status=stt.DendroCoreStatus,
+            if stt.GoldenChalicesBountyStatus in game_state.get_player(actual_damage.target.pid.other).combat_statuses:
+                # Nilou - Golden Chalices
+                effects.append(
+                    AddSummonEffect(
+                        target_pid=actual_damage.target.pid.other,
+                        summon=sm.BountifulCoreSummon,
+                    )
                 )
-            )
+            else:
+                effects.append(
+                    AddCombatStatusEffect(
+                        target_pid=actual_damage.target.pid.other,
+                        status=stt.DendroCoreStatus,
+                    )
+                )
 
         elif reaction.reaction_type is Reaction.CRYSTALLIZE:
             effects.append(

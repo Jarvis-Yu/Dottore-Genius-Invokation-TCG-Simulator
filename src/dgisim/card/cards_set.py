@@ -47,6 +47,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     TheScentRemained,
     TheSeedOfStoredKnowledge,
     TheShrinesSacredShade,
+    TheStarrySkiesTheirFlowersRain,
     ThunderingPenance,
     TranscendentAutomaton,
     TurnControl,
