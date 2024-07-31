@@ -3113,6 +3113,7 @@ class FatuiConspiracy(EventCard, _DiceOnlyChoiceProvider):
         stt.MirrorMaidenStatus,
         stt.PyroslingerBracerStatus,
     ))
+    _FATUUS_TUPLE = tuple(FATUUS)
 
     @override
     @classmethod
@@ -3127,18 +3128,10 @@ class FatuiConspiracy(EventCard, _DiceOnlyChoiceProvider):
     def effects(
             cls, game_state: gs.GameState, pid: Pid, instruction: act.Instruction,
     ) -> tuple[eft.Effect, ...]:
-        oppo_combat_statuses = game_state.get_player(pid.other).combat_statuses
-        available_fatuus = [
-            fatui
-            for fatui in cls.FATUUS
-            if fatui not in oppo_combat_statuses
-        ]
-        if not available_fatuus:
-            available_fatuus = list(cls.FATUUS)
         return (
             eft.AddCombatStatusEffect(
                 target_pid=pid.other,
-                status=random.choice(available_fatuus),
+                status=random.choice(cls._FATUUS_TUPLE),
             ),
         )
 

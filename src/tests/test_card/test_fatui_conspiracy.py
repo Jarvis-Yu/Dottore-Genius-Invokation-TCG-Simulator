@@ -83,13 +83,13 @@ class TestFatuiConspiracy(unittest.TestCase):
         assert_last_dmg(self, game_state, Pid.P2, last_index=0, amount=1, elem=first_fatui.ELEMENT)
         self.assertNotIn(type(first_fatui), game_state.player2.combat_statuses)
 
-        """ check generated fatuus try to be different """
+        """ check generated fatuus doens't try to be different """
         for _ in range(5):
             game_state = base_state
             game_state = play_dice_only_card(game_state, Pid.P1, EVENT_CARD, cost=2)
             game_state = play_dice_only_card(game_state, Pid.P1, EVENT_CARD, cost=2)
             fatuus = get_fatuus(game_state)
-            self.assertEqual(len(fatuus), 2)
+            self.assertTrue(len(fatuus) == 1 or len(fatuus) == 2)
             self.assertEqual(
                 len(fatuus),
                 len(set([type(fatui) for fatui in fatuus])),
