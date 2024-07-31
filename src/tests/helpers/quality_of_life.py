@@ -28,6 +28,7 @@ from src.dgisim.state.game_state import GameState
 from src.dgisim.state.player_state import PlayerState
 from src.dgisim.status.enums import *
 from src.dgisim.status.status import *
+from src.dgisim.summon.summon import *
 from src.dgisim.support.support import *
 
 
@@ -1155,5 +1156,72 @@ def add_combat_status(game_state: GameState, pid: Pid, status: type[CombatStatus
         pid,
         lambda p: p.factory().f_combat_statuses(
             lambda csts: csts.add_status(status)
+        ).build()
+    ).build()
+
+
+def update_combat_status(game_state: GameState, pid: Pid, status: CombatStatus) -> GameState:
+    return game_state.factory().f_player(
+        pid,
+        lambda p: p.factory().f_combat_statuses(
+            lambda csts: csts.update_status(status)
+        ).build()
+    ).build()
+
+
+def remove_combat_status(game_state: GameState, pid: Pid, status: type[CombatStatus]) -> GameState:
+    return game_state.factory().f_player(
+        pid,
+        lambda p: p.factory().f_combat_statuses(
+            lambda csts: csts.remove(status)
+        ).build()
+    ).build()
+
+
+def add_character_status(
+        game_state: GameState, pid: Pid, status: type[CharacterStatus], char_id: None | int = None,
+) -> GameState:
+    if char_id is None:
+        target = StaticTarget.from_player_active(game_state, pid)
+    else:
+        target = StaticTarget.from_char_id(pid, char_id)
+    return game_state.factory().f_player(
+        pid,
+        lambda p: p.factory().f_characters(
+            lambda cs: cs.factory().f_character(
+                cast(int, target.id),
+                lambda c: c.factory().f_character_statuses(
+                    lambda sts: sts.add_status(status)
+                ).build()
+            ).build()
+        ).build()
+    ).build()
+
+
+def remove_character_status(
+        game_state: GameState, pid: Pid, status: type[CharacterStatus], char_id: None | int = None,
+) -> GameState:
+    if char_id is None:
+        target = StaticTarget.from_player_active(game_state, pid)
+    else:
+        target = StaticTarget.from_char_id(pid, char_id)
+    return game_state.factory().f_player(
+        pid,
+        lambda p: p.factory().f_characters(
+            lambda cs: cs.factory().f_character(
+                cast(int, target.id),
+                lambda c: c.factory().f_character_statuses(
+                    lambda sts: sts.remove(status)
+                ).build()
+            ).build()
+        ).build()
+    ).build()
+
+
+def add_summon(game_state: GameState, pid: Pid, summon: type[Summon]) -> GameState:
+    return game_state.factory().f_player(
+        pid,
+        lambda p: p.factory().f_summons(
+            lambda sms: sms.add_summon(summon)
         ).build()
     ).build()

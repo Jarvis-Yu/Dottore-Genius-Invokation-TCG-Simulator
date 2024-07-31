@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (46/95 implemented)](#character-4695-implemented)
+  - [Character (47/95 implemented)](#character-4795-implemented)
   - [Card (199/334 implemented)](#card-199334-implemented)
 
-## Character (46/95 implemented)
+## Character (47/95 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -67,7 +67,7 @@ all I need now is to implement each card and character.
   - [x] Collei
   - [ ] Guardian of Apep's Oasis
   - [x] Jadeplume Terrorshroom
-  - [ ] Kaveh
+  - [x] Kaveh
   - [ ] Kirara
   - [x] Nahida
   - [x] Tighnari

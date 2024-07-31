@@ -13,6 +13,7 @@
   - Chongyun
   - Diona
   - Fatui Cryo Cicin Mage
+  - Kaveh
   - Layla
   - Lisa
   - Lyney

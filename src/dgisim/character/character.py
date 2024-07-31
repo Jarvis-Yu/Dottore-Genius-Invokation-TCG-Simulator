@@ -52,6 +52,7 @@ __all__ = [
     "KaedeharaKazuha",
     "Kaeya",
     "KamisatoAyaka",
+    "Kaveh",
     "Keqing",
     "Klee",
     "KujouSara",
@@ -2288,6 +2289,84 @@ class KamisatoAyaka(Character):
             energy=0,
             max_energy=3,
             hiddens=stts.Statuses((stt.KamisatoArtSenhoStatus(),)),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
+class Kaveh(Character):
+    _ELEMENT = Element.DENDRO
+    _WEAPON_TYPE = WeaponType.CLAYMORE
+    _TALENT_STATUS = stt.TheArtOfBudgetingStatus
+    _FACTIONS = frozenset((Faction.SUMERU,))
+
+    _SKILL1_COST = AbstractDice({
+        Element.DENDRO: 1,
+        Element.ANY: 2,
+    })
+    _SKILL2_COST = AbstractDice({
+        Element.DENDRO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDice({
+        Element.DENDRO: 3,
+    })
+
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        )
+
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.DENDRO,
+                damage=2,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+            eft.AddCombatStatusEffect(
+                target_pid=source.pid,
+                status=stt.BurstScanStatus,
+            ),
+        )
+
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                amount=self.max_energy,
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.DENDRO,
+                damage=3,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            eft.AddCharacterStatusEffect(
+                target=source,
+                status=stt.MehraksAssistanceStatus,
+            ),
+            eft.UpdateCombatStatusEffect(
+                target_pid=source.pid,
+                status=stt.BurstScanStatus(usages=2),
+            ),
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=2,
+            hiddens=stts.Statuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )

@@ -273,10 +273,6 @@ class OrderedCards:
     def cards(self) -> tuple[type[Card], ...]:
         return self._cards
 
-    def peek(self) -> type[Card]:
-        """ :returns: the top card. """
-        return self._cards[-1]
-
     def pick(self, n: int = 1) -> tuple[OrderedCards, OrderedCards]:
         """ :returns: cards left and top n cards. """
         n = min(len(self._cards), n)
@@ -428,6 +424,16 @@ class OrderedCards:
         if card not in self._cards:
             return self
         return OrderedCards([c for c in self._cards if c is not card])
+
+    def peek(self) -> None | type[Card]:
+        """ :returns: the top card. """
+        return self._cards[-1] if self._cards else None
+
+    def pop(self) -> tuple[OrderedCards, None | type[Card]]:
+        """ :returns: the rest of the cards and the top card. """
+        if not self._cards:
+            return self, None
+        return OrderedCards(self._cards[:-1]), self._cards[-1]
 
     def extend(self, cards: OrderedCards | Iterable[type[Card]], limit: None | int = None) -> OrderedCards:
         """

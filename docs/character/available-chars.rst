@@ -50,6 +50,7 @@ Dendro
 
 * Collei
 * Jadeplume Terrorshroom
+* Kaveh
 * Nahida
 * Tighnari
 * Yaoyao

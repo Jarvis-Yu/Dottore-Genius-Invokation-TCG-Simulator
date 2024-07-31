@@ -131,6 +131,7 @@ CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
         (char.Nahida, 503),
         (char.Yaoyao, 504),
         # (char.Baizhu, 505),
+        (char.Kaveh, 506),
 
         #### Anemo 600 ####
         # (char.Sucrose, 600),
@@ -427,6 +428,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.TheSeedOfStoredKnowledge, 1428),
         (card.Beneficent, 1429),
         # Baizhu 1430
+        (card.TheArtOfBudgeting, 1431),
 
         #### 4.7 Anemo 1525 ####
         # Sucrose 1525
@@ -554,6 +556,7 @@ EFFECT_MAPPING: dict[type["Effect"], int] = HashableDict({
         (effect.PrivateAddCardEffect, 285),
         (effect.PublicAddDeckCardRandomEffect, 286),
         (effect.PublicAddDeckCardEvenEffect, 287),
+        (effect.PrivateRemoveDeckCardTopEffect, 288),
 
         #### 4.5 Dice Effect 290 ####
         (effect.AddDiceEffect, 290),
@@ -910,6 +913,10 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.BeneficentStatus, 10680),
         (status.AdeptalLegacyStatus, 10681),
         ## Baizhu 10700 ##
+        ## Kaveh 10720 ##
+        (status.TheArtOfBudgetingStatus, 10720),
+        (status.BurstScanStatus, 10721),
+        (status.MehraksAssistanceStatus, 10722),
 
         #### 4.7 Anemo Character Status 12600 ####
         ## Sucrose 12600 ##

@@ -112,6 +112,7 @@ __all__ = [
     "PrivateAddCardEffect",
     "PublicAddDeckCardRandomEffect",
     "PublicAddDeckCardEvenEffect",
+    "PrivateRemoveDeckCardTopEffect",
     "AddDiceEffect",
     "RemoveDiceEffect",
     "AddCharacterStatusEffect",
@@ -1764,6 +1765,18 @@ class PublicAddDeckCardEvenEffect(DirectEffect):
             ).f_publicly_gained_cards(
                 lambda cs: cs.extend({self.card: self.num})
             ).build()
+        ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class PrivateRemoveDeckCardTopEffect(DirectEffect):
+    pid: Pid
+
+    def execute(self, game_state: GameState) -> GameState:
+        new_deck, popped_card = game_state.get_player(self.pid).deck_cards.pop()
+        return game_state.factory().f_player(
+            self.pid,
+            lambda p: p.factory().deck_cards(new_deck).build()
         ).build()
 
 

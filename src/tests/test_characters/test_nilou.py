@@ -25,10 +25,6 @@ class TestNilou(unittest.TestCase):
         game_state = add_dmg_listener(self.BASE_GAME, Pid.P1)
         game_state = replace_character(game_state, Pid.P1, Klee, char_id=1)
         game_state = replace_character(game_state, Pid.P1, Xingqiu, char_id=3)
-        game_state = RemoveCharacterStatusEffect(
-            target=StaticTarget.from_player_active(game_state, Pid.P1),
-            status=StoneForceStatus,
-        ).execute(game_state)
         game_state = step_skill(
             game_state, Pid.P1, CharacterSkill.SKILL2,
             cost=ActualDice({Element.HYDRO: 3}),

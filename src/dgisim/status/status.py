@@ -259,6 +259,10 @@ __all__ = [
     "KamisatoAyakaCryoInfusionEnhancedStatus",
     "KamisatoAyakaCryoInfusionStatus",
     "KantenSenmyouBlessingStatus",
+    ## Kaveh ##
+    "TheArtOfBudgetingStatus",
+    "BurstScanStatus",
+    "MehraksAssistanceStatus",
     ## Keqing ##
     "KeqingElectroInfusionEnhancedStatus",
     "KeqingElectroInfusionStatus",
@@ -5423,6 +5427,118 @@ class KantenSenmyouBlessingStatus(TalentEquipmentStatus, _UsageStatus):
         return [], self
 
 
+#### Kaveh ####
+
+@dataclass(frozen=True, kw_only=True)
+class TheArtOfBudgetingStatus(TalentEquipmentStatus):
+    @cached_classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import TheArtOfBudgeting
+        return TheArtOfBudgeting
+
+
+@dataclass(frozen=True, kw_only=True)
+class BurstScanStatus(CombatStatus, _UsageStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 3
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.PRE_ACTION,
+    ))
+    @cached_classproperty
+    def _BOUNTIFUL_CORE(cls): from ..summon.summon import BountifulCoreSummon; return BountifulCoreSummon
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.PRE_ACTION:
+            this_player = game_state.get_player(source.pid)
+            effects: list[eft.Effect] = []
+            if DendroCoreStatus in this_player.combat_statuses:
+                effects.append(
+                    eft.UpdateCombatStatusEffect(
+                        target_pid=source.pid,
+                        status=replace(this_player.combat_statuses.just_find(DendroCoreStatus), usages=-1),
+                    )
+                )
+            elif self._BOUNTIFUL_CORE in this_player.summons:
+                effects.append(
+                    eft.UpdateSummonEffect(
+                        target_pid=source.pid,
+                        summon=replace(this_player.summons.just_find(self._BOUNTIFUL_CORE), usages=-1),
+                    )
+                )
+            if len(effects) > 0:
+                deck_top_card = this_player.deck_cards.peek()
+                if deck_top_card is None:
+                    return [], self
+                effects.extend((
+                    eft.PrivateRemoveDeckCardTopEffect(
+                        pid=source.pid,
+                    ),
+                    eft.ReferredDamageEffect(
+                        source=source,
+                        target=DynamicCharacterTarget.OPPO_ACTIVE,
+                        element=Element.DENDRO,
+                        damage=deck_top_card._DICE_COST.num_dice(),
+                        damage_type=DamageType(status=True),
+                    ),
+                ))
+                return effects, replace(self, usages=-1)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class MehraksAssistanceStatus(CharacterStatus, _UsageStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_SKILL,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_ELEMENT:
+            assert isinstance(item, DmgPEvent)
+            if (
+                    item.dmg.source == status_source
+                    and item.dmg.damage_type.directly_from_character()
+                    and item.dmg.element is Element.PHYSICAL
+            ):
+                return item.convert_element(Element.DENDRO), self
+        elif signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            if (
+                    item.dmg.source == status_source
+                    and item.dmg.damage_type.direct_normal_attack()
+            ):
+                return item.delta_damage(1), self
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.POST_SKILL:
+            assert isinstance(detail, SkillIEvent)
+            if detail.source == source and detail.skill_true_type.is_normal_attack():
+                return [
+                    eft.AddCombatStatusEffect(
+                        target_pid=source.pid,
+                        status=BurstScanStatus,
+                    ),
+                ], self
+        elif signal is TriggeringSignal.ROUND_END:
+            return [], replace(self, usages=-1)
+        return [], self
+
+
 #### Keqing ####
 
 
@@ -5433,10 +5549,11 @@ class KeqingTalentStatus(CharacterHiddenStatus):
         TriggeringSignal.POST_SKILL,
     ))
 
+    @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
-    ) -> tuple[list[eft.Effect], None | KeqingTalentStatus]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.POST_SKILL:
             return [], type(self)(can_infuse=False)
         return [], self  # pragma: no cover

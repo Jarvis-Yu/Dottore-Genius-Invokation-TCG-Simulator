@@ -274,6 +274,8 @@ __all__ = [
     "ColdBloodedStrike",
     ## KamiSato Ayaka ##
     "KantenSenmyouBlessing",
+    ## Kaveh ##
+    "TheArtOfBudgeting",
     ## Keqing ##
     "LightningStiletto",
     "ThunderingPenance",
@@ -4405,6 +4407,15 @@ class KantenSenmyouBlessing(_TalentEquipmentAnyEventCard):
                 status=cls._EQUIPMENT_STATUS,
             ),
         )
+
+
+#### Kaveh ####
+
+class TheArtOfBudgeting(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDice({Element.DENDRO: 3})
+    _CHARACTER = chr.Kaveh
+    _EQUIPMENT_STATUS = stt.TheArtOfBudgetingStatus
+    _SKILL = CharacterSkill.SKILL2
 
 
 #### Keqing ####
