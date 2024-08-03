@@ -81,7 +81,14 @@ class TestDehya(unittest.TestCase):
         p1ac = game_state.player1.just_get_active_character()
         self.assertEqual(p1ac.hp, 7)
 
-        # dmg to Ally trigger
+        # dmg to non-active ally doesn't trigger
+        game_state = silent_fast_swap(game_state, Pid.P1, 3)
+        game_state = simulate_status_dmg(game_state, 3, Element.PYRO, Pid.P1, char_id=1)
+        p1c1, _, _ = game_state.player1.characters.get_characters()
+        self.assertEqual(p1c1.hp, 7)
+        game_state = simulate_status_heal(game_state, 3, Pid.P1, char_id=1)
+
+        # dmg to active ally triggers
         game_state = silent_fast_swap(game_state, Pid.P1, 1)
         game_state = simulate_status_dmg(game_state, 3, Element.PYRO, Pid.P1)
         p1c1, p1c2, _ = game_state.player1.characters.get_characters()

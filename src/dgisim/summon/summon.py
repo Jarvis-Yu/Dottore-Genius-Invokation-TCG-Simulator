@@ -736,11 +736,12 @@ class FierySanctumFieldSummon(_DmgPerRoundSummon, stt._ShieldStatus):
     MAX_USAGES: ClassVar[int] = 3
     DMG: ClassVar[int] = 1
     ELEMENT: ClassVar[Element] = Element.PYRO
-
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         *_DmgPerRoundSummon.REACTABLE_SIGNALS,
         TriggeringSignal.POST_DMG,
     ))
+    @cached_classproperty
+    def _DEHYA(cls): from ..character.character import Dehya; return Dehya
 
     @override
     def _preprocess(
@@ -751,13 +752,12 @@ class FierySanctumFieldSummon(_DmgPerRoundSummon, stt._ShieldStatus):
             assert isinstance(item, DmgPEvent)
             dmg = item.dmg
             char = game_state.get_character_target(dmg.target)
-            from ..character.character import Dehya
             if not (
-                    dmg.target.pid is status_source.pid
+                    self._target_is_self_active(game_state, status_source, dmg.target)
                     and self.shield_usages > 0
                     and dmg.damage > 0
                     and char is not None
-                    and type(char) is not Dehya
+                    and type(char) is not self._DEHYA
             ):
                 return item, self
             return (
