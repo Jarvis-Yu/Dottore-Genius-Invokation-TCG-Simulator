@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (47/95 implemented)](#character-4795-implemented)
-  - [Card (199/334 implemented)](#card-199334-implemented)
+  - [Character (48/95 implemented)](#character-4895-implemented)
+  - [Card (200/334 implemented)](#card-200334-implemented)
 
-## Character (47/95 implemented)
+## Character (48/95 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -20,7 +20,7 @@ all I need now is to implement each card and character.
   - [x] Lyney
   - [ ] Thoma
   - [ ] Xiangling
-  - [ ] Xinyan
+  - [x] Xinyan
   - [x] Yoimiya
 - [ ] Hydro:
   - [ ] Abyss Herald: Wicked Torrents
@@ -97,9 +97,9 @@ all I need now is to implement each card and character.
   - [x] Stonehide Lawachurl
   - [ ] Yun Jin
 
-## Card (199/334 implemented)
+## Card (200/334 implemented)
 
-- [ ] Equipment Card (95/177):
+- [ ] Equipment Card (96/177):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
@@ -125,6 +125,7 @@ all I need now is to implement each card and character.
     - [x] Prophecy of Submersion
     - [x] Pulsating Witch
     - [x] Rite of Resurrection
+    - [x] Rockin' in a Flaming World
     - [x] Sanguine Rouge
     - [x] Shaken, Not Purred
     - [x] Sin of Pride
@@ -135,6 +136,7 @@ all I need now is to implement each card and character.
     - [x] Strategic Reserve
     - [x] Streaming Surge
     - [x] Tamakushi Casket
+    - [ ] The Art of Budgeting
     - [x] The Scent Remained
     - [x] The Seed of Stored Knowledge
     - [x] The Shrine's Sacred Shade

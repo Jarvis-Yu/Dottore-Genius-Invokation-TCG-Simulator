@@ -102,6 +102,7 @@ CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
         # (char.Yanfei, 209),
         (char.Dehya, 210),
         (char.Lyney, 211),
+        (char.Xinyan, 212),
 
         #### Elctro 300 ####
         (char.Fischl, 300),
@@ -399,6 +400,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         # Yanfei 1134
         (card.StalwartAndTrue, 1135),
         (card.ConclusiveOvation, 1136),
+        (card.RockinInAFlamingWorld, 1137),
 
         #### 4.4 Electro 1225 ####
         (card.StellarPredator, 1225),
@@ -550,13 +552,12 @@ EFFECT_MAPPING: dict[type["Effect"], int] = HashableDict({
         #### 4.4 Card Effect 280 ####
         (effect.DrawTopCardEffect, 280),
         (effect.DrawRandomCardOfTypeEffect, 281),
-        (effect.PublicAddCardEffect, 282),
-        (effect.PublicRemoveCardEffect, 283),
-        (effect.PublicRemoveAllCardEffect, 284),
-        (effect.PrivateAddCardEffect, 285),
-        (effect.PublicAddDeckCardRandomEffect, 286),
-        (effect.PublicAddDeckCardEvenEffect, 287),
-        (effect.PrivateRemoveDeckCardTopEffect, 288),
+        (effect.AddCardEffect, 282),
+        (effect.RemoveCardEffect, 283),
+        (effect.RemoveAllCardEffect, 284),
+        (effect.PublicAddDeckCardRandomEffect, 285),
+        (effect.PublicAddDeckCardEvenEffect, 286),
+        (effect.PrivateRemoveDeckCardTopEffect, 287),
 
         #### 4.5 Dice Effect 290 ####
         (effect.AddDiceEffect, 290),
@@ -839,6 +840,10 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         ## Lyney 4820 ##
         (status.ConclusiveOvationStatus, 4820),
         (status.PropSurplusStatus, 4821),
+        ## Xinyan 4840 ##
+        (status.RockinInAFlamingWorldStatus, 4840),
+        (status.FestiveFiresStatus, 4841),
+        (status.ShieldOfPassionStatus, 4842),
 
         #### 4.4 Electro Character Status 6600 ####
         ## Fischl 6600 ##

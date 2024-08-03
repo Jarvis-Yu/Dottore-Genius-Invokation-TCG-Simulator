@@ -3,6 +3,7 @@ This file contains the base class Character for all characters,
 and implementation of all characters. (in alphabetic order)
 """
 from __future__ import annotations
+import random
 from abc import abstractmethod
 from dataclasses import replace
 from functools import lru_cache
@@ -76,6 +77,7 @@ __all__ = [
     "Venti",
     "Wanderer",
     "Xingqiu",
+    "Xinyan",
     "YaeMiko",
     "Yaoyao",
     "Yelan",
@@ -1731,7 +1733,7 @@ class Ganyu(Character):
                 target=DynamicCharacterTarget.OPPO_OFF_FIELD,
                 element=Element.PIERCING,
                 damage=piercing_dmg,
-                damage_type=DamageType(elemental_skill=True),
+                damage_type=DamageType(elemental_skill=True, no_boost=True),
             ),
         ) + normal_attack_template(
             game_state=game_state,
@@ -2429,7 +2431,7 @@ class Keqing(Character):
         from ..card.card import LightningStiletto
         if not can_infuse and cards.contains(LightningStiletto):
             effects.append(
-                eft.PublicRemoveAllCardEffect(
+                eft.RemoveAllCardEffect(
                     source.pid,
                     LightningStiletto,
                 )
@@ -2460,7 +2462,7 @@ class Keqing(Character):
                 )
         else:
             effects.append(
-                eft.PublicAddCardEffect(
+                eft.AddCardEffect(
                     pid=source.pid,
                     card=LightningStiletto,
                 )
@@ -4546,6 +4548,118 @@ class Xingqiu(Character):
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )
+
+
+class Xinyan(Character):
+    _ELEMENT = Element.PYRO
+    _WEAPON_TYPE = WeaponType.CLAYMORE
+    _TALENT_STATUS = None
+    _FACTIONS = frozenset((Faction.LIYUE,))
+
+    _SKILL1_COST = AbstractDice({
+        Element.PYRO: 1,
+        Element.ANY: 2,
+    })
+    _SKILL2_COST = AbstractDice({
+        Element.PYRO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDice({
+        Element.PYRO: 3,
+    })
+
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        )
+
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        effects: list[eft.Effect] = [
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.PYRO,
+                damage=2,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+        ]
+        hands = game_state.get_player(source.pid).hand_cards
+        if hands.not_empty():
+            highest_cost = max([card._DICE_COST.num_dice() for card in hands])
+            satisfiable_cards = [
+                card
+                for card in hands.ordered_cards
+                if card._DICE_COST.num_dice() == highest_cost
+            ]
+            effects.append(
+                eft.RemoveCardEffect(
+                    pid=source.pid,
+                    card=random.choice(satisfiable_cards),
+                    public=False,
+                )
+            )
+        effects.append(
+            eft.AddCombatStatusEffect(
+                target_pid=source.pid,
+                status=stt.ShieldOfPassionStatus,
+            )
+        )
+        return tuple(effects)
+
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        hands = game_state.get_player(source.pid).hand_cards.ordered_cards
+        effects: list[eft.Effect] = [
+            eft.EnergyDrainEffect(
+                target=source,
+                amount=self.max_energy,
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_OFF_FIELD,
+                element=Element.PIERCING,
+                damage=2,
+                damage_type=DamageType(elemental_burst=True, no_boost=True),
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.PHYSICAL,
+                damage=3,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+        ]
+        for hand in hands:
+            effects.append(
+                eft.RemoveCardEffect(
+                    pid=source.pid,
+                    card=hand,
+                    public=False,
+                )
+            )
+        effects.append(
+            eft.AddCombatStatusEffect(
+                target_pid=source.pid,
+                status=stt.FestiveFiresStatus,
+            )
+        )
+        return tuple(effects)
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=2,
+            hiddens=stts.Statuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
 
 
 class YaeMiko(Character):

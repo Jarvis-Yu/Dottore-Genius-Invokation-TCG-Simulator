@@ -6,7 +6,7 @@ class TestAmosBow(unittest.TestCase):
     def test_behaviour(self):
         base_state = ONE_ACTION_TEMPLATE
         for i in range(2):
-            base_state = PublicAddCardEffect(Pid.P1, AmosBow).execute(base_state)
+            base_state = AddCardEffect(Pid.P1, AmosBow).execute(base_state)
         base_state = replace_character(base_state, Pid.P1, Fischl, char_id=1)
         base_state = replace_character(base_state, Pid.P1, Ganyu, char_id=2)
         base_state = grant_all_infinite_revival(base_state)

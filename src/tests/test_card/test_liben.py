@@ -5,7 +5,7 @@ from src.tests.test_card.common_imports import *
 
 class TestLiben(unittest.TestCase):
     BASE_STATE = ACTION_TEMPLATE
-    BASE_STATE = PublicAddCardEffect(Pid.P1, Liben).execute(BASE_STATE)
+    BASE_STATE = AddCardEffect(Pid.P1, Liben).execute(BASE_STATE)
     BASE_STATE = replace_character(BASE_STATE, Pid.P1, Collei, 1)
     BASE_STATE = replace_character(BASE_STATE, Pid.P1, Nahida, 2)
     BASE_STATE = replace_character(BASE_STATE, Pid.P1, Tighnari, 3)

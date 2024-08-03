@@ -275,7 +275,7 @@ class TestQiqi(unittest.TestCase):
         game_state = replace_character(revival_consumed_state, Pid.P1, Keqing, char_id=3)
         game_state = silent_fast_swap(game_state, Pid.P1, char_id=3)
         game_state = simulate_status_dmg(game_state, BIG_INT, pid=Pid.P1, char_id=2)
-        game_state = PublicAddCardEffect(Pid.P1, TeyvatFriedEgg).execute(game_state)
+        game_state = AddCardEffect(Pid.P1, TeyvatFriedEgg).execute(game_state)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=TeyvatFriedEgg,
             instruction=StaticTargetInstruction(

@@ -49,8 +49,8 @@ class TestAncientCourtyard(unittest.TestCase):
 
         for card, costs, instr in zip(test_cards, expected_cost, instructions):
             with self.subTest(card=card.__name__):
-                game_state = PublicAddCardEffect(Pid.P1, card=card).execute(base_state)
-                game_state = PublicAddCardEffect(Pid.P1, card=card).execute(game_state)
+                game_state = AddCardEffect(Pid.P1, card=card).execute(base_state)
+                game_state = AddCardEffect(Pid.P1, card=card).execute(game_state)
 
                 # if this step doesn't raise an error, then the cost is valid (the card is valid)
                 game_state = step_action(game_state, Pid.P1, CardAction(

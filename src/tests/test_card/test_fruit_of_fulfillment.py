@@ -5,7 +5,7 @@ from .common_imports import *
 class TestFruitOfFullfillment(unittest.TestCase):
     def test_behaviour(self):
         base_state = ONE_ACTION_TEMPLATE
-        base_state = PublicAddCardEffect(Pid.P1, FruitOfFulfillment).execute(base_state)
+        base_state = AddCardEffect(Pid.P1, FruitOfFulfillment).execute(base_state)
         base_state = replace_character(base_state, Pid.P1, Klee, char_id=1)
         base_state = add_dmg_listener(base_state, Pid.P1)
 

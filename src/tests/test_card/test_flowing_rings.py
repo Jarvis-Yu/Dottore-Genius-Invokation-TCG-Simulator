@@ -5,7 +5,7 @@ from .common_imports import *
 class TestFlowingRings(unittest.TestCase):
     def test_behaviour(self):
         base_state = ONE_ACTION_TEMPLATE
-        base_state = PublicAddCardEffect(Pid.P1, FlowingRings).execute(base_state)
+        base_state = AddCardEffect(Pid.P1, FlowingRings).execute(base_state)
         base_state = grant_all_infinite_revival(base_state)
 
         # equip artifact

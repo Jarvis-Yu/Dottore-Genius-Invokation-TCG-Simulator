@@ -5,7 +5,7 @@ from .common_imports import *
 class TestEngulfingLightning(unittest.TestCase):
     def test_behaviour(self):
         base_state = ONE_ACTION_TEMPLATE
-        base_state = PublicAddCardEffect(Pid.P1, EngulfingLightning).execute(base_state)
+        base_state = AddCardEffect(Pid.P1, EngulfingLightning).execute(base_state)
         base_state = replace_character(base_state, Pid.P1, HuTao, char_id=1)
         base_state = silent_fast_swap(base_state, Pid.P1, char_id=1)
         base_state = grant_all_infinite_revival(base_state)
@@ -39,7 +39,7 @@ class TestEngulfingLightning(unittest.TestCase):
         # check that Calx's Art can trigger
         game_state = next_round_with_great_omni(game_state)
         game_state = end_round(game_state, Pid.P2)
-        game_state = PublicAddCardEffect(Pid.P1, CalxsArts).execute(game_state)
+        game_state = AddCardEffect(Pid.P1, CalxsArts).execute(game_state)
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=CalxsArts,
             instruction=DiceOnlyInstruction(dice=ActualDice({Element.PYRO: 1})),

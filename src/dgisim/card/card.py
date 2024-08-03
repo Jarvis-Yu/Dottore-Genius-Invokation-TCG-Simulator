@@ -323,6 +323,8 @@ __all__ = [
     "GalesOfReverie",
     ## Xingqiu ##
     "TheScentRemained",
+    ## Xinyan ##
+    "RockinInAFlamingWorld",
     ## Yae Miko ##
     "TheShrinesSacredShade",
     ## Yaoyao ##
@@ -3338,7 +3340,7 @@ class Lyresong(EventCard, _CharTargetChoiceProvider):
                 target=instruction.target,
                 status=type(artifact),
             ),
-            eft.PublicAddCardEffect(
+            eft.AddCardEffect(
                 pid=instruction.target.pid,
                 card=card,
             ),
@@ -3635,13 +3637,15 @@ class SunyataFlower(EventCard, _SupportTargetChoiceProvider):
                 target_pid=instruction.target.pid,
                 sid=instruction.target.id,
             ),
-            eft.PrivateAddCardEffect(
+            eft.AddCardEffect(
                 pid=pid,
                 card=random.choice(card_pool),
+                public=False,
             ),
-            eft.PrivateAddCardEffect(
+            eft.AddCardEffect(
                 pid=pid,
                 card=random.choice(card_pool),
+                public=False,
             ),
             eft.AddCombatStatusEffect(
                 target_pid=pid,
@@ -3824,7 +3828,7 @@ class WhereIsTheUnseenRazor(EventCard, _CharTargetChoiceProvider):
                 target=instruction.target,
                 status=type(weapon),
             ),
-            eft.PublicAddCardEffect(
+            eft.AddCardEffect(
                 pid=instruction.target.pid,
                 card=card,
             ),
@@ -4701,6 +4705,17 @@ class TheScentRemained(_TalentEquipmentSkillCard):
     _CHARACTER = chr.Xingqiu
     _EQUIPMENT_STATUS = stt.TheScentRemainedStatus
     _SKILL = CharacterSkill.SKILL2
+
+
+#### Xinyan ####
+
+
+class RockinInAFlamingWorld(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDice({Element.PYRO: 1, Element.ANY: 2})
+    _CHARACTER = chr.Xinyan
+    _EQUIPMENT_STATUS = stt.RockinInAFlamingWorldStatus
+    _SKILL = CharacterSkill.SKILL1
+
 
 #### Yae Miko ####
 

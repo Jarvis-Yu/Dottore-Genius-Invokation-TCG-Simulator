@@ -4,7 +4,7 @@ from .common_imports import *
 
 
 class TestElementalShatteringIce(unittest.TestCase):
-    BASE_GAME = PublicAddCardEffect(
+    BASE_GAME = AddCardEffect(
         Pid.P1, card=ElementalResonanceShatteringIce,
     ).execute(ACTION_TEMPLATE)
 

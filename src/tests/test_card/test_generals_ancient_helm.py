@@ -7,7 +7,7 @@ class TestGeneralsAncientHelm(unittest.TestCase):
     def test_behaviour(self):
         base_state = ACTION_TEMPLATE
         for i in range(2):
-            base_state = PublicAddCardEffect(Pid.P1, GeneralsAncientHelm).execute(base_state)
+            base_state = AddCardEffect(Pid.P1, GeneralsAncientHelm).execute(base_state)
 
         game_state = base_state
         for i in range(1, 3):

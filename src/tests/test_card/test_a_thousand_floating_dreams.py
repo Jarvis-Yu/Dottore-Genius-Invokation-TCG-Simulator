@@ -6,7 +6,7 @@ class TestAThousandFloatingDreams(unittest.TestCase):
     def test_behaviour(self):
         base_state = ONE_ACTION_TEMPLATE
         for i in range(2):
-            base_state = PublicAddCardEffect(Pid.P1, AThousandFloatingDreams).execute(base_state)
+            base_state = AddCardEffect(Pid.P1, AThousandFloatingDreams).execute(base_state)
         base_state = replace_character(base_state, Pid.P1, Nahida, char_id=1)
         base_state = replace_character(base_state, Pid.P1, Klee, char_id=2)
         base_state = replace_character(base_state, Pid.P1, Mona, char_id=3)

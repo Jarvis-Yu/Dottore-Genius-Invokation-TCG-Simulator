@@ -19,6 +19,7 @@
   - Lyney
   - Nilou
   - Stonehide Lawachurl
+  - Xinyan
   - Yaoyao
   - Yelan
 - New Cards:
@@ -29,6 +30,7 @@
       - Conclusive Ovation
       - Light's Remit
       - Pulsating Witch
+      - Rockin' in a Flaming World
       - Shaken, Not Purred
       - Steady Breathing
       - Stonehide Reforged

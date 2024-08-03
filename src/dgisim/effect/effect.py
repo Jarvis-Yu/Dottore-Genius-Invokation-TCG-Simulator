@@ -106,10 +106,9 @@ __all__ = [
     "ReviveRecoverHPEffect",
     "DrawTopCardEffect",
     "DrawRandomCardOfTypeEffect",
-    "PublicAddCardEffect",
-    "PublicRemoveCardEffect",
-    "PublicRemoveAllCardEffect",
-    "PrivateAddCardEffect",
+    "AddCardEffect",
+    "RemoveCardEffect",
+    "RemoveAllCardEffect",
     "PublicAddDeckCardRandomEffect",
     "PublicAddDeckCardEvenEffect",
     "PrivateRemoveDeckCardTopEffect",
@@ -1653,9 +1652,10 @@ class DrawRandomCardOfTypeEffect(DirectEffect):
 
 
 @dataclass(frozen=True, repr=False)
-class PublicAddCardEffect(DirectEffect):
+class AddCardEffect(DirectEffect):
     pid: Pid
     card: type[Card]
+    public: bool = True
 
     def execute(self, game_state: GameState) -> GameState:
         hand_card_limit = game_state.mode.hand_card_limit()
@@ -1666,15 +1666,16 @@ class PublicAddCardEffect(DirectEffect):
             lambda p: p.factory().f_hand_cards(
                 lambda cs: cs.add(self.card)
             ).f_publicly_gained_cards(
-                lambda cs: cs.add(self.card)
+                lambda cs: cs.add(self.card) if self.public else cs
             ).build()
         ).build()
 
 
 @dataclass(frozen=True, repr=False)
-class PublicRemoveCardEffect(DirectEffect):
+class RemoveCardEffect(DirectEffect):
     pid: Pid
     card: type[Card]
+    public: bool = True
 
     def execute(self, game_state: GameState) -> GameState:
         pid = self.pid
@@ -1687,15 +1688,16 @@ class PublicRemoveCardEffect(DirectEffect):
             lambda p: p.factory().f_hand_cards(
                 lambda cs: cs.remove(card)
             ).f_publicly_used_cards(
-                lambda cs: cs.add(card)
+                lambda cs: cs.add(card) if self.public else cs
             ).build()
         ).build()
-
+        
 
 @dataclass(frozen=True, repr=False)
-class PublicRemoveAllCardEffect(DirectEffect):
+class RemoveAllCardEffect(DirectEffect):
     pid: Pid
     card: type[Card]
+    public: bool = True
 
     def execute(self, game_state: GameState) -> GameState:
         pid = self.pid
@@ -1708,28 +1710,7 @@ class PublicRemoveAllCardEffect(DirectEffect):
             lambda p: p.factory().f_hand_cards(
                 lambda cs: cs.remove_all(card)
             ).f_publicly_used_cards(
-                lambda cs: cs + {card: hand_cards[card]}
-            ).build()
-        ).build()
-
-
-@dataclass(frozen=True, repr=False)
-class PrivateAddCardEffect(DirectEffect):
-    """
-    Add a card to the hand cards of the player such that the opponent cannot see
-    which exact card is added.
-    """
-    pid: Pid
-    card: type[Card]
-
-    def execute(self, game_state: GameState) -> GameState:
-        hand_card_limit = game_state.mode.hand_card_limit()
-        if game_state.get_player(self.pid).hand_cards.num_cards() >= hand_card_limit:
-            return game_state
-        return game_state.factory().f_player(
-            self.pid,
-            lambda p: p.factory().f_hand_cards(
-                lambda cs: cs.add(self.card)
+                lambda cs: cs + {card: hand_cards[card]} if self.public else cs
             ).build()
         ).build()
 

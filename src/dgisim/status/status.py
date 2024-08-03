@@ -351,6 +351,10 @@ __all__ = [
     "RainSwordStatus",
     "RainbowBladeworkStatus",
     "TheScentRemainedStatus",
+    ## Xinyan ##
+    "RockinInAFlamingWorldStatus",
+    "FestiveFiresStatus",
+    "ShieldOfPassionStatus",
     ## Yae Miko ##
     "RiteOfDispatchStatus",
     "TenkoThunderboltsStatus",
@@ -7389,6 +7393,80 @@ class TheScentRemainedStatus(TalentEquipmentStatus):
         from ..card.card import TheScentRemained
         return TheScentRemained
 
+#### Xinyan ####
+
+@dataclass(frozen=True, kw_only=True)
+class RockinInAFlamingWorldStatus(TalentEquipmentStatus, _UsageLivingStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @cached_classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import RockinInAFlamingWorld
+        return RockinInAFlamingWorld
+
+    @override
+    def _preprocess(
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS and self.usages > 0:
+            assert isinstance(item, DmgPEvent)
+            if (
+                    item.dmg.source == status_source
+                    and item.dmg.damage_type.directly_from_character()
+                    and item.dmg.damage_type.can_boost
+                    and game_state.get_player(status_source.pid).hand_cards.num_cards() <= 1
+            ):
+                return item.delta_damage(2), replace(self, usages=self.usages-1)
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
+            return [], replace(self, usages=self.MAX_USAGES)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class FestiveFiresStatus(CombatStatus, _UsageStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            if game_state.get_player(source.pid).hand_cards.num_cards() <= 1:
+                return [
+                    eft.ReferredDamageEffect(
+                        source=source,
+                        target=DynamicCharacterTarget.OPPO_ACTIVE,
+                        element=Element.PYRO,
+                        damage=1,
+                        damage_type=DamageType(status=True),
+                    )
+                ], replace(self, usages=-1)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class ShieldOfPassionStatus(CombatStatus, StackedShieldStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+
+
 #### Yae Miko ####
 
 
@@ -7402,10 +7480,7 @@ class RiteOfDispatchStatus(CharacterStatus):
 
     @override
     def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: PreprocessableEvent,
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
         """

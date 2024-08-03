@@ -7,7 +7,7 @@ class TestTenacityOfTheMillelith(unittest.TestCase):
     def test_behaviour(self):
         base_state = ACTION_TEMPLATE
         for i in range(2):
-            base_state = PublicAddCardEffect(Pid.P1, TenacityOfTheMillelith).execute(base_state)
+            base_state = AddCardEffect(Pid.P1, TenacityOfTheMillelith).execute(base_state)
         base_state = replace_character(base_state, Pid.P1, Noelle, char_id=1)
         base_state = replace_character(base_state, Pid.P1, Kaeya, char_id=2)
         base_state = replace_character(base_state, Pid.P2, Keqing, char_id=1)

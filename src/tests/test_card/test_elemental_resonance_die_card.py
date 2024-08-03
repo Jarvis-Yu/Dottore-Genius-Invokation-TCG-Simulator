@@ -8,7 +8,7 @@ class TestElementalResonanceDieCard(unittest.TestCase):
     As all elemental resonance die cards are literally the same except for its element.
     We only test the pyro one.
     """
-    BASE_GAME = PublicAddCardEffect(
+    BASE_GAME = AddCardEffect(
         Pid.P1, card=ElementalResonanceWovenFlames,
     ).execute(ACTION_TEMPLATE)
 

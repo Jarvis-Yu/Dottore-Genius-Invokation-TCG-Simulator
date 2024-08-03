@@ -5,7 +5,7 @@ from .common_imports import *
 class TestVortexVanquisher(unittest.TestCase):
     def test_behaviour(self):
         base_state = ONE_ACTION_TEMPLATE
-        base_state = PublicAddCardEffect(Pid.P1, VortexVanquisher).execute(base_state)
+        base_state = AddCardEffect(Pid.P1, VortexVanquisher).execute(base_state)
         base_state = replace_character(base_state, Pid.P1, Shenhe, char_id=1)
         base_state = grant_all_infinite_revival(base_state)
         base_state = add_dmg_listener(base_state, Pid.P1)

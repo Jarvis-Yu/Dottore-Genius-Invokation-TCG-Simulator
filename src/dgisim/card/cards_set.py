@@ -33,6 +33,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ProphecyOfSubmersion,
     PulsatingWitch,
     RiteOfResurrection,
+    RockinInAFlamingWorld,
     SanguineRouge,
     ShakenNotPurred,
     SinOfPride,

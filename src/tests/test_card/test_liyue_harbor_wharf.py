@@ -6,7 +6,7 @@ from .common_imports import *
 class TestLiyueHarborWharf(unittest.TestCase):
     def test_behaviour(self):
         base_state = ONE_ACTION_TEMPLATE
-        base_state = PublicAddCardEffect(Pid.P1, LiyueHarborWharf).execute(base_state)
+        base_state = AddCardEffect(Pid.P1, LiyueHarborWharf).execute(base_state)
 
         game_state = base_state
         game_state = play_support_card(game_state, Pid.P1, LiyueHarborWharf, cost=2)

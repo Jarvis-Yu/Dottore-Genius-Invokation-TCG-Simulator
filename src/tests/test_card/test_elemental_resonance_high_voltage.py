@@ -4,7 +4,7 @@ from .common_imports import *
 
 
 class TestElementalResonanceHighVoltage(unittest.TestCase):
-    BASE_GAME = PublicAddCardEffect(
+    BASE_GAME = AddCardEffect(
         Pid.P1, card=ElementalResonanceHighVoltage,
     ).execute(ACTION_TEMPLATE).factory().f_player1(
         lambda p1: p1.factory().f_characters(
@@ -34,7 +34,7 @@ class TestElementalResonanceHighVoltage(unittest.TestCase):
     def test_status_behaviour(self):
         base_state = self.BASE_GAME
         for i in range(3):
-            base_state = PublicAddCardEffect(
+            base_state = AddCardEffect(
                 Pid.P1, ElementalResonanceHighVoltage
             ).execute(base_state)
 

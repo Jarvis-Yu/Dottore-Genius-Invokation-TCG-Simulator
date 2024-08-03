@@ -5,7 +5,7 @@ from .common_imports import *
 class TestJoyousCelebration(unittest.TestCase):
     def test_behaviour(self):
         base_state = ACTION_TEMPLATE
-        base_state = PublicAddCardEffect(Pid.P1, JoyousCelebration).execute(base_state)
+        base_state = AddCardEffect(Pid.P1, JoyousCelebration).execute(base_state)
 
         # cannot be used if active character is GEO
         game_state = replace_character(base_state, Pid.P1, Ningguang, 1)

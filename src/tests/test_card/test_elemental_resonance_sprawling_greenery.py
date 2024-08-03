@@ -4,7 +4,7 @@ from .common_imports import *
 
 
 class TestElementalResonanceSprawlingGreenery(unittest.TestCase):
-    BASE_GAME = PublicAddCardEffect(
+    BASE_GAME = AddCardEffect(
         Pid.P1, card=ElementalResonanceSprawlingGreenery
     ).execute(ACTION_TEMPLATE).factory().f_player1(
         lambda p1: p1.factory().f_characters(

@@ -5,7 +5,7 @@ from .common_imports import *
 class TestCrownOfWatatsumi(unittest.TestCase):
     def test_behaviour(self):
         base_state = ONE_ACTION_TEMPLATE
-        base_state = PublicAddCardEffect(Pid.P1, CrownOfWatatsumi).execute(base_state)
+        base_state = AddCardEffect(Pid.P1, CrownOfWatatsumi).execute(base_state)
         base_state = grant_all_infinite_revival(base_state)
         base_state = replace_character(base_state, Pid.P1, Xingqiu, 1)
         base_state = simulate_status_dmg(base_state, 5, pid=Pid.P1)

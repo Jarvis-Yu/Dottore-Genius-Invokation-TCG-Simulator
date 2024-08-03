@@ -5,7 +5,7 @@ from .common_imports import *
 class TestCovenantOfRock(unittest.TestCase):
     def test_behaviour(self):
         base_state = ACTION_TEMPLATE
-        base_state = PublicAddCardEffect(Pid.P1, CovenantOfRock).execute(base_state)
+        base_state = AddCardEffect(Pid.P1, CovenantOfRock).execute(base_state)
 
         assert base_state.player1.dice.num_dice() > 0
         self.assertFalse(CovenantOfRock.loosely_usable(base_state, Pid.P1))

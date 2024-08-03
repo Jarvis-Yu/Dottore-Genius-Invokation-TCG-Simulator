@@ -94,7 +94,7 @@ class TestCollei(unittest.TestCase):
         # second talent card in same round doesn't generate another sprout status
         game_state = heal_for_all(game_state)
         game_state = apply_elemental_aura(game_state, Element.ELECTRO, Pid.P2)
-        game_state = PublicAddCardEffect(Pid.P1, FloralSidewinder).execute(game_state)
+        game_state = AddCardEffect(Pid.P1, FloralSidewinder).execute(game_state)
         game_state = skip_action_round(game_state, Pid.P2)
         game_state = silent_fast_swap(game_state, Pid.P1, char_id=2)
         game_state = step_action(game_state, Pid.P1, CardAction(

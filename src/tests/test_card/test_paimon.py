@@ -6,7 +6,7 @@ from .common_imports import *
 class TestPaimon(unittest.TestCase):
     def test_behaviour(self):
         base_state = ACTION_TEMPLATE
-        base_state = PublicAddCardEffect(Pid.P1, Paimon).execute(base_state)
+        base_state = AddCardEffect(Pid.P1, Paimon).execute(base_state)
 
         def skip_round(game_state: GameState) -> GameState:
             gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())

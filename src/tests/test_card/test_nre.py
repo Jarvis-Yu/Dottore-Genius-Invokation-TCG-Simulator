@@ -11,9 +11,9 @@ class TestNRE(unittest.TestCase):
                 OrderedCards.from_empty().add(SweetMadame).add(SweetMadame)
             ).build()
         ).build()
-        base_state = PublicAddCardEffect(Pid.P1, NRE).execute(base_state)
+        base_state = AddCardEffect(Pid.P1, NRE).execute(base_state)
         for i in range(2):
-            base_state = PublicAddCardEffect(Pid.P1, NorthernSmokedChicken).execute(base_state)
+            base_state = AddCardEffect(Pid.P1, NorthernSmokedChicken).execute(base_state)
 
         # test food added on entry
         game_state = step_action(base_state, Pid.P1, CardAction(

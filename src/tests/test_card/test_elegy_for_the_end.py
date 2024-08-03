@@ -5,7 +5,7 @@ from .common_imports import *
 class TestElegyForTheEnd(unittest.TestCase):
     def test_behaviour(self):
         base_state = ACTION_TEMPLATE
-        base_state = PublicAddCardEffect(Pid.P1, ElegyForTheEnd).execute(base_state)
+        base_state = AddCardEffect(Pid.P1, ElegyForTheEnd).execute(base_state)
         base_state = replace_character(base_state, Pid.P1, Venti, 1)
         base_state = replace_character(base_state, Pid.P1, Yoimiya, 2)
         base_state = replace_character(base_state, Pid.P1, Ganyu, 3)

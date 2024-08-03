@@ -5,13 +5,13 @@ from .common_imports import *
 class TestPassingOfJudgment(unittest.TestCase):
     def test_behaviour(self):
         base_state = ACTION_TEMPLATE
-        base_state = PublicAddCardEffect(Pid.P1, PassingOfJudgment).execute(base_state)
-        base_state = PublicAddCardEffect(Pid.P1, TheBestestTravelCompanion).execute(base_state)
-        base_state = PublicAddCardEffect(Pid.P2, TheBestestTravelCompanion).execute(base_state)
-        base_state = PublicAddCardEffect(Pid.P2, TheBestestTravelCompanion).execute(base_state)
-        base_state = PublicAddCardEffect(Pid.P2, LotusFlowerCrisp).execute(base_state)
-        base_state = PublicAddCardEffect(Pid.P2, LightningStiletto).execute(base_state)
-        base_state = PublicAddCardEffect(Pid.P2, TravelersHandySword).execute(base_state)
+        base_state = AddCardEffect(Pid.P1, PassingOfJudgment).execute(base_state)
+        base_state = AddCardEffect(Pid.P1, TheBestestTravelCompanion).execute(base_state)
+        base_state = AddCardEffect(Pid.P2, TheBestestTravelCompanion).execute(base_state)
+        base_state = AddCardEffect(Pid.P2, TheBestestTravelCompanion).execute(base_state)
+        base_state = AddCardEffect(Pid.P2, LotusFlowerCrisp).execute(base_state)
+        base_state = AddCardEffect(Pid.P2, LightningStiletto).execute(base_state)
+        base_state = AddCardEffect(Pid.P2, TravelersHandySword).execute(base_state)
         base_state = replace_character(base_state, Pid.P2, Keqing, 3)
 
         # P1 play card and see that it doesn't affect self

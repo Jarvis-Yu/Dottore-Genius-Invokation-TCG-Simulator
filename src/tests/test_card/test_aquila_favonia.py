@@ -6,7 +6,7 @@ class TestAquilaFavonia(unittest.TestCase):
     def test_behaviour(self):
         base_state = ACTION_TEMPLATE
         for i in range(3):
-            base_state = PublicAddCardEffect(Pid.P1, AquilaFavonia).execute(base_state)
+            base_state = AddCardEffect(Pid.P1, AquilaFavonia).execute(base_state)
         base_state = replace_character(base_state, Pid.P1, Keqing, char_id=1)
         base_state = replace_character(base_state, Pid.P1, Jean, char_id=1)
         base_state = replace_character(base_state, Pid.P1, Bennett, char_id=1)

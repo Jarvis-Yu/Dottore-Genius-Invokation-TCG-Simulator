@@ -6,7 +6,7 @@ from .common_imports import *
 class TestChangTheNinth(unittest.TestCase):
     def test_behaviour(self):
         base_state = ACTION_TEMPLATE
-        base_state = PublicAddCardEffect(Pid.P1, ChangTheNinth).execute(base_state)
+        base_state = AddCardEffect(Pid.P1, ChangTheNinth).execute(base_state)
         base_state = replace_character(base_state, Pid.P1, Keqing, char_id=1)
         base_state = replace_character(base_state, Pid.P2, Xingqiu, char_id=1)
         base_state = grant_all_infinite_revival(base_state)

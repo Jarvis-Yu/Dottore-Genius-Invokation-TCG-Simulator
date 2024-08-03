@@ -6,7 +6,7 @@ from .common_imports import *
 class TestParametricTransformer(unittest.TestCase):
     def test_behaviour(self):
         base_state = ONE_ACTION_TEMPLATE
-        base_state = PublicAddCardEffect(Pid.P1, ParametricTransformer).execute(base_state)
+        base_state = AddCardEffect(Pid.P1, ParametricTransformer).execute(base_state)
         base_state = replace_character(base_state, Pid.P1, Xingqiu, char_id=1)
         base_state = replace_character(base_state, Pid.P2, Mona, char_id=1)
         base_state = grant_all_thick_shield(base_state)

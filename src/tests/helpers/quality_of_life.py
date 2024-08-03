@@ -899,6 +899,7 @@ def assert_last_dmg(
         status: None | bool = None,
         summon: None | bool = None,
         card: None | bool = None,
+        num: None | int = None,
         clear: bool = False,
 ) -> GameState:
     """
@@ -928,6 +929,8 @@ def assert_last_dmg(
         testbody.assertIs(summon, dmg.damage_type.directly_from_summon())
     if card is not None:
         testbody.assertIs(card, dmg.damage_type.directly_from_card())
+    if num is not None:
+        testbody.assertEqual(num, len(dmgs))
     if clear:
         game_state = remove_dmg_listener(game_state, pid)
         game_state = add_dmg_listener(game_state, pid)

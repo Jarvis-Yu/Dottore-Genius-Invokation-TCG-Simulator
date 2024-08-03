@@ -7,7 +7,7 @@ class TestInstructorsCap(unittest.TestCase):
     def test_behaviour(self):
         base_state = ONE_ACTION_TEMPLATE
         for i in range(2):
-            base_state = PublicAddCardEffect(Pid.P1, InstructorsCap).execute(base_state)
+            base_state = AddCardEffect(Pid.P1, InstructorsCap).execute(base_state)
         base_state = replace_character(base_state, Pid.P1, Noelle, char_id=1)
         base_state = replace_character(base_state, Pid.P1, Kaeya, char_id=2)
         base_state = grant_all_thick_shield(base_state)
@@ -76,7 +76,7 @@ class TestInstructorsCap(unittest.TestCase):
 
     def test_self_reaction(self):
         base_state = ONE_ACTION_TEMPLATE
-        base_state = PublicAddCardEffect(Pid.P1, InstructorsCap).execute(base_state)
+        base_state = AddCardEffect(Pid.P1, InstructorsCap).execute(base_state)
         base_state = replace_character(base_state, Pid.P1, Xingqiu, char_id=1)
 
         # test Xingqiu self reaction triggers
@@ -96,7 +96,7 @@ class TestInstructorsCap(unittest.TestCase):
 
         # test card reaction cannot cause delayed trigger
         game_state = apply_elemental_aura(game_state, Element.PYRO, Pid.P1)
-        game_state = PublicAddCardEffect(Pid.P1, JoyousCelebration).execute(game_state)
+        game_state = AddCardEffect(Pid.P1, JoyousCelebration).execute(game_state)
         dice_before = game_state.player1.dice
         game_state = step_action(game_state, Pid.P1, CardAction(
             card=JoyousCelebration,

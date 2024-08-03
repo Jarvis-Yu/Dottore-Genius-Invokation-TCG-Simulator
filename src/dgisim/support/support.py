@@ -482,9 +482,10 @@ class MamereSupport(Support, stt._UsageStatus):
                 if issubclass(card, self._CARD_CATEGORIES) and card is not self._MAMERE_CARD
             ]
             return [
-                eft.PrivateAddCardEffect(
+                eft.AddCardEffect(
                     pid=source.pid,
                     card=choice(card_pool),
+                    public=False,
                 )
             ], replace(self, usages=-1, triggered=False, activated=False)
         elif signal is TriggeringSignal.ROUND_END and not self.activated:

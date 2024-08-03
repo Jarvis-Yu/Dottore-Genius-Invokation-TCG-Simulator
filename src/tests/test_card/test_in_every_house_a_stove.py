@@ -5,7 +5,7 @@ from .common_imports import *
 class TestInEveryHouseAStove(unittest.TestCase):
     def test_first_round_behaviour(self):
         base_state = ACTION_TEMPLATE
-        base_state = PublicAddCardEffect(Pid.P1, InEveryHouseAStove).execute(base_state)
+        base_state = AddCardEffect(Pid.P1, InEveryHouseAStove).execute(base_state)
 
         # round 1 with 1 kind of 2 talent cards should not trigger
         game_state = replace_entire_deck(base_state, Pid.P1, Cards({
@@ -52,7 +52,7 @@ class TestInEveryHouseAStove(unittest.TestCase):
 
     def test_2plus_behaviour(self):
         base_state = ACTION_TEMPLATE
-        base_state = PublicAddCardEffect(Pid.P1, InEveryHouseAStove).execute(base_state)
+        base_state = AddCardEffect(Pid.P1, InEveryHouseAStove).execute(base_state)
         base_state = replace_entire_deck(base_state, Pid.P1, Cards({
             InEveryHouseAStove: 1,
             Paimon: 255,

@@ -6,7 +6,7 @@ class TestFavoniusSword(unittest.TestCase):
     def test_behaviour(self):
         base_state = ONE_ACTION_TEMPLATE
         for _ in range(3):
-            base_state = PublicAddCardEffect(Pid.P1, FavoniusSword).execute(base_state)
+            base_state = AddCardEffect(Pid.P1, FavoniusSword).execute(base_state)
 
         base_state = replace_character(base_state, Pid.P1, Keqing, char_id=1)
         base_state = silent_fast_swap(base_state, Pid.P1, char_id=1)

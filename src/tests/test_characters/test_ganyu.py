@@ -57,7 +57,7 @@ class TestGanyu(unittest.TestCase):
         self.assertFalse(p2c3.elemental_aura.has_aura())
 
         # test skill2 is treated as normal attack
-        game_state = PublicAddCardEffect(Pid.P1, JueyunGuoba).execute(game_state)
+        game_state = AddCardEffect(Pid.P1, JueyunGuoba).execute(game_state)
         game_state = AddCombatStatusEffect(Pid.P1, RainbowBladeworkStatus).execute(game_state)
         game_state = step_action(game_state, Pid.P2, EndRoundAction())
         game_state = step_action(game_state, Pid.P1, CardAction(

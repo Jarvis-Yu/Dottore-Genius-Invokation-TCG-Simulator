@@ -317,7 +317,7 @@ class ActionPhase(ph.Phase):
         assert new_dice.is_legal()
 
         # Card
-        new_effects.append(PublicRemoveCardEffect(pid, card))
+        new_effects.append(RemoveCardEffect(pid, card))
         if card.is_combat_action() and dice.is_even():
             from ...status.status import ChargedAttackStatus
             new_effects.append(UpdateHiddenStatusEffect(

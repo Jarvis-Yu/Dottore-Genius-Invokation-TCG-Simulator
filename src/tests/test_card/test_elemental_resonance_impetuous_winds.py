@@ -4,7 +4,7 @@ from .common_imports import *
 
 
 class TestElementalImpetuousWinds(unittest.TestCase):
-    BASE_GAME = PublicAddCardEffect(
+    BASE_GAME = AddCardEffect(
         Pid.P1, card=ElementalResonanceImpetuousWinds,
     ).execute(ACTION_TEMPLATE)
 
@@ -23,7 +23,7 @@ class TestElementalImpetuousWinds(unittest.TestCase):
     def test_status_behaviour(self):
         base_state = self.BASE_GAME
         for i in range(3):
-            base_state = PublicAddCardEffect(
+            base_state = AddCardEffect(
                 Pid.P1, ElementalResonanceImpetuousWinds
             ).execute(base_state)
 
