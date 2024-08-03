@@ -1,7 +1,7 @@
 Available Cards
 ===============
 
-200 of 334 cards in Genius Invokation TCG are available in the simulator.
+201 of 334 cards in Genius Invokation TCG are available in the simulator.
 (excluding character cards which are not counted as cards in ``dgisim``)
 
 Equipment Cards
@@ -165,6 +165,7 @@ Item Card
 Location Card
 ^^^^^^^^^^^^^
 
+* Central Laboratory Ruins
 * Dawn Winery
 * Gandharva Ville
 * Golden House

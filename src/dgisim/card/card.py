@@ -221,6 +221,7 @@ __all__ = [
     "SeedDispensary",
     "TreasureSeekingSeelie",
     ## Location ##
+    "CentralLaboratoryRuins",
     "DawnWinery",
     "GandharvaVille",
     "GoldenHouse",
@@ -4101,6 +4102,11 @@ class TreasureSeekingSeelie(ItemCard):
 # >>>>>>>>>>>>>>>>>>>> Support Cards / Item Cards >>>>>>>>>>>>>>>>>>>>
 
 # <<<<<<<<<<<<<<<<<<<< Support Cards / Location Cards <<<<<<<<<<<<<<<<<<<<
+
+
+class CentralLaboratoryRuins(LocationCard):
+    _DICE_COST = AbstractDice({Element.OMNI: 1})
+    _SUPPORT_STATUS = sp.CentralLaboratoryRuinsSupport
 
 
 class DawnWinery(LocationCard):

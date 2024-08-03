@@ -87,6 +87,7 @@ __all__ = [
 
     # Broadcast Effect
     "BroadcastCardDrawEffect",
+    "BroadcastCardDiscardEffect",
     "BroadcastDamageEffect",
     "BroadcastHealingEffect",
     "BroadcastStatusRemovalEffect",
@@ -108,10 +109,11 @@ __all__ = [
     "DrawRandomCardOfTypeEffect",
     "AddCardEffect",
     "RemoveCardEffect",
+    "DiscardCardEffect",
     "RemoveAllCardEffect",
     "PublicAddDeckCardRandomEffect",
     "PublicAddDeckCardEvenEffect",
-    "PrivateRemoveDeckCardTopEffect",
+    "PrivateDiscardDeckCardTopEffect",
     "AddDiceEffect",
     "RemoveDiceEffect",
     "AddCharacterStatusEffect",
@@ -832,6 +834,19 @@ class BroadcastCardDrawEffect(BroadcastEffect):
             pid=self.drawer_pid,
             signal=TriggeringSignal.POST_CARD_DRAW,
             detail=CardIEvent(player=self.drawer_pid, card=self.card),
+        ).execute(game_state)
+
+
+@dataclass(frozen=True, repr=False)
+class BroadcastCardDiscardEffect(BroadcastEffect):
+    owner_pid: Pid
+    card: type[Card]
+
+    def execute(self, game_state: GameState) -> GameState:
+        return AllStatusTriggererEffect(
+            pid=self.owner_pid,
+            signal=TriggeringSignal.POST_CARD_DISCARD,
+            detail=CardIEvent(player=self.owner_pid, card=self.card),
         ).execute(game_state)
 
 
@@ -1691,6 +1706,33 @@ class RemoveCardEffect(DirectEffect):
                 lambda cs: cs.add(card) if self.public else cs
             ).build()
         ).build()
+
+
+@dataclass(frozen=True, repr=False)
+class DiscardCardEffect(DirectEffect):
+    pid: Pid
+    card: type[Card]
+    public: bool = True
+
+    def execute(self, game_state: GameState) -> GameState:
+        pid = self.pid
+        card = self.card
+        hand_cards = game_state.get_player(pid).hand_cards
+        if not hand_cards.contains(card):  # pragma: no cover
+            return game_state
+        return game_state.factory().f_player(
+            pid,
+            lambda p: p.factory().f_hand_cards(
+                lambda cs: cs.remove(card)
+            ).f_publicly_used_cards(
+                lambda cs: cs.add(card) if self.public else cs
+            ).build()
+        ).f_common_effect_stack(
+            lambda es: es.push_left(BroadcastCardDiscardEffect(
+                owner_pid=self.pid,
+                card=self.card,
+            ))
+        ).build()
         
 
 @dataclass(frozen=True, repr=False)
@@ -1750,7 +1792,7 @@ class PublicAddDeckCardEvenEffect(DirectEffect):
 
 
 @dataclass(frozen=True, repr=False)
-class PrivateRemoveDeckCardTopEffect(DirectEffect):
+class PrivateDiscardDeckCardTopEffect(DirectEffect):
     pid: Pid
 
     def execute(self, game_state: GameState) -> GameState:
@@ -1758,6 +1800,11 @@ class PrivateRemoveDeckCardTopEffect(DirectEffect):
         return game_state.factory().f_player(
             self.pid,
             lambda p: p.factory().deck_cards(new_deck).build()
+        ).f_common_effect_stack(
+            lambda es: es if popped_card is None else es.push_left(BroadcastCardDiscardEffect(
+                owner_pid=self.pid,
+                card=popped_card,
+            ))
         ).build()
 
 

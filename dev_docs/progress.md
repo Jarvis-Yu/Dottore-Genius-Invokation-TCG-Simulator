@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (48/95 implemented)](#character-4895-implemented)
-  - [Card (200/334 implemented)](#card-200334-implemented)
+  - [Card (201/334 implemented)](#card-201334-implemented)
 
 ## Character (48/95 implemented)
 
@@ -97,7 +97,7 @@ all I need now is to implement each card and character.
   - [x] Stonehide Lawachurl
   - [ ] Yun Jin
 
-## Card (200/334 implemented)
+## Card (201/334 implemented)
 
 - [ ] Equipment Card (96/177):
   - [ ] Talent Card:
@@ -224,7 +224,7 @@ all I need now is to implement each card and character.
     - [x] Vourukasha's Glow
     - [x] Wine-Stained Tricorne
     - [x] Witch's Scorching Hat
-- [ ] Support Card (36/56):
+- [ ] Support Card (37/56):
   - [ ] Companion Card:
     - [x] Chang the Ninth
     - [x] Chef Mao
@@ -254,7 +254,7 @@ all I need now is to implement each card and character.
     - [x] Seed Dispensary
     - [x] Treasure-Seeking Seelie
   - [ ] Location Card:
-    - [ ] Central Laboratory Ruins
+    - [x] Central Laboratory Ruins
     - [x] Dawn Winery
     - [ ] Fortress of Meropide
     - [x] Gandharva Ville

@@ -5478,7 +5478,7 @@ class BurstScanStatus(CombatStatus, _UsageStatus):
                 if deck_top_card is None:
                     return [], self
                 effects.extend((
-                    eft.PrivateRemoveDeckCardTopEffect(
+                    eft.PrivateDiscardDeckCardTopEffect(
                         pid=source.pid,
                     ),
                     eft.ReferredDamageEffect(

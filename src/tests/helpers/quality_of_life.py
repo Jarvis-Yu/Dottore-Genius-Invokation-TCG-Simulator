@@ -1228,3 +1228,16 @@ def add_summon(game_state: GameState, pid: Pid, summon: type[Summon]) -> GameSta
             lambda sms: sms.add_summon(summon)
         ).build()
     ).build()
+
+
+def tune_elem(
+        game_state: GameState, pid: Pid, elem: Element,
+        card: None | type[Card] = None,
+        observe: bool = False,
+) -> GameState:
+    if card is None:
+        card = game_state.get_player(pid).hand_cards.ordered_cards[0]
+    return step_action(game_state, pid, ElementalTuningAction(
+        card=card,
+        dice_elem=elem,
+    ), observe=observe)

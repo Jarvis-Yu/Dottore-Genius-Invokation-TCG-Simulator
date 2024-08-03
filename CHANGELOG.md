@@ -53,6 +53,7 @@
       - Red Feather Fan
       - Seed Dispensary
     - Location Cards:
+      - Central Laboratory Ruins
       - Dawn Winery
       - Gandharva Ville
       - Golden House

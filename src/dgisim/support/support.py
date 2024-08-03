@@ -71,6 +71,7 @@ __all__ = [
     "TreasureSeekingSeelieSupport",
 
     ## Locations ##
+    "CentralLaboratoryRuinsSupport",
     "DawnWinerySupport",
     "GandharvaVilleSupport",
     "GoldenHouseSupport",
@@ -1119,10 +1120,42 @@ class TreasureSeekingSeelieSupport(Support, stt._UsageLivingStatus):
 
 
 @dataclass(frozen=True, kw_only=True)
+class CentralLaboratoryRuinsSupport(Support, stt._UsageLivingStatus):
+    usages: int = 0
+    MAX_USAGES: ClassVar[int] = 9
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_CARD_DISCARD,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.POST_CARD_DISCARD:
+            assert isinstance(detail, CardIEvent)
+            if detail.player is source.pid:
+                effects: list[eft.Effect] = []
+                next_usages = self.usages + 1
+                if next_usages % 3 == 0:
+                    effects.append(eft.AddDiceEffect(
+                        source=source.with_status(type(self)),
+                        pid=source.pid,
+                        element=Element.OMNI,
+                        num=1,
+                    ))
+                if next_usages == self.MAX_USAGES:
+                    new_self = None
+                else:
+                    new_self = replace(self, usages=1)
+                return effects, new_self
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
 class DawnWinerySupport(Support, stt._UsageLivingStatus):
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2
-
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
     ))

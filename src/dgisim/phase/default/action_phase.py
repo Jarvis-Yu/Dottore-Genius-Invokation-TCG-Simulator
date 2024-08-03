@@ -374,6 +374,10 @@ class ActionPhase(ph.Phase):
             assert False
             return None
         effects: list[Effect] = [
+            BroadcastCardDiscardEffect(
+                owner_pid=pid,
+                card=action.card,
+            ),
             AllStatusTriggererEffect(
                 pid,
                 TriggeringSignal.POST_ANY,
@@ -523,7 +527,7 @@ class ActionPhase(ph.Phase):
     ) -> None | GameState:
         # check action arrived at the right state
         if pid is not self.waiting_for(game_state):
-            raise Exception(f"Unexpected action from {pid} at game state:\n{game_state}")
+            raise Exception(f"Unexpected action {action} from {pid} at game state:\n{game_state}")
 
         # check death swap phase
         if game_state.death_swapping(pid):

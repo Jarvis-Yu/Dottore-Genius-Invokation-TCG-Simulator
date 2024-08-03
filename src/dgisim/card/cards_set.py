@@ -209,6 +209,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     SeedDispensary,
     TreasureSeekingSeelie,
     ## Support Card / Location ##
+    CentralLaboratoryRuins,
     DawnWinery,
     GandharvaVille,
     GoldenHouse,

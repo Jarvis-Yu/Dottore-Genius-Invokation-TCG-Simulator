@@ -4594,7 +4594,7 @@ class Xinyan(Character):
                 if card._DICE_COST.num_dice() == highest_cost
             ]
             effects.append(
-                eft.RemoveCardEffect(
+                eft.DiscardCardEffect(
                     pid=source.pid,
                     card=random.choice(satisfiable_cards),
                     public=False,
@@ -4632,7 +4632,7 @@ class Xinyan(Character):
         ]
         for hand in hands:
             effects.append(
-                eft.RemoveCardEffect(
+                eft.DiscardCardEffect(
                     pid=source.pid,
                     card=hand,
                     public=False,

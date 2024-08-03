@@ -246,6 +246,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.StormterrorsLair, 264),
         (card.OperaEpiclese, 265),
         (card.WeepingWillowOfTheLake, 266),
+        (card.CentralLaboratoryRuins, 267),
 
         #### 2.2 Companion Card 0350 ####
         (card.Paimon, 350),
@@ -557,7 +558,8 @@ EFFECT_MAPPING: dict[type["Effect"], int] = HashableDict({
         (effect.RemoveAllCardEffect, 284),
         (effect.PublicAddDeckCardRandomEffect, 285),
         (effect.PublicAddDeckCardEvenEffect, 286),
-        (effect.PrivateRemoveDeckCardTopEffect, 287),
+        (effect.PrivateDiscardDeckCardTopEffect, 287),
+        (effect.DiscardCardEffect, 288),
 
         #### 4.5 Dice Effect 290 ####
         (effect.AddDiceEffect, 290),
@@ -580,6 +582,7 @@ EFFECT_MAPPING: dict[type["Effect"], int] = HashableDict({
         (effect.BroadcastHealingEffect, 402),
         (effect.BroadcastStatusRemovalEffect, 403),
         (effect.BroadcastCardDrawEffect, 404),
+        (effect.BroadcastCardDiscardEffect, 405),
         #### End 500 ####
     )
 })
@@ -1054,6 +1057,7 @@ SUPP_MAPPING: dict[type["Support"], int] = HashableDict({
         (support.OperaEpicleseSupport, 15),
         (support.WeepingWillowOfTheLakeSupport, 16),
         (support.TheMausoleumOfKingDeshretSupport, 17),
+        (support.CentralLaboratoryRuinsSupport, 18),
 
         #### Companion 100 ####
         (support.PaimonSupport, 100),
