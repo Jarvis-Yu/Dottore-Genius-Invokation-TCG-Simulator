@@ -91,7 +91,7 @@ CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
 
         #### Pyro 200 ####
         # (char.Diluc, 200),
-        # (char.Xiangling, 201),
+        (char.Xiangling, 201),
         (char.Bennett, 202),
         (char.Yoimiya, 203),
         (char.FatuiPyroAgent, 204),
@@ -391,7 +391,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
 
         #### 4.3 Pyro 1125 ####
         # Diluc 1125
-        # Xiangling 1126
+        (card.Crossfire, 1126),
         (card.GrandExpectation, 1127),
         (card.NaganoharaMeteorSwarm, 1128),
         (card.PaidInFull, 1129),
@@ -816,6 +816,8 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         #### 4.3 Pyro Character Status 4600 ####
         ## Diluc 4600 ##
         ## Xiangling 4620 ##
+        (status.CrossfireStatus, 4620),
+        (status.PyronadoStatus, 4621),
         ## Bennett 4640 ##
         (status.GrandExpectationStatus, 4640),
         (status.InspirationFieldStatus, 4641),
@@ -991,7 +993,7 @@ SUMM_MAPPING: dict[type["Summon"], int] = HashableDict({
         # (summon.GardenOfPuritySummon, 108),
 
         #### Pyro 200 ####
-        # (summon.GuobaSummon, 200),
+        (summon.GuobaSummon, 200),
         (summon.BurningFlameSummon, 201),
         (summon.HilichurlBerserkerSummon, 202),
         # (summon.BaronBunnySummon, 203),

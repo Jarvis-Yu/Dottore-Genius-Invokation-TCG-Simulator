@@ -50,6 +50,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     Tighnari,
     Venti,
     Wanderer,
+    Xiangling,
     Xingqiu,
     Xinyan,
     YaeMiko,

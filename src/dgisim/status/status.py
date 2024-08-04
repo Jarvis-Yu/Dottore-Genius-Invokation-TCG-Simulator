@@ -350,6 +350,7 @@ __all__ = [
     "GalesOfReverieStatus",
     "WindfavoredStatus",
     ## Xiangling ##
+    "CrossfireStatus",
     "PyronadoStatus",
     ## Xingqiu ##
     "RainSwordStatus",
@@ -7335,15 +7336,24 @@ class WindfavoredStatus(CharacterStatus, _UsageStatus):
 #### Xiangling ####
 
 @dataclass(frozen=True, kw_only=True)
+class CrossfireStatus(TalentEquipmentStatus):
+    @cached_classproperty
+    def CARD(cls) -> type[crd.TalentEquipmentCard]:
+        from ..card.card import Crossfire
+        return Crossfire
+
+
+@dataclass(frozen=True, kw_only=True)
 class PyronadoStatus(CombatStatus, _UsageStatus):
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2
     DMG_AMOUNT: ClassVar[int] = 2
     DMG_ELEM: ClassVar[Element] = Element.PYRO
-
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.POST_SKILL,
     ))
+    @cached_classproperty
+    def _XIANGLING(cls): from ..character.character import Xiangling; return Xiangling
 
     @override
     def _react_to_signal(
@@ -7352,7 +7362,13 @@ class PyronadoStatus(CombatStatus, _UsageStatus):
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.POST_SKILL:
             assert isinstance(detail, SkillIEvent)
-            if detail.source.pid is source.pid:
+            if (
+                    detail.source.pid is source.pid
+                    and not (
+                        isinstance(game_state.get_character_target(detail.source), self._XIANGLING)
+                        and detail.skill_type.is_elemental_burst()
+                    )
+            ):
                 return [eft.ReferredDamageEffect(
                     source=source,
                     target=DynamicCharacterTarget.OPPO_ACTIVE,

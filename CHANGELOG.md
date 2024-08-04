@@ -20,6 +20,7 @@
   - Nilou
   - Stonehide Lawachurl
   - Thoma
+  - Xiangling
   - Xinyan
   - Yaoyao
   - Yelan
@@ -30,6 +31,7 @@
       - Beneficent
       - Cicin's Cold Glare
       - Conclusive Ovation
+      - Crossfire
       - Light's Remit
       - Pulsating Witch
       - Rockin' in a Flaming World

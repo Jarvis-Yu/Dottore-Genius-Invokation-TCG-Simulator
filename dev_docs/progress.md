@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (49/95 implemented)](#character-4995-implemented)
-  - [Card (202/334 implemented)](#card-202334-implemented)
+  - [Character (50/95 implemented)](#character-5095-implemented)
+  - [Card (203/334 implemented)](#card-203334-implemented)
 
-## Character (49/95 implemented)
+## Character (50/95 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -19,7 +19,7 @@ all I need now is to implement each card and character.
   - [x] Klee
   - [x] Lyney
   - [x] Thoma
-  - [ ] Xiangling
+  - [x] Xiangling
   - [x] Xinyan
   - [x] Yoimiya
 - [ ] Hydro:
@@ -97,9 +97,9 @@ all I need now is to implement each card and character.
   - [x] Stonehide Lawachurl
   - [ ] Yun Jin
 
-## Card (202/334 implemented)
+## Card (203/334 implemented)
 
-- [ ] Equipment Card (97/177):
+- [ ] Equipment Card (98/177):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
@@ -108,6 +108,7 @@ all I need now is to implement each card and character.
     - [x] Cicin's Cold Glare
     - [x] Cold-Blooded Strike
     - [x] Conclusive Ovation
+    - [x] Crossfire
     - [x] Descent of Divinity
     - [x] Embrace of Winds
     - [x] Floral Sidewinder

@@ -324,6 +324,8 @@ __all__ = [
     "EmbraceOfWinds",
     ## Wanderer ##
     "GalesOfReverie",
+    ## Xiangling ##
+    "Crossfire",
     ## Xingqiu ##
     "TheScentRemained",
     ## Xinyan ##
@@ -4712,6 +4714,15 @@ class GalesOfReverie(_TalentEquipmentSkillCard):
     _DICE_COST = AbstractDice({Element.ANEMO: 4})
     _CHARACTER = chr.Wanderer
     _EQUIPMENT_STATUS = stt.GalesOfReverieStatus
+    _SKILL = CharacterSkill.SKILL2
+
+
+#### Xiangling ####
+
+class Crossfire(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDice({Element.PYRO: 3})
+    _CHARACTER = chr.Xiangling
+    _EQUIPMENT_STATUS = stt.CrossfireStatus
     _SKILL = CharacterSkill.SKILL2
 
 

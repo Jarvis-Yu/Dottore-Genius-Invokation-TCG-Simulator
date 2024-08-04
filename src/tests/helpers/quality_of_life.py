@@ -1123,6 +1123,11 @@ class _TempTestAutoRemoveAuraStatus(CombatStatus):
                         and DendroCoreStatus not in game_state.get_player(detail.dmg.target.pid.other).combat_statuses
                 ):
                     effects.append(RemoveCombatStatusEffect(detail.dmg.target.pid.other, DendroCoreStatus))
+                elif detail.dmg.element is Element.DENDRO:
+                    if BountifulCoreSummon not in game_state.get_player(detail.dmg.target.pid.other).summons:
+                        effects.append(RemoveSummonEffect(detail.dmg.target.pid.other, BountifulCoreSummon))
+                    elif game_state.get_player(detail.dmg.target.pid.other).summons.just_find(BountifulCoreSummon).usages < BountifulCoreSummon.MAX_USAGES:
+                        effects.append(UpdateSummonEffect(detail.dmg.target.pid.other, BountifulCoreSummon(usages=-1)))
                 return effects, self
         return [], self
 
