@@ -19,12 +19,14 @@
   - Lyney
   - Nilou
   - Stonehide Lawachurl
+  - Thoma
   - Xinyan
   - Yaoyao
   - Yelan
 - New Cards:
   - Equipment Cards:
     - Talent Cards:
+      - A Subordinate's Skills
       - Beneficent
       - Cicin's Cold Glare
       - Conclusive Ovation

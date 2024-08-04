@@ -316,6 +316,8 @@ __all__ = [
     "StonehideReforged",
     ## Tartaglia ##
     "AbyssalMayhemHydrospout",
+    ## Thoma ##
+    "ASubordinatesSkills",
     ## Tighnari ##
     "KeenSight",
     ## Venti ##
@@ -4674,6 +4676,16 @@ class AbyssalMayhemHydrospout(_TalentEquipmentSkillCard):
     _CHARACTER = chr.Tartaglia
     _EQUIPMENT_STATUS = stt.AbyssalMayhemHydrospoutStatus
     _SKILL = CharacterSkill.SKILL2
+
+
+#### Thoma ####
+
+
+class ASubordinatesSkills(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDice({Element.PYRO: 3})
+    _CHARACTER = chr.Thoma
+    _EQUIPMENT_STATUS = stt.ASubordinatesSkillsStatus
+    _SKILL = CharacterSkill.ELEMENTAL_BURST
 
 
 #### Tighnari ####

@@ -73,6 +73,7 @@ __all__ = [
     "Shenhe",
     "StonehideLawachurl",
     "Tartaglia",
+    "Thoma",
     "Tighnari",
     "Venti",
     "Wanderer",
@@ -4156,7 +4157,7 @@ class Tartaglia(Character):
         effects: list[eft.Effect] = [
             eft.EnergyDrainEffect(
                 target=source,
-                amount=3,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -4220,6 +4221,96 @@ class Tartaglia(Character):
         )
 
 
+class Thoma(Character):
+    _ELEMENT = Element.PYRO
+    _WEAPON_TYPE = WeaponType.POLEARM
+    _TALENT_STATUS = stt.ASubordinatesSkillsStatus
+    _FACTIONS = frozenset((Faction.INAZUMA,))
+
+    _SKILL1_COST = AbstractDice({
+        Element.PYRO: 1,
+        Element.ANY: 2,
+    })
+    _SKILL2_COST = AbstractDice({
+        Element.PYRO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDice({
+        Element.PYRO: 3,
+    })
+
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        )
+
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.PYRO,
+                damage=2,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+            eft.AddCombatStatusEffect(
+                target_pid=source.pid,
+                status=stt.BlazingBarrierStatus,
+            ),
+        )
+
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        effects: list[eft.Effect] = [
+            eft.EnergyDrainEffect(
+                target=source,
+                amount=self.max_energy,
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.PYRO,
+                damage=2,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            eft.AddCombatStatusEffect(
+                target_pid=source.pid,
+                status=stt.BlazingBarrierStatus,
+            ),
+        ]
+        if not self.talent_equipped():
+            effects.append(
+                eft.AddCombatStatusEffect(
+                    target_pid=source.pid,
+                    status=stt.ScorchingOoyoroiStatus,
+                )
+            )
+        else:
+            effects.append(
+                eft.UpdateCombatStatusEffect(
+                    target_pid=source.pid,
+                    status=stt.ScorchingOoyoroiStatus(usages=3),
+                )
+            )
+        return tuple(effects)
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=2,
+            hiddens=stts.Statuses(()),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
+
 class Tighnari(Character):
     _ELEMENT = Element.DENDRO
     _WEAPON_TYPE = WeaponType.BOW
@@ -4264,7 +4355,7 @@ class Tighnari(Character):
         return (
             eft.EnergyDrainEffect(
                 target=source,
-                amount=2,
+                amount=self.max_energy,
             ),
             eft.ReferredDamageEffect(
                 source=source,
@@ -4283,7 +4374,7 @@ class Tighnari(Character):
         )
 
     @classmethod
-    def from_default(cls, id: int = -1) -> Tighnari:
+    def from_default(cls, id: int = -1) -> Self:
         return cls(
             id=id,
             alive=True,
@@ -4553,7 +4644,7 @@ class Xingqiu(Character):
 class Xinyan(Character):
     _ELEMENT = Element.PYRO
     _WEAPON_TYPE = WeaponType.CLAYMORE
-    _TALENT_STATUS = None
+    _TALENT_STATUS = stt.RockinInAFlamingWorldStatus
     _FACTIONS = frozenset((Faction.LIYUE,))
 
     _SKILL1_COST = AbstractDice({

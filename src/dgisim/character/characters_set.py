@@ -46,6 +46,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     Shenhe,
     StonehideLawachurl,
     Tartaglia,
+    Thoma,
     Tighnari,
     Venti,
     Wanderer,

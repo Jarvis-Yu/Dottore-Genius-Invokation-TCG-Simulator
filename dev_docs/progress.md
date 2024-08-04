@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (48/95 implemented)](#character-4895-implemented)
-  - [Card (201/334 implemented)](#card-201334-implemented)
+  - [Character (49/95 implemented)](#character-4995-implemented)
+  - [Card (202/334 implemented)](#card-202334-implemented)
 
-## Character (48/95 implemented)
+## Character (49/95 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -18,7 +18,7 @@ all I need now is to implement each card and character.
   - [x] Hu Tao
   - [x] Klee
   - [x] Lyney
-  - [ ] Thoma
+  - [x] Thoma
   - [ ] Xiangling
   - [x] Xinyan
   - [x] Yoimiya
@@ -97,12 +97,13 @@ all I need now is to implement each card and character.
   - [x] Stonehide Lawachurl
   - [ ] Yun Jin
 
-## Card (201/334 implemented)
+## Card (202/334 implemented)
 
-- [ ] Equipment Card (96/177):
+- [ ] Equipment Card (97/177):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
+    - [x] A Subordinate's Skills
     - [x] Beneficent
     - [x] Cicin's Cold Glare
     - [x] Cold-Blooded Strike
@@ -165,11 +166,11 @@ all I need now is to implement each card and character.
       - [ ] Tome of the Eternal Flow
       - [ ] Tulaytullah's Remembrance
     - [ ] Claymore:
-      - [ ] "Ultimate Overlord's Mega Magic Sword"
       - [ ] Beacon of the Reed Sea
       - [ ] Forest Regalia
       - [x] Sacrificial Greatsword
       - [x] The Bell
+      - [ ] "Ultimate Overlord's Mega Magic Sword"
       - [x] White Iron Greatsword
       - [x] Wolf's Gravestone
     - [ ] Polearm:

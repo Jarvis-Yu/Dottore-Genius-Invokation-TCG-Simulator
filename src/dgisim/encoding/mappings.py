@@ -103,6 +103,7 @@ CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
         (char.Dehya, 210),
         (char.Lyney, 211),
         (char.Xinyan, 212),
+        (char.Thoma, 213),
 
         #### Elctro 300 ####
         (char.Fischl, 300),
@@ -402,6 +403,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.StalwartAndTrue, 1135),
         (card.ConclusiveOvation, 1136),
         (card.RockinInAFlamingWorld, 1137),
+        (card.ASubordinatesSkills, 1138),
 
         #### 4.4 Electro 1225 ####
         (card.StellarPredator, 1225),
@@ -847,6 +849,10 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.RockinInAFlamingWorldStatus, 4840),
         (status.FestiveFiresStatus, 4841),
         (status.ShieldOfPassionStatus, 4842),
+        ## Thoma 4860 ##
+        (status.ASubordinatesSkillsStatus, 4860),
+        (status.BlazingBarrierStatus, 4861),
+        (status.ScorchingOoyoroiStatus, 4862),
 
         #### 4.4 Electro Character Status 6600 ####
         ## Fischl 6600 ##
