@@ -54,6 +54,7 @@ __all__ = [
     "KaedeharaKazuha",
     "Kaeya",
     "KamisatoAyaka",
+    "KamisatoAyato",
     "Kaveh",
     "Keqing",
     "Klee",
@@ -2370,6 +2371,80 @@ class KamisatoAyaka(Character):
             energy=0,
             max_energy=3,
             hiddens=stts.Statuses((stt.KamisatoArtSenhoStatus(),)),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
+class KamisatoAyato(Character):
+    _ELEMENT = Element.HYDRO
+    _WEAPON_TYPE = WeaponType.SWORD
+    _TALENT_STATUS = stt.KyoukaFuushiStatus
+    _FACTIONS = frozenset((Faction.INAZUMA,))
+
+    _SKILL1_COST = AbstractDice({
+        Element.HYDRO: 1,
+        Element.ANY: 2,
+    })
+    _SKILL2_COST = AbstractDice({
+        Element.HYDRO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDice({
+        Element.HYDRO: 3,
+    })
+
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        )
+
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.HYDRO,
+                damage=2,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+            eft.AddCharacterStatusEffect(
+                target=source,
+                status=stt.TakimeguriKankaStatus,
+            ),
+        )
+
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                amount=self.max_energy,
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.HYDRO,
+                damage=1,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=sm.GardenOfPuritySummon,
+            ),
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=2,
+            hiddens=stts.Statuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
         )

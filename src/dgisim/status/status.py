@@ -261,6 +261,8 @@ __all__ = [
     "KamisatoAyakaCryoInfusionEnhancedStatus",
     "KamisatoAyakaCryoInfusionStatus",
     "KantenSenmyouBlessingStatus",
+    ## Kamisato Ayato ##
+    "TakimeguriKankaStatus",
     ## Kaveh ##
     "TheArtOfBudgetingStatus",
     "BurstScanStatus",
@@ -5446,18 +5448,12 @@ class KantenSenmyouBlessingStatus(TalentEquipmentStatus, _UsageStatus):
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.ROUND_END,
     ))
-
     @cached_classproperty
-    def CARD(cls) -> type[crd.TalentEquipmentCard]:
-        from ..card.card import KantenSenmyouBlessing
-        return KantenSenmyouBlessing
+    def CARD(cls): from ..card.card import KantenSenmyouBlessing; return KantenSenmyouBlessing
 
     @override
     def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: PreprocessableEvent,
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.SWAP_COST_OMNI:
@@ -5481,6 +5477,53 @@ class KantenSenmyouBlessingStatus(TalentEquipmentStatus, _UsageStatus):
         if signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
             return [], replace(self, usages=self.MAX_USAGES)
         return [], self
+
+
+#### Kamisato Ayato ####
+
+@dataclass(frozen=True, kw_only=True)
+class KyoukaFuushiStatus(TalentEquipmentStatus):
+    @cached_classproperty
+    def CARD(cls): from ..card.card import KyoukaFuushi; return KyoukaFuushi
+
+
+@dataclass(frozen=True, kw_only=True)
+class TakimeguriKankaStatus(CharacterStatus, _UsageStatus):
+    usages: int = 3
+    MAX_USAGES: ClassVar[int] = 3
+    @cached_classproperty
+    def _AYATO(cls): from ..character.character import KamisatoAyato; return KamisatoAyato
+
+    @override
+    def _preprocess(
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_ELEMENT:
+            assert isinstance(item, DmgPEvent)
+            if (
+                    item.dmg.source == status_source
+                    and item.dmg.damage_type.direct_normal_attack()
+                    and item.dmg.element is Element.PHYSICAL
+                    and item.dmg.damage_type.can_boost
+            ):
+                return item.convert_element(Element.HYDRO), self
+        elif signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            if (
+                    item.dmg.source == status_source
+                    and item.dmg.damage_type.direct_normal_attack()
+                    and item.dmg.damage_type.can_boost
+            ):
+                dmg_boost = 1
+                char_target = game_state.get_character_target(item.dmg.target)
+                if char_target is not None and char_target.hp <= 6 and any(
+                        isinstance(char, self._AYATO) and char.talent_equipped()
+                        for char in game_state.get_player(status_source.pid).characters
+                ):
+                    dmg_boost += 2
+                return item.delta_damage(dmg_boost), replace(self, usages=self.usages-1)
+        return item, self
 
 
 #### Kaveh ####

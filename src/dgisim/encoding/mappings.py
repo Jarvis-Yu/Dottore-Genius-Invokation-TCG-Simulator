@@ -83,7 +83,7 @@ CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
         (char.RhodeiaOfLoch, 103),
         # (char.MirrorMaiden, 104),
         (char.SangonomiyaKokomi, 105),
-        # (char.KamisatoAyato, 106),
+        (char.KamisatoAyato, 106),
         (char.Tartaglia, 107),
         # (char.Candice, 108),
         (char.Nilou, 109),
@@ -383,7 +383,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.StreamingSurge, 1028),
         # MirrorMaiden 1029
         (card.TamakushiCasket, 1030),
-        # KamisatoAyato 1031
+        (card.KyoukaFuushi, 1031),
         (card.AbyssalMayhemHydrospout, 1032),
         # Candice 1033
         (card.TheStarrySkiesTheirFlowersRain, 1034),
@@ -795,6 +795,8 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.TamakushiCasketStatus, 2700),
         (status.CeremonialGarmentStatus, 2701),
         ## KamisatoAyato 2720 ##
+        (status.KyoukaFuushiStatus, 2720),
+        (status.TakimeguriKankaStatus, 2721),
         ## Tartaglia 2740 ##
         (status.AbyssalMayhemHydrospoutStatus, 2740),
         (status.MeleeStanceStatus, 2741),
@@ -991,7 +993,7 @@ SUMM_MAPPING: dict[type["Summon"], int] = HashableDict({
         (summon.HydroSamachurlSummon, 105),
         ##(summon.HealingRainSummon, 106),
         (summon.BakeKurageSummon, 107),
-        # (summon.GardenOfPuritySummon, 108),
+        (summon.GardenOfPuritySummon, 108),
 
         #### Pyro 200 ####
         (summon.GuobaSummon, 200),

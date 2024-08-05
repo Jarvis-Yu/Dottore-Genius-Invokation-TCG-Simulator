@@ -52,6 +52,7 @@ __all__ = [
     "EyeOfStormyJudgmentSummon",
     "FierySanctumFieldSummon",
     "FrostflakeSekiNoToSummon",
+    "GardenOfPuritySummon",
     "GrinMalkinHatSummon",
     "GuobaSummon",
     "HilichurlBerserkerSummon",
@@ -802,6 +803,29 @@ class FrostflakeSekiNoToSummon(_DmgPerRoundSummon):
 
 
 @dataclass(frozen=True, kw_only=True)
+class GardenOfPuritySummon(_DmgPerRoundSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    DMG: ClassVar[int] = 2
+    ELEMENT: ClassVar[Element] = Element.HYDRO
+
+    @override
+    def _preprocess(
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_PLUS:
+            assert isinstance(item, DmgPEvent)
+            if (
+                    item.dmg.source.pid is status_source.pid
+                    and item.dmg.damage_type.direct_normal_attack()
+                    and item.dmg.damage_type.can_boost
+            ):
+                return item.delta_damage(1), self
+        return item, self
+
+
+@dataclass(frozen=True, kw_only=True)
 class GrinMalkinHatSummon(_DmgPerRoundSummon):
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 2
@@ -1300,10 +1324,7 @@ class SolarIsotomaSummon(_DmgPerRoundSummon):
 
     @override
     def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: PreprocessableEvent,
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.SKILL_COST_ANY:

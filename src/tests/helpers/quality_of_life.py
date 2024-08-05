@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, replace
-from typing import Callable, ClassVar, cast, Iterable
+from typing import Callable, ClassVar, cast, Iterable, Sequence
 
 import unittest
 from typing_extensions import Self
@@ -631,6 +631,13 @@ def replace_character(
     return auto_step(game_state)
 
 
+def replace_characters(game_state: GameState, pid: Pid, chars: Sequence[None | type[Character]]) -> GameState:
+    for i, char in enumerate(chars):
+        if char is not None:
+            game_state = replace_character(game_state, pid, char, char_id=i+1)
+    return game_state
+
+
 def replace_character_make_active_add_card(
         game_state: GameState,
         pid: Pid,
@@ -1136,8 +1143,6 @@ def add_aura_remover(game_state: GameState, pid: Pid) -> GameState:
     """
     Adds a combat status that triggers on POST_DMG, that auto apply element to characters
     affacted by the damage element to remove the aura.
-
-    TODO: update when Nilou is implemented
     """
     return game_state.factory().f_player(
         pid,

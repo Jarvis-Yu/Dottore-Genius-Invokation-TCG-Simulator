@@ -277,6 +277,8 @@ __all__ = [
     "ColdBloodedStrike",
     ## KamiSato Ayaka ##
     "KantenSenmyouBlessing",
+    ## Kamisato Ayato ##
+    "KyoukaFuushi",
     ## Kaveh ##
     "TheArtOfBudgeting",
     ## Keqing ##
@@ -4434,6 +4436,15 @@ class KantenSenmyouBlessing(_TalentEquipmentAnyEventCard):
                 status=cls._EQUIPMENT_STATUS,
             ),
         )
+
+
+#### Kamisato Ayato ####
+
+class KyoukaFuushi(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDice({Element.HYDRO: 3})
+    _CHARACTER = chr.KamisatoAyato
+    _EQUIPMENT_STATUS = stt.KyoukaFuushiStatus
+    _SKILL = CharacterSkill.SKILL2
 
 
 #### Kaveh ####

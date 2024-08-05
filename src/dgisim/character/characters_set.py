@@ -27,6 +27,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     KaedeharaKazuha,
     Kaeya,
     KamisatoAyaka,
+    KamisatoAyato,
     Kaveh,
     Keqing,
     Klee,

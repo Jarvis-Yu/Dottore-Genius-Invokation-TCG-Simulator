@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (51/95 implemented)](#character-5195-implemented)
-  - [Card (204/334 implemented)](#card-204334-implemented)
+  - [Character (52/95 implemented)](#character-5295-implemented)
+  - [Card (205/334 implemented)](#card-205334-implemented)
 
-## Character (51/95 implemented)
+## Character (52/95 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -27,7 +27,7 @@ all I need now is to implement each card and character.
   - [ ] All-Devouring Narwhal
   - [x] Barbara
   - [ ] Furina
-  - [ ] Kamisato Ayato
+  - [x] Kamisato Ayato
   - [x] Mona
   - [ ] Neuvillette
   - [x] Nilou
@@ -97,9 +97,9 @@ all I need now is to implement each card and character.
   - [x] Stonehide Lawachurl
   - [ ] Yun Jin
 
-## Card (204/334 implemented)
+## Card (205/334 implemented)
 
-- [ ] Equipment Card (99/177):
+- [ ] Equipment Card (100/177):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
@@ -117,6 +117,7 @@ all I need now is to implement each card and character.
     - [x] Grand Expectation
     - [x] I Got Your Back
     - [x] Keen Sight
+    - [x] Kyouka Fuushi
     - [x] Lands of Dandelion
     - [x] Light's Remit
     - [x] Mystical Abandon

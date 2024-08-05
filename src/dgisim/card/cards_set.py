@@ -25,6 +25,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     IGotYourBack,
     KantenSenmyouBlessing,
     KeenSight,
+    KyoukaFuushi,
     LandsOfDandelion,
     LightsRemit,
     MysticalAbandon,

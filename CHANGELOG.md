@@ -14,6 +14,7 @@
   - Chongyun
   - Diona
   - Fatui Cryo Cicin Mage
+  - Kamisato Ayato
   - Kaveh
   - Layla
   - Lisa
@@ -34,6 +35,7 @@
       - Conclusive Ovation
       - Crossfire
       - Glorious Season
+      - Kyouka Fuushi
       - Light's Remit
       - Pulsating Witch
       - Rockin' in a Flaming World
