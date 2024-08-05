@@ -9,6 +9,7 @@ __all__ = [
 _DEFAULT_CHARACTERS: list[type[Character]] = [
     Albedo,
     AratakiItto,
+    Barbara,
     Bennett,
     Chongyun,
     Collei,

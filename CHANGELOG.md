@@ -10,6 +10,7 @@
 ---
 
 - New Characters:
+  - Barbara
   - Chongyun
   - Diona
   - Fatui Cryo Cicin Mage
@@ -32,6 +33,7 @@
       - Cicin's Cold Glare
       - Conclusive Ovation
       - Crossfire
+      - Glorious Season
       - Light's Remit
       - Pulsating Witch
       - Rockin' in a Flaming World

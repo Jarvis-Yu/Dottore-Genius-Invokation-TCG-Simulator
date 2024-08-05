@@ -20,6 +20,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     EmbraceOfWinds,
     FloralSidewinder,
     GalesOfReverie,
+    GloriousSeason,
     GrandExpectation,
     IGotYourBack,
     KantenSenmyouBlessing,

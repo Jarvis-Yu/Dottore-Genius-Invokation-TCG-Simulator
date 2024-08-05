@@ -36,6 +36,7 @@ __all__ = [
     # concretes
     "Albedo",
     "AratakiItto",
+    "Barbara",
     "Bennett",
     "Chongyun",
     "Collei",
@@ -789,27 +790,27 @@ class AratakiItto(Character):
 
 class Barbara(Character):
     _ELEMENT = Element.HYDRO
-    _WEAPON_TYPE = WeaponType.SWORD
-    _TALENT_STATUS = stt.GrandExpectationStatus
+    _WEAPON_TYPE = WeaponType.CATALYST
+    _TALENT_STATUS = stt.GloriousSeasonStatus
     _FACTIONS = frozenset((Faction.MONDSTADT,))
 
     _SKILL1_COST = AbstractDice({
-        Element.PYRO: 1,
+        Element.HYDRO: 1,
         Element.ANY: 2,
     })
     _SKILL2_COST = AbstractDice({
-        Element.PYRO: 3,
+        Element.HYDRO: 3,
     })
     _ELEMENTAL_BURST_COST = AbstractDice({
-        Element.PYRO: 4,
+        Element.HYDRO: 3,
     })
 
     def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
         return normal_attack_template(
             game_state=game_state,
             source=source,
-            element=Element.PHYSICAL,
-            damage=2,
+            element=Element.HYDRO,
+            damage=1,
         )
 
     def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
@@ -817,9 +818,13 @@ class Barbara(Character):
             eft.ReferredDamageEffect(
                 source=source,
                 target=DynamicCharacterTarget.OPPO_ACTIVE,
-                element=Element.PYRO,
-                damage=3,
+                element=Element.HYDRO,
+                damage=1,
                 damage_type=DamageType(elemental_skill=True),
+            ),
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=sm.MelodyLoopSummon,
             ),
         )
 
@@ -829,33 +834,18 @@ class Barbara(Character):
                 target=source,
                 amount=self.max_energy,
             ),
-            eft.ReferredDamageEffect(
-                source=source,
-                target=DynamicCharacterTarget.OPPO_ACTIVE,
-                element=Element.PYRO,
-                damage=2,
-                damage_type=DamageType(elemental_burst=True),
-            ),
         ]
-        this_player = game_state.get_player(source.pid)
-        talent_equiped = self.talent_equipped()
-        if stt.InspirationFieldStatus in this_player.combat_statuses and talent_equiped:
-            effects.append(
-                eft.RemoveCombatStatusEffect(
-                    target_pid=source.pid,
-                    status=stt.InspirationFieldStatus,
-                )
-            )
-        effects.append(
-            eft.AddCombatStatusEffect(
-                target_pid=source.pid,
-                status=(
-                    stt.InspirationFieldStatus
-                    if not talent_equiped
-                    else stt.InspirationFieldEnhancedStatus
-                )
-            )
+        alive_chars = game_state.get_player(source.pid).characters.get_required_chars(
+            activity_order=True, alive=True,
         )
+        for char in alive_chars:
+            effects.append(
+                eft.RecoverHPEffect(
+                    source=source,
+                    target=StaticTarget.from_char_id(source.pid, char.id),
+                    amount=4,
+                )
+            )
         return tuple(effects)
 
     @classmethod
@@ -866,7 +856,7 @@ class Barbara(Character):
             hp=10,
             max_hp=10,
             energy=0,
-            max_energy=2,
+            max_energy=3,
             hiddens=stts.Statuses(()),
             statuses=stts.Statuses(()),
             elemental_aura=ElementalAura.from_default(),
@@ -1300,7 +1290,7 @@ class Diona(Character):
             eft.RecoverHPEffect(
                 source=source,
                 target=source,
-                recovery=2,
+                amount=2,
             ),
             eft.AddSummonEffect(
                 target_pid=source.pid,
@@ -1940,7 +1930,7 @@ class HuTao(Character):
             eft.RecoverHPEffect(
                 source=source,
                 target=source,
-                recovery=heal,
+                amount=heal,
             ),
         )
 
@@ -2082,7 +2072,7 @@ class Jean(Character):
             effects.append(eft.RecoverHPEffect(
                 source=source,
                 target=StaticTarget.from_char_id(source.pid, character.id),
-                recovery=2,
+                amount=2,
             ))
         effects.append(
             eft.AddSummonEffect(
@@ -3659,7 +3649,7 @@ class Qiqi(Character):
                         eft.ReviveRecoverHPEffect(
                             source=source,
                             target=StaticTarget.from_char_id(source.pid, char.id),
-                            recovery=2,
+                            amount=2,
                         )
                         for char in defeated_chars
                     )
@@ -3986,7 +3976,7 @@ class SangonomiyaKokomi(Character):
             effects.append(eft.RecoverHPEffect(
                 source=source,
                 target=StaticTarget.from_char_id(source.pid, character.id),
-                recovery=1,
+                amount=1,
             ))
         effects.append(
             eft.AddCharacterStatusEffect(

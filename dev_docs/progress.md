@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (50/95 implemented)](#character-5095-implemented)
-  - [Card (203/334 implemented)](#card-203334-implemented)
+  - [Character (51/95 implemented)](#character-5195-implemented)
+  - [Card (204/334 implemented)](#card-204334-implemented)
 
-## Character (50/95 implemented)
+## Character (51/95 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -25,7 +25,7 @@ all I need now is to implement each card and character.
 - [ ] Hydro:
   - [ ] Abyss Herald: Wicked Torrents
   - [ ] All-Devouring Narwhal
-  - [ ] Barbara
+  - [x] Barbara
   - [ ] Furina
   - [ ] Kamisato Ayato
   - [x] Mona
@@ -97,9 +97,9 @@ all I need now is to implement each card and character.
   - [x] Stonehide Lawachurl
   - [ ] Yun Jin
 
-## Card (203/334 implemented)
+## Card (204/334 implemented)
 
-- [ ] Equipment Card (98/177):
+- [ ] Equipment Card (99/177):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
@@ -113,6 +113,7 @@ all I need now is to implement each card and character.
     - [x] Embrace of Winds
     - [x] Floral Sidewinder
     - [x] Gales of Reverie
+    - [x] Glorious Season
     - [x] Grand Expectation
     - [x] I Got Your Back
     - [x] Keen Sight

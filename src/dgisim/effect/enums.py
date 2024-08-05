@@ -2,6 +2,8 @@ from __future__ import annotations
 from enum import Enum
 from typing import ClassVar, TYPE_CHECKING
 
+from ..helper.quality_of_life import cached_classproperty
+
 if TYPE_CHECKING:
     from ..character.character import Character
     from ..state.enums import Pid
@@ -90,6 +92,11 @@ class DynamicCharacterTarget(Enum):
     OPPO_NEXT_OFF = 15
     OPPO_PREV_OFF = 16
 
+    @cached_classproperty
+    def _STATIC_TARGET(cls) -> type[StaticTarget]:
+        from .structs import StaticTarget
+        return StaticTarget
+
     def get_targets(
             self,
             game_state: GameState,
@@ -102,12 +109,12 @@ class DynamicCharacterTarget(Enum):
         :param ref_char_id: the character id treated as centre if applicable
         :returns: a list of static targets of the targets
         """
-        from .structs import StaticTarget
 
+        _StaticTarget = self._STATIC_TARGET
         targets: list[StaticTarget] = []
         match self:
             case DynamicCharacterTarget.OPPO_ACTIVE:
-                targets.append(StaticTarget.from_player_active(game_state, pid.other))
+                targets.append(_StaticTarget.from_player_active(game_state, pid.other))
             case DynamicCharacterTarget.OPPO_OFF_FIELD:
                 oppo_chars = game_state.get_player(
                     pid.other
@@ -119,7 +126,7 @@ class DynamicCharacterTarget(Enum):
                 else:
                     avoided_char_id = ref_char_id
                 targets.extend([
-                    StaticTarget.from_char_id(pid.other, char.id)
+                    _StaticTarget.from_char_id(pid.other, char.id)
                     for char in oppo_chars
                     if char.id != avoided_char_id
                 ])
@@ -127,21 +134,21 @@ class DynamicCharacterTarget(Enum):
                 selected_char = game_state.get_player(
                     pid.other
                 ).characters.get_nth_next_alive_character_in_activity_order(1)
-                targets.append(StaticTarget.from_char_id(pid.other, selected_char.id))
+                targets.append(_StaticTarget.from_char_id(pid.other, selected_char.id))
             case DynamicCharacterTarget.OPPO_NEXT_OFF:
                 off_field_chars = game_state.get_player(
                     pid.other
                 ).characters.get_alive_character_in_activity_order()[1:]
                 if len(off_field_chars) != 0:
-                    targets.append(StaticTarget.from_char_id(pid.other, off_field_chars[0].id))
+                    targets.append(_StaticTarget.from_char_id(pid.other, off_field_chars[0].id))
             case DynamicCharacterTarget.SELF_ACTIVE:
-                targets.append(StaticTarget.from_player_active(game_state, pid))
+                targets.append(_StaticTarget.from_player_active(game_state, pid))
             case DynamicCharacterTarget.SELF_NEXT_OFF:
                 off_field_chars = game_state.get_player(
                     pid
                 ).characters.get_alive_character_in_activity_order()[1:]
                 if len(off_field_chars) != 0:
-                    targets.append(StaticTarget.from_char_id(pid, off_field_chars[0].id))
+                    targets.append(_StaticTarget.from_char_id(pid, off_field_chars[0].id))
             case _:
                 raise NotImplementedError(f"get_targets for {self} is not implemented")
         return targets

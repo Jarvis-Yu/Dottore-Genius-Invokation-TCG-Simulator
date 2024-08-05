@@ -190,6 +190,8 @@ __all__ = [
     "AratakiIchibanStatus",
     "RagingOniKingStatus",
     "SuperlativeSuperstrengthStatus",
+    ## Barbara ##
+    "GloriousSeasonStatus",
     ## Bennett ##
     "GrandExpectationStatus",
     "InspirationFieldStatus",
@@ -1840,7 +1842,7 @@ class AquilaFavoniaStatus(WeaponEquipmentStatus, _UsageLivingStatus):
                     eft.RecoverHPEffect(
                         source=source,
                         target=source,
-                        recovery=self.HP_RECOVERY,
+                        amount=self.HP_RECOVERY,
                     ),
                 ], replace(self, usages=-1, activated=False)
             else:
@@ -2663,7 +2665,7 @@ class VourukashasGlowStatus(_HeartOfKhvarenasBrillianceLikeStatus):
                 eft.RecoverHPEffect(
                     source=source,
                     target=source,
-                    recovery=1,
+                    amount=1,
                 ),
             ], self
         return super()._react_to_signal(game_state, source, signal, detail)
@@ -3876,7 +3878,7 @@ class MushroomPizzaStatus(CharacterStatus, _UsageStatus):
                 eft.RecoverHPEffect(
                     source=source,
                     target=source,
-                    recovery=1,
+                    amount=1,
                 )
             )
         if signal is TriggeringSignal.ROUND_END:
@@ -4188,15 +4190,60 @@ class SuperlativeSuperstrengthStatus(CharacterStatus, _UsageStatus):
         return item, self
 
 
+#### Barbara ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class GloriousSeasonStatus(TalentEquipmentStatus, _UsageLivingStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
+    @cached_classproperty
+    def CARD(cls): from ..card.card import GloriousSeason; return GloriousSeason
+    @cached_classproperty
+    def _BARBARA(cls): from ..character.character import Barbara; return Barbara
+    @cached_classproperty
+    def _MELODY_LOOP(cls): from ..summon.summon import MelodyLoopSummon; return MelodyLoopSummon
+
+    @override
+    def _preprocess(
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.SWAP_COST_OMNI and self.usages > 0:
+            assert isinstance(item, ActionPEvent)
+            if (
+                    item.source.pid is status_source.pid
+                    and item.dice_cost.can_cost_less_elem()
+                    and self._MELODY_LOOP in game_state.get_player(status_source.pid).summons
+                    and any(
+                        isinstance(char, self._BARBARA) and char.alive and char.talent_equipped()
+                        for char in game_state.get_player(status_source.pid).characters
+                    )
+            ):
+                return item.with_new_cost(item.dice_cost.cost_less_elem(1)), replace(self, usages=-1)
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
+            return [], replace(self, usages=self.MAX_USAGES)
+        return [], self
+
+
+
 #### Bennett ####
 
 
 @dataclass(frozen=True, kw_only=True)
 class GrandExpectationStatus(TalentEquipmentStatus):
     @cached_classproperty
-    def CARD(cls) -> type[crd.TalentEquipmentCard]:
-        from ..card.card import GrandExpectation
-        return GrandExpectation
+    def CARD(cls): from ..card.card import GrandExpectation; return GrandExpectation
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -4280,7 +4327,7 @@ class _InspirationFieldStatus(CombatStatus, _UsageStatus):
                 eft.RecoverHPEffect(
                     source=source,
                     target=target,
-                    recovery=self.RECOVERY,
+                    amount=self.RECOVERY,
                 )
             ], replace(self, usages=0, activated=False, target_char_id=None)
         if signal is TriggeringSignal.ROUND_END:
@@ -4518,7 +4565,7 @@ class StalwartAndTrueStatus(TalentEquipmentStatus):
                 return [eft.RecoverHPEffect(
                     source=source,
                     target=source,
-                    recovery=2,
+                    amount=2,
                 )], self
         return [], self
 
@@ -4609,7 +4656,7 @@ class ElectroCrystalCoreStatus(CharacterStatus, RevivalStatus):
                 eft.ReviveRecoverHPEffect(
                     source=source,
                     target=source,
-                    recovery=self._HEAL_AMOUNT,
+                    amount=self._HEAL_AMOUNT,
                 )
             )
         return effects
@@ -5318,7 +5365,7 @@ class ColdBloodedStrikeStatus(TalentEquipmentStatus):
                 eft.RecoverHPEffect(
                     source=source,
                     target=source,
-                    recovery=2,
+                    amount=2,
                 )
             )
             new_self = replace(new_self, usages=self.usages - 1, activated=False)
@@ -5483,7 +5530,7 @@ class BurstScanStatus(CombatStatus, _UsageStatus):
                 if deck_top_card is None:
                     return [], self
                 effects.extend((
-                    eft.PrivateDiscardDeckCardTopEffect(
+                    eft.DiscardDeckCardTopEffect(
                         pid=source.pid,
                     ),
                     eft.ReferredDamageEffect(
@@ -5958,7 +6005,7 @@ class PropSurplusStatus(CharacterStatus, _UsageLivingStatus):
                 eft.RecoverHPEffect(
                     source=source,
                     target=source,
-                    recovery=self.usages,
+                    amount=self.usages,
                 ),
             ], None
         return [], self
@@ -6327,7 +6374,7 @@ class FullPlateStatus(CombatStatus, StackedShieldStatus):
                     effects.append(eft.RecoverHPEffect(
                         source=source,
                         target=StaticTarget(source.pid, Zone.CHARACTERS, char.id),
-                        recovery=self.HEAL_AMOUNT,
+                        amount=self.HEAL_AMOUNT,
                     ))
             return effects, replace(self, usages=0, heal_usages=self.heal_usages - 1)
         elif signal is TriggeringSignal.ROUND_END:
@@ -6451,7 +6498,7 @@ class FortunePreservingTalismanStatus(CombatStatus, _UsageStatus):
                 eft.RecoverHPEffect(
                     source=source,
                     target=StaticTarget.from_char_id(source.pid, active_char.id),
-                    recovery=self.HEAL_AMOUNT,
+                    amount=self.HEAL_AMOUNT,
                 )
             ], replace(self, usages=-1, activated=False)
         return [], self
@@ -6611,7 +6658,7 @@ class CeremonialGarmentStatus(CharacterStatus, _UsageStatus):
                 eft.RecoverHPEffect(
                     source=source,
                     target=StaticTarget.from_char_id(source.pid, char.id),
-                    recovery=1,
+                    amount=1,
                 )
                 for char in self_chars.get_alive_character_in_activity_order()
             ], replace(self, usages=0, activated=False)
@@ -7636,7 +7683,7 @@ class AdeptalLegacyStatus(CombatStatus, _UsageStatus):
                 eft.RecoverHPEffect(
                     source=source,
                     target=StaticTarget.from_player_active(game_state, source.pid),
-                    recovery=1,
+                    amount=1,
                 ),
             ], replace(self, usages=-1)
         return [], self

@@ -65,7 +65,7 @@ class TestEffect(unittest.TestCase):
             lambda es: es.push_one(RecoverHPEffect(
                 source=StaticTarget(Pid.P1, Zone.CHARACTERS, 2),
                 target=StaticTarget(Pid.P1, Zone.CHARACTERS, 2),
-                recovery=1,
+                amount=1,
             ))
         ).build()
         g1 = g1.step()
@@ -78,7 +78,7 @@ class TestEffect(unittest.TestCase):
             lambda es: es.push_one(RecoverHPEffect(
                 source=StaticTarget(Pid.P1, Zone.CHARACTERS, 2),
                 target=StaticTarget(Pid.P1, Zone.CHARACTERS, 2),
-                recovery=3,
+                amount=3,
             ))
         ).build()
         g2 = g2.step()

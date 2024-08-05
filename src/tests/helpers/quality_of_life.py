@@ -77,7 +77,7 @@ class _TempTestInfiniteRevivalStatus(CharacterHiddenStatus, RevivalStatus):
                 ReviveRecoverHPEffect(
                     source=source,
                     target=source,
-                    recovery=BIG_INT,
+                    amount=BIG_INT,
                 ),
             )
         return effects
@@ -125,7 +125,7 @@ class _TempTestHealingStatus(CharacterStatus):
                 RecoverHPEffect(
                     source=source,
                     target=source,
-                    recovery=self.healing,
+                    amount=self.healing,
                 ),
             ], None
         return [], self
@@ -439,7 +439,7 @@ def set_hp(
             return auto_step(ReviveRecoverHPEffect(
                 StaticTarget.from_char_id(pid, char_id),
                 StaticTarget.from_char_id(pid, char_id),
-                recovery=hp,
+                amount=hp,
             ).execute(game_state), observe=True)
         return game_state.factory().f_player(
             pid,
@@ -469,7 +469,7 @@ def set_hp(
             game_state = auto_step(ReviveRecoverHPEffect(
                 StaticTarget.from_char_id(pid, char.id),
                 StaticTarget.from_char_id(pid, char.id),
-                recovery=hp,
+                amount=hp,
             ).execute(game_state), observe=observe)
     return game_state
 
@@ -1246,3 +1246,72 @@ def tune_elem(
         card=card,
         dice_elem=elem,
     ), observe=observe)
+
+
+@dataclass(frozen=True)
+class _TempTestHealingListenerStatus(PlayerHiddenStatus):
+    pid: Pid
+    healings: tuple[HealingIEvent, ...] = ()
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_HEALING,
+    ))
+
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[Effect], None | Self]:
+        if signal is TriggeringSignal.POST_HEALING:
+            assert isinstance(detail, HealingIEvent)
+            if detail.source.pid is self.pid:
+                return [], replace(self, healings=self.healings + (detail,))
+        return [], self
+
+
+def add_healing_listener(game_state: GameState, pid: Pid) -> GameState:
+    return game_state.factory().f_player(
+        pid,
+        lambda p: p.factory().f_hidden_statuses(
+            lambda hs: hs.update_status(_TempTestHealingListenerStatus(pid=pid))
+        ).build()
+    ).build()
+
+
+def remove_healing_listener(game_state: GameState, pid: Pid) -> GameState:
+    return game_state.factory().f_player(
+        pid,
+        lambda p: p.factory().f_hidden_statuses(
+            lambda hs: hs.remove(_TempTestHealingListenerStatus)
+        ).build()
+    ).build()
+
+
+def get_healing_data(game_state: GameState, pid: Pid) -> tuple[HealingIEvent, ...]:
+    hidden_statuses = game_state.get_player(pid).hidden_statuses
+    assert _TempTestHealingListenerStatus in hidden_statuses
+    listener = hidden_statuses.just_find(_TempTestHealingListenerStatus)
+    return listener.healings
+
+
+def assert_last_healing(
+        testbody: unittest.TestCase, game_state: GameState, pid: Pid,
+        last_index: int = 0,
+        source: None | StaticTarget = None,
+        target: None | StaticTarget = None,
+        amount: None | int = None,
+        num: None | int = None,
+        clear: bool = False,
+) -> GameState:
+    healings = get_healing_data(game_state, pid)
+    healing = healings[-(last_index + 1)]
+    if source is not None:
+        testbody.assertEqual(healing.source, source)
+    if target is not None:
+        testbody.assertEqual(healing.target, target)
+    if amount is not None:
+        testbody.assertEqual(healing.healing, amount)
+    if num is not None:
+        testbody.assertEqual(num, len(healings))
+    if clear:
+        game_state = remove_healing_listener(game_state, pid)
+        game_state = add_healing_listener(game_state, pid)
+    return game_state

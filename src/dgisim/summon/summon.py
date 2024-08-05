@@ -59,6 +59,7 @@ __all__ = [
     "HydroSamachurlSummon",
     "LightfallSwordSummon",
     "LightningRoseSummon",
+    "MelodyLoopSummon",
     "OceanicMimicFrogSummon",
     "OceanicMimicRaptorSummon",
     "OceanicMimicSquirrelSummon",
@@ -230,7 +231,7 @@ class _ConvertableAnemoSummon(_DestroyOnNumSummon):
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         es: list[eft.Effect] = []
         new_self = self
         if signal is TriggeringSignal.POST_SKILL:
@@ -371,7 +372,7 @@ class BakeKurageSummon(_DestroyOnNumSummon):
                     target=StaticTarget.from_char_id(
                         source.pid, self_chars.just_get_active_character_id()
                     ),
-                    recovery=self.HEAL_AMOUNT,
+                    amount=self.HEAL_AMOUNT,
                 ),
             ], replace(self, usages=-1)
         return [], self
@@ -667,7 +668,7 @@ class DandelionFieldSummon(_DestroyOnNumSummon):
                 eft.RecoverHPEffect(
                     source=StaticTarget.from_summon(source.pid, type(self)),
                     target=StaticTarget.from_player_active(game_state, source.pid),
-                    recovery=self.HEAL_AMOUNT,
+                    amount=self.HEAL_AMOUNT,
                 ),
             ], replace(self, usages=-1)
         return [], self
@@ -691,7 +692,7 @@ class DrunkenMistSummon(_DmgPerRoundSummon):
                 eft.RecoverHPEffect(
                     source=StaticTarget.from_summon(source.pid, type(self)),
                     target=StaticTarget.from_player_active(game_state, source.pid),
-                    recovery=2,
+                    amount=2,
                 )
             )
         return es, new_self
@@ -878,7 +879,7 @@ class HeraldOfFrostSummon(_DmgPerRoundSummon):
                 eft.RecoverHPEffect(
                     source=StaticTarget.from_summon(source.pid, type(self)),
                     target=StaticTarget.from_char_id(source.pid, char_to_heal.id),
-                    recovery=self.HEAL_AMOUNT,
+                    amount=self.HEAL_AMOUNT,
                 ),
             ]
             return recoveries, replace(self, usages=0, activated=False)
@@ -891,7 +892,7 @@ class HeraldOfFrostSummon(_DmgPerRoundSummon):
                     eft.RecoverHPEffect(
                         source=StaticTarget.from_summon(source.pid, type(self)),
                         target=StaticTarget.from_player_active(game_state, source.pid),
-                        recovery=self.HEAL_AMOUNT,
+                        amount=self.HEAL_AMOUNT,
                     ),
                 ], replace(self, usages=0, one_time_healing_available=False)
         elif signal is TriggeringSignal.ROUND_END and not self.one_time_healing_available:
@@ -1005,6 +1006,43 @@ class LightningRoseSummon(_DmgPerRoundSummon):
 
 
 @dataclass(frozen=True, kw_only=True)
+class MelodyLoopSummon(_DestroyOnNumSummon):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            alive_chars = game_state.get_player(source.pid).characters.get_required_chars(
+                activity_order=True, alive=True,
+            )
+            effects: list[eft.Effect] = [
+                eft.RecoverHPEffect(
+                    source=source,
+                    target=StaticTarget.from_char_id(source.pid, char.id),
+                    amount=1,
+                )
+                for char in alive_chars
+            ]
+            effects.append(
+                eft.ApplyElementalAuraEffect(
+                    source=source,
+                    target=StaticTarget.from_player_active(game_state, source.pid),
+                    element=Element.HYDRO,
+                    source_type=DamageType(summon=True),
+                )
+            )
+            return effects, replace(self, usages=-1)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
 class OceanicMimicFrogSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 1
@@ -1019,7 +1057,7 @@ class OceanicMimicFrogSummon(_DestoryOnEndNumSummon, stt.FixedShieldStatus):
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
-    ) -> tuple[list[eft.Effect], Optional[Self]]:
+    ) -> tuple[list[eft.Effect], None | Self]:
         es: list[eft.Effect] = []
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT \
                 and self.usages == 0:
@@ -1524,7 +1562,7 @@ class YueguiThrowingModeSummon(_DestroyOnNumSummon):
                 eft.RecoverHPEffect(
                     source=source,
                     target=char_target,
-                    recovery=self.HEALING + healing,
+                    amount=self.HEALING + healing,
                 ),
             ], replace(self, usages=-1)
         return [], self

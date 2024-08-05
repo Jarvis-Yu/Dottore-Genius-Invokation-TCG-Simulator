@@ -77,7 +77,7 @@ CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
         (char.Layla, 9),
 
         #### Hydro 100 ####
-        # (char.Barbara, 100),
+        (char.Barbara, 100),
         (char.Xingqiu, 101),
         (char.Mona, 102),
         (char.RhodeiaOfLoch, 103),
@@ -377,7 +377,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         (card.LightsRemit, 934),
 
         #### 4.2 Hydro 1025 ####
-        # Barbara 1025
+        (card.GloriousSeason, 1025),
         (card.TheScentRemained, 1026),
         (card.ProphecyOfSubmersion, 1027),
         (card.StreamingSurge, 1028),
@@ -560,7 +560,7 @@ EFFECT_MAPPING: dict[type["Effect"], int] = HashableDict({
         (effect.RemoveAllCardEffect, 284),
         (effect.PublicAddDeckCardRandomEffect, 285),
         (effect.PublicAddDeckCardEvenEffect, 286),
-        (effect.PrivateDiscardDeckCardTopEffect, 287),
+        (effect.DiscardDeckCardTopEffect, 287),
         (effect.DiscardCardEffect, 288),
 
         #### 4.5 Dice Effect 290 ####
@@ -779,6 +779,7 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
 
         #### 4.2 Hydro Character Status 2600 ####
         ## Barbara 2600 ##
+        (status.GloriousSeasonStatus, 2600),
         ## Xingqiu 2620 ##
         (status.TheScentRemainedStatus, 2620),
         (status.RainSwordStatus, 2621),
@@ -982,7 +983,7 @@ SUMM_MAPPING: dict[type["Summon"], int] = HashableDict({
         (summon.CelestialDreamsphereSummon, 9),
 
         #### Hydro 100 ####
-        # (summon.MelodyLoopSummon, 100),
+        (summon.MelodyLoopSummon, 100),
         (summon.ReflectionSummon, 101),
         (summon.OceanicMimicSquirrelSummon, 102),
         (summon.OceanicMimicRaptorSummon, 103),

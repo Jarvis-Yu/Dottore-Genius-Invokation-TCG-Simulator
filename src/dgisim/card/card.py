@@ -241,6 +241,8 @@ __all__ = [
     "DescentOfDivinity",
     ## Arataki Itto ##
     "AratakiIchiban",
+    ## Barbara ##
+    "GloriousSeason",
     ## Bennett ##
     "GrandExpectation",
     ## Chongyun ##
@@ -2138,7 +2140,7 @@ class OceanHuedClam(ArtifactEquipmentCard):
             eft.RecoverHPEffect(
                 source=StaticTarget.from_personal_status(pid, cast(int, instruction.target.id), cls.ARTIFACT_STATUS),
                 target=StaticTarget.from_char_id(pid, cast(int, instruction.target.id)),
-                recovery=2,
+                amount=2,
             ),
         )
 
@@ -2465,7 +2467,7 @@ class TeyvatFriedEgg(FoodCard, _CharTargetChoiceProvider):
             eft.ReviveRecoverHPEffect(
                 source=StaticTarget.from_card(pid, cls),
                 target=instruction.target,
-                recovery=1,
+                amount=1,
             ),
         )
 
@@ -3003,13 +3005,13 @@ class ElementalResonanceSoothingWater(_ElementalResonanceCard, _DiceOnlyChoicePr
         effects: list[eft.Effect] = [eft.RecoverHPEffect(
             source=StaticTarget.from_card(pid, cls),
             target=StaticTarget.from_char_id(pid, chars[0].id),
-            recovery=cls._MAIN_RECOVERY,
+            amount=cls._MAIN_RECOVERY,
         )]
         for char in chars[1:]:
             effects.append(eft.RecoverHPEffect(
                 source=StaticTarget.from_card(pid, cls),
                 target=StaticTarget.from_char_id(pid, char.id),
-                recovery=cls._SUB_RECOVERY,
+                amount=cls._SUB_RECOVERY,
             ))
         return tuple(effects)
 
@@ -4225,6 +4227,17 @@ class AratakiIchiban(_TalentEquipmentSkillCard):
     _EQUIPMENT_STATUS = stt.AratakiIchibanStatus
     _SKILL = CharacterSkill.SKILL1
 
+
+#### Barbara ####
+
+
+class GloriousSeason(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDice({Element.HYDRO: 3})
+    _CHARACTER = chr.Barbara
+    _EQUIPMENT_STATUS = stt.GloriousSeasonStatus
+    _SKILL = CharacterSkill.SKILL2
+
+
 #### Bennett ####
 
 
@@ -4296,7 +4309,7 @@ class AbsorbingPrism(TalentEventCard, _CombatActionCard, _DiceOnlyChoiceProvider
             eft.RecoverHPEffect(
                 StaticTarget.from_card(pid, cls),
                 target=target,
-                recovery=3,
+                amount=3,
             ),
             eft.AddCharacterStatusEffect(
                 target=target,

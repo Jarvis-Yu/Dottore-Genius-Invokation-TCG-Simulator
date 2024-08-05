@@ -113,7 +113,7 @@ __all__ = [
     "RemoveAllCardEffect",
     "PublicAddDeckCardRandomEffect",
     "PublicAddDeckCardEvenEffect",
-    "PrivateDiscardDeckCardTopEffect",
+    "DiscardDeckCardTopEffect",
     "AddDiceEffect",
     "RemoveDiceEffect",
     "AddCharacterStatusEffect",
@@ -1536,7 +1536,7 @@ class EnergyDrainEffect(DirectEffect):
 class RecoverHPEffect(DirectEffect):
     source: StaticTarget
     target: StaticTarget
-    recovery: int
+    amount: int
 
     def execute(self, game_state: GameState) -> GameState:
         character = game_state.get_target(self.target)
@@ -1545,7 +1545,7 @@ class RecoverHPEffect(DirectEffect):
             return game_state
         if character.is_defeated():
             return game_state
-        hp = min(character.hp + self.recovery, character.max_hp)
+        hp = min(character.hp + self.amount, character.max_hp)
         if hp == character.hp:
             return game_state
         return game_state.factory().f_player(
@@ -1575,7 +1575,7 @@ class ReviveRecoverHPEffect(RecoverHPEffect):
         if not isinstance(character, Character):  # pragma: no cover
             return game_state
         assert character.hp == 0, game_state
-        hp = min(self.recovery, character.max_hp)
+        hp = min(self.amount, character.max_hp)
         if hp == 0:
             return game_state
         return game_state.factory().f_player(
@@ -1792,8 +1792,9 @@ class PublicAddDeckCardEvenEffect(DirectEffect):
 
 
 @dataclass(frozen=True, repr=False)
-class PrivateDiscardDeckCardTopEffect(DirectEffect):
+class DiscardDeckCardTopEffect(DirectEffect):
     pid: Pid
+    public: bool = True
 
     def execute(self, game_state: GameState) -> GameState:
         new_deck, popped_card = game_state.get_player(self.pid).deck_cards.pop()
