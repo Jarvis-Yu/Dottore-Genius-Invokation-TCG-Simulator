@@ -994,11 +994,14 @@ def keep_only_support(game_state: GameState, pid: Pid, support_type: type[Suppor
 
 def play_support_card(
         game_state: GameState, pid: Pid, card: type[SupportCard],
+        new: bool = False,
         cost: None | int | ActualDice = None,
         replaced_sid: None | int = None,
         observe: bool = False,
 ) -> GameState:
     """ note: use OMNI dice by default """
+    if new:
+        game_state = add_hand_card(game_state, pid, card)
     if cost is None:
         cost = ActualDice({Element.OMNI: card._DICE_COST.num_dice()})
     elif isinstance(cost, int):
@@ -1021,10 +1024,13 @@ def play_support_card(
 def play_char_target_card(
         game_state: GameState, pid: Pid, card: type[Card],
         char_id: None | int = None,
+        new: bool = False,
         cost: None | int | ActualDice = None,
         observe: bool = False,
 ) -> GameState:
     """ note: use OMNI dice by default """
+    if new:
+        game_state = add_hand_card(game_state, pid, card)
     if cost is None:
         cost = ActualDice({Element.OMNI: card._DICE_COST.num_dice()})
     elif isinstance(cost, int):
@@ -1044,9 +1050,12 @@ def play_char_target_card(
 def play_dice_only_card(
         game_state: GameState, pid: Pid, card: type[Card],
         cost: None | int | ActualDice = None,
+        new: bool = False,
         observe: bool = False,
 ) -> GameState:
     """ note: use OMNI dice by default """
+    if new:
+        game_state = add_hand_card(game_state, pid, card)
     if cost is None:
         cost = ActualDice({Element.OMNI: card._DICE_COST.num_dice()})
     elif isinstance(cost, int):
@@ -1236,6 +1245,15 @@ def add_summon(game_state: GameState, pid: Pid, summon: type[Summon]) -> GameSta
         pid,
         lambda p: p.factory().f_summons(
             lambda sms: sms.add_summon(summon)
+        ).build()
+    ).build()
+
+
+def add_support(game_state: GameState, pid: Pid, support: type[Support]) -> GameState:
+    return game_state.factory().f_player(
+        pid,
+        lambda p: p.factory().f_supports(
+            lambda sps: sps.update_support(support(sid=sps.new_sid(support)))
         ).build()
     ).build()
 

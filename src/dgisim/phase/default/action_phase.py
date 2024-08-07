@@ -375,6 +375,7 @@ class ActionPhase(ph.Phase):
             return None
         effects: list[Effect] = [
             BroadcastCardDiscardEffect(
+                triggerer=StaticTarget.from_player(pid),
                 owner_pid=pid,
                 card=action.card,
             ),

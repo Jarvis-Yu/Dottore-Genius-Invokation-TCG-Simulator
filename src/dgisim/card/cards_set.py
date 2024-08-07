@@ -49,6 +49,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     StreamingSurge,
     SunyataFlower,
     TamakushiCasket,
+    TheArtOfBudgeting,
     TheScentRemained,
     TheSeedOfStoredKnowledge,
     TheShrinesSacredShade,

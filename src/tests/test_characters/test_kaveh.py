@@ -208,3 +208,76 @@ class TestKaveh(unittest.TestCase):
 
         game_state = next_round(game_state)
         self.assertNotIn(MehraksAssistanceStatus, p1_active_char(game_state).character_statuses)
+
+    def test_talent_card(self):
+        base_state = self.BASE_GAME
+        base_state = end_round(base_state, Pid.P2)
+        base_state = grant_all_infinite_revival(base_state)
+
+        def p1_lab(game_state: GameState) -> CentralLaboratoryRuinsSupport:
+            return game_state.player1.supports.just_find(CentralLaboratoryRuinsSupport, sid=1)
+
+        """ check discarding top location card triggers talent """
+        game_state = base_state
+        game_state = replace_deck_cards(game_state, Pid.P1, Cards({OperaEpiclese: 1}))
+        game_state = apply_elemental_aura(game_state, Element.HYDRO, Pid.P2)
+        game_state = add_support(game_state, Pid.P1, CentralLaboratoryRuinsSupport)
+        assert p1_lab(game_state).usages == 0
+
+        game_state = play_dice_only_card(
+            game_state, Pid.P1, TheArtOfBudgeting, cost=ActualDice({Element.DENDRO: 3}),
+        )
+        self.assertEqual(p1_lab(game_state).usages, 1)
+        self.assertEqual(game_state.player1.deck_cards, OrderedCards(()))
+        self.assertEqual(game_state.player1.hand_cards[OperaEpiclese], 1)
+        self.assertIn(TheArtOfBudgetingInEffectStatus, game_state.player1.combat_statuses)
+
+        discount_state = game_state
+
+        # check status lasts one round only
+        game_state = discount_state
+        game_state = next_round_with_great_omni(game_state)
+        self.assertNotIn(TheArtOfBudgetingInEffectStatus, game_state.player1.combat_statuses)
+
+        game_state = end_round(game_state, Pid.P2)
+        game_state = remove_aura(game_state, Pid.P2)
+        game_state = apply_elemental_aura(game_state, Element.HYDRO, Pid.P2)
+        game_state = replace_deck_cards(game_state, Pid.P1, Cards({OperaEpiclese: 1}))
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
+        self.assertIn(TheArtOfBudgetingInEffectStatus, game_state.player1.combat_statuses)
+
+        # check it discounts next 'location' card
+        game_state = discount_state
+        assert Paimon._DICE_COST.num_dice() == 3
+        assert ParametricTransformer._DICE_COST.num_dice() == 2
+        assert DawnWinery._DICE_COST.num_dice() == 2
+        game_state = play_support_card(game_state, Pid.P1, Paimon, cost=3, new=True)
+        game_state = play_support_card(game_state, Pid.P1, ParametricTransformer, cost=2, new=True)
+        game_state = play_support_card(game_state, Pid.P1, DawnWinery, cost=0, new=True)
+        self.assertNotIn(TheArtOfBudgetingInEffectStatus, game_state.player1.combat_statuses)
+
+        # check it discounts once per round
+        game_state = remove_aura(game_state, Pid.P2)
+        game_state = apply_elemental_aura(game_state, Element.HYDRO, Pid.P2)
+        game_state = replace_deck_cards(game_state, Pid.P1, Cards({OperaEpiclese: 1}))
+        game_state = replace_hand_cards(game_state, Pid.P1, Cards.from_empty())
+        game_state = step_skill(game_state, Pid.P1, CharacterSkill.SKILL2)
+        self.assertEqual(p1_lab(game_state).usages, 2)
+        self.assertEqual(game_state.player1.deck_cards, OrderedCards(()))
+        self.assertEqual(game_state.player1.hand_cards[OperaEpiclese], 0)
+        self.assertNotIn(TheArtOfBudgetingInEffectStatus, game_state.player1.combat_statuses)
+
+        """ check discarding top non-location card does not trigger talent """
+        game_state = base_state
+        game_state = replace_deck_cards(game_state, Pid.P1, Cards({Paimon: 1}))
+        game_state = apply_elemental_aura(game_state, Element.HYDRO, Pid.P2)
+        game_state = add_support(game_state, Pid.P1, CentralLaboratoryRuinsSupport)
+        assert p1_lab(game_state).usages == 0
+
+        game_state = play_dice_only_card(
+            game_state, Pid.P1, TheArtOfBudgeting, cost=ActualDice({Element.DENDRO: 3}),
+        )
+        self.assertEqual(p1_lab(game_state).usages, 1)
+        self.assertEqual(game_state.player1.deck_cards, OrderedCards(()))
+        self.assertEqual(game_state.player1.hand_cards[Paimon], 0)
+        self.assertNotIn(TheArtOfBudgetingInEffectStatus, game_state.player1.combat_statuses)

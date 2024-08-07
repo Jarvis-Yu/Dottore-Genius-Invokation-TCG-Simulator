@@ -1,7 +1,7 @@
 Available Cards
 ===============
 
-205 of 334 cards in Genius Invokation TCG are available in the simulator.
+206 of 334 cards in Genius Invokation TCG are available in the simulator.
 (excluding character cards which are not counted as cards in ``dgisim``)
 
 Equipment Cards
@@ -121,6 +121,7 @@ Talent Card
 * Strategic Reserve
 * Streaming Surge
 * Tamakushi Casket
+* The Art of Budgeting
 * The Scent Remained
 * The Seed of Stored Knowledge
 * The Shrine's Sacred Shade

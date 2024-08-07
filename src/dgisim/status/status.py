@@ -267,11 +267,12 @@ __all__ = [
     "TheArtOfBudgetingStatus",
     "BurstScanStatus",
     "MehraksAssistanceStatus",
+    "TheArtOfBudgetingInEffectStatus",
     ## Keqing ##
+    "ThunderingPenanceStatus",
     "KeqingElectroInfusionEnhancedStatus",
     "KeqingElectroInfusionStatus",
     "KeqingTalentStatus",
-    "ThunderingPenanceStatus",
     ## Klee ##
     "ExplosiveSparkStatus",
     "PoundingSurpriseStatus",
@@ -5530,21 +5531,40 @@ class TakimeguriKankaStatus(CharacterStatus, _UsageStatus):
 
 @dataclass(frozen=True, kw_only=True)
 class TheArtOfBudgetingStatus(TalentEquipmentStatus):
+    available: bool = True
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.ROUND_END,
+    ))
     @cached_classproperty
     def CARD(cls) -> type[crd.TalentEquipmentCard]:
         from ..card.card import TheArtOfBudgeting
         return TheArtOfBudgeting
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.ROUND_END and not self.available:
+            return [], replace(self, available=True)
+        return [], self
 
 
 @dataclass(frozen=True, kw_only=True)
 class BurstScanStatus(CombatStatus, _UsageStatus):
     usages: int = 1
     MAX_USAGES: ClassVar[int] = 3
+    triggered: bool = False
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
         TriggeringSignal.PRE_ACTION,
+        TriggeringSignal.POST_CARD_DISCARD,
     ))
     @cached_classproperty
     def _BOUNTIFUL_CORE(cls): from ..summon.summon import BountifulCoreSummon; return BountifulCoreSummon
+    @cached_classproperty
+    def _KAVEH(cls): from ..character.character import Kaveh; return Kaveh
+    @cached_classproperty
+    def _LOCATION_CARD(cls): from ..card.card import LocationCard; return LocationCard
 
     @override
     def _react_to_signal(
@@ -5553,7 +5573,25 @@ class BurstScanStatus(CombatStatus, _UsageStatus):
     ) -> tuple[list[eft.Effect], None | Self]:
         if signal is TriggeringSignal.PRE_ACTION:
             this_player = game_state.get_player(source.pid)
+            if not (
+                    DendroCoreStatus in this_player.combat_statuses
+                    or self._BOUNTIFUL_CORE in this_player.summons
+            ):
+                return [], self
+            new_self = self
+            if game_state.get_player(source.pid).deck_cards.peek() is not None:
+                new_self = replace(new_self, usages=0, triggered=True)
+            return [
+                eft.DiscardDeckCardTopEffect(
+                    triggerer=source.with_status(type(self)),
+                    pid=source.pid,
+                ),
+            ], new_self
+        elif signal is TriggeringSignal.POST_CARD_DISCARD and self.triggered:
+            assert isinstance(detail, CardIEvent)
+            discarded_card = detail.card
             effects: list[eft.Effect] = []
+            this_player = game_state.get_player(source.pid)
             if DendroCoreStatus in this_player.combat_statuses:
                 effects.append(
                     eft.UpdateCombatStatusEffect(
@@ -5568,23 +5606,41 @@ class BurstScanStatus(CombatStatus, _UsageStatus):
                         summon=replace(this_player.summons.just_find(self._BOUNTIFUL_CORE), usages=-1),
                     )
                 )
-            if len(effects) > 0:
-                deck_top_card = this_player.deck_cards.peek()
-                if deck_top_card is None:
-                    return [], self
+            effects.append(
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=Element.DENDRO,
+                    damage=discarded_card._DICE_COST.num_dice(),
+                    damage_type=DamageType(status=True),
+                )
+            )
+            if (
+                    issubclass(discarded_card, self._LOCATION_CARD)
+                    and (
+                        talented_kaveh := next((
+                            char
+                            for char in this_player.characters.get_alive_characters()
+                            if isinstance(char, self._KAVEH) and char.talent_equipped()
+                        ), None)
+                    )
+                    and talented_kaveh.character_statuses.just_find(TheArtOfBudgetingStatus).available
+            ):
                 effects.extend((
-                    eft.DiscardDeckCardTopEffect(
+                    eft.AddCardEffect(
                         pid=source.pid,
+                        card=discarded_card,
                     ),
-                    eft.ReferredDamageEffect(
-                        source=source,
-                        target=DynamicCharacterTarget.OPPO_ACTIVE,
-                        element=Element.DENDRO,
-                        damage=deck_top_card._DICE_COST.num_dice(),
-                        damage_type=DamageType(status=True),
+                    eft.UpdateCharacterStatusEffect(
+                        target=StaticTarget.from_char_id(source.pid, talented_kaveh.id),
+                        status=TheArtOfBudgetingStatus(available=False),
+                    ),
+                    eft.AddCombatStatusEffect(
+                        target_pid=source.pid,
+                        status=TheArtOfBudgetingInEffectStatus,
                     ),
                 ))
-                return effects, replace(self, usages=-1)
+            return effects, replace(self, usages=-1, triggered=False)
         return [], self
 
 
@@ -5638,27 +5694,28 @@ class MehraksAssistanceStatus(CharacterStatus, _UsageStatus):
         return [], self
 
 
-#### Keqing ####
-
-
 @dataclass(frozen=True, kw_only=True)
-class KeqingTalentStatus(CharacterHiddenStatus):
-    can_infuse: bool
-    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        TriggeringSignal.POST_SKILL,
-    ))
+class TheArtOfBudgetingInEffectStatus(CombatStatus, _OneRoundStatus):
+    @cached_classproperty
+    def _LOCATION_CARD(cls): from ..card.card import LocationCard; return LocationCard
 
     @override
-    def _react_to_signal(
-            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
-            detail: None | InformableEvent
-    ) -> tuple[list[eft.Effect], None | Self]:
-        if signal is TriggeringSignal.POST_SKILL:
-            return [], type(self)(can_infuse=False)
-        return [], self  # pragma: no cover
+    def _preprocess(
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.CARD1_COST_OMNI:
+            assert isinstance(item, CardPEvent)
+            if (
+                    item.pid == status_source.pid
+                    and issubclass(item.card_type, self._LOCATION_CARD)
+                    and item.dice_cost.can_cost_less_elem()
+            ):
+                return item.with_new_cost(item.dice_cost.cost_less_elem(2)), None
+        return item, self
 
-    def __str__(self) -> str:
-        return super().__str__() + f"({case_val(self.can_infuse, 1, 0)})"  # pragma: no cover
+
+#### Keqing ####
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -5682,6 +5739,26 @@ class KeqingElectroInfusionStatus(CharacterStatus, _InfusionStatus):
     usages: int = 2
     MAX_USAGES: ClassVar[int] = 2
     ELEMENT: ClassVar[Element] = Element.ELECTRO
+
+
+@dataclass(frozen=True, kw_only=True)
+class KeqingTalentStatus(CharacterHiddenStatus):
+    can_infuse: bool
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_SKILL,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.POST_SKILL:
+            return [], type(self)(can_infuse=False)
+        return [], self  # pragma: no cover
+
+    def __str__(self) -> str:
+        return super().__str__() + f"({case_val(self.can_infuse, 1, 0)})"  # pragma: no cover
 
 
 #### Klee ####

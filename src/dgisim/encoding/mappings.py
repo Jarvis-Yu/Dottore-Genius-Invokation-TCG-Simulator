@@ -936,6 +936,7 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.TheArtOfBudgetingStatus, 10720),
         (status.BurstScanStatus, 10721),
         (status.MehraksAssistanceStatus, 10722),
+        (status.TheArtOfBudgetingInEffectStatus, 10723),
 
         #### 4.7 Anemo Character Status 12600 ####
         ## Sucrose 12600 ##

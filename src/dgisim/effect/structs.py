@@ -24,14 +24,20 @@ __all__ = [
 class StaticTarget:
     pid: Pid
     zone: Zone
-    id: int | type["Summon"] | type["Card"]
+    id: None | int | type["Summon"] | type["Card"] = None
     status: None | type["Status"] = None
 
     def encoding(self, encoding_plan: "EncodingPlan") -> list[int]:
+        if isinstance(self.id, int):
+            id = self.id
+        elif self.id is None:
+            id = 0
+        else:
+            id = encoding_plan.encode_item(self.id)
         return [
             self.pid.value,
             self.zone.value,
-            self.id if isinstance(self.id, int) else encoding_plan.encode_item(self.id),
+            id,
         ]
 
     @classmethod
@@ -106,6 +112,10 @@ class StaticTarget:
     @classmethod
     def from_card(cls, pid: Pid, card: type["Card"]) -> Self:
         return cls(pid, Zone.HAND_CARD, card)
+
+    @classmethod
+    def from_player(cls, pid: Pid) -> Self:
+        return cls(pid, Zone.PLAYER)
 
 
 @dataclass(frozen=True, kw_only=True, repr=False)

@@ -839,6 +839,7 @@ class BroadcastCardDrawEffect(BroadcastEffect):
 
 @dataclass(frozen=True, repr=False)
 class BroadcastCardDiscardEffect(BroadcastEffect):
+    triggerer: StaticTarget
     owner_pid: Pid
     card: type[Card]
 
@@ -1710,6 +1711,7 @@ class RemoveCardEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class DiscardCardEffect(DirectEffect):
+    triggerer: StaticTarget
     pid: Pid
     card: type[Card]
     public: bool = True
@@ -1729,6 +1731,7 @@ class DiscardCardEffect(DirectEffect):
             ).build()
         ).f_common_effect_stack(
             lambda es: es.push_left(BroadcastCardDiscardEffect(
+                triggerer=self.triggerer,
                 owner_pid=self.pid,
                 card=self.card,
             ))
@@ -1793,6 +1796,7 @@ class PublicAddDeckCardEvenEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class DiscardDeckCardTopEffect(DirectEffect):
+    triggerer: StaticTarget
     pid: Pid
     public: bool = True
 
@@ -1803,6 +1807,7 @@ class DiscardDeckCardTopEffect(DirectEffect):
             lambda p: p.factory().deck_cards(new_deck).build()
         ).f_common_effect_stack(
             lambda es: es if popped_card is None else es.push_left(BroadcastCardDiscardEffect(
+                triggerer=self.triggerer,
                 owner_pid=self.pid,
                 card=popped_card,
             ))

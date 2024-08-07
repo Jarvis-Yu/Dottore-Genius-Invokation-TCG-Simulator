@@ -25,6 +25,7 @@ class Zone(Enum):
     HIDDEN_STATUSES = 3
     COMBAT_STATUSES = 4
     HAND_CARD = 5
+    PLAYER = 6
 
 
 class TriggeringSignal(Enum):

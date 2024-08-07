@@ -4918,6 +4918,7 @@ class Xinyan(Character):
             ]
             effects.append(
                 eft.DiscardCardEffect(
+                    triggerer=source,
                     pid=source.pid,
                     card=random.choice(satisfiable_cards),
                 )
@@ -4955,6 +4956,7 @@ class Xinyan(Character):
         for hand in hands:
             effects.append(
                 eft.DiscardCardEffect(
+                    triggerer=source,
                     pid=source.pid,
                     card=hand,
                 )

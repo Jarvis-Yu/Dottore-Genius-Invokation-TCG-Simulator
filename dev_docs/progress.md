@@ -5,7 +5,7 @@ all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
   - [Character (52/95 implemented)](#character-5295-implemented)
-  - [Card (205/334 implemented)](#card-205334-implemented)
+  - [Card (206/334 implemented)](#card-206334-implemented)
 
 ## Character (52/95 implemented)
 
@@ -97,9 +97,9 @@ all I need now is to implement each card and character.
   - [x] Stonehide Lawachurl
   - [ ] Yun Jin
 
-## Card (205/334 implemented)
+## Card (206/334 implemented)
 
-- [ ] Equipment Card (100/177):
+- [ ] Equipment Card (101/177):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] Arataki Ichiban
@@ -140,7 +140,7 @@ all I need now is to implement each card and character.
     - [x] Strategic Reserve
     - [x] Streaming Surge
     - [x] Tamakushi Casket
-    - [ ] The Art of Budgeting
+    - [x] The Art of Budgeting
     - [x] The Scent Remained
     - [x] The Seed of Stored Knowledge
     - [x] The Shrine's Sacred Shade

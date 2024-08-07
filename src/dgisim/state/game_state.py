@@ -306,7 +306,7 @@ class GameState:
         elif target.zone is Zone.SUPPORTS:
             return player.supports.find_by_sid(cast(int, target.id))
         else:
-            raise Exception("Not Reached!")
+            raise Exception(f"Not Reached! {target}")
 
     def get_character_target(self, target: StaticTarget) -> None | Character:
         """ :returns: the character target that `target` specifies. """
