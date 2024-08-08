@@ -63,7 +63,7 @@ class TestEffect(unittest.TestCase):
         # Heals normally
         g1 = game_state.factory().f_effect_stack(
             lambda es: es.push_one(RecoverHPEffect(
-                source=StaticTarget(Pid.P1, Zone.CHARACTERS, 2),
+                triggerer=StaticTarget(Pid.P1, Zone.CHARACTERS, 2),
                 target=StaticTarget(Pid.P1, Zone.CHARACTERS, 2),
                 amount=1,
             ))
@@ -76,7 +76,7 @@ class TestEffect(unittest.TestCase):
         # No overheal
         g2 = game_state.factory().f_effect_stack(
             lambda es: es.push_one(RecoverHPEffect(
-                source=StaticTarget(Pid.P1, Zone.CHARACTERS, 2),
+                triggerer=StaticTarget(Pid.P1, Zone.CHARACTERS, 2),
                 target=StaticTarget(Pid.P1, Zone.CHARACTERS, 2),
                 amount=3,
             ))

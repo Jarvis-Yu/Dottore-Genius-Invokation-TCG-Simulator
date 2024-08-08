@@ -287,6 +287,10 @@ __all__ = [
     ## Lisa ##
     "ConductiveStatus",
     "PulsatingWitchStatus",
+    ## Lynette ##
+    "AColdBladeLikeAShadowStatus",
+    "LynetteSkill2CounterStatus",
+    "OverawingAssaultStatus",
     ## Lyney ##
     "ConclusiveOvationStatus",
     "PropSurplusStatus",
@@ -1843,7 +1847,7 @@ class AquilaFavoniaStatus(WeaponEquipmentStatus, _UsageLivingStatus):
             if self._target_is_self_active(game_state, source, source):
                 return [
                     eft.RecoverHPEffect(
-                        source=source,
+                        triggerer=source,
                         target=source,
                         amount=self.HP_RECOVERY,
                     ),
@@ -2666,7 +2670,7 @@ class VourukashasGlowStatus(_HeartOfKhvarenasBrillianceLikeStatus):
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT and self.usages < self.MAX_USAGES:
             return [
                 eft.RecoverHPEffect(
-                    source=source,
+                    triggerer=source,
                     target=source,
                     amount=1,
                 ),
@@ -3879,7 +3883,7 @@ class MushroomPizzaStatus(CharacterStatus, _UsageStatus):
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             es.append(
                 eft.RecoverHPEffect(
-                    source=source,
+                    triggerer=source,
                     target=source,
                     amount=1,
                 )
@@ -4328,7 +4332,7 @@ class _InspirationFieldStatus(CombatStatus, _UsageStatus):
                 return [], replace(self, usages=0, activated=False, target_char_id=None)
             return [
                 eft.RecoverHPEffect(
-                    source=source,
+                    triggerer=source,
                     target=target,
                     amount=self.RECOVERY,
                 )
@@ -4566,7 +4570,7 @@ class StalwartAndTrueStatus(TalentEquipmentStatus):
                     and this_char.hp <= 6
             ):
                 return [eft.RecoverHPEffect(
-                    source=source,
+                    triggerer=source,
                     target=source,
                     amount=2,
                 )], self
@@ -4657,7 +4661,7 @@ class ElectroCrystalCoreStatus(CharacterStatus, RevivalStatus):
         if signal is TriggeringSignal.TRIGGER_REVIVAL:
             effects.append(
                 eft.ReviveRecoverHPEffect(
-                    source=source,
+                    triggerer=source,
                     target=source,
                     amount=self._HEAL_AMOUNT,
                 )
@@ -5366,7 +5370,7 @@ class ColdBloodedStrikeStatus(TalentEquipmentStatus):
             assert self.usages >= 1
             es.append(
                 eft.RecoverHPEffect(
-                    source=source,
+                    triggerer=source,
                     target=source,
                     amount=2,
                 )
@@ -6039,6 +6043,69 @@ class PulsatingWitchStatus(TalentEquipmentStatus, _UsageLivingStatus):
         return [], self
 
 
+#### Lynette ####
+
+@dataclass(frozen=True, kw_only=True)
+class AColdBladeLikeAShadowStatus(TalentEquipmentStatus):
+    @cached_classproperty
+    def CARD(cls): from ..card.card import AColdBladeLikeAShadow; return AColdBladeLikeAShadow
+
+
+@dataclass(frozen=True, kw_only=True)
+class LynetteSkill2CounterStatus(CharacterHiddenStatus, _UsageLivingStatus):
+    usages: int = 0
+    MAX_USAGES: ClassVar[int] = 2
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_SKILL,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.POST_SKILL and self.usages < self.MAX_USAGES:
+            assert isinstance(detail, SkillIEvent)
+            if (
+                    detail.source == source
+                    and detail.skill_type.is_skill2()
+            ):
+                return [], replace(self, usages=1)
+        elif signal is TriggeringSignal.ROUND_END and self.usages > 0:
+            return [], replace(self, usages=-self.MAX_USAGES)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class OverawingAssaultStatus(CharacterStatus):
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            effects: list[eft.Effect] = []
+            attached_character = game_state.get_character_target(source)
+            assert attached_character is not None
+            if attached_character.hp >= 6:
+                effects.append(
+                    eft.SpecificDamageEffect(
+                        source=source,
+                        target=source,
+                        element=Element.PIERCING,
+                        damage=2,
+                        damage_type=DamageType(status=True, no_boost=True),
+                    ),
+                )
+            return effects, None
+        return [], self
+
+
 #### Lyney ####
 
 @dataclass(frozen=True, kw_only=True)
@@ -6123,7 +6190,7 @@ class PropSurplusStatus(CharacterStatus, _UsageLivingStatus):
         if signal is TriggeringSignal.POST_SKILL and self.triggered:
             return [
                 eft.RecoverHPEffect(
-                    source=source,
+                    triggerer=source,
                     target=source,
                     amount=self.usages,
                 ),
@@ -6492,7 +6559,7 @@ class FullPlateStatus(CombatStatus, StackedShieldStatus):
             for char in this_player.characters.get_character_in_activity_order():
                 if char.is_alive():
                     effects.append(eft.RecoverHPEffect(
-                        source=source,
+                        triggerer=source,
                         target=StaticTarget(source.pid, Zone.CHARACTERS, char.id),
                         amount=self.HEAL_AMOUNT,
                     ))
@@ -6616,7 +6683,7 @@ class FortunePreservingTalismanStatus(CombatStatus, _UsageStatus):
                 return [], replace(self, usages=0, activated=False)
             return [
                 eft.RecoverHPEffect(
-                    source=source,
+                    triggerer=source,
                     target=StaticTarget.from_char_id(source.pid, active_char.id),
                     amount=self.HEAL_AMOUNT,
                 )
@@ -6776,7 +6843,7 @@ class CeremonialGarmentStatus(CharacterStatus, _UsageStatus):
             self_chars = game_state.get_player(source.pid).characters
             return [
                 eft.RecoverHPEffect(
-                    source=source,
+                    triggerer=source,
                     target=StaticTarget.from_char_id(source.pid, char.id),
                     amount=1,
                 )
@@ -7801,7 +7868,7 @@ class AdeptalLegacyStatus(CombatStatus, _UsageStatus):
                     damage_type=DamageType(status=True),
                 ),
                 eft.RecoverHPEffect(
-                    source=source,
+                    triggerer=source,
                     target=StaticTarget.from_player_active(game_state, source.pid),
                     amount=1,
                 ),

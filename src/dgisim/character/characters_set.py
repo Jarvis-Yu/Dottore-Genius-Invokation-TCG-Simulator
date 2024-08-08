@@ -34,6 +34,7 @@ _DEFAULT_CHARACTERS: list[type[Character]] = [
     KujouSara,
     Layla,
     Lisa,
+    Lynette,
     Lyney,
     MaguuKenki,
     Mona,

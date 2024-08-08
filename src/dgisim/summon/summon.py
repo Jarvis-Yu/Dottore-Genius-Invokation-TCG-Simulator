@@ -22,7 +22,7 @@ from ..status import status as stt
 from ..character.enums import CharacterSkill, CharacterSkillType
 from ..effect.enums import TriggeringSignal, DynamicCharacterTarget, Zone
 from ..effect.structs import DamageType, StaticTarget
-from ..element import Element, Reaction
+from ..element import AURA_ELEMENTS, Element, Reaction
 from ..event import *
 from ..helper.quality_of_life import BIG_INT, cached_classproperty
 from ..status.enums import Preprocessables, Informables
@@ -38,6 +38,7 @@ __all__ = [
     # concrete implementations
     "AutumnWhirlwindSummon",
     "BakeKurageSummon",
+    "BogglecatBoxSummon",
     "BountifulCoreSummon",
     "BurningFlameSummon",
     "CelestialDreamsphereSummon",
@@ -307,46 +308,20 @@ class AutumnWhirlwindSummon(_ConvertableAnemoSummon):
 @dataclass(frozen=True, kw_only=True)
 class BakeKurageSummon(_DestroyOnNumSummon):
     usages: int = 2
-    # activated: bool = False
     MAX_USAGES: ClassVar[int] = 2
     BASE_DMG: ClassVar[int] = 1
     ADDITIONAL_DMG_BOOST: ClassVar[int] = 1
     HEAL_AMOUNT: ClassVar[int] = 1
     ELEMENT: ClassVar[Element] = Element.HYDRO
     REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
-        # TriggeringSignal.COMBAT_ACTION,
         TriggeringSignal.END_ROUND_CHECK_OUT,
     ))
-
-    # @override
-    # def _inform(
-    #         self,
-    #         game_state: GameState,
-    #         status_source: StaticTarget,
-    #         info_type: Informables,
-    #         information: InformableEvent,
-    # ) -> Self:
-    #     if info_type is Informables.POST_SKILL_USAGE:
-    #         assert isinstance(information, SkillIEvent)
-    #         if not (
-    #                 information.source.pid is status_source.pid
-    #                 and information.skill_type is CharacterSkill.ELEMENTAL_BURST
-    #                 and not self.activated
-    #         ):
-    #             return self
-    #         char = game_state.get_character_target(information.source)
-    #         from ..character.character import SangonomiyaKokomi
-    #         if isinstance(char, SangonomiyaKokomi) and char.talent_equipped():
-    #             return replace(self, activated=True)
-    #     return self
 
     @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
     ) -> tuple[list[eft.Effect], None | Self]:
-        # if signal is TriggeringSignal.COMBAT_ACTION and self.activated:
-        #     return [], replace(self, usages=self.MAX_USAGES, activated=False)
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             self_chars = game_state.get_player(source.pid).characters
             activate_additional_dmg_boost = any(
@@ -369,13 +344,68 @@ class BakeKurageSummon(_DestroyOnNumSummon):
                     damage_type=DamageType(summon=True),
                 ),
                 eft.RecoverHPEffect(
-                    source=StaticTarget.from_summon(source.pid, type(self)),
+                    triggerer=StaticTarget.from_summon(source.pid, type(self)),
                     target=StaticTarget.from_char_id(
                         source.pid, self_chars.just_get_active_character_id()
                     ),
                     amount=self.HEAL_AMOUNT,
                 ),
             ], replace(self, usages=-1)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class BogglecatBoxSummon(_DestroyOnNumSummon, stt._ShieldStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    elem: Element = Element.ANEMO
+    DMG: ClassVar[int] = 1
+    available: bool = True  # dmg reduction
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_DMG,
+        TriggeringSignal.END_ROUND_CHECK_OUT,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _preprocess(
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
+            signal: Preprocessables,
+    ) -> tuple[PreprocessableEvent, None | Self]:
+        if signal is Preprocessables.DMG_AMOUNT_MINUS and self.available:
+            assert isinstance(item, DmgPEvent)
+            if (
+                    self._is_target(game_state, status_source, item.dmg)
+                    and item.dmg.damage > 0
+                    and item.dmg.element is not Element.PIERCING
+            ):
+                return item.delta_damage(-1), replace(self, available=False)
+        return item, self
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.POST_DMG and self.elem is Element.ANEMO:
+            assert isinstance(detail, DmgIEvent)
+            if (
+                    detail.dmg.target.pid is source.pid
+                    and detail.dmg.element in Reaction.SWIRL.first_elems
+            ):
+                return [], replace(self, usages=0, elem=detail.dmg.element)
+        elif signal is TriggeringSignal.END_ROUND_CHECK_OUT:
+            return [
+                eft.ReferredDamageEffect(
+                    source=source,
+                    target=DynamicCharacterTarget.OPPO_ACTIVE,
+                    element=self.elem,
+                    damage=self.DMG,
+                    damage_type=DamageType(summon=True),
+                ),
+            ], replace(self, usages=-1)
+        elif signal is TriggeringSignal.ROUND_END and not self.available:
+            return [], replace(self, usages=0, available=True)
         return [], self
 
 
@@ -393,6 +423,7 @@ class BountifulCoreSummon(_DmgPerRoundSummon):
     def _NILOU(cls): from ..character.character import Nilou; return Nilou
 
 
+    @override
     def _react_to_signal(
             self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
             detail: None | InformableEvent
@@ -470,10 +501,7 @@ class ChainsOfWardingThunderSummon(_DmgPerRoundSummon):
 
     @override
     def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: PreprocessableEvent,
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.SWAP_COST_ANY:
@@ -667,7 +695,7 @@ class DandelionFieldSummon(_DestroyOnNumSummon):
                     damage_type=DamageType(summon=True),
                 ),
                 eft.RecoverHPEffect(
-                    source=StaticTarget.from_summon(source.pid, type(self)),
+                    triggerer=StaticTarget.from_summon(source.pid, type(self)),
                     target=StaticTarget.from_player_active(game_state, source.pid),
                     amount=self.HEAL_AMOUNT,
                 ),
@@ -691,7 +719,7 @@ class DrunkenMistSummon(_DmgPerRoundSummon):
         if signal is TriggeringSignal.END_ROUND_CHECK_OUT:
             es.append(
                 eft.RecoverHPEffect(
-                    source=StaticTarget.from_summon(source.pid, type(self)),
+                    triggerer=StaticTarget.from_summon(source.pid, type(self)),
                     target=StaticTarget.from_player_active(game_state, source.pid),
                     amount=2,
                 )
@@ -759,6 +787,7 @@ class FierySanctumFieldSummon(_DmgPerRoundSummon, stt._ShieldStatus):
                     self._target_is_self_active(game_state, status_source, dmg.target)
                     and self.shield_usages > 0
                     and dmg.damage > 0
+                    and dmg.element is not Element.PIERCING
                     and char is not None
                     and type(char) is not self._DEHYA
             ):
@@ -901,7 +930,7 @@ class HeraldOfFrostSummon(_DmgPerRoundSummon):
             )
             recoveries: list[eft.Effect] = [
                 eft.RecoverHPEffect(
-                    source=StaticTarget.from_summon(source.pid, type(self)),
+                    triggerer=StaticTarget.from_summon(source.pid, type(self)),
                     target=StaticTarget.from_char_id(source.pid, char_to_heal.id),
                     amount=self.HEAL_AMOUNT,
                 ),
@@ -914,7 +943,7 @@ class HeraldOfFrostSummon(_DmgPerRoundSummon):
             ):
                 return [
                     eft.RecoverHPEffect(
-                        source=StaticTarget.from_summon(source.pid, type(self)),
+                        triggerer=StaticTarget.from_summon(source.pid, type(self)),
                         target=StaticTarget.from_player_active(game_state, source.pid),
                         amount=self.HEAL_AMOUNT,
                     ),
@@ -1048,7 +1077,7 @@ class MelodyLoopSummon(_DestroyOnNumSummon):
             )
             effects: list[eft.Effect] = [
                 eft.RecoverHPEffect(
-                    source=source,
+                    triggerer=source,
                     target=StaticTarget.from_char_id(source.pid, char.id),
                     amount=1,
                 )
@@ -1581,7 +1610,7 @@ class YueguiThrowingModeSummon(_DestroyOnNumSummon):
                     damage_type=DamageType(summon=True),
                 ),
                 eft.RecoverHPEffect(
-                    source=source,
+                    triggerer=source,
                     target=char_target,
                     amount=self.HEALING + healing,
                 ),

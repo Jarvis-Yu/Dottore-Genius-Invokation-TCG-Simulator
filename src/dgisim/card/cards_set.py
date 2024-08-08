@@ -9,6 +9,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     ## Talents ##
     AbsorbingPrism,
     AbyssalMayhemHydrospout,
+    AColdBladeLikeAShadow,
     AratakiIchiban,
     ASubordinatesSkills,
     Beneficent,

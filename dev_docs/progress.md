@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (52/95 implemented)](#character-5295-implemented)
-  - [Card (206/334 implemented)](#card-206334-implemented)
+  - [Character (53/95 implemented)](#character-5395-implemented)
+  - [Card (207/334 implemented)](#card-207334-implemented)
 
-## Character (52/95 implemented)
+## Character (53/95 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -42,7 +42,7 @@ all I need now is to implement each card and character.
   - [ ] Faruzan
   - [x] Jean
   - [x] Kaedehara Kazuha
-  - [ ] Lynette
+  - [x] Lynette
   - [x] Maguu Kenki
   - [ ] Sayu
   - [x] Venti
@@ -97,11 +97,12 @@ all I need now is to implement each card and character.
   - [x] Stonehide Lawachurl
   - [ ] Yun Jin
 
-## Card (206/334 implemented)
+## Card (207/334 implemented)
 
-- [ ] Equipment Card (101/177):
+- [ ] Equipment Card (102/177):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
+    - [x] A Cold Blade Like a Shadow
     - [x] Arataki Ichiban
     - [x] A Subordinate's Skills
     - [x] Beneficent

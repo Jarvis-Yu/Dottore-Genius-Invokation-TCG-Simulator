@@ -143,6 +143,7 @@ CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
         # (char.Xiao, 604),
         (char.KaedeharaKazuha, 605),
         (char.Wanderer, 606),
+        (char.Lynette, 607),
 
         #### End 700 ####
     )
@@ -443,6 +444,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         # Xiao 1529
         (card.PoeticsOfFuubutsu, 1530),
         (card.GalesOfReverie, 1531),
+        (card.AColdBladeLikeAShadow, 1532),
 
         #### 5 Special Card 1625 ####
         (card.OmniCard, 1625),
@@ -965,6 +967,10 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.DescentStatus, 12720),
         (status.GalesOfReverieStatus, 12721),
         (status.WindfavoredStatus, 12722),
+        ## Lynette 12740 ##
+        (status.AColdBladeLikeAShadowStatus, 12740),
+        (status.LynetteSkill2CounterStatus, 12741),
+        (status.OverawingAssaultStatus, 12742),
 
         #### End 14600 ####
     )
@@ -1030,15 +1036,16 @@ SUMM_MAPPING: dict[type["Summon"], int] = HashableDict({
         (summon.YueguiThrowingModeSummon, 503),
         # (summon.GossamerSpriteSummon, 504),
 
-        #### Anemo(convertible) 600 ####
+        #### Anemo(inconvertible) 600 ####
         (summon.DandelionFieldSummon, 600),
         (summon.ShadowswordLoneGaleSummon, 601),
         ##(summon.WhirlwindSummon, 602),
 
-        #### Anemo(inconvertible) 650 ####
+        #### Anemo(convertible) 650 ####
         # (summon.LargeWindSpiritSummon, 650),
         (summon.StormEyeSummon, 651),
         (summon.AutumnWhirlwindSummon, 652),
+        (summon.BogglecatBoxSummon, 653),
 
         #### Physical 700 ####
         (summon.TaroumaruEnragedSummon, 700),

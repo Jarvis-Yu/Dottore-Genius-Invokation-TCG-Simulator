@@ -75,7 +75,7 @@ class _TempTestInfiniteRevivalStatus(CharacterHiddenStatus, RevivalStatus):
         if signal is TriggeringSignal.TRIGGER_REVIVAL:
             effects.append(
                 ReviveRecoverHPEffect(
-                    source=source,
+                    triggerer=source,
                     target=source,
                     amount=BIG_INT,
                 ),
@@ -123,7 +123,7 @@ class _TempTestHealingStatus(CharacterStatus):
         if signal is TriggeringSignal.POST_SKILL:
             return [
                 RecoverHPEffect(
-                    source=source,
+                    triggerer=source,
                     target=source,
                     amount=self.healing,
                 ),
@@ -474,18 +474,26 @@ def set_hp(
     return game_state
 
 
-def next_round(game_state: GameState, observe: bool = False) -> GameState:
+def next_round(game_state: GameState, pid: None | Pid = None, observe: bool = False) -> GameState:
     gsm = GameStateMachine(game_state, LazyAgent(), LazyAgent())
     gsm.step_until_phase(game_state.mode.end_phase, observe=observe)
     gsm.step_until_phase(game_state.mode.action_phase, observe=observe)
     gsm.auto_step(observe=observe)
-    return gsm.get_game_state()
+    game_state = gsm.get_game_state()
+    if pid is not None:
+        game_state = end_round(game_state, pid.other, observe)
+    return game_state
 
 
-def next_round_with_great_omni(game_state: GameState, observe: bool = False) -> GameState:
-    """ skips to next round and fill players with even number of dice """
-    game_state = next_round(game_state, observe)
-    return fill_dice_with_omni(game_state)
+def next_round_with_great_omni(game_state: GameState, pid: None | Pid = None, observe: bool = False) -> GameState:
+    """
+    :param pid: end the round of the other player if not None.
+
+    skips to next round and fill players with even number of dice.
+    """
+    game_state = next_round(game_state, pid, observe)
+    game_state = fill_dice_with_omni(game_state)
+    return game_state
 
 
 def oppo_aura_elem(game_state: GameState, elem: Element, char_id: None | int = None) -> GameState:
@@ -915,6 +923,10 @@ def assert_last_dmg(
     Prerequisite: the game state has a corresponding dmg listener.
     """
     dmgs = get_dmg_listener_data(game_state, pid)
+    if num is not None:
+        testbody.assertEqual(num, len(dmgs))
+        if num == 0:
+            return game_state
     dmg = dmgs[-(last_index + 1)]
     if source is not None:
         testbody.assertEqual(dmg.source, source)
@@ -936,8 +948,6 @@ def assert_last_dmg(
         testbody.assertIs(summon, dmg.damage_type.directly_from_summon())
     if card is not None:
         testbody.assertIs(card, dmg.damage_type.directly_from_card())
-    if num is not None:
-        testbody.assertEqual(num, len(dmgs))
     if clear:
         game_state = remove_dmg_listener(game_state, pid)
         game_state = add_dmg_listener(game_state, pid)
@@ -1325,6 +1335,10 @@ def assert_last_healing(
         clear: bool = False,
 ) -> GameState:
     healings = get_healing_data(game_state, pid)
+    if num is not None:
+        testbody.assertEqual(num, len(healings))
+        if num == 0:
+            return game_state
     healing = healings[-(last_index + 1)]
     if source is not None:
         testbody.assertEqual(healing.source, source)
@@ -1332,8 +1346,6 @@ def assert_last_healing(
         testbody.assertEqual(healing.target, target)
     if amount is not None:
         testbody.assertEqual(healing.healing, amount)
-    if num is not None:
-        testbody.assertEqual(num, len(healings))
     if clear:
         game_state = remove_healing_listener(game_state, pid)
         game_state = add_healing_listener(game_state, pid)

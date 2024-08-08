@@ -18,6 +18,7 @@
   - Kaveh
   - Layla
   - Lisa
+  - Lynette
   - Lyney
   - Nilou
   - Stonehide Lawachurl
@@ -29,6 +30,7 @@
 - New Cards:
   - Equipment Cards:
     - Talent Cards:
+      - A Cold Blade Like a Shadow
       - A Subordinate's Skills
       - Beneficent
       - Cicin's Cold Glare

@@ -292,6 +292,8 @@ __all__ = [
     "LightsRemit",
     ## Lisa ##
     "PulsatingWitch",
+    ## Lynette ##
+    "AColdBladeLikeAShadow",
     ## Lyney ##
     "ConclusiveOvation",
     ## Maguu Kenki ##
@@ -2140,7 +2142,7 @@ class OceanHuedClam(ArtifactEquipmentCard):
     ) -> tuple[eft.Effect, ...]:
         return (
             eft.RecoverHPEffect(
-                source=StaticTarget.from_personal_status(pid, cast(int, instruction.target.id), cls.ARTIFACT_STATUS),
+                triggerer=StaticTarget.from_personal_status(pid, cast(int, instruction.target.id), cls.ARTIFACT_STATUS),
                 target=StaticTarget.from_char_id(pid, cast(int, instruction.target.id)),
                 amount=2,
             ),
@@ -2467,7 +2469,7 @@ class TeyvatFriedEgg(FoodCard, _CharTargetChoiceProvider):
         assert isinstance(instruction, act.StaticTargetInstruction)
         return (
             eft.ReviveRecoverHPEffect(
-                source=StaticTarget.from_card(pid, cls),
+                triggerer=StaticTarget.from_card(pid, cls),
                 target=instruction.target,
                 amount=1,
             ),
@@ -3005,13 +3007,13 @@ class ElementalResonanceSoothingWater(_ElementalResonanceCard, _DiceOnlyChoicePr
     ) -> tuple[eft.Effect, ...]:
         chars = game_state.get_player(pid).characters.get_alive_character_in_activity_order()
         effects: list[eft.Effect] = [eft.RecoverHPEffect(
-            source=StaticTarget.from_card(pid, cls),
+            triggerer=StaticTarget.from_card(pid, cls),
             target=StaticTarget.from_char_id(pid, chars[0].id),
             amount=cls._MAIN_RECOVERY,
         )]
         for char in chars[1:]:
             effects.append(eft.RecoverHPEffect(
-                source=StaticTarget.from_card(pid, cls),
+                triggerer=StaticTarget.from_card(pid, cls),
                 target=StaticTarget.from_char_id(pid, char.id),
                 amount=cls._SUB_RECOVERY,
             ))
@@ -4569,6 +4571,15 @@ class PulsatingWitch(_TalentEquipmentAnyEventCard):
                 status=cls._EQUIPMENT_STATUS,
             ),
         )
+
+
+#### Lynette ####
+
+class AColdBladeLikeAShadow(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDice({Element.ANEMO: 3})
+    _CHARACTER = chr.Lynette
+    _EQUIPMENT_STATUS = stt.AColdBladeLikeAShadowStatus
+    _SKILL = CharacterSkill.SKILL2
 
 
 #### Lyney ####

@@ -871,7 +871,7 @@ class BroadcastDamageEffect(BroadcastEffect):
 @dataclass(frozen=True, repr=False)
 class BroadcastHealingEffect(BroadcastEffect):
     home_pid: Pid
-    source: StaticTarget
+    triggerer: StaticTarget
     target: StaticTarget
     amount: int
 
@@ -879,7 +879,7 @@ class BroadcastHealingEffect(BroadcastEffect):
         return AllStatusTriggererEffect(
             pid=self.home_pid,
             signal=TriggeringSignal.POST_HEALING,
-            detail=HealingIEvent(source=self.source, target=self.target, healing=self.amount),
+            detail=HealingIEvent(source=self.triggerer, target=self.target, healing=self.amount),
         ).execute(game_state)
 
 
@@ -1535,7 +1535,7 @@ class EnergyDrainEffect(DirectEffect):
 
 @dataclass(frozen=True, repr=False)
 class RecoverHPEffect(DirectEffect):
-    source: StaticTarget
+    triggerer: StaticTarget
     target: StaticTarget
     amount: int
 
@@ -1559,8 +1559,8 @@ class RecoverHPEffect(DirectEffect):
             ).build()
         ).f_common_effect_stack(
             lambda es: es.push_left(BroadcastHealingEffect(
-                home_pid=self.source.pid,
-                source=self.source,
+                home_pid=self.triggerer.pid,
+                triggerer=self.triggerer,
                 target=self.target,
                 amount=hp - character.hp,  # type: ignore
             ))
@@ -1594,8 +1594,8 @@ class ReviveRecoverHPEffect(RecoverHPEffect):
             ))
         ).f_common_effect_stack(
             lambda es: es.push_left(BroadcastHealingEffect(
-                home_pid=self.source.pid,
-                source=self.source,
+                home_pid=self.triggerer.pid,
+                triggerer=self.triggerer,
                 target=self.target,
                 amount=hp,
             ))

@@ -15,8 +15,10 @@ if TYPE_CHECKING:
 __all__ = [
     "AURA_ELEMENTS",
     "AURA_ELEMENTS_ORDERED",
+    "DMG_ELEMENTS",
     "Element",
     "ElementalAura",
+    "PURE_ELEMENTS",
     "Reaction",
     "ReactionDetail",
 ]
@@ -47,18 +49,6 @@ class Element(Enum):
         return self in AURA_ELEMENTS
 
 
-#: Elements of the seven.
-PURE_ELEMENTS: set[Element] = {
-    Element.PYRO,
-    Element.HYDRO,
-    Element.ANEMO,
-    Element.ELECTRO,
-    Element.DENDRO,
-    Element.CRYO,
-    Element.GEO,
-}
-
-
 #: Aurable elements ordered by reaction priority.
 AURA_ELEMENTS_ORDERED: tuple[Element, ...] = (
     Element.PYRO,
@@ -70,6 +60,32 @@ AURA_ELEMENTS_ORDERED: tuple[Element, ...] = (
 
 #: Elements that can be applied to characters.
 AURA_ELEMENTS: FrozenSet[Element] = frozenset(AURA_ELEMENTS_ORDERED)
+
+
+#: Elements of damages
+DMG_ELEMENTS: frozenset[Element] = frozenset({
+    Element.PHYSICAL,
+    Element.PYRO,
+    Element.HYDRO,
+    Element.ANEMO,
+    Element.ELECTRO,
+    Element.DENDRO,
+    Element.CRYO,
+    Element.GEO,
+    Element.PIERCING,
+})
+
+
+#: Elements of the seven.
+PURE_ELEMENTS: frozenset[Element] = frozenset({
+    Element.PYRO,
+    Element.HYDRO,
+    Element.ANEMO,
+    Element.ELECTRO,
+    Element.DENDRO,
+    Element.CRYO,
+    Element.GEO,
+})
 
 
 @dataclass(frozen=True)

@@ -61,6 +61,7 @@ __all__ = [
     "KujouSara",
     "Layla",
     "Lisa",
+    "Lynette",
     "Lyney",
     "MaguuKenki",
     "Mona",
@@ -842,7 +843,7 @@ class Barbara(Character):
         for char in alive_chars:
             effects.append(
                 eft.RecoverHPEffect(
-                    source=source,
+                    triggerer=source,
                     target=StaticTarget.from_char_id(source.pid, char.id),
                     amount=4,
                 )
@@ -1289,7 +1290,7 @@ class Diona(Character):
                 damage_type=DamageType(elemental_burst=True),
             ),
             eft.RecoverHPEffect(
-                source=source,
+                triggerer=source,
                 target=source,
                 amount=2,
             ),
@@ -1929,7 +1930,7 @@ class HuTao(Character):
                 damage_type=DamageType(elemental_burst=True),
             ),
             eft.RecoverHPEffect(
-                source=source,
+                triggerer=source,
                 target=source,
                 amount=heal,
             ),
@@ -2071,7 +2072,7 @@ class Jean(Character):
         self_characters = game_state.get_player(source.pid).characters
         for character in self_characters.get_alive_character_in_activity_order():
             effects.append(eft.RecoverHPEffect(
-                source=source,
+                triggerer=source,
                 target=StaticTarget.from_char_id(source.pid, character.id),
                 amount=2,
             ))
@@ -3003,6 +3004,101 @@ class Lisa(Character):
         )
 
 
+class Lynette(Character):
+    _ELEMENT = Element.ANEMO
+    _WEAPON_TYPE = WeaponType.SWORD
+    _TALENT_STATUS = stt.AColdBladeLikeAShadowStatus
+    _FACTIONS = frozenset((Faction.FATUI, Faction.FONTAINE))
+
+    _SKILL1_COST = AbstractDice({
+        Element.ANEMO: 1,
+        Element.ANY: 2,
+    })
+    _SKILL2_COST = AbstractDice({
+        Element.ANEMO: 3,
+    })
+    _ELEMENTAL_BURST_COST = AbstractDice({
+        Element.ANEMO: 3,
+    })
+
+    @override
+    def _skill1(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return normal_attack_template(
+            game_state=game_state,
+            source=source,
+            element=Element.PHYSICAL,
+            damage=2,
+        )
+
+    @override
+    def _skill2(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        skill2_count = self.hidden_statuses.just_find(stt.LynetteSkill2CounterStatus).usages
+        talent_triggered = skill2_count == 1 and self.talent_equipped()
+        effects: list[eft.Effect] = [
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.ANEMO,
+                damage=5 if talent_triggered else 3,
+                damage_type=DamageType(elemental_skill=True),
+            ),
+        ]
+        if skill2_count == 0 and self.hp <= 8:
+            effects.extend((
+                eft.RecoverHPEffect(
+                    triggerer=source,
+                    target=source,
+                    amount=2,
+                ),
+                eft.AddCharacterStatusEffect(
+                    target=source,
+                    status=stt.OverawingAssaultStatus,
+                ),
+            ))
+        if talent_triggered:
+            effects.append(
+                eft.BackwardSwapCharacterEffect(
+                    target_player=source.pid.other,
+                )
+            )
+        return tuple(effects)
+
+    @override
+    def _elemental_burst(self, game_state: GameState, source: StaticTarget) -> tuple[eft.Effect, ...]:
+        return (
+            eft.EnergyDrainEffect(
+                target=source,
+                amount=self.max_energy,
+            ),
+            eft.ReferredDamageEffect(
+                source=source,
+                target=DynamicCharacterTarget.OPPO_ACTIVE,
+                element=Element.ANEMO,
+                damage=2,
+                damage_type=DamageType(elemental_burst=True),
+            ),
+            eft.AddSummonEffect(
+                target_pid=source.pid,
+                summon=sm.BogglecatBoxSummon,
+            ),
+        )
+
+    @classmethod
+    def from_default(cls, id: int = -1) -> Self:
+        return cls(
+            id=id,
+            alive=True,
+            hp=10,
+            max_hp=10,
+            energy=0,
+            max_energy=2,
+            hiddens=stts.Statuses((stt.LynetteSkill2CounterStatus(),)),
+            statuses=stts.Statuses(()),
+            elemental_aura=ElementalAura.from_default(),
+        )
+
+
+
 class Lyney(Character):
     _ELEMENT = Element.PYRO
     _WEAPON_TYPE = WeaponType.BOW
@@ -3722,7 +3818,7 @@ class Qiqi(Character):
                         ),
                     ) + tuple(
                         eft.ReviveRecoverHPEffect(
-                            source=source,
+                            triggerer=source,
                             target=StaticTarget.from_char_id(source.pid, char.id),
                             amount=2,
                         )
@@ -4049,7 +4145,7 @@ class SangonomiyaKokomi(Character):
         self_characters = game_state.get_player(source.pid).characters
         for character in self_characters.get_alive_character_in_activity_order():
             effects.append(eft.RecoverHPEffect(
-                source=source,
+                triggerer=source,
                 target=StaticTarget.from_char_id(source.pid, character.id),
                 amount=1,
             ))
