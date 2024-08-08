@@ -4,10 +4,10 @@ The basics for running the entire game are all implemented,
 all I need now is to implement each card and character.
 
 - [Implementation Progress](#implementation-progress)
-  - [Character (53/95 implemented)](#character-5395-implemented)
-  - [Card (207/334 implemented)](#card-207334-implemented)
+  - [Character (54/95 implemented)](#character-5495-implemented)
+  - [Card (208/334 implemented)](#card-208334-implemented)
 
-## Character (53/95 implemented)
+## Character (54/95 implemented)
 
 - [ ] Pyro:
   - [x] Bennett
@@ -59,7 +59,7 @@ all I need now is to implement each card and character.
   - [x] Lisa
   - [ ] Millennial Pearl Seahorse
   - [x] Raiden Shogun
-  - [ ] Razor
+  - [x] Razor
   - [ ] Thunder Manifestation
   - [x] Yae Miko
 - [ ] Dendro:
@@ -97,14 +97,15 @@ all I need now is to implement each card and character.
   - [x] Stonehide Lawachurl
   - [ ] Yun Jin
 
-## Card (207/334 implemented)
+## Card (208/334 implemented)
 
-- [ ] Equipment Card (102/177):
+- [ ] Equipment Card (103/177):
   - [ ] Talent Card:
     - [x] Abyssal Mayhem Hydrospout
     - [x] A Cold Blade Like a Shadow
     - [x] Arataki Ichiban
     - [x] A Subordinate's Skills
+    - [x] Awakening
     - [x] Beneficent
     - [x] Cicin's Cold Glare
     - [x] Cold-Blooded Strike

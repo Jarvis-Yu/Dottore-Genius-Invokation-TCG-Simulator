@@ -323,6 +323,9 @@ __all__ = [
     "ChakraDesiderataHiddenStatus",
     "ChakraDesiderataStatus",
     "WishesUnnumberedStatus",
+    ## Razor ##
+    "AwakeningStatus",
+    "TheWolfWithinStatus",
     ## Rhodeia of Loch ##
     "StreamingSurgeStatus",
     ## Sangonomiya Kokomi ##
@@ -6743,10 +6746,7 @@ class ChakraDesiderataStatus(CharacterStatus, _UsageLivingStatus):
 
     @override
     def _inform(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            info_type: Informables,
+            self, game_state: GameState, status_source: StaticTarget, info_type: Informables,
             information: InformableEvent,
     ) -> Self:
         if info_type is Informables.POST_SKILL_USAGE:
@@ -6785,9 +6785,88 @@ class ChakraDesiderataStatus(CharacterStatus, _UsageLivingStatus):
 @dataclass(frozen=True, kw_only=True)
 class WishesUnnumberedStatus(TalentEquipmentStatus):
     @cached_classproperty
-    def CARD(cls) -> type[crd.TalentEquipmentCard]:
-        from ..card.card import WishesUnnumbered
-        return WishesUnnumbered
+    def CARD(cls): from ..card.card import WishesUnnumbered; return WishesUnnumbered
+
+
+#### Razor ####
+
+
+@dataclass(frozen=True, kw_only=True)
+class AwakeningStatus(TalentEquipmentStatus, _UsageLivingStatus):
+    usages: int = 1
+    MAX_USAGES: ClassVar[int] = 1
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_SKILL,
+        TriggeringSignal.ROUND_END,
+    ))
+    @cached_classproperty
+    def CARD(cls): from ..card.card import Awakening; return Awakening
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.POST_SKILL and self.usages > 0:
+            assert isinstance(detail, SkillIEvent)
+            if detail.source == source and detail.skill_type.is_skill2():
+                alive_chars = game_state.get_player(source.pid).characters.get_required_chars(
+                    activity_order=True, alive=True,
+                )
+                char = next((
+                    char
+                    for char in alive_chars
+                    if char.energy < char.max_energy
+                ), None)
+                effects: list[eft.Effect] = []
+                if char is not None:
+                    effects.append(
+                        eft.EnergyRechargeEffect(
+                            target=StaticTarget.from_char_id(source.pid, char.id),
+                            amount=1,
+                        )
+                    )
+                return effects, replace(self, usages=-1)
+        elif signal is TriggeringSignal.ROUND_END and self.usages < self.MAX_USAGES:
+            return [], replace(self, usages=self.MAX_USAGES)
+        return [], self
+
+
+@dataclass(frozen=True, kw_only=True)
+class TheWolfWithinStatus(CharacterStatus, _UsageStatus):
+    usages: int = 2
+    MAX_USAGES: ClassVar[int] = 2
+    REACTABLE_SIGNALS: ClassVar[frozenset[TriggeringSignal]] = frozenset((
+        TriggeringSignal.POST_SKILL,
+        TriggeringSignal.ROUND_END,
+    ))
+
+    @override
+    def _react_to_signal(
+            self, game_state: GameState, source: StaticTarget, signal: TriggeringSignal,
+            detail: None | InformableEvent
+    ) -> tuple[list[eft.Effect], None | Self]:
+        if signal is TriggeringSignal.POST_SKILL:
+            assert isinstance(detail, SkillIEvent)
+            if (
+                    detail.source == source
+                    and (
+                        detail.skill_type.is_skill1()
+                        or detail.skill_type.is_skill2()
+                    )
+            ):
+                return [
+                    eft.ReferredDamageEffect(
+                        source=source.with_status(type(self)),
+                        target=DynamicCharacterTarget.OPPO_ACTIVE,
+                        element=Element.ELECTRO,
+                        damage=2,
+                        damage_type=DamageType(status=True),
+                    ),
+                ], self
+        elif signal is TriggeringSignal.ROUND_END:
+            return [], replace(self, usages=-1)
+        return [], self
 
 
 #### Rhodeia of Loch ####
@@ -6796,9 +6875,7 @@ class WishesUnnumberedStatus(TalentEquipmentStatus):
 @dataclass(frozen=True, kw_only=True)
 class StreamingSurgeStatus(TalentEquipmentStatus):
     @cached_classproperty
-    def CARD(cls) -> type[crd.TalentEquipmentCard]:
-        from ..card.card import StreamingSurge
-        return StreamingSurge
+    def CARD(cls): from ..card.card import StreamingSurge; return StreamingSurge
 
 
 #### Sangonomiya Kokomi ####
@@ -6817,10 +6894,7 @@ class CeremonialGarmentStatus(CharacterStatus, _UsageStatus):
 
     @override
     def _preprocess(
-            self,
-            game_state: GameState,
-            status_source: StaticTarget,
-            item: PreprocessableEvent,
+            self, game_state: GameState, status_source: StaticTarget, item: PreprocessableEvent,
             signal: Preprocessables,
     ) -> tuple[PreprocessableEvent, None | Self]:
         if signal is Preprocessables.DMG_AMOUNT_PLUS:

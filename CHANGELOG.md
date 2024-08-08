@@ -21,6 +21,7 @@
   - Lynette
   - Lyney
   - Nilou
+  - Razor
   - Stonehide Lawachurl
   - Thoma
   - Xiangling
@@ -32,6 +33,7 @@
     - Talent Cards:
       - A Cold Blade Like a Shadow
       - A Subordinate's Skills
+      - Awakening
       - Beneficent
       - Cicin's Cold Glare
       - Conclusive Ovation

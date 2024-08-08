@@ -323,6 +323,42 @@ def recharge_energy_for(
     ).build()
 
 
+def drain_energy_for(
+        game_state: GameState, pid: Pid, char_id: None | int = None, amount: None | int = None,
+) -> GameState:
+    """
+    :param amount: if None, then set to min energy, otherwise set to max(0, amount)
+    """
+    assert not (amount is not None and amount < 0)
+    return game_state.factory().f_player(
+        pid,
+        lambda p: p.factory().f_characters(
+            lambda cs: cs.factory().f_character(
+                cs.just_get_active_character_id() if char_id is None else char_id,
+                lambda c: c.factory().energy(
+                    0 if amount is None else max(0, amount)
+                ).build()
+            ).build()
+        ).build()
+    ).build()
+
+
+def recharge_energies_for(game_state: GameState, pid: Pid, amounts: tuple[None | int, ...]) -> GameState:
+    for i, amount in enumerate(amounts):
+        if amount is None:
+            continue
+        game_state = recharge_energy_for(game_state, pid, i + 1, amount)
+    return game_state
+
+
+def drain_energies_for(game_state: GameState, pid: Pid, amounts: tuple[None | int, ...]) -> GameState:
+    for i, amount in enumerate(amounts):
+        if amount is None:
+            continue
+        game_state = drain_energy_for(game_state, pid, i + 1, amount)
+    return game_state
+
+
 def fill_dice_with_omni(game_state: GameState) -> GameState:
     dice = {
         Element.OMNI: BIG_INT,
@@ -1350,3 +1386,23 @@ def assert_last_healing(
         game_state = remove_healing_listener(game_state, pid)
         game_state = add_healing_listener(game_state, pid)
     return game_state
+
+
+def assert_hps(
+        testbody: unittest.TestCase, game_state: GameState, pid: Pid,
+        hps: tuple[None | int, ...],
+) -> None:
+    chars = game_state.get_player(pid).characters
+    for i, hp in enumerate(hps):
+        char = chars.just_get_character(i + 1)
+        testbody.assertEqual(char.hp, hp, f"char[{i + 1}] {char.name()}")
+
+
+def assert_energies(
+        testbody: unittest.TestCase, game_state: GameState, pid: Pid,
+        energies: tuple[None | int, ...],
+) -> None:
+    chars = game_state.get_player(pid).characters
+    for i, energy in enumerate(energies):
+        char = chars.just_get_character(i + 1)
+        testbody.assertEqual(char.energy, energy, f"char[{i + 1}] {char.name()}")

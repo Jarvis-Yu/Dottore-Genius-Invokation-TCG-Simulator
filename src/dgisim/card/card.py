@@ -312,6 +312,8 @@ __all__ = [
     "RiteOfResurrection",
     ## Raiden Shogun ##
     "WishesUnnumbered",
+    ## Razor ##
+    "Awakening",
     ## Rhodeia of Loch ##
     "StreamingSurge",
     ## Sangonomiya Kokomi ##
@@ -4667,6 +4669,15 @@ class WishesUnnumbered(_TalentEquipmentSkillCard):
     _CHARACTER = chr.RaidenShogun
     _EQUIPMENT_STATUS = stt.WishesUnnumberedStatus
     _SKILL = CharacterSkill.ELEMENTAL_BURST
+
+
+#### Razor ####
+
+class Awakening(_TalentEquipmentSkillCard):
+    _DICE_COST = AbstractDice({Element.ELECTRO: 3})
+    _CHARACTER = chr.Razor
+    _EQUIPMENT_STATUS = stt.AwakeningStatus
+    _SKILL = CharacterSkill.SKILL2
 
 
 #### Rhodeia of Loch ####

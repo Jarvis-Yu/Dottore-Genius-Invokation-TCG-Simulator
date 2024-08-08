@@ -108,7 +108,7 @@ CHAR_MAPPING: dict[type["Character"], int] = HashableDict({
         #### Elctro 300 ####
         (char.Fischl, 300),
         (char.Keqing, 301),
-        # (char.Razor, 302),
+        (char.Razor, 302),
         # (char.Cyno, 303),
         # (char.Beidou, 304),
         (char.KujouSara, 305),
@@ -409,7 +409,7 @@ CARD_MAPPING: dict[type["Card"], int] = HashableDict({
         #### 4.4 Electro 1225 ####
         (card.StellarPredator, 1225),
         (card.ThunderingPenance, 1226),
-        # Razor 1227
+        (card.Awakening, 1227),
         # Cyno 1228
         # Beidou 1229
         (card.SinOfPride, 1230),
@@ -870,6 +870,8 @@ STT_MAPPING: dict[type["Status"], int] = HashableDict({
         (status.KeqingElectroInfusionStatus, 6622),
         (status.KeqingElectroInfusionEnhancedStatus, 6623),
         ## Razor 6640 ##
+        (status.AwakeningStatus, 6640),
+        (status.TheWolfWithinStatus, 6641),
         ## Cyno 6660 ##
         ## Beidou 6680 ##
         ## KujouSara 6700 ##

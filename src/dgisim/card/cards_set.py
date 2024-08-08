@@ -12,6 +12,7 @@ _DEFAULT_CARDS: list[type[Card]] = [
     AColdBladeLikeAShadow,
     AratakiIchiban,
     ASubordinatesSkills,
+    Awakening,
     Beneficent,
     CicinsColdGlare,
     ColdBloodedStrike,
